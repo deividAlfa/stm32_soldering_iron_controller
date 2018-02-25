@@ -64,19 +64,55 @@ void resetSettings() {
 	systemSettings.currentTip = 1;
 	systemSettings.sleep.sleepTemperature = 150;
 	strcpy(systemSettings.ironTips[1].name, "010");
-#elif
+#else
 	for(uint8_t x = 0; x < 10; ++x) {
-		systemSettings.ironTips[x].calADC_At_200 = 976;//793;
-		systemSettings.ironTips[x].calADC_At_300 = 1536;//1323;
-		systemSettings.ironTips[x].calADC_At_400 = 1966;//1900;
-		systemSettings.ironTips[x].PID.Kp = 0.02;
-		systemSettings.ironTips[x].PID.Kd = 0;//0.00025182;
-		systemSettings.ironTips[x].PID.Ki = 0.0025;//0.1;//.0038516;
+		systemSettings.ironTips[x].calADC_At_200 = 1300;
+		systemSettings.ironTips[x].calADC_At_300 = 2000;
+		systemSettings.ironTips[x].calADC_At_400 = 3000;
+		systemSettings.ironTips[x].PID.Kp = 0.0003;
+		systemSettings.ironTips[x].PID.Kd = 0;
+		systemSettings.ironTips[x].PID.Ki = 0.0025;
 		systemSettings.ironTips[x].PID.min = 0;
 		systemSettings.ironTips[x].PID.max = 1;
 		systemSettings.ironTips[x].PID.maxI = 200;
 		systemSettings.ironTips[x].PID.minI = -50;
 	}
+	systemSettings.currentNumberOfTips = 4;
+	systemSettings.currentTip = 1;
+	systemSettings.ironTips[1].calADC_At_200 = 1221;
+	systemSettings.ironTips[1].calADC_At_300 = 1904;
+	systemSettings.ironTips[1].calADC_At_400 = 2586;
+	strcpy(systemSettings.ironTips[1].name, "B  \0ÿ");
+	systemSettings.ironTips[1].PID.max = 1;
+	systemSettings.ironTips[1].PID.min = 0;
+	systemSettings.ironTips[1].PID.Kp = 0.0040069999999999999;
+	systemSettings.ironTips[1].PID.Ki = 0.003106000000000002;
+	systemSettings.ironTips[1].PID.Kd = 0.00007;
+	systemSettings.ironTips[1].PID.maxI = 200;
+	systemSettings.ironTips[1].PID.minI = -50;
+	systemSettings.ironTips[2].calADC_At_200 = 1463;
+	systemSettings.ironTips[2].calADC_At_300 = 2313;
+	systemSettings.ironTips[2].calADC_At_400 = 3162;
+	strcpy(systemSettings.ironTips[2].name, "BC2\0ÿ");
+	systemSettings.ironTips[2].PID.max = 1;
+	systemSettings.ironTips[2].PID.min = 0;
+	systemSettings.ironTips[2].PID.Kp = 0.003056;
+	systemSettings.ironTips[2].PID.Ki = 0.0025000000000000001;
+	systemSettings.ironTips[2].PID.Kd = 0;
+	systemSettings.ironTips[2].PID.maxI = 200;
+	systemSettings.ironTips[2].PID.minI = -50;
+	systemSettings.ironTips[3].calADC_At_200 = 1268;
+	systemSettings.ironTips[3].calADC_At_300 = 1932;
+	systemSettings.ironTips[3].calADC_At_400 = 3598;
+	strcpy(systemSettings.ironTips[3].name, "D24\0ÿ");
+	systemSettings.ironTips[3].PID.max = 1;
+	systemSettings.ironTips[3].PID.min = 0;
+	systemSettings.ironTips[3].PID.Kp = 0.02;
+	systemSettings.ironTips[3].PID.Ki = 0.0025000000000000001;
+	systemSettings.ironTips[3].PID.Kd = 0;
+	systemSettings.ironTips[3].PID.maxI = 200;
+	systemSettings.ironTips[3].PID.minI = -50;
+
 #endif
 	systemSettings.setTemperature = 320;
 }
