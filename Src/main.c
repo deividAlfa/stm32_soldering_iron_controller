@@ -80,10 +80,10 @@ static void MX_TIM3_Init(void);
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 RE_State_t RE1_Data;
 
-static uint32_t lastActivity;
-
 static uint8_t activity = 1;
 static uint32_t pwmStoppedSince = 0;
+static uint32_t startOfNoActivityTime = 0;
+static uint8_t startOfNoActivity = 0;
 #define ADC_MEASURE_DELAY	0
 int main(void)
 {
@@ -151,10 +151,17 @@ int main(void)
 	  if(iron_temp_measure_state == iron_temp_measure_ready) {
 		  readTipTemperatureCompensated(1);
 
-		  if(HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin) == GPIO_PIN_RESET)
-			  activity = 0;
-		  else
+		  if(HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin) == GPIO_PIN_RESET) {
+			  if(startOfNoActivity == 0)
+				  startOfNoActivityTime = HAL_GetTick();
+			  startOfNoActivity = 1;
+			  if((HAL_GetTick() - startOfNoActivityTime) > 500)
+				  activity = 0;
+		  }
+		  else {
 			  activity = 1;
+			  startOfNoActivity = 0;
+		  }
 
 		  handleIron(activity);
 		  iron_temp_measure_state = iron_temp_measure_idle;
