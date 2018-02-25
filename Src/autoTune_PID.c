@@ -22,7 +22,7 @@ int cycles;
 double targetInputValue = 0;
 double minOutput, maxOutput;
 uint8_t znMode = znModeBasicPID;
-int cycles = 10;
+int cycles = 100;
 
 // See startTuningLoop()
 int i;
