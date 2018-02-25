@@ -212,13 +212,13 @@ void calibration_screen_setup(screen_t *scr) {
 	widget->buttonWidget.selectable.tab = 1;
 	widget->buttonWidget.action = &okAction;
 	addSetTemperatureReachedCallback(tempReachedCallback);
-	cal_pid.Kp = 0.01;
-	cal_pid.Ki = 0.0025;
-	cal_pid.Kd = 0;
-	cal_pid.min = 0;
-	cal_pid.max = 1;
-	cal_pid.maxI = 200;
-	cal_pid.minI = -50;
+	cal_pid.Kp = systemSettings.ironTips[0].PID.Kp;
+	cal_pid.Ki = systemSettings.ironTips[0].PID.Ki;
+	cal_pid.Kd = systemSettings.ironTips[0].PID.Kd;
+	cal_pid.min = systemSettings.ironTips[0].PID.min;
+	cal_pid.max = systemSettings.ironTips[0].PID.max;
+	cal_pid.maxI = systemSettings.ironTips[0].PID.maxI;
+	cal_pid.minI = systemSettings.ironTips[0].PID.minI;
 }
 
 static uint8_t processCalibration() {
