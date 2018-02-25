@@ -8,7 +8,7 @@
 #include "settings.h"
 #include <string.h>
 #define FLASH_ADDR (0x8000000|64512)/*Flash start OR'ed with the maximum amount of flash - 256 bytes*/
-
+#define JBC
 void saveSettings() {
 	HAL_FLASH_Unlock(); //unlock flash writing
 	FLASH_EraseInitTypeDef erase;
@@ -47,6 +47,24 @@ void resetSettings() {
 	systemSettings.currentTip = 0;
 	systemSettings.currentNumberOfTips = 1;
 	strcpy(systemSettings.ironTips[0].name, "DFLT");
+#ifdef JBC
+	for(uint8_t x = 0; x < 10; ++x) {
+		systemSettings.ironTips[x].calADC_At_200 = 390;
+		systemSettings.ironTips[x].calADC_At_300 = 625;
+		systemSettings.ironTips[x].calADC_At_400 = 883;
+		systemSettings.ironTips[x].PID.Kp = 0.0028;
+		systemSettings.ironTips[x].PID.Ki = 0.0018;
+		systemSettings.ironTips[x].PID.Kd = 0.00007;
+		systemSettings.ironTips[x].PID.min = 0;
+		systemSettings.ironTips[x].PID.max = 1;
+		systemSettings.ironTips[x].PID.maxI = 200;
+		systemSettings.ironTips[x].PID.minI = -50;
+	}
+	systemSettings.currentNumberOfTips = 2;
+	systemSettings.currentTip = 1;
+	systemSettings.sleep.sleepTemperature = 150;
+	strcpy(systemSettings.ironTips[1].name, "010");
+#elif
 	for(uint8_t x = 0; x < 10; ++x) {
 		systemSettings.ironTips[x].calADC_At_200 = 976;//793;
 		systemSettings.ironTips[x].calADC_At_300 = 1536;//1323;
@@ -59,5 +77,6 @@ void resetSettings() {
 		systemSettings.ironTips[x].PID.maxI = 200;
 		systemSettings.ironTips[x].PID.minI = -50;
 	}
-	systemSettings.setTemperature = 300;
+#endif
+	systemSettings.setTemperature = 320;
 }
