@@ -81,7 +81,6 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 RE_State_t RE1_Data;
 
 static uint32_t lastActivity;
-static uint8_t lastActivityNeedsUpdate;
 
 static uint8_t activity = 1;
 static uint32_t pwmStoppedSince = 0;
@@ -152,13 +151,11 @@ int main(void)
 	  if(iron_temp_measure_state == iron_temp_measure_ready) {
 		  readTipTemperatureCompensated(1);
 
-		  if((lastActivityNeedsUpdate == 1) && (HAL_GetTick() - lastActivity > 100)) {
-			  if(HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin) == GPIO_PIN_RESET)
-				  activity = 0;
-			  else
-				  activity = 1;
-			  lastActivityNeedsUpdate = 0;
-		  }
+		  if(HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin) == GPIO_PIN_RESET)
+			  activity = 0;
+		  else
+			  activity = 1;
+
 		  handleIron(activity);
 		  iron_temp_measure_state = iron_temp_measure_idle;
 	  }
@@ -236,10 +233,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if((GPIO_Pin == ROT_ENC_BUTTON_GPIO_Pin) || (GPIO_Pin == ROT_ENC_R_Pin) || (GPIO_Pin == ROT_ENC_L_Pin)) {
 		  RE_Process(&RE1_Data);
-	}
-	else if(GPIO_Pin == WAKE_Pin) {
-		lastActivityNeedsUpdate = 1;
-		lastActivity = HAL_GetTick();
 	}
 }
 
