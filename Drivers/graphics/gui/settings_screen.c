@@ -7,14 +7,12 @@
 
 #include "settings_screen.h"
 #include "../../../../Src/pid.h"
-#include "../../../../Src/autoTune_PID.h"
 #include "../../../../Src/iron.h"
 #include "../../../../Src/settings.h"
 #include "../ssd1306.h"
 #include "oled.h"
 
 static widget_t *combo = NULL;
-static uint8_t autoPIDRunning = 0;
 static uint16_t KP = 0;
 static uint16_t KI = 0;
 static uint16_t KD = 0;
@@ -27,9 +25,7 @@ static uint16_t SLEEPTEMP = 0;
 static char str[20]="aaa";
 static widget_t *tipCombo = NULL;
 static widget_t *delTipButton = NULL;
-static widget_t *autoTuneButton = NULL;
 static comboBox_item_t *addNewTipComboItem = NULL;
-static iron_mode_t modeBKP;
 
 static void edit_iron_tip_screen_init(screen_t *scr) {
 	if(strcmp(tipCombo->comboBoxWidget.currentItem->text, "ADD NEW") == 0) {
@@ -192,14 +188,7 @@ static int cancelPID(widget_t *w) {
 	setupPIDFromStruct();
 	return screen_main;
 }
-static int autoPID(widget_t *w) {
-	autoPIDRunning = 1;
-	modeBKP = getCurrentMode();
-	setCurrentMode(mode_set);
-	startAutoTune();
-	strcpy(autoTuneButton->displayString, "WAIT");
-	return -1;
-}
+
 static void * getKp() {
 	KP = currentPID.Kp * 10000000;
 	return &KP;
@@ -227,22 +216,7 @@ static void setKd(uint16_t *val) {
 	currentPID.Kd = (double)KD / 10000000;
 	setupPIDFromStruct();
 }
-////
-static int pid_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
-	if(autoPIDRunning) {
-		if(isAutoTuneFinished()) {
-			autoPIDRunning = 0;
-			setCurrentMode(modeBKP);
-			strcpy(autoTuneButton->displayString, "AUTO");
-			currentPID.Kp = autoTuneGetKp();
-			currentPID.Ki = autoTuneGetKi();
-			currentPID.Kd = autoTuneGetKd();
-		}
-		return -1;
-	}
-	else
-		return default_screenProcessInput(scr, input, state);
-}
+
 static void settings_screen_init(screen_t *scr) {
 	UG_FontSetHSpace(0);
 	UG_FontSetVSpace(0);
@@ -283,7 +257,7 @@ void settings_screen_setup(screen_t *scr) {
 	///Edit PID screen
 	screen_t *sc = oled_addScreen(screen_edit_pid);
 	sc->draw = &default_screenDraw;
-	sc->processInput = &pid_screenProcessInput;
+	sc->processInput = &default_screenProcessInput;
 	sc->init = &default_init;
 	sc->update = &default_screenUpdate;
 	widget_t *w = screen_addWidget(sc);
@@ -375,18 +349,6 @@ void settings_screen_setup(screen_t *scr) {
 	w->reservedChars = 4;
 	w->buttonWidget.selectable.tab = 3;
 	w->buttonWidget.action = &savePID;
-
-	w = screen_addWidget(sc);
-	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
-	w->posX = 40;
-	w->posY = 56;
-	s = "AUTO";
-	strcpy(w->displayString, s);
-	w->reservedChars = 4;
-	w->buttonWidget.selectable.tab = 4;
-	w->buttonWidget.action = &autoPID;
-	autoTuneButton = w;
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);

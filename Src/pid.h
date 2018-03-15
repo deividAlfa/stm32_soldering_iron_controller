@@ -33,6 +33,4 @@ double getPID_I();
 double getOutput();
 double getPID_SetPoint();
 double getPID_PresentValue();
-void startAutoTune();
-uint8_t isAutoTuneFinished();
 #endif /* PID_H_ */

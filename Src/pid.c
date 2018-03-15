@@ -6,22 +6,12 @@
  */
 
 #include "pid.h"
-#include "autoTune_PID.h"
 #include "tempsensors.h"
 
 static double max, min, Kp, Kd, Ki, pre_error, integral, mset, mpv, maxI, minI;
 static double p, i, d, currentOutput;
 uint32_t lastTime;
-static uint8_t autoTuneRunning = 0;
-static uint8_t autoTuneRequested = 0;
 
-uint8_t isAutoTuneFinished() {
-	return (autoTuneRequested == 0 && autoTuneRunning == 0);
-}
-
-void startAutoTune() {
-	autoTuneRequested = 1;
-}
 double getError() {
 	return pre_error;
 }
@@ -50,21 +40,6 @@ void resetPID() {
 }
 double calculatePID( double setpoint, double pv )
 {
-	if(autoTuneRequested) {
-		autoTuneRequested = 0;
-		autoTuneRunning = 1;
-		autoTuneSetOutputRange(0, 1);
-		autoTuneSetZNMode(znModeBasicPID);
-		autoTuneSetTargetInputValue(human2adc(300));
-		autoTuneStartTuningLoop();
-	}
-	if(autoTuneRunning) {
-		if(autoTuneisFinished()) {
-			autoTuneRunning = 0;
-		}
-		else
-			return autoTuneTunePID(pv);
-	}
 	mset = setpoint;
 	mpv = pv;
     double dt = (HAL_GetTick() - lastTime) ;
