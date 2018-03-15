@@ -123,6 +123,7 @@ int main(void)
   UG_Update();
   update_display();
 
+  HAL_IWDG_Start(&hiwdg);
   RE_Init(&RE1_Data, ROT_ENC_L_GPIO_Port, ROT_ENC_L_Pin, ROT_ENC_R_GPIO_Port, ROT_ENC_R_Pin, ROT_ENC_BUTTON_GPIO_Port, ROT_ENC_BUTTON_GPIO_Pin);
 
   uint32_t lastTimeDisplay = HAL_GetTick();
@@ -148,6 +149,7 @@ int main(void)
 
   while (1)
   {
+	  HAL_IWDG_Refresh(&hiwdg);
 	  if(iron_temp_measure_state == iron_temp_measure_ready) {
 		  readTipTemperatureCompensated(1);
 
