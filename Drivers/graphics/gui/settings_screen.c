@@ -17,6 +17,7 @@ static uint16_t KP = 0;
 static uint16_t KI = 0;
 static uint16_t KD = 0;
 static uint16_t CONTRAST = 0;
+static uint16_t MAX_POWER = 100;
 static uint16_t BTEMP = 0;
 static uint16_t BTIME = 0;
 static uint16_t SLEEPTIME = 0;
@@ -98,6 +99,26 @@ static int delTip(widget_t *w) {
 	return screen_edit_iron_tips;
 }
 ////
+static void * getMaxPower() {
+	MAX_POWER = currentPID.max * 100;
+	return &MAX_POWER;
+}
+static void setMaxPower(uint16_t *val) {
+	MAX_POWER = *val;
+	currentPID.max = (double)MAX_POWER / 100.0;
+	setupPIDFromStruct();
+}
+static int savePower(widget_t *w) {
+	systemSettings.ironTips[systemSettings.currentTip].PID.max = currentPID.max;
+	saveSettings();
+	return screen_main;
+
+}
+static int cancelPower(widget_t *w) {
+	currentPID.max = systemSettings.ironTips[systemSettings.currentTip].PID.max;
+	setupPIDFromStruct();
+	return screen_main;
+}
 static void * getContrast_() {
 	CONTRAST = getContrast();
 	return &CONTRAST;
@@ -246,6 +267,7 @@ void settings_screen_setup(screen_t *scr) {
 	widget->posY = 17;
 	widget->font_size = &FONT_6X8;
 	comboAddItem(widget, "PID", screen_edit_pid);
+	comboAddItem(widget, "POWER", screen_edit_max_power);
 	comboAddItem(widget, "SCREEN", screen_edit_contrast);
 	comboAddItem(widget, "BOOST", screen_edit_boost);
 	comboAddItem(widget, "SLEEP", screen_edit_sleep);
@@ -361,6 +383,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 5;
 	w->buttonWidget.action = &cancelPID;
 
+	//SCREEN
 	sc = oled_addScreen(screen_edit_contrast);
 	sc->draw = &default_screenDraw;
 	sc->processInput = &default_screenProcessInput;
@@ -420,6 +443,68 @@ void settings_screen_setup(screen_t *scr) {
 	w->reservedChars = 6;
 	w->buttonWidget.selectable.tab = 2;
 	w->buttonWidget.action = &cancelContrast;
+
+	//Screen edit power
+	sc = oled_addScreen(screen_edit_max_power);
+	sc->draw = &default_screenDraw;
+	sc->processInput = &default_screenProcessInput;
+	sc->init = &default_init;
+	sc->update = &default_screenUpdate;
+	w = screen_addWidget(sc);
+
+	widgetDefaultsInit(w, widget_label);
+	s = "MAX POWER";
+	strcpy(w->displayString, s);
+	w->posX = 45;
+	w->posY = 0;
+	w->font_size = &FONT_8X14;
+	w->reservedChars = 9;
+
+	w = screen_addWidget(sc);
+	widgetDefaultsInit(w, widget_label);
+	s = "Value:";
+	strcpy(w->displayString, s);
+	w->posX = 30;
+	w->posY = 17;
+	w->font_size = &FONT_6X8;
+	w->reservedChars = 6;
+
+	w = screen_addWidget(sc);
+	widgetDefaultsInit(w, widget_editable);
+	w->posX = 70;
+	w->posY = 17;
+	w->font_size = &FONT_6X8;
+	w->editable.inputData.getData = &getMaxPower;
+	w->editable.inputData.number_of_dec = 0;
+	w->editable.inputData.type = field_uinteger16;
+	w->editable.big_step = 10;
+	w->editable.step = 1;
+	w->editable.selectable.tab = 0;
+	w->editable.setData = (void (*)(void *))&setMaxPower;
+	w->editable.max_value = 100;
+	w->editable.min_value = 1;
+	w->reservedChars = 3;
+
+	w = screen_addWidget(sc);
+	widgetDefaultsInit(w, widget_button);
+	w->font_size = &FONT_6X8;
+	w->posX = 2;
+	w->posY = 56;
+	s = "SAVE";
+	strcpy(w->displayString, s);
+	w->reservedChars = 4;
+	w->buttonWidget.selectable.tab = 1;
+	w->buttonWidget.action = &savePower;
+	w = screen_addWidget(sc);
+	widgetDefaultsInit(w, widget_button);
+	w->font_size = &FONT_6X8;
+	w->posX = 90;
+	w->posY = 56;
+	s = "CANCEL";
+	strcpy(w->displayString, s);
+	w->reservedChars = 6;
+	w->buttonWidget.selectable.tab = 2;
+	w->buttonWidget.action = &cancelPower;
 
 	///Screen edit boost
 	sc = oled_addScreen(screen_edit_boost);
