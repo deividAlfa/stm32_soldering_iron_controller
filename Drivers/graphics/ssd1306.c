@@ -1,5 +1,8 @@
 #include "ssd1306.h"
+//#define SH1106_FIX
+
 static unsigned char buffer[128*8]; // 128x64 1BPP OLED
+
 static SPI_HandleTypeDef * m_hspi;
 static uint8_t m_contrast = 0xCF;
 
@@ -43,8 +46,13 @@ void update_display( void )
    for(p=0;p<8;p++)
    {
       write_cmd(0xB0|p);
-      write_cmd(0x00+((0x10&0x0F)*16+0x00)%16);
-      write_cmd(0x10+((0x10&0x0F)*16+0x00)/16);
+#ifdef SH1106_FIX
+#warning "BUILDING FOR 1.3inch SCREEN"
+      write_cmd(0x02);
+#else
+      write_cmd(0x00);
+#endif
+      write_cmd(0x10);
       write_data(buffer + p * 128);
    }
 }
