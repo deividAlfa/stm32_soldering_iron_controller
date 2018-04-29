@@ -578,7 +578,7 @@ void settings_screen_setup(screen_t *scr) {
 	s = "SAVE";
 	strcpy(w->displayString, s);
 	w->reservedChars = 4;
-	w->buttonWidget.selectable.tab = 1;
+	w->buttonWidget.selectable.tab = 2;
 	w->buttonWidget.action = &saveBoost;
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
@@ -588,7 +588,7 @@ void settings_screen_setup(screen_t *scr) {
 	s = "CANCEL";
 	strcpy(w->displayString, s);
 	w->reservedChars = 6;
-	w->buttonWidget.selectable.tab = 2;
+	w->buttonWidget.selectable.tab = 3;
 	w->buttonWidget.action = &cancelBoost;
 
 	//Screen edit Sleep
