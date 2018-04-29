@@ -135,9 +135,9 @@ void main_screen_setup(screen_t *scr) {
 	//iron tip temperature display
 	widget_t *widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_display);
-	widget->posX = 45;
-	widget->posY = 25;
-	widget->font_size = &FONT_12X20;
+	widget->posX = 45 - 3 - 4;
+	widget->posY = 23;
+	widget->font_size = &FONT_16X26;
 	widget->displayWidget.getData = &main_screen_getIronTemp;
 	widget->displayWidget.number_of_dec = 0;
 	widget->displayWidget.type = field_uinteger16;
@@ -171,9 +171,9 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_label);
 	s = "\247C";
 	strcpy(widget->displayString, s);
-	widget->posX = 50 + 3 * 12 -5;
-	widget->posY = 20 + 5;
-	widget->font_size = &FONT_12X20;
+	widget->posX = 50 + 3 * 12 -5 + 3;
+	widget->posY = 20 + 5 - 2;
+	widget->font_size = &FONT_16X26;
 	widget->reservedChars = 2;
 	widget->draw = &default_widgetDraw;
 	ironTempLabelWidget = widget;
@@ -181,9 +181,9 @@ void main_screen_setup(screen_t *scr) {
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
 	strcpy(widget->displayString, "NO IRON");
-	widget->posX = 20;
-	widget->posY = 20 + 5;
-	widget->font_size = &FONT_12X20;
+	widget->posX = 20 - 3;
+	widget->posY = 20 + 5 - 2;
+	widget->font_size = &FONT_16X26;
 	widget->reservedChars = 7;
 	widget->draw = &default_widgetDraw;
 	noIronWidget = widget;
