@@ -11,7 +11,7 @@
 #include "../../../Src/settings.h"
 #include "../generalIO/buzzer.h"
 
-#define NO_IRON_ADC 50000
+#define NO_IRON_ADC 5000
 static uint8_t hasIron = 1;
 static uint16_t m_tip = 0;
 static uint16_t m_mode = 0;
