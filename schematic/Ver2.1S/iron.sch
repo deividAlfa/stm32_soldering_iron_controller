@@ -15604,6 +15604,7 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <part name="RTEMP" library="ngspice-simulation" library_urn="urn:adsk.eagle:library:527439" deviceset="R" device=""/>
 <part name="GND23" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="RIRON" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="0204/2V" package3d_urn="urn:adsk.eagle:package:25948/1"/>
+<part name="GND25" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -15670,8 +15671,8 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <instance part="OLED" gate="1" x="254" y="40.64" rot="MR90"/>
 <instance part="+3V7" gate="G$1" x="256.54" y="50.8" rot="MR0"/>
 <instance part="GND15" gate="1" x="266.7" y="43.18" rot="MR0"/>
-<instance part="G1" gate="1" x="154.94" y="-15.24" rot="R90"/>
-<instance part="+3V9" gate="G$1" x="160.02" y="-5.08"/>
+<instance part="G1" gate="1" x="157.48" y="-7.62"/>
+<instance part="+3V9" gate="G$1" x="147.32" y="-10.16"/>
 <instance part="DEBUG" gate="1" x="264.16" y="-7.62" rot="MR90"/>
 <instance part="GND17" gate="1" x="279.4" y="-5.08" rot="MR0"/>
 <instance part="+3V10" gate="G$1" x="259.08" y="17.78"/>
@@ -15695,6 +15696,7 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <instance part="RTEMP" gate="G$1" x="50.8" y="22.86"/>
 <instance part="GND23" gate="1" x="45.72" y="10.16"/>
 <instance part="RIRON" gate="G$1" x="50.8" y="12.7"/>
+<instance part="GND25" gate="1" x="152.4" y="-10.16"/>
 </instances>
 <busses>
 </busses>
@@ -15784,8 +15786,6 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <segment>
 <pinref part="C1" gate="G$1" pin="1"/>
 <pinref part="GND14" gate="1" pin="GND"/>
-<pinref part="G1" gate="1" pin="-"/>
-<junction x="154.94" y="-20.32"/>
 </segment>
 <segment>
 <pinref part="GND15" gate="1" pin="GND"/>
@@ -15831,6 +15831,12 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <segment>
 <pinref part="C11" gate="G$1" pin="2"/>
 <pinref part="GND21" gate="1" pin="GND"/>
+</segment>
+<segment>
+<pinref part="GND25" gate="1" pin="GND"/>
+<pinref part="G1" gate="1" pin="-"/>
+<wire x1="157.48" y1="-7.62" x2="152.4" y2="-7.62" width="0.1524" layer="91"/>
+<junction x="152.4" y="-7.62"/>
 </segment>
 </net>
 <net name="+3V3" class="0">
@@ -15888,8 +15894,7 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <segment>
 <pinref part="+3V9" gate="G$1" pin="+3V3"/>
 <pinref part="U1" gate="MCU" pin="VDDA"/>
-<wire x1="160.02" y1="-7.62" x2="160.02" y2="-12.7" width="0.1524" layer="91"/>
-<wire x1="160.02" y1="-12.7" x2="162.56" y2="-12.7" width="0.1524" layer="91"/>
+<wire x1="147.32" y1="-12.7" x2="162.56" y2="-12.7" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="U4" gate="G$1" pin="8"/>
@@ -16207,13 +16212,6 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <label x="210.82" y="53.34" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="N$8" class="0">
-<segment>
-<pinref part="U1" gate="MCU" pin="VBAT"/>
-<pinref part="G1" gate="1" pin="+"/>
-<wire x1="154.94" y1="-10.16" x2="162.56" y2="-10.16" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="DBG_DIO" class="0">
 <segment>
 <pinref part="DEBUG" gate="1" pin="3"/>
@@ -16341,6 +16339,13 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <pinref part="SV1" gate="G$1" pin="2"/>
 <wire x1="119.38" y1="-30.48" x2="109.22" y2="-30.48" width="0.1524" layer="91"/>
 <label x="116.84" y="-30.48" size="1.778" layer="95" rot="MR0"/>
+</segment>
+</net>
+<net name="N$8" class="0">
+<segment>
+<pinref part="U1" gate="MCU" pin="VBAT"/>
+<pinref part="G1" gate="1" pin="+"/>
+<wire x1="162.56" y1="-10.16" x2="162.56" y2="-7.62" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
