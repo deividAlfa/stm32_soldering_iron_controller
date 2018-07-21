@@ -41,6 +41,8 @@
 									<listOptionValue builtIn="false" value="../Drivers/generalIO"/>
 									<listOptionValue builtIn="false" value="../Drivers/graphics"/>
 									<listOptionValue builtIn="false" value="../Drivers/graphics/gui"/>
+									<listOptionValue builtIn="false" value="/home/jomat/t12/hello/helloiron/Drivers/software_I2C"/>
+									<listOptionValue builtIn="false" value="/home/jomat/t12/hello/helloiron/Drivers/1us_delay"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.2067007569" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__weak=&quot;__attribute__((weak))&quot;"/>
@@ -49,6 +51,7 @@
 									<listOptionValue builtIn="false" value="STM32F103xB"/>
 								</option>
 								<option id="fr.ac6.managedbuild.gnu.c.compiler.option.misc.other.1979793526" superClass="fr.ac6.managedbuild.gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-fmessage-length=0" valueType="string"/>
+								<option id="gnu.c.compiler.option.include.files.289632152" superClass="gnu.c.compiler.option.include.files" useByScannerDiscovery="false" valueType="includeFiles"/>
 								<inputType id="fr.ac6.managedbuild.tool.gnu.cross.c.compiler.input.c.1683333413" superClass="fr.ac6.managedbuild.tool.gnu.cross.c.compiler.input.c"/>
 								<inputType id="fr.ac6.managedbuild.tool.gnu.cross.c.compiler.input.s.1513016259" superClass="fr.ac6.managedbuild.tool.gnu.cross.c.compiler.input.s"/>
 							</tool>
@@ -164,6 +167,10 @@
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1469565012" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 								<inputType id="fr.ac6.managedbuild.tool.gnu.cross.assembler.input.1294921516" superClass="fr.ac6.managedbuild.tool.gnu.cross.assembler.input"/>
+							</tool>
+							<tool id="fr.ac6.managedbuild.tool.gnu.cross.assembler.exe.release.990008195" name="MCU GCC Assembler" superClass="fr.ac6.managedbuild.tool.gnu.cross.assembler.exe.release">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1728120002" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+								<inputType id="fr.ac6.managedbuild.tool.gnu.cross.assembler.input.607439206" superClass="fr.ac6.managedbuild.tool.gnu.cross.assembler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
