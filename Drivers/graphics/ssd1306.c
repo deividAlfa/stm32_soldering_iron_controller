@@ -1,25 +1,48 @@
 #include "ssd1306.h"
+#define HW_VER2_1S
+#ifdef HW_VER2_1S
+#  include "string.h"
+#  include "software_I2C.h"
+#endif
 //#define SH1106_FIX
 
 static unsigned char buffer[128*8]; // 128x64 1BPP OLED
 
+#ifndef HW_VER2_1S
 static SPI_HandleTypeDef * m_hspi;
+#endif
 static uint8_t m_contrast = 0xCF;
 
 void write_data(uint8_t *data) {
+#ifndef HW_VER2_1S
 	HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin,GPIO_PIN_SET);//CS
 	HAL_GPIO_WritePin(OLED_DC_GPIO_Port, OLED_DC_Pin,GPIO_PIN_SET);//DC
 	HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin,GPIO_PIN_RESET);//CS
 	HAL_SPI_Transmit(m_hspi, data, 128, 1000);
 	HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin,GPIO_PIN_SET);//CS
+#else
+	uint8_t idata[129];
+	idata[0] = 0x40; // we're sending data, not a cmd
+	memcpy(&idata[1], data, 128);
+	i2c_write(OLED_SCL_GPIO_Port,OLED_SCL_Pin,OLED_SDA_GPIO_Port,OLED_SDA_Pin,0x78,idata,129);
+#endif
 }
+
 void write_cmd(uint8_t data) {
+#ifndef HW_VER2_1S
 	HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin,GPIO_PIN_SET);//CS
 	HAL_GPIO_WritePin(OLED_DC_GPIO_Port, OLED_DC_Pin,GPIO_PIN_RESET);//DC
 	HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin,GPIO_PIN_RESET);//CS
 	HAL_SPI_Transmit(m_hspi, &data, 1, 1000);
 	HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin,GPIO_PIN_SET);//CS
+#else
+	uint8_t idata[2];
+	idata[0] = 0x00; // we're sending a cmd, not data
+	idata[1] = data;
+	i2c_write(OLED_SCL_GPIO_Port,OLED_SCL_Pin,OLED_SDA_GPIO_Port,OLED_SDA_Pin,0x78,idata,2);
+#endif
 }
+
 void pset(UG_S16 x, UG_S16 y, UG_COLOR c)
 {
    unsigned int p;
@@ -67,11 +90,13 @@ uint8_t getContrast() {
 }
 void ssd1306_init(SPI_HandleTypeDef *hspi)
 {
+#ifndef HW_VER2_1S
 	m_hspi = hspi;
 	HAL_GPIO_WritePin(OLED_RST_GPIO_Port, OLED_RST_Pin,GPIO_PIN_RESET);//RST
 	HAL_Delay(100);
 	HAL_GPIO_WritePin(OLED_RST_GPIO_Port, OLED_RST_Pin,GPIO_PIN_SET);//RST
 	HAL_Delay(100);
+#endif
 
    write_cmd(0xAE| 0x00);  // Display Off (0x00/0x01)
 
