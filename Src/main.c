@@ -520,11 +520,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(T12PWM_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = V_INPUT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  HAL_GPIO_Init(V_INPUT_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pins : PBPin PBPin */
   GPIO_InitStruct.Pin = OLED_SCL_Pin|OLED_SDA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
