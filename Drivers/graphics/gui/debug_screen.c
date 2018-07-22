@@ -22,6 +22,19 @@ static void * debug_screen_getADC1_1() {
 	temp = iron_temp_adc_avg;
 	return &temp;
 }
+static void * debug_screen_get_iron() {
+	temp = adc_measures[0].iron;
+	return &temp;
+}
+static void * debug_screen_get_supply() {
+	temp = adc_measures[0].supply;
+	return &temp;
+}
+
+static void * debug_screen_get_cold_junction() {
+	temp = adc_measures[0].cold_junction;
+	return &temp;
+}
 static void * debug_screen_getP() {
 	temp = getPID_P();
 	return &temp;
@@ -91,6 +104,13 @@ static int cancelDebug2(widget_t *w) {
 	return screen_main;
 }
 
+static int saveDebug3(widget_t *w) {
+	saveSettings();
+	return screen_main;
+}
+static int cancelDebug3(widget_t *w) {
+	return screen_main;
+}
 //temp_adc
 //kp ki kd
 //error
@@ -258,5 +278,67 @@ void debug_screen2_setup(screen_t *scr) {
 	widget->reservedChars = 6;
 	widget->buttonWidget.selectable.tab = 5;
 	widget->buttonWidget.action = &cancelDebug2;
+
+}
+
+void debug_screen3_setup(screen_t *scr) {
+	scr->draw = &default_screenDraw;
+	scr->processInput = &default_screenProcessInput;
+	scr->init = &debug_screen_init;
+	scr->update = &default_screenUpdate;
+
+	widget_t *widget = screen_addWidget(scr);
+	//ADC_1_1 display
+	widgetDefaultsInit(widget, widget_display);
+	widget->posX = 1;
+	widget->posY = 0;
+	widget->font_size = &FONT_6X8;
+	widget->displayWidget.getData = &debug_screen_get_iron;
+	widget->displayWidget.number_of_dec = 0;
+	widget->displayWidget.type = field_uinteger16;
+	widget->reservedChars = 5;
+	widget = screen_addWidget(scr);
+
+	//ADC_1_1 display
+	widgetDefaultsInit(widget, widget_display);
+	widget->posX = 1;
+	widget->posY = 10;
+	widget->font_size = &FONT_6X8;
+	widget->displayWidget.getData = &debug_screen_get_supply;
+	widget->displayWidget.number_of_dec = 0;
+	widget->displayWidget.type = field_uinteger16;
+	widget->reservedChars = 5;
+	widget = screen_addWidget(scr);
+
+	//ADC_1_1 display
+	widgetDefaultsInit(widget, widget_display);
+	widget->posX = 1;
+	widget->posY = 20;
+	widget->font_size = &FONT_6X8;
+	widget->displayWidget.getData = &debug_screen_get_cold_junction;
+	widget->displayWidget.number_of_dec = 0;
+	widget->displayWidget.type = field_uinteger16;
+	widget->reservedChars = 5;
+	widget = screen_addWidget(scr);
+
+	widgetDefaultsInit(widget, widget_button);
+	widget->font_size = &FONT_6X8;
+	widget->posX = 2;
+	widget->posY = 56;
+	char *s = "SAVE";
+	strcpy(widget->displayString, s);
+	widget->reservedChars = 4;
+	widget->buttonWidget.selectable.tab = 0;
+	widget->buttonWidget.action = &saveDebug3;
+	widget = screen_addWidget(scr);
+	widgetDefaultsInit(widget, widget_button);
+	widget->font_size = &FONT_6X8;
+	widget->posX = 90;
+	widget->posY = 56;
+	s = "CANCEL";
+	strcpy(widget->displayString, s);
+	widget->reservedChars = 6;
+	widget->buttonWidget.selectable.tab = 1;
+	widget->buttonWidget.action = &cancelDebug3;
 
 }

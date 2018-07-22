@@ -38,6 +38,7 @@ enum {screen_splash
 	, screen_last_scrollable
 	, screen_debug
 	, screen_debug2
+	, screen_debug3
 	, screen_edit_pid
 	, screen_edit_sleep
 	, screen_edit_contrast

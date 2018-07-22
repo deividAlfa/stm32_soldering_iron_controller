@@ -6,7 +6,7 @@
  */
 
 #include "splash.h"
-#define SPLASH_TIMEOUT 1000
+#define SPLASH_TIMEOUT 500
 
 static int splash_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *);
 static void splash_init(screen_t * scr);
@@ -23,7 +23,7 @@ void splash_setup(screen_t * scr) {
 
 static int splash_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	if(HAL_GetTick() - splash_time > SPLASH_TIMEOUT)
-		return screen_main;
+		return screen_debug3;
 	return -1;
 }
 

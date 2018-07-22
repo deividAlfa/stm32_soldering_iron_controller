@@ -266,6 +266,9 @@ void settings_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_combo);
 	widget->posY = 17;
 	widget->font_size = &FONT_6X8;
+	comboAddItem(widget, "DEBUG3", screen_debug3);
+	comboAddItem(widget, "DEBUG", screen_debug);
+	comboAddItem(widget, "DEBUG2", screen_debug2);
 	comboAddItem(widget, "PID", screen_edit_pid);
 	comboAddItem(widget, "POWER", screen_edit_max_power);
 	comboAddItem(widget, "SCREEN", screen_edit_contrast);
