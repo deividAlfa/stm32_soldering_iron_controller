@@ -76,10 +76,6 @@
 #define PWM_CONTROL_Pin GPIO_PIN_8
 #define PWM_CONTROL_GPIO_Port GPIOB
 #else
-#define NTC_Pin GPIO_PIN_15 // temp dummy
-#define NTC_GPIO_Port GPIOB // temp dummy
-#define VREF_Pin GPIO_PIN_14 // temp dummy
-#define VREF_GPIO_Port GPIOB // temp dummy
 #define V_INPUT_Pin GPIO_PIN_1
 #define V_INPUT_GPIO_Port GPIOB
 #define EEPROM_SCL_Pin GPIO_PIN_0
@@ -96,17 +92,15 @@
 #define WAKE_GPIO_Port GPIOA
 #define T12PWM_Pin GPIO_PIN_0
 #define T12PWM_GPIO_Port GPIOB
-#define VSUPPL_Pin GPIO_PIN_1
-#define VSUPPL_GPIO_Port GPIOB
 #define OLED_SCL_Pin GPIO_PIN_13
 #define OLED_SCL_GPIO_Port GPIOB
 #define OLED_SDA_Pin GPIO_PIN_12
 #define OLED_SDA_GPIO_Port GPIOB
 #define ROT_ENC_BUTTON_GPIO_Pin GPIO_PIN_15
 #define ROT_ENC_BUTTON_GPIO_Port GPIOA
-#define ROT_ENC_L_Pin GPIO_PIN_3
+#define ROT_ENC_L_Pin GPIO_PIN_4
 #define ROT_ENC_L_GPIO_Port GPIOB
-#define ROT_ENC_R_Pin GPIO_PIN_4
+#define ROT_ENC_R_Pin GPIO_PIN_3
 #define ROT_ENC_R_GPIO_Port GPIOB
 #endif
 
