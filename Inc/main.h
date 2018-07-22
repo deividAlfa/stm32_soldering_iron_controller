@@ -86,9 +86,9 @@
 #define IRON_TEMP_GPIO_Port GPIOA
 #define BUZZER_Pin GPIO_PIN_5
 #define BUZZER_GPIO_Port GPIOA
-#define TEMPAMB_Pin GPIO_PIN_6
+#define TEMPAMB_Pin GPIO_PIN_7
 #define TEMPAMB_GPIO_Port GPIOA
-#define WAKE_Pin GPIO_PIN_7
+#define WAKE_Pin GPIO_PIN_6
 #define WAKE_GPIO_Port GPIOA
 #define T12PWM_Pin GPIO_PIN_0
 #define T12PWM_GPIO_Port GPIOB
