@@ -26,7 +26,7 @@ void MX_ADC1_Init(ADC_HandleTypeDef *hadc1)
   hadc1->Init.DiscontinuousConvMode = DISABLE;
   hadc1->Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1->Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1->Init.NbrOfConversion = 2;
+  hadc1->Init.NbrOfConversion = 3;
   if (HAL_ADC_Init(hadc1) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -40,11 +40,11 @@ void MX_ADC1_Init(ADC_HandleTypeDef *hadc1)
     _Error_Handler(__FILE__, __LINE__);
   }
 
-    /**Configure Regular Channel
-    */
-  sConfig.Channel = ADC_CHANNEL_1;
-  sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLE_TIME;
+  /**Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
   if (HAL_ADC_ConfigChannel(hadc1, &sConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -52,12 +52,22 @@ void MX_ADC1_Init(ADC_HandleTypeDef *hadc1)
 
     /**Configure Regular Channel
     */
-  sConfig.Channel = ADC_CHANNEL_3;
-  sConfig.Rank = 2;
+  sConfig.Channel = ADC_CHANNEL_7;
+  sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(hadc1, &sConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+
+    /**Configure Regular Channel
+    */
+  sConfig.Channel = ADC_CHANNEL_9;
+  sConfig.Rank = ADC_REGULAR_RANK_3;
+  if (HAL_ADC_ConfigChannel(hadc1, &sConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
 
 }
 
@@ -74,7 +84,7 @@ void MX_ADC2_Init(ADC_HandleTypeDef * hadc2)
   hadc2->Init.DiscontinuousConvMode = DISABLE;
   hadc2->Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc2->Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc2->Init.NbrOfConversion = 2;
+  hadc2->Init.NbrOfConversion = 3;
   if (HAL_ADC_Init(hadc2) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -82,9 +92,9 @@ void MX_ADC2_Init(ADC_HandleTypeDef * hadc2)
 
     /**Configure Regular Channel
     */
-  sConfig.Channel = ADC_CHANNEL_4;
-  sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLE_TIME;
+  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
   if (HAL_ADC_ConfigChannel(hadc2, &sConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -92,12 +102,22 @@ void MX_ADC2_Init(ADC_HandleTypeDef * hadc2)
 
     /**Configure Regular Channel
     */
-  sConfig.Channel = ADC_CHANNEL_2;
-  sConfig.Rank = 2;
-  sConfig.SamplingTime = ADC_SAMPLE_TIME;
+  sConfig.Channel = ADC_CHANNEL_7;
+  sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(hadc2, &sConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+
+    /**Configure Regular Channel
+    */
+  sConfig.Channel = ADC_CHANNEL_9;
+  sConfig.Rank = ADC_REGULAR_RANK_3;
+  if (HAL_ADC_ConfigChannel(hadc2, &sConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+
 
 }
