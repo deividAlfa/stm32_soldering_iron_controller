@@ -8,9 +8,6 @@
 
 static unsigned char buffer[128*8]; // 128x64 1BPP OLED
 
-#ifndef HW_VER2_1S
-static SPI_HandleTypeDef * m_hspi;
-#endif
 static uint8_t m_contrast = 0xCF;
 
 void write_data(uint8_t *data) {
@@ -88,16 +85,8 @@ void setContrast(uint8_t value) {
 uint8_t getContrast() {
 	return m_contrast;
 }
-void ssd1306_init(SPI_HandleTypeDef *hspi)
+void ssd1306_init()
 {
-#ifndef HW_VER2_1S
-	m_hspi = hspi;
-	HAL_GPIO_WritePin(OLED_RST_GPIO_Port, OLED_RST_Pin,GPIO_PIN_RESET);//RST
-	HAL_Delay(100);
-	HAL_GPIO_WritePin(OLED_RST_GPIO_Port, OLED_RST_Pin,GPIO_PIN_SET);//RST
-	HAL_Delay(100);
-#endif
-
    write_cmd(0xAE| 0x00);  // Display Off (0x00/0x01)
 
    write_cmd(0xD5);         // Set Display Clock Divide Ratio / Oscillator Frequency

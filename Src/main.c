@@ -57,7 +57,6 @@ ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 DMA_HandleTypeDef hdma_adc1;
 IWDG_HandleTypeDef hiwdg;
-SPI_HandleTypeDef hspi1;
 TIM_HandleTypeDef pwm_tim4;
 TIM_HandleTypeDef temp_measure_tim3;
 UART_HandleTypeDef huart3;
@@ -71,7 +70,6 @@ volatile uint32_t dma = 0;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
-static void MX_SPI1_Init(void);
 static void MX_IWDG_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_USART3_UART_Init(void);
@@ -99,7 +97,7 @@ int main(void)
 	  buzzer_alarm_start();
   else
 	  buzzer_short_beep();
-  MX_SPI1_Init();
+
   MX_IWDG_Init();
   MX_TIM4_Init();
   MX_USART3_UART_Init();
@@ -111,11 +109,12 @@ int main(void)
 	  Error_Handler();
   }
   HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) adc_measures, sizeof(adc_measures)/ sizeof(uint32_t));
+
   HAL_TIM_Base_Start_IT(&temp_measure_tim3);
   restoreSettings();
 
   UG_GUI gui;
-  ssd1306_init(&hspi1);
+  ssd1306_init();
   UG_Init(&gui, pset, 128, 64);
   guiInit();
   oled_init();
@@ -242,6 +241,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if((GPIO_Pin == ROT_ENC_BUTTON_GPIO_Pin) || (GPIO_Pin == ROT_ENC_R_Pin) || (GPIO_Pin == ROT_ENC_L_Pin)) {
 		  RE_Process(&RE1_Data);
+
 	}
 }
 
@@ -313,29 +313,6 @@ static void MX_IWDG_Init(void)
   hiwdg.Init.Prescaler = IWDG_PRESCALER_32;
   hiwdg.Init.Reload = 4095;
   if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-}
-
-/* SPI1 init function */
-static void MX_SPI1_Init(void)
-{
-
-  hspi1.Instance = SPI1;
-  hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_1LINE;
-  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi1.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi1) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
@@ -516,11 +493,9 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, EEPROM_SCL_Pin|EEPROM_SDA_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(T12PWM_GPIO_Port, T12PWM_Pin, GPIO_PIN_RESET);
@@ -528,12 +503,8 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, OLED_SCL_Pin|OLED_SDA_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pins : PAPin PAPin */
-  GPIO_InitStruct.Pin = EEPROM_SCL_Pin|EEPROM_SDA_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, EEPROM_SCL_Pin|EEPROM_SDA_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = BUZZER_Pin;
@@ -541,12 +512,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(BUZZER_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PAPin PAPin */
-  GPIO_InitStruct.Pin = WAKE_Pin|ROT_ENC_BUTTON_GPIO_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = T12PWM_Pin;
@@ -556,9 +521,9 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(T12PWM_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = VSUPPL_Pin;
+  GPIO_InitStruct.Pin = V_INPUT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  HAL_GPIO_Init(VSUPPL_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(V_INPUT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PBPin PBPin */
   GPIO_InitStruct.Pin = OLED_SCL_Pin|OLED_SDA_Pin;
@@ -567,12 +532,36 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PBPin PBPin */
-  GPIO_InitStruct.Pin = ROT_ENC_L_Pin|ROT_ENC_R_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  /*Configure GPIO pins : PAPin PAPin */
+  GPIO_InitStruct.Pin = EEPROM_SCL_Pin|EEPROM_SDA_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : ROT_ENC_L_Pin ROT_ENC_R_Pin */
+  GPIO_InitStruct.Pin = ROT_ENC_L_Pin| ROT_ENC_R_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : ROT_ENC_BUTTON_GPIO_Pin WAKE_Pin */
+  GPIO_InitStruct.Pin = ROT_ENC_BUTTON_GPIO_Pin | WAKE_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 }
 #endif
 /* USER CODE BEGIN 4 */
