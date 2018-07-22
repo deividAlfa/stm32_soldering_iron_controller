@@ -101,7 +101,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     PA3     ------> ADC1_IN3
     PA4     ------> ADC1_IN4 
     */
-    GPIO_InitStruct.Pin = IRON_TEMP_Pin|VREF_Pin|NTC_Pin|V_INPUT_Pin;
+    GPIO_InitStruct.Pin = IRON_TEMP_Pin|V_INPUT_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
@@ -139,7 +139,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     PA3     ------> ADC2_IN3
     PA4     ------> ADC2_IN4 
     */
-    GPIO_InitStruct.Pin = VREF_Pin|NTC_Pin|V_INPUT_Pin;
+    GPIO_InitStruct.Pin = V_INPUT_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
@@ -167,7 +167,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
     PA3     ------> ADC1_IN3
     PA4     ------> ADC1_IN4 
     */
-    HAL_GPIO_DeInit(GPIOA, IRON_TEMP_Pin|VREF_Pin|NTC_Pin|V_INPUT_Pin);
+    HAL_GPIO_DeInit(GPIOA, IRON_TEMP_Pin|V_INPUT_Pin);
 
     /* ADC1 DMA DeInit */
     HAL_DMA_DeInit(hadc->DMA_Handle);
@@ -188,7 +188,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
     PA3     ------> ADC2_IN3
     PA4     ------> ADC2_IN4 
     */
-    HAL_GPIO_DeInit(GPIOA, VREF_Pin|NTC_Pin|V_INPUT_Pin);
+    HAL_GPIO_DeInit(GPIOA, V_INPUT_Pin);
 
   /* USER CODE BEGIN ADC2_MspDeInit 1 */
 
@@ -196,7 +196,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
   }
 
 }
-
+#ifdef HAL_SPI_MODULE_ENABLED
 void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
 {
 
@@ -248,6 +248,7 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
   }
 
 }
+#endif
 
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 {
