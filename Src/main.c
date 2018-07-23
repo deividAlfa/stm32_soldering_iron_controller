@@ -114,6 +114,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&temp_measure_tim3);
   restoreSettings();
 
+  DWT_Delay_Init(); // Important for I2C communication
   UG_GUI gui;
   ssd1306_init();
   UG_Init(&gui, pset, 128, 64);
