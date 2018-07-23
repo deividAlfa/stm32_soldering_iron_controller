@@ -91,6 +91,7 @@ int main(void)
   MX_DMA_Init();
   MX_ADC2_Init(&hadc2);
   MX_ADC1_Init(&hadc1);
+  buzzer_init();
   if(HAL_ADCEx_Calibration_Start(&hadc2) != HAL_OK)
 	  buzzer_alarm_start();
   else if(HAL_ADCEx_Calibration_Start(&hadc1) != HAL_OK)
@@ -126,7 +127,6 @@ int main(void)
   RE_Init(&RE1_Data, ROT_ENC_L_GPIO_Port, ROT_ENC_L_Pin, ROT_ENC_R_GPIO_Port, ROT_ENC_R_Pin, ROT_ENC_BUTTON_GPIO_Port, ROT_ENC_BUTTON_GPIO_Pin);
 
   uint32_t lastTimeDisplay = HAL_GetTick();
-  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
 
   setPWM_tim(&pwm_tim4);
   iron_temp_measure_state = iron_temp_measure_idle;
@@ -139,7 +139,6 @@ int main(void)
   setCurrentTip(systemSettings.currentTip);
   setupPIDFromStruct();
   ironInit(&pwm_tim4);
-  buzzer_init();
 
   if(HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin) == GPIO_PIN_RESET) {
 	  activity = 0;
