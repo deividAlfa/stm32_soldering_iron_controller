@@ -7,6 +7,7 @@
 
 #include "main_screen.h"
 #include "tempsensors.h"
+#include "voltagesensors.h"
 #include "../../../Src/iron.h"
 #include "../../../Src/settings.h"
 #include "../generalIO/buzzer.h"
@@ -65,6 +66,10 @@ const unsigned char therm [] = {
 
 };
 
+const unsigned char flash [] = {
+		0x00, 0x00, 0x00, 0x00, 0x80, 0x40, 0x00, 0x00,
+		0x00, 0x00, 0x46, 0x37, 0x1d, 0x0c, 0x00, 0x00,
+};
 static int tempProcessInput(widget_t* w, RE_Rotation_t r, RE_State_t * s) {
 	switch (w->editable.selectable.state) {
 		case widget_selected:
@@ -89,6 +94,11 @@ static void * main_screen_getIronTemp() {
 
 static void * main_screen_getAmbTemp() {
 	temp = readColdJunctionSensorTemp_mC() / 100;
+	return &temp;
+}
+
+static void * main_screen_getSupplyVoltage() {
+	temp = getSupplyVoltage_mv()/100;
 	return &temp;
 }
 
@@ -178,6 +188,7 @@ void main_screen_setup(screen_t *scr) {
 	widget->draw = &default_widgetDraw;
 	ironTempLabelWidget = widget;
 
+	// NO IRON
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
 	strcpy(widget->displayString, "NO IRON");
@@ -211,6 +222,27 @@ void main_screen_setup(screen_t *scr) {
 	widget->displayWidget.type = field_uinteger16;
 	widget->reservedChars = 4;
 
+	//Flash bmp next to Supply voltage
+	widget = screen_addWidget(scr);
+	widgetDefaultsInit(widget, widget_bmp);
+	widget->posX = 40;
+	widget->posY = 47;
+	widget->displayBmp.bmp.p = (unsigned char*)flash;
+	widget->displayBmp.bmp.width = 8;
+	widget->displayBmp.bmp.height = 16;
+	widget->displayBmp.bmp.colors = 2;
+	widget->displayBmp.bmp.bpp = 8;
+
+	//Supply Voltage display
+	widget = screen_addWidget(scr);
+	widgetDefaultsInit(widget, widget_display);
+	widget->posX = 50;
+	widget->posY = 50;
+	widget->font_size = &FONT_8X14;
+	widget->displayWidget.getData = &main_screen_getSupplyVoltage;
+	widget->displayWidget.number_of_dec = 1;
+	widget->displayWidget.type = field_uinteger16;
+	widget->reservedChars = 4;
 
 	// tip temperature setpoint
 	widget = screen_addWidget(scr);
