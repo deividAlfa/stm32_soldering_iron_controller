@@ -99,6 +99,7 @@ int main(void)
   else
 	  buzzer_short_beep();
 
+  ironInit(&tim_pwm);
   MX_IWDG_Init();
   MX_TIM4_Init();
   MX_USART3_UART_Init();
@@ -139,7 +140,7 @@ int main(void)
   applySleepSettings();
   setCurrentTip(systemSettings.currentTip);
   setupPIDFromStruct();
-  ironInit(&tim_pwm);
+
 
   if(HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin) == GPIO_PIN_RESET) {
 	  activity = 0;
@@ -191,7 +192,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
 	if(hadc != &hadc1)
 		return;
 	if(iron_temp_measure_state == iron_temp_measure_requested) {
-		HAL_TIM_PWM_Stop(&tim_pwm, TIM_CHANNEL_3);
+		turnIronOff();
 		iron_temp_measure_state = iron_temp_measure_pwm_stopped;
 		pwmStoppedSince = HAL_GetTick();
 	}
@@ -235,7 +236,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		iron_temp_adc_avg = acc / (sizeof(ironTempADCRollingAverage)/sizeof(ironTempADCRollingAverage[0]));
 		iron_temp_measure_state = iron_temp_measure_ready;
 		if(getIronOn())
-			HAL_TIM_PWM_Start(&tim_pwm, TIM_CHANNEL_3);
+			turnIronOn();
 	}
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
