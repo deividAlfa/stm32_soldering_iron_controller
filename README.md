@@ -5,7 +5,14 @@ Working:
   * OLED Display
   * Rotary Encoder
   * Buzzer
+  * Wake switch
+  * Supply voltage sensor
+  * Ambient temperature sensor (might need calibration)
+  * Tip temperature read out (might also need calibration)
 
+TODO:
+  * T12 PWM Control
+  * I2C eeprom
 
 # stm32_soldering_iron_controller
 Custom firmware for the chinese kseger soldering iron controller
