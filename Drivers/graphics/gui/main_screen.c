@@ -12,7 +12,7 @@
 #include "../../../Src/settings.h"
 #include "../generalIO/buzzer.h"
 
-#define NO_IRON_ADC 5000
+#define NO_IRON_ADC 4050
 static uint8_t hasIron = 1;
 static uint16_t m_tip = 0;
 static uint16_t m_mode = 0;
@@ -119,7 +119,7 @@ void main_screenUpdate(screen_t *scr) {
 		ironTempLabelWidget->enabled = 0;
 		ironTempWidget->enabled = 0;
 		noIronWidget->enabled = 1;
-		buzzer_alarm_start();
+		//buzzer_alarm_start();
 		hasIron = 0;
 	}
 	else if((t <= NO_IRON_ADC) && !hasIron){
@@ -192,7 +192,7 @@ void main_screen_setup(screen_t *scr) {
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
 	strcpy(widget->displayString, "NO IRON");
-	widget->posX = 20 - 3;
+	widget->posX = 5;
 	widget->posY = 20 + 5 - 2;
 	widget->font_size = &FONT_16X26;
 	widget->reservedChars = 7;
