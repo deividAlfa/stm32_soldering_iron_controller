@@ -14,8 +14,8 @@ void MX_ADC1_Init(ADC_HandleTypeDef * hadc1);
 
 typedef struct {
 	uint32_t iron;
-	uint32_t supply;
 	uint32_t cold_junction;
+	uint32_t supply;
 } adc_measures_t;
 extern volatile adc_measures_t adc_measures[10];
 
