@@ -41,8 +41,8 @@
 
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_adc1;
-extern TIM_HandleTypeDef pwm_tim4;
-extern TIM_HandleTypeDef temp_measure_tim3;
+extern TIM_HandleTypeDef tim_pwm;
+extern TIM_HandleTypeDef tim_temp_measure;
 
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
@@ -257,12 +257,12 @@ void DMA1_Channel1_IRQHandler(void)
 /**
 * @brief This function handles TIM3 global interrupt.
 */
-void TIM3_IRQHandler(void)
+void TIM4_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_IRQn 0 */
 
   /* USER CODE END TIM3_IRQn 0 */
-  HAL_TIM_IRQHandler(&temp_measure_tim3);
+  HAL_TIM_IRQHandler(&tim_temp_measure);
   /* USER CODE BEGIN TIM3_IRQn 1 */
 
   /* USER CODE END TIM3_IRQn 1 */
@@ -271,11 +271,11 @@ void TIM3_IRQHandler(void)
 /**
 * @brief This function handles TIM4 global interrupt.
 */
-void TIM4_IRQHandler(void)
+void TIM3_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM4_IRQn 0 */
  /* USER CODE END TIM4_IRQn 0 */
-  HAL_TIM_IRQHandler(&pwm_tim4);
+  HAL_TIM_IRQHandler(&tim_pwm);
   /* USER CODE BEGIN TIM4_IRQn 1 */
 
   /* USER CODE END TIM4_IRQn 1 */
