@@ -11,7 +11,7 @@
 const uint16_t temp_minC = 100;                 // Minimum calibration temperature in degrees of Celsius
 const uint16_t temp_maxC = 450;                 // Maximum calibration temperature in degrees of Celsius
 
-static const uint16_t NTC_R = 1013;
+static const uint16_t NTC_R = 4700;
 static tipData *currentTipData;
 
 uint16_t readColdJunctionSensorTemp_mC(void) {
@@ -22,6 +22,7 @@ uint16_t readColdJunctionSensorTemp_mC(void) {
 	uint32_t ad_value, avg_data, slide_data;
 
 	uint8_t gMeas_cnt = 9;
+
 	ad_sum = min = max = adc_measures[0].cold_junction;
 	while (gMeas_cnt > 0) {
 		ad_value = adc_measures[gMeas_cnt].cold_junction;
@@ -33,7 +34,7 @@ uint16_t readColdJunctionSensorTemp_mC(void) {
 		gMeas_cnt--;
 	}
 	ad_sum = ad_sum - max - min;
-	avg_data = ad_sum / 8;
+	avg_data = (uint16_t)ad_sum / 8;
 
 	rollingAverage[rIndex] = avg_data; //store this result
 	rIndex = (rIndex + 1) % 4; //move the index
