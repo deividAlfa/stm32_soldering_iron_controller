@@ -192,7 +192,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
 	if(hadc != &hadc1)
 		return;
 	if(iron_temp_measure_state == iron_temp_measure_requested) {
-		turnIronOff();
+		HAL_TIM_PWM_Stop(&tim_pwm, TIM_CHANNEL_3);  // don't use turnIronOff();
 		iron_temp_measure_state = iron_temp_measure_pwm_stopped;
 		pwmStoppedSince = HAL_GetTick();
 	}
@@ -236,7 +236,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		iron_temp_adc_avg = acc / (sizeof(ironTempADCRollingAverage)/sizeof(ironTempADCRollingAverage[0]));
 		iron_temp_measure_state = iron_temp_measure_ready;
 		if(getIronOn())
-			turnIronOn();
+			HAL_TIM_PWM_Start(&tim_pwm, TIM_CHANNEL_3);  // don't use turnIronOn();
 	}
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
