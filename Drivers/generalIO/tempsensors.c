@@ -67,7 +67,10 @@ tipData * getCurrentTip() {
 uint16_t human2adc(uint16_t t) {
   uint16_t temp = t;
   uint16_t ambientTemperature = readColdJunctionSensorTemp_mC() / 1000;
-  t = t - ambientTemperature;
+  if(ambientTemperature > 50)
+	  ambientTemperature = 50;
+  if(t > ambientTemperature)
+	  t = t - ambientTemperature;
   if (t < temp_minC) t = temp_minC;
   if (t > temp_maxC) t = temp_maxC;
   if (t >= currentTipData->calADC_At_300)
@@ -113,5 +116,9 @@ uint16_t adc2Human(uint16_t adc_value) {
 
 long map(long x, long in_min, long in_max, long out_min, long out_max)
 {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	long ret;
+	ret = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	if(ret < 0)
+		ret = 0;
+	return ret;
 }
