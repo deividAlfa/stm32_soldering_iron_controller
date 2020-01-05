@@ -211,7 +211,7 @@ void handleIron(uint8_t activity) {
 	  set = 1500.0 *(set * 100.0 -12.0388878376)/102.72647713;
 	  if(set < 0)
 		  set = 0;
-	  __HAL_TIM_SET_COMPARE(ironPWMTimer, TIM_CHANNEL_3, set);
+	  __HAL_TIM_SET_COMPARE(ironPWMTimer, TIM_CHANNEL_3, CONV_TO_UINT(set));
 	  if((getSetTemperature() == readTipTemperatureCompensated(0)) && !temperatureReachedFlag) {
 		  temperatureReached(getSetTemperature());
 		  temperatureReachedFlag = 1;

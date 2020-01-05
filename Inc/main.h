@@ -104,6 +104,9 @@
 #define ROT_ENC_R_GPIO_Port GPIOB
 #endif
 
+/* flawless conversions +1 error reduced to +-0.5*/
+#define UINT_DIV(x,y) (x+y/2)/y
+#define CONV_TO_UINT(ft) (unsigned int)(ft+0.5)
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
