@@ -1,3 +1,4 @@
+
 /**
   ******************************************************************************
   * File Name          : main.c
@@ -57,8 +58,8 @@ ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 DMA_HandleTypeDef hdma_adc1;
 IWDG_HandleTypeDef hiwdg;
-TIM_HandleTypeDef tim_pwm;
-TIM_HandleTypeDef tim_temp_measure;
+TIM_HandleTypeDef tim3_pwm;
+TIM_HandleTypeDef tim4_temp_measure;
 UART_HandleTypeDef huart3;
 TIM_OC_InitTypeDef sConfigOC;
 
@@ -99,7 +100,7 @@ int main(void)
   else
 	  buzzer_short_beep();
 
-  ironInit(&tim_pwm);
+  ironInit(&tim3_pwm);
   MX_IWDG_Init();
   MX_TIM4_Init();
   MX_USART3_UART_Init();
@@ -112,7 +113,7 @@ int main(void)
   }
   HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) adc_measures, sizeof(adc_measures)/ sizeof(uint32_t));
 
-  HAL_TIM_Base_Start_IT(&tim_temp_measure);
+  HAL_TIM_Base_Start_IT(&tim4_temp_measure);
   restoreSettings();
 
   DWT_Delay_Init(); // Important for I2C communication
@@ -130,7 +131,7 @@ int main(void)
 
   uint32_t lastTimeDisplay = HAL_GetTick();
 
-  setPWM_tim(&tim_pwm);
+  setPWM_tim(&tim3_pwm);
   iron_temp_measure_state = iron_temp_measure_idle;
 
   setContrast(systemSettings.contrast);
@@ -182,7 +183,7 @@ int main(void)
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if(htim != &tim_temp_measure)
+	if(htim != &tim4_temp_measure)
 		return;
 	if(iron_temp_measure_state == iron_temp_measure_idle) {
 		iron_temp_measure_state = iron_temp_measure_requested;
@@ -192,7 +193,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
 	if(hadc != &hadc1)
 		return;
 	if(iron_temp_measure_state == iron_temp_measure_requested) {
-		HAL_TIM_PWM_Stop(&tim_pwm, TIM_CHANNEL_3);  // don't use turnIronOff();
+		HAL_TIM_PWM_Stop(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOff();
 		iron_temp_measure_state = iron_temp_measure_pwm_stopped;
 		pwmStoppedSince = HAL_GetTick();
 	}
@@ -240,7 +241,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		iron_temp_adc_avg = UINT_DIV(acc, FIFO_LEN); //minimize divide error from +-1 to +- 0.5
 		iron_temp_measure_state = iron_temp_measure_ready;
 		if(getIronOn())
-			HAL_TIM_PWM_Start(&tim_pwm, TIM_CHANNEL_3);  // don't use turnIronOn();
+			HAL_TIM_PWM_Start(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOn();
 	}
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
@@ -335,25 +336,25 @@ static void MX_TIM4_Init(void)
   TIM_ClockConfigTypeDef sClockSourceConfig;
   TIM_MasterConfigTypeDef sMasterConfig;
 
-  tim_temp_measure.Instance = TIM4;
-  tim_temp_measure.Init.Prescaler = 6000;
-  tim_temp_measure.Init.CounterMode = TIM_COUNTERMODE_UP;
-  tim_temp_measure.Init.Period = 10;
-  tim_temp_measure.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;//CHECK
-  if (HAL_TIM_Base_Init(&tim_temp_measure) != HAL_OK)
+  tim4_temp_measure.Instance = TIM4;
+  tim4_temp_measure.Init.Prescaler = 6000;
+  tim4_temp_measure.Init.CounterMode = TIM_COUNTERMODE_UP;
+  tim4_temp_measure.Init.Period = 10;
+  tim4_temp_measure.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;//CHECK
+  if (HAL_TIM_Base_Init(&tim4_temp_measure) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
 
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&tim_temp_measure, &sClockSourceConfig) != HAL_OK)
+  if (HAL_TIM_ConfigClockSource(&tim4_temp_measure, &sClockSourceConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
 
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&tim_temp_measure, &sMasterConfig) != HAL_OK)
+  if (HAL_TIMEx_MasterConfigSynchronization(&tim4_temp_measure, &sMasterConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
@@ -370,23 +371,23 @@ static void MX_TIM3_Init(void)
 
   TIM_ClockConfigTypeDef sClockSourceConfig;
 
-  tim_pwm.Instance = TIM3;
-  tim_pwm.Init.Prescaler = 16;
-  tim_pwm.Init.CounterMode = TIM_COUNTERMODE_UP;
-  tim_pwm.Init.Period = 1500;
-  tim_pwm.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  if (HAL_TIM_Base_Init(&tim_pwm) != HAL_OK)
+  tim3_pwm.Instance = TIM3;
+  tim3_pwm.Init.Prescaler = 16;
+  tim3_pwm.Init.CounterMode = TIM_COUNTERMODE_UP;
+  tim3_pwm.Init.Period = 1500;
+  tim3_pwm.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  if (HAL_TIM_Base_Init(&tim3_pwm) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
 
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&tim_pwm, &sClockSourceConfig) != HAL_OK)
+  if (HAL_TIM_ConfigClockSource(&tim3_pwm, &sClockSourceConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
 
-  if (HAL_TIM_PWM_Init(&tim_pwm) != HAL_OK)
+  if (HAL_TIM_PWM_Init(&tim3_pwm) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
@@ -395,12 +396,12 @@ static void MX_TIM3_Init(void)
   sConfigOC.Pulse = 750;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&tim_pwm, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  if (HAL_TIM_PWM_ConfigChannel(&tim3_pwm, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
 
-  HAL_TIM_MspPostInit(&tim_pwm);
+  HAL_TIM_MspPostInit(&tim3_pwm);
 
 }
 
