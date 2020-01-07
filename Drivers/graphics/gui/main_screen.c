@@ -261,7 +261,7 @@ void main_screen_setup(screen_t *scr) {
 	widget->editable.inputData.number_of_dec = 0;
 	widget->editable.inputData.type = field_uinteger16;
 	widget->editable.big_step = 10;
-	widget->editable.step = 1;
+	widget->editable.step = 5;
 	widget->editable.selectable.tab = 0;
 	widget->editable.setData = (void (*)(void *))&setTemp;
 	widget->editable.max_value = 300;

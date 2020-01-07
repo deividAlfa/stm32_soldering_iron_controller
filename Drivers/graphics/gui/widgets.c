@@ -358,7 +358,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 			uint16_t ui16;
 			char *str;
 			int8_t inc;
-			if(fabs(state->Diff) > 2) {
+			if(fabs(state->Diff) > 1) {
 				inc = widget->editable.big_step;
 				if(state->Diff < 0)
 					inc = -1 * inc;
