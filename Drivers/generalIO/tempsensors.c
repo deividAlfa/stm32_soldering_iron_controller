@@ -46,9 +46,9 @@ uint16_t readColdJunctionSensorTemp_mC(void) {
 	return adc_read;
 
 }
-
-uint16_t readTipTemperatureCompensated(uint8_t new){
-	static uint16_t last_value;
+float last_value;
+float readTipTemperatureCompensated(uint8_t new){
+	//static float last_value;
 	if(!new)
 		return last_value;
 	last_value = adc2Human(iron_temp_adc_avg);
@@ -100,10 +100,11 @@ uint16_t human2adc(uint16_t t) {
   return temp;
 }
 
+float tempH = 0;
 // Translate temperature from internal units to the human readable value (Celsius or Farenheit)
-uint16_t adc2Human(uint16_t adc_value) {
-  uint16_t tempH = 0;
-  uint16_t ambientTemperature = readColdJunctionSensorTemp_mC() / 1000;
+float adc2Human(uint16_t adc_value) {
+
+  float ambientTemperature = readColdJunctionSensorTemp_mC() / 1000;
   if (adc_value < currentTipData->calADC_At_200) {
     tempH = map(adc_value, 0, currentTipData->calADC_At_200, ambientTemperature, 200);
   } else if (adc_value >= currentTipData->calADC_At_300) {
@@ -113,10 +114,10 @@ uint16_t adc2Human(uint16_t adc_value) {
   }
   return tempH + ambientTemperature;
 }
-
-long map(long x, long in_min, long in_max, long out_min, long out_max)
+float ret;
+float map(float x, float in_min, float in_max, float out_min, float out_max)
 {
-	long ret;
+
 	ret = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 	if(ret < 0)
 		ret = 0;

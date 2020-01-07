@@ -92,6 +92,12 @@ static void * main_screen_getIronTemp() {
 	return &temp;
 }
 
+static void * main_screen_getIronTemp10x() {
+	static uint16_t temp10x;
+	temp10x = (uint16_t)(readTipTemperatureCompensated(0) * 10.0);
+	return &temp10x;
+}
+
 static void * main_screen_getAmbTemp() {
 	temp = readColdJunctionSensorTemp_mC() / 100;
 	return &temp;
@@ -145,13 +151,13 @@ void main_screen_setup(screen_t *scr) {
 	//iron tip temperature display
 	widget_t *widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_display);
-	widget->posX = 45 - 3 - 4;
+	widget->posX = 45 - 3 - 4 - 35;
 	widget->posY = 23;
 	widget->font_size = &FONT_16X26;
-	widget->displayWidget.getData = &main_screen_getIronTemp;
-	widget->displayWidget.number_of_dec = 0;
+	widget->displayWidget.getData = &main_screen_getIronTemp10x;
+	widget->displayWidget.number_of_dec = 1;
 	widget->displayWidget.type = field_uinteger16;
-	widget->reservedChars = 3;
+	widget->reservedChars = 5;
 	ironTempWidget = widget;
 
 	//power display
