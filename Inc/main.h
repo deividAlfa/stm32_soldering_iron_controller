@@ -114,6 +114,7 @@
 #define UINT_DIV(x,y) (x+y/2)/y
 #define CONV_TO_UINT(ft) (unsigned int)(ft+0.5)
 
+#define ADC_MEASURES_LEN 512
 #define FAKE_25_COLD_JUNGTION
 #define FAKE_SUPPLY_VOLTAGE_OK
 #define LEAVE_ONLY_IRON_MEAS

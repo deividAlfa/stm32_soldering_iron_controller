@@ -207,9 +207,9 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
 int aleliuja;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
-	static uint16_t ironTempADCRollingAverage[2] = {0};
-	static uint8_t rindex = 0;
-	static uint8_t doOnce = 0;
+	static uint16_t ironTempADCRollingAverage[10] = {0};
+	static int rindex = 0;
+	static int doOnce = 0;
 	uint32_t acc = 0;
 	uint16_t max = 0;
 	uint16_t min = 0xFFFF;
@@ -220,7 +220,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		iron_temp_measure_state = iron_temp_measure_started;
 		return;
 	} else if(iron_temp_measure_state == iron_temp_measure_started) {
-		for(uint8_t x = 0; x < sizeof(adc_measures)/sizeof(adc_measures[0]); ++x) {
+		for(int x = 0; x < sizeof(adc_measures)/sizeof(adc_measures[0]); ++x) {
 			temp = adc_measures[x].iron;
 			acc += temp;
 			if(temp > max)
@@ -230,7 +230,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		}
 //		acc = acc - min - max;
 //		uint16_t last = acc / ((sizeof(adc_measures)/sizeof(adc_measures[0])) -2);
-		uint16_t last = UINT_DIV(acc , FIFO_LEN);
+		uint16_t last = UINT_DIV( (acc - min - max) , FIFO_LEN-2);
 		ironTempADCRollingAverage[rindex] = last;
 		if(doOnce) {
 			for(uint8_t x = 0; x < sizeof(ironTempADCRollingAverage)/sizeof(ironTempADCRollingAverage[0]); ++x) {

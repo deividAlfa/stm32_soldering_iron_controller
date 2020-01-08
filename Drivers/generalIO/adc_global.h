@@ -27,7 +27,7 @@ typedef struct {
 } adc_measures_t;
 #endif
 
-#define ADC_MEASURES_LEN 250
+
 extern volatile adc_measures_t adc_measures[ADC_MEASURES_LEN];
 
 typedef enum {iron_temp_measure_idle
