@@ -187,19 +187,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		return;
 	if(iron_temp_measure_state == iron_temp_measure_idle) {
 		iron_temp_measure_state = iron_temp_measure_requested;
+		HAL_TIM_PWM_Stop(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOff();
+		iron_temp_measure_state = iron_temp_measure_pwm_stopped;
+		pwmStoppedSince = HAL_GetTick();		
 	}
 }
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
 	if(hadc != &hadc1)
 		return;
-	if(iron_temp_measure_state == iron_temp_measure_requested) {
-		HAL_TIM_PWM_Stop(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOff();
-		iron_temp_measure_state = iron_temp_measure_pwm_stopped;
-		pwmStoppedSince = HAL_GetTick();
-	}
+//	if(iron_temp_measure_state == iron_temp_measure_requested) {
+//		HAL_TIM_PWM_Stop(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOff();
+//		iron_temp_measure_state = iron_temp_measure_pwm_stopped;
+//		pwmStoppedSince = HAL_GetTick();
+//	}
 }
 
 #define FIFO_LEN (sizeof(ironTempADCRollingAverage)/sizeof(ironTempADCRollingAverage[0]))
+int aleliuja;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 	static uint16_t ironTempADCRollingAverage[10] = {0};
@@ -242,7 +246,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		iron_temp_measure_state = iron_temp_measure_ready;
 		if(getIronOn())
 			HAL_TIM_PWM_Start(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOn();
-	}
+		}
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if((GPIO_Pin == ROT_ENC_BUTTON_GPIO_Pin) || (GPIO_Pin == ROT_ENC_R_Pin) || (GPIO_Pin == ROT_ENC_L_Pin)) {
