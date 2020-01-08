@@ -207,7 +207,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
 int aleliuja;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
-	static uint16_t ironTempADCRollingAverage[10] = {0};
+	static uint16_t ironTempADCRollingAverage[2] = {0};
 	static int rindex = 0;
 	static int doOnce = 0;
 	uint32_t acc = 0;
