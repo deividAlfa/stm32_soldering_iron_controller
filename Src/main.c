@@ -202,11 +202,12 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
 //	}
 }
 
-#define FIFO_LEN (sizeof(ironTempADCRollingAverage)/sizeof(ironTempADCRollingAverage[0]))
+#define FIFO_LEN 			(sizeof(adc_measures)/sizeof(adc_measures[0]))
+#define ROLLING_AVG_LEN 	(sizeof(ironTempADCRollingAverage)/sizeof(ironTempADCRollingAverage[0]))
 int aleliuja;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
-	static uint16_t ironTempADCRollingAverage[10] = {0};
+	static uint16_t ironTempADCRollingAverage[2] = {0};
 	static uint8_t rindex = 0;
 	static uint8_t doOnce = 0;
 	uint32_t acc = 0;
@@ -237,12 +238,12 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 			}
 			doOnce =0;
 		}
-		rindex = (rindex + 1) % 10;
+		rindex = (rindex + 1) % ROLLING_AVG_LEN;
 		acc = 0;
 		for(uint8_t x = 0; x < sizeof(ironTempADCRollingAverage)/sizeof(ironTempADCRollingAverage[0]); ++x) {
 			acc += ironTempADCRollingAverage[x];
 		}
-		iron_temp_adc_avg = UINT_DIV(acc, FIFO_LEN); //minimize divide error from +-1 to +- 0.5
+		iron_temp_adc_avg = UINT_DIV(acc, ROLLING_AVG_LEN); //minimize divide error from +-1 to +- 0.5
 		iron_temp_measure_state = iron_temp_measure_ready;
 		if(getIronOn())
 			HAL_TIM_PWM_Start(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOn();

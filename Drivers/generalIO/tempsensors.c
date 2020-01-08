@@ -21,7 +21,7 @@ uint16_t readColdJunctionSensorTemp_mC(void) {
 	uint32_t max, min;
 	uint32_t ad_value, avg_data, slide_data;
 
-	uint8_t gMeas_cnt = 9;
+	uint8_t gMeas_cnt = sizeof(adc_measures)/sizeof(adc_measures[0]) -1;
 	ad_sum = min = max = adc_measures[0].cold_junction;
 	while (gMeas_cnt > 0) {
 		ad_value = adc_measures[gMeas_cnt].cold_junction;

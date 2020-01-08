@@ -17,7 +17,9 @@ typedef struct {
 	uint32_t cold_junction;
 	uint32_t supply;
 } adc_measures_t;
-extern volatile adc_measures_t adc_measures[10];
+
+#define ADC_MEASURES_LEN 10
+extern volatile adc_measures_t adc_measures[ADC_MEASURES_LEN];
 
 typedef enum {iron_temp_measure_idle
 	, iron_temp_measure_pwm_stopped
