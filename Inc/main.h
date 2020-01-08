@@ -46,62 +46,68 @@
 
 /* Private define ------------------------------------------------------------*/
 #define HW_VER2_1S
+
 #ifndef HW_VER2_1S
-#define OLED_CS_Pin GPIO_PIN_0
-#define OLED_CS_GPIO_Port GPIOA
-#define IRON_TEMP_Pin GPIO_PIN_1
-#define IRON_TEMP_GPIO_Port GPIOA
-#define VREF_Pin GPIO_PIN_2
-#define VREF_GPIO_Port GPIOA
-#define NTC_Pin GPIO_PIN_3
-#define NTC_GPIO_Port GPIOA
-#define V_INPUT_Pin GPIO_PIN_4
-#define V_INPUT_GPIO_Port GPIOA
-#define ROT_ENC_L_Pin GPIO_PIN_1
-#define ROT_ENC_L_GPIO_Port GPIOB
-#define ROT_ENC_R_Pin GPIO_PIN_0
-#define ROT_ENC_R_GPIO_Port GPIOB
-#define ROT_ENC_BUTTON_GPIO_Port GPIOB
-#define ROT_ENC_BUTTON_GPIO_Pin GPIO_PIN_5
-#define JUMPER_Pin GPIO_PIN_2
-#define JUMPER_GPIO_Port GPIOB
-#define OLED_DC_Pin GPIO_PIN_8
-#define OLED_DC_GPIO_Port GPIOA
-#define OLED_RST_Pin GPIO_PIN_9
-#define OLED_RST_GPIO_Port GPIOA
-#define WAKE_Pin GPIO_PIN_6
-#define WAKE_GPIO_Port GPIOB
-#define BUZZER_Pin GPIO_PIN_7
-#define BUZZER_GPIO_Port GPIOB
-#define PWM_CONTROL_Pin GPIO_PIN_8
-#define PWM_CONTROL_GPIO_Port GPIOB
+	#define OLED_CS_Pin GPIO_PIN_0
+	#define OLED_CS_GPIO_Port GPIOA
+	#define IRON_TEMP_Pin GPIO_PIN_1
+	#define IRON_TEMP_GPIO_Port GPIOA
+	#define VREF_Pin GPIO_PIN_2
+	#define VREF_GPIO_Port GPIOA
+	#define NTC_Pin GPIO_PIN_3
+	#define NTC_GPIO_Port GPIOA
+	#define V_INPUT_Pin GPIO_PIN_4
+	#define V_INPUT_GPIO_Port GPIOA
+	#define ROT_ENC_L_Pin GPIO_PIN_1
+	#define ROT_ENC_L_GPIO_Port GPIOB
+	#define ROT_ENC_R_Pin GPIO_PIN_0
+	#define ROT_ENC_R_GPIO_Port GPIOB
+	#define ROT_ENC_BUTTON_GPIO_Port GPIOB
+	#define ROT_ENC_BUTTON_GPIO_Pin GPIO_PIN_5
+	#define JUMPER_Pin GPIO_PIN_2
+	#define JUMPER_GPIO_Port GPIOB
+	#define OLED_DC_Pin GPIO_PIN_8
+	#define OLED_DC_GPIO_Port GPIOA
+	#define OLED_RST_Pin GPIO_PIN_9
+	#define OLED_RST_GPIO_Port GPIOA
+	#define WAKE_Pin GPIO_PIN_6
+	#define WAKE_GPIO_Port GPIOB
+	#define BUZZER_Pin GPIO_PIN_7
+	#define BUZZER_GPIO_Port GPIOB
+	#define PWM_CONTROL_Pin GPIO_PIN_8
+	#define PWM_CONTROL_GPIO_Port GPIOB
 #else
-#define V_INPUT_Pin GPIO_PIN_1
-#define V_INPUT_GPIO_Port GPIOB
-#define EEPROM_SCL_Pin GPIO_PIN_0
-#define EEPROM_SCL_GPIO_Port GPIOA
-#define EEPROM_SDA_Pin GPIO_PIN_1
-#define EEPROM_SDA_GPIO_Port GPIOA
-#define IRON_TEMP_Pin GPIO_PIN_2
-#define IRON_TEMP_GPIO_Port GPIOA
-#define BUZZER_Pin GPIO_PIN_5
-#define BUZZER_GPIO_Port GPIOA
-#define TEMPAMB_Pin GPIO_PIN_7
-#define TEMPAMB_GPIO_Port GPIOA
-#define WAKE_Pin GPIO_PIN_6
-#define WAKE_GPIO_Port GPIOA
-#define T12PWM_Pin GPIO_PIN_0
-#define T12PWM_GPIO_Port GPIOB
-#define OLED_SCL_Pin GPIO_PIN_13
-#define OLED_SCL_GPIO_Port GPIOB
-#define OLED_SDA_Pin GPIO_PIN_12
-#define OLED_SDA_GPIO_Port GPIOB
-#define ROT_ENC_BUTTON_GPIO_Pin GPIO_PIN_15
-#define ROT_ENC_BUTTON_GPIO_Port GPIOA
-#define ROT_ENC_L_Pin GPIO_PIN_4
-#define ROT_ENC_L_GPIO_Port GPIOB
-#define ROT_ENC_R_Pin GPIO_PIN_3
-#define ROT_ENC_R_GPIO_Port GPIOB
+	#define V_INPUT_Pin GPIO_PIN_1
+	#define V_INPUT_GPIO_Port GPIOB
+	#define EEPROM_SCL_Pin GPIO_PIN_0
+	#define EEPROM_SCL_GPIO_Port GPIOA
+	#define EEPROM_SDA_Pin GPIO_PIN_1
+	#define EEPROM_SDA_GPIO_Port GPIOA
+	#define IRON_TEMP_Pin GPIO_PIN_2
+	#define IRON_TEMP_GPIO_Port GPIOA
+#if 0 // turn off buzzer madness
+	#define BUZZER_Pin GPIO_PIN_5
+	#define BUZZER_GPIO_Port GPIOA
+#else
+	#define BUZZER_Pin GPIO_PIN_9	/* NC pin */
+	#define BUZZER_GPIO_Port GPIOA
+#endif
+	#define TEMPAMB_Pin GPIO_PIN_7
+	#define TEMPAMB_GPIO_Port GPIOA
+	#define WAKE_Pin GPIO_PIN_6
+	#define WAKE_GPIO_Port GPIOA
+	#define T12PWM_Pin GPIO_PIN_0
+	#define T12PWM_GPIO_Port GPIOB
+	#define OLED_SCL_Pin GPIO_PIN_13
+	#define OLED_SCL_GPIO_Port GPIOB
+	#define OLED_SDA_Pin GPIO_PIN_12
+	#define OLED_SDA_GPIO_Port GPIOB
+	#define ROT_ENC_BUTTON_GPIO_Pin GPIO_PIN_15
+	#define ROT_ENC_BUTTON_GPIO_Port GPIOA
+	#define ROT_ENC_L_Pin GPIO_PIN_4
+	#define ROT_ENC_L_GPIO_Port GPIOB
+	#define ROT_ENC_R_Pin GPIO_PIN_3
+	#define ROT_ENC_R_GPIO_Port GPIOB
 #endif
 
 /* flawless conversions +1 error reduced to +-0.5*/
