@@ -9,14 +9,23 @@
 #define GENERALIO_ADC_GLOBAL_H_
 
 #include "stm32f1xx_hal.h"
+#include "main.h"
 void MX_ADC2_Init(ADC_HandleTypeDef * hadc2);
 void MX_ADC1_Init(ADC_HandleTypeDef * hadc1);
 
+#ifndef LEAVE_ONLY_IRON_MEAS
 typedef struct {
 	uint32_t iron;
 	uint32_t cold_junction;
 	uint32_t supply;
 } adc_measures_t;
+#else
+typedef struct {
+	uint32_t iron;
+//	uint32_t cold_junction;
+//	uint32_t supply;
+} adc_measures_t;
+#endif
 
 #define ADC_MEASURES_LEN 250
 extern volatile adc_measures_t adc_measures[ADC_MEASURES_LEN];

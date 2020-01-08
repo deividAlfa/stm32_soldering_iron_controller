@@ -26,6 +26,8 @@ static void * debug_screen_get_iron() {
 	temp = adc_measures[0].iron;
 	return &temp;
 }
+
+#ifndef FAKE_SUPPLY_VOLTAGE_OK
 static void * debug_screen_get_supply() {
 	temp = adc_measures[0].supply;
 	return &temp;
@@ -35,6 +37,19 @@ static void * debug_screen_get_cold_junction() {
 	temp = adc_measures[0].cold_junction;
 	return &temp;
 }
+#else
+static void * debug_screen_get_supply() {
+	temp = 2400;
+	return &temp;
+}
+
+static void * debug_screen_get_cold_junction() {
+	temp = 21000;
+	return &temp;
+}
+#endif
+
+
 static void * debug_screen_getP() {
 	temp = getPID_P();
 	return &temp;
