@@ -38,7 +38,7 @@ void resetPID() {
 	pre_error = 0;
 	integral = 0;
 }
-volatile int pid_err = 0;
+
 double calculatePID( double setpoint, double pv )
 {
 	mset = setpoint;
@@ -46,6 +46,7 @@ double calculatePID( double setpoint, double pv )
 
     uint32_t tick_start = HAL_GetTick();
     double dt = (tick_start - lastTime) ;
+    lastTime = tick_start;
     dt = dt / 1000;
     // Calculate error
     double error = setpoint - pv;
@@ -82,11 +83,6 @@ double calculatePID( double setpoint, double pv )
 
     // Save error to previous error
     pre_error = error;
-    lastTime = HAL_GetTick();
-
-    if(lastTime != tick_start){
-        pid_err++;
-    }
     currentOutput = output;
     return output;
 }
