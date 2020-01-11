@@ -79,110 +79,20 @@ static void MX_TIM3_Init(void);
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 RE_State_t RE1_Data;
 
-static uint8_t activity = 1;
 static uint32_t pwmStoppedSince = 0;
+static uint8_t activity = 1;
 static uint32_t startOfNoActivityTime = 0;
 static uint8_t startOfNoActivity = 0;
 #define ADC_MEASURE_DELAY	0
-int main(void)
-{
-  HAL_Init();
-  SystemClock_Config();
-  MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_ADC2_Init(&hadc2);
-  MX_ADC1_Init(&hadc1);
-  buzzer_init();
-  if(HAL_ADCEx_Calibration_Start(&hadc2) != HAL_OK)
-	  buzzer_alarm_start();
-  else if(HAL_ADCEx_Calibration_Start(&hadc1) != HAL_OK)
-	  buzzer_alarm_start();
-  else
-	  buzzer_short_beep();
 
-  ironInit(&tim3_pwm);
-  MX_IWDG_Init();
-  MX_TIM4_Init();
-  MX_USART3_UART_Init();
-  MX_TIM3_Init();
-  /* Enable ADC slave */
-  if (HAL_ADC_Start(&hadc2) != HAL_OK)
-  {
-	  buzzer_alarm_start();
-	  Error_Handler();
-  }
-  HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) adc_measures, sizeof(adc_measures)/ sizeof(uint32_t));
-
-  HAL_TIM_Base_Start_IT(&tim4_temp_measure);
-  restoreSettings();
-
-  DWT_Delay_Init(); // Important for I2C communication
-  UG_GUI gui;
-  ssd1306_init();
-  UG_Init(&gui, pset, 128, 64);
-  guiInit();
-  oled_init();
-  oled_draw();
-  UG_Update();
-  update_display();
-
-  HAL_IWDG_Start(&hiwdg);
-  RE_Init(&RE1_Data, ROT_ENC_L_GPIO_Port, ROT_ENC_L_Pin, ROT_ENC_R_GPIO_Port, ROT_ENC_R_Pin, ROT_ENC_BUTTON_GPIO_Port, ROT_ENC_BUTTON_GPIO_Pin);
-
-  uint32_t lastTimeDisplay = HAL_GetTick();
-
-  setPWM_tim(&tim3_pwm);
-  iron_temp_measure_state = iron_temp_measure_idle;
-
-  setContrast(systemSettings.contrast);
-  currentBoostSettings = systemSettings.boost;
-  currentSleepSettings = systemSettings.sleep;
-  applyBoostSettings();
-  applySleepSettings();
-  setCurrentTip(systemSettings.currentTip);
-  setupPIDFromStruct();
-
-
-  if(HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin) == GPIO_PIN_RESET) {
-	  activity = 0;
-	  setCurrentMode(mode_sleep);
-  }
-
-  while (1)
-  {
-	  HAL_IWDG_Refresh(&hiwdg);
-	  if(iron_temp_measure_state == iron_temp_measure_ready) {
-		  readTipTemperatureCompensated(1);
-
-		  if(HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin) == GPIO_PIN_RESET) {
-			  if(startOfNoActivity == 0)
-				  startOfNoActivityTime = HAL_GetTick();
-			  startOfNoActivity = 1;
-			  if((HAL_GetTick() - startOfNoActivityTime) > 500)
-				  activity = 0;
-		  }
-		  else {
-			  activity = 1;
-			  startOfNoActivity = 0;
-		  }
-
-		  handleIron(activity);
-		  iron_temp_measure_state = iron_temp_measure_idle;
-	  }
-
-	  if(HAL_GetTick() - lastTimeDisplay > 50) {
-		  handle_buzzer();
-		  RE_Rotation_t r = RE_Get(&RE1_Data);
-		  oled_update();
-		  oled_processInput(r, &RE1_Data);
-		  oled_draw();
-		  lastTimeDisplay = HAL_GetTick();
-	  }
-  }
-
-}
-
+struct{
+	int elapsed_cnt;
+	int pulse_cnt;
+}tim4_var;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if(htim == &tim3_pwm ){
+		tim4_var.elapsed_cnt++;
+	}
 	if(htim != &tim4_temp_measure)
 		return;
 	if(iron_temp_measure_state == iron_temp_measure_idle) {
@@ -194,6 +104,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) adc_measures, sizeof(adc_measures)/ sizeof(uint32_t));
 	}
 }
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
+	tim4_var.pulse_cnt ++;
+	if(htim == &tim3_pwm ){
+		tim4_var.pulse_cnt ++;
+	}
+}
+
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
 	if(hadc != &hadc1)
 		return;
@@ -332,7 +250,7 @@ static void MX_IWDG_Init(void)
   }
 
 }
-
+#include "stm32f1xx_hal_tim.h"
 /* TIM3 init function
 Timer used to interrupt power to the iron in order
 to measure Termocouple ADC
@@ -408,6 +326,7 @@ static void MX_TIM3_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_UPDATE);
 
   HAL_TIM_MspPostInit(&tim3_pwm);
 
@@ -568,6 +487,104 @@ void MX_GPIO_Init(void)
 #endif
 /* USER CODE BEGIN 4 */
 
+
+int main(void)
+{
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_ADC2_Init(&hadc2);
+  MX_ADC1_Init(&hadc1);
+  buzzer_init();
+  if(HAL_ADCEx_Calibration_Start(&hadc2) != HAL_OK)
+	  buzzer_alarm_start();
+  else if(HAL_ADCEx_Calibration_Start(&hadc1) != HAL_OK)
+	  buzzer_alarm_start();
+  else
+	  buzzer_short_beep();
+
+  ironInit(&tim3_pwm);
+  MX_IWDG_Init();
+  MX_TIM4_Init();
+  MX_USART3_UART_Init();
+  MX_TIM3_Init();
+  /* Enable ADC slave */
+  if (HAL_ADC_Start(&hadc2) != HAL_OK)
+  {
+	  buzzer_alarm_start();
+	  Error_Handler();
+  }
+  HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) adc_measures, sizeof(adc_measures)/ sizeof(uint32_t));
+
+  HAL_TIM_Base_Start_IT(&tim4_temp_measure);
+  restoreSettings();
+
+  DWT_Delay_Init(); // Important for I2C communication
+  UG_GUI gui;
+  ssd1306_init();
+  UG_Init(&gui, pset, 128, 64);
+  guiInit();
+  oled_init();
+  oled_draw();
+  UG_Update();
+  update_display();
+
+  HAL_IWDG_Start(&hiwdg);
+  RE_Init(&RE1_Data, ROT_ENC_L_GPIO_Port, ROT_ENC_L_Pin, ROT_ENC_R_GPIO_Port, ROT_ENC_R_Pin, ROT_ENC_BUTTON_GPIO_Port, ROT_ENC_BUTTON_GPIO_Pin);
+
+  uint32_t lastTimeDisplay = HAL_GetTick();
+
+  setPWM_tim(&tim3_pwm);
+  iron_temp_measure_state = iron_temp_measure_idle;
+
+  setContrast(systemSettings.contrast);
+  currentBoostSettings = systemSettings.boost;
+  currentSleepSettings = systemSettings.sleep;
+  applyBoostSettings();
+  applySleepSettings();
+  setCurrentTip(systemSettings.currentTip);
+  setupPIDFromStruct();
+
+
+  if(HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin) == GPIO_PIN_RESET) {
+	  activity = 0;
+	  setCurrentMode(mode_sleep);
+  }
+
+  while (1)
+  {
+	  HAL_IWDG_Refresh(&hiwdg);
+	  if(iron_temp_measure_state == iron_temp_measure_ready) {
+		  readTipTemperatureCompensated(1);
+
+		  if(HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin) == GPIO_PIN_RESET) {
+			  if(startOfNoActivity == 0)
+				  startOfNoActivityTime = HAL_GetTick();
+			  startOfNoActivity = 1;
+			  if((HAL_GetTick() - startOfNoActivityTime) > 500)
+				  activity = 0;
+		  }
+		  else {
+			  activity = 1;
+			  startOfNoActivity = 0;
+		  }
+
+		  handleIron(activity);
+		  iron_temp_measure_state = iron_temp_measure_idle;
+	  }
+
+	  if(HAL_GetTick() - lastTimeDisplay > 50) {
+		  handle_buzzer();
+		  RE_Rotation_t r = RE_Get(&RE1_Data);
+		  oled_update();
+		  oled_processInput(r, &RE1_Data);
+		  oled_draw();
+		  lastTimeDisplay = HAL_GetTick();
+	  }
+  }
+
+}
 /* USER CODE END 4 */
 
 /**
