@@ -7,8 +7,10 @@
 
 #include "pid.h"
 #include "tempsensors.h"
+#include "filtrai.h"
 
-static double max, min, Kp, Kd, Ki, pre_error, integral, mset, mpv, maxI, minI;
+static double max, min, Kp, Kd, Ki, pre_error, mset, mpv, maxI, minI;
+float integral;
 static double p, i, d, currentOutput;
 uint32_t lastTime;
 
@@ -39,6 +41,11 @@ void resetPID() {
 	integral = 0;
 }
 
+
+__attribute__((used))  INTEGRATOR_FT Ti_buf = INIT_INTEGRATOR(400, float); /* equal to ms */
+__attribute__((used))  INTEGRATOR_FT Td_buf = INIT_INTEGRATOR(10, float); /* equal to ms */
+__attribute__((used)) float integrator_rlt;
+
 double calculatePID( double setpoint, double pv )
 {
 	mset = setpoint;
@@ -55,12 +62,19 @@ double calculatePID( double setpoint, double pv )
     double Pout = Kp * error;
 
     // Integral term
+    float integral_tmp = error * dt;
+
+#if 1/* lets try proper integrator */
+    integral = integrator_ft(integral_tmp, &Ti_buf );
+#else
     integral += error * dt;
+#endif
     if(integral > maxI)
     	integral = maxI;
     else if(integral < minI)
         	integral = minI;
     double Iout = Ki * integral;
+
 
     // Derivative term
     double derivative;
@@ -68,7 +82,13 @@ double calculatePID( double setpoint, double pv )
     		derivative = 0;
     	else
     		derivative = (error - pre_error) / dt;
+#if 0
+    derivative = integrator_ft(derivative, &Td_buf );
     double Dout = Kd * derivative;
+#else
+    double Dout = Kd * derivative;
+#endif
+
 
     // Calculate total output
     double output = Pout + Iout + Dout;
@@ -81,8 +101,14 @@ double calculatePID( double setpoint, double pv )
     else if( output < min )
         output = min;
 
+
+#if 0
+    pre_error = integrator_ft(error, &Td_buf );
+#else
     // Save error to previous error
     pre_error = error;
+#endif
+
     currentOutput = output;
     return output;
 }
