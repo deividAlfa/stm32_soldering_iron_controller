@@ -41,7 +41,7 @@ void resetSettings() {
 	systemSettings.contrast = 0x7F;
 	systemSettings.boost.temperature = 400;
 	systemSettings.boost.time = 60;
-	systemSettings.sleep.sleepTime = 0;
+	systemSettings.sleep.sleepTime = 50;
 	systemSettings.sleep.standbyTime = 5;
 	systemSettings.sleep.sleepTemperature = 100;
 	systemSettings.currentTip = 0;
@@ -78,19 +78,20 @@ void resetSettings() {
 		systemSettings.ironTips[x].PID.maxI = 200;
 		systemSettings.ironTips[x].PID.minI = -50;
 	}
-	systemSettings.currentNumberOfTips = 4;
+	systemSettings.currentNumberOfTips = 5;
 	systemSettings.currentTip = 1;
-	systemSettings.ironTips[1].calADC_At_200 = 1221;
-	systemSettings.ironTips[1].calADC_At_300 = 1904;
+	systemSettings.ironTips[1].calADC_At_200 = 1400;
+	systemSettings.ironTips[1].calADC_At_300 = 2100;
 	systemSettings.ironTips[1].calADC_At_400 = 2586;
 	strcpy(systemSettings.ironTips[1].name, "B  \0ÿ");
 	systemSettings.ironTips[1].PID.max = 1;
 	systemSettings.ironTips[1].PID.min = 0;
 	systemSettings.ironTips[1].PID.Kp = 0.0040069999999999999*1.5;
-	systemSettings.ironTips[1].PID.Ki = 0.003106000000000002*10;
-	systemSettings.ironTips[1].PID.Kd = 0.00007*10;
+	systemSettings.ironTips[1].PID.Ki = 0.003106000000000002*50*10*3;
+	systemSettings.ironTips[1].PID.Kd = 0.00007;
 	systemSettings.ironTips[1].PID.maxI = 200;
 	systemSettings.ironTips[1].PID.minI = -50;
+
 	systemSettings.ironTips[2].calADC_At_200 = 1463;
 	systemSettings.ironTips[2].calADC_At_300 = 2313;
 	systemSettings.ironTips[2].calADC_At_400 = 3162;
@@ -113,6 +114,18 @@ void resetSettings() {
 	systemSettings.ironTips[3].PID.Kd = 0;
 	systemSettings.ironTips[3].PID.maxI = 200;
 	systemSettings.ironTips[3].PID.minI = -50;
+
+	strcpy(systemSettings.ironTips[4].name, "C1  \0ÿ");
+	systemSettings.ironTips[4].calADC_At_200 = 1500;
+	systemSettings.ironTips[4].calADC_At_300 = 2300;
+	systemSettings.ironTips[4].calADC_At_400 = 3000;
+	systemSettings.ironTips[4].PID.max = 1;
+	systemSettings.ironTips[4].PID.min = 0;
+	systemSettings.ironTips[4].PID.Kp = 0.0040069999999999999*1.5;
+	systemSettings.ironTips[4].PID.Ki = 0.003106000000000002*50*10*5;
+	systemSettings.ironTips[4].PID.Kd = 0.00007;
+	systemSettings.ironTips[4].PID.maxI = 200;
+	systemSettings.ironTips[4].PID.minI = -50;
 
 #endif
 	systemSettings.setTemperature = 320;
