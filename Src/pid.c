@@ -26,12 +26,12 @@ void setupPIDFromStruct() {
 }
 void setupPID(double _max, double _min, double _Kp, double _Kd, double _Ki, int16_t _minI, int16_t _maxI ) {
 	max = _max;
-	min = _min;
+	min = 0;
 	Kp = _Kp;
 	Kd = _Kd;
 	Ki = _Ki;
 	minI = _minI;
-	maxI = _maxI;
+	maxI = _maxI*5;
 	pre_error = 0;
 	integral = 0;
 }
@@ -46,6 +46,15 @@ __attribute__((used))  INTEGRATOR_FT Ti_buf = INIT_INTEGRATOR(400, float); /* eq
 __attribute__((used))  INTEGRATOR_FT Td_buf = INIT_INTEGRATOR(10, float); /* equal to ms */
 __attribute__((used)) float integrator_rlt;
 
+double output;
+double Iout;
+double Dout;
+double derivative;
+double Pout;
+float perc_avg;
+int err4=0;
+
+#define POS(x) ((x<0)?-x:x )
 double calculatePID( double setpoint, double pv )
 {
 	mset = setpoint;
@@ -59,25 +68,25 @@ double calculatePID( double setpoint, double pv )
     double error = setpoint - pv;
 
     // Proportional term
-    double Pout = Kp * error;
+    Pout = Kp * error;
 
     // Integral term
     float integral_tmp = error * dt;
 
-#if 1/* lets try proper integrator */
-    integral = integrator_ft(integral_tmp, &Ti_buf );
+#if 0/* lets try proper integrator */
+    integral = integrator_ft(error, &Ti_buf );
 #else
     integral += error * dt;
-#endif
     if(integral > maxI)
     	integral = maxI;
     else if(integral < minI)
         	integral = minI;
-    double Iout = Ki * integral;
+#endif
+    Iout = Ki * integral;
 
 
     // Derivative term
-    double derivative;
+    derivative;
     	if(error == pre_error)
     		derivative = 0;
     	else
@@ -86,12 +95,16 @@ double calculatePID( double setpoint, double pv )
     derivative = integrator_ft(derivative, &Td_buf );
     double Dout = Kd * derivative;
 #else
-    double Dout = Kd * derivative;
+    Dout = Kd * derivative;
 #endif
 
 
     // Calculate total output
-    double output = Pout + Iout + Dout;
+    output = Pout + Iout;// + Dout;
+    float res = POS(Iout)/(POS(Iout)+POS(Pout))*100.0;
+    err4 +=(res<0)?1:0;
+    perc_avg = integrator_ft(res, &Ti_buf );
+
     p = Pout;
     i = Iout;
     d = Dout;

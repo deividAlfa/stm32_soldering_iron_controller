@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include "stm32f1xx_hal_flash.h"
 
-#define SETTINGSVERSION 15 /*Change this if you change the struct below to prevent people getting out of sync*/
+#define SETTINGSVERSION 55 /*Change this if you change the struct below to prevent people getting out of sync*/
 
 struct systemSettings {
 	uint8_t version;				//Used to track if a reset is needed on firmware upgrade
