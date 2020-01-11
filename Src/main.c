@@ -88,10 +88,10 @@ static uint8_t startOfNoActivity = 0;
 struct{
 	int elapsed_cnt;
 	int pulse_cnt;
-}tim4_var;
+}tim3_stats;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if(htim == &tim3_pwm ){
-		tim4_var.elapsed_cnt++;
+		tim3_stats.elapsed_cnt++;
 	}
 	if(htim != &tim4_temp_measure)
 		return;
@@ -105,12 +105,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	}
 }
 
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
-	tim4_var.pulse_cnt ++;
-	if(htim == &tim3_pwm ){
-		tim4_var.pulse_cnt ++;
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
+		tim3_stats.pulse_cnt ++;
+		if(htim == &tim3_pwm ){
+			tim3_stats.pulse_cnt ++;
+		}
 	}
-}
+
 
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
 	if(hadc != &hadc1)
@@ -327,7 +328,10 @@ static void MX_TIM3_Init(void)
     _Error_Handler(__FILE__, __LINE__);
   }
   __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_UPDATE);
-
+  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC3);
+//  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC1);
+//  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC2);
+//  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC4);
   HAL_TIM_MspPostInit(&tim3_pwm);
 
 }

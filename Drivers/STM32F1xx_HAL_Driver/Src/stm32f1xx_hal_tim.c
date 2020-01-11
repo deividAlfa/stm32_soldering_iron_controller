@@ -2749,6 +2749,8 @@ HAL_StatusTypeDef HAL_TIM_Encoder_Stop_DMA(TIM_HandleTypeDef *htim, uint32_t Cha
   * @param  htim : TIM  handle
   * @retval None
   */
+
+volatile unsigned int cc[4]={0};
 void HAL_TIM_IRQHandler(TIM_HandleTypeDef *htim)
 {
   /* Capture compare 1 event */
@@ -2759,7 +2761,7 @@ void HAL_TIM_IRQHandler(TIM_HandleTypeDef *htim)
       {
         __HAL_TIM_CLEAR_IT(htim, TIM_IT_CC1);
         htim->Channel = HAL_TIM_ACTIVE_CHANNEL_1;
-
+        cc[0]++;
         /* Input capture event */
         if((htim->Instance->CCMR1 & TIM_CCMR1_CC1S) != 0x00)
         {
@@ -2782,6 +2784,7 @@ void HAL_TIM_IRQHandler(TIM_HandleTypeDef *htim)
     {
       __HAL_TIM_CLEAR_IT(htim, TIM_IT_CC2);
       htim->Channel = HAL_TIM_ACTIVE_CHANNEL_2;
+      cc[1]++;
       /* Input capture event */
       if((htim->Instance->CCMR1 & TIM_CCMR1_CC2S) != 0x00)
       {
@@ -2803,6 +2806,7 @@ void HAL_TIM_IRQHandler(TIM_HandleTypeDef *htim)
     {
       __HAL_TIM_CLEAR_IT(htim, TIM_IT_CC3);
       htim->Channel = HAL_TIM_ACTIVE_CHANNEL_3;
+      cc[2]++;
       /* Input capture event */
       if((htim->Instance->CCMR2 & TIM_CCMR2_CC3S) != 0x00)
       {
@@ -2824,6 +2828,7 @@ void HAL_TIM_IRQHandler(TIM_HandleTypeDef *htim)
     {
       __HAL_TIM_CLEAR_IT(htim, TIM_IT_CC4);
       htim->Channel = HAL_TIM_ACTIVE_CHANNEL_4;
+      cc[3]++;
       /* Input capture event */
       if((htim->Instance->CCMR2 & TIM_CCMR2_CC4S) != 0x00)
       {
