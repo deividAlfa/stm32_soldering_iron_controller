@@ -199,7 +199,7 @@ void handleIron(uint8_t activity) {
 			break;
 	}
 
-	  double set;
+	  double set=0;
 	  if(debugMode)
 		  set = calculatePID(debugSetPoint, iron_temp_adc_avg);
 	  else
@@ -208,9 +208,15 @@ void handleIron(uint8_t activity) {
 		  currentIronPower = set * 100;
 	  else
 		  currentIronPower = 0;
-	  set = 1500.0 *(set * 100.0 -12.0388878376)/102.72647713;
-	  if(set < 0)
-		  set = 0;
+	  //set = 1500.0 *(set * 100.0 -12.0388878376)/102.72647713;
+	  set = 1500.0 * set;
+	  //set = 40; // equal to 350
+
+	  //set += 40* (readTipTemperatureCompensated(0)/350.0); // 40 pwm equal to 350C
+
+	  set = (set<0)?0:set;
+	  set = (set>1500)?1500:set;
+
 	  __HAL_TIM_SET_COMPARE(ironPWMTimer, TIM_CHANNEL_3, CONV_TO_UINT(set));
 	  if((getSetTemperature() == readTipTemperatureCompensated(0)) && !temperatureReachedFlag) {
 		  temperatureReached(getSetTemperature());
