@@ -195,6 +195,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		}
 //		acc = acc - min - max;
 //		uint16_t last = acc / ((sizeof(adc_measures)/sizeof(adc_measures[0])) -2);
+		iron_temp_measure_state = UINT_DIV( (acc - min - max) , FIFO_LEN-2);
 		uint16_t last = UINT_DIV( (acc - min - max) , FIFO_LEN-2);
 		ironTempADCRollingAverage[rindex] = last;
 		if(doOnce) {
