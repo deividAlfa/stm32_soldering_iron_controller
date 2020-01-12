@@ -87,8 +87,8 @@ void resetSettings() {
 	strcpy(systemSettings.ironTips[1].name, "B  \0ÿ");
 	systemSettings.ironTips[1].PID.max = 1;
 	systemSettings.ironTips[1].PID.min = 0;
-	systemSettings.ironTips[1].PID.Kp = 0.0040069999999999999*0.5;
-	systemSettings.ironTips[1].PID.Ki = 0.003106000000000002*50;
+	systemSettings.ironTips[1].PID.Kp = 0.0040069999999999999*1;
+	systemSettings.ironTips[1].PID.Ki = 0.003106000000000002;
 	systemSettings.ironTips[1].PID.Kd = 0;//0.00007;
 	systemSettings.ironTips[1].PID.maxI = 200;
 	systemSettings.ironTips[1].PID.minI = -50;

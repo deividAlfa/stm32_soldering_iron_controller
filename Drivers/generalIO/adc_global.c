@@ -6,7 +6,7 @@
  */
 
 #include "adc_global.h"
-#define ADC_SAMPLE_TIME ADC_SAMPLETIME_239CYCLES_5
+//#define ADC_SAMPLE_TIME ADC_SAMPLETIME_239CYCLES_5
 volatile adc_measures_t adc_measures[ADC_MEASURES_LEN];
 volatile iron_temp_measure_state_t iron_temp_measure_state = iron_temp_measure_idle;
 volatile uint16_t iron_temp_adc_avg = 0;
@@ -134,7 +134,7 @@ void MX_ADC1_Init(ADC_HandleTypeDef *hadc1)
     /**Common config
     */
   hadc1->Instance = ADC1;
-  hadc1->Init.ScanConvMode = ADC_SCAN_ENABLE;
+  hadc1->Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc1->Init.ContinuousConvMode = ENABLE;
   hadc1->Init.DiscontinuousConvMode = DISABLE;
   hadc1->Init.ExternalTrigConv = ADC_SOFTWARE_START;
@@ -192,7 +192,7 @@ void MX_ADC2_Init(ADC_HandleTypeDef * hadc2)
     /**Common config
     */
   hadc2->Instance = ADC2;
-  hadc2->Init.ScanConvMode = ADC_SCAN_ENABLE;
+  hadc2->Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc2->Init.ContinuousConvMode = ENABLE;
   hadc2->Init.DiscontinuousConvMode = DISABLE;
   hadc2->Init.ExternalTrigConv = ADC_SOFTWARE_START;

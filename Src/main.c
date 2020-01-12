@@ -91,12 +91,25 @@ struct{
 }tim3_stats;
 int err2=0;
 volatile int samples_dumped, CNDTR;
+__root  uint32_t tick_dt;
+
+uint32_t Ts[5];
+
+#define GET_TS(result) 					\
+static uint32_t prev_tick;        \
+uint32_t tick_now = HAL_GetTick();      \
+result = tick_now - prev_tick;   \
+prev_tick = tick_now;
+	
+uint32_t started ;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if(htim == &tim3_pwm ){
 		tim3_stats.elapsed_cnt++;
 	}
 	if(htim != &tim4_temp_measure)
 		return;
+	GET_TS(Ts[0]);
+
 	if(iron_temp_measure_state == iron_temp_measure_idle) {
 		iron_temp_measure_state = iron_temp_measure_requested;
 		HAL_TIM_PWM_Stop(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOff();
@@ -111,6 +124,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 //		idx = (idx==0)?ADC_MEASURES_LEN:idx;
 //		HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) &adc_measures.iron[samples_dumped], idx);
 		iron_temp_measure_state = iron_temp_measure_started;
+		//__HAL_ADC_ENABLE(&hadc1);
+		//__HAL_ADC_ENABLE(&hadc2);
+		started = HAL_GetTick();
 		HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) adc_measures, sizeof(adc_measures)/ sizeof(uint32_t));
 
 	}else{
@@ -128,6 +144,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 
 
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
+	GET_TS(Ts[1]);
 	if(hadc != &hadc1)
 		return;
 //	if(iron_temp_measure_state == iron_temp_measure_requested) {
@@ -142,6 +159,8 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
 int aleliuja;
 int err=0;
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
+
+	GET_TS(Ts[2]);
 	static uint16_t ironTempADCRollingAverage[2] = {0};
 	static int rindex = 0;
 	static int doOnce = 0;
@@ -155,7 +174,13 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		iron_temp_measure_state = iron_temp_measure_started;
 		return;
 	} else if(iron_temp_measure_state == iron_temp_measure_started) {
-		HAL_ADCEx_MultiModeStop_DMA(&hadc1);
+		Ts[4] = HAL_GetTick() - started;
+		//__HAL_ADC_DISABLE(&hadc1);
+		//__HAL_ADC_DISABLE(&hadc2);
+
+
+//		__HAL_ADC_ENABLE
+		//__HAL_ADC_DISABLE(&hadc1);
 		CNDTR = hadc1.DMA_Handle->Instance->CNDTR;
 
 		for(int x = 0; x < sizeof(adc_measures)/sizeof(adc_measures[0]); ++x) {
@@ -235,7 +260,7 @@ void SystemClock_Config(void)
   }
 
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV4;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -346,8 +371,8 @@ static void MX_TIM3_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_UPDATE);
-  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC3);
+//  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_UPDATE);
+//  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC3);
 //  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC1);
 //  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC2);
 //  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC4);
@@ -577,8 +602,11 @@ int main(void)
 
   while (1)
   {
+	  GET_TS(Ts[3]);
+
 	  HAL_IWDG_Refresh(&hiwdg);
 	  if(iron_temp_measure_state == iron_temp_measure_ready) {
+		  HAL_ADCEx_MultiModeStop_DMA(&hadc1);
 		  readTipTemperatureCompensated(1);
 
 		  if(HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin) == GPIO_PIN_RESET) {
@@ -592,7 +620,6 @@ int main(void)
 			  activity = 1;
 			  startOfNoActivity = 0;
 		  }
-
 		  handleIron(activity);
 		  iron_temp_measure_state = iron_temp_measure_idle;
 	  }

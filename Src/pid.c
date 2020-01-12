@@ -55,15 +55,17 @@ float perc_avg;
 int err4=0;
 
 #define POS(x) ((x<0)?-x:x )
+double Ts;
 double calculatePID( double setpoint, double pv )
 {
 	mset = setpoint;
 	mpv = pv;
 
     uint32_t tick_start = HAL_GetTick();
-    double dt = (tick_start - lastTime) ;
+    Ts = (tick_start - lastTime) ;
     lastTime = tick_start;
-    dt = dt / 1000;
+    Ts = Ts / 1000;
+
     // Calculate error
     double error = setpoint - pv;
 
@@ -71,12 +73,12 @@ double calculatePID( double setpoint, double pv )
     Pout = Kp * error;
 
     // Integral term
-    float integral_tmp = error * dt;
+    float integral_tmp = error * Ts;
 
 #if 0/* lets try proper integrator */
     integral = integrator_ft(error, &Ti_buf );
 #else
-    integral += error * dt;
+    integral += error * Ts;
     if(integral > maxI)
     	integral = maxI;
     else if(integral < minI)
@@ -90,7 +92,7 @@ double calculatePID( double setpoint, double pv )
     	if(error == pre_error)
     		derivative = 0;
     	else
-    		derivative = (error - pre_error) / dt;
+    		derivative = (error - pre_error) / Ts;
 #if 0
     derivative = integrator_ft(derivative, &Td_buf );
     double Dout = Kd * derivative;
