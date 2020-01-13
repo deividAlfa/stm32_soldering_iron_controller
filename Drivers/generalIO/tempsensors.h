@@ -10,7 +10,7 @@
 
 #include "stm32f1xx_hal.h"
 #include  "adc_global.h"
-#include "../../../Src/settings.h"
+#include "settings.h"
 
 uint16_t readColdJunctionSensorTemp_mC(void);
 uint16_t coldJunctionTemp_mC_To_uV(int tempX10);

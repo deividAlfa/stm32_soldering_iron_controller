@@ -6,8 +6,8 @@
  */
 
 #include "calibration_screen.h"
-#include "../../../Src/iron.h"
-#include "../../../Src/pid.h"
+#include "iron.h"
+#include "pid.h"
 #include "../../generalIO/adc_global.h"
 #include "../../generalIO/tempsensors.h"
 #include "../../graphics/gui/oled.h"

@@ -40,7 +40,7 @@
 #define __MAIN_H
 #include "stdint.h"
   /* Includes ------------------------------------------------------------------*/
-
+#include "config.h"
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -121,15 +121,9 @@ uint32_t tick_now = HAL_GetTick();      \
 result = tick_now - prev_tick;   \
 prev_tick = tick_now;
 
-/* flawless conversions +1 error reduced to +-0.5*/
-#define UINT_DIV(x,y) (x+y/2)/y
-#define CONV_TO_UINT(ft) (unsigned int)(ft+0.5)
-
-#define ADC_MEASURES_LEN (2048)
-
-#define FAKE_25_COLD_JUNGTION
-#define FAKE_SUPPLY_VOLTAGE_OK
-#define LEAVE_ONLY_IRON_MEAS
+  /* flawless conversions +1 error reduced to +-0.5*/
+  #define UINT_DIV(x,y) (x+y/2)/y
+  #define CONV_TO_UINT(ft) (unsigned int)(ft+0.5)
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

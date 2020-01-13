@@ -5,6 +5,8 @@
 #include "rotary_encoder.h"
 #include "iron.h"
 #include "string.h"
+#include "config.h"
+
 volatile uint16_t iron_temp_adc_avg = 0;
 static uint32_t pwmStoppedSince = 0;
 
@@ -27,6 +29,14 @@ int err2=0;
 volatile int samples_dumped, CNDTR;
 uint32_t tick_dt;
 uint32_t started ;
+
+
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
+		tim3_stats.pulse_cnt ++;
+		if(htim == &tim3_pwm ){
+			tim3_stats.pulse_cnt ++;
+		}
+	}
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if(htim == &tim3_pwm ){
@@ -61,24 +71,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	}
 }
 
-void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
-		tim3_stats.pulse_cnt ++;
-		if(htim == &tim3_pwm ){
-			tim3_stats.pulse_cnt ++;
-		}
-	}
-
-
-void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
-	GET_TS(Ts[1]);
-	if(hadc != &hadc1)
-		return;
-//	if(iron_temp_measure_state == iron_temp_measure_requested) {
-//		HAL_TIM_PWM_Stop(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOff();
-//		iron_temp_measure_state = iron_temp_measure_pwm_stopped;
-//		pwmStoppedSince = HAL_GetTick();
-//	}
-}
 
 #define FIFO_LEN 			(sizeof(adc_measures)/sizeof(adc_measures[0]))
 #define ROLLING_AVG_LEN 	(sizeof(ironTempADCRollingAverage)/sizeof(ironTempADCRollingAverage[0]))
@@ -100,8 +92,12 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		iron_temp_measure_state = iron_temp_measure_started;
 		return;
 	} else if(iron_temp_measure_state == iron_temp_measure_started) {
-		  HAL_ADCEx_MultiModeStop_DMA(&hadc1);
 
+#ifdef TEST_ALLTIME_SAMPLING
+		 HAL_DMA_Abort(&hadc1.DMA_Handle);
+#else
+		HAL_ADCEx_MultiModeStop_DMA(&hadc1);
+#endif
 		Ts[4] = HAL_GetTick() - started;
 		//__HAL_ADC_DISABLE(&hadc1);
 		//__HAL_ADC_DISABLE(&hadc2);
@@ -150,6 +146,18 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
 	}
 }
+
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
+	GET_TS(Ts[1]);
+	if(hadc != &hadc1)
+		return;
+//	if(iron_temp_measure_state == iron_temp_measure_requested) {
+//		HAL_TIM_PWM_Stop(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOff();
+//		iron_temp_measure_state = iron_temp_measure_pwm_stopped;
+//		pwmStoppedSince = HAL_GetTick();
+//	}
+}
+
 /**
   * @brief  This function is executed in case of error occurrence.
   * @param  None

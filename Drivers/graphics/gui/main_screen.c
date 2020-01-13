@@ -8,9 +8,9 @@
 #include "main_screen.h"
 #include "tempsensors.h"
 #include "voltagesensors.h"
-#include "../../../Src/iron.h"
-#include "../../../Src/settings.h"
-#include "../generalIO/buzzer.h"
+#include "iron.h"
+#include "settings.h"
+#include "../Drivers/generalIO/buzzer.h"
 
 #define NO_IRON_ADC 4050
 static uint8_t hasIron = 1;

@@ -6,9 +6,9 @@
  */
 
 #include "settings_screen.h"
-#include "../../../../Src/pid.h"
-#include "../../../../Src/iron.h"
-#include "../../../../Src/settings.h"
+#include "pid.h"
+#include "iron.h"
+#include "settings.h"
 #include "../ssd1306.h"
 #include "oled.h"
 
