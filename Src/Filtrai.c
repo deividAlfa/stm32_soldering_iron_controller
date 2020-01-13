@@ -5,6 +5,7 @@
  *      Author: Admin
  */
 #include "filtrai.h"
+#include "string.h"
 
 #define APPEND(A,B) (A##B)
 

@@ -49,20 +49,18 @@ __attribute__((used)) float integrator_rlt;
 double output;
 double Iout;
 double Dout;
-double derivative;
 double Pout;
 float perc_avg;
 int err4=0;
 
 #define POS(x) ((x<0)?-x:x )
-double Ts;
 double calculatePID( double setpoint, double pv )
 {
 	mset = setpoint;
 	mpv = pv;
 
     uint32_t tick_start = HAL_GetTick();
-    Ts = (tick_start - lastTime) ;
+    double Ts = (tick_start - lastTime) ;
     lastTime = tick_start;
     Ts = Ts / 1000;
 
@@ -72,8 +70,6 @@ double calculatePID( double setpoint, double pv )
     // Proportional term
     Pout = Kp * error;
 
-    // Integral term
-    float integral_tmp = error * Ts;
 
 #if 0/* lets try proper integrator */
     integral = integrator_ft(error, &Ti_buf );
@@ -88,7 +84,7 @@ double calculatePID( double setpoint, double pv )
 
 
     // Derivative term
-    derivative;
+    double derivative;
     	if(error == pre_error)
     		derivative = 0;
     	else

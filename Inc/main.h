@@ -38,6 +38,7 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __MAIN_H
 #define __MAIN_H
+#include "stdint.h"
   /* Includes ------------------------------------------------------------------*/
 
 /* USER CODE BEGIN Includes */
@@ -112,11 +113,19 @@
 
 #define __root __attribute__((used))
 
+extern uint32_t Ts[5];
+
+#define GET_TS(result) 					\
+static uint32_t prev_tick;        \
+uint32_t tick_now = HAL_GetTick();      \
+result = tick_now - prev_tick;   \
+prev_tick = tick_now;
+
 /* flawless conversions +1 error reduced to +-0.5*/
 #define UINT_DIV(x,y) (x+y/2)/y
 #define CONV_TO_UINT(ft) (unsigned int)(ft+0.5)
 
-#define ADC_MEASURES_LEN (1024)
+#define ADC_MEASURES_LEN (2048)
 
 #define FAKE_25_COLD_JUNGTION
 #define FAKE_SUPPLY_VOLTAGE_OK

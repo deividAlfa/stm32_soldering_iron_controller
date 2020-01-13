@@ -11,10 +11,11 @@
 const uint16_t temp_minC = 100;                 // Minimum calibration temperature in degrees of Celsius
 const uint16_t temp_maxC = 450;                 // Maximum calibration temperature in degrees of Celsius
 
-static const uint16_t NTC_R = 1013;
+
 static tipData *currentTipData;
 
 #ifndef FAKE_25_COLD_JUNGTION
+static const uint16_t NTC_R = 1013;
 uint16_t readColdJunctionSensorTemp_mC(void) {
 	static uint32_t rollingAverage[4];
 	static uint8_t rIndex = 0;

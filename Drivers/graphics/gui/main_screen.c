@@ -87,7 +87,7 @@ static int tempProcessInput(widget_t* w, RE_Rotation_t r, RE_State_t * s) {
 	}
 	return default_widgetProcessInput(w, r, s);
 }
-static void * main_screen_getIronTemp() {
+void * main_screen_getIronTemp() {
 	temp = readTipTemperatureCompensated(0);
 	return &temp;
 }

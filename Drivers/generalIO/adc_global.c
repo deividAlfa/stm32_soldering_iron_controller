@@ -5,11 +5,9 @@
  *      Author: jose
  */
 
-#include "adc_global.h"
-//#define ADC_SAMPLE_TIME ADC_SAMPLETIME_239CYCLES_5
-volatile adc_measures_t adc_measures[ADC_MEASURES_LEN];
-volatile iron_temp_measure_state_t iron_temp_measure_state = iron_temp_measure_idle;
-volatile uint16_t iron_temp_adc_avg = 0;
+#include "main.h"
+#include "stm32f1xx_hal.h"
+#include "stm32f1xx_hal_tim.h"
 
 #ifndef LEAVE_ONLY_IRON_MEAS
 /* ADC1 init function */

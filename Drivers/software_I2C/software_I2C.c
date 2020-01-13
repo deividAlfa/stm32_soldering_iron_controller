@@ -40,7 +40,7 @@ static void i2c_stop(GPIO_TypeDef *sclport, uint16_t sclpin, GPIO_TypeDef *sdapo
   
 }
 
-static void i2c_send_ack(GPIO_TypeDef *sclport, uint16_t sclpin, GPIO_TypeDef *sdaport, uint16_t sdapin) {
+void i2c_send_ack(GPIO_TypeDef *sclport, uint16_t sclpin, GPIO_TypeDef *sdaport, uint16_t sdapin) {
   
   i2c_delay();
   digitalWrite(sdaport, sdapin, LOW);
@@ -71,7 +71,7 @@ static uint8_t i2c_get_ack(GPIO_TypeDef *sclport, uint16_t sclpin, GPIO_TypeDef 
   
 }
 
-static void i2c_send_nack(GPIO_TypeDef *sclport, uint16_t sclpin, GPIO_TypeDef *sdaport, uint16_t sdapin) {
+void i2c_send_nack(GPIO_TypeDef *sclport, uint16_t sclpin, GPIO_TypeDef *sdaport, uint16_t sdapin) {
   
   i2c_delay();
   digitalWrite(sdaport, sdapin, HIGH);
@@ -99,7 +99,7 @@ static void i2c_shift_out(GPIO_TypeDef *sclport, uint16_t sclpin, GPIO_TypeDef *
 
 }
 
-static uint8_t i2c_shift_in(GPIO_TypeDef *sclport, uint16_t sclpin, GPIO_TypeDef *sdaport, uint16_t sdapin) {
+uint8_t i2c_shift_in(GPIO_TypeDef *sclport, uint16_t sclpin, GPIO_TypeDef *sdaport, uint16_t sdapin) {
   
   uint8_t data=0;
   for (int i=0;i<8;i++) {
