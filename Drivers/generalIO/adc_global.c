@@ -147,7 +147,7 @@ void MX_ADC1_Init(ADC_HandleTypeDef *hadc1)
 
     /**Configure the ADC multi-mode
     */
-  multimode.Mode = ADC_DUALMODE_REGSIMULT;
+  multimode.Mode = ADC_DUALMODE_INTERLSLOW;
   if (HAL_ADCEx_MultiModeConfigChannel(hadc1, &multimode) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
