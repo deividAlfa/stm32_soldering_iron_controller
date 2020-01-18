@@ -186,10 +186,11 @@ void calibration_screen_setup(screen_t *scr) {
 	widget->posX = 55;
 	widget->posY = 30;
 	widget->font_size = &FONT_8X14;
-	widget->editable.inputData.getData = &getMeasuredTemp;
-	widget->editable.setData = &setMeasuredTemp;
+	widget->editable->inputData.getData = &getMeasuredTemp;
+	widget->editable->setData = &setMeasuredTemp;
+	widget->editable->selectable.tab = 0;
 	widget->reservedChars = 3;
-	widget->editable.selectable.tab = 0;
+
 	widget = screen_addWidget(sc);
 	widgetDefaultsInit(widget, widget_button);
 	widget->font_size = &FONT_6X8;

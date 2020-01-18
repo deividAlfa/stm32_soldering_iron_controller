@@ -222,13 +222,13 @@ void debug_screen2_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 10;
 	widget->font_size = &FONT_6X8;
-	widget->editable.inputData.getData = &debug_screen2_getDebugSetpoint;
-	widget->editable.inputData.number_of_dec = 0;
-	widget->editable.inputData.type = field_uinteger16;
-	widget->editable.big_step = 100;
-	widget->editable.step = 1;
-	widget->editable.selectable.tab = 0;
-	widget->editable.setData = (void (*)(void *))&debug_screen2_setDebugSetpoint;
+	widget->editable->inputData.getData = &debug_screen2_getDebugSetpoint;
+	widget->editable->inputData.number_of_dec = 0;
+	widget->editable->inputData.type = field_uinteger16;
+	widget->editable->big_step = 100;
+	widget->editable->step = 1;
+	widget->editable->selectable.tab = 0;
+	widget->editable->setData = (void (*)(void *))&debug_screen2_setDebugSetpoint;
 	widget->reservedChars = 5;
 
 	widget = screen_addWidget(scr);
@@ -236,13 +236,13 @@ void debug_screen2_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 20;
 	widget->font_size = &FONT_6X8;
-	widget->editable.inputData.getData = &debug_screen2_getCalcAt200;
-	widget->editable.inputData.number_of_dec = 0;
-	widget->editable.inputData.type = field_uinteger16;
-	widget->editable.big_step = 100;
-	widget->editable.step = 1;
-	widget->editable.selectable.tab = 1;
-	widget->editable.setData = (void (*)(void *))&debug_screen2_setCalcAt200;
+	widget->editable->inputData.getData = &debug_screen2_getCalcAt200;
+	widget->editable->inputData.number_of_dec = 0;
+	widget->editable->inputData.type = field_uinteger16;
+	widget->editable->big_step = 100;
+	widget->editable->step = 1;
+	widget->editable->selectable.tab = 1;
+	widget->editable->setData = (void (*)(void *))&debug_screen2_setCalcAt200;
 	widget->reservedChars = 5;
 
 	widget = screen_addWidget(scr);
@@ -250,13 +250,13 @@ void debug_screen2_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 30;
 	widget->font_size = &FONT_6X8;
-	widget->editable.inputData.getData = &debug_screen2_getCalcAt300;
-	widget->editable.inputData.number_of_dec = 0;
-	widget->editable.inputData.type = field_uinteger16;
-	widget->editable.big_step = 100;
-	widget->editable.step = 1;
-	widget->editable.selectable.tab = 2;
-	widget->editable.setData = (void (*)(void *))&debug_screen2_setCalcAt300;
+	widget->editable->inputData.getData = &debug_screen2_getCalcAt300;
+	widget->editable->inputData.number_of_dec = 0;
+	widget->editable->inputData.type = field_uinteger16;
+	widget->editable->big_step = 100;
+	widget->editable->step = 1;
+	widget->editable->selectable.tab = 2;
+	widget->editable->setData = (void (*)(void *))&debug_screen2_setCalcAt300;
 	widget->reservedChars = 5;
 
 	widget = screen_addWidget(scr);
@@ -264,13 +264,13 @@ void debug_screen2_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 40;
 	widget->font_size = &FONT_6X8;
-	widget->editable.inputData.getData = &debug_screen2_getCalcAt400;
-	widget->editable.inputData.number_of_dec = 0;
-	widget->editable.inputData.type = field_uinteger16;
-	widget->editable.big_step = 100;
-	widget->editable.step = 1;
-	widget->editable.selectable.tab = 3;
-	widget->editable.setData = (void (*)(void *))&debug_screen2_setCalcAt400;
+	widget->editable->inputData.getData = &debug_screen2_getCalcAt400;
+	widget->editable->inputData.number_of_dec = 0;
+	widget->editable->inputData.type = field_uinteger16;
+	widget->editable->big_step = 100;
+	widget->editable->step = 1;
+	widget->editable->selectable.tab = 3;
+	widget->editable->setData = (void (*)(void *))&debug_screen2_setCalcAt400;
 	widget->reservedChars = 5;
 
 	widget = screen_addWidget(scr);

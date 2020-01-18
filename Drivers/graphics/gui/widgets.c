@@ -14,7 +14,7 @@ displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget) {
 			return &widget->displayWidget;
 			break;
 		case widget_editable:
-			return &widget->editable.inputData;
+			return &widget->editable->inputData;
 			break;
 		case widget_multi_option:
 			return &widget->multiOptionWidget->editable.inputData;
@@ -41,7 +41,7 @@ selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget) {
 		return NULL;
 	switch (widget->type) {
 		case widget_editable:
-			return &widget->editable.selectable;
+			return &widget->editable->selectable;
 			break;
 		case widget_multi_option:
 				return &widget->multiOptionWidget->editable.selectable;
@@ -68,6 +68,9 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	if(t == widget_multi_option){
 		w->multiOptionWidget = _malloc(sizeof(multi_option_widget_t));//&((multi_option_widget_t){0});
 		memset(w->multiOptionWidget, 0, sizeof(multi_option_widget_t) );
+	}else if(t == widget_editable){
+		w->editable = _malloc(sizeof(editable_wiget_t));//&((multi_option_widget_t){0});
+		memset(w->multiOptionWidget, 0, sizeof(editable_wiget_t) );
 	}else{
 		w->multiOptionWidget =0;
 	}
@@ -90,16 +93,16 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 			w->displayWidget.update = &default_widgetUpdate;
 			break;
 		case widget_editable:
-			w->editable.big_step = 10;
-			w->editable.inputData.getData = NULL;
-			w->editable.inputData.number_of_dec = 0;
-			w->editable.inputData.type = field_uinteger16;
-			w->editable.inputData.update = &default_widgetUpdate;
-			w->editable.setData = NULL;
-			w->editable.step = 1;
-			w->editable.selectable.tab = 0;
-			w->editable.max_value = 0xFFFF;
-			w->editable.min_value = 0;
+			w->editable->big_step = 10;
+			w->editable->inputData.getData = NULL;
+			w->editable->inputData.number_of_dec = 0;
+			w->editable->inputData.type = field_uinteger16;
+			w->editable->inputData.update = &default_widgetUpdate;
+			w->editable->setData = NULL;
+			w->editable->step = 1;
+			w->editable->selectable.tab = 0;
+			w->editable->max_value = 0xFFFF;
+			w->editable->min_value = 0;
 			break;
 		case widget_multi_option:
 			w->multiOptionWidget->editable.big_step = 10;
@@ -374,24 +377,24 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 			char *str;
 			int8_t inc;
 			if(fabs(state->Diff) > 1) {
-				inc = widget->editable.big_step;
+				inc = widget->editable->big_step;
 				if(state->Diff < 0)
 					inc = -1 * inc;
 			}
 			else
-				inc = widget->editable.step * state->Diff;
-			switch (widget->editable.inputData.type) {
+				inc = widget->editable->step * state->Diff;
+			switch (widget->editable->inputData.type) {
 			case field_uinteger16:
-				ui16 = *(uint16_t*)widget->editable.inputData.getData();
+				ui16 = *(uint16_t*)widget->editable->inputData.getData();
 				ui16 = ui16 + inc;
-				if(ui16 > widget->editable.max_value)
-					ui16 = widget->editable.max_value;
-				else if(ui16 < widget->editable.min_value)
-					ui16 = widget->editable.min_value;
-				widget->editable.setData(&ui16);
+				if(ui16 > widget->editable->max_value)
+					ui16 = widget->editable->max_value;
+				else if(ui16 < widget->editable->min_value)
+					ui16 = widget->editable->min_value;
+				widget->editable->setData(&ui16);
 				break;
 			case field_string:
-				str = (char*)widget->editable.inputData.getData();
+				str = (char*)widget->editable->inputData.getData();
 				strcpy(widget->displayString, str);
 				widget->displayString[extractEditablePartFromWidget(widget)->current_edit] += inc;
 				if(widget->displayString[extractEditablePartFromWidget(widget)->current_edit] < 48) {
@@ -409,7 +412,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 						widget->displayString[extractEditablePartFromWidget(widget)->current_edit] = 122;
 				}
 
-				widget->editable.setData(widget->displayString);
+				widget->editable->setData(widget->displayString);
 				break;
 			default:
 				break;

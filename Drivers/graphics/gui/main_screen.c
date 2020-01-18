@@ -18,7 +18,7 @@ static uint16_t m_tip = 0;
 static uint16_t m_mode = 0;
 static uint16_t m_temp = 0;
 static char *modestr[] = {"STB:", "BOO:", "SLP:", "SET:"};
-static char *tipstr[sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0])];
+static char *tipstr[ sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]) ];
 static multi_option_widget_t *tipsWidget = NULL;
 static widget_t *ironTempWidget;
 static widget_t *ironTempLabelWidget;
@@ -71,7 +71,7 @@ const unsigned char flash [] = {
 		0x00, 0x00, 0x46, 0x37, 0x1d, 0x0c, 0x00, 0x00,
 };
 static int tempProcessInput(widget_t* w, RE_Rotation_t r, RE_State_t * s) {
-	switch (w->editable.selectable.state) {
+	switch (w->editable->selectable.state) {
 		case widget_selected:
 			if(r == Click && getCurrentMode() != mode_set)
 				setCurrentMode(mode_set);
@@ -253,21 +253,21 @@ void main_screen_setup(screen_t *scr) {
 	// tip temperature setpoint
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_editable);
-	widget->editable.selectable.processInput = (int (*)(widget_t*, RE_Rotation_t, RE_State_t *))&tempProcessInput;
+	widget->editable->selectable.processInput = (int (*)(widget_t*, RE_Rotation_t, RE_State_t *))&tempProcessInput;
 	widget->posX = 36;
 	widget->posY = 1;
 	widget->font_size = &FONT_8X14;
-	widget->editable.inputData.getData = &getTemp;
-	widget->editable.inputData.number_of_dec = 0;
-	widget->editable.inputData.type = field_uinteger16;
-	widget->editable.big_step = 10;
-	widget->editable.step = 5;
-	widget->editable.selectable.tab = 0;
-	widget->editable.setData = (void (*)(void *))&setTemp;
-	widget->editable.max_value = 300;
+	widget->editable->inputData.getData = &getTemp;
+	widget->editable->inputData.number_of_dec = 0;
+	widget->editable->inputData.type = field_uinteger16;
+	widget->editable->big_step = 10;
+	widget->editable->step = 5;
+	widget->editable->selectable.tab = 0;
+	widget->editable->setData = (void (*)(void *))&setTemp;
+	widget->editable->max_value = 300;
 	widget->reservedChars = 3;
-	widget->editable.selectable.state = widget_edit;
-	widget->editable.selectable.longPressAction = &boostOn;
+	widget->editable->selectable.state = widget_edit;
+	widget->editable->selectable.longPressAction = &boostOn;
 	scr->current_widget = widget;
 
 	// mode

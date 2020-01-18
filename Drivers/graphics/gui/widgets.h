@@ -129,7 +129,7 @@ struct widget_t
 	void (*draw)(widget_t*);
 	union {
 		label_wiget_t 			label;
-		editable_wiget_t 		editable;	//40
+		editable_wiget_t 		*editable;	//40
 		displayOnly_wiget_t 	displayWidget;
 		bmp_wiget_t 			displayBmp;
 		multi_option_widget_t 	*multiOptionWidget; //48
