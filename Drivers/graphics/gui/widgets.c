@@ -71,6 +71,9 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	}else if(t == widget_editable){
 		w->editable = _malloc(sizeof(editable_wiget_t));//&((multi_option_widget_t){0});
 		memset(w->multiOptionWidget, 0, sizeof(editable_wiget_t) );
+	}else if(t == widget_bmp){
+		w->displayBmp = _malloc(sizeof(widget_bmp));//&((multi_option_widget_t){0});
+		memset(w->displayBmp, 0, sizeof(widget_bmp) );
 	}else{
 		w->multiOptionWidget =0;
 	}
@@ -84,7 +87,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	}
 	switch (t) {
 		case widget_bmp:
-			w->displayBmp.bmp.p = NULL;
+			w->displayBmp->bmp.p = NULL;
 			break;
 		case widget_display:
 			w->displayWidget.getData = NULL;
@@ -202,7 +205,7 @@ void default_widgetDraw(widget_t *widget) {
 	UG_COLOR color;
 	uint8_t draw_frame = 0;
 	if(widget->type == widget_bmp) {
-		UG_DrawBMP(widget->posX ,widget->posY , &widget->displayBmp.bmp);
+		UG_DrawBMP(widget->posX ,widget->posY , &widget->displayBmp->bmp);
 		return;
 	}
 

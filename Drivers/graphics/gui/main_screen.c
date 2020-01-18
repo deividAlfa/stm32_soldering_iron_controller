@@ -211,11 +211,11 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_bmp);
 	widget->posX = 85;
 	widget->posY = 47;
-	widget->displayBmp.bmp.p = (unsigned char*)therm;
-	widget->displayBmp.bmp.width = 8;
-	widget->displayBmp.bmp.height = 16;
-	widget->displayBmp.bmp.colors = 2;
-	widget->displayBmp.bmp.bpp = 8;
+	widget->displayBmp->bmp.p = (unsigned char*)therm;
+	widget->displayBmp->bmp.width = 8;
+	widget->displayBmp->bmp.height = 16;
+	widget->displayBmp->bmp.colors = 2;
+	widget->displayBmp->bmp.bpp = 8;
 
 	//Ambient temperature display
 	widget = screen_addWidget(scr);
@@ -233,11 +233,11 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_bmp);
 	widget->posX = 40;
 	widget->posY = 47;
-	widget->displayBmp.bmp.p = (unsigned char*)flash;
-	widget->displayBmp.bmp.width = 8;
-	widget->displayBmp.bmp.height = 16;
-	widget->displayBmp.bmp.colors = 2;
-	widget->displayBmp.bmp.bpp = 8;
+	widget->displayBmp->bmp.p = (unsigned char*)flash;
+	widget->displayBmp->bmp.width = 8;
+	widget->displayBmp->bmp.height = 16;
+	widget->displayBmp->bmp.colors = 2;
+	widget->displayBmp->bmp.bpp = 8;
 
 	//Supply Voltage display
 	widget = screen_addWidget(scr);
