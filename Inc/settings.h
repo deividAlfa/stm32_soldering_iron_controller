@@ -17,7 +17,7 @@
 
 #define SETTINGSVERSION 44 /*Change this if you change the struct below to prevent people getting out of sync*/
 
-struct systemSettings {
+typedef struct {
 	uint8_t version;				//Used to track if a reset is needed on firmware upgrade
 	uint8_t contrast;
 	ironBoost_t boost;
@@ -26,7 +26,9 @@ struct systemSettings {
 	uint8_t currentNumberOfTips;
 	uint8_t currentTip;
 	uint16_t setTemperature;
-} systemSettings;
+} systemSettings_t;
+
+extern volatile systemSettings_t systemSettings;
 
 void saveSettings();
 void restoreSettings();

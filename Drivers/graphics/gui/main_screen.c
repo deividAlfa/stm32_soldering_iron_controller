@@ -276,40 +276,42 @@ void main_screen_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 1;
 	widget->font_size = &FONT_8X14;
-	widget->multiOptionWidget.editable.inputData.getData = &getMode;
-	widget->multiOptionWidget.editable.inputData.number_of_dec = 0;
-	widget->multiOptionWidget.editable.inputData.type = field_uinteger16;
-	widget->multiOptionWidget.editable.big_step = 0;
-	widget->multiOptionWidget.editable.step = 0;
-	widget->multiOptionWidget.editable.selectable.tab = 2;
-	widget->multiOptionWidget.editable.setData = (void (*)(void *))&setMode;
+	widget->multiOptionWidget->editable.inputData.getData = &getMode;
+	widget->multiOptionWidget->editable.inputData.number_of_dec = 0;
+	widget->multiOptionWidget->editable.inputData.type = field_uinteger16;
+	widget->multiOptionWidget->editable.big_step = 0;
+	widget->multiOptionWidget->editable.step = 0;
+	widget->multiOptionWidget->editable.selectable.tab = 2;
+	widget->multiOptionWidget->editable.setData = (void (*)(void *))&setMode;
 
 	widget->reservedChars = 4;
 
-	widget->multiOptionWidget.options = modestr;
-	widget->multiOptionWidget.numberOfOptions = 4;
-	widget->multiOptionWidget.currentOption = 0;
-	widget->multiOptionWidget.defaultOption = 0;
+	widget->multiOptionWidget->options = modestr;
+	widget->multiOptionWidget->numberOfOptions = 4;
+	widget->multiOptionWidget->currentOption = 0;
+	widget->multiOptionWidget->defaultOption = 0;
 	// tips
 	widget = screen_addWidget(scr);
+//	widget->multiOptionWidget = &((multi_option_widget_t){0});
 	widgetDefaultsInit(widget, widget_multi_option);
 	widget->posX = 1;
 	widget->posY = 50;
 	widget->font_size = &FONT_8X14;
-	widget->multiOptionWidget.editable.inputData.getData = &getTip;
-	widget->multiOptionWidget.editable.inputData.number_of_dec = 0;
-	widget->multiOptionWidget.editable.inputData.type = field_uinteger16;
-	widget->multiOptionWidget.editable.big_step = 0;
-	widget->multiOptionWidget.editable.step = 0;
-	widget->multiOptionWidget.editable.selectable.tab = 1;
-	widget->multiOptionWidget.editable.setData = (void (*)(void *))&setTip;
+	widget->multiOptionWidget->editable.inputData.getData = &getTip;
+	widget->multiOptionWidget->editable.inputData.number_of_dec = 0;
+	widget->multiOptionWidget->editable.inputData.type = field_uinteger16;
+	widget->multiOptionWidget->editable.big_step = 0;
+	widget->multiOptionWidget->editable.step = 0;
+	widget->multiOptionWidget->editable.selectable.tab = 1;
+	widget->multiOptionWidget->editable.setData = (void (*)(void *))&setTip;
 
 	widget->reservedChars = 5;
 
-	widget->multiOptionWidget.options = tipstr;
-	widget->multiOptionWidget.numberOfOptions = systemSettings.currentNumberOfTips;
+	widget->multiOptionWidget->options = tipstr;
+	widget->multiOptionWidget->numberOfOptions = systemSettings.currentNumberOfTips;
+	widget->multiOptionWidget->currentOption = 0;
+	widget->multiOptionWidget->defaultOption = 0;
 	tipsWidget = &widget->multiOptionWidget;
-	widget->multiOptionWidget.currentOption = 0;
-	widget->multiOptionWidget.defaultOption = 0;
+
 }
 

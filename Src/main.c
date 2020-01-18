@@ -18,6 +18,10 @@ volatile iron_temp_measure_state_t iron_temp_measure_state = iron_temp_measure_i
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 
+int malloc_size=0;
+int malloc_idx = 0;
+int malloc_arr[MALLOC_TRACE_LEN];
+
 /* Private variables ---------------------------------------------------------*/
 
 
@@ -51,6 +55,7 @@ int main(void)
   MX_DMA_Init();
   MX_ADC2_Init(&hadc2);
   MX_ADC1_Init(&hadc1);
+  HAL_Delay(1000);
   buzzer_init();
   if(HAL_ADCEx_Calibration_Start(&hadc2) != HAL_OK)
 	  buzzer_alarm_start();

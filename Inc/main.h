@@ -124,6 +124,17 @@ prev_tick = tick_now;
   /* flawless conversions +1 error reduced to +-0.5*/
   #define UINT_DIV(x,y) (x+y/2)/y
   #define CONV_TO_UINT(ft) (unsigned int)(ft+0.5)
+
+#define MALLOC_TRACE_LEN 100
+extern int malloc_size;
+extern int malloc_idx ;
+extern int malloc_arr[MALLOC_TRACE_LEN];
+
+#define _malloc(size) 				\
+malloc(size);						\
+malloc_arr[(malloc_idx++)%MALLOC_TRACE_LEN]=size;	\
+malloc_size+=(size)
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

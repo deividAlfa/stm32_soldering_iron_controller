@@ -725,7 +725,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->posY = 17;
 	w->font_size = &FONT_6X8;
 	for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++x) {
-		char *t = malloc(sizeof(systemSettings.ironTips[0].name)/sizeof(systemSettings.ironTips[0].name[0]));
+		char *t = _malloc(sizeof(systemSettings.ironTips[0].name)/sizeof(systemSettings.ironTips[0].name[0]));
 		t[0] = '\0';
 		if(!t)
 		    _Error_Handler(__FILE__, __LINE__);

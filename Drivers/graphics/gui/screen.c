@@ -18,7 +18,7 @@ widget_t *screen_addWidget(screen_t *scr) {
 			last_widget = last_widget->next_widget;
 	}
 
-	widget_t *new_widget = malloc(sizeof(widget_t));
+	widget_t *new_widget = _malloc(sizeof(widget_t));
 	if(new_widget == NULL)
 		Error_Handler();
 	new_widget->next_widget = NULL;
@@ -81,15 +81,15 @@ void default_screenDraw(screen_t *scr) {
 		}
 	}
 }
-
+displayOnly_wiget_t *dis;
 void default_screenUpdate(screen_t *scr) {
 	widget_t *last_widget = NULL;
 	if(scr->widgets) {
 		last_widget = scr->widgets;
-		displayOnly_wiget_t *dis;
+
 		while(last_widget) {
 			dis = extractDisplayPartFromWidget(last_widget);
-			if(dis->update) {
+			if(dis->update && dis) {
 					dis->update(last_widget);
 			}
 			last_widget = last_widget->next_widget;

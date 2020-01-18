@@ -7,6 +7,9 @@
 
 #include "settings.h"
 #include <string.h>
+
+volatile systemSettings_t systemSettings = {0};
+
 #define FLASH_ADDR (0x8000000|64512)/*Flash start OR'ed with the maximum amount of flash - 256 bytes*/
 //#define JBC
 void saveSettings() {
@@ -25,19 +28,22 @@ void saveSettings() {
 }
 
 void restoreSettings() {
-	uint16_t *data = (uint16_t*) &systemSettings;
-	for (uint16_t i = 0; i < (sizeof(systemSettings) / 2); i++) {
-		data[i] = *(uint16_t *) (FLASH_ADDR + (i * 2));
-	}
-	if (systemSettings.version != SETTINGSVERSION) {
-		resetSettings();
-		saveSettings();
-	}
+//	uint16_t *data = (uint16_t*) &systemSettings;
+//	for (uint16_t i = 0; i < (sizeof(systemSettings) / 2); i++) {
+//		data[i] = *(uint16_t *) (FLASH_ADDR + (i * 2));
+//	}
+		resetSettings();	
+//	if (systemSettings.version != SETTINGSVERSION) {
+//		resetSettings();
+//		saveSettings();
+//	}
 
 }
 
 #define PID_MIN -0.05
+
 void resetSettings() {
+	memset( &systemSettings , 0, sizeof(systemSettings_t) );
 	systemSettings.version = SETTINGSVERSION;
 	systemSettings.contrast = 0x7F;
 	systemSettings.boost.temperature = 400;
@@ -78,6 +84,7 @@ void resetSettings() {
 		systemSettings.ironTips[x].PID.max = 1;
 		systemSettings.ironTips[x].PID.maxI = 200;
 		systemSettings.ironTips[x].PID.minI = -50;
+		strcpy(systemSettings.ironTips[0].name, "DFLT");
 	}
 	systemSettings.currentNumberOfTips = 5;
 	systemSettings.currentTip = 1;

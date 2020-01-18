@@ -100,7 +100,7 @@ void setCurrentTemperature(uint16_t temperature) {
 
 }
 void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback) {
-	setTemperatureReachedCallbackStruct_t *s = malloc(sizeof(setTemperatureReachedCallbackStruct_t));
+	setTemperatureReachedCallbackStruct_t *s = _malloc(sizeof(setTemperatureReachedCallbackStruct_t));
 	if(!s)
 		while(1){}
 	s->callback = callback;
@@ -116,7 +116,7 @@ void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback) {
 	last->next = s;
 }
 void addModeChangedCallback(currentModeChanged callback) {
-	currentModeChangedCallbackStruct_t *s = malloc(sizeof(currentModeChangedCallbackStruct_t));
+	currentModeChangedCallbackStruct_t *s = _malloc(sizeof(currentModeChangedCallbackStruct_t));
 	s->callback = callback;
 	s->next = NULL;
 	currentModeChangedCallbackStruct_t *last = currentModeChangedCallbacks;

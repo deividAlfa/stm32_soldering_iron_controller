@@ -17,7 +17,7 @@ displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget) {
 			return &widget->editable.inputData;
 			break;
 		case widget_multi_option:
-			return &widget->multiOptionWidget.editable.inputData;
+			return &widget->multiOptionWidget->editable.inputData;
 		default:
 			return NULL;
 			break;
@@ -30,7 +30,7 @@ editable_wiget_t * extractEditablePartFromWidget(widget_t *widget) {
 			return &widget->editable;
 			break;
 		case widget_multi_option:
-			return &widget->multiOptionWidget.editable;
+			return &widget->multiOptionWidget->editable;					
 		default:
 			return NULL;
 			break;
@@ -44,7 +44,7 @@ selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget) {
 			return &widget->editable.selectable;
 			break;
 		case widget_multi_option:
-			return &widget->multiOptionWidget.editable.selectable;
+				return &widget->multiOptionWidget->editable.selectable;
 		case widget_button:
 			return &widget->buttonWidget.selectable;
 		case widget_combo:
@@ -65,6 +65,12 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	w->reservedChars = 5;
 	w->next_widget = NULL;
 	selectable_widget_t *sel;
+	if(t == widget_multi_option){
+		w->multiOptionWidget = _malloc(sizeof(multi_option_widget_t));//&((multi_option_widget_t){0});
+		memset(w->multiOptionWidget, 0, sizeof(multi_option_widget_t) );
+	}else{
+		w->multiOptionWidget =0;
+	}
 	sel = extractSelectablePartFromWidget(w);
 	if(sel) {
 		sel->previous_state = widget_idle;
@@ -96,20 +102,20 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 			w->editable.min_value = 0;
 			break;
 		case widget_multi_option:
-			w->multiOptionWidget.editable.big_step = 10;
-			w->multiOptionWidget.editable.inputData.getData = NULL;
-			w->multiOptionWidget.editable.inputData.number_of_dec = 0;
-			w->multiOptionWidget.editable.inputData.type = field_uinteger16;
-			w->multiOptionWidget.editable.inputData.update = &default_widgetUpdate;
-			w->multiOptionWidget.editable.setData = NULL;
-			w->multiOptionWidget.editable.step = 1;
-			w->multiOptionWidget.editable.selectable.tab = 0;
-			w->multiOptionWidget.editable.max_value = 0xFF;
-			w->multiOptionWidget.editable.min_value = 0;
-			w->multiOptionWidget.currentOption = 0;
-			w->multiOptionWidget.defaultOption = 0;
-			w->multiOptionWidget.numberOfOptions = 0;
-			w->multiOptionWidget.options = NULL;
+			w->multiOptionWidget->editable.big_step = 10;
+			w->multiOptionWidget->editable.inputData.getData = NULL;
+			w->multiOptionWidget->editable.inputData.number_of_dec = 0;
+			w->multiOptionWidget->editable.inputData.type = field_uinteger16;
+			w->multiOptionWidget->editable.inputData.update = &default_widgetUpdate;
+			w->multiOptionWidget->editable.setData = NULL;
+			w->multiOptionWidget->editable.step = 1;
+			w->multiOptionWidget->editable.selectable.tab = 0;
+			w->multiOptionWidget->editable.max_value = 0xFF;
+			w->multiOptionWidget->editable.min_value = 0;
+			w->multiOptionWidget->currentOption = 0;
+			w->multiOptionWidget->defaultOption = 0;
+			w->multiOptionWidget->numberOfOptions = 0;
+			w->multiOptionWidget->options = NULL;
 			break;
 		case widget_combo:
 			w->comboBoxWidget.currentItem = NULL;
@@ -126,6 +132,8 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 		default:
 			break;
 	}
+
+
 }
 
 static void insertDot(char *str, uint8_t dec) {
@@ -135,6 +143,7 @@ static void insertDot(char *str, uint8_t dec) {
 	str[strlen(str) - dec - 1] = '.';
 }
 
+volatile int str_len;
 void default_widgetUpdate(widget_t *widget) {
 	void * data;
 	displayOnly_wiget_t *dis = extractDisplayPartFromWidget(widget);
@@ -146,9 +155,15 @@ void default_widgetUpdate(widget_t *widget) {
 	char *str;
 	switch (widget->type) {
 	case widget_multi_option:
-		strcpy(widget->displayString, widget->multiOptionWidget.options[*(uint8_t*)data]);
-		widget->multiOptionWidget.currentOption = *(uint8_t*)data;
+	{
+#ifndef TODO
+
+		str_len = strlen(widget->multiOptionWidget->options[*(uint8_t*)data]);
+		strcpy(widget->displayString, widget->multiOptionWidget->options[*(uint8_t*)data]);
+#endif
+		widget->multiOptionWidget->currentOption = *(uint8_t*)data;
 		break;
+	}
 	default:
 		switch (dis->type) {
 			case field_uinteger16:
@@ -289,13 +304,13 @@ int comboBoxProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t *stat
 		while(current && !current->enabled) {
 			current = current->next_item;
 		}
-		if(current) {
-			widget->comboBoxWidget.currentItem = current;
+			if(current) {
+				widget->comboBoxWidget.currentItem = current;
 			uint8_t index = comboItemToIndex(widget, current);
 			if(index > lastIndex)
 				++widget->comboBoxWidget.currentScroll;
 		}
-	}
+	}		
 	else if(input == Rotate_Decrement) {
 		if(widget->comboBoxWidget.currentItem == widget->comboBoxWidget.items)
 			return -1;
@@ -402,16 +417,16 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 			return -1;
 		}
 		else if((widget->type == widget_multi_option) && (extractSelectablePartFromWidget(widget)->state == widget_edit)) {
-			int temp = widget->multiOptionWidget.currentOption;
+			int temp = widget->multiOptionWidget->currentOption;
 			if(input == Rotate_Increment)
 				++temp;
 			else if(input == Rotate_Decrement)
 				--temp;
 			if(temp < 0)
-				temp = widget->multiOptionWidget.numberOfOptions - 1;
-			else if(temp > widget->multiOptionWidget.numberOfOptions -1)
+				temp = widget->multiOptionWidget->numberOfOptions - 1;
+			else if(temp > widget->multiOptionWidget->numberOfOptions -1)
 				temp = 0;
-			widget->multiOptionWidget.editable.setData(&temp);
+			widget->multiOptionWidget->editable.setData(&temp);
 		}
 		else if (sel->state == widget_selected) {
 			uint8_t next = 0xFF;
@@ -465,7 +480,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 }
 
 comboBox_item_t *comboAddItem(widget_t *combo, char *label, uint8_t actionScreen) {
-	comboBox_item_t *item = malloc(sizeof(comboBox_item_t));
+	comboBox_item_t *item = _malloc(sizeof(comboBox_item_t));
 	if(!item)
 		return NULL;
 	item->text = label;

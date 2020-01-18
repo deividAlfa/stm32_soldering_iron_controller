@@ -128,13 +128,13 @@ struct widget_t
 	struct screen_t *parent;
 	void (*draw)(widget_t*);
 	union {
-		label_wiget_t label;
-		editable_wiget_t editable;
-		displayOnly_wiget_t displayWidget;
-		bmp_wiget_t displayBmp;
-		multi_option_widget_t multiOptionWidget;
-		comboBox_widget_t comboBoxWidget;
-		button_widget_t buttonWidget;
+		label_wiget_t 			label;
+		editable_wiget_t 		editable;	//40
+		displayOnly_wiget_t 	displayWidget;
+		bmp_wiget_t 			displayBmp;
+		multi_option_widget_t 	*multiOptionWidget; //48
+		comboBox_widget_t 		comboBoxWidget;
+		button_widget_t 		buttonWidget;
 	};
 };
 

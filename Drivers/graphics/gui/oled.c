@@ -13,7 +13,7 @@ static screen_t *screens = NULL;
 static screen_t *current_screen;
 
 screen_t *oled_addScreen(uint8_t index) {
-	screen_t *ret = malloc(sizeof(screen_t));
+	screen_t *ret = _malloc(sizeof(screen_t));
 	if(!ret)
 		Error_Handler();
 	ret->index = index;
