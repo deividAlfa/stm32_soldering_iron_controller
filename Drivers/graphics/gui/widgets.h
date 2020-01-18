@@ -130,11 +130,11 @@ struct widget_t
 	union {
 		label_wiget_t 			*label;
 		editable_wiget_t 		*editable;	//40
-		displayOnly_wiget_t 	displayWidget;
+		displayOnly_wiget_t 	displayWidget; //12
 		bmp_wiget_t 			*displayBmp;
 		multi_option_widget_t 	*multiOptionWidget; //48
-		comboBox_widget_t 		comboBoxWidget;
-		button_widget_t 		buttonWidget;
+		comboBox_widget_t 		*comboBoxWidget; //28
+		button_widget_t 		buttonWidget; //20
 	};
 };
 

@@ -29,18 +29,18 @@ static widget_t *delTipButton = NULL;
 static comboBox_item_t *addNewTipComboItem = NULL;
 
 static void edit_iron_tip_screen_init(screen_t *scr) {
-	if(strcmp(tipCombo->comboBoxWidget.currentItem->text, "ADD NEW") == 0) {
+	if(strcmp(tipCombo->comboBoxWidget->currentItem->text, "ADD NEW") == 0) {
 		strcpy(str, "   ");
 		delTipButton->enabled = 0;
 	}
 	else {
-		strcpy(str, tipCombo->comboBoxWidget.currentItem->text);
+		strcpy(str, tipCombo->comboBoxWidget->currentItem->text);
 		delTipButton->enabled = 1;
 	}
 	default_init(scr);
 }
 static void edit_iron_screen_init(screen_t *scr) {
-	comboBox_item_t *i = tipCombo->comboBoxWidget.items;
+	comboBox_item_t *i = tipCombo->comboBoxWidget->items;
 	for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++x) {
 		if(x < systemSettings.currentNumberOfTips) {
 			strcpy(i->text, systemSettings.ironTips[x].name);
@@ -50,8 +50,8 @@ static void edit_iron_screen_init(screen_t *scr) {
 			i->enabled = 0;
 		i = i->next_item;
 	}
-	tipCombo->comboBoxWidget.currentItem = tipCombo->comboBoxWidget.items;
-	tipCombo->comboBoxWidget.currentScroll = 0;
+	tipCombo->comboBoxWidget->currentItem = tipCombo->comboBoxWidget->items;
+	tipCombo->comboBoxWidget->currentScroll = 0;
 	if(systemSettings.currentNumberOfTips > sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0])) {
 		addNewTipComboItem->enabled = 0;
 	}
@@ -64,14 +64,14 @@ static void setTipStr(char *s) {
 	strcpy(str, s);
 }
 static int saveTip(widget_t *w) {
-	if(strcmp(tipCombo->comboBoxWidget.currentItem->text, "ADD NEW") == 0) {
+	if(strcmp(tipCombo->comboBoxWidget->currentItem->text, "ADD NEW") == 0) {
 		strcpy(systemSettings.ironTips[systemSettings.currentNumberOfTips].name, str);
 		++systemSettings.currentNumberOfTips;
 		saveSettings();
 	}
 	else {
 		for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++ x) {
-			if(strcmp(tipCombo->comboBoxWidget.currentItem->text, systemSettings.ironTips[x].name) == 0) {
+			if(strcmp(tipCombo->comboBoxWidget->currentItem->text, systemSettings.ironTips[x].name) == 0) {
 				strcpy(systemSettings.ironTips[x].name, str);
 				saveSettings();
 				break;
@@ -86,7 +86,7 @@ static int cancelTip(widget_t *w) {
 static int delTip(widget_t *w) {
 	uint8_t itemIndex = 0;
 	for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++ x) {
-		if(strcmp(tipCombo->comboBoxWidget.currentItem->text, systemSettings.ironTips[x].name) == 0) {
+		if(strcmp(tipCombo->comboBoxWidget->currentItem->text, systemSettings.ironTips[x].name) == 0) {
 			itemIndex = x;
 			break;
 		}
@@ -243,7 +243,7 @@ static void settings_screen_init(screen_t *scr) {
 	UG_FontSetVSpace(0);
 	default_init(scr);
 	scr->current_widget = combo;
-	scr->current_widget->comboBoxWidget.selectable.state = widget_selected;
+	scr->current_widget->comboBoxWidget->selectable.state = widget_selected;
 }
 
 void settings_screen_setup(screen_t *scr) {

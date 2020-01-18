@@ -48,7 +48,7 @@ selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget) {
 		case widget_button:
 			return &widget->buttonWidget.selectable;
 		case widget_combo:
-			return &widget->comboBoxWidget.selectable;
+			return &widget->comboBoxWidget->selectable;
 		default:
 			return NULL;
 			break;
@@ -74,6 +74,9 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	}else if(t == widget_bmp){
 		w->displayBmp = _malloc(sizeof(widget_bmp));//&((multi_option_widget_t){0});
 		memset(w->displayBmp, 0, sizeof(widget_bmp) );
+	}else if(t == widget_combo){
+		w->comboBoxWidget = _malloc(sizeof(comboBox_widget_t));//&((multi_option_widget_t){0});
+		memset(w->comboBoxWidget, 0, sizeof(comboBox_widget_t) );
 	}else{
 		w->multiOptionWidget =0;
 	}
@@ -124,11 +127,11 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 			w->multiOptionWidget->options = NULL;
 			break;
 		case widget_combo:
-			w->comboBoxWidget.currentItem = NULL;
-			w->comboBoxWidget.items = NULL;
+			w->comboBoxWidget->currentItem = NULL;
+			w->comboBoxWidget->items = NULL;
 			w->draw = &comboBoxDraw;
-			w->comboBoxWidget.currentScroll = 0;
-			w->comboBoxWidget.selectable.processInput = &comboBoxProcessInput;
+			w->comboBoxWidget->currentScroll = 0;
+			w->comboBoxWidget->selectable.processInput = &comboBoxProcessInput;
 			break;
 		case widget_button:
 			w->buttonWidget.action = NULL;
@@ -261,9 +264,9 @@ void comboBoxDraw(widget_t *widget) {
 	uint16_t yDim = UG_GetYDim() - widget->posY;
 	uint16_t height = widget->font_size->char_height;
 	height += 2;
-	comboBox_item_t *item = widget->comboBoxWidget.items;
+	comboBox_item_t *item = widget->comboBoxWidget->items;
 	uint8_t scroll = 0;
-	while(scroll < widget->comboBoxWidget.currentScroll) {
+	while(scroll < widget->comboBoxWidget->currentScroll) {
 		if(!item->next_item)
 			break;
 		item = item->next_item;
@@ -273,7 +276,7 @@ void comboBoxDraw(widget_t *widget) {
 	UG_FontSelect(widget->font_size);
 	for(uint8_t x = 0; x < yDim / height; ++x) {
 		UG_FillFrame(0, x * height + widget->posY -1, UG_GetXDim(), x * height + widget->posY + widget->font_size->char_height, C_BLACK);
-		if(item == widget->comboBoxWidget.currentItem) {
+		if(item == widget->comboBoxWidget->currentItem) {
 			UG_DrawFrame(0, x * height + widget->posY -1, UG_GetXDim() -1, x * height + widget->posY + widget->font_size->char_height, C_WHITE);
 		}
 		UG_PutString(UG_GetXDim() / 2 - (strlen(item->text) / 2 * widget->font_size->char_width) ,x * height + widget->posY, item->text);
@@ -288,7 +291,7 @@ void comboBoxDraw(widget_t *widget) {
 
 uint8_t comboItemToIndex(widget_t *combo, comboBox_item_t *item) {
 	uint8_t index = 0;
-	comboBox_item_t *i = combo->comboBoxWidget.items;
+	comboBox_item_t *i = combo->comboBoxWidget->items;
 	while(i && i != item) {
 		i = i->next_item;
 		if(i->enabled)
@@ -297,40 +300,40 @@ uint8_t comboItemToIndex(widget_t *combo, comboBox_item_t *item) {
 	return index;
 }
 int comboBoxProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t *state) {
-	uint8_t firstIndex = widget->comboBoxWidget.currentScroll;
+	uint8_t firstIndex = widget->comboBoxWidget->currentScroll;
 	uint16_t yDim = UG_GetYDim() - widget->posY;
 	uint16_t height = widget->font_size->char_height;
 	height += 2;
 	uint8_t maxIndex = yDim / height;
-	uint8_t lastIndex = widget->comboBoxWidget.currentScroll + maxIndex -1;
+	uint8_t lastIndex = widget->comboBoxWidget->currentScroll + maxIndex -1;
 	if(input == Click)
-		return widget->comboBoxWidget.currentItem->action_screen;
+		return widget->comboBoxWidget->currentItem->action_screen;
 	else if(input == Rotate_Increment) {
-		comboBox_item_t *current = widget->comboBoxWidget.currentItem->next_item;
+		comboBox_item_t *current = widget->comboBoxWidget->currentItem->next_item;
 		while(current && !current->enabled) {
 			current = current->next_item;
 		}
 			if(current) {
-				widget->comboBoxWidget.currentItem = current;
+				widget->comboBoxWidget->currentItem = current;
 			uint8_t index = comboItemToIndex(widget, current);
 			if(index > lastIndex)
-				++widget->comboBoxWidget.currentScroll;
+				++widget->comboBoxWidget->currentScroll;
 		}
 	}		
 	else if(input == Rotate_Decrement) {
-		if(widget->comboBoxWidget.currentItem == widget->comboBoxWidget.items)
+		if(widget->comboBoxWidget->currentItem == widget->comboBoxWidget->items)
 			return -1;
 		comboBox_item_t *current = NULL;
 		do {
-			current = widget->comboBoxWidget.items;
-			while(current->next_item != widget->comboBoxWidget.currentItem) {
+			current = widget->comboBoxWidget->items;
+			while(current->next_item != widget->comboBoxWidget->currentItem) {
 				current = current->next_item;
 			}
-			widget->comboBoxWidget.currentItem = current;
+			widget->comboBoxWidget->currentItem = current;
 		}while(!current->enabled);
 		uint8_t index = comboItemToIndex(widget, current);
 		if(index < firstIndex)
-			--widget->comboBoxWidget.currentScroll;
+			--widget->comboBoxWidget->currentScroll;
 	}
 	return -1;
 }
@@ -494,10 +497,10 @@ comboBox_item_t *comboAddItem(widget_t *combo, char *label, uint8_t actionScreen
 	item->action_screen = actionScreen;
 	item->enabled = 1;
 
-	comboBox_item_t *last = combo->comboBoxWidget.items;
+	comboBox_item_t *last = combo->comboBoxWidget->items;
 	if(!last) {
-		combo->comboBoxWidget.items = item;
-		combo->comboBoxWidget.currentItem = item;
+		combo->comboBoxWidget->items = item;
+		combo->comboBoxWidget->currentItem = item;
 		return item;
 	}
 	while(last->next_item){
