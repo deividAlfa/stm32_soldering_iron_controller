@@ -142,9 +142,9 @@ void debug_screen_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 0;
 	widget->font_size = &FONT_6X8;
-	widget->displayWidget.getData = &debug_screen_getADC1_1;
-	widget->displayWidget.number_of_dec = 0;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &debug_screen_getADC1_1;
+	widget->displayWidget->number_of_dec = 0;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 5;
 	widget = screen_addWidget(scr);
 	//P TERM
@@ -152,9 +152,9 @@ void debug_screen_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 20;
 	widget->font_size = &FONT_6X8;
-	widget->displayWidget.getData = &debug_screen_getP;
-	widget->displayWidget.number_of_dec = 0;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &debug_screen_getP;
+	widget->displayWidget->number_of_dec = 0;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 5;
 	//I TERM
 	widget = screen_addWidget(scr);
@@ -162,9 +162,9 @@ void debug_screen_setup(screen_t *scr) {
 	widget->posX = 30;
 	widget->posY = 20;
 	widget->font_size = &FONT_6X8;
-	widget->displayWidget.getData = &debug_screen_getI;
-	widget->displayWidget.number_of_dec = 0;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &debug_screen_getI;
+	widget->displayWidget->number_of_dec = 0;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 5;
 	//D TERM
 	widget = screen_addWidget(scr);
@@ -172,9 +172,9 @@ void debug_screen_setup(screen_t *scr) {
 	widget->posX = 60;
 	widget->posY = 20;
 	widget->font_size = &FONT_6X8;
-	widget->displayWidget.getData = &debug_screen_getD;
-	widget->displayWidget.number_of_dec = 0;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &debug_screen_getD;
+	widget->displayWidget->number_of_dec = 0;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 5;
 
 	widget = screen_addWidget(scr);
@@ -182,9 +182,9 @@ void debug_screen_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 30;
 	widget->font_size = &FONT_6X8;
-	widget->displayWidget.getData = &debug_screen_getError;
-	widget->displayWidget.number_of_dec = 0;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &debug_screen_getError;
+	widget->displayWidget->number_of_dec = 0;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 5;
 
 	widget = screen_addWidget(scr);
@@ -192,9 +192,9 @@ void debug_screen_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 40;
 	widget->font_size = &FONT_6X8;
-	widget->displayWidget.getData = &debug_screen_getOutput;
-	widget->displayWidget.number_of_dec = 0;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &debug_screen_getOutput;
+	widget->displayWidget->number_of_dec = 0;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 5;
 }
 
@@ -212,9 +212,9 @@ void debug_screen2_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 0;
 	widget->font_size = &FONT_6X8;
-	widget->displayWidget.getData = &debug_screen_getADC1_1;
-	widget->displayWidget.number_of_dec = 0;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &debug_screen_getADC1_1;
+	widget->displayWidget->number_of_dec = 0;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 5;
 	widget = screen_addWidget(scr);
 
@@ -308,9 +308,9 @@ void debug_screen3_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 0;
 	widget->font_size = &FONT_6X8;
-	widget->displayWidget.getData = &debug_screen_get_iron;
-	widget->displayWidget.number_of_dec = 0;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &debug_screen_get_iron;
+	widget->displayWidget->number_of_dec = 0;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 5;
 	widget = screen_addWidget(scr);
 
@@ -319,9 +319,9 @@ void debug_screen3_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 10;
 	widget->font_size = &FONT_6X8;
-	widget->displayWidget.getData = &debug_screen_get_supply;
-	widget->displayWidget.number_of_dec = 0;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &debug_screen_get_supply;
+	widget->displayWidget->number_of_dec = 0;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 5;
 	widget = screen_addWidget(scr);
 
@@ -330,9 +330,9 @@ void debug_screen3_setup(screen_t *scr) {
 	widget->posX = 1;
 	widget->posY = 20;
 	widget->font_size = &FONT_6X8;
-	widget->displayWidget.getData = &debug_screen_get_cold_junction;
-	widget->displayWidget.number_of_dec = 0;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &debug_screen_get_cold_junction;
+	widget->displayWidget->number_of_dec = 0;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 5;
 	widget = screen_addWidget(scr);
 

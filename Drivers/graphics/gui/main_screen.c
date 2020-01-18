@@ -154,9 +154,9 @@ void main_screen_setup(screen_t *scr) {
 	widget->posX = 45 - 3 - 4 - 35;
 	widget->posY = 23;
 	widget->font_size = &FONT_16X26;
-	widget->displayWidget.getData = &main_screen_getIronTemp10x;
-	widget->displayWidget.number_of_dec = 1;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &main_screen_getIronTemp10x;
+	widget->displayWidget->number_of_dec = 1;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 5;
 	ironTempWidget = widget;
 
@@ -166,9 +166,9 @@ void main_screen_setup(screen_t *scr) {
 	widget->posX = 93;
 	widget->posY = 1;
 	widget->font_size = &FONT_8X14;
-	widget->displayWidget.getData = &main_screen_getIronPower;
-	widget->displayWidget.number_of_dec = 0;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &main_screen_getIronPower;
+	widget->displayWidget->number_of_dec = 0;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 3;
 
 	//power percentage symbol
@@ -223,9 +223,9 @@ void main_screen_setup(screen_t *scr) {
 	widget->posX = 95;
 	widget->posY = 50;
 	widget->font_size = &FONT_8X14;
-	widget->displayWidget.getData = &main_screen_getAmbTemp;
-	widget->displayWidget.number_of_dec = 1;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &main_screen_getAmbTemp;
+	widget->displayWidget->number_of_dec = 1;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 4;
 
 	//Flash bmp next to Supply voltage
@@ -245,9 +245,9 @@ void main_screen_setup(screen_t *scr) {
 	widget->posX = 50;
 	widget->posY = 50;
 	widget->font_size = &FONT_8X14;
-	widget->displayWidget.getData = &main_screen_getSupplyVoltage;
-	widget->displayWidget.number_of_dec = 1;
-	widget->displayWidget.type = field_uinteger16;
+	widget->displayWidget->getData = &main_screen_getSupplyVoltage;
+	widget->displayWidget->number_of_dec = 1;
+	widget->displayWidget->type = field_uinteger16;
 	widget->reservedChars = 4;
 
 	// tip temperature setpoint

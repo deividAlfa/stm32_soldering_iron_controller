@@ -1,6 +1,6 @@
 #pragma once
 
-#define ADC_MEASURES_LEN (512)
+#define ADC_MEASURES_LEN (256)
 
 #define FAKE_25_COLD_JUNGTION
 #define FAKE_SUPPLY_VOLTAGE_OK

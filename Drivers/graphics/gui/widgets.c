@@ -80,6 +80,9 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	}else if(t == widget_button){
 		w->buttonWidget = _malloc(sizeof(button_widget_t));//&((multi_option_widget_t){0});
 		memset(w->buttonWidget, 0, sizeof(button_widget_t) );
+	}else if(t == widget_display){
+		w->displayWidget = _malloc(sizeof(displayOnly_wiget_t));//&((multi_option_widget_t){0});
+		memset(w->displayWidget, 0, sizeof(displayOnly_wiget_t) );
 	}else{
 		w->multiOptionWidget =0;
 	}
@@ -96,10 +99,10 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 			w->displayBmp->bmp.p = NULL;
 			break;
 		case widget_display:
-			w->displayWidget.getData = NULL;
-			w->displayWidget.number_of_dec = 0;
-			w->displayWidget.type = field_uinteger16;
-			w->displayWidget.update = &default_widgetUpdate;
+			w->displayWidget->getData = NULL;
+			w->displayWidget->number_of_dec = 0;
+			w->displayWidget->type = field_uinteger16;
+			w->displayWidget->update = &default_widgetUpdate;
 			break;
 		case widget_editable:
 			w->editable->big_step = 10;
