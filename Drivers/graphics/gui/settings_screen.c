@@ -372,8 +372,8 @@ void settings_screen_setup(screen_t *scr) {
 	s = "SAVE";
 	strcpy(w->displayString, s);
 	w->reservedChars = 4;
-	w->buttonWidget.selectable.tab = 3;
-	w->buttonWidget.action = &savePID;
+	w->buttonWidget->selectable.tab = 3;
+	w->buttonWidget->action = &savePID;
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
@@ -383,8 +383,8 @@ void settings_screen_setup(screen_t *scr) {
 	s = "CANCEL";
 	strcpy(w->displayString, s);
 	w->reservedChars = 6;
-	w->buttonWidget.selectable.tab = 5;
-	w->buttonWidget.action = &cancelPID;
+	w->buttonWidget->selectable.tab = 5;
+	w->buttonWidget->action = &cancelPID;
 
 	//SCREEN
 	sc = oled_addScreen(screen_edit_contrast);
@@ -434,8 +434,8 @@ void settings_screen_setup(screen_t *scr) {
 	s = "SAVE";
 	strcpy(w->displayString, s);
 	w->reservedChars = 4;
-	w->buttonWidget.selectable.tab = 1;
-	w->buttonWidget.action = &saveContrast;
+	w->buttonWidget->selectable.tab = 1;
+	w->buttonWidget->action = &saveContrast;
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
 	w->font_size = &FONT_6X8;
@@ -444,8 +444,8 @@ void settings_screen_setup(screen_t *scr) {
 	s = "CANCEL";
 	strcpy(w->displayString, s);
 	w->reservedChars = 6;
-	w->buttonWidget.selectable.tab = 2;
-	w->buttonWidget.action = &cancelContrast;
+	w->buttonWidget->selectable.tab = 2;
+	w->buttonWidget->action = &cancelContrast;
 
 	//Screen edit power
 	sc = oled_addScreen(screen_edit_max_power);
@@ -496,8 +496,8 @@ void settings_screen_setup(screen_t *scr) {
 	s = "SAVE";
 	strcpy(w->displayString, s);
 	w->reservedChars = 4;
-	w->buttonWidget.selectable.tab = 1;
-	w->buttonWidget.action = &savePower;
+	w->buttonWidget->selectable.tab = 1;
+	w->buttonWidget->action = &savePower;
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
 	w->font_size = &FONT_6X8;
@@ -506,8 +506,8 @@ void settings_screen_setup(screen_t *scr) {
 	s = "CANCEL";
 	strcpy(w->displayString, s);
 	w->reservedChars = 6;
-	w->buttonWidget.selectable.tab = 2;
-	w->buttonWidget.action = &cancelPower;
+	w->buttonWidget->selectable.tab = 2;
+	w->buttonWidget->action = &cancelPower;
 
 	///Screen edit boost
 	sc = oled_addScreen(screen_edit_boost);
@@ -581,8 +581,8 @@ void settings_screen_setup(screen_t *scr) {
 	s = "SAVE";
 	strcpy(w->displayString, s);
 	w->reservedChars = 4;
-	w->buttonWidget.selectable.tab = 2;
-	w->buttonWidget.action = &saveBoost;
+	w->buttonWidget->selectable.tab = 2;
+	w->buttonWidget->action = &saveBoost;
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
 	w->font_size = &FONT_6X8;
@@ -591,8 +591,8 @@ void settings_screen_setup(screen_t *scr) {
 	s = "CANCEL";
 	strcpy(w->displayString, s);
 	w->reservedChars = 6;
-	w->buttonWidget.selectable.tab = 3;
-	w->buttonWidget.action = &cancelBoost;
+	w->buttonWidget->selectable.tab = 3;
+	w->buttonWidget->action = &cancelBoost;
 
 	//Screen edit Sleep
 	sc = oled_addScreen(screen_edit_sleep);
@@ -690,8 +690,8 @@ void settings_screen_setup(screen_t *scr) {
 	s = "SAVE";
 	strcpy(w->displayString, s);
 	w->reservedChars = 4;
-	w->buttonWidget.selectable.tab = 3;
-	w->buttonWidget.action = &saveSleep;
+	w->buttonWidget->selectable.tab = 3;
+	w->buttonWidget->action = &saveSleep;
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
 	w->font_size = &FONT_6X8;
@@ -700,8 +700,8 @@ void settings_screen_setup(screen_t *scr) {
 	s = "CANCEL";
 	strcpy(w->displayString, s);
 	w->reservedChars = 6;
-	w->buttonWidget.selectable.tab = 4;
-	w->buttonWidget.action = &cancelSleep;
+	w->buttonWidget->selectable.tab = 4;
+	w->buttonWidget->action = &cancelSleep;
 
 	//Screen edit iron tips
 	sc = oled_addScreen(screen_edit_iron_tips);
@@ -774,8 +774,8 @@ void settings_screen_setup(screen_t *scr) {
 	s = "SAVE";
 	strcpy(w->displayString, s);
 	w->reservedChars = 4;
-	w->buttonWidget.selectable.tab = 1;
-	w->buttonWidget.action = &saveTip;
+	w->buttonWidget->selectable.tab = 1;
+	w->buttonWidget->action = &saveTip;
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
 	w->font_size = &FONT_6X8;
@@ -784,8 +784,8 @@ void settings_screen_setup(screen_t *scr) {
 	s = "CANCEL";
 	strcpy(w->displayString, s);
 	w->reservedChars = 6;
-	w->buttonWidget.selectable.tab = 2;
-	w->buttonWidget.action = &cancelTip;
+	w->buttonWidget->selectable.tab = 2;
+	w->buttonWidget->action = &cancelTip;
 
 	w = screen_addWidget(sc);
 	delTipButton = w;
@@ -796,6 +796,6 @@ void settings_screen_setup(screen_t *scr) {
 	s = "DELETE";
 	strcpy(w->displayString, s);
 	w->reservedChars = 6;
-	w->buttonWidget.selectable.tab = 3;
-	w->buttonWidget.action = &delTip;
+	w->buttonWidget->selectable.tab = 3;
+	w->buttonWidget->action = &delTip;
 }

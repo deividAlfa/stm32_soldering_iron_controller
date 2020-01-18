@@ -46,7 +46,7 @@ selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget) {
 		case widget_multi_option:
 				return &widget->multiOptionWidget->editable.selectable;
 		case widget_button:
-			return &widget->buttonWidget.selectable;
+			return &widget->buttonWidget->selectable;
 		case widget_combo:
 			return &widget->comboBoxWidget->selectable;
 		default:
@@ -77,6 +77,9 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	}else if(t == widget_combo){
 		w->comboBoxWidget = _malloc(sizeof(comboBox_widget_t));//&((multi_option_widget_t){0});
 		memset(w->comboBoxWidget, 0, sizeof(comboBox_widget_t) );
+	}else if(t == widget_button){
+		w->buttonWidget = _malloc(sizeof(button_widget_t));//&((multi_option_widget_t){0});
+		memset(w->buttonWidget, 0, sizeof(button_widget_t) );
 	}else{
 		w->multiOptionWidget =0;
 	}
@@ -134,7 +137,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 			w->comboBoxWidget->selectable.processInput = &comboBoxProcessInput;
 			break;
 		case widget_button:
-			w->buttonWidget.action = NULL;
+			w->buttonWidget->action = NULL;
 			break;
 		case widget_label:
 			break;
@@ -353,7 +356,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 			switch (sel->state) {
 				case widget_selected:
 					if(widget->type == widget_button)
-						return widget->buttonWidget.action(widget);
+						return widget->buttonWidget->action(widget);
 					if(extractDisplayPartFromWidget(widget)->type == field_string)
 						extractEditablePartFromWidget(widget)->current_edit = 0;
 					sel->state = widget_edit;

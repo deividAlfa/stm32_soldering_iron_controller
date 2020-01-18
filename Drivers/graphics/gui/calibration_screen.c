@@ -162,8 +162,8 @@ void calibration_screen_setup(screen_t *scr) {
 	s = "CANCEL";
 	strcpy(widget->displayString, s);
 	widget->reservedChars = 6;
-	widget->buttonWidget.selectable.tab = 0;
-	widget->buttonWidget.action = &cancelAction;
+	widget->buttonWidget->selectable.tab = 0;
+	widget->buttonWidget->action = &cancelAction;
 	cancelButton = widget;
 
 	screen_t *sc = oled_addScreen(screen_edit_calibration_input);
@@ -199,8 +199,8 @@ void calibration_screen_setup(screen_t *scr) {
 	s = "CANCEL";
 	strcpy(widget->displayString, s);
 	widget->reservedChars = 6;
-	widget->buttonWidget.selectable.tab = 2;
-	widget->buttonWidget.action = &cancelAction;
+	widget->buttonWidget->selectable.tab = 2;
+	widget->buttonWidget->action = &cancelAction;
 
 	widget = screen_addWidget(sc);
 	widgetDefaultsInit(widget, widget_button);
@@ -210,8 +210,8 @@ void calibration_screen_setup(screen_t *scr) {
 	s = "OK";
 	strcpy(widget->displayString, s);
 	widget->reservedChars = 6;
-	widget->buttonWidget.selectable.tab = 1;
-	widget->buttonWidget.action = &okAction;
+	widget->buttonWidget->selectable.tab = 1;
+	widget->buttonWidget->action = &okAction;
 	addSetTemperatureReachedCallback(tempReachedCallback);
 	cal_pid.Kp = systemSettings.ironTips[0].PID.Kp;
 	cal_pid.Ki = systemSettings.ironTips[0].PID.Ki;

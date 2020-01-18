@@ -134,7 +134,7 @@ struct widget_t
 		bmp_wiget_t 			*displayBmp;
 		multi_option_widget_t 	*multiOptionWidget; //48
 		comboBox_widget_t 		*comboBoxWidget; //28
-		button_widget_t 		buttonWidget; //20
+		button_widget_t 		*buttonWidget; //20
 	};
 };
 
