@@ -1,0 +1,7 @@
+#pragma once
+
+#define ADC_MEASURES_LEN (2048)
+
+#define FAKE_25_COLD_JUNGTION
+#define FAKE_SUPPLY_VOLTAGE_OK
+#define LEAVE_ONLY_IRON_MEAS
