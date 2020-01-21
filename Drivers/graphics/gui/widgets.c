@@ -11,7 +11,7 @@
 displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget) {
 	switch (widget->type) {
 		case widget_display:
-			return &widget->displayWidget;
+			return widget->displayWidget;
 			break;
 		case widget_editable:
 			return &widget->editable->inputData;
@@ -27,10 +27,10 @@ displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget) {
 editable_wiget_t * extractEditablePartFromWidget(widget_t *widget) {
 	switch (widget->type) {
 		case widget_editable:
-			return &widget->editable;
+			return widget->editable;
 			break;
 		case widget_multi_option:
-			return &widget->multiOptionWidget->editable;					
+			return &widget->multiOptionWidget->editable;
 		default:
 			return NULL;
 			break;
@@ -54,6 +54,11 @@ selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget) {
 			break;
 	}
 }
+
+#define M_MALLOC(field, type)				\
+		w->field = _malloc(sizeof(type));		\
+		memset(w->field, 0, sizeof(type) );
+
 void widgetDefaultsInit(widget_t *w, widgetType t) {
 	w->type = t;
 	w->draw = &default_widgetDraw;
@@ -65,24 +70,37 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	w->reservedChars = 5;
 	w->next_widget = NULL;
 	selectable_widget_t *sel;
+
+	w->displayWidget = NULL;
+	w->multiOptionWidget = NULL;
+	w->displayBmp = NULL;
+	w->comboBoxWidget = NULL;
+	w->buttonWidget = NULL;
+	w->editable = NULL;
 	if(t == widget_multi_option){
-		w->multiOptionWidget = _malloc(sizeof(multi_option_widget_t));//&((multi_option_widget_t){0});
-		memset(w->multiOptionWidget, 0, sizeof(multi_option_widget_t) );
+		M_MALLOC(multiOptionWidget,multi_option_widget_t);
+//		w->multiOptionWidget = _malloc(sizeof(multi_option_widget_t));//&((multi_option_widget_t){0});
+//		memset(w->multiOptionWidget, 0, sizeof(multi_option_widget_t) );
 	}else if(t == widget_editable){
-		w->editable = _malloc(sizeof(editable_wiget_t));//&((multi_option_widget_t){0});
-		memset(w->multiOptionWidget, 0, sizeof(editable_wiget_t) );
+		M_MALLOC(editable,editable_wiget_t);
+//		w->editable = _malloc(sizeof(editable_wiget_t));//&((multi_option_widget_t){0});
+//		memset(w->editable, 0, sizeof(editable_wiget_t) );
 	}else if(t == widget_bmp){
-		w->displayBmp = _malloc(sizeof(widget_bmp));//&((multi_option_widget_t){0});
-		memset(w->displayBmp, 0, sizeof(widget_bmp) );
+		M_MALLOC(displayBmp,widget_bmp);
+//		w->displayBmp = _malloc(sizeof(widget_bmp));//&((multi_option_widget_t){0});
+//		memset(w->displayBmp, 0, sizeof(widget_bmp) );
 	}else if(t == widget_combo){
-		w->comboBoxWidget = _malloc(sizeof(comboBox_widget_t));//&((multi_option_widget_t){0});
-		memset(w->comboBoxWidget, 0, sizeof(comboBox_widget_t) );
+		M_MALLOC(comboBoxWidget,comboBox_widget_t);
+//		w->comboBoxWidget = _malloc(sizeof(comboBox_widget_t));//&((multi_option_widget_t){0});
+//		memset(w->comboBoxWidget, 0, sizeof(comboBox_widget_t) );
 	}else if(t == widget_button){
-		w->buttonWidget = _malloc(sizeof(button_widget_t));//&((multi_option_widget_t){0});
-		memset(w->buttonWidget, 0, sizeof(button_widget_t) );
+		M_MALLOC(buttonWidget,button_widget_t);
+//		w->buttonWidget = _malloc(sizeof(button_widget_t));//&((multi_option_widget_t){0});
+//		memset(w->buttonWidget, 0, sizeof(button_widget_t) );
 	}else if(t == widget_display){
-		w->displayWidget = _malloc(sizeof(displayOnly_wiget_t));//&((multi_option_widget_t){0});
-		memset(w->displayWidget, 0, sizeof(displayOnly_wiget_t) );
+		M_MALLOC(displayWidget,displayOnly_wiget_t);
+//		w->displayWidget = _malloc(sizeof(displayOnly_wiget_t));//&((multi_option_widget_t){0});
+//		memset(w->displayWidget, 0, sizeof(displayOnly_wiget_t) );
 	}else{
 		w->multiOptionWidget =0;
 	}

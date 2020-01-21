@@ -114,17 +114,29 @@ typedef struct button_widget_t {
 	selectable_widget_t selectable;
 } button_widget_t;
 
+#pragma pack(push,1)
 struct widget_t
 {
-	uint8_t inverted;
+
 	char displayString[20];
-	uint8_t reservedChars;
-	uint8_t posX;
-	uint8_t posY;
+
+	struct{
+//	uint8_t reservedChars;
+//	uint8_t posX;
+//	uint8_t posY;
+//	uint8_t enabled;
+//	uint8_t inverted;
+//	widgetType type;
+	uint32_t reservedChars  :8;
+	uint32_t posX           :8;
+	uint32_t posY           :8;
+	uint32_t enabled        :1;
+	uint32_t inverted	    :1;
+	uint32_t type		    :6;
+	};
+
 	const UG_FONT *font_size;
 	widget_t *next_widget;
-	uint8_t enabled;
-	widgetType type;
 	struct screen_t *parent;
 	void (*draw)(widget_t*);
 	union {
@@ -137,6 +149,7 @@ struct widget_t
 		button_widget_t 		*buttonWidget; //20
 	};
 };
+#pragma pack(pop)
 
 displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget);
 editable_wiget_t * extractEditablePartFromWidget(widget_t *widget);
