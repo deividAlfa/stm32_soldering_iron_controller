@@ -25,13 +25,9 @@ typedef enum widgetFieldType {field_float
 	, field_uinteger16
 	, field_bmp
 	, field_string}widgetFieldType;
-typedef enum widgetType {widget_combo
-	, widget_label
-	, widget_display
-	, widget_editable
-	, widget_bmp
-	, widget_multi_option
-	, widget_button}widgetType;
+typedef enum FontType {_FONT_6X8
+	, _FONT_8X14
+	, _FONT_16X26}FontType;
 enum {screen_splash
 	, screen_main
 	, screen_settings
@@ -50,6 +46,13 @@ enum {screen_splash
 	, screen_edit_calibration_wait
 	, screen_edit_calibration_input
 	, screen_LAST};
+typedef enum widgetType {widget_combo
+	, widget_label
+	, widget_display
+	, widget_editable
+	, widget_bmp
+	, widget_multi_option
+	, widget_button}widgetType;
 
 typedef struct widget_t widget_t;
 typedef struct comboBox_item_t comboBox_item_t;
@@ -130,12 +133,14 @@ struct widget_t
 	uint32_t reservedChars  :8;
 	uint32_t posX           :8;
 	uint32_t posY           :8;
-	uint32_t enabled        :1;
-	uint32_t inverted	    :1;
-	uint32_t type		    :6;
+	uint32_t enabled        :1; //bool
+	uint32_t inverted	    :1; //bool
+	uint32_t type		    :4; //widgetType
+	uint32_t font_size		:2; //FontType
 	};
+    
 
-	const UG_FONT *font_size;
+	//const UG_FONT *font_size;
 	widget_t *next_widget;
 	struct screen_t *parent;
 	void (*draw)(widget_t*);
@@ -154,6 +159,7 @@ struct widget_t
 displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget);
 editable_wiget_t * extractEditablePartFromWidget(widget_t *widget);
 selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget);
+const UG_FONT * extractFontFromType(uint32_t type);
 void widgetDefaultsInit(widget_t *w, widgetType t);
 void default_widgetDraw(widget_t *widget);
 void default_widgetUpdate(widget_t *widget);

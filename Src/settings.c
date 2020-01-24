@@ -8,7 +8,27 @@
 #include "settings.h"
 #include <string.h>
 
-volatile systemSettings_t systemSettings = {0};
+#define PID_MIN -0.05
+//				.calADC_At_200 = 1300	,
+//				.calADC_At_300 = 2000	,
+//				.calADC_At_400 = 3000	,
+//				.PID.Kp = 0.0003		,
+//				.PID.Kd = 0				,
+//				.PID.Ki = 0.0025		,
+//				.PID.min = PID_MIN		,
+//				.PID.max = 1			,
+//				.PID.maxI = 200			,
+//				.PID.minI = -50			,
+//				.name =  "DFLT"
+
+
+systemSettings_t systemSettings = {
+		.ironTips[0 ... 9] = {
+				1300 , 2000	,3000	, 0.0003	, 0	, 0.0025	,PID_MIN,1	, 200, -50	, .name = "DFLT"
+			},
+};
+
+
 
 #define FLASH_ADDR (0x8000000|64512)/*Flash start OR'ed with the maximum amount of flash - 256 bytes*/
 //#define JBC
@@ -40,8 +60,8 @@ void restoreSettings() {
 
 }
 
-#define PID_MIN -0.05
 
+char string[] = "october";
 void resetSettings() {
 	memset( &systemSettings , 0, sizeof(systemSettings_t) );
 	systemSettings.version = SETTINGSVERSION;
@@ -74,19 +94,22 @@ void resetSettings() {
 	strcpy(systemSettings.ironTips[1].name, "010");
 #else
 	for(uint8_t x = 0; x < 10; ++x) {
-		systemSettings.ironTips[x].calADC_At_200 = 1300;
-		systemSettings.ironTips[x].calADC_At_300 = 2000;
-		systemSettings.ironTips[x].calADC_At_400 = 3000;
-		systemSettings.ironTips[x].PID.Kp = 0.0003;
-		systemSettings.ironTips[x].PID.Kd = 0;
-		systemSettings.ironTips[x].PID.Ki = 0.0025;
-		systemSettings.ironTips[x].PID.min = PID_MIN;
-		systemSettings.ironTips[x].PID.max = 1;
-		systemSettings.ironTips[x].PID.maxI = 200;
-		systemSettings.ironTips[x].PID.minI = -50;
-		strcpy(systemSettings.ironTips[0].name, "DFLT");
+		tipData a = {
+				.calADC_At_200 = 1300	,
+				.calADC_At_300 = 2000	,
+				.calADC_At_400 = 3000	,
+				.PID.Kp = 0.0003		,
+				.PID.Kd = 0				,
+				.PID.Ki = 0.0025		,
+				.PID.min = PID_MIN		,
+				.PID.max = 1			,
+				.PID.maxI = 200			,
+				.PID.minI = -50			,
+				.name =  "DFLT"
+		};
+		systemSettings.ironTips[x] = a;
 	}
-	systemSettings.currentNumberOfTips = 5;
+
 	systemSettings.currentTip = 1;
 	systemSettings.ironTips[1].calADC_At_200 = 1400;
 	systemSettings.ironTips[1].calADC_At_300 = 2000;

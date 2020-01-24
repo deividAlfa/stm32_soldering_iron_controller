@@ -258,14 +258,14 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, s);
 	widget->posX = 10;
 	widget->posY = 0;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = _FONT_8X14;
 	widget->reservedChars = 8;
 	widget->draw = &default_widgetDraw;
 	widget = screen_addWidget(scr);
 	widget->posX = 0;
 	widgetDefaultsInit(widget, widget_combo);
 	widget->posY = 17;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	comboAddItem(widget, "DEBUG3", screen_debug3);
 	comboAddItem(widget, "DEBUG", screen_debug);
 	comboAddItem(widget, "DEBUG2", screen_debug2);
@@ -292,7 +292,7 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 50;
 	w->posY = 0;
-	w->font_size = &FONT_8X14;
+	w->font_size = _FONT_8X14;
 	w->reservedChars = 3;
 
 	w = screen_addWidget(sc);
@@ -301,14 +301,14 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 30;
 	w->posY = 17;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->reservedChars = 3;
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = 55;
 	w->posY = 17;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->editable->inputData.getData = &getKp;
 	w->editable->inputData.number_of_dec = 2;
 	w->editable->inputData.type = field_uinteger16;
@@ -324,14 +324,14 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 30;
 	w->posY = 29;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->reservedChars = 3;
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = 55;
 	w->posY = 29;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->editable->inputData.getData = &getKi;
 	w->editable->inputData.number_of_dec = 2;
 	w->editable->inputData.type = field_uinteger16;
@@ -347,14 +347,14 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 30;
 	w->posY = 41;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->reservedChars = 3;
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = 55;
 	w->posY = 41;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->editable->inputData.getData = &getKd;
 	w->editable->inputData.number_of_dec = 2;
 	w->editable->inputData.type = field_uinteger16;
@@ -366,7 +366,7 @@ void settings_screen_setup(screen_t *scr) {
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 2;
 	w->posY = 56;
 	s = "SAVE";
@@ -377,7 +377,7 @@ void settings_screen_setup(screen_t *scr) {
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 90;
 	w->posY = 56;
 	s = "CANCEL";
@@ -399,7 +399,7 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 50;
 	w->posY = 0;
-	w->font_size = &FONT_8X14;
+	w->font_size = _FONT_8X14;
 	w->reservedChars = 8;
 
 	w = screen_addWidget(sc);
@@ -408,14 +408,14 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 30;
 	w->posY = 17;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->reservedChars = 6;
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = 70;
 	w->posY = 17;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->editable->inputData.getData = &getContrast_;
 	w->editable->inputData.number_of_dec = 0;
 	w->editable->inputData.type = field_uinteger16;
@@ -428,7 +428,7 @@ void settings_screen_setup(screen_t *scr) {
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 2;
 	w->posY = 56;
 	s = "SAVE";
@@ -438,7 +438,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget->action = &saveContrast;
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 90;
 	w->posY = 56;
 	s = "CANCEL";
@@ -460,7 +460,7 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 45;
 	w->posY = 0;
-	w->font_size = &FONT_8X14;
+	w->font_size = _FONT_8X14;
 	w->reservedChars = 9;
 
 	w = screen_addWidget(sc);
@@ -469,14 +469,14 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 30;
 	w->posY = 17;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->reservedChars = 6;
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = 70;
 	w->posY = 17;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->editable->inputData.getData = &getMaxPower;
 	w->editable->inputData.number_of_dec = 0;
 	w->editable->inputData.type = field_uinteger16;
@@ -490,7 +490,7 @@ void settings_screen_setup(screen_t *scr) {
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 2;
 	w->posY = 56;
 	s = "SAVE";
@@ -500,7 +500,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget->action = &savePower;
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 90;
 	w->posY = 56;
 	s = "CANCEL";
@@ -522,7 +522,7 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 50;
 	w->posY = 0;
-	w->font_size = &FONT_8X14;
+	w->font_size = _FONT_8X14;
 	w->reservedChars = 1;
 
 	w = screen_addWidget(sc);
@@ -531,7 +531,7 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 30;
 	w->posY = 17;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->reservedChars = 6;
 
 	w = screen_addWidget(sc);
@@ -540,14 +540,14 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 30;
 	w->posY = 27;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->reservedChars = 6;
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = 85;
 	w->posY = 17;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->editable->inputData.getData = &getBoostTime;
 	w->editable->inputData.number_of_dec = 0;
 	w->editable->inputData.type = field_uinteger16;
@@ -562,7 +562,7 @@ void settings_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = 85;
 	w->posY = 27;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->editable->inputData.getData = &getBoostTemp;
 	w->editable->inputData.number_of_dec = 0;
 	w->editable->inputData.type = field_uinteger16;
@@ -575,7 +575,7 @@ void settings_screen_setup(screen_t *scr) {
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 2;
 	w->posY = 56;
 	s = "SAVE";
@@ -585,7 +585,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget->action = &saveBoost;
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 90;
 	w->posY = 56;
 	s = "CANCEL";
@@ -607,7 +607,7 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 0;
 	w->posY = 0;
-	w->font_size = &FONT_8X14;
+	w->font_size = _FONT_8X14;
 	w->reservedChars = 3;
 
 	w = screen_addWidget(sc);
@@ -616,14 +616,14 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 2;
 	w->posY = 17;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->reservedChars = 3;
 	//
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = 100;
 	w->posY = 17;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->editable->inputData.getData = &getSleepTime;
 	w->editable->inputData.number_of_dec = 0;
 	w->editable->inputData.type = field_uinteger16;
@@ -640,14 +640,14 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 2;
 	w->posY = 29;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->reservedChars = 3;
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = 100;
 	w->posY = 29;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->editable->inputData.getData = &getSleepTemp;
 	w->editable->inputData.number_of_dec = 0;
 	w->editable->inputData.type = field_uinteger16;
@@ -664,14 +664,14 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 2;
 	w->posY = 41;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->reservedChars = 3;
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = 100;
 	w->posY = 41;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->editable->inputData.getData = &getStandByTime;
 	w->editable->inputData.number_of_dec = 0;
 	w->editable->inputData.type = field_uinteger16;
@@ -684,7 +684,7 @@ void settings_screen_setup(screen_t *scr) {
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 2;
 	w->posY = 56;
 	s = "SAVE";
@@ -694,7 +694,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget->action = &saveSleep;
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 90;
 	w->posY = 56;
 	s = "CANCEL";
@@ -716,14 +716,14 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 0;
 	w->posY = 0;
-	w->font_size = &FONT_8X14;
+	w->font_size = _FONT_8X14;
 	w->reservedChars = 3;
 	//
 	w = screen_addWidget(sc);
 	tipCombo = w;
 	widgetDefaultsInit(w, widget_combo);
 	w->posY = 17;
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++x) {
 		char *t = _malloc(sizeof(systemSettings.ironTips[0].name)/sizeof(systemSettings.ironTips[0].name[0]));
 		t[0] = '\0';
@@ -748,14 +748,14 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, s);
 	w->posX = 0;
 	w->posY = 0;
-	w->font_size = &FONT_8X14;
+	w->font_size = _FONT_8X14;
 	w->reservedChars = 3;
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = 30;
 	w->posY = 17;
-	w->font_size = &FONT_8X14;
+	w->font_size = _FONT_8X14;
 	w->editable->inputData.getData = &getTipStr;
 	w->editable->inputData.number_of_dec = 0;
 	w->editable->inputData.type = field_string;
@@ -768,7 +768,7 @@ void settings_screen_setup(screen_t *scr) {
 
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 2;
 	w->posY = 56;
 	s = "SAVE";
@@ -778,7 +778,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget->action = &saveTip;
 	w = screen_addWidget(sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 50;
 	w->posY = 56;
 	s = "CANCEL";
@@ -790,7 +790,7 @@ void settings_screen_setup(screen_t *scr) {
 	w = screen_addWidget(sc);
 	delTipButton = w;
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_6X8;
+	w->font_size = _FONT_6X8;
 	w->posX = 90;
 	w->posY = 56;
 	s = "DELETE";

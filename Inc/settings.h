@@ -28,7 +28,7 @@ typedef struct {
 	uint16_t setTemperature;
 } systemSettings_t;
 
-extern volatile systemSettings_t systemSettings;
+extern systemSettings_t systemSettings;
 
 void saveSettings();
 void restoreSettings();

@@ -143,7 +143,7 @@ void calibration_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, s);
 	widget->posX = 10;
 	widget->posY = 16;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = _FONT_8X14;
 	waitWidget = widget;
 
 	widget = screen_addWidget(scr);
@@ -151,12 +151,12 @@ void calibration_screen_setup(screen_t *scr) {
 	waitStr = widget->displayString;
 	widget->posX = 0;
 	widget->posY = 30;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	waitTemp = widget;
 
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->posX = 90;
 	widget->posY = 56;
 	s = "CANCEL";
@@ -179,13 +179,13 @@ void calibration_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, s);
 	widget->posX = 10;
 	widget->posY = 16;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 
 	widget = screen_addWidget(sc);
 	widgetDefaultsInit(widget, widget_editable);
 	widget->posX = 55;
 	widget->posY = 30;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = _FONT_8X14;
 	widget->editable->inputData.getData = &getMeasuredTemp;
 	widget->editable->setData = &setMeasuredTemp;
 	widget->editable->selectable.tab = 0;
@@ -193,7 +193,7 @@ void calibration_screen_setup(screen_t *scr) {
 
 	widget = screen_addWidget(sc);
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->posX = 90;
 	widget->posY = 56;
 	s = "CANCEL";
@@ -204,7 +204,7 @@ void calibration_screen_setup(screen_t *scr) {
 
 	widget = screen_addWidget(sc);
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->posX = 20;
 	widget->posY = 56;
 	s = "OK";

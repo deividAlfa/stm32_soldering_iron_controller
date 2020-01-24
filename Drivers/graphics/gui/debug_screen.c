@@ -141,7 +141,7 @@ void debug_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 1;
 	widget->posY = 0;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->displayWidget->getData = &debug_screen_getADC1_1;
 	widget->displayWidget->number_of_dec = 0;
 	widget->displayWidget->type = field_uinteger16;
@@ -151,7 +151,7 @@ void debug_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 1;
 	widget->posY = 20;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->displayWidget->getData = &debug_screen_getP;
 	widget->displayWidget->number_of_dec = 0;
 	widget->displayWidget->type = field_uinteger16;
@@ -161,7 +161,7 @@ void debug_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 30;
 	widget->posY = 20;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->displayWidget->getData = &debug_screen_getI;
 	widget->displayWidget->number_of_dec = 0;
 	widget->displayWidget->type = field_uinteger16;
@@ -171,7 +171,7 @@ void debug_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 60;
 	widget->posY = 20;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->displayWidget->getData = &debug_screen_getD;
 	widget->displayWidget->number_of_dec = 0;
 	widget->displayWidget->type = field_uinteger16;
@@ -181,7 +181,7 @@ void debug_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 1;
 	widget->posY = 30;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->displayWidget->getData = &debug_screen_getError;
 	widget->displayWidget->number_of_dec = 0;
 	widget->displayWidget->type = field_uinteger16;
@@ -191,7 +191,7 @@ void debug_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 1;
 	widget->posY = 40;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->displayWidget->getData = &debug_screen_getOutput;
 	widget->displayWidget->number_of_dec = 0;
 	widget->displayWidget->type = field_uinteger16;
@@ -211,7 +211,7 @@ void debug_screen2_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 1;
 	widget->posY = 0;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->displayWidget->getData = &debug_screen_getADC1_1;
 	widget->displayWidget->number_of_dec = 0;
 	widget->displayWidget->type = field_uinteger16;
@@ -221,7 +221,7 @@ void debug_screen2_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_editable);
 	widget->posX = 1;
 	widget->posY = 10;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->editable->inputData.getData = &debug_screen2_getDebugSetpoint;
 	widget->editable->inputData.number_of_dec = 0;
 	widget->editable->inputData.type = field_uinteger16;
@@ -235,7 +235,7 @@ void debug_screen2_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_editable);
 	widget->posX = 1;
 	widget->posY = 20;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->editable->inputData.getData = &debug_screen2_getCalcAt200;
 	widget->editable->inputData.number_of_dec = 0;
 	widget->editable->inputData.type = field_uinteger16;
@@ -249,7 +249,7 @@ void debug_screen2_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_editable);
 	widget->posX = 1;
 	widget->posY = 30;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->editable->inputData.getData = &debug_screen2_getCalcAt300;
 	widget->editable->inputData.number_of_dec = 0;
 	widget->editable->inputData.type = field_uinteger16;
@@ -263,7 +263,7 @@ void debug_screen2_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_editable);
 	widget->posX = 1;
 	widget->posY = 40;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->editable->inputData.getData = &debug_screen2_getCalcAt400;
 	widget->editable->inputData.number_of_dec = 0;
 	widget->editable->inputData.type = field_uinteger16;
@@ -275,7 +275,7 @@ void debug_screen2_setup(screen_t *scr) {
 
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->posX = 2;
 	widget->posY = 56;
 	char *s = "SAVE";
@@ -285,7 +285,7 @@ void debug_screen2_setup(screen_t *scr) {
 	widget->buttonWidget->action = &saveDebug2;
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->posX = 90;
 	widget->posY = 56;
 	s = "CANCEL";
@@ -307,7 +307,7 @@ void debug_screen3_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 1;
 	widget->posY = 0;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->displayWidget->getData = &debug_screen_get_iron;
 	widget->displayWidget->number_of_dec = 0;
 	widget->displayWidget->type = field_uinteger16;
@@ -318,7 +318,7 @@ void debug_screen3_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 1;
 	widget->posY = 10;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->displayWidget->getData = &debug_screen_get_supply;
 	widget->displayWidget->number_of_dec = 0;
 	widget->displayWidget->type = field_uinteger16;
@@ -329,7 +329,7 @@ void debug_screen3_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 1;
 	widget->posY = 20;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->displayWidget->getData = &debug_screen_get_cold_junction;
 	widget->displayWidget->number_of_dec = 0;
 	widget->displayWidget->type = field_uinteger16;
@@ -337,7 +337,7 @@ void debug_screen3_setup(screen_t *scr) {
 	widget = screen_addWidget(scr);
 
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->posX = 2;
 	widget->posY = 56;
 	char *s = "SAVE";
@@ -347,7 +347,7 @@ void debug_screen3_setup(screen_t *scr) {
 	widget->buttonWidget->action = &saveDebug3;
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8;
+	widget->font_size = _FONT_6X8;
 	widget->posX = 90;
 	widget->posY = 56;
 	s = "CANCEL";

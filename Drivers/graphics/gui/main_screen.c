@@ -153,7 +153,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 45 - 3 - 4 - 35;
 	widget->posY = 23;
-	widget->font_size = &FONT_16X26;
+	widget->font_size = _FONT_16X26;
 	widget->displayWidget->getData = &main_screen_getIronTemp10x;
 	widget->displayWidget->number_of_dec = 1;
 	widget->displayWidget->type = field_uinteger16;
@@ -165,7 +165,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 93;
 	widget->posY = 1;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = _FONT_8X14;
 	widget->displayWidget->getData = &main_screen_getIronPower;
 	widget->displayWidget->number_of_dec = 0;
 	widget->displayWidget->type = field_uinteger16;
@@ -178,7 +178,7 @@ void main_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, s);
 	widget->posX = 119;
 	widget->posY = 1;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = _FONT_8X14;
 	widget->reservedChars = 1;
 	widget->draw = &default_widgetDraw;
 
@@ -189,7 +189,7 @@ void main_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, s);
 	widget->posX = 50 + 3 * 12 -5 + 3;
 	widget->posY = 20 + 5 - 2;
-	widget->font_size = &FONT_16X26;
+	widget->font_size = _FONT_16X26;
 	widget->reservedChars = 2;
 	widget->draw = &default_widgetDraw;
 	ironTempLabelWidget = widget;
@@ -200,7 +200,7 @@ void main_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, "NO IRON");
 	widget->posX = 5;
 	widget->posY = 20 + 5 - 2;
-	widget->font_size = &FONT_16X26;
+	widget->font_size = _FONT_16X26;
 	widget->reservedChars = 7;
 	widget->draw = &default_widgetDraw;
 	noIronWidget = widget;
@@ -222,7 +222,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 95;
 	widget->posY = 50;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = _FONT_8X14;
 	widget->displayWidget->getData = &main_screen_getAmbTemp;
 	widget->displayWidget->number_of_dec = 1;
 	widget->displayWidget->type = field_uinteger16;
@@ -244,7 +244,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 50;
 	widget->posY = 50;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = _FONT_8X14;
 	widget->displayWidget->getData = &main_screen_getSupplyVoltage;
 	widget->displayWidget->number_of_dec = 1;
 	widget->displayWidget->type = field_uinteger16;
@@ -256,7 +256,7 @@ void main_screen_setup(screen_t *scr) {
 	widget->editable->selectable.processInput = (int (*)(widget_t*, RE_Rotation_t, RE_State_t *))&tempProcessInput;
 	widget->posX = 36;
 	widget->posY = 1;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = _FONT_8X14;
 	widget->editable->inputData.getData = &getTemp;
 	widget->editable->inputData.number_of_dec = 0;
 	widget->editable->inputData.type = field_uinteger16;
@@ -275,7 +275,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_multi_option);
 	widget->posX = 1;
 	widget->posY = 1;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = _FONT_8X14;
 	widget->multiOptionWidget->editable.inputData.getData = &getMode;
 	widget->multiOptionWidget->editable.inputData.number_of_dec = 0;
 	widget->multiOptionWidget->editable.inputData.type = field_uinteger16;
@@ -296,7 +296,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_multi_option);
 	widget->posX = 1;
 	widget->posY = 50;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = _FONT_8X14;
 	widget->multiOptionWidget->editable.inputData.getData = &getTip;
 	widget->multiOptionWidget->editable.inputData.number_of_dec = 0;
 	widget->multiOptionWidget->editable.inputData.type = field_uinteger16;
@@ -311,7 +311,7 @@ void main_screen_setup(screen_t *scr) {
 	widget->multiOptionWidget->numberOfOptions = systemSettings.currentNumberOfTips;
 	widget->multiOptionWidget->currentOption = 0;
 	widget->multiOptionWidget->defaultOption = 0;
-	tipsWidget = &widget->multiOptionWidget;
+	tipsWidget = widget->multiOptionWidget;
 
 }
 

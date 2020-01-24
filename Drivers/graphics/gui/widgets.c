@@ -24,6 +24,15 @@ displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget) {
 	}
 }
 
+inline const UG_FONT * extractFontFromType(uint32_t type) {
+	const UG_FONT *FONT_PTRS[3] = { &FONT_6X8, &FONT_8X14, &FONT_16X26};
+
+	if(type<0 || type>= sizeof(FONT_PTRS)/sizeof(FONT_PTRS[0]) )
+		type=0;
+
+	return FONT_PTRS[type];
+}
+
 editable_wiget_t * extractEditablePartFromWidget(widget_t *widget) {
 	switch (widget->type) {
 		case widget_editable:
@@ -63,7 +72,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	w->type = t;
 	w->draw = &default_widgetDraw;
 	w->enabled = 1;
-	w->font_size = &FONT_8X14;
+	w->font_size = _FONT_8X14;
 	w->inverted = 0;
 	w->posX = 0;
 	w->posY = 0;
@@ -183,7 +192,7 @@ void default_widgetUpdate(widget_t *widget) {
 	if(!dis)
 		return;
 	data = dis->getData();
-	UG_FontSelect(widget->font_size);
+	UG_FontSelect(extractFontFromType(widget->font_size));
 	uint16_t val_ui16;
 	char *str;
 	switch (widget->type) {
@@ -257,7 +266,7 @@ void default_widgetDraw(widget_t *widget) {
 					break;
 			}
 	}
-	UG_FontSelect(widget->font_size);
+	UG_FontSelect(extractFontFromType(widget->font_size));
 	char space[sizeof(widget->displayString)] = "           ";
 	if((widget->type != widget_label) && (extractDisplayPartFromWidget(widget)->type != field_string)) {
 		space[widget->reservedChars] = (char)'\0';
@@ -273,20 +282,20 @@ void default_widgetDraw(widget_t *widget) {
 		widget->displayString[widget->reservedChars] = (char)'\0';
 		UG_PutString(widget->posX ,widget->posY , widget->displayString);
 		if(extractSelectablePartFromWidget(widget)->state == widget_edit)
-			UG_PutChar(widget->displayString[extractEditablePartFromWidget(widget)->current_edit], widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit, widget->posY, C_BLACK, C_WHITE);
+			UG_PutChar(widget->displayString[extractEditablePartFromWidget(widget)->current_edit], widget->posX + extractFontFromType(widget->font_size)->char_width * extractEditablePartFromWidget(widget)->current_edit, widget->posY, C_BLACK, C_WHITE);
 	}
 	else
 		UG_PutString(widget->posX ,widget->posY , widget->displayString);
 	if(draw_frame) {
 		UG_DrawFrame(widget->posX - 1, widget->posY - 1,
-											widget->posX + widget->reservedChars * widget->font_size->char_width + 1,
-											widget->posY + widget->font_size->char_height -1, color);
+											widget->posX + widget->reservedChars * extractFontFromType(widget->font_size)->char_width + 1,
+											widget->posY + extractFontFromType(widget->font_size)->char_height -1, color);
 	}
 }
 
 void comboBoxDraw(widget_t *widget) {
 	uint16_t yDim = UG_GetYDim() - widget->posY;
-	uint16_t height = widget->font_size->char_height;
+	uint16_t height = extractFontFromType(widget->font_size)->char_height;
 	height += 2;
 	comboBox_item_t *item = widget->comboBoxWidget->items;
 	uint8_t scroll = 0;
@@ -297,13 +306,13 @@ void comboBoxDraw(widget_t *widget) {
 		if(item->enabled)
 			++scroll;
 	}
-	UG_FontSelect(widget->font_size);
+	UG_FontSelect(extractFontFromType(widget->font_size));
 	for(uint8_t x = 0; x < yDim / height; ++x) {
-		UG_FillFrame(0, x * height + widget->posY -1, UG_GetXDim(), x * height + widget->posY + widget->font_size->char_height, C_BLACK);
+		UG_FillFrame(0, x * height + widget->posY -1, UG_GetXDim(), x * height + widget->posY + extractFontFromType(widget->font_size)->char_height, C_BLACK);
 		if(item == widget->comboBoxWidget->currentItem) {
-			UG_DrawFrame(0, x * height + widget->posY -1, UG_GetXDim() -1, x * height + widget->posY + widget->font_size->char_height, C_WHITE);
+			UG_DrawFrame(0, x * height + widget->posY -1, UG_GetXDim() -1, x * height + widget->posY + extractFontFromType(widget->font_size)->char_height, C_WHITE);
 		}
-		UG_PutString(UG_GetXDim() / 2 - (strlen(item->text) / 2 * widget->font_size->char_width) ,x * height + widget->posY, item->text);
+		UG_PutString(UG_GetXDim() / 2 - (strlen(item->text) / 2 * extractFontFromType(widget->font_size)->char_width) ,x * height + widget->posY, item->text);
 		do {
 			item = item->next_item;
 		}while(item && !item->enabled);
@@ -326,7 +335,7 @@ uint8_t comboItemToIndex(widget_t *combo, comboBox_item_t *item) {
 int comboBoxProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t *state) {
 	uint8_t firstIndex = widget->comboBoxWidget->currentScroll;
 	uint16_t yDim = UG_GetYDim() - widget->posY;
-	uint16_t height = widget->font_size->char_height;
+	uint16_t height = extractFontFromType(widget->font_size)->char_height;
 	height += 2;
 	uint8_t maxIndex = yDim / height;
 	uint8_t lastIndex = widget->comboBoxWidget->currentScroll + maxIndex -1;
