@@ -28,10 +28,11 @@ typedef struct ironSleep_t {
 } ironSleep_t;
 
 typedef struct tipData {
+	char name[5];
 	uint16_t calADC_At_200;
 	uint16_t calADC_At_300;
 	uint16_t calADC_At_400;
-	char name[5];
+
 	pid_values_t PID;
 } tipData;
 

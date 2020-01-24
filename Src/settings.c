@@ -3,6 +3,8 @@
  *
  *  Created on: Sep 13, 2017
  *      Author: jose
+ *      Modified on: Sep 13, 2019
+ *      Author: jose
  */
 
 #include "settings.h"
@@ -21,10 +23,10 @@
 //				.PID.minI = -50			,
 //				.name =  "DFLT"
 
-
+#define DFTL_PARAMS 1300 , 2000	,3000 , { 0.0003	, 0	, 0.0025, PID_MIN, 1 , 200, -50 }
 systemSettings_t systemSettings = {
 		.ironTips[0 ... 9] = {
-				1300 , 2000	,3000	, 0.0003	, 0	, 0.0025	,PID_MIN,1	, 200, -50	, .name = "DFLT"
+				"DFLT", DFTL_PARAMS
 			},
 };
 
@@ -61,7 +63,6 @@ void restoreSettings() {
 }
 
 
-char string[] = "october";
 void resetSettings() {
 	memset( &systemSettings , 0, sizeof(systemSettings_t) );
 	systemSettings.version = SETTINGSVERSION;
@@ -72,92 +73,39 @@ void resetSettings() {
 	systemSettings.sleep.standbyTime = 5;
 	systemSettings.sleep.sleepTemperature = 100;
 	systemSettings.currentTip = 0;
-	systemSettings.currentNumberOfTips = 1;
-	strcpy(systemSettings.ironTips[0].name, "DFLT");
-#ifdef JBC
-#warning "BUILDING FOR JBC"
-	for(uint8_t x = 0; x < 10; ++x) {
-		systemSettings.ironTips[x].calADC_At_200 = 390;
-		systemSettings.ironTips[x].calADC_At_300 = 625;
-		systemSettings.ironTips[x].calADC_At_400 = 883;
-		systemSettings.ironTips[x].PID.Kp = 0.0028;
-		systemSettings.ironTips[x].PID.Ki = 0.0018;
-		systemSettings.ironTips[x].PID.Kd = 0.00007;
-		systemSettings.ironTips[x].PID.min = PID_MIN;
-		systemSettings.ironTips[x].PID.max = 1;
-		systemSettings.ironTips[x].PID.maxI = 200;
-		systemSettings.ironTips[x].PID.minI = -50;
-	}
-	systemSettings.currentNumberOfTips = 2;
+	systemSettings.setTemperature = 320;
 	systemSettings.currentTip = 1;
 	systemSettings.sleep.sleepTemperature = 150;
-	strcpy(systemSettings.ironTips[1].name, "010");
-#else
-	for(uint8_t x = 0; x < 10; ++x) {
-		tipData a = {
-				.calADC_At_200 = 1300	,
-				.calADC_At_300 = 2000	,
-				.calADC_At_400 = 3000	,
-				.PID.Kp = 0.0003		,
-				.PID.Kd = 0				,
-				.PID.Ki = 0.0025		,
-				.PID.min = PID_MIN		,
-				.PID.max = 1			,
-				.PID.maxI = 200			,
-				.PID.minI = -50			,
-				.name =  "DFLT"
-		};
-		systemSettings.ironTips[x] = a;
-	}
 
-	systemSettings.currentTip = 1;
-	systemSettings.ironTips[1].calADC_At_200 = 1400;
-	systemSettings.ironTips[1].calADC_At_300 = 2000;
-	systemSettings.ironTips[1].calADC_At_400 = 2586;
-	strcpy(systemSettings.ironTips[1].name, "B  \0ÿ");
-	systemSettings.ironTips[1].PID.max = 1;
-	systemSettings.ironTips[1].PID.min = 0;
-	systemSettings.ironTips[1].PID.Kp = 0.0040069999999999999*1;
-	systemSettings.ironTips[1].PID.Ki = 0.003106000000000002*5;
-	systemSettings.ironTips[1].PID.Kd = 0;//0.00007;
-	systemSettings.ironTips[1].PID.maxI = 200;
-	systemSettings.ironTips[1].PID.minI = -50;
+//	for(uint8_t x = 0; x < 10; ++x) {
+//		tipData a = {
+//				.calADC_At_200 = 1300	,
+//				.calADC_At_300 = 2000	,
+//				.calADC_At_400 = 3000	,
+//				.PID.Kp = 0.0003		,
+//				.PID.Kd = 0				,
+//				.PID.Ki = 0.0025		,
+//				.PID.min = PID_MIN		,
+//				.PID.max = 1			,
+//				.PID.maxI = 200			,
+//				.PID.minI = -50			,
+//				.name =  "DFLT"
+//		};
+//		systemSettings.ironTips[x] = a;
+//	}
+	int idx = 0;
+	systemSettings.ironTips[idx++] = (tipData){"B"		, 1400 , 2000	,2586 , { 0.004	, 0.0031       , 0, PID_MIN, 1 , 200, -50} };
+	systemSettings.ironTips[idx++] = (tipData){"BL"		, DFTL_PARAMS };
+	systemSettings.ironTips[idx++] = (tipData){"BC2"	, DFTL_PARAMS };
+	systemSettings.ironTips[idx++] = (tipData){"BCF1"	, DFTL_PARAMS };
+	systemSettings.ironTips[idx++] = (tipData){"D24"	, DFTL_PARAMS };
+	systemSettings.ironTips[idx++] = (tipData){"C1"		, DFTL_PARAMS };
+	systemSettings.ironTips[idx++] = (tipData){"C2"		, DFTL_PARAMS };
+	systemSettings.ironTips[idx++] = (tipData){"C4"		, DFTL_PARAMS };
+	systemSettings.ironTips[idx++] = (tipData){"ILS"	, DFTL_PARAMS };
+	systemSettings.ironTips[idx++] = (tipData){"D24"	, DFTL_PARAMS };
 
-	systemSettings.ironTips[2].calADC_At_200 = 1463;
-	systemSettings.ironTips[2].calADC_At_300 = 2313;
-	systemSettings.ironTips[2].calADC_At_400 = 3162;
-	strcpy(systemSettings.ironTips[2].name, "BC2\0ÿ");
-	systemSettings.ironTips[2].PID.max = 1;
-	systemSettings.ironTips[2].PID.min = PID_MIN;
-	systemSettings.ironTips[2].PID.Kp = 0.003056;
-	systemSettings.ironTips[2].PID.Ki = 0.0025000000000000001;
-	systemSettings.ironTips[2].PID.Kd = 0;
-	systemSettings.ironTips[2].PID.maxI = 200;
-	systemSettings.ironTips[2].PID.minI = -50;
-	systemSettings.ironTips[3].calADC_At_200 = 1268;
-	systemSettings.ironTips[3].calADC_At_300 = 1932;
-	systemSettings.ironTips[3].calADC_At_400 = 3598;
-	strcpy(systemSettings.ironTips[3].name, "D24\0ÿ");
-	systemSettings.ironTips[3].PID.max = 1;
-	systemSettings.ironTips[3].PID.min = PID_MIN;
-	systemSettings.ironTips[3].PID.Kp = 0.02;
-	systemSettings.ironTips[3].PID.Ki = 0.0025000000000000001;
-	systemSettings.ironTips[3].PID.Kd = 0;
-	systemSettings.ironTips[3].PID.maxI = 200;
-	systemSettings.ironTips[3].PID.minI = -50;
 
-	strcpy(systemSettings.ironTips[4].name, "C1  \0ÿ");
-	systemSettings.ironTips[4].calADC_At_200 = 1500;
-	systemSettings.ironTips[4].calADC_At_300 = 2300;
-	systemSettings.ironTips[4].calADC_At_400 = 3000;
-	systemSettings.ironTips[4].PID.max = 1;
-	systemSettings.ironTips[4].PID.min = PID_MIN;
-	systemSettings.ironTips[4].PID.Kp = 0.0040069999999999999*1.5;
-	systemSettings.ironTips[4].PID.Ki = 0.003106000000000002*50*10*5;
-	systemSettings.ironTips[4].PID.Kd = 0;//0.00007;
-	systemSettings.ironTips[4].PID.maxI = 200;
-	systemSettings.ironTips[4].PID.minI = -50;
+	systemSettings.currentNumberOfTips = idx;
 
-#endif
-	systemSettings.setTemperature = 320;
 }

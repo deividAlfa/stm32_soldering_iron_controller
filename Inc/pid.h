@@ -10,13 +10,14 @@
 
 #include "stm32f1xx_hal.h"
 typedef struct pid_values {
-	double max;
-	double min;
 	double Kp;
 	double Ki;
 	double Kd;
+	double max;
+	double min;
 	int16_t maxI;
 	int16_t minI;
+
 } pid_values_t;
 
 pid_values_t currentPID;
