@@ -158,6 +158,8 @@ uint16_t getSetTemperature() {
 	return currentSetTemperature;
 }
 
+
+
 double set=0;
 void handleIron(uint8_t activity) {
 	uint32_t currentTime = HAL_GetTick();
@@ -202,13 +204,23 @@ void handleIron(uint8_t activity) {
 	}
 
 
+
+	  if((getSetTemperature() == readTipTemperatureCompensated(0)) && !temperatureReachedFlag) {
+		  temperatureReached(getSetTemperature());
+		  temperatureReachedFlag = 1;
+	  }
+}
+
+void update_pwm(void){
+	  TICK;
 	  if(debugMode){
 		  set = calculatePID(debugSetPoint, iron_temp_adc_avg);
 	  }else{
 		  set = calculatePID(human2adc(tempSetPoint), iron_temp_adc_avg);
 	  }
+	  TOCK(Benchmark._06_pid_calc_dur);
 	  set = 1500.0 * set;
-  	  //set += 20* (readTipTemperatureCompensated(0)/350.0); // 40 pwm equal to 350C
+	  //set += 20* (readTipTemperatureCompensated(0)/350.0); // 40 pwm equal to 350C
 	  set = (set<0)?0:set;
 	  set = (set>1500)?1500:set;
 
@@ -220,15 +232,7 @@ void handleIron(uint8_t activity) {
 
 	  //set = 40; // equal to 350
 
-
-
-
-
 	  __HAL_TIM_SET_COMPARE(ironPWMTimer, TIM_CHANNEL_3, CONV_TO_UINT(set));
-	  if((getSetTemperature() == readTipTemperatureCompensated(0)) && !temperatureReachedFlag) {
-		  temperatureReached(getSetTemperature());
-		  temperatureReachedFlag = 1;
-	  }
 }
 
 void ironInit(TIM_HandleTypeDef *timer) {

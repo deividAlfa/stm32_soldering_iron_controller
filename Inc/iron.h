@@ -51,6 +51,7 @@ void addModeChangedCallback(currentModeChanged callback);
 void applyBoostSettings();
 void applySleepSettings();
 void handleIron(uint8_t activity);
+void update_pwm(void);
 void ironInit(TIM_HandleTypeDef *timer);
 void turnIronOn();
 void turnIronOff();

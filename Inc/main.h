@@ -113,13 +113,33 @@
 
 #define __root __attribute__((used))
 
-extern uint32_t Ts[5];
+typedef struct{
+	uint32_t _00_pwm_update_T;
+	uint32_t _01_sample_dur;
+	uint32_t _02_timer_T;
+	uint32_t _03_sample_period;
+	uint32_t _04_oled_update_dur;
+	uint32_t _05_main_calc_dur;
+	uint32_t _06_pid_calc_dur;
+	uint32_t _07_ft_integrator;
+}Ts_t;
 
-#define GET_TS(result) 					\
+extern Ts_t Benchmark;
+
+#define TICK_TOCK(result) 					\
 static uint32_t prev_tick;        \
 uint32_t tick_now = HAL_GetTick();      \
 result = tick_now - prev_tick;   \
 prev_tick = tick_now;
+
+
+#define TICK						\
+{									\
+uint32_t tick = HAL_GetTick();
+
+#define TOCK(res)					\
+	res = HAL_GetTick() - tick;		\
+}
 
   /* flawless conversions +1 error reduced to +-0.5*/
   #define UINT_DIV(x,y) (x+y/2)/y

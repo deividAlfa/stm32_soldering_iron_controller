@@ -85,25 +85,25 @@ uint16_t human2adc(uint16_t t) {
   else
     temp = map(t , 200, 300, currentTipData->calADC_At_200, currentTipData->calADC_At_300);
 
-  uint16_t tH = adc2Human(temp)- ambientTemperature;
-  if(tH == t)
-	  return temp;
-  if(tH < t) {
-	  for(uint16_t x = 0; x < 1000; ++x) {
-		  ++temp;
-		  tH = adc2Human(temp)- ambientTemperature;
-		  if(tH >= t)
-			  return temp;
-	  }
-  }
-  if(tH > t) {
-	  for(uint16_t x = 0; x < 1000; ++x) {
-		  --temp;
-		  tH = adc2Human(temp)- ambientTemperature;
-		  if(tH <= t)
-			  return temp;
-	  }
-  }
+//  uint16_t tH = adc2Human(temp)- ambientTemperature;
+//  if(tH == t)
+//	  return temp;
+//  if(tH < t) {
+//	  for(uint16_t x = 0; x < 1000; ++x) {
+//		  ++temp;
+//		  tH = adc2Human(temp)- ambientTemperature;
+//		  if(tH >= t)
+//			  return temp;
+//	  }
+//  }
+//  if(tH > t) {
+//	  for(uint16_t x = 0; x < 1000; ++x) {
+//		  --temp;
+//		  tH = adc2Human(temp)- ambientTemperature;
+//		  if(tH <= t)
+//			  return temp;
+//	  }
+//  }
   return temp;
 }
 

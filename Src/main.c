@@ -24,8 +24,8 @@ int malloc_arr[MALLOC_TRACE_LEN];
 
 /* Private variables ---------------------------------------------------------*/
 
-
-uint32_t Ts[5];
+Ts_t Benchmark;
+//uint32_t Ts[5];
 
 static uint8_t activity = 1;
 static uint32_t startOfNoActivityTime = 0;
@@ -114,10 +114,12 @@ int main(void)
 
   while (1)
   {
-	  GET_TS(Ts[3]);
+
 
 	  HAL_IWDG_Refresh(&hiwdg);
 	  if(iron_temp_measure_state == iron_temp_measure_ready) {
+		  TICK_TOCK(Benchmark._00_pwm_update_T);
+		  TICK;
 		  readTipTemperatureCompensated(1);
 
 		  if(HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin) == GPIO_PIN_RESET) {
@@ -133,15 +135,18 @@ int main(void)
 		  }
 		  handleIron(activity);
 		  iron_temp_measure_state = iron_temp_measure_idle;
+		  TOCK(Benchmark._05_main_calc_dur);
 	  }
 
 	  if(HAL_GetTick() - lastTimeDisplay > 50) {
+		  TICK;
 		  handle_buzzer();
 		  RE_Rotation_t r = RE_Get(&RE1_Data);
 		  oled_update();
 		  oled_processInput(r, &RE1_Data);
 		  oled_draw();
 		  lastTimeDisplay = HAL_GetTick();
+		  TOCK(Benchmark._04_oled_update_dur)
 	  }
   }
 

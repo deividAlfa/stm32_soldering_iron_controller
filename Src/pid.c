@@ -42,8 +42,8 @@ void resetPID() {
 }
 
 
-__attribute__((used))  INTEGRATOR_FT Ti_buf = INIT_INTEGRATOR(400, float); /* equal to ms */
-__attribute__((used))  INTEGRATOR_FT Td_buf = INIT_INTEGRATOR(10, float); /* equal to ms */
+__attribute__((used))  INTEGRATOR_FT Ti_buf = INIT_INTEGRATOR(400, float, 100); /* equal to ms */
+//__attribute__((used))  INTEGRATOR_FT Td_buf = INIT_INTEGRATOR(10, float, 10); /* equal to ms */
 __attribute__((used)) float integrator_rlt;
 
 double output;
@@ -101,7 +101,10 @@ double calculatePID( double setpoint, double pv )
     output = Pout + Iout;// + Dout;
     float res = POS(Iout)/(POS(Iout)+POS(Pout))*100.0;
     err4 +=(res<0)?1:0;
+
+    TICK;
     perc_avg = integrator_ft(res, &Ti_buf );
+    TOCK(Benchmark._07_ft_integrator);
 
     p = Pout;
     i = Iout;

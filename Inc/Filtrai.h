@@ -19,8 +19,11 @@ typedef struct{
 typedef struct{
   float (*buf_p)[1];
   const unsigned int buf_size;
+  const unsigned int update_size;
   unsigned int counter;
+  unsigned int abs_counter;
   uint8_t inited;
+  float result;
 }INTEGRATOR_FT;
 
 typedef struct{
@@ -30,11 +33,12 @@ typedef struct{
   uint8_t inited;
 }INTEGRATOR_U16;
 
-#define INIT_INTEGRATOR(size,type)						     \
+#define INIT_INTEGRATOR(size,type,update)				     \
 {            												 \
 	.buf_p		= 	 ( type(*)[1])&( type [size]){0}   		,\
 	.buf_size	= size										,\
-	.counter 	= 0											 \
+	.counter 	= 0											,\
+	.update_size = update									\
 }
 
 

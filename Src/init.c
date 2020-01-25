@@ -97,9 +97,9 @@ void MX_TIM4_Init(void)
   TIM_MasterConfigTypeDef sMasterConfig;
 
   tim4_temp_measure.Instance = TIM4;
-  tim4_temp_measure.Init.Prescaler = 6000;
+  tim4_temp_measure.Init.Prescaler = 7000;
   tim4_temp_measure.Init.CounterMode = TIM_COUNTERMODE_UP;
-  tim4_temp_measure.Init.Period = 30;
+  tim4_temp_measure.Init.Period = 40;
   tim4_temp_measure.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;//CHECK
   if (HAL_TIM_Base_Init(&tim4_temp_measure) != HAL_OK)
   {

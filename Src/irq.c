@@ -44,7 +44,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	}
 	if(htim != &tim4_temp_measure)
 		return;
-	GET_TS(Ts[0]);
+	TICK_TOCK(Benchmark._02_timer_T);
 
 	if(iron_temp_measure_state == iron_temp_measure_idle) {
 		iron_temp_measure_state = iron_temp_measure_requested;
@@ -78,7 +78,7 @@ int aleliuja;
 int err=0;
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 
-	GET_TS(Ts[2]);
+	TICK_TOCK(Benchmark._03_sample_period);
 	static uint16_t ironTempADCRollingAverage[2] = {0};
 	static int rindex = 0;
 	static int doOnce = 0;
@@ -98,7 +98,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 #else
 		HAL_ADCEx_MultiModeStop_DMA(&hadc1);
 #endif
-		Ts[4] = HAL_GetTick() - started;
+		Benchmark._01_sample_dur = HAL_GetTick() - started;
 		//__HAL_ADC_DISABLE(&hadc1);
 		//__HAL_ADC_DISABLE(&hadc2);
 
@@ -137,6 +137,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		iron_temp_measure_state = iron_temp_measure_ready;
 
 		if(getIronOn())
+			update_pwm();
 			HAL_TIM_PWM_Start(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOn();
 		}
 }
@@ -148,7 +149,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 }
 
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
-	GET_TS(Ts[1]);
 	if(hadc != &hadc1)
 		return;
 //	if(iron_temp_measure_state == iron_temp_measure_requested) {

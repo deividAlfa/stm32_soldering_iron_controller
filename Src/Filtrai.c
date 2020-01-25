@@ -34,21 +34,25 @@ int32_t integrator(int32_t sample, INTEGRATOR_INT *i)
 
 float integrator_ft(float sample, INTEGRATOR_FT *i)
 {
- float result;
  double accu=0;
- int j;
+
  (*i->buf_p)[i->counter]=sample;
  i->counter=( (i->counter)+1)%i->buf_size;
- if(i->counter == 0){
+ if(i->counter == 0 && i->inited == 0){
 	 i->inited = 1;
  }
- accu=0;
-  for(j=0; j<i->buf_size;j++){
-    accu+=(*i->buf_p)[j];
+
+  if( (i->abs_counter % (i->update_size)) ==0 ){
+	  accu=0;
+	  int j;
+	  int buf_size = (i->inited)?(i->buf_size):(i->counter);
+	  for(j=0; j<buf_size;j++){
+		accu+=(*i->buf_p)[j];
+	  }
+	  i->result= (accu)/buf_size;
   }
-  float div = (i->inited)?(i->buf_size):(i->counter);
-  result= (accu)/div;
-  return result;
+  i->abs_counter++;
+  return i->result;
 }
 
 uint16_t integrator_u16(uint16_t sample, INTEGRATOR_U16 *i)
