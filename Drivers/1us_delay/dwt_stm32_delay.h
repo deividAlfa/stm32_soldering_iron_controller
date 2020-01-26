@@ -20,7 +20,7 @@ uint32_t DWT_Delay_Init(void);
 
 /**
  * @brief  This function provides a delay (in microseconds)
- * @param  microseconds: delay in microseconds
+ * @param  microseconds: delay in microsecondse
  */
 __STATIC_INLINE void DWT_Delay_us(volatile uint32_t microseconds)
 {

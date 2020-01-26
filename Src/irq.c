@@ -63,7 +63,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		//__HAL_ADC_ENABLE(&hadc1);
 		//__HAL_ADC_ENABLE(&hadc2);
 		started = HAL_GetTick();
-		HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) adc_measures, sizeof(adc_measures)/ sizeof(uint32_t));
+		HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) adc_measures, ADC_MEASURES_LEN );
 
 	}else{
 
@@ -107,7 +107,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		//__HAL_ADC_DISABLE(&hadc1);
 		CNDTR = hadc1.DMA_Handle->Instance->CNDTR;
 
-		for(int x = 0; x < sizeof(adc_measures)/sizeof(adc_measures[0]); ++x) {
+		for(int x = 0; x < sizeof(adc_measures)/sizeof(adc_measures[0].iron); ++x) {
 			temp = adc_measures[x].iron;
 			if( adc_measures[x].iron==0) err++;
 
@@ -136,11 +136,13 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		iron_temp_adc_avg = UINT_DIV(acc, ROLLING_AVG_LEN); //minimize divide error from +-1 to +- 0.5
 		iron_temp_measure_state = iron_temp_measure_ready;
 
-		if(getIronOn())
+		if(getIronOn()){
 			update_pwm();
 			HAL_TIM_PWM_Start(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOn();
 		}
+	}
 }
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if((GPIO_Pin == ROT_ENC_BUTTON_GPIO_Pin) || (GPIO_Pin == ROT_ENC_R_Pin) || (GPIO_Pin == ROT_ENC_L_Pin)) {
 		  RE_Process(&RE1_Data);

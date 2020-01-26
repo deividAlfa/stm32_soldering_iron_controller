@@ -116,7 +116,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
     hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
     hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
     hdma_adc1.Init.Mode = DMA_CIRCULAR;
     hdma_adc1.Init.Priority = DMA_PRIORITY_HIGH;
     if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
@@ -333,7 +333,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 		/* TIM3 interrupt DeInit */
 		HAL_NVIC_DisableIRQ(TIM4_IRQn);
 		/* USER CODE BEGIN TIM3_MspDeInit 1 */
-
+	    HAL_GPIO_DeInit(T12PWM_GPIO_Port, T12PWM_Pin);
 		/* USER CODE END TIM3_MspDeInit 1 */
 	}
 	else   if(htim_base->Instance==TIM3)

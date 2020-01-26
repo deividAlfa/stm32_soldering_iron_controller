@@ -75,7 +75,7 @@ int main(void)
 	  buzzer_alarm_start();
 	  Error_Handler();
   }
-  HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) adc_measures, sizeof(adc_measures)/ sizeof(uint32_t));
+  HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) adc_measures, ADC_MEASURES_LEN );
 
   HAL_TIM_Base_Start_IT(&tim4_temp_measure);
   restoreSettings();

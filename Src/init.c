@@ -152,7 +152,7 @@ void MX_TIM3_Init(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.OCMode = TIM_OCMODE_PWM1; //TIM_OCMODE_TIMING;
   sConfigOC.Pulse = 750;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -282,6 +282,13 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(BUZZER_GPIO_Port, &GPIO_InitStruct);
+
+  HAL_GPIO_WritePin(GPIOB, T12PWM_Pin, GPIO_PIN_RESET);
+  GPIO_InitStruct.Pin = T12PWM_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PBPin PBPin */
   GPIO_InitStruct.Pin = OLED_SCL_Pin|OLED_SDA_Pin;

@@ -21,7 +21,7 @@ typedef struct {
 } adc_measures_t;
 #else
 typedef struct {
-	uint32_t iron;
+	uint16_t iron;
 //	uint32_t cold_junction;
 //	uint32_t supply;
 } adc_measures_t;
