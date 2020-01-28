@@ -11,7 +11,7 @@
 #include "init.h"
 #include "config.h"
 
-volatile adc_measures_t adc_measures[ADC_MEASURES_LEN];
+adc_measures_t adc_measures[ADC_MEASURES_LEN];
 volatile iron_temp_measure_state_t iron_temp_measure_state = iron_temp_measure_idle;
 
 
