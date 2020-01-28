@@ -63,5 +63,5 @@ void RE_SetMode(RE_State_t* data, RE_Mode_t mode);
 RE_Rotation_t RE_Get(RE_State_t* data);
 void RE_Process(RE_State_t* data);
 
-
+extern RE_State_t RE1_Data;
 #endif /* GENERALIO_ROTARY_ENCODER_H_ */

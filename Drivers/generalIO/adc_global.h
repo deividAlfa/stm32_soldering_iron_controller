@@ -10,6 +10,10 @@
 
 #include "stm32f1xx_hal.h"
 #include "main.h"
+
+extern ADC_HandleTypeDef hadc1;
+extern ADC_HandleTypeDef hadc2;
+
 void MX_ADC2_Init(ADC_HandleTypeDef * hadc2);
 void MX_ADC1_Init(ADC_HandleTypeDef * hadc1);
 
