@@ -225,7 +225,7 @@ void update_pwm(void){
 	  set = (set>1500)?1500:set;
 
 	  if(isIronOn)
-		  currentIronPower = set/1500.0 * 100;
+		  currentIronPower = UINT_DIV(set*100.0, 1500);
 	  else
 		  currentIronPower = 0;
 	  //set = 1500.0 *(set * 100.0 -12.0388878376)/102.72647713;

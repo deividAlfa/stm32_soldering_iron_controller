@@ -10,11 +10,11 @@
 
 #include "stm32f1xx_hal.h"
 typedef struct pid_values {
-	double Kp;
-	double Ki;
-	double Kd;
-	double max;
-	double min;
+	float Kp;
+	float Ki;
+	float Kd;
+	float max;
+	float min;
 	int16_t maxI;
 	int16_t minI;
 
@@ -23,15 +23,15 @@ typedef struct pid_values {
 pid_values_t currentPID;
 
 void setupPIDFromStruct();
-void setupPID(double max, double min, double Kp, double Kd, double Ki, int16_t _minI, int16_t _maxI );
-double calculatePID( double setpoint, double pv );
+void setupPID(float max, float min, float Kp, float Kd, float Ki, int16_t _minI, int16_t _maxI );
+float calculatePID( float setpoint, float pv );
 void resetPID();
-double getError();
-double getIntegral();
-double getPID_D();
-double getPID_P();
-double getPID_I();
-double getOutput();
-double getPID_SetPoint();
-double getPID_PresentValue();
+float getError();
+float getIntegral();
+float getPID_D();
+float getPID_P();
+float getPID_I();
+float getOutput();
+float getPID_SetPoint();
+float getPID_PresentValue();
 #endif /* PID_H_ */

@@ -65,6 +65,7 @@ float readTipTemperatureCompensated(uint8_t new){
 void setCurrentTip(uint8_t tip) {
 	currentTipData = &systemSettings.ironTips[tip];
 	currentPID = currentTipData->PID;
+	setupPIDFromStruct();
 }
 
 tipData * getCurrentTip() {
