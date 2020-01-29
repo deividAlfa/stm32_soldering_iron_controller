@@ -54,5 +54,6 @@ int32_t integrator_int(int32_t sample, INTEGRATOR_INT *i);
 float integrator_ft(float sample, INTEGRATOR_FT *i);
 uint16_t integrator_u16(uint16_t sample, INTEGRATOR_U16 *i);
 uint8_t isavgof5(int32_t data, ISAVGOF5 *i);
+uint16_t arr_u16_avg(uint16_t* arr, uint16_t len);
 
 #endif /* FILTRAI_H_ */

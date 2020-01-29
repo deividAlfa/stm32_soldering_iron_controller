@@ -4,14 +4,13 @@
 #include "init.h"
 #include "adc_global.h"
 #include "iron.h"
-#include "string.h"
-#include "config.h"
+#include "string.h" //memset
+#include "filtrai.h"
 
-volatile int samples_dumped, CNDTR;
-uint32_t tick_dt;
+volatile int CNDTR;
+
 volatile uint16_t iron_temp_adc_avg = 0;
 
-#define ADC_MEASURE_DELAY	0
 
 inline void PWM_TIM3_PULSE(TIM_HandleTypeDef *htim){
 
@@ -39,30 +38,8 @@ void START_MEASURE(TIM_HandleTypeDef *htim){
 }
 
 
-#define FIFO_LEN 			(sizeof(adc_measures)/sizeof(adc_measures[0]))
-#define ROLLING_AVG_LEN 	(sizeof(ironTempADCRollingAverage)/sizeof(ironTempADCRollingAverage[0]))
-int aleliuja;
-int err=0;
 
 
-uint16_t arr_u16_avg(uint16_t* arr, uint16_t len){
-	uint32_t acc = 0;
-	uint16_t max = 0;
-	uint16_t min = 0xFFFF;
-	uint16_t temp;
-	uint16_t result;
-	for(int x = 0; x < len; x++) {
-		temp = *arr++;
-		acc += temp;
-		if(temp > max)
-			max = temp;
-		if(temp < min)
-			min = temp;
-	}
-
-	result = UINT_DIV( (acc - min - max) , len-2);
-	return result;
-}
 
 void PROCESS_MEASUREMENT_DATA(ADC_HandleTypeDef *htim){
 
