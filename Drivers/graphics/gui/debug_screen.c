@@ -23,7 +23,7 @@ static void * debug_screen_getADC1_1() {
 	return &temp;
 }
 static void * debug_screen_get_iron() {
-	temp = adc_measures[0].iron;
+	temp = adc_measures.iron[0];
 	return &temp;
 }
 

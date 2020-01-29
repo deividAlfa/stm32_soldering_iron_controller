@@ -24,15 +24,16 @@ typedef struct {
 	uint32_t supply;
 } adc_measures_t;
 #else
+
 typedef struct {
-	uint16_t iron;
+	uint16_t iron[ADC_MEASURES_LEN];
 //	uint32_t cold_junction;
 //	uint32_t supply;
 } adc_measures_t;
 #endif
 
 
-extern adc_measures_t adc_measures[ADC_MEASURES_LEN];
+extern adc_measures_t adc_measures;
 
 typedef enum {iron_temp_measure_idle
 	, iron_temp_measure_pwm_stopped
