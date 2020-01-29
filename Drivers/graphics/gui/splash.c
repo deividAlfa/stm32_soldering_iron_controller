@@ -23,7 +23,7 @@ void splash_setup(screen_t * scr) {
 
 static int splash_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	if(HAL_GetTick() - splash_time > SPLASH_TIMEOUT)
-		return screen_debug3;
+		return screen_main; //screen_debug3;
 	return -1;
 }
 
