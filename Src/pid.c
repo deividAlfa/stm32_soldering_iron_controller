@@ -53,7 +53,7 @@ float Pout;
 float perc_avg;
 int err4=0;
 
-#define POS(x) ((x<0)?-x:x )
+
 float calculatePID( float setpoint, float pv )
 {
 	mset = setpoint;
@@ -104,7 +104,7 @@ float calculatePID( float setpoint, float pv )
 
     // Calculate total output
     output = Pout + Iout;// + Dout;
-    float res = POS(Iout)/(POS(Iout)+POS(Pout))*100.0;
+    float res = ABS(Iout)/(ABS(Iout)+ABS(Pout))*100.0;
     err4 +=(res<0)?1:0;
 
     TICK;

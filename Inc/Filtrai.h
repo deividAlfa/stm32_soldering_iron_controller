@@ -9,6 +9,9 @@
 #include "main.h"
 #include "stdint.h"
 
+#define ABS(x) (( (x)<0)? -(x):(x))
+#define POS(x) (( (x)<0)?  0 : (x))
+
 typedef struct{
   int (*buf_p)[1];
   const unsigned int buf_size;
@@ -55,5 +58,9 @@ float integrator_ft(float sample, INTEGRATOR_FT *i);
 uint16_t integrator_u16(uint16_t sample, INTEGRATOR_U16 *i);
 uint8_t isavgof5(int32_t data, ISAVGOF5 *i);
 uint16_t arr_u16_avg(uint16_t* arr, uint16_t len);
+
+void replace_zeros_with_neighbours_u8(uint8_t* arr, uint16_t len, uint8_t* out, uint16_t init_neighbour);
+void arr_find_vals_u8(uint8_t* arr, uint16_t len, uint16_t val, uint8_t* out, uint16_t* out_len);
+uint16_t arr_u16_avg_with_u8_ref(uint16_t* arr, uint16_t len, uint8_t* ref, uint8_t ref_valid_val);
 
 #endif /* FILTRAI_H_ */

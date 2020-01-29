@@ -132,3 +132,72 @@ uint16_t arr_u16_avg(uint16_t* arr, uint16_t len){
 	result = UINT_DIV( (acc - min - max) , len-2);
 	return result;
 }
+
+uint16_t arr_u16_avg_with_u8_ref(uint16_t* arr, uint16_t len, uint8_t* ref, uint8_t ref_valid_val){
+	uint32_t acc = 0;
+	uint16_t max = 0;
+	uint16_t min = 0xFFFF;
+	uint16_t temp;
+	uint16_t result;
+	uint16_t acc_len =0;
+	for(int x = 0; x < len; x++) {
+		temp = *arr++;
+			if(*ref++ == ref_valid_val){
+				acc += temp;
+				acc_len++;
+				if(temp > max)
+					max = temp;
+				if(temp < min)
+					min = temp;
+			}
+	}
+	if(acc_len>10){
+		result = UINT_DIV( (acc - min - max) , acc_len-2);
+	}else{
+		result = UINT_DIV( acc , acc_len);
+	}
+	return result;
+}
+
+void replace_zeros_with_neighbours_u8(uint8_t* arr, uint16_t len, uint8_t* out, uint16_t init_neighbour){
+	uint16_t neighbour = init_neighbour;
+	uint16_t tmp;
+
+	for(int x = 0; x < len; x++) {
+		tmp = *arr++;
+		if(tmp>0 && tmp != neighbour){
+			neighbour = tmp;
+		}
+		*out++ = neighbour;
+	}
+}
+
+void arr_find_vals_u8(uint8_t* arr, uint16_t len, uint16_t val, uint8_t* out, uint16_t* out_len){
+
+	uint16_t tmp;
+	uint16_t out_idx = 0;
+	for(int x = 0; x < len; x++) {
+		tmp = *arr++;
+		if(tmp == val){
+			*out++ = tmp;
+			out_idx++;
+		}
+	}
+	*out_len = out_idx;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
