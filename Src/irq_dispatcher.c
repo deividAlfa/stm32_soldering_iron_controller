@@ -19,23 +19,28 @@ struct{
 inline void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 		if(htim == &tim3_pwm ){
 			tim3_stats.pulse_cnt ++;
-			PWM_TIM3_PULSE(htim);
+			flawless_iron_off_cb(htim);
 		}
 	}
 
 inline void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if(htim == &tim3_pwm ){
 		tim3_stats.elapsed_cnt++;
-		PWM_TIM3_RESET(htim);
+		flawless_iron_on_cb(htim);
 	}
+
 
 	if(htim == &tim4_temp_measure){
 		if(iron_temp_measure_state == iron_temp_measure_idle) {
-			START_MEASURE(htim);
+#ifndef FLAWLESS_MEAS
+			measure_start_blocking_mode(htim);
+#endif
 			iron_temp_measure_state = iron_temp_measure_started;
+
 			started = HAL_GetTick();
 		}
 	}
+
 
 	TICK_TOCK(Benchmark._02_timer_T);
 }
@@ -47,8 +52,12 @@ inline void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 	if(hadc == &hadc1){
 		TICK_TOCK(Benchmark._03_sample_period);
 		if(iron_temp_measure_state == iron_temp_measure_started){
-			PROCESS_MEASUREMENT_DATA(hadc);
-			UPDATE_PWM_TURN_ON();
+#ifdef FLAWLESS_MEAS
+			flawless_adc_process(hadc);
+#else
+			blocking_mode_adc_process(hadc);
+#endif
+
 			iron_temp_measure_state = iron_temp_measure_ready;
 			Benchmark._01_sample_dur = HAL_GetTick() - started;
 		}
