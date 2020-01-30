@@ -59,8 +59,8 @@ uint16_t integrator_u16(uint16_t sample, INTEGRATOR_U16 *i);
 uint8_t isavgof5(int32_t data, ISAVGOF5 *i);
 uint16_t arr_u16_avg(uint16_t* arr, uint16_t len);
 
-void replace_zeros_with_neighbours_u8(uint8_t* arr, uint16_t len, uint8_t* out, uint16_t init_neighbour);
+void replace_ignored_val_by_neighbours(int8_t ignored_val, int8_t* arr, uint16_t len, int8_t* out);
 void arr_find_vals_u8(uint8_t* arr, uint16_t len, uint16_t val, uint8_t* out, uint16_t* out_len);
-uint16_t arr_u16_avg_with_u8_ref(uint16_t* arr, uint16_t len, uint8_t* ref, uint8_t ref_valid_val);
+uint16_t arr_calc_avgU16_when_ref_value_is(uint16_t* arr, uint16_t len, int8_t* ref, uint8_t ref_valid_val);
 
 #endif /* FILTRAI_H_ */

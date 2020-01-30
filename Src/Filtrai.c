@@ -133,7 +133,7 @@ uint16_t arr_u16_avg(uint16_t* arr, uint16_t len){
 	return result;
 }
 
-uint16_t arr_u16_avg_with_u8_ref(uint16_t* arr, uint16_t len, uint8_t* ref, uint8_t ref_valid_val){
+uint16_t arr_calc_avgU16_when_ref_value_is(uint16_t* arr, uint16_t len, int8_t* ref, uint8_t ref_valid_val){
 	uint32_t acc = 0;
 	uint16_t max = 0;
 	uint16_t min = 0xFFFF;
@@ -159,13 +159,14 @@ uint16_t arr_u16_avg_with_u8_ref(uint16_t* arr, uint16_t len, uint8_t* ref, uint
 	return result;
 }
 
-void replace_zeros_with_neighbours_u8(uint8_t* arr, uint16_t len, uint8_t* out, uint16_t init_neighbour){
-	uint16_t neighbour = init_neighbour;
-	uint16_t tmp;
+void replace_ignored_val_by_neighbours(int8_t ignored_val, int8_t* arr, uint16_t len, int8_t* out){
+	int8_t neighbour = ignored_val;
+	int8_t tmp;
 
 	for(int x = 0; x < len; x++) {
 		tmp = *arr++;
-		if(tmp>0 && tmp != neighbour){
+		if(tmp!=ignored_val && tmp != neighbour){
+			/* new neighbour */
 			neighbour = tmp;
 		}
 		*out++ = neighbour;

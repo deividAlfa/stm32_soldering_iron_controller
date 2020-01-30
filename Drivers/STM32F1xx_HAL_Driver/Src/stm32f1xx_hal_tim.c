@@ -2751,8 +2751,12 @@ HAL_StatusTypeDef HAL_TIM_Encoder_Stop_DMA(TIM_HandleTypeDef *htim, uint32_t Cha
   */
 
 volatile unsigned int cc[4]={0};
+volatile int CNDTR;
+extern ADC_HandleTypeDef hadc1;
 void HAL_TIM_IRQHandler(TIM_HandleTypeDef *htim)
 {
+  CNDTR = hadc1.DMA_Handle->Instance->CNDTR; /* CNDTR has lag? */
+
   /* Capture compare 1 event */
   if(__HAL_TIM_GET_FLAG(htim, TIM_FLAG_CC1) != RESET)
   {

@@ -11,6 +11,7 @@
 #include "tempsensors.h"
 #include "settings.h"
 #include "buzzer.h"
+#include "init.h"
 
 static iron_mode_t currentMode = mode_standby;
 static uint32_t currentModeTimer = 0;
@@ -211,6 +212,12 @@ void handleIron(uint8_t activity) {
 	  }
 }
 
+#ifdef FLAWLESS_MEAS
+	#define POWER_LIMIT_PERC 90.0	/* iron is turned on all the time */
+#else
+	#define POWER_LIMIT_PERC 100.0 /* but iron is turned off ~50 % of time */
+#endif
+
 void update_pwm(void){
 	  TICK;
 	  if(debugMode){
@@ -219,18 +226,15 @@ void update_pwm(void){
 		  set = calculatePID(human2adc(tempSetPoint), iron_temp_adc_avg);
 	  }
 	  TOCK(Benchmark._06_pid_calc_dur);
-	  set = 1500.0 * set;
+	  set = PWM_TIM_PERDIO * set;
 	  //set += 20* (readTipTemperatureCompensated(0)/350.0); // 40 pwm equal to 350C
 	  set = (set<0)?0:set;
-	  set = (set>1500)?1500:set;
+	  set = (set>PWM_TIM_PERDIO)?PWM_TIM_PERDIO:set;
 
 	  if(isIronOn)
-		  currentIronPower = UINT_DIV(set*100.0, 1500);
+		  currentIronPower = UINT_DIV(set*POWER_LIMIT_PERC, PWM_TIM_PERDIO);
 	  else
 		  currentIronPower = 0;
-	  //set = 1500.0 *(set * 100.0 -12.0388878376)/102.72647713;
-
-	  //set = 40; // equal to 350
 
 	  __HAL_TIM_SET_COMPARE(ironPWMTimer, TIM_CHANNEL_3, CONV_TO_UINT(set));
 }
