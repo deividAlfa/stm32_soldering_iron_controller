@@ -194,15 +194,16 @@ uint16_t arr_set_zeros_above_threshold(uint16_t *src, uint16_t len, uint16_t thr
 	return zeroed;
 }
 
-uint16_t arr_rem_selected_val(uint16_t selected_val, uint16_t *src, uint16_t len ){
+uint16_t arr_trunctate_val(uint16_t selected_val, uint16_t *src, uint16_t len ){
 	uint16_t new_size = 0;
 	uint16_t tmp;
 	uint16_t* dst = src;
 
 	for(int i = 0; i < len; i++) {
 		tmp = * (src + i);
-		if( tmp == selected_val){
+		if( tmp != selected_val){
 			*dst++ = tmp;
+			new_size++;
 		}
 	}
 	return new_size;

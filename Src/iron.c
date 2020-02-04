@@ -213,7 +213,7 @@ void handleIron(uint8_t activity) {
 }
 
 #ifdef FLAWLESS_MEAS
-	#define POWER_LIMIT_PERC 90.0	/* iron is turned on all the time */
+	#define POWER_LIMIT_PERC 70.0	/* iron is turned on all the time */
 #else
 	#define POWER_LIMIT_PERC 100.0 /* but iron is turned off ~50 % of time */
 #endif
@@ -228,7 +228,7 @@ void update_pwm(void){
 	  TOCK(Benchmark._06_pid_calc_dur);
 	  set = PWM_TIM_PERDIO * set;
 	  //set += 20* (readTipTemperatureCompensated(0)/350.0); // 40 pwm equal to 350C
-	  set = (set<0)?0:set;
+	  set = (set<1)?1:set;
 	  set = (set>PWM_TIM_PERDIO)?PWM_TIM_PERDIO:set;
 
 	  if(isIronOn)
@@ -236,7 +236,7 @@ void update_pwm(void){
 	  else
 		  currentIronPower = 0;
 
-	  __HAL_TIM_SET_COMPARE(ironPWMTimer, TIM_CHANNEL_3, CONV_TO_UINT(set));
+	  __HAL_TIM_SET_COMPARE(ironPWMTimer, TIM_CHANNEL_3, CONV_TO_UINT(currentIronPower));
 }
 
 void ironInit(TIM_HandleTypeDef *timer) {
