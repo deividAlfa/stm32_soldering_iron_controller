@@ -19,21 +19,21 @@ struct{
 inline void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 		if(htim == &tim3_pwm ){
 			tim3_stats.pulse_cnt ++;
-			flawless_iron_off_cb(htim);
+			tim3_pulseFinishCb(htim);
 		}
 	}
 
 inline void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if(htim == &tim3_pwm ){
 		tim3_stats.elapsed_cnt++;
-		flawless_iron_on_cb(htim);
+		tim3_PeriodicElapsedCb(htim);
 	}
 
 
 	if(htim == &tim4_temp_measure){
 		if(iron_temp_measure_state == iron_temp_measure_idle) {
 #ifndef FLAWLESS_MEAS
-			measure_start_blocking_mode(htim);
+			tim4_PeriodElapsedCallback(htim);
 #endif
 			iron_temp_measure_state = iron_temp_measure_started;
 
@@ -53,9 +53,9 @@ inline void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 		TICK_TOCK(Benchmark._03_sample_period);
 		if(iron_temp_measure_state == iron_temp_measure_started){
 #ifdef FLAWLESS_MEAS
-			flawless_adc_process(hadc);
+			flawless_adc_ConvCpltCb(hadc);
 #else
-			blocking_mode_adc_process(hadc);
+			adc_ConvCpltCb(hadc);
 #endif
 
 			iron_temp_measure_state = iron_temp_measure_ready;

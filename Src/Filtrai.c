@@ -115,6 +115,7 @@ uint8_t isavgof5(int32_t data, ISAVGOF5 *i){
 }
 
 uint16_t arr_u16_avg(uint16_t* arr, uint16_t len){
+
 	uint32_t acc = 0;
 	uint16_t max = 0;
 	uint16_t min = 0xFFFF;
@@ -133,59 +134,133 @@ uint16_t arr_u16_avg(uint16_t* arr, uint16_t len){
 	return result;
 }
 
-uint16_t arr_calc_avgU16_when_ref_value_is(uint16_t* arr, uint16_t len, int8_t* ref, uint8_t ref_valid_val){
-	uint32_t acc = 0;
-	uint16_t max = 0;
-	uint16_t min = 0xFFFF;
-	uint16_t temp;
-	uint16_t result;
-	uint16_t acc_len =0;
-	for(int x = 0; x < len; x++) {
-		temp = *arr++;
-			if(*ref++ == ref_valid_val){
-				acc += temp;
-				acc_len++;
-				if(temp > max)
-					max = temp;
-				if(temp < min)
-					min = temp;
-			}
-	}
-	if(acc_len>10){
-		result = UINT_DIV( (acc - min - max) , acc_len-2);
-	}else{
-		result = UINT_DIV( acc , acc_len);
-	}
-	return result;
-}
-
-void replace_ignored_val_by_neighbours(int8_t ignored_val, int8_t* arr, uint16_t len, int8_t* out){
-	int8_t neighbour = ignored_val;
-	int8_t tmp;
-
-	for(int x = 0; x < len; x++) {
-		tmp = *arr++;
-		if(tmp!=ignored_val && tmp != neighbour){
-			/* new neighbour */
-			neighbour = tmp;
-		}
-		*out++ = neighbour;
-	}
-}
-
-void arr_find_vals_u8(uint8_t* arr, uint16_t len, uint16_t val, uint8_t* out, uint16_t* out_len){
+uint16_t arr_set_zeros_above_threshold(uint16_t *src, uint16_t len, uint16_t thr, uint16_t rising_edge_dur, uint16_t falling_edge_dur){
 
 	uint16_t tmp;
-	uint16_t out_idx = 0;
-	for(int x = 0; x < len; x++) {
-		tmp = *arr++;
-		if(tmp == val){
-			*out++ = tmp;
-			out_idx++;
+	uint16_t prev_tmp;
+	uint16_t edge;
+	uint16_t* dst;
+	uint16_t zeroed = 0;
+
+	if(src == NULL || len < 2 ){
+		return 0;
+	}
+
+	edge = 0;
+	prev_tmp = *src;
+	/* find falling edge */
+	for(int i = 1; i < len; i++) {
+		dst = src + i; /* array forward search */
+		tmp = *dst;
+
+		edge = (tmp < thr && prev_tmp >= thr && edge == 0)?falling_edge_dur:0;
+
+		if(edge){
+			edge--;
+			zeroed++;
+			*dst = 0;
+		}
+		prev_tmp = tmp;
+	}
+
+	edge = 0;
+	prev_tmp = *(src+(len-1));
+	/* find rising edge */
+	for(int i = 1; i < len; i++) {
+		dst = src + (len-1) - i; /* array backwards search */
+		tmp = *dst;
+
+		edge = (tmp < thr && prev_tmp >= thr && edge == 0)?rising_edge_dur:0;
+
+		if(edge){
+			edge--;
+			zeroed++;
+			*dst = 0;
+		}
+		prev_tmp = tmp;
+	}
+
+	/* above thr search */
+	for(int i = 0; i < len; i++) {
+		dst = src + i;
+		tmp = *dst;
+
+		if(tmp >= thr){
+			zeroed++;
+			*dst = 0;
 		}
 	}
-	*out_len = out_idx;
+
+	return zeroed;
 }
+
+uint16_t arr_rem_selected_val(uint16_t selected_val, uint16_t *src, uint16_t len ){
+	uint16_t new_size = 0;
+	uint16_t tmp;
+	uint16_t* dst = src;
+
+	for(int i = 0; i < len; i++) {
+		tmp = * (src + i);
+		if( tmp == selected_val){
+			*dst++ = tmp;
+		}
+	}
+	return new_size;
+}
+
+//uint16_t arr_calc_avgU16_when_ref_value_is(uint16_t* arr, uint16_t len, int8_t* ref, uint8_t ref_valid_val){
+//	uint32_t acc = 0;
+//	uint16_t max = 0;
+//	uint16_t min = 0xFFFF;
+//	uint16_t temp;
+//	uint16_t result;
+//	uint16_t acc_len =0;
+//	for(int x = 0; x < len; x++) {
+//		temp = *arr++;
+//			if(*ref++ == ref_valid_val){
+//				acc += temp;
+//				acc_len++;
+//				if(temp > max)
+//					max = temp;
+//				if(temp < min)
+//					min = temp;
+//			}
+//	}
+//	if(acc_len>10){
+//		result = UINT_DIV( (acc - min - max) , acc_len-2);
+//	}else{
+//		result = UINT_DIV( acc , acc_len);
+//	}
+//	return result;
+//}
+//
+//void replace_ignored_val_by_neighbours(int8_t ignored_val, int8_t* arr, uint16_t len, int8_t* out){
+//	int8_t neighbour = ignored_val;
+//	int8_t tmp;
+//
+//	for(int x = 0; x < len; x++) {
+//		tmp = *arr++;
+//		if(tmp!=ignored_val && tmp != neighbour){
+//			/* new neighbour */
+//			neighbour = tmp;
+//		}
+//		*out++ = neighbour;
+//	}
+//}
+//
+//void arr_find_vals_u8(uint8_t* arr, uint16_t len, uint16_t val, uint8_t* out, uint16_t* out_len){
+//
+//	uint16_t tmp;
+//	uint16_t out_idx = 0;
+//	for(int x = 0; x < len; x++) {
+//		tmp = *arr++;
+//		if(tmp == val){
+//			*out++ = tmp;
+//			out_idx++;
+//		}
+//	}
+//	*out_len = out_idx;
+//}
 
 
 
