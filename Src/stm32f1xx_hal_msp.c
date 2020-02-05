@@ -333,7 +333,9 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 		/* TIM3 interrupt DeInit */
 		HAL_NVIC_DisableIRQ(TIM4_IRQn);
 		/* USER CODE BEGIN TIM3_MspDeInit 1 */
+#ifndef FLAWLESS_MEAS
 	    HAL_GPIO_DeInit(T12PWM_GPIO_Port, T12PWM_Pin);
+#endif  
 		/* USER CODE END TIM3_MspDeInit 1 */
 	}
 	else   if(htim_base->Instance==TIM3)
