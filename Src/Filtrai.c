@@ -152,9 +152,14 @@ uint16_t arr_set_zeros_above_threshold(uint16_t *src, uint16_t len, uint16_t thr
 	for(int i = 1; i < len; i++) {
 		dst = src + i; /* array forward search */
 		tmp = *dst;
-
-		edge = (tmp < thr && prev_tmp >= thr && edge == 0)?falling_edge_dur:0;
-
+                
+                if(edge && tmp>=thr){
+                    edge = 0;                    
+                }
+                
+                if(!edge){
+                    edge = (tmp < thr && prev_tmp >= thr && edge == 0)?falling_edge_dur:0;
+                }
 		if(edge){
 			edge--;
 			zeroed++;
@@ -170,8 +175,14 @@ uint16_t arr_set_zeros_above_threshold(uint16_t *src, uint16_t len, uint16_t thr
 		dst = src + (len-1) - i; /* array backwards search */
 		tmp = *dst;
 
-		edge = (tmp < thr && prev_tmp >= thr && edge == 0)?rising_edge_dur:0;
-
+                if(edge && tmp>=thr){
+                    edge = 0;                    
+                }
+                
+                if(!edge){
+                    edge = (tmp < thr && prev_tmp >= thr && edge == 0)?rising_edge_dur:0;
+                }
+                
 		if(edge){
 			edge--;
 			zeroed++;
@@ -194,7 +205,7 @@ uint16_t arr_set_zeros_above_threshold(uint16_t *src, uint16_t len, uint16_t thr
 	return zeroed;
 }
 
-uint16_t arr_trunctate_val(uint16_t selected_val, uint16_t *src, uint16_t len ){
+uint16_t arr_rem_selected_val(uint16_t selected_val, uint16_t *src, uint16_t len ){
 	uint16_t new_size = 0;
 	uint16_t tmp;
 	uint16_t* dst = src;
@@ -203,11 +214,14 @@ uint16_t arr_trunctate_val(uint16_t selected_val, uint16_t *src, uint16_t len ){
 		tmp = * (src + i);
 		if( tmp != selected_val){
 			*dst++ = tmp;
-			new_size++;
+                        new_size++;
 		}
 	}
+        
+    memset( (uint8_t*)dst,0,(len-new_size)*2);
 	return new_size;
 }
+
 
 //uint16_t arr_calc_avgU16_when_ref_value_is(uint16_t* arr, uint16_t len, int8_t* ref, uint8_t ref_valid_val){
 //	uint32_t acc = 0;

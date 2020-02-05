@@ -32,11 +32,14 @@ void flawless_adc_ConvCpltCb(ADC_HandleTypeDef *htim){
 
 		uint16_t tmp_arr[ADC_HISTORY_LEN];
 		memcpy(&tmp_arr[0],&adc_measures.iron[ADC_MEASURES_LEN-ADC_HISTORY_LEN-1], ADC_HISTORY_LEN*sizeof(tmp_arr[0]));
-
 		arr_set_zeros_above_threshold(&adc_measures.iron[0],ADC_MEASURES_LEN+ADC_HISTORY_LEN, 4000, 10, 30 );
+		new_len = arr_rem_selected_val(0, &adc_measures.iron[ADC_HISTORY_LEN],ADC_MEASURES_LEN);
 
-		new_len = arr_trunctate_val(0, &adc_measures.iron[ADC_HISTORY_LEN],ADC_MEASURES_LEN);
-		iron_temp_adc_avg = arr_u16_avg(&adc_measures.iron[ADC_HISTORY_LEN], new_len);
+		if(new_len <=2){
+			iron_temp_adc_avg = 4055;
+		}else{
+			iron_temp_adc_avg = arr_u16_avg(&adc_measures.iron[ADC_HISTORY_LEN], new_len);
+		}
 
 		memcpy(&adc_measures.iron[0], &tmp_arr[0], ADC_HISTORY_LEN*sizeof(tmp_arr[0]));
 

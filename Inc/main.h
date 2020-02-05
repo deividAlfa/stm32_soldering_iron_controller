@@ -143,15 +143,18 @@ uint32_t tick = HAL_GetTick();
 
   /* flawless conversions +1 error reduced to +-0.5*/
   //#define UINT_DIV(x,y) (x+y/2)/y
-inline uint16_t UINT_DIV(uint16_t a,uint16_t b){
-	if(b==0){
-		return 0;
-	}
+//inline uint16_t UINT_DIV(uint16_t a,uint16_t b){
+//	if(b==0){
+//		return 0;
+//	}
+//
+//	return (a+b/2)/b;
+//
+//}
 
-	return (a+b/2)/b;
 
-}
-  #define CONV_TO_UINT(ft) (unsigned int)(ft+0.5)
+#define UINT_DIV(x,y) ((x+y/2)/y)
+#define CONV_TO_UINT(ft) (unsigned int)(ft+0.5)
 
 #define MALLOC_TRACE_LEN 100
 extern int malloc_size;

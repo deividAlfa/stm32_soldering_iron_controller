@@ -58,7 +58,7 @@ float integrator_ft(float sample, INTEGRATOR_FT *i);
 uint16_t integrator_u16(uint16_t sample, INTEGRATOR_U16 *i);
 uint8_t isavgof5(int32_t data, ISAVGOF5 *i);
 uint16_t arr_u16_avg(uint16_t* arr, uint16_t len);
-uint16_t arr_trunctate_val(uint16_t selected_val, uint16_t *src, uint16_t len );
+uint16_t arr_rem_selected_val(uint16_t selected_val, uint16_t *src, uint16_t len );
 uint16_t arr_set_zeros_above_threshold(uint16_t *src, uint16_t len, uint16_t thr, uint16_t rising_edge_dur, uint16_t falling_edge_dur);
 
 //void replace_ignored_val_by_neighbours(int8_t ignored_val, int8_t* arr, uint16_t len, int8_t* out);
