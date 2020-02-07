@@ -214,15 +214,42 @@ uint16_t arr_rem_selected_val(uint16_t selected_val, uint16_t *src, uint16_t len
 		tmp = * (src + i);
 		if( tmp != selected_val){
 			*dst++ = tmp;
-                        new_size++;
+            new_size++;
 		}
 	}
         
-    memset( (uint8_t*)dst,0,(len-new_size)*2);
+    //memset( (uint8_t*)dst,0,(len-new_size)*2);
 	return new_size;
 }
 
+uint16_t arr_u16_avg_ignore_val(uint16_t ignore_val, uint16_t* arr, uint16_t len, uint16_t* new_len){
 
+	uint32_t acc = 0;
+	uint16_t max = 0;
+	uint16_t min = 0xFFFF;
+	uint16_t tmp;
+	uint16_t result;
+    uint16_t len2=0;
+	for(int x = 0; x < len; x++) {
+		tmp = *arr++;
+                if( tmp == ignore_val){
+                    continue;
+                }
+                len2++;
+		acc += tmp;
+		if(tmp > max)
+			max = tmp;
+		if(tmp < min)
+			min = tmp;
+	}
+        if(len2>2){
+            result = UINT_DIV( (acc - min - max) , len2-2);
+        }else{
+            result = 0;
+        }
+    *new_len = len2;
+	return result;
+}
 //uint16_t arr_calc_avgU16_when_ref_value_is(uint16_t* arr, uint16_t len, int8_t* ref, uint8_t ref_valid_val){
 //	uint32_t acc = 0;
 //	uint16_t max = 0;
