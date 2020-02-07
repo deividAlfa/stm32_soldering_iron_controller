@@ -218,7 +218,7 @@ void handleIron(uint8_t activity) {
 	#define POWER_LIMIT_PERC 100.0 /* but iron is turned off ~50 % of time */
 #endif
 
-void update_pwm(void){
+uint16_t update_pwm(void){
 	  TICK;
 	  if(debugMode){
 		  set = calculatePID(debugSetPoint, iron_temp_adc_avg);
@@ -236,7 +236,10 @@ void update_pwm(void){
 	  else
 		  currentIronPower = 0;
 
-	  __HAL_TIM_SET_COMPARE(ironPWMTimer, TIM_CHANNEL_3, CONV_TO_UINT(currentIronPower));
+	  return CONV_TO_UINT(currentIronPower);
+}
+void iron_pwm_cc_set(uint16_t val){
+	__HAL_TIM_SET_COMPARE(ironPWMTimer, TIM_CHANNEL_3, val);
 }
 
 void ironInit(TIM_HandleTypeDef *timer) {

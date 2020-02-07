@@ -16,9 +16,18 @@ volatile uint16_t iron_temp_adc_avg = 0;
 volatile uint16_t new_len;
 volatile int good_vals;
 
+uint16_t new_pwm_cc = 0;
+void tim3_pulseFinishCb(TIM_HandleTypeDef *htim){
+	static uint16_t prev_pwm_cc = 0;
+	if(prev_pwm_cc != new_pwm_cc){
+		iron_pwm_cc_set(new_pwm_cc);
+	}
+	prev_pwm_cc = new_pwm_cc;
+}
+
 void flawless_adc_ConvCpltCb(ADC_HandleTypeDef *htim){
 
-		HAL_TIM_PWM_Stop(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOff();
+		//HAL_TIM_PWM_Stop(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOff();
 		HAL_ADCEx_MultiModeStop_DMA(&hadc1);
 
 //		int tmp = 0;
@@ -42,8 +51,8 @@ void flawless_adc_ConvCpltCb(ADC_HandleTypeDef *htim){
 		//memcpy(&adc_measures.iron[0], &tmp_arr[0], *sizeof(tmp_arr[0]));
 
 		if(getIronOn()){
-			update_pwm();
-			HAL_TIM_PWM_Start(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOn();
+			new_pwm_cc = update_pwm();
+			//HAL_TIM_PWM_Start(&tim3_pwm, TIM_CHANNEL_3);  // don't use turnIronOn();
 		}
 
 		HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) &adc_measures.iron, ADC_MEASURES_LEN ); /* never stop adc */

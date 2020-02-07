@@ -147,6 +147,11 @@ void MX_TIM3_Init(void) {
 			!= HAL_OK) {
 		_Error_Handler(__FILE__, __LINE__);
 	}
+	  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_UPDATE);
+	  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC3);
+	//  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC1);
+	//  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC2);
+	//  __HAL_TIM_ENABLE_IT(&tim3_pwm, TIM_IT_CC4);
 	HAL_TIM_MspPostInit(&tim3_pwm);
 
 }
