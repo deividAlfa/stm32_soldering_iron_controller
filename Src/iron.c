@@ -212,12 +212,6 @@ void handleIron(uint8_t activity) {
 	  }
 }
 
-#ifdef FLAWLESS_MEAS
-	#define POWER_LIMIT_PERC 70.0	/* iron is turned on all the time */
-#else
-	#define POWER_LIMIT_PERC 100.0 /* but iron is turned off ~50 % of time */
-#endif
-
 uint16_t update_pwm(void){
 	  TICK;
 	  if(debugMode){
@@ -225,18 +219,18 @@ uint16_t update_pwm(void){
 	  }else{
 		  set = calculatePID(human2adc(tempSetPoint), iron_temp_adc_avg);
 	  }
-	  TOCK(Benchmark._06_pid_calc_dur);
+	  Benchmark._06_pid_calc_dur = TOCK;
 	  set = PWM_TIM_PERDIO * set;
 	  //set += 20* (readTipTemperatureCompensated(0)/350.0); // 40 pwm equal to 350C
-	  set = (set<1)?1:set;
-	  set = (set>PWM_TIM_PERDIO)?PWM_TIM_PERDIO:set;
+	  set = (set<1)?0:set;
+	  set = (set>PWM_TIM_PERDIO_LIMIT)?PWM_TIM_PERDIO_LIMIT:set;
 
 	  if(isIronOn)
-		  currentIronPower = UINT_DIV(set*POWER_LIMIT_PERC, PWM_TIM_PERDIO);
+		  currentIronPower = UINT_DIV(set*100, PWM_TIM_PERDIO);
 	  else
 		  currentIronPower = 0;
 
-	  return CONV_TO_UINT(currentIronPower);
+	  return CONV_TO_UINT(set);
 }
 void iron_pwm_cc_set(uint16_t val){
 	__HAL_TIM_SET_COMPARE(ironPWMTimer, TIM_CHANNEL_3, val);

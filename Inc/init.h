@@ -2,7 +2,7 @@
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx_hal_tim.h"
 
-#define	PWM_TIM_PERDIO 1500
+
 
 void MX_GPIO_Init(void);
 void MX_DMA_Init(void);

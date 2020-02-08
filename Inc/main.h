@@ -122,6 +122,7 @@ typedef struct{
 	uint32_t _05_main_calc_dur;
 	uint32_t _06_pid_calc_dur;
 	uint32_t _07_ft_integrator;
+	uint32_t _08_adc_proc_dur;
 }Ts_t;
 
 extern Ts_t Benchmark;
@@ -137,8 +138,8 @@ prev_tick = tick_now;
 {									\
 uint32_t tick = HAL_GetTick();
 
-#define TOCK(res)					\
-	res = HAL_GetTick() - tick;		\
+#define TOCK					\
+	 HAL_GetTick() - tick;		\
 }
 
   /* flawless conversions +1 error reduced to +-0.5*/
@@ -153,7 +154,7 @@ uint32_t tick = HAL_GetTick();
 //}
 
 
-#define UINT_DIV(x,y) ((x+y/2)/y)
+#define UINT_DIV(x,y) (((x)+(y)/2)/(y))
 #define CONV_TO_UINT(ft) (unsigned int)(ft+0.5)
 
 #define MALLOC_TRACE_LEN 100

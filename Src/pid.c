@@ -52,7 +52,7 @@ float Dout;
 float Pout;
 float perc_avg;
 int err4=0;
-
+float error;
 
 float calculatePID( float setpoint, float pv )
 {
@@ -65,7 +65,7 @@ float calculatePID( float setpoint, float pv )
     Ts = Ts / 1000;
 
     // Calculate error
-    float error = setpoint - pv;
+    error = setpoint - pv;
 
     // Proportional term
     Pout = Kp * error;
@@ -81,7 +81,7 @@ float calculatePID( float setpoint, float pv )
         	integral = minI;
     }
 
-    if( pv > (setpoint + 0.08*setpoint)){
+    if( pv > (setpoint + 0.02*setpoint)){
     	integral = 0;
     }
 #endif
@@ -103,13 +103,13 @@ float calculatePID( float setpoint, float pv )
 
 
     // Calculate total output
-    output = Pout + Iout;// + Dout;
+    output = Pout + Iout + Dout;
     float res = ABS(Iout)/(ABS(Iout)+ABS(Pout))*100.0;
     err4 +=(res<0)?1:0;
 
     TICK;
     perc_avg = integrator_ft(res, &Ti_buf );
-    TOCK(Benchmark._07_ft_integrator);
+    Benchmark._07_ft_integrator = TOCK;
 
     p = Pout;
     i = Iout;

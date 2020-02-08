@@ -92,7 +92,7 @@ void resetSettings() {
 //		systemSettings.ironTips[x] = a;
 //	}
 	int idx = 0;
-	systemSettings.ironTips[idx++] = (tipData){"B"		, 1400 , 2000	,2586 , { 0.003	, 0.003*6	 , 		 0,  1 , 0, 200, -50} };
+	systemSettings.ironTips[idx++] = (tipData){"B"		, 1300 , 2100	,2586 , { 0.003	, 0.003*6	 , 		 0,  1 , 0, 200, -50} };
 	systemSettings.ironTips[idx++] = (tipData){"BL"		, 1100 , 1800	,2800 , { 0.0015 , 0.003*2	,   0.001 ,  1 , 0, 200, -50 }};
 	systemSettings.ironTips[idx++] = (tipData){"BC2"	, 1200 , 2000	,3100 , { 0.003	, 0.0025*5	, 		0 ,  1 , 0, 200, -50 }};
 

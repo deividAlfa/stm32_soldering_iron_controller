@@ -135,7 +135,7 @@ int main(void)
 		  }
 		  handleIron(activity);
 		  iron_temp_measure_state = iron_temp_measure_idle;
-		  TOCK(Benchmark._05_main_calc_dur);
+		  Benchmark._05_main_calc_dur = TOCK;
 	  }
 
 	  if(HAL_GetTick() - lastTimeDisplay > 50) {
@@ -146,7 +146,7 @@ int main(void)
 		  oled_processInput(r, &RE1_Data);
 		  oled_draw();
 		  lastTimeDisplay = HAL_GetTick();
-		  TOCK(Benchmark._04_oled_update_dur)
+		  Benchmark._04_oled_update_dur = TOCK;
 	  }
   }
 
