@@ -21,8 +21,8 @@
 //				.PID.maxI = 200			,
 //				.PID.minI = -50			,
 //				.name =  "DFLT"
-
-#define DFTL_PARAMS 1300 , 2000	,3000 , { 0.003	, 0.025, 0 ,  1 , 0, 200, -50 }
+#define DF_LIMS 1 , 0, 200, -50
+#define DFTL_PARAMS 1300 , 2000	,3000 , { 0.003	, 0.025, 0,  DF_LIMS }
 systemSettings_t systemSettings = {
 		.ironTips[0 ... 9] = {
 				"DFLT", DFTL_PARAMS
@@ -72,7 +72,7 @@ void resetSettings() {
 	systemSettings.sleep.standbyTime = 5;
 	systemSettings.sleep.sleepTemperature = 100;
 	systemSettings.setTemperature = 320;
-	systemSettings.currentTip = 0;
+	systemSettings.currentTip = 2;
 	systemSettings.sleep.sleepTemperature = 100;
 
 //	for(uint8_t x = 0; x < 10; ++x) {
@@ -92,16 +92,17 @@ void resetSettings() {
 //		systemSettings.ironTips[x] = a;
 //	}
 	int idx = 0;
-	systemSettings.ironTips[idx++] = (tipData){"B"		, 1300 , 2100	,2586 , { 0.003	, 0.003*6	 , 		 0,  1 , 0, 200, -50} };
-	systemSettings.ironTips[idx++] = (tipData){"BL"		, 1100 , 1800	,2800 , { 0.0015 , 0.003*2	,   0.001 ,  1 , 0, 200, -50 }};
-	systemSettings.ironTips[idx++] = (tipData){"BC2"	, 1200 , 2000	,3100 , { 0.003	, 0.0025*5	, 		0 ,  1 , 0, 200, -50 }};
+	systemSettings.ironTips[idx++] = (tipData){"B"		, 1300 , 2100	,2586 , { 0.003	, 0.003*6	, 		0, DF_LIMS} };
+	systemSettings.ironTips[idx++] = (tipData){"BL"		, 1100 , 1800	,2800 , { 0.0015 , 0.003 	,   	0, DF_LIMS }};
+	systemSettings.ironTips[idx++] = (tipData){"ILS"	, 1400 , 2150	,2800 , { 0.001	, 0.003		,   	0, DF_LIMS }};
+	systemSettings.ironTips[idx++] = (tipData){"BC2"	, 1200 , 2000	,3100 , { 0.003	, 0.0025*5	, 		0, DF_LIMS }};
 
 	systemSettings.ironTips[idx++] = (tipData){"BCF1"	, DFTL_PARAMS };
 	systemSettings.ironTips[idx++] = (tipData){"D24"	, DFTL_PARAMS };
-	systemSettings.ironTips[idx++] = (tipData){"C1"		, DFTL_PARAMS };
+	systemSettings.ironTips[idx++] = (tipData){"C1"		, 1100 , 1800	,2800 , { 0.0015 , 0.003 	,   	0, DF_LIMS }};
 	systemSettings.ironTips[idx++] = (tipData){"C2"		, DFTL_PARAMS };
 	systemSettings.ironTips[idx++] = (tipData){"C4"		, DFTL_PARAMS };
-	systemSettings.ironTips[idx++] = (tipData){"ILS"	, 1300 , 2100	,2800 , { 0.001	, 0.003		,   0 ,  1 , 0, 200, -50 }};
+
 	systemSettings.ironTips[idx++] = (tipData){"D24"	, DFTL_PARAMS };
 
 
