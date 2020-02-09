@@ -161,7 +161,7 @@ uint16_t getSetTemperature() {
 
 
 
-double set=0;
+float set=0;
 void handleIron(uint8_t activity) {
 	uint32_t currentTime = HAL_GetTick();
 	if(setTemperatureChanged && (currentTime - lastSetTemperatureTime > 5000)) {
@@ -220,7 +220,8 @@ uint16_t update_pwm(void){
 		  set = calculatePID(human2adc(tempSetPoint), iron_temp_adc_avg);
 	  }
 	  Benchmark._06_pid_calc_dur = TOCK;
-	  set = PWM_TIM_PERDIO * set;
+	  set = (float)PWM_TIM_PERDIO * set;
+
 	  //set += 20* (readTipTemperatureCompensated(0)/350.0); // 40 pwm equal to 350C
 	  set = (set<1)?0:set;
 	  set = (set>PWM_TIM_PERDIO_LIMIT)?PWM_TIM_PERDIO_LIMIT:set;
