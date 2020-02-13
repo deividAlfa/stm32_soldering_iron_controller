@@ -54,8 +54,11 @@ float perc_avg;
 int err4=0;
 float error;
 
+uint8_t fallback = 0;
+float fallback_integer;
 float calculatePID( float setpoint, float pv )
 {
+	float tmp;
 	mset = setpoint;
 	mpv = pv;
 
@@ -81,9 +84,28 @@ float calculatePID( float setpoint, float pv )
         	integral = minI;
     }
 
-    if( pv > (setpoint + 0.02*setpoint)){
-    	integral = 0;
+
+    if( pv > (setpoint + 0.002*setpoint)){
+    	tmp = integral*0.06;
+    	if(integral>=tmp){
+    		integral -= tmp;
+    	}
     }
+//    if( pv > (setpoint + 0.03*setpoint)){
+//    	fallback = 1;
+//    }
+//
+//    if(fallback && pv < (setpoint + 0.002*setpoint)){
+//    	fallback = 0;
+//    }
+//
+//    if(fallback){
+//    	if(integral>0){
+//    		integral = 0;
+//    		//integral -= integral*0.1;
+//    	}
+//    }
+
 #endif
     Iout = Ki * integral;
 

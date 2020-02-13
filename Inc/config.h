@@ -1,7 +1,7 @@
 #pragma once
 
 #define	PWM_TIM_PERDIO 			3000
-#define	PWM_TIM_PERDIO_LIMIT 	2500
+#define	PWM_TIM_PERDIO_LIMIT 	2400
 
 #define ADC_MEASURES_LEN (2048)
 //#define ADC_HISTORY_LEN  64

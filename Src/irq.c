@@ -30,7 +30,7 @@ void tim3_pulseFinishCb(TIM_HandleTypeDef *htim){
 void flawless_adc_ConvCpltCb(ADC_HandleTypeDef *htim){
 		TICK;
 		HAL_ADCEx_MultiModeStop_DMA(&hadc1);
-		arr_set_zeros_above_threshold(&adc_measures.iron[0],ADC_MEASURES_LEN, 4000, 10, 30 );
+		arr_set_zeros_above_threshold(&adc_measures.iron[0],ADC_MEASURES_LEN, 4000, 10, 35 );
 
 		iron_temp_adc_avg = arr_u16_avg_ignore_val(0, &adc_measures.iron[30], ADC_MEASURES_LEN-30, &new_len);
 		if(new_len <=2){
