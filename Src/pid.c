@@ -10,7 +10,7 @@
 #include "filtrai.h"
 
 static float max, min, Kp, Kd, Ki, pre_error, mset, mpv, maxI, minI;
-float integral;
+double integral;
 static float p, i, d, currentOutput;
 uint32_t lastTime;
 
@@ -24,12 +24,17 @@ float getIntegral() {
 void setupPIDFromStruct() {
 	setupPID(currentPID.max, currentPID.min, currentPID.Kp, currentPID.Kd, currentPID.Ki, currentPID.minI, currentPID.maxI);
 }
+int stabilize=0;
+float Ki_df;
+float Kp_df;
 void setupPID(float _max, float _min, float _Kp, float _Kd, float _Ki, int16_t _minI, int16_t _maxI ) {
 	max = _max;
 	min = 0;
 	Kp = _Kp;
 	Kd = _Kd;
 	Ki = _Ki;
+	Ki_df = Ki;
+	Kp_df = Kp;
 	minI = _minI;
 	maxI = _maxI*5;
 	pre_error = 0;
@@ -41,7 +46,7 @@ void resetPID() {
 	integral = 0;
 }
 
-
+__attribute__((used))  INTEGRATOR_FT err_buf = INIT_INTEGRATOR(50, float, 3); /* equal to ms */
 __attribute__((used))  INTEGRATOR_FT Ti_buf = INIT_INTEGRATOR(400, float, 100); /* equal to ms */
 //__attribute__((used))  INTEGRATOR_FT Td_buf = INIT_INTEGRATOR(10, float, 10); /* equal to ms */
 __attribute__((used)) float integrator_rlt;
@@ -56,9 +61,10 @@ float error;
 
 uint8_t fallback = 0;
 float fallback_integer;
+uint8_t zone = 0;
+extern tipData *currentTipData;
 float calculatePID( float setpoint, float pv )
 {
-	float tmp;
 	mset = setpoint;
 	mpv = pv;
 
@@ -71,43 +77,47 @@ float calculatePID( float setpoint, float pv )
     error = setpoint - pv;
 
     // Proportional term
-    Pout = Kp * error;
+    Pout = POS(Kp * error);
+
+    static float prev_setpoint = 0;
+    if(setpoint != prev_setpoint){
+    	Ki = map(setpoint, currentTipData->calADC_At_200, currentTipData->calADC_At_300, Ki_df*0.3, Ki_df);
+    	Kp = map(setpoint, currentTipData->calADC_At_200, currentTipData->calADC_At_300, Kp_df*0.2, Kp_df);
+        prev_setpoint = setpoint;
+    }
 
 
-#if 0/* lets try proper integrator */
-    integral = integrator_ft(error, &Ti_buf );
-#else
-    integral += error * Ts;
+    integral += error*Ki * Ts;
     if(integral > maxI){
     	integral = maxI;
     }else if(integral < minI){
         	integral = minI;
     }
 
+	if( pv > (setpoint + 0.03*setpoint)){
+		integral = 0;
+	}
 
-    if( pv > (setpoint + 0.002*setpoint)){
-    	tmp = integral*0.06;
-    	if(integral>=tmp){
-    		integral -= tmp;
-    	}
-    }
-//    if( pv > (setpoint + 0.03*setpoint)){
-//    	fallback = 1;
-//    }
-//
-//    if(fallback && pv < (setpoint + 0.002*setpoint)){
-//    	fallback = 0;
-//    }
-//
-//    if(fallback){
-//    	if(integral>0){
-//    		integral = 0;
-//    		//integral -= integral*0.1;
-//    	}
-//    }
 
-#endif
-    Iout = Ki * integral;
+//	float err = integrator_ft(ABS(pv-setpoint), &err_buf );
+//		if( err < 4){
+//			Ki = Ki_df/4.0;
+//			zone=1;
+//		}else if( err < 10){
+//			Ki = Ki_df/3.0;
+//			zone=2;
+//		}else{
+//			stabilize = 5;
+//			zone=3;
+//			Ki = Ki_df;
+//		}
+
+
+	if(integral<0){
+		integral = 0;
+	}
+
+    Iout = integral;
 
 
     // Derivative term

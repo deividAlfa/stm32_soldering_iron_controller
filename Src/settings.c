@@ -21,7 +21,7 @@
 //				.PID.maxI = 200			,
 //				.PID.minI = -50			,
 //				.name =  "DFLT"
-#define DF_LIMS 1 , 0, 200, -50
+#define DF_LIMS 1 , 0, 200, 0
 #define DFTL_PARAMS 1300 , 2000	,3000 , { 0.003	, 0.025, 0,  DF_LIMS }
 systemSettings_t systemSettings = {
 		.ironTips[0 ... 9] = {
@@ -49,15 +49,15 @@ void saveSettings() {
 }
 
 void restoreSettings() {
-//	uint16_t *data = (uint16_t*) &systemSettings;
-//	for (uint16_t i = 0; i < (sizeof(systemSettings) / 2); i++) {
-//		data[i] = *(uint16_t *) (FLASH_ADDR + (i * 2));
-//	}
-		resetSettings();	
-//	if (systemSettings.version != SETTINGSVERSION) {
-//		resetSettings();
-//		saveSettings();
-//	}
+	uint16_t *data = (uint16_t*) &systemSettings;
+	for (uint16_t i = 0; i < (sizeof(systemSettings) / 2); i++) {
+		data[i] = *(uint16_t *) (FLASH_ADDR + (i * 2));
+	}
+	//resetSettings();
+	if (systemSettings.version != SETTINGSVERSION) {
+		resetSettings();
+		saveSettings();
+}
 
 }
 
@@ -92,17 +92,20 @@ void resetSettings() {
 //		systemSettings.ironTips[x] = a;
 //	}
 	int idx = 0;
-	systemSettings.ironTips[idx++] = (tipData){"B"		, 1300 , 2100	,2586 , { 0.003	, 0.003*6	, 		0, DF_LIMS} };
-	systemSettings.ironTips[idx++] = (tipData){"BL"		, 1100 , 1800	,2800 , { 0.0015 , 0.004 	,   	0, DF_LIMS }};
-	systemSettings.ironTips[idx++] = (tipData){"ILS"	, 1400 , 2150	,2800 , { 0.001	, 0.003		,   	0, DF_LIMS }};
-	systemSettings.ironTips[idx++] = (tipData){"BC2"	, 1200 , 2000	,3100 , { 0.003	, 0.0025*5	, 		0, DF_LIMS }};
-
-	systemSettings.ironTips[idx++] = (tipData){"BCF1"	, 1100 , 1800	,2800 , { 0.001 , 0.0005 	,   	0, DF_LIMS }};
-	systemSettings.ironTips[idx++] = (tipData){"D16"	, 1200 , 2000	,2586 , { 0.003	, 0.003*2	, 		0, DF_LIMS} };
-	systemSettings.ironTips[idx++] = (tipData){"D24"	, 1300 , 2400	,2586 , { 0.003	, 0.003*2	, 		0, DF_LIMS} };
-	systemSettings.ironTips[idx++] = (tipData){"C1"		, 1450 , 2300	,2800 , { 0.0015 , 0.003 	,   	0, DF_LIMS }};
-	systemSettings.ironTips[idx++] = (tipData){"C2"		, DFTL_PARAMS };
+	systemSettings.ironTips[idx++] = (tipData){"B"		, 1300 , 2100	,2586 , { 0.0015 , 0.002	, 		0, DF_LIMS} };
+	systemSettings.ironTips[idx++] = (tipData){"BC2"	, 1200 , 2000	,3100 , { 0.003	, 0.0025	, 		0, DF_LIMS }};
+	systemSettings.ironTips[idx++] = (tipData){"BL"		, 1100 , 1800	,2800 , { 0.0015 , 0.002 	,   	0, DF_LIMS }};
+	//systemSettings.ironTips[idx++] = (tipData){"BCF1"	, 1100 , 1800	,2800 , { 0.001 , 0.0005 	,   	0, DF_LIMS }};
+	//systemSettings.ironTips[idx++] = (tipData){"C1"		, 1450 , 2300	,2800 , { 0.0015 , 0.003 	,   	0, DF_LIMS }};
+	//systemSettings.ironTips[idx++] = (tipData){"C2"		, DFTL_PARAMS };
 	systemSettings.ironTips[idx++] = (tipData){"C4"		, 1200 , 2600	,3000 , { 0.003	, 0.003*2	, 		0, DF_LIMS} };
+	systemSettings.ironTips[idx++] = (tipData){"D16"	, 1200 , 2000	,2586 , { 0.003	, 0.003*2	, 		0, DF_LIMS} };
+	systemSettings.ironTips[idx++] = (tipData){"D24"	, 1300 , 2300	,2586 , { 0.003	, 0.003*2	, 		0, DF_LIMS} };
+	systemSettings.ironTips[idx++] = (tipData){"ILS"	, 1400 , 2150	,2800 , { 0.001	, 0.003		,   	0, DF_LIMS }};
+
+
+
+
 
 
 
