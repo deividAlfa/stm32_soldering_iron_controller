@@ -264,7 +264,7 @@ void main_screen_setup(screen_t *scr) {
 	widget->editable->step = 5;
 	widget->editable->selectable.tab = 0;
 	widget->editable->setData = (void (*)(void *))&setTemp;
-	widget->editable->max_value = 300;
+	widget->editable->max_value = 350;
 	widget->reservedChars = 3;
 	widget->editable->selectable.state = widget_edit;
 	widget->editable->selectable.longPressAction = &boostOn;

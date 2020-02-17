@@ -416,9 +416,9 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 			char *str;
 			int8_t inc;
 			if(fabs(state->Diff) > 1) {
-				inc = widget->editable->big_step;
-				if(state->Diff < 0)
-					inc = -1 * inc;
+				inc = widget->editable->big_step* state->Diff;
+				//if(state->Diff < 0)
+//					inc = -1 * inc;
 			}
 			else
 				inc = widget->editable->step * state->Diff;
