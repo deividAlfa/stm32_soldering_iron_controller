@@ -46,7 +46,6 @@ extern IWDG_HandleTypeDef hiwdg;
 extern TIM_HandleTypeDef tim3_pwm;
 
 
-
 int main(void)
 {
   HAL_Init();

@@ -81,8 +81,8 @@ float calculatePID( float setpoint, float pv )
 
     static float prev_setpoint = 0;
     if(setpoint != prev_setpoint){
-    	Ki = map(setpoint, currentTipData->calADC_At_200, currentTipData->calADC_At_300, Ki_df*0.3, Ki_df);
-    	Kp = map(setpoint, currentTipData->calADC_At_200, currentTipData->calADC_At_300, Kp_df*0.2, Kp_df);
+    	Ki = map_w_limits(setpoint, currentTipData->calADC_At_200, currentTipData->calADC_At_300, Ki_df*0.3, Ki_df);
+    	Kp = map_w_limits(setpoint, currentTipData->calADC_At_200, currentTipData->calADC_At_300, Kp_df*0.2, Kp_df);
         prev_setpoint = setpoint;
     }
 
@@ -99,19 +99,10 @@ float calculatePID( float setpoint, float pv )
 	}
 
 
-//	float err = integrator_ft(ABS(pv-setpoint), &err_buf );
-//		if( err < 4){
-//			Ki = Ki_df/4.0;
-//			zone=1;
-//		}else if( err < 10){
-//			Ki = Ki_df/3.0;
-//			zone=2;
-//		}else{
-//			stabilize = 5;
-//			zone=3;
-//			Ki = Ki_df;
-//		}
-
+	if( ABS(setpoint-pv) > 200 ){
+		//Kp = Kp_df*4;
+		integral = 0;
+	}
 
 	if(integral<0){
 		integral = 0;

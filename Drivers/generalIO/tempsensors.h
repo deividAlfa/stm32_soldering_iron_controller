@@ -21,6 +21,7 @@ void setCurrentTip(uint8_t tip);
 tipData * getCurrentTip();
 
 float map(float x, float in_min, float in_max, float out_min, float out_max);
+float map_w_limits(float x, float in_min, float in_max, float out_min, float out_max);
 float adc2Human(uint16_t);
 uint16_t human2adc(uint16_t);
 #endif /* GENERALIO_TEMPSENSORS_H_ */

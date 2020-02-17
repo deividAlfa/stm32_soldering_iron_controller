@@ -81,7 +81,7 @@ uint16_t human2adc(uint16_t t) {
 	  t = t - ambientTemperature;
   if (t < temp_minC) t = temp_minC;
   if (t > temp_maxC) t = temp_maxC;
-  if (t >= currentTipData->calADC_At_300)
+  if (t >= 300)
     temp = map(t, 300, 400, currentTipData->calADC_At_300, currentTipData->calADC_At_400);
   else
     temp = map(t , 200, 300, currentTipData->calADC_At_200, currentTipData->calADC_At_300);
@@ -114,13 +114,14 @@ float adc2Human(uint16_t adc_value) {
 
   float ambientTemperature = readColdJunctionSensorTemp_mC() / 1000;
   if (adc_value < currentTipData->calADC_At_200) {
-    tempH = map(adc_value, 0, currentTipData->calADC_At_200, ambientTemperature, 200);
+    tempH = map(adc_value, 0, currentTipData->calADC_At_200, 21, 200);
   } else if (adc_value >= currentTipData->calADC_At_300) {
     tempH = map(adc_value, currentTipData->calADC_At_300, currentTipData->calADC_At_400, 300, 400);
   } else {
     tempH = map(adc_value, currentTipData->calADC_At_200, currentTipData->calADC_At_300, 200, 300);
   }
   return tempH + ambientTemperature;
+  return tempH;
 }
 float ret;
 float map(float x, float in_min, float in_max, float out_min, float out_max)
@@ -129,5 +130,21 @@ float map(float x, float in_min, float in_max, float out_min, float out_max)
 	ret = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 	if(ret < 0)
 		ret = 0;
+	return ret;
+}
+
+float map_w_limits(float x, float in_min, float in_max, float out_min, float out_max)
+{
+
+	float ret = map(x,in_min,in_max,out_min,out_max);
+
+	if (ret<out_min){
+		ret= out_min;
+	}
+
+	if (ret>out_max){
+		ret= out_max;
+	}
+
 	return ret;
 }
