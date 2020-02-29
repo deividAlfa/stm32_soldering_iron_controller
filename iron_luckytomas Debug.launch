@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="com.st.stm32cube.ide.mcu.debug.launch.launchConfigurationType">
-<stringAttribute key="com.st.stm32cube.ide.mcu.debug.jlink.device" value="STM32F103C8"/>
+<stringAttribute key="com.st.stm32cube.ide.mcu.debug.jlink.device" value="STM32F103CB"/>
 <stringAttribute key="com.st.stm32cube.ide.mcu.debug.jlink.endian" value="little"/>
 <stringAttribute key="com.st.stm32cube.ide.mcu.debug.jlink.init_speed" value="4000"/>
 <booleanAttribute key="com.st.stm32cube.ide.mcu.debug.jlink.jlink_check_serial_number" value="false"/>
