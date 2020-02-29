@@ -412,7 +412,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 			return -1;
 		}
 		if((widget->type == widget_editable) && (extractSelectablePartFromWidget(widget)->state == widget_edit)) {
-			uint16_t ui16;
+			int tmp;
 			char *str;
 			int8_t inc;
 			if(fabs(state->Diff) > 1) {
@@ -424,13 +424,16 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 				inc = widget->editable->step * state->Diff;
 			switch (widget->editable->inputData.type) {
 			case field_uinteger16:
-				ui16 = *(uint16_t*)widget->editable->inputData.getData();
-				ui16 = ui16 + inc;
-				if(ui16 > widget->editable->max_value)
-					ui16 = widget->editable->max_value;
-				else if(ui16 < widget->editable->min_value)
-					ui16 = widget->editable->min_value;
-				widget->editable->setData(&ui16);
+				tmp = *(uint16_t*)widget->editable->inputData.getData();
+				tmp = tmp + inc;
+				if(tmp > widget->editable->max_value){
+					tmp = widget->editable->max_value;
+				}else if(tmp < 0){
+					tmp = 270; //temperature settigns feature, easy access 270C
+				}else if(tmp < widget->editable->min_value){
+					tmp = widget->editable->min_value;
+				}
+				widget->editable->setData(&tmp);
 				break;
 			case field_string:
 				str = (char*)widget->editable->inputData.getData();
