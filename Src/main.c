@@ -49,6 +49,8 @@ extern TIM_HandleTypeDef tim3_pwm;
 int main(void)
 {
   HAL_Init();
+  //resetSettings();
+
   SystemClock_Config();
   MX_GPIO_Init();
   MX_DMA_Init();
@@ -96,7 +98,6 @@ int main(void)
 
   setPWM_tim(&tim3_pwm);
   iron_temp_measure_state = iron_temp_measure_idle;
-
   setContrast(systemSettings.contrast);
   currentBoostSettings = systemSettings.boost;
   currentSleepSettings = systemSettings.sleep;

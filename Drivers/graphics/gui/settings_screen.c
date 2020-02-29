@@ -94,7 +94,7 @@ static int delTip(widget_t *w) {
 	for(int x = itemIndex; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]) - 1; ++ x) {
 		systemSettings.ironTips[x] = systemSettings.ironTips[x + 1];
 	}
-	--systemSettings.currentNumberOfTips;
+	systemSettings.currentNumberOfTips = 0;
 	saveSettings();
 	return screen_edit_iron_tips;
 }

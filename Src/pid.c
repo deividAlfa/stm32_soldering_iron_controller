@@ -95,12 +95,10 @@ float calculatePID( float setpoint, float pv )
     }
 
 	if( pv > (setpoint + 0.03*setpoint)){
-		integral = 0;
+		integral -= integral*0.1;
 	}
 
-
-	if( ABS(setpoint-pv) > 200 ){
-		//Kp = Kp_df*4;
+	if( ABS(setpoint-pv) > 400 ){
 		integral = 0;
 	}
 
