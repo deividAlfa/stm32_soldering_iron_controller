@@ -3,3 +3,4 @@ Debug*
 private/
 /Release/
 .settings
+*.kra
