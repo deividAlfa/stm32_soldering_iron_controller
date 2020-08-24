@@ -146,5 +146,9 @@ float map_w_limits(float x, float in_min, float in_max, float out_min, float out
 		ret= out_max;
 	}
 
+	long ret;
+	ret = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	if(ret < 0)
+		ret = 0;
 	return ret;
 }
