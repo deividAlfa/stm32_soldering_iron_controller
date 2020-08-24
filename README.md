@@ -48,10 +48,10 @@
 
 Well which Docs are you looking for?
 
-* **New Docs, Full Repo:** --> https://github.com/dreamcat4/t12-t245-controllers-docs
-* **Backup of PTDreamer Blog** --> https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/research/ptdreamer
-* Hardware Compatibility Docs --> https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/controllers/stm32-t12-oled
-* **Docs for Compiling / Flashing with ST Official Toolchain** --> https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/tools/software/STM32CubeIDE
+* **[New Docs, Full Repo](https://github.com/dreamcat4/t12-t245-controllers-docs)**
+* **[Backup of PTDreamer Blog](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/research/ptdreamer)** 
+* **[Hardware Compatibility Docs](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/controllers/stm32-t12-oled)**
+* **[How to Compile & Flash This Code with Official ST Toolchain](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/tools/software/STM32CubeIDE)**
 * *Docs for Compiling / Flashing with VSCode and PlatformIO* - TBD. Not done.
 
 <a id="compatibility"></a>
