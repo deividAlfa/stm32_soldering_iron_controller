@@ -2,20 +2,43 @@
 
 <!-- MarkdownTOC -->
 
+* [Status](#status)
+    * [Working](#working)
+    * [Todo](#todo)
 * [Where are Docs?](#where-are-docs)
 * [Compatibility](#compatibility)
 * [Critique](#critique)
 * [Backup First!](#backup-first)
-* [Status](#status)
-    * [Working](#working)
-    * [Todo](#todo)
 
 <!-- /MarkdownTOC -->
+
+
+<a id="status"></a>
+## Status
 
 * Custom firmware for the chinese kseger soldering iron controller
 * Original version by PTDreamer
 * Updated branch - for v2.1s, from newer fork: `LuckyTomas`, flawless_testing` branch
 * Merged to master, with Docs, and minor update by Dreamcat4
+
+**WARNING:** Tip temperature measurement is still unreliable, this firmware might heat up your iron far above the temperature on display. Use with caution and at own risk!
+
+<a id="working"></a>
+### Working
+
+* OLED Display
+* Rotary Encoder
+* Buzzer
+* Wake switch
+* Supply voltage sensor
+* Ambient temperature sensor (might need calibration)
+* Tip temperature read out (might also need calibration)
+* T12 PWM Control (might burn your tip)
+
+<a id="todo"></a>
+### Todo
+
+* I2C eeprom
 
 <a id="where-are-docs"></a>
 ## Where are Docs?
@@ -76,29 +99,6 @@ Otherwise there may be some kind of issue or problem, that's worse for this Open
 The simplest way to backup is actually to buy a new MCU. Then remove the original MCU with hot air, or chipquik, or bizmuth low temperature solder. And set it aside in case the Open Firmware here fails to work. Since there are so many versions of the hardware PCB. KSGER and friends keeps changing them all the time.
 
 Unfortunately we cannot backup the firmware with programmer PC link. This is because the program in the MCU memory is security protected. It cannot be read fully. So the original commercial firmware cannot be backup over SWD protocol, or JTAG whatever. Not for these STMF1xx series MCUs. Sorry to say that. 
-
-<a id="status"></a>
-## Status
-
-**WARNING:** Tip temperature measurement is still unreliable, this firmware might heat up your iron far above the temperature on display. Use with caution and at own risk!
-
-<a id="working"></a>
-### Working
-
-* OLED Display
-* Rotary Encoder
-* Buzzer
-* Wake switch
-* Supply voltage sensor
-* Ambient temperature sensor (might need calibration)
-* Tip temperature read out (might also need calibration)
-* T12 PWM Control (might burn your tip)
-
-<a id="todo"></a>
-### Todo
-
-* I2C eeprom
-
 
 
 
