@@ -123,32 +123,29 @@ float adc2Human(uint16_t adc_value) {
   return tempH + ambientTemperature;
   return tempH;
 }
+
 float ret;
 float map(float x, float in_min, float in_max, float out_min, float out_max)
 {
 
-	ret = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-	if(ret < 0)
-		ret = 0;
-	return ret;
+  ret = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  if(ret < 0)
+    ret = 0;
+  return ret;
 }
 
 float map_w_limits(float x, float in_min, float in_max, float out_min, float out_max)
 {
 
-	float ret = map(x,in_min,in_max,out_min,out_max);
+  float ret = map(x,in_min,in_max,out_min,out_max);
 
-	if (ret<out_min){
-		ret= out_min;
-	}
+  if (ret<out_min){
+    ret= out_min;
+  }
 
-	if (ret>out_max){
-		ret= out_max;
-	}
+  if (ret>out_max){
+    ret= out_max;
+  }
 
-	long ret;
-	ret = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-	if(ret < 0)
-		ret = 0;
-	return ret;
+  return ret;
 }
