@@ -6,11 +6,12 @@
  */
 
 #include "calibration_screen.h"
-#include "iron.h"
-#include "pid.h"
+#include "../../../Core/Src/iron.h"
+#include "../../../Core/Src/pid.h"
 #include "../../generalIO/adc_global.h"
 #include "../../generalIO/tempsensors.h"
-#include "../../graphics/gui/oled.h"
+#include "oled.h"
+#include <stdio.h>
 
 typedef enum {cal_200, cal_300, cal_400, cal_end}state_t;
 static uint16_t state_temps[3] = {200, 300, 400};
@@ -71,7 +72,7 @@ static void setCalState(state_t s) {
 }
 
 static int cancelAction(widget_t* w) {
-	return screen_main;
+	return screen_settings;
 }
 
 static int okAction(widget_t *w) {
@@ -80,8 +81,8 @@ static int okAction(widget_t *w) {
 		current_state = cal_200;
 		return screen_main;
 	}
-	measured_temps[(int)current_state] = measuredTemp - (readColdJunctionSensorTemp_mC() / 1000);
-	adcAtTemp[(int)current_state] = iron_temp_adc_avg;
+	measured_temps[(int)current_state] = measuredTemp - (readColdJunctionSensorTemp_C_x10() / 10);
+	adcAtTemp[(int)current_state] = Iron.Temp.Temp_Adc_Avg;
 	setCalState(++current_state);
 	return screen_edit_calibration_wait;
 }
@@ -129,6 +130,7 @@ static void waitOnExit(screen_t *scr) {
 		setupPIDFromStruct();
 	}
 }
+
 void calibration_screen_setup(screen_t *scr) {
 	scr->draw = &default_screenDraw;
 	scr->processInput = &waitProcessInput;
@@ -143,7 +145,7 @@ void calibration_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, s);
 	widget->posX = 10;
 	widget->posY = 16;
-	widget->font_size = _FONT_8X14;
+	widget->font_size = &FONT_8X14;
 	waitWidget = widget;
 
 	widget = screen_addWidget(scr);
@@ -151,19 +153,19 @@ void calibration_screen_setup(screen_t *scr) {
 	waitStr = widget->displayString;
 	widget->posX = 0;
 	widget->posY = 30;
-	widget->font_size = _FONT_6X8;
+	widget->font_size = &FONT_6X8;
 	waitTemp = widget;
 
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = _FONT_6X8;
+	widget->font_size = &FONT_6X8;
 	widget->posX = 90;
 	widget->posY = 56;
 	s = "CANCEL";
 	strcpy(widget->displayString, s);
 	widget->reservedChars = 6;
-	widget->buttonWidget->selectable.tab = 0;
-	widget->buttonWidget->action = &cancelAction;
+	widget->buttonWidget.selectable.tab = 0;
+	widget->buttonWidget.action = &cancelAction;
 	cancelButton = widget;
 
 	screen_t *sc = oled_addScreen(screen_edit_calibration_input);
@@ -179,39 +181,38 @@ void calibration_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, s);
 	widget->posX = 10;
 	widget->posY = 16;
-	widget->font_size = _FONT_6X8;
+	widget->font_size = &FONT_6X8;
 
 	widget = screen_addWidget(sc);
 	widgetDefaultsInit(widget, widget_editable);
 	widget->posX = 55;
 	widget->posY = 30;
-	widget->font_size = _FONT_8X14;
-	widget->editable->inputData.getData = &getMeasuredTemp;
-	widget->editable->setData = &setMeasuredTemp;
-	widget->editable->selectable.tab = 0;
+	widget->font_size = &FONT_8X14;
+	widget->editable.inputData.getData = &getMeasuredTemp;
+	widget->editable.setData = &setMeasuredTemp;
 	widget->reservedChars = 3;
-
+	widget->editable.selectable.tab = 0;
 	widget = screen_addWidget(sc);
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = _FONT_6X8;
+	widget->font_size = &FONT_6X8;
 	widget->posX = 90;
 	widget->posY = 56;
 	s = "CANCEL";
 	strcpy(widget->displayString, s);
 	widget->reservedChars = 6;
-	widget->buttonWidget->selectable.tab = 2;
-	widget->buttonWidget->action = &cancelAction;
+	widget->buttonWidget.selectable.tab = 1;
+	widget->buttonWidget.action = &cancelAction;
 
 	widget = screen_addWidget(sc);
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = _FONT_6X8;
+	widget->font_size = &FONT_6X8;
 	widget->posX = 20;
 	widget->posY = 56;
 	s = "OK";
 	strcpy(widget->displayString, s);
 	widget->reservedChars = 6;
-	widget->buttonWidget->selectable.tab = 1;
-	widget->buttonWidget->action = &okAction;
+	widget->buttonWidget.selectable.tab = 2;
+	widget->buttonWidget.action = &okAction;
 	addSetTemperatureReachedCallback(tempReachedCallback);
 	cal_pid.Kp = systemSettings.ironTips[0].PID.Kp;
 	cal_pid.Ki = systemSettings.ironTips[0].PID.Ki;
@@ -224,7 +225,7 @@ void calibration_screen_setup(screen_t *scr) {
 
 static uint8_t processCalibration() {
 	  uint16_t delta = state_temps[1] - state_temps[0]; delta >>= 1;
-	  uint16_t ambient = readColdJunctionSensorTemp_mC() / 1000;
+	  uint16_t ambient = readColdJunctionSensorTemp_C_x10() / 10;
 
 	  if ((measured_temps[cal_300] > measured_temps[cal_200]) && ((measured_temps[cal_200] + delta) < measured_temps[cal_300]))
 	    adcCal[cal_300] = map(state_temps[cal_300], measured_temps[cal_200], measured_temps[cal_300], adcAtTemp[cal_200], adcAtTemp[cal_300]);

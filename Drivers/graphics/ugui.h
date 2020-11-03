@@ -1047,5 +1047,5 @@ UG_RESULT UG_ImageHide( UG_WINDOW* wnd, UG_U8 id );
 UG_RESULT UG_ImageSetBMP( UG_WINDOW* wnd, UG_U8 id, const UG_BMP* bmp );
 
 
-
+extern UG_GUI user_gui;;
 #endif

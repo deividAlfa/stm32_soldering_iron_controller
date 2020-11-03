@@ -16,10 +16,23 @@
 <a id="status"></a>
 ## Status
 
+Commentary starts here:
+
+https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle/msg3284800/#msg3284800
+
+Fork of the STM32 T12 firmware originally developed by PTDreamer
+Some improvements, adapted for better portability.
+Check the .ioc file in STM32CUBEMX, all settings are there.
+Use the same pin names, check setup.h for setting few parameters
+
 * Custom firmware for the chinese kseger soldering iron controller
 * Original version by PTDreamer
 * Updated branch - for v2.1s, from newer fork: `LuckyTomas`, flawless_testing` branch
 * Merged to master, with Docs, and minor update by Dreamcat4
+* Adapted and refined with many improvements by DavidAlfa
+* Compatibility for STM32F072 added by DavidAlfa
+* Tested on STM32F072 (on a QUICKO T12 board). Needs further testing on other MCUs / boards
+* Should be more broadly compatible with other MCUs from STM32 family
 
 **WARNING:** Tip temperature measurement is still unreliable, this firmware might heat up your iron far above the temperature on display. Use with caution and at own risk!
 

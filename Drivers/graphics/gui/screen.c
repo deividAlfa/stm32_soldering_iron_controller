@@ -18,7 +18,7 @@ widget_t *screen_addWidget(screen_t *scr) {
 			last_widget = last_widget->next_widget;
 	}
 
-	widget_t *new_widget = _malloc(sizeof(widget_t));
+	widget_t *new_widget = malloc(sizeof(widget_t));
 	if(new_widget == NULL)
 		Error_Handler();
 	new_widget->next_widget = NULL;
@@ -36,7 +36,7 @@ widget_t * screen_tabToWidget(screen_t * scr, uint8_t tab) {
 		last_widget = scr->widgets;
 		while(last_widget) {
 			if(last_widget->type == widget_editable) {
-				if(last_widget->editable->selectable.tab == tab)
+				if(last_widget->editable.selectable.tab == tab)
 					return last_widget;
 			}
 			last_widget = last_widget->next_widget;
@@ -81,15 +81,15 @@ void default_screenDraw(screen_t *scr) {
 		}
 	}
 }
-displayOnly_wiget_t *dis;
+
 void default_screenUpdate(screen_t *scr) {
 	widget_t *last_widget = NULL;
 	if(scr->widgets) {
 		last_widget = scr->widgets;
-
+		displayOnly_wiget_t *dis;
 		while(last_widget) {
 			dis = extractDisplayPartFromWidget(last_widget);
-			if(dis->update && dis) {
+			if(dis->update) {
 					dis->update(last_widget);
 			}
 			last_widget = last_widget->next_widget;

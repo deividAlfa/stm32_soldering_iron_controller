@@ -7,39 +7,31 @@
 
 #include "widgets.h"
 #include "screen.h"
+#include <stdio.h>
 
 displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget) {
 	switch (widget->type) {
 		case widget_display:
-			return widget->displayWidget;
+			return &widget->displayWidget;
 			break;
 		case widget_editable:
-			return &widget->editable->inputData;
+			return &widget->editable.inputData;
 			break;
 		case widget_multi_option:
-			return &widget->multiOptionWidget->editable.inputData;
+			return &widget->multiOptionWidget.editable.inputData;
 		default:
 			return NULL;
 			break;
 	}
 }
 
-inline const UG_FONT * extractFontFromType(uint32_t type) {
-	const UG_FONT *FONT_PTRS[3] = { &FONT_6X8, &FONT_8X14, &FONT_16X26};
-
-	if(type<0 || type>= sizeof(FONT_PTRS)/sizeof(FONT_PTRS[0]) )
-		type=0;
-
-	return FONT_PTRS[type];
-}
-
 editable_wiget_t * extractEditablePartFromWidget(widget_t *widget) {
 	switch (widget->type) {
 		case widget_editable:
-			return widget->editable;
+			return &widget->editable;
 			break;
 		case widget_multi_option:
-			return &widget->multiOptionWidget->editable;
+			return &widget->multiOptionWidget.editable;
 		default:
 			return NULL;
 			break;
@@ -50,69 +42,30 @@ selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget) {
 		return NULL;
 	switch (widget->type) {
 		case widget_editable:
-			return &widget->editable->selectable;
+			return &widget->editable.selectable;
 			break;
 		case widget_multi_option:
-				return &widget->multiOptionWidget->editable.selectable;
+			return &widget->multiOptionWidget.editable.selectable;
 		case widget_button:
-			return &widget->buttonWidget->selectable;
+			return &widget->buttonWidget.selectable;
 		case widget_combo:
-			return &widget->comboBoxWidget->selectable;
+			return &widget->comboBoxWidget.selectable;
 		default:
 			return NULL;
 			break;
 	}
 }
-
-#define M_MALLOC(field, type)				\
-		w->field = _malloc(sizeof(type));		\
-		memset(w->field, 0, sizeof(type) );
-
 void widgetDefaultsInit(widget_t *w, widgetType t) {
 	w->type = t;
 	w->draw = &default_widgetDraw;
 	w->enabled = 1;
-	w->font_size = _FONT_8X14;
+	w->font_size = &FONT_8X14;
 	w->inverted = 0;
 	w->posX = 0;
 	w->posY = 0;
 	w->reservedChars = 5;
 	w->next_widget = NULL;
 	selectable_widget_t *sel;
-
-	w->displayWidget = NULL;
-	w->multiOptionWidget = NULL;
-	w->displayBmp = NULL;
-	w->comboBoxWidget = NULL;
-	w->buttonWidget = NULL;
-	w->editable = NULL;
-	if(t == widget_multi_option){
-		M_MALLOC(multiOptionWidget,multi_option_widget_t);
-//		w->multiOptionWidget = _malloc(sizeof(multi_option_widget_t));//&((multi_option_widget_t){0});
-//		memset(w->multiOptionWidget, 0, sizeof(multi_option_widget_t) );
-	}else if(t == widget_editable){
-		M_MALLOC(editable,editable_wiget_t);
-//		w->editable = _malloc(sizeof(editable_wiget_t));//&((multi_option_widget_t){0});
-//		memset(w->editable, 0, sizeof(editable_wiget_t) );
-	}else if(t == widget_bmp){
-		M_MALLOC(displayBmp,widget_bmp);
-//		w->displayBmp = _malloc(sizeof(widget_bmp));//&((multi_option_widget_t){0});
-//		memset(w->displayBmp, 0, sizeof(widget_bmp) );
-	}else if(t == widget_combo){
-		M_MALLOC(comboBoxWidget,comboBox_widget_t);
-//		w->comboBoxWidget = _malloc(sizeof(comboBox_widget_t));//&((multi_option_widget_t){0});
-//		memset(w->comboBoxWidget, 0, sizeof(comboBox_widget_t) );
-	}else if(t == widget_button){
-		M_MALLOC(buttonWidget,button_widget_t);
-//		w->buttonWidget = _malloc(sizeof(button_widget_t));//&((multi_option_widget_t){0});
-//		memset(w->buttonWidget, 0, sizeof(button_widget_t) );
-	}else if(t == widget_display){
-		M_MALLOC(displayWidget,displayOnly_wiget_t);
-//		w->displayWidget = _malloc(sizeof(displayOnly_wiget_t));//&((multi_option_widget_t){0});
-//		memset(w->displayWidget, 0, sizeof(displayOnly_wiget_t) );
-	}else{
-		w->multiOptionWidget =0;
-	}
 	sel = extractSelectablePartFromWidget(w);
 	if(sel) {
 		sel->previous_state = widget_idle;
@@ -123,98 +76,104 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	}
 	switch (t) {
 		case widget_bmp:
-			w->displayBmp->bmp.p = NULL;
+			w->displayBmp.bmp.p = NULL;
 			break;
 		case widget_display:
-			w->displayWidget->getData = NULL;
-			w->displayWidget->number_of_dec = 0;
-			w->displayWidget->type = field_uinteger16;
-			w->displayWidget->update = &default_widgetUpdate;
+			w->displayWidget.getData = NULL;
+			w->displayWidget.number_of_dec = 0;
+			w->displayWidget.type = field_uinteger16;
+			w->displayWidget.update = &default_widgetUpdate;
+			w->displayWidget.justify = justify_left;
 			break;
 		case widget_editable:
-			w->editable->big_step = 10;
-			w->editable->inputData.getData = NULL;
-			w->editable->inputData.number_of_dec = 0;
-			w->editable->inputData.type = field_uinteger16;
-			w->editable->inputData.update = &default_widgetUpdate;
-			w->editable->setData = NULL;
-			w->editable->step = 1;
-			w->editable->selectable.tab = 0;
-			w->editable->max_value = 0xFFFF;
-			w->editable->min_value = 0;
+			w->editable.big_step = 10;
+			w->editable.inputData.getData = NULL;
+			w->editable.inputData.number_of_dec = 0;
+			w->editable.inputData.type = field_uinteger16;
+			w->editable.inputData.update = &default_widgetUpdate;
+			w->editable.setData = NULL;
+			w->editable.step = 1;
+			w->editable.selectable.tab = 0;
+			w->editable.max_value = 0xFFFF;
+			w->editable.min_value = 0;
 			break;
 		case widget_multi_option:
-			w->multiOptionWidget->editable.big_step = 10;
-			w->multiOptionWidget->editable.inputData.getData = NULL;
-			w->multiOptionWidget->editable.inputData.number_of_dec = 0;
-			w->multiOptionWidget->editable.inputData.type = field_uinteger16;
-			w->multiOptionWidget->editable.inputData.update = &default_widgetUpdate;
-			w->multiOptionWidget->editable.setData = NULL;
-			w->multiOptionWidget->editable.step = 1;
-			w->multiOptionWidget->editable.selectable.tab = 0;
-			w->multiOptionWidget->editable.max_value = 0xFF;
-			w->multiOptionWidget->editable.min_value = 0;
-			w->multiOptionWidget->currentOption = 0;
-			w->multiOptionWidget->defaultOption = 0;
-			w->multiOptionWidget->numberOfOptions = 0;
-			w->multiOptionWidget->options = NULL;
+			w->multiOptionWidget.editable.big_step = 10;
+			w->multiOptionWidget.editable.inputData.getData = NULL;
+			w->multiOptionWidget.editable.inputData.number_of_dec = 0;
+			w->multiOptionWidget.editable.inputData.type = field_uinteger16;
+			w->multiOptionWidget.editable.inputData.update = &default_widgetUpdate;
+			w->multiOptionWidget.editable.setData = NULL;
+			w->multiOptionWidget.editable.step = 1;
+			w->multiOptionWidget.editable.selectable.tab = 0;
+			w->multiOptionWidget.editable.max_value = 0xFF;
+			w->multiOptionWidget.editable.min_value = 0;
+			w->multiOptionWidget.currentOption = 0;
+			w->multiOptionWidget.defaultOption = 0;
+			w->multiOptionWidget.numberOfOptions = 0;
+			w->multiOptionWidget.options = NULL;
 			break;
 		case widget_combo:
-			w->comboBoxWidget->currentItem = NULL;
-			w->comboBoxWidget->items = NULL;
+			w->comboBoxWidget.currentItem = NULL;
+			w->comboBoxWidget.items = NULL;
 			w->draw = &comboBoxDraw;
-			w->comboBoxWidget->currentScroll = 0;
-			w->comboBoxWidget->selectable.processInput = &comboBoxProcessInput;
+			w->comboBoxWidget.currentScroll = 0;
+			w->comboBoxWidget.selectable.processInput = &comboBoxProcessInput;
 			break;
 		case widget_button:
-			w->buttonWidget->action = NULL;
+			w->buttonWidget.action = NULL;
 			break;
 		case widget_label:
 			break;
 		default:
 			break;
 	}
-
-
 }
 
+
 static void insertDot(char *str, uint8_t dec) {
+	int p = strlen(str);
+	if(!dec){
+		return;
+	}
 	for(int x = strlen(str); x > (int)strlen(str) - (int)dec - 2; --x) {
 		str[x + 1] = str[x];
 	}
 	str[strlen(str) - dec - 1] = '.';
+
+	if(str[strlen(str) - dec - 2] == ' '){
+		str[strlen(str) - dec - 2] = '0';
+	}
 }
 
-volatile int str_len;
 void default_widgetUpdate(widget_t *widget) {
 	void * data;
 	displayOnly_wiget_t *dis = extractDisplayPartFromWidget(widget);
 	if(!dis)
 		return;
 	data = dis->getData();
-	UG_FontSelect(extractFontFromType(widget->font_size));
+	UG_FontSelect(widget->font_size);
 	uint16_t val_ui16;
+
 	char *str;
 	switch (widget->type) {
 	case widget_multi_option:
-	{
-#ifndef TODO
-
-		str_len = strlen(widget->multiOptionWidget->options[*(uint8_t*)data]);
-		strcpy(widget->displayString, widget->multiOptionWidget->options[*(uint8_t*)data]);
-#endif
-		widget->multiOptionWidget->currentOption = *(uint8_t*)data;
+		strcpy(widget->displayString, widget->multiOptionWidget.options[*(uint8_t*)data]);
+		widget->multiOptionWidget.currentOption = *(uint8_t*)data;
 		break;
-	}
 	default:
 		switch (dis->type) {
-			case field_uinteger16:
-				val_ui16 = *((uint16_t*)(data));
+		case field_uinteger16:
+			val_ui16 = *((uint16_t*)(data));
+
+			if(widget->displayWidget.justify == justify_right){
+				sprintf(widget->displayString,"%*d", (widget->reservedChars - dis->number_of_dec), val_ui16);
+			}
+			else{
 				sprintf(widget->displayString,"%d", val_ui16);
-				if(dis->number_of_dec) {
-					insertDot(widget->displayString, dis->number_of_dec);
 				}
-				break;
+			insertDot(widget->displayString, dis->number_of_dec);
+			break;
 			case field_string:
 				str = (char*)(data);
 				strcpy(widget->displayString, str);
@@ -225,7 +184,6 @@ void default_widgetUpdate(widget_t *widget) {
 		break;
 	}
 }
-
 void default_widgetDraw(widget_t *widget) {
 	if(!widget->enabled)
 		return;
@@ -241,7 +199,7 @@ void default_widgetDraw(widget_t *widget) {
 	UG_COLOR color;
 	uint8_t draw_frame = 0;
 	if(widget->type == widget_bmp) {
-		UG_DrawBMP(widget->posX ,widget->posY , &widget->displayBmp->bmp);
+		UG_DrawBMP(widget->posX ,widget->posY , &widget->displayBmp.bmp);
 		return;
 	}
 
@@ -266,7 +224,7 @@ void default_widgetDraw(widget_t *widget) {
 					break;
 			}
 	}
-	UG_FontSelect(extractFontFromType(widget->font_size));
+	UG_FontSelect(widget->font_size);
 	char space[sizeof(widget->displayString)] = "           ";
 	if((widget->type != widget_label) && (extractDisplayPartFromWidget(widget)->type != field_string)) {
 		space[widget->reservedChars] = (char)'\0';
@@ -282,37 +240,37 @@ void default_widgetDraw(widget_t *widget) {
 		widget->displayString[widget->reservedChars] = (char)'\0';
 		UG_PutString(widget->posX ,widget->posY , widget->displayString);
 		if(extractSelectablePartFromWidget(widget)->state == widget_edit)
-			UG_PutChar(widget->displayString[extractEditablePartFromWidget(widget)->current_edit], widget->posX + extractFontFromType(widget->font_size)->char_width * extractEditablePartFromWidget(widget)->current_edit, widget->posY, C_BLACK, C_WHITE);
+			UG_PutChar(widget->displayString[extractEditablePartFromWidget(widget)->current_edit], widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit, widget->posY, C_BLACK, C_WHITE);
 	}
 	else
 		UG_PutString(widget->posX ,widget->posY , widget->displayString);
 	if(draw_frame) {
 		UG_DrawFrame(widget->posX - 1, widget->posY - 1,
-											widget->posX + widget->reservedChars * extractFontFromType(widget->font_size)->char_width + 1,
-											widget->posY + extractFontFromType(widget->font_size)->char_height -1, color);
+											widget->posX + widget->reservedChars * widget->font_size->char_width + 1,
+											widget->posY + widget->font_size->char_height -1, color);
 	}
 }
 
 void comboBoxDraw(widget_t *widget) {
 	uint16_t yDim = UG_GetYDim() - widget->posY;
-	uint16_t height = extractFontFromType(widget->font_size)->char_height;
+	uint16_t height = widget->font_size->char_height;
 	height += 2;
-	comboBox_item_t *item = widget->comboBoxWidget->items;
+	comboBox_item_t *item = widget->comboBoxWidget.items;
 	uint8_t scroll = 0;
-	while(scroll < widget->comboBoxWidget->currentScroll) {
+	while(scroll < widget->comboBoxWidget.currentScroll) {
 		if(!item->next_item)
 			break;
 		item = item->next_item;
 		if(item->enabled)
 			++scroll;
 	}
-	UG_FontSelect(extractFontFromType(widget->font_size));
+	UG_FontSelect(widget->font_size);
 	for(uint8_t x = 0; x < yDim / height; ++x) {
-		UG_FillFrame(0, x * height + widget->posY -1, UG_GetXDim(), x * height + widget->posY + extractFontFromType(widget->font_size)->char_height, C_BLACK);
-		if(item == widget->comboBoxWidget->currentItem) {
-			UG_DrawFrame(0, x * height + widget->posY -1, UG_GetXDim() -1, x * height + widget->posY + extractFontFromType(widget->font_size)->char_height, C_WHITE);
+		UG_FillFrame(0, x * height + widget->posY -1, UG_GetXDim(), x * height + widget->posY + widget->font_size->char_height, C_BLACK);
+		if(item == widget->comboBoxWidget.currentItem) {
+			UG_DrawFrame(0, x * height + widget->posY -1, UG_GetXDim() -1, x * height + widget->posY + widget->font_size->char_height, C_WHITE);
 		}
-		UG_PutString(UG_GetXDim() / 2 - (strlen(item->text) / 2 * extractFontFromType(widget->font_size)->char_width) ,x * height + widget->posY, item->text);
+		UG_PutString(UG_GetXDim() / 2 - (strlen(item->text) / 2 * widget->font_size->char_width) ,x * height + widget->posY, item->text);
 		do {
 			item = item->next_item;
 		}while(item && !item->enabled);
@@ -324,7 +282,7 @@ void comboBoxDraw(widget_t *widget) {
 
 uint8_t comboItemToIndex(widget_t *combo, comboBox_item_t *item) {
 	uint8_t index = 0;
-	comboBox_item_t *i = combo->comboBoxWidget->items;
+	comboBox_item_t *i = combo->comboBoxWidget.items;
 	while(i && i != item) {
 		i = i->next_item;
 		if(i->enabled)
@@ -333,40 +291,40 @@ uint8_t comboItemToIndex(widget_t *combo, comboBox_item_t *item) {
 	return index;
 }
 int comboBoxProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t *state) {
-	uint8_t firstIndex = widget->comboBoxWidget->currentScroll;
+	uint8_t firstIndex = widget->comboBoxWidget.currentScroll;
 	uint16_t yDim = UG_GetYDim() - widget->posY;
-	uint16_t height = extractFontFromType(widget->font_size)->char_height;
+	uint16_t height = widget->font_size->char_height;
 	height += 2;
 	uint8_t maxIndex = yDim / height;
-	uint8_t lastIndex = widget->comboBoxWidget->currentScroll + maxIndex -1;
+	uint8_t lastIndex = widget->comboBoxWidget.currentScroll + maxIndex -1;
 	if(input == Click)
-		return widget->comboBoxWidget->currentItem->action_screen;
+		return widget->comboBoxWidget.currentItem->action_screen;
 	else if(input == Rotate_Increment) {
-		comboBox_item_t *current = widget->comboBoxWidget->currentItem->next_item;
+		comboBox_item_t *current = widget->comboBoxWidget.currentItem->next_item;
 		while(current && !current->enabled) {
 			current = current->next_item;
 		}
-			if(current) {
-				widget->comboBoxWidget->currentItem = current;
+		if(current) {
+			widget->comboBoxWidget.currentItem = current;
 			uint8_t index = comboItemToIndex(widget, current);
 			if(index > lastIndex)
-				++widget->comboBoxWidget->currentScroll;
+				++widget->comboBoxWidget.currentScroll;
 		}
-	}		
+	}
 	else if(input == Rotate_Decrement) {
-		if(widget->comboBoxWidget->currentItem == widget->comboBoxWidget->items)
+		if(widget->comboBoxWidget.currentItem == widget->comboBoxWidget.items)
 			return -1;
 		comboBox_item_t *current = NULL;
 		do {
-			current = widget->comboBoxWidget->items;
-			while(current->next_item != widget->comboBoxWidget->currentItem) {
+			current = widget->comboBoxWidget.items;
+			while(current->next_item != widget->comboBoxWidget.currentItem) {
 				current = current->next_item;
 			}
-			widget->comboBoxWidget->currentItem = current;
+			widget->comboBoxWidget.currentItem = current;
 		}while(!current->enabled);
 		uint8_t index = comboItemToIndex(widget, current);
 		if(index < firstIndex)
-			--widget->comboBoxWidget->currentScroll;
+			--widget->comboBoxWidget.currentScroll;
 	}
 	return -1;
 }
@@ -386,7 +344,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 			switch (sel->state) {
 				case widget_selected:
 					if(widget->type == widget_button)
-						return widget->buttonWidget->action(widget);
+						return widget->buttonWidget.action(widget);
 					if(extractDisplayPartFromWidget(widget)->type == field_string)
 						extractEditablePartFromWidget(widget)->current_edit = 0;
 					sel->state = widget_edit;
@@ -412,31 +370,45 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 			return -1;
 		}
 		if((widget->type == widget_editable) && (extractSelectablePartFromWidget(widget)->state == widget_edit)) {
-			int tmp;
+			uint16_t ui16;
 			char *str;
 			int8_t inc;
-			if(fabs(state->Diff) > 1) {
-				inc = widget->editable->big_step* state->Diff;
-				//if(state->Diff < 0)
-//					inc = -1 * inc;
+			if(fabs(state->Diff) > 2) {
+				inc = widget->editable.big_step;
+				if(state->Diff < 0)
+					inc = -1 * inc;
 			}
 			else
-				inc = widget->editable->step * state->Diff;
-			switch (widget->editable->inputData.type) {
+				inc = widget->editable.step * state->Diff;
+			switch (widget->editable.inputData.type) {
 			case field_uinteger16:
-				tmp = *(uint16_t*)widget->editable->inputData.getData();
-				tmp = tmp + inc;
-				if(tmp > widget->editable->max_value){
-					tmp = widget->editable->max_value;
-				}else if(tmp < 0){
-					tmp = 270; //temperature settigns feature, easy access 270C
-				}else if(tmp < widget->editable->min_value){
-					tmp = widget->editable->min_value;
+				ui16 = *(uint16_t*)widget->editable.inputData.getData();
+				if(inc>0){
+					if((uint16_t)(ui16 + inc)<ui16){
+						ui16 = widget->editable.max_value;		// Check we don't overflow the int
+					}
+					else{
+						ui16 = ui16 + inc;
+					}
+					if(ui16 > widget->editable.max_value){		// Check we don't pass the max value
+						ui16 = widget->editable.max_value;
+					}
 				}
-				widget->editable->setData(&tmp);
+				else{
+					if((uint16_t)(ui16 + inc)>ui16){
+						ui16 = widget->editable.min_value;		// Check we don't underflow the int
+					}
+					else{
+						ui16 = ui16 + inc;
+					}
+					if(ui16 < widget->editable.min_value){		// Check we don't pass the min value
+						ui16 = widget->editable.min_value;
+					}
+				}
+				widget->editable.setData(&ui16);
 				break;
 			case field_string:
-				str = (char*)widget->editable->inputData.getData();
+				str = (char*)widget->editable.inputData.getData();
 				strcpy(widget->displayString, str);
 				widget->displayString[extractEditablePartFromWidget(widget)->current_edit] += inc;
 				if(widget->displayString[extractEditablePartFromWidget(widget)->current_edit] < 48) {
@@ -454,7 +426,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 						widget->displayString[extractEditablePartFromWidget(widget)->current_edit] = 122;
 				}
 
-				widget->editable->setData(widget->displayString);
+				widget->editable.setData(widget->displayString);
 				break;
 			default:
 				break;
@@ -462,16 +434,16 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 			return -1;
 		}
 		else if((widget->type == widget_multi_option) && (extractSelectablePartFromWidget(widget)->state == widget_edit)) {
-			int temp = widget->multiOptionWidget->currentOption;
+			int temp = widget->multiOptionWidget.currentOption;
 			if(input == Rotate_Increment)
 				++temp;
 			else if(input == Rotate_Decrement)
 				--temp;
 			if(temp < 0)
-				temp = widget->multiOptionWidget->numberOfOptions - 1;
-			else if(temp > widget->multiOptionWidget->numberOfOptions -1)
+				temp = widget->multiOptionWidget.numberOfOptions - 1;
+			else if(temp > widget->multiOptionWidget.numberOfOptions -1)
 				temp = 0;
-			widget->multiOptionWidget->editable.setData(&temp);
+			widget->multiOptionWidget.editable.setData(&temp);
 		}
 		else if (sel->state == widget_selected) {
 			uint8_t next = 0xFF;
@@ -525,7 +497,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 }
 
 comboBox_item_t *comboAddItem(widget_t *combo, char *label, uint8_t actionScreen) {
-	comboBox_item_t *item = _malloc(sizeof(comboBox_item_t));
+	comboBox_item_t *item = malloc(sizeof(comboBox_item_t));
 	if(!item)
 		return NULL;
 	item->text = label;
@@ -533,10 +505,10 @@ comboBox_item_t *comboAddItem(widget_t *combo, char *label, uint8_t actionScreen
 	item->action_screen = actionScreen;
 	item->enabled = 1;
 
-	comboBox_item_t *last = combo->comboBoxWidget->items;
+	comboBox_item_t *last = combo->comboBoxWidget.items;
 	if(!last) {
-		combo->comboBoxWidget->items = item;
-		combo->comboBoxWidget->currentItem = item;
+		combo->comboBoxWidget.items = item;
+		combo->comboBoxWidget.currentItem = item;
 		return item;
 	}
 	while(last->next_item){

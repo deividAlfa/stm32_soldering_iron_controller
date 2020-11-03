@@ -1,6 +1,2 @@
-Debug*
-
-private/
+/Debug/
 /Release/
-.settings
-*.kra

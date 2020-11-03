@@ -7,6 +7,8 @@
  */
 
 #include "rotary_encoder.h"
+volatile RE_State_t RE1_Data;
+
 
 /* Return with status macro */
 #define RETURN_WITH_STATUS(p, s) (p)->Rotation = s; return s

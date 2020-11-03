@@ -10,7 +10,7 @@
 
 #define BIG_TRESHOLD 200
 
-#include "stm32f1xx_hal.h"
+#include "stm32f0xx_hal.h"
 
 typedef enum {
 	Rotate_Increment, /*!< Encoder was incremented */
@@ -62,6 +62,6 @@ void RE_Init(RE_State_t* data, GPIO_TypeDef* GPIO_A_Port, uint16_t GPIO_A_Pin, G
 void RE_SetMode(RE_State_t* data, RE_Mode_t mode);
 RE_Rotation_t RE_Get(RE_State_t* data);
 void RE_Process(RE_State_t* data);
+extern volatile RE_State_t RE1_Data;
 
-extern RE_State_t RE1_Data;
 #endif /* GENERALIO_ROTARY_ENCODER_H_ */

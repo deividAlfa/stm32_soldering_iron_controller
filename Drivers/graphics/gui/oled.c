@@ -8,12 +8,14 @@
 
 #include <stdlib.h>
 #include "oled.h"
+#include "../ssd1306.h"
+#include "setup.h"
 
 static screen_t *screens = NULL;
 static screen_t *current_screen;
 
 screen_t *oled_addScreen(uint8_t index) {
-	screen_t *ret = _malloc(sizeof(screen_t));
+	screen_t *ret = malloc(sizeof(screen_t));
 	if(!ret)
 		Error_Handler();
 	ret->index = index;
@@ -39,6 +41,11 @@ screen_t *oled_addScreen(uint8_t index) {
 }
 
 void oled_draw() {
+
+#ifndef Soft_SPI
+	while(oled_status!=oled_idle);	//Wait for DMA to finish sending the buffer ( 1mS at most )
+#endif
+
 	current_screen->draw(current_screen);
 	UG_Update();
 	update_display();
@@ -59,6 +66,8 @@ void oled_init() {
 		}
 	}
 }
+
+
 
 void oled_processInput(RE_Rotation_t input, RE_State_t *state) {
 	int ret = current_screen->processInput(current_screen, input, state);

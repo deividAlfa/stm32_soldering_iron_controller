@@ -8,39 +8,40 @@
 #ifndef GENERALIO_ADC_GLOBAL_H_
 #define GENERALIO_ADC_GLOBAL_H_
 
-#include "stm32f1xx_hal.h"
-#include "main.h"
 
-extern ADC_HandleTypeDef hadc1;
-extern ADC_HandleTypeDef hadc2;
-
-void MX_ADC2_Init(ADC_HandleTypeDef * hadc2);
-void MX_ADC1_Init(ADC_HandleTypeDef * hadc1);
-
-#ifndef LEAVE_ONLY_IRON_MEAS
-typedef struct {
-	uint32_t iron;
-	uint32_t cold_junction;
-	uint32_t supply;
-} adc_measures_t;
-#else
+#include "stm32f0xx_hal.h"
+#include "setup.h"
 
 typedef struct {
-	uint16_t iron[ADC_MEASURES_LEN];
-//	uint32_t cold_junction;
-//	uint32_t supply;
+	uint16_t reference;
+	uint16_t cold_junction;
+	uint16_t supply;
+	uint16_t iron;
+	//uint16_t int_temp;
+	//uint16_t int_ref;
 } adc_measures_t;
-#endif
+
+typedef struct{
+	  uint16_t	*adc_buffer;
+	  uint16_t 	adc_buffer_size;
+	  uint16_t  adc_buffer_elements;
+	  uint16_t	rolling_buffer_size;
+	  uint16_t  rolling_buffer[RollingBufferSize];		//from Setup.h
+	  uint16_t	rolling_buffer_index;
+	  uint16_t	last_avg;
+} RollingTypeDef_t;
+
+typedef enum { adc_dma_active, adc_dma_idle } adc_dma_status_t;
+
+extern adc_dma_status_t adc_dma_status;
+extern volatile adc_measures_t adc_measures[Adc_Buffer_Size];
+
+uint16_t ADC_to_mV (uint16_t adc);
+void RollingUpdate(RollingTypeDef_t* Data);
+void ADC_Set(ADC_HandleTypeDef *adc);
+uint8_t ADC_Cal(void);
+uint8_t ADC_Stop_DMA(void);
+uint8_t  ADC_Start_DMA(void);
 
 
-extern adc_measures_t adc_measures;
-
-typedef enum {iron_temp_measure_idle
-	, iron_temp_measure_pwm_stopped
-	, iron_temp_measure_requested
-	, iron_temp_measure_started
-	, iron_temp_measure_ready
-} iron_temp_measure_state_t;
-extern volatile iron_temp_measure_state_t iron_temp_measure_state;
-extern volatile uint16_t iron_temp_adc_avg;
 #endif /* GENERALIO_ADC_GLOBAL_H_ */

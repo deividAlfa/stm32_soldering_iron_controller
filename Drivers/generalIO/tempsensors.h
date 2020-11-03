@@ -8,20 +8,29 @@
 #ifndef GENERALIO_TEMPSENSORS_H_
 #define GENERALIO_TEMPSENSORS_H_
 
-#include "stm32f1xx_hal.h"
-#include  "adc_global.h"
-#include "settings.h"
+#include "stm32f0xx_hal.h"
+#include "adc_global.h"
+#include "../../Core/Src/settings.h"
+#include "../../Core/inc/setup.h"
 
-uint16_t readColdJunctionSensorTemp_mC(void);
+int16_t readColdJunctionSensorTemp_C_x10(void);
 uint16_t coldJunctionTemp_mC_To_uV(int tempX10);
+uint16_t readIntTemp_mC(void);
 uint16_t readTipSensorADC_Avg(void);
-float readTipTemperatureCompensated(uint8_t new);
+uint16_t readTipTemperatureCompensated(uint8_t new);
 uint16_t realTempToADC(uint16_t real);
 void setCurrentTip(uint8_t tip);
 tipData * getCurrentTip();
 
-float map(float x, float in_min, float in_max, float out_min, float out_max);
-float map_w_limits(float x, float in_min, float in_max, float out_min, float out_max);
-float adc2Human(uint16_t);
+long map(long x, long in_min, long in_max, long out_min, long out_max);
+uint16_t adc2Human(uint16_t);
 uint16_t human2adc(uint16_t);
+
+
+
+
+
+
+
 #endif /* GENERALIO_TEMPSENSORS_H_ */
+

@@ -10,6 +10,6 @@
 
 #include "oled.h"
 
-void guiInit();
+void guiInit(TIM_HandleTypeDef *tim);
 void guiDraw();
 #endif /* GRAPHICS_GUI_GUI_H_ */
