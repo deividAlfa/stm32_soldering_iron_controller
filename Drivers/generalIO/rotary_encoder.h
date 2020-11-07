@@ -10,7 +10,7 @@
 
 #define BIG_TRESHOLD 200
 
-#include "stm32f0xx_hal.h"
+#include "main.h"
 
 typedef enum {
 	Rotate_Increment, /*!< Encoder was incremented */

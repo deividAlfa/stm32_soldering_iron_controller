@@ -8,8 +8,9 @@
 #ifndef GRAPHICS_SSD1306_H_
 #define GRAPHICS_SSD1306_H_
 #include "ugui.h"
-#include "stm32f0xx_hal.h"
 #include "main.h"
+#include "main.h"
+#include "setup.h"
 
 //For checking if SPI DMA is active. Check before drawing the buffer.
 typedef enum {
@@ -24,9 +25,6 @@ typedef enum {
 #define Oled_Clear_DC() HAL_GPIO_WritePin(OLED_DC_GPIO_Port, OLED_DC_Pin,GPIO_PIN_RESET)
 #define Oled_Set_RES() HAL_GPIO_WritePin(OLED_RST_GPIO_Port, OLED_RST_Pin,GPIO_PIN_SET)
 #define Oled_Clear_RES() HAL_GPIO_WritePin(OLED_RST_GPIO_Port, OLED_RST_Pin,GPIO_PIN_RESET)
-
-
-
 
 extern volatile unsigned char OledBuffer[]; // 128x64 1BPP OLED
 extern volatile oled_status_t oled_status;

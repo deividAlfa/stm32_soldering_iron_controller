@@ -63,34 +63,41 @@ int NTC_table[257] = {
 
 
 int16_t readColdJunctionSensorTemp_C_x10(void) {
-	int16_t p1,p2;
+	int16_t p1, p2;
 	int16_t temp;
 	static RollingTypeDef_t data = {
-		adc_buffer: 			(uint16_t*)&adc_measures[0].cold_junction,
-		adc_buffer_size: 		Adc_Buffer_Size,
-		adc_buffer_elements:	Adc_Buffer_Elements,
-		rolling_buffer_size: 	RollingBufferSize,
-		rolling_buffer_index: 	0,
-		last_avg: 				0
+			adc_buffer: (uint16_t*) &adc_measures[0].cold_junction,
+			adc_buffer_size: Adc_Buffer_Size,
+			adc_buffer_elements: Adc_Buffer_Elements,
+			rolling_buffer_size: RollingBufferSize,
+			rolling_buffer_index: 0,
+			last_avg: 0,
+			init: 0
 	};
+
+	if (!data.init) {
+		uint16_t x = data.rolling_buffer_size;
+		for (x = 0; x < data.rolling_buffer_size; x++) {
+			data.rolling_buffer[x] = 0;
+		}
+		data.init = 1;
+	}
 
 	RollingUpdate(&data);	//Update average
 
 	/* Estimate the interpolating point before and after the ADC value. */
-	p1 = NTC_table[ (data.last_avg >> 4)  ];
-	p2 = NTC_table[ (data.last_avg >> 4)+1];
+	p1 = NTC_table[(data.last_avg >> 4)];
+	p2 = NTC_table[(data.last_avg >> 4) + 1];
 
 	/* Interpolate between both points. */
-	temp= p1 - ( (p1-p2) * (data.last_avg & 0x000F) ) / 16;
+	temp = p1 - ((p1 - p2) * (data.last_avg & 0x000F)) / 16;
 
-	return (int16_t)temp;
+	return (int16_t) temp;
 }
 
-
-
-uint16_t readTipTemperatureCompensated(uint8_t new){
+uint16_t readTipTemperatureCompensated(uint8_t new) {
 	static uint16_t last_value;
-	if(!new)
+	if (!new)
 		return last_value;
 	last_value = adc2Human(Iron.Temp.Temp_Adc_Avg);
 	return last_value;
@@ -101,66 +108,71 @@ void setCurrentTip(uint8_t tip) {
 	currentPID = currentTipData->PID;
 }
 
-tipData * getCurrentTip() {
+tipData* getCurrentTip() {
 	return currentTipData;
 }
 // Translate the human readable temperature into internal value
 uint16_t human2adc(uint16_t t) {
-  uint16_t temp = t;
-  uint16_t ambientTemperature = readColdJunctionSensorTemp_C_x10() / 10;
-  if(ambientTemperature > 50)
-	  ambientTemperature = 50;
-  if(t > ambientTemperature)
-	  t = t - ambientTemperature;
-  if (t < temp_minC) t = temp_minC;
-  if (t > temp_maxC) t = temp_maxC;
-  if (t >= currentTipData->calADC_At_300)
-    temp = map(t, 300, 400, currentTipData->calADC_At_300, currentTipData->calADC_At_400);
-  else
-    temp = map(t , 200, 300, currentTipData->calADC_At_200, currentTipData->calADC_At_300);
+	uint16_t temp = t;
+	int16_t ambientTemperature = readColdJunctionSensorTemp_C_x10() / 10;
+	if (ambientTemperature > 50)
+		ambientTemperature = 50;
+	if (t > ambientTemperature)
+		t = t - ambientTemperature;
+	if (t < temp_minC)
+		t = temp_minC;
+	if (t > temp_maxC)
+		t = temp_maxC;
+	if (t >= currentTipData->calADC_At_300)
+		temp = map(t, 300, 400, currentTipData->calADC_At_300,
+				currentTipData->calADC_At_400);
+	else
+		temp = map(t, 200, 300, currentTipData->calADC_At_200,
+				currentTipData->calADC_At_300);
 
-  uint16_t tH = adc2Human(temp)- ambientTemperature;
-  if(tH == t)
-	  return temp;
-  if(tH < t) {
-	  for(uint16_t x = 0; x < 1000; ++x) {
-		  ++temp;
-		  tH = adc2Human(temp)- ambientTemperature;
-		  if(tH >= t)
-			  return temp;
-	  }
-  }
-  if(tH > t) {
-	  for(uint16_t x = 0; x < 1000; ++x) {
-		  --temp;
-		  tH = adc2Human(temp)- ambientTemperature;
-		  if(tH <= t)
-			  return temp;
-	  }
-  }
-  return temp;
+	uint16_t tH = adc2Human(temp) - ambientTemperature;
+	if (tH == t)
+		return temp;
+	if (tH < t) {
+		for (uint16_t x = 0; x < 1000; ++x) {
+			++temp;
+			tH = adc2Human(temp) - ambientTemperature;
+			if (tH >= t)
+				return temp;
+		}
+	}
+	if (tH > t) {
+		for (uint16_t x = 0; x < 1000; ++x) {
+			--temp;
+			tH = adc2Human(temp) - ambientTemperature;
+			if (tH <= t)
+				return temp;
+		}
+	}
+	return temp;
 }
 // Translate temperature from internal units to the human readable value (Celsius or Farenheit)
 uint16_t adc2Human(uint16_t adc_value) {
-  int16_t tempH = 0;
-  int16_t ambientTemperature;
-  ambientTemperature = readColdJunctionSensorTemp_C_x10();
-  ambientTemperature /= 10;
-  if (adc_value < currentTipData->calADC_At_200) {
-    tempH = map(adc_value, 0, currentTipData->calADC_At_200, ambientTemperature, 200);
-  } else if (adc_value >= currentTipData->calADC_At_300) {
-    tempH = map(adc_value, currentTipData->calADC_At_300, currentTipData->calADC_At_400, 300, 400);
-  } else {
-    tempH = map(adc_value, currentTipData->calADC_At_200, currentTipData->calADC_At_300, 200, 300);
-  }
-  return tempH + ambientTemperature;
+	int16_t tempH = 0;
+	int16_t ambientTemperature;
+	ambientTemperature = readColdJunctionSensorTemp_C_x10() / 10;
+	if (adc_value < currentTipData->calADC_At_200) {
+		tempH = map(adc_value, 0, currentTipData->calADC_At_200,
+				ambientTemperature, 200);
+	} else if (adc_value >= currentTipData->calADC_At_300) {
+		tempH = map(adc_value, currentTipData->calADC_At_300,
+				currentTipData->calADC_At_400, 300, 400);
+	} else {
+		tempH = map(adc_value, currentTipData->calADC_At_200,
+				currentTipData->calADC_At_300, 200, 300);
+	}
+	return tempH + ambientTemperature;
 }
 
-long map(long x, long in_min, long in_max, long out_min, long out_max)
-{
+long map(long x, long in_min, long in_max, long out_min, long out_max) {
 	long ret;
 	ret = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-	if(ret < 0)
+	if (ret < 0)
 		ret = 0;
 	return ret;
 }

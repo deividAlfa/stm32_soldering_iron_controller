@@ -8,7 +8,7 @@
 #ifndef PID_H_
 #define PID_H_
 
-#include "stm32f0xx_hal.h"
+#include "main.h"
 typedef struct pid_values {
 	double max;
 	double min;

@@ -515,9 +515,9 @@ static void MX_GPIO_Init(void)
 void Enable_Soft_SPI_SPI(void){
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-	HAL_SPI_MspDeInit(&hspi2);
-	 /*Configure GPIO pins : LED_Pin OLED_DC_Pin OLED_RST_Pin */
-	 GPIO_InitStruct.Pin = LED_Pin|OLED_DC_Pin|OLED_RST_Pin|OLED_SCK_Pin|OLED_SDO_Pin;
+	HAL_SPI_MspDeInit(&SPI_DEVICE);
+	 /*Configure GPIO pins : OLED_DC_Pin OLED_RST_Pin */
+	 GPIO_InitStruct.Pin = OLED_DC_Pin|OLED_RST_Pin|SCK_Pin|SDO_Pin;
 	 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	 GPIO_InitStruct.Pull = GPIO_NOPULL;
 	 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -528,7 +528,7 @@ void Enable_Soft_SPI_SPI(void){
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi){
 	static uint8_t OledRow=0;
 
-	if(hspi != &hspi2){		return; 	}
+	if(hspi != &SPI_DEVICE){		return; 	}
 	if(OledRow>7){															//We sent the last row of the OLED buffer data. Return without retriggering DMA.
 				OledRow=0;
 				oled_status=oled_idle;
@@ -537,7 +537,11 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi){
 		}
 	oled_status=oled_sending_cmd;
 	write_cmd(0xB0|OledRow);
+	#ifdef SH1106_FIX
 	write_cmd(0x02);
+	#else
+	write_cmd(0x00);
+	#endif
 	write_cmd(0x10);
 	oled_status=oled_sending_data;
 	Oled_Clear_CS();
@@ -608,8 +612,8 @@ void CheckReset(void){
 	 UG_SetForecolor(C_WHITE);
 	 UG_SetBackcolor(C_BLACK);
 	 UG_PutString(10,20,"HOLD BUTTON");
-	 UG_PutString(10,32," TO RESET");
-	 UG_PutString(10,44,"DEFAULTS!!");
+	 UG_PutString(18,32,"TO RESET");
+	 UG_PutString(16,44,"DEFAULTS!!");
 	 update_display();
 
 	 uint16_t ResetTimer= HAL_GetTick();

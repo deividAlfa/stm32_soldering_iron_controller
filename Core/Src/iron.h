@@ -8,7 +8,7 @@
 #ifndef IRON_H_
 #define IRON_H_
 
-#include "stm32f0xx_hal.h"
+#include "main.h"
 #include "pid.h"
 
 typedef void (*setTemperatureReachedCallback)(uint16_t);
@@ -40,35 +40,35 @@ typedef struct tipData {
 
 typedef struct {
 
-	TIM_HandleTypeDef *Pwm_Timer;
-	uint32_t Pwm_Channel;
-	uint8_t CurrentIronPower;
+	TIM_HandleTypeDef 	*Pwm_Timer;
+	uint32_t 		Pwm_Channel;
+	uint8_t 		CurrentIronPower;
 
 	struct{
-		uint8_t TemperatureReachedFlag;
-		uint16_t CurrentSetTemperature;
-		uint16_t UserCurrentSetTemperature;
-		uint32_t LastSetTemperatureTime;
-		uint8_t SetTemperatureChanged;
-		uint16_t Temp_Adc_Avg;
-		uint16_t TempSetPoint;
+		uint8_t		TemperatureReachedFlag;
+		uint16_t 	CurrentSetTemperature;
+		uint16_t 	UserCurrentSetTemperature;
+		uint32_t 	LastSetTemperatureTime;
+		uint8_t 	SetTemperatureChanged;
+		uint16_t 	Temp_Adc_Avg;
+		uint16_t 	TempSetPoint;
 	}Temp;
 	struct{
-		uint8_t Mode ;
-		uint16_t SetPoint;
+		uint8_t 	Enabled ;
+		uint16_t 	SetPoint;
 	}Debug;
 	struct{
-		uint8_t isOn;
-		uint8_t Active;
-		uint32_t PwmStoppedSince;
-		uint32_t StartOfNoActivityTime;
-		uint8_t ProcessUpdate;
+		uint8_t 	isOn;
+		uint8_t 	Active;
+		uint32_t 	PwmStoppedSince;
+		uint32_t 	StartOfNoActivityTime;
+		uint8_t 	ProcessUpdate;
 		iron_temp_measure_state_t TempMeasureState;
-		iron_mode_t CurrentMode;
-		uint32_t CurrentModeTimer;
+		iron_mode_t	CurrentMode;
+		uint32_t 	CurrentModeTimer;
 	} Status;
-	ironSleep_t CurrentSleepSettings;
-	ironBoost_t CurrentBoostSettings;
+	ironSleep_t 	CurrentSleepSettings;
+	ironBoost_t 	CurrentBoostSettings;
 
 }iron_t;
 

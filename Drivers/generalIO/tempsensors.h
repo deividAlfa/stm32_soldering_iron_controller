@@ -8,7 +8,7 @@
 #ifndef GENERALIO_TEMPSENSORS_H_
 #define GENERALIO_TEMPSENSORS_H_
 
-#include "stm32f0xx_hal.h"
+#include "main.h"
 #include "adc_global.h"
 #include "../../Core/Src/settings.h"
 #include "../../Core/inc/setup.h"

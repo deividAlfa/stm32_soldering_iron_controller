@@ -78,6 +78,10 @@ void Error_Handler(void);
 #define OLED_DC_GPIO_Port GPIOB
 #define OLED_RST_Pin GPIO_PIN_12
 #define OLED_RST_GPIO_Port GPIOB
+#define SCK_Pin GPIO_PIN_13
+#define SCK_GPIO_Port GPIOB
+#define SDO_Pin GPIO_PIN_15
+#define SDO_GPIO_Port GPIOB
 #define ROT_ENC_R_Pin GPIO_PIN_8
 #define ROT_ENC_R_GPIO_Port GPIOA
 #define ROT_ENC_R_EXTI_IRQn EXTI4_15_IRQn

@@ -9,7 +9,7 @@
 #define GENERALIO_ADC_GLOBAL_H_
 
 
-#include "stm32f0xx_hal.h"
+#include "main.h"
 #include "setup.h"
 
 typedef struct {
@@ -29,6 +29,7 @@ typedef struct{
 	  uint16_t  rolling_buffer[RollingBufferSize];		//from Setup.h
 	  uint16_t	rolling_buffer_index;
 	  uint16_t	last_avg;
+	  uint8_t	init;
 } RollingTypeDef_t;
 
 typedef enum { adc_dma_active, adc_dma_idle } adc_dma_status_t;

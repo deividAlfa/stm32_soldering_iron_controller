@@ -219,8 +219,7 @@ void main_screen_setup(screen_t *scr) {
 	//ºC label next to iron tip temperature
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
-	s = "\247C";
-	strcpy(widget->displayString, s);
+	strcpy(widget->displayString, "\247C");
 	widget->posX = 50 + 3 * 12 -5 + 3;
 	widget->posY = 18;
 	widget->font_size = &FONT_16X26;
@@ -243,15 +242,14 @@ void main_screen_setup(screen_t *scr) {
 	//power percentage symbol
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
-	s = "%";
-	strcpy(widget->displayString, s);
+	strcpy(widget->displayString, "%");
 	widget->posX = 119;
 	widget->posY = 0;
 	widget->font_size = &FONT_8X14;
 	widget->reservedChars = 1;
 	widget->draw = &default_widgetDraw;
 
-
+	// NO IRON widget
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
 	strcpy(widget->displayString, "NO IRON");
@@ -296,13 +294,13 @@ void main_screen_setup(screen_t *scr) {
 	widget->displayWidget.number_of_dec = 1;
 	widget->displayWidget.type = field_uinteger16;
 	widget->reservedChars = 4;
+	widget->displayWidget.justify = justify_right;
 
 	//V input display "V"
 	//power percentage symbol
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
-	s ="V";
-	strcpy(widget->displayString, s);
+	strcpy(widget->displayString, "V");
 	widget->posX = 33;
 	widget->posY = 0;
 	widget->font_size = &FONT_8X14;

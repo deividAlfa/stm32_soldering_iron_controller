@@ -1,5 +1,5 @@
 #include "ssd1306.h"
-#include "stm32f0xx_hal.h"
+#include "main.h"
 #include "setup.h"
 #include "main.h"
 #define SH1106_FIX
@@ -24,11 +24,11 @@ void spi_send(uint8_t SPIData){
 	for (SPICount = 0; SPICount < 8; SPICount++)          // Prepare to clock out the Address byte
 		  {
 		    if (SPIData & 0x80)                                 // Check for a 1
-		    	HAL_GPIO_WritePin(OLED_SDO_GPIO_Port, OLED_SDO_Pin, GPIO_PIN_SET);
+		    	HAL_GPIO_WritePin(SDO_GPIO_Port, SDO_Pin, GPIO_PIN_SET);
 		    else
-		    	HAL_GPIO_WritePin(OLED_SDO_GPIO_Port, OLED_SDO_Pin, GPIO_PIN_RESET);
-		    HAL_GPIO_WritePin(OLED_SCK_GPIO_Port, OLED_SCK_Pin, GPIO_PIN_SET);
-		    HAL_GPIO_WritePin(OLED_SCK_GPIO_Port, OLED_SCK_Pin, GPIO_PIN_RESET);
+		    	HAL_GPIO_WritePin(SDO_GPIO_Port, SDO_Pin, GPIO_PIN_RESET);
+		    HAL_GPIO_WritePin(SCK_GPIO_Port, SCK_Pin, GPIO_PIN_SET);
+		    HAL_GPIO_WritePin(SCK_GPIO_Port, SCK_Pin, GPIO_PIN_RESET);
 		    SPIData <<= 1;                                      // Rotate to get the next bit
 
 		  }
@@ -77,16 +77,11 @@ void update_display( void )
 		write_cmd(0xB0|p);
 
 #ifdef SH1106_FIX
-#warning "BUILDING FOR 1.3inch SCREEN"
-
 		write_cmd(0x02);
 
 #else
-
 		write_cmd(0x00);
-
 #endif
-
 		write_cmd(0x10);
 		write_data(OledBuffer + p * 128);
    }
@@ -100,16 +95,10 @@ void send_display_bf(uint8_t *oled_buffer)
 	   write_cmd(0xB0|p);
 
 #ifdef SH1106_FIX
-#warning "BUILDING FOR 1.3inch SCREEN"
-
       write_cmd(0x02);
-
 #else
-
       write_cmd(0x00);
-
 #endif
-
       write_cmd(0x10);
       write_data(oled_buffer + p * 128);
    }

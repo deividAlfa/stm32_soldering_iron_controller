@@ -29,7 +29,7 @@ volatile iron_t Iron = {
 		TempSetPoint:				0,
 	},
 	{//Debug
-		Mode:						0,
+		Enabled:					0,
 		SetPoint:					0,
 	},
 	{//Status
@@ -63,7 +63,7 @@ void setDebugSetPoint(uint16_t value) {
 	Iron.Debug.SetPoint = value;
 }
 void setDebugMode(uint8_t value) {
-	Iron.Debug.Mode = value;
+	Iron.Debug.Enabled = value;
 }
 static void temperatureReached(uint16_t temp) {
 	setTemperatureReachedCallbackStruct_t *s = temperatureReachedCallbacks;
@@ -200,9 +200,17 @@ void handleIron(void) {
 		adc_buffer_elements:	Adc_Buffer_Elements,
 		rolling_buffer_size: 	RollingBufferSize,
 		rolling_buffer_index: 	0,
-		last_avg: 				0
+		last_avg: 				0,
+		init: 					0
 	};
 
+	if(!data.init){
+		uint16_t x = data.rolling_buffer_size;
+		for(x=0;x<data.rolling_buffer_size;x++) {
+			data.rolling_buffer[x]=0;
+		}
+		data.init=1;
+	}
 
 	if(Iron.Status.TempMeasureState == iron_temp_measure_requested){		//Stop PWM
 		#ifdef	PWM_CHx
@@ -245,12 +253,13 @@ void handleIron(void) {
 
 	readTipTemperatureCompensated(1);
 	Iron.Status.TempMeasureState = iron_temp_measure_idle;
-
-	if(Iron.Temp.SetTemperatureChanged && (CurrentTime - ((uint32_t)Iron.Temp.LastSetTemperatureTime*1000) > 5000)) {
-		Iron.Temp.SetTemperatureChanged = 0;
-		if(systemSettings.setTemperature != Iron.Temp.UserCurrentSetTemperature) {
-			systemSettings.setTemperature = Iron.Temp.CurrentSetTemperature;
-			saveSettings();
+	if(CurrTemp_Save_Time){
+		if(Iron.Temp.SetTemperatureChanged && (CurrentTime - ((uint32_t)Iron.Temp.LastSetTemperatureTime*1000) > CurrTemp_Save_Time)) {
+			Iron.Temp.SetTemperatureChanged = 0;
+			if(systemSettings.setTemperature != Iron.Temp.UserCurrentSetTemperature) {
+				systemSettings.setTemperature = Iron.Temp.CurrentSetTemperature;
+				saveSettings();
+			}
 		}
 	}
 	switch (Iron.Status.CurrentMode) {
@@ -286,7 +295,7 @@ void handleIron(void) {
 	}
 
 	  double set;
-	  if(Iron.Debug.Mode)
+	  if(Iron.Debug.Enabled)
 		  set = calculatePID(Iron.Debug.SetPoint, Iron.Temp.Temp_Adc_Avg);
 	  else
 		  set = calculatePID(human2adc(Iron.Temp.TempSetPoint), Iron.Temp.Temp_Adc_Avg);
