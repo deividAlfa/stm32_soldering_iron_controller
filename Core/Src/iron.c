@@ -253,7 +253,7 @@ void handleIron(void) {
 	readTipTemperatureCompensated(1);
 	Iron.Status.TempMeasureState = iron_temp_measure_idle;
 	if(CurrTemp_Save_Time_S){
-		if(Iron.Temp.SetTemperatureChanged && (CurrentTime - ((uint32_t)Iron.Temp.LastSetTemperatureTime*1000) > CurrTemp_Save_Time_S*1000)) {
+		if(Iron.Temp.SetTemperatureChanged && (CurrentTime - ((uint32_t)Iron.Temp.LastSetTemperatureTime*1000) > (uint32_t)CurrTemp_Save_Time_S*1000)) {
 			Iron.Temp.SetTemperatureChanged = 0;
 			if(systemSettings.setTemperature != Iron.Temp.UserCurrentSetTemperature) {
 				systemSettings.setTemperature = Iron.Temp.CurrentSetTemperature;

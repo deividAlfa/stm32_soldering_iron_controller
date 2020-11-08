@@ -145,10 +145,10 @@ void Enable_Soft_SPI_SPI(void){
 }
 
 
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi){
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *_hspi){
 	static uint8_t OledRow=0;
 
-	if(hspi != &SPI_DEVICE){		return; 	}
+	if(_hspi != &SPI_DEVICE){		return; 	}
 	if(OledRow>7){															//We sent the last row of the OLED buffer data. Return without retriggering DMA.
 				OledRow=0;
 				oled_status=oled_idle;
@@ -171,11 +171,11 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi){
 	}
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim) {
 	static uint16_t UpdateCount=0,PIDUpdateCount=0;
 	//Timer set every 1mS
 
-	if(htim == &BASE_TIMER)  {
+	if(_htim == &BASE_TIMER)  {
 
 		if(++PIDUpdateCount>=PID_Refresh_ms){		//Timer for updating Tip temperature and PID calculation
 			PIDUpdateCount=0;
@@ -192,11 +192,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 }
 
 
-void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc){
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* _hadc){
 }
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
-	if(hadc != &ADC_DEVICE){
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
+	if(_hadc != &ADC_DEVICE){
 		return;
 	}
 	// DMA callback is called every 300uS or less.
