@@ -35,7 +35,7 @@ typedef struct{
 typedef enum { adc_dma_active, adc_dma_idle } adc_dma_status_t;
 
 extern adc_dma_status_t adc_dma_status;
-extern volatile adc_measures_t adc_measures[Adc_Buffer_Size];
+extern adc_measures_t adc_measures[Adc_Buffer_Size];
 
 uint16_t ADC_to_mV (uint16_t adc);
 void RollingUpdate(RollingTypeDef_t* Data);

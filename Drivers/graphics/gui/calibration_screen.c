@@ -6,12 +6,8 @@
  */
 
 #include "calibration_screen.h"
-#include "../../../Core/Src/iron.h"
-#include "../../../Core/Src/pid.h"
-#include "../../generalIO/adc_global.h"
-#include "../../generalIO/tempsensors.h"
-#include "oled.h"
 #include <stdio.h>
+#include "oled.h"
 
 typedef enum {cal_200, cal_300, cal_400, cal_end}state_t;
 static uint16_t state_temps[3] = {200, 300, 400};

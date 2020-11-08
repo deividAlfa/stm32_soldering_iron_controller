@@ -8,7 +8,7 @@
 #ifndef IRON_H_
 #define IRON_H_
 
-#include "main.h"
+
 #include "pid.h"
 
 typedef void (*setTemperatureReachedCallback)(uint16_t);

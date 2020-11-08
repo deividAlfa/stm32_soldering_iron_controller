@@ -10,8 +10,8 @@
 
 #include "main.h"
 #include "adc_global.h"
-#include "../../Core/Src/settings.h"
-#include "../../Core/inc/setup.h"
+#include "settings.h"
+#include "setup.h"
 
 int16_t readColdJunctionSensorTemp_C_x10(void);
 uint16_t coldJunctionTemp_mC_To_uV(int tempX10);

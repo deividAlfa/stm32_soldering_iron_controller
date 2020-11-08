@@ -6,11 +6,8 @@
  */
 
 #include "main_screen.h"
-#include "../../generalIO/tempsensors.h"
-#include "../../generalIO/voltagesensors.h"
-#include "../../../Core/Src/iron.h"
-#include "../../../Core/Src/settings.h"
-#include "../../generalIO/buzzer.h"
+#include "oled.h"
+
 #define NO_IRON_ADC 4000
 static uint8_t hasIron = 1;
 static uint16_t m_tip = 0;

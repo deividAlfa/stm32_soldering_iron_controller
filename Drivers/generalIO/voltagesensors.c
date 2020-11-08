@@ -39,7 +39,6 @@ uint16_t getSupplyVoltage_v_x10() {
 }
 
 uint16_t getReferenceVoltage_mv_x10() {
-	uint32_t temp;
 	static RollingTypeDef_t data = {
 		adc_buffer: 			&adc_measures[0].reference,
 		adc_buffer_size: 		Adc_Buffer_Size,

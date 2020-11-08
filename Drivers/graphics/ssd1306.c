@@ -1,7 +1,4 @@
 #include "ssd1306.h"
-#include "main.h"
-#include "setup.h"
-#include "main.h"
 #define SH1106_FIX
 
 

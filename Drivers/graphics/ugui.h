@@ -187,7 +187,7 @@ typedef struct
 /* -------------------------------------------------------------------------------- */
 typedef struct
 {
-   void* p;
+   uint8_t *p;
    UG_U16 width;
    UG_U16 height;
    UG_U8 bpp;

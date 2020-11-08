@@ -8,8 +8,6 @@
 
 #include <stdlib.h>
 #include "oled.h"
-#include "../ssd1306.h"
-#include "setup.h"
 
 static screen_t *screens = NULL;
 static screen_t *current_screen;

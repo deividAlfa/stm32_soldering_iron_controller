@@ -6,8 +6,7 @@
  */
 
 #include "debug_screen.h"
-#include "../../generalIO/adc_global.h"
-#include "../../generalIO/tempsensors.h"
+#include "oled.h"
 
 uint16_t temp;
 

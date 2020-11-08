@@ -7,8 +7,9 @@
 
 #include "screen.h"
 #include <stdlib.h>
-#include "string.h"
+#include <string.h>
 #include <math.h>
+#include "oled.h"
 
 widget_t *screen_addWidget(screen_t *scr) {
 	widget_t *last_widget = NULL;

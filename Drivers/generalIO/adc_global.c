@@ -9,7 +9,7 @@
 #include "setup.h"
 
 //From setup.h
-volatile adc_measures_t adc_measures[Adc_Buffer_Size];
+adc_measures_t adc_measures[Adc_Buffer_Size];
 adc_dma_status_t adc_dma_status = adc_dma_idle;
 volatile uint16_t vref_adc_avg = 0;
 volatile uint16_t ntc_adc_avg = 0;

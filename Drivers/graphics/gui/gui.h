@@ -9,6 +9,7 @@
 #define GRAPHICS_GUI_GUI_H_
 
 #include "oled.h"
+#include "screen.h"
 
 void guiInit(TIM_HandleTypeDef *tim);
 void guiDraw();

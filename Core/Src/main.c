@@ -22,22 +22,21 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "../../Drivers/generalIO/buzzer.h"
-#include "../../Drivers/graphics/ssd1306.h"
-#include "../../Drivers/generalIO/buzzer.h"
-#include "../../Drivers/generalIO/rotary_encoder.h"
-#include "../../Drivers/generalIO/adc_global.h"
-#include "../../Drivers/generalIO/tempsensors.h"
-#include "../../Drivers/generalIO/voltagesensors.h"
-#include "../../Drivers/graphics/gui/screen.h"
-#include "../../Drivers/graphics/gui/gui.h"
-#include "../../Drivers/graphics/gui/debug_screen.h"
+#include "setup.h"
+#include "iron.h"
 #include "pid.h"
 #include "settings.h"
-#include "iron.h"
+#include "adc_global.h"
+#include "buzzer.h"
+#include "buzzer.h"
+#include "rotary_encoder.h"
+#include "tempsensors.h"
+#include "voltagesensors.h"
+#include "ssd1306.h"
+#include "gui.h"
+#include "screen.h"
 #include <stdint.h>
 #include <stdio.h>
-#include "setup.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

@@ -8,7 +8,6 @@
 #ifndef GRAPHICS_GUI_OLED_H_
 #define GRAPHICS_GUI_OLED_H_
 
-#include "../../generalIO/rotary_encoder.h"
 #include "screen.h"
 
 screen_t *oled_addScreen(uint8_t index);

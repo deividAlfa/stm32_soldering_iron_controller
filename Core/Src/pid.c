@@ -6,7 +6,7 @@
  */
 
 #include "pid.h"
-#include "../../Drivers/generalIO/tempsensors.h"
+#include "tempsensors.h"
 
 static double max, min, Kp, Kd, Ki, pre_error, integral, mset, mpv, maxI, minI;
 static double p, i, d, currentOutput;

@@ -6,7 +6,6 @@
  */
 
 #include "gui.h"
-#include "../ugui.h"
 #include "main_screen.h"
 #include "debug_screen.h"
 #include "debug_screen2.h"
@@ -14,7 +13,6 @@
 #include "settings_screen.h"
 #include "calibration_screen.h"
 #include "oled.h"
-#include "../ssd1306.h"
 
 
 /* To debug free ram

@@ -7,11 +7,10 @@
 
 #include "iron.h"
 #include <stdlib.h>
-#include "pid.h"
-#include "../../Drivers/generalIO/tempsensors.h"
-#include "../../Drivers/generalIO/buzzer.h"
+#include "tempsensors.h"
+#include "buzzer.h"
 #include "settings.h"
-#include "setup.h"
+#include "main.h"
 
 
 volatile iron_t Iron = {

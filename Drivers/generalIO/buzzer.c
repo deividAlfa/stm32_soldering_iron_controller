@@ -6,8 +6,8 @@
  */
 
 #include "buzzer.h"
-#include "../../Core/Src/iron.h"
-#include "../../Core/Inc/main.h"
+#include "iron.h"
+#include "main.h"
 
 typedef enum {STATE_SB, STATE_LB, STATE_AL, STATE_IDLE} buzzer_state_type;
 

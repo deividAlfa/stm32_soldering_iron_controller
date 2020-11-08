@@ -8,10 +8,19 @@
 #ifndef GRAPHICS_GUI_SCREEN_H_
 #define GRAPHICS_GUI_SCREEN_H_
 
-#include "../../generalIO/rotary_encoder.h"
-#include "../ssd1306.h"
-#include "../ugui.h"
+#include "main.h"
+#include "setup.h"
+#include "iron.h"
+#include "pid.h"
+#include "settings.h"
+#include "ssd1306.h"
+#include "ugui.h"
 #include "widgets.h"
+#include "adc_global.h"
+#include "buzzer.h"
+#include "rotary_encoder.h"
+#include "tempsensors.h"
+#include "voltagesensors.h"
 
 typedef struct screen_t screen_t;
 

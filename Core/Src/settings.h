@@ -11,9 +11,8 @@
 #include "main.h"
 #include "pid.h"
 #include "iron.h"
-#include "../../Drivers/generalIO/tempsensors.h"
+#include "tempsensors.h"
 #include <stdint.h>
-#include "stm32f0xx_hal_flash.h"
 
 #define SETTINGSVERSION 2 /*Change this if you change the struct below to prevent people getting out of sync*/
 

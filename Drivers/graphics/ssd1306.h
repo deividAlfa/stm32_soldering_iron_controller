@@ -9,7 +9,6 @@
 #define GRAPHICS_SSD1306_H_
 #include "ugui.h"
 #include "main.h"
-#include "main.h"
 #include "setup.h"
 
 //For checking if SPI DMA is active. Check before drawing the buffer.

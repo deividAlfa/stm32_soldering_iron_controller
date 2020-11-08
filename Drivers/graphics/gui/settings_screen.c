@@ -6,10 +6,6 @@
  */
 
 #include "settings_screen.h"
-#include "../../Core/Src/pid.h"
-#include "../../Core/Src/iron.h"
-#include "../../Core/Src/settings.h"
-#include "../ssd1306.h"
 #include "oled.h"
 
 static widget_t *combo = NULL;
@@ -280,7 +276,7 @@ void settings_screen_setup(screen_t *scr) {
 
 	//--------------------------------------------------------------------------------------------
 	// Edit PID screen
-	screen_t *sc = oled_addScreen(screen_edit_pid);
+	screen_t *sc =oled_addScreen(screen_edit_pid);
 	sc->draw = &default_screenDraw;
 	sc->processInput = &default_screenProcessInput;
 	sc->init = &default_init;

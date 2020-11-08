@@ -9,12 +9,11 @@
 #define GRAPHICS_GUI_WIDGETS_H_
 
 #include <stdlib.h>
-#include "string.h"
+#include <string.h>
 #include <math.h>
-
-#include "../../generalIO/rotary_encoder.h"
-#include "../ssd1306.h"
-#include "../ugui.h"
+#include "rotary_encoder.h"
+#include "ssd1306.h"
+#include "ugui.h"
 
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
 typedef enum widgetFieldType {field_float, field_integer, field_uinteger16, field_bmp, field_string}widgetFieldType;

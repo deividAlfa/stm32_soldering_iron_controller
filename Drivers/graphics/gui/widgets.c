@@ -7,6 +7,7 @@
 
 #include "widgets.h"
 #include "screen.h"
+#include "oled.h"
 #include <stdio.h>
 
 displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget) {
@@ -132,7 +133,6 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 
 
 static void insertDot(char *str, uint8_t dec) {
-	int p = strlen(str);
 	if(!dec){
 		return;
 	}
