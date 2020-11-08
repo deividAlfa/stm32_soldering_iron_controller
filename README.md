@@ -102,7 +102,11 @@ Click in the right arrow of the build button (Hammer icon), select Release, then
 
 
 Videos of the complete build steps here:
+
+STM32F072
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/dtz3Nw_tk-4/0.jpg)](https://www.youtube.com/watch?v=dtz3Nw_tk-4 "STM32F072 Build")
+
+STM32F103
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/fdoPI83p_gw/0.jpg)](https://www.youtube.com/watch?v=fdoPI83p_gw "STM32F103 Build")
 
 
