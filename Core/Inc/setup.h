@@ -103,14 +103,6 @@
 #endif
 
 
-
-#define WAKE_input			HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin)
-#define BUTTON_input		HAL_GPIO_ReadPin(ROT_ENC_BUTTON_GPIO_Port, ROT_ENC_BUTTON_Pin)
-
-
-
-
-
 #define _Error_Handler(__FILE__, __LINE__); Error_Handler();
 
 

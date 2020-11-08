@@ -94,7 +94,8 @@ void Error_Handler(void);
 #define PWM_OUTPUT_Pin GPIO_PIN_8
 #define PWM_OUTPUT_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
+#define WAKE_input			HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin)
+#define BUTTON_input		HAL_GPIO_ReadPin(ROT_ENC_BUTTON_GPIO_Port, ROT_ENC_BUTTON_Pin)
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
