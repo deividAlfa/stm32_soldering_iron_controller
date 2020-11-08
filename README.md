@@ -59,7 +59,7 @@ When CUBEMX configurator opens, just close it.
 
 Delete the T12.ioc file, checkout or download the code in a zip.
 
-Go to the project folder, and paste Core and Drivers folders, overwriting al files.
+Go to the project folder, and paste Core and Drivers folders, overwriting all files.
 There are two .ioc (CUBEMX templates) included by default:
    
         - T12-STM32F072.ioc : For Quicko T12 with STM32F072
