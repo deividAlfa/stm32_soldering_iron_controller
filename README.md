@@ -98,6 +98,7 @@ Open setup.h and define your board. There are 3 included, uncomment the correct 
 ## Building
 
 Click in the right arrow of the build button (Hammer icon), select Release, then click on the build button and should build right away.
+
 ![Alt text](/Readme_files/release.jpg?raw=true "Title")
 
 
