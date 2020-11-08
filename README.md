@@ -54,11 +54,12 @@ DEFINE YOUR HARDWARE FIRST!!
 By default it won't compile. You need to make few steps first!
    * There are two .ioc (CUBEMX templates) included by default:
    
-        - T12-STM32F072.ioc, for Quicko T12 with STM32F072
-        - T12-STM32F103.ioc, For the STM32F103, as the original FW.
+        - T12-STM32F072.ioc : For Quicko T12 with STM32F072
+        - T12-STM32F103.ioc : For the STM32F103, as the original FW.
  
 If you are OK with any of these, copy any and rename it to "T12.ioc"
-Open it, make any small change, ex. take an unused pin and set is as GPIO_Input. Then revert to reset state.This will trigger the code generation.
+Open it, make any small change, ex. take an unused pin and set is as GPIO_Input.
+Then revert to reset state.This will trigger the code generation.
 Close saving changes and the code will be generated.
 
 Open setup.h and define your board. There are 3 included, uncomment the correct one:
@@ -66,7 +67,8 @@ Open setup.h and define your board. There are 3 included, uncomment the correct 
     //#define QUICKO_T12_STM072
     //#define T12_STM103
     //#define YOUR_CUSTOM_CONFIG
-   If your config uses different pinout / pheripherals, adjust the active config too!
+    
+   If your board use the same MCU but different pinout, you will need to adjust the .ioc and the setup.h config!
    
    As long as you use the same PIN labels, you will only need to touch setup.h.
 
@@ -77,16 +79,27 @@ Go to Project properties -> C/C++ Build -> Settings -> MCU GCC Compiler -> Prepr
     * STM32F103xB		// For STM103
     * STM32F072xB		// For STM072
     
+    
  If you use a different MCU:
  Create a new empty project with that MCU. Follow [Creating a .ioc file from scratch](#Creating_ioc)
  
  Go to the preprocessor settings and the MCU define will be there, copy the value to the T12 project.
 
-Copy the .ioc to the T12 project and rename it as "T12.ioc".
+Copy these files from the new project to the T12 project:
+
+
+	In /, the .ioc file, and rename it to T12.ioc
+	In /, the flash description file, ex. STM32F103C8TX_FLASH.ld
+	In /Core/Startup: The startup file, ex. startup_stm32f103c8tx.s
+
  
- It's recommended to make another copy of it and storeing it for future use, defining the MCU used, ex. T12-STM32F101.ioc.
+ It's recommended to make another copy of the .ioc file and storing it for future use, defining the MCU used:
  
- Never directly rename these! Copy and rename! If you lose it, making a new .ioc will take a while!
+ Ex. T12-STM32F101.ioc.
+ 
+ Never directly rename the .ioc files! Copy and rename instead!
+ 
+ If you lose it, making a new .ioc will take a while!
 
 <a id="Creating_ioc"></a>
 ## Creating a .ioc file from scratch
@@ -94,15 +107,18 @@ Copy the .ioc to the T12 project and rename it as "T12.ioc".
 If you make a new .ioc file, ex. for a different MCU, follow this guide:
 
     * MISC
-        -  Wake signal from handle: GPIO EXT*, User label: WAKE, No pull
-           GPIO config: Rising/falling edge interrupt mode
+        -  Wake signal from handle: GPIO EXTI*, User label: WAKE, No pull
+           GPIO config: Rising/falling edge interrupt mode. 
+           Ensure that NVIC interrupt is enabled for it!
+          
         -  Buzzer signal: GPIO Output, User label: BUZZER,  No pull
-        
-    * ENCODER
+
+	* ENCODER
         -  Rotatory encoder right signal: GPIO EXTI*, name: ROT_ENC_R
         -  Rotatory encoder left signal: GPIO EXTI*, name: ROT_ENC_L
         -  Rotatory encoder button signal: GPIO EXTI*,name: ROT_ENC_BUTTON
         -  GPIO config: All EXTI inputs set in rising/falling edge interrupt mode, all no pull
+        -  Ensure that NVIC interrupts are enabled for them!
         
     * OLED 
         -  Oled CS signal: GPIO Output, name: OLED_CS
@@ -252,3 +268,10 @@ Well which Docs are you looking for?
 
 <a id="compatibility"></a>
 ## Compatibility
+
+
+
+
+
+
+
