@@ -50,59 +50,45 @@ Although that is one of the proposits of this fork, to ease that part.
 <a id="Setup_instructions"></a>
 ## Setup instructions
 DEFINE YOUR HARDWARE FIRST!!
-
-By default it won't compile. You need to make few steps first!
-   * There are two .ioc (CUBEMX templates) included by default:
+You need to take few steps first.
+Create a new, empty project in STM32CUBE IDE, selecting your MCU. Name it "T12" for easiness.
+If your MCU is not in the included templates list (see below), follow [Creating a .ioc file from scratch](#Creating_ioc) and then continue [Configuring setup.h](#setup_h)
+When CUBEMX configurator opens, just close it.
+Download the code.
+Go to the project folder, and paste Core and Drivers folders, overwriting al files.
+   There are two .ioc (CUBEMX templates) included by default:
    
         - T12-STM32F072.ioc : For Quicko T12 with STM32F072
         - T12-STM32F103.ioc : For the STM32F103, as the original FW.
  
-If you are OK with any of these, copy any and rename it to "T12.ioc"
-Open it, make any small change, ex. take an unused pin and set is as GPIO_Input.
-Then revert to reset state.This will trigger the code generation.
+If you are OK with any of these, copy any to the root of the project and rename it to "T12.ioc"
+Open it, make any small change, ex. take an unused pin and set is as GPIO_Input, then revert it to reset state.
+This will trigger the code generation.
 Close saving changes and the code will be generated.
 
+Add the new folder to the include search path!
+Right click on project -> Properties -> C/C++ Build -> Settings ->  Tool Settings -> MCU GCC Compiler -> Include paths
+Click on Add... Select Workspace and select these folder while holding Control key:
+
+    /Core/Inc
+    /Core/Src
+    /Drivers/generalIO
+    /Drivers/graphics
+    /Drivers/graphics/gui
+![Alt text](/Readme_files/Includes.jpg?raw=true "Title")
+
+Click in the right arrow of the build button (Hammer icon), select Release, then click on the build button and should build right away.
+![Alt text](/Readme_files/release.jpg?raw=true "Title")
+<a id="setup_h"></a>
+##### Configuring setup.h
 Open setup.h and define your board. There are 3 included, uncomment the correct one:
 
-    //#define QUICKO_T12_STM072
+    //#define T12_STM072
     //#define T12_STM103
     //#define YOUR_CUSTOM_CONFIG
     
    If your board use the same MCU but different pinout, you will need to adjust the .ioc and the setup.h config!
-   
-   As long as you use the same PIN labels, you will only need to touch setup.h.
-
-Go to Project properties -> C/C++ Build -> Settings -> MCU GCC Compiler -> Preprocessor
-
- Add one of these to the Define symbols, depending on your MCU
- 
-    * STM32F103xB		// For STM103
-    * STM32F072xB		// For STM072
-    
-    
- If you use a different MCU:
- Create a new empty project with that MCU. Follow [Creating a .ioc file from scratch](#Creating_ioc)
- 
- Go to the preprocessor settings and the MCU define will be there, copy the value to the T12 project.
-
-Copy these files from the new project to the T12 project:
-
-
-	In /, the .ioc file, and rename it to T12.ioc
-	In /, the flash description file, ex. STM32F103C8TX_FLASH.ld
-	In /Core/Startup: The startup file, ex. startup_stm32f103c8tx.s
-
- 
- It's recommended to make another copy of the .ioc file and storing it for future use, defining the MCU used:
- 
- Ex. T12-STM32F101.ioc.
- 
- Never directly rename the .ioc files! Copy and rename instead!
- 
- If you lose it, making a new .ioc will take a while!
-
-If you change the MCU when you already compiled for another one, delete all the stm32xxx files in Src and Inc folders, as they will cause conflict.
-Then regenerate the the code with the .ioc file as explained before.
+      As long as you use the same PIN labels, you will only need to touch setup.h.
 
 <a id="Creating_ioc"></a>
 ## Creating a .ioc file from scratch

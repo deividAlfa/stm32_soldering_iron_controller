@@ -49,8 +49,8 @@
 
 
 
-#define QUICKO_T12_STM072
-//#define T12_STM103
+//#define QUICKO_T12_STM072
+#define T12_STM103
 //#define YOUR_CUSTOM_CONFIG
 
 
