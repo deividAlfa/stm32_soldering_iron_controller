@@ -211,7 +211,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
     * PWM
         - GPIO:
            * User label: PWM_OUTPUT
-           * Mode: TIMxCHx(N) ("x" and "N" depends of the pin selected)
+           * Mode: TIMxCHx(N) ("x" and "N" depends on the selected pin)
            
         - TIMER: Select timer assigned to the pin.
             - Check Activated 
