@@ -111,7 +111,7 @@ STM32F103
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/fdoPI83p_gw/0.jpg)](https://www.youtube.com/watch?v=fdoPI83p_gw "STM32F103 Build")
 
 
-Keep in mind that the flash is almost full, so it will not build in debug mode unless you change Build optimizations to -Os(Build for size)
+Keep in mind that the flash is almost full, so it will not build in debug mode unless you change Build optimizations to -Os(Optimize for size)
 
 <a id="Creating_ioc"></a>
 ## Creating a .ioc file from scratch
