@@ -49,13 +49,13 @@
 
 
 
-//#define QUICKO_T12_STM072
-#define T12_STM103
-//#define YOUR_CUSTOM_CONFIG
+//#define T12_STM32F072
+//#define T12_STM32F103
+//#define T12_STM32F_CUSTOM_
 
 
 
-#ifdef QUICKO_T12_STM072
+#ifdef T12_STM32F072
 //-----------------------------
 // For STM32F072 in Quicko T12
 //-----------------------------
@@ -74,7 +74,7 @@
 #define ADC_CH3 			V_INPUT			// ADC 3rd used channel
 #define ADC_CH4 			IRON_TEMP		// ADC 4th used channel
 
-#elif defined T12_STM103
+#elif defined T12_STM32F103
 //-----------------------------
 // For STM32F103, original controller from PTDreamer
 //-----------------------------
@@ -94,7 +94,7 @@
 #define ADC_CH3 			NTC				// ADC 3rd used channel
 #define ADC_CH4 			V_INPUT			// ADC 4th used channel
 
-#elif defined YOUR_CUSTOM_CONFIG
+#elif defined T12_STM32F_CUSTOM_
 //-----------------------------
 // For STM32___, Your custom board
 //-----------------------------

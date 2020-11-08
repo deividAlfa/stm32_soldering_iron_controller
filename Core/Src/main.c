@@ -484,12 +484,19 @@ void Enable_Soft_SPI_SPI(void){
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 
 	HAL_SPI_MspDeInit(&SPI_DEVICE);
-	 /*Configure GPIO pins : OLED_DC_Pin OLED_RST_Pin */
-	 GPIO_InitStruct.Pin = OLED_DC_Pin|OLED_RST_Pin|SCK_Pin|SDO_Pin;
+	 /*Configure GPIO pins : SCK_Pin */
+	 GPIO_InitStruct.Pin = 	SCK_Pin;
 	 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	 GPIO_InitStruct.Pull = GPIO_NOPULL;
 	 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	 HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	 HAL_GPIO_Init(SCK_GPIO_Port, &GPIO_InitStruct);
+
+	 /*Configure GPIO pins : SDO_Pin */
+	 GPIO_InitStruct.Pin = 	SDO_Pin;
+	 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	 GPIO_InitStruct.Pull = GPIO_NOPULL;
+	 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	 HAL_GPIO_Init(SDO_GPIO_Port, &GPIO_InitStruct);
 }
 
 
