@@ -30,7 +30,8 @@
  */
 											// If your screen doesn't work, and want to discard a SPI problem
 //#define Soft_SPI							// Uncomment to disable Hardware SPI with DMA and use software SPI
-
+#define SH1106_FIX							// For 1.3" OLED
+//#define JBC
 
 //#define T12_STM32F072
 //#define T12_STM32F103
@@ -41,7 +42,6 @@
 // For STM32F072 in Quicko T12
 //-----------------------------
 
-#define SH1106_FIX							// For 1.3" OLED
 #define BASE_TIMER			htim3			// 1mS base timer for timing functions
 #define PWM_TIMER 			htim17			// PWM Timer
 #define PWM_CHANNEL 		TIM_CHANNEL_1	// PWM Timer Channel
@@ -49,7 +49,6 @@
 //#define CHx								// Using CHx Output type
 #define ADC_DEVICE 			hadc			// ADC device
 #define SPI_DEVICE 			hspi2			// SPI device
-
 #define ADC_CH1 			VREF			// ADC 1st used channel
 #define ADC_CH2 			NTC				// ADC 2nd used channel
 #define ADC_CH3 			V_INPUT			// ADC 3rd used channel
@@ -60,7 +59,6 @@
 // For STM32F103, original controller from PTDreamer
 //-----------------------------
 
-#define SH1106_FIX							// For 1.3" OLED
 #define BASE_TIMER			htim3			// 1mS base timer for timing functions
 #define PWM_TIMER 			htim4			// PWM Timer
 #define PWM_CHANNEL 		TIM_CHANNEL_3	// PWM Timer Channel
@@ -68,8 +66,6 @@
 #define CHx								// Using CHx Output type
 #define ADC_DEVICE 			hadc1			// ADC device
 #define SPI_DEVICE 			hspi1			// SPI device
-
-
 #define ADC_CH1 			IRON_TEMP		// ADC 1st used channel
 #define ADC_CH2 			VREF			// ADC 2nd used channel
 #define ADC_CH3 			NTC				// ADC 3rd used channel
@@ -80,7 +76,6 @@
 // For STM32___, Your custom board
 //-----------------------------
 
-#define SH1106_FIX							// For 1.3" OLED
 #define BASE_TIMER			htim?			// 1mS base timer for timing functions
 #define PWM_TIMER 			htim?		// PWM Timer
 #define PWM_CHANNEL 		TIM_CHANNEL_?	// PWM Timer Channel
@@ -88,9 +83,6 @@
 #define CHx									// Using CHx Output type
 #define ADC_DEVICE 			hadc?			// ADC device
 #define SPI_DEVICE 			hspi?			// SPI device
-
-
-
 #define ADC_CH1 			VREF			// ADC 1st used channel
 #define ADC_CH2 			NTC				// ADC 2nd used channel
 #define ADC_CH3 			V_INPUT			// ADC 3rd used channel

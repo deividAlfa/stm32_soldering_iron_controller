@@ -8,7 +8,6 @@
 #include "settings.h"
 #include <string.h>
 #define FLASH_ADDR (0x8000000|64512)/*Flash start OR'ed with the maximum amount of flash - 256 bytes*/
-//#define JBC
 void saveSettings() {
 	HAL_FLASH_Unlock(); //unlock flash writing
 	FLASH_EraseInitTypeDef erase;
@@ -50,7 +49,6 @@ void resetSettings() {
 	systemSettings.currentNumberOfTips = 1;
 	strcpy(systemSettings.ironTips[0].name, "DFLT");
 #ifdef JBC
-#warning "BUILDING FOR JBC"
 	for(uint8_t x = 0; x < 10; ++x) {
 		systemSettings.ironTips[x].calADC_At_200 = 390;
 		systemSettings.ironTips[x].calADC_At_300 = 625;
