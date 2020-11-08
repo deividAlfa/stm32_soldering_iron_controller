@@ -178,7 +178,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
             * VRef pin label: VREF
             * Iron Temp pin label: IRON_TEMP
         - Parameter settings:
-        -   * Mark channels assigned to the used inputs
+            * Select channels assigned to the used inputs
             * Clock prescaler: Asynchronous clock mode
             * Resolution: 12 bit resolution
             * Data Alignment: Right alignment
