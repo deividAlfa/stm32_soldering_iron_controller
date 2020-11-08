@@ -39,7 +39,7 @@ Which can then result in bad performance / bad temperature regulation.
 
 <a id="backup-first"></a>
 ## Backup First!
-Usually the MCU will be read-protected, so you won't be able to read it's contents, only erase it.
+Usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.
 
 The simplest way to not loose the originl FW is actually to buy a new MCU, then remove the original MCU with hot air, or chipquik, or bizmuth low temperature solder, and store it in a safe place in case you want to revert back.
 
