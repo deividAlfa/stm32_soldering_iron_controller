@@ -50,13 +50,17 @@ Although that is one of the proposits of this fork, to ease that part.
 <a id="Setup_instructions"></a>
 ## Setup instructions
 DEFINE YOUR HARDWARE FIRST!!
-You need to take few steps first.
+
 Create a new, empty project in STM32CUBE IDE, selecting your MCU. Name it "T12" for easiness.
+
 If your MCU is not in the included templates list (see below), follow [Creating a .ioc file from scratch](#Creating_ioc) and then continue [Configuring setup.h](#setup_h)
+
 When CUBEMX configurator opens, just close it.
-Download the code.
+
+Delete the T12.ioc file, checkout or download the code in a zip.
+
 Go to the project folder, and paste Core and Drivers folders, overwriting al files.
-   There are two .ioc (CUBEMX templates) included by default:
+There are two .ioc (CUBEMX templates) included by default:
    
         - T12-STM32F072.ioc : For Quicko T12 with STM32F072
         - T12-STM32F103.ioc : For the STM32F103, as the original FW.
@@ -68,6 +72,9 @@ Close saving changes and the code will be generated.
 
 Add the new folder to the include search path!
 Right click on project -> Properties -> C/C++ Build -> Settings ->  Tool Settings -> MCU GCC Compiler -> Include paths
+
+On the upper menu, Configuration, Select [All configurations]
+
 Click on Add... Select Workspace and select these folder while holding Control key:
 
     /Core/Inc
@@ -77,10 +84,8 @@ Click on Add... Select Workspace and select these folder while holding Control k
     /Drivers/graphics/gui
 ![Alt text](/Readme_files/Includes.jpg?raw=true "Title")
 
-Click in the right arrow of the build button (Hammer icon), select Release, then click on the build button and should build right away.
-![Alt text](/Readme_files/release.jpg?raw=true "Title")
 <a id="setup_h"></a>
-##### Configuring setup.h
+## Configuring setup.h
 Open setup.h and define your board. There are 3 included, uncomment the correct one:
 
     //#define T12_STM072
@@ -89,6 +94,14 @@ Open setup.h and define your board. There are 3 included, uncomment the correct 
     
    If your board use the same MCU but different pinout, you will need to adjust the .ioc and the setup.h config!
       As long as you use the same PIN labels, you will only need to touch setup.h.
+     
+## Building
+
+Click in the right arrow of the build button (Hammer icon), select Release, then click on the build button and should build right away.
+![Alt text](/Readme_files/release.jpg?raw=true "Title")
+
+
+Keep in mind that the flash is almost full, so it will not build in debug mode unless you change Build optimizations to -Os(Build for size)
 
 <a id="Creating_ioc"></a>
 ## Creating a .ioc file from scratch
