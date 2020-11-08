@@ -101,6 +101,11 @@ Click in the right arrow of the build button (Hammer icon), select Release, then
 ![Alt text](/Readme_files/release.jpg?raw=true "Title")
 
 
+Videos of the complete build steps here:
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/dtz3Nw_tk-4/0.jpg)](https://www.youtube.com/watch?v=dtz3Nw_tk-4 "STM32F072 Build")
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/fdoPI83p_gw/0.jpg)](https://www.youtube.com/watch?v=fdoPI83p_gw "STM32F103 Build")
+
+
 Keep in mind that the flash is almost full, so it will not build in debug mode unless you change Build optimizations to -Os(Build for size)
 
 <a id="Creating_ioc"></a>
