@@ -39,7 +39,7 @@ extern adc_measures_t adc_measures[Adc_Buffer_Size];
 
 uint16_t ADC_to_mV (uint16_t adc);
 void RollingUpdate(RollingTypeDef_t* Data);
-void ADC_Set(ADC_HandleTypeDef *adc);
+void ADC_Init(ADC_HandleTypeDef *adc);
 uint8_t ADC_Cal(void);
 uint8_t ADC_Stop_DMA(void);
 uint8_t  ADC_Start_DMA(void);

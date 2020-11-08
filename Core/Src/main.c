@@ -137,6 +137,7 @@ int main(void)
   CheckReset();
   restoreSettings();
   setupPIDFromStruct();
+  ADC_Init(&ADC_DEVICE);
   RE_Init(&RE1_Data, ROT_ENC_L_GPIO_Port, ROT_ENC_L_Pin, ROT_ENC_R_GPIO_Port, ROT_ENC_R_Pin, ROT_ENC_BUTTON_GPIO_Port, ROT_ENC_BUTTON_Pin);
   buzzer_init();
   ironInit(&PWM_TIMER,PWM_CHANNEL);
@@ -266,15 +267,6 @@ static void MX_ADC_Init(void)
   }
   /* USER CODE BEGIN ADC_Init 2 */
 
-
-  ADC_Set(&ADC_DEVICE);
-
-  if(ADC_Cal() != HAL_OK ){
-	  buzzer_alarm_start();
-  }
-  else{
-	  buzzer_short_beep();
-  }
 
 
   /* USER CODE END ADC_Init 2 */

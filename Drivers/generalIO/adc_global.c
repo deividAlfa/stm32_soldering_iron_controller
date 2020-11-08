@@ -20,10 +20,16 @@ uint8_t ADC_Cal(void){
 	return HAL_ADCEx_Calibration_Start(hadc_device);
 }
 
-void ADC_Set(ADC_HandleTypeDef *adc){
-	hadc_device=adc;
-}
 
+void ADC_Init(ADC_HandleTypeDef *adc){
+	hadc_device=adc;
+	if(ADC_Cal() != HAL_OK ){
+		buzzer_alarm_start();
+	}
+	else{
+		buzzer_short_beep();
+	}
+}
 
 uint8_t ADC_Start_DMA(void){
 	if(	adc_dma_status == adc_dma_idle ){		// If DMA still busy, return
