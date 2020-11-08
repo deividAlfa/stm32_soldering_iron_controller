@@ -33,14 +33,6 @@
  * If you change the timers, pwm channel, adc, spi devices,
  * you will have to set them here too for the rest of the program to adjust.
  *
- * Config settings for Quicko T12 STM32F072 and PTDreamer STM32F103 alrready included.
- * Uncomment the correct one
- *
- * After building the .ioc file, go to Project properties -> C/C++ Build -> Settings -> MCU GCC Compiler -> Preprocessor
- * And add one of these to the Define symbols
- * STM32F103xB		// For STM103
- * STM32F072xB		// For STM072
- *
  */
 
 											// If your screen doesn't work, and want to discard a SPI problem
