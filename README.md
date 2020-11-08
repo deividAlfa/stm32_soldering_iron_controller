@@ -101,6 +101,9 @@ Copy these files from the new project to the T12 project:
  
  If you lose it, making a new .ioc will take a while!
 
+If you change the MCU when you already compiled for another one, delete all the stm32xxx files in Src and Inc folders, as they will cause conflict.
+Then regenerate the the code with the .ioc file as explained before.
+
 <a id="Creating_ioc"></a>
 ## Creating a .ioc file from scratch
 
