@@ -3,15 +3,10 @@
 #define SETUP_H_
 /*
  * Setup.h file
- *
- * The firmware will not build automatically. You have to set few things first:
- *  - Set the C
- */
+*/
+
 /*
  * Software adjustments
- *
- * Adjust all the delays in steps of 1mS
- *
  */
 
 #define Adc_Buffer_Size 	16				// ADC DMA buffer size Buffer[ADC_Buffer_Size][Adc_Buffer_Elements]
@@ -32,20 +27,14 @@
  * HARDWARE SETTINGS
  * If you change the timers, pwm channel, adc, spi devices,
  * you will have to set them here too for the rest of the program to adjust.
- *
  */
-
 											// If your screen doesn't work, and want to discard a SPI problem
 //#define Soft_SPI							// Uncomment to disable Hardware SPI with DMA and use software SPI
-
-
 
 
 //#define T12_STM32F072
 //#define T12_STM32F103
 //#define T12_STM32F_CUSTOM_
-
-
 
 #ifdef T12_STM32F072
 //-----------------------------
