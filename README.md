@@ -195,9 +195,10 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
             * Watchdog disabled
             * IF ADJUSTABLE regular channels:
               Set channels 1 to 4 to the inputs, all 13.5 cycles.
-                The channel order goes from 0 to 15, skipping the disabled channels.
-                IMPORTANT: Configure in setup.h the order of the channels and set their labels accordingly, ex:
-                *   #define ADC_CH1 			VREF			// ADC 1st used channel, ex. ch0
+            
+            * IMPORTANT: Configure in setup.h the order of the channels and set their labels accordingly!
+              The ADC channel order goes from 0 to 15 (unless otherwise set in regular config), skipping the disabled channels.
+               *   #define ADC_CH1 			VREF			// ADC 1st used channel, ex. ch0
                     #define ADC_CH2 			NTC				// ADC 2nd used channel, ex. ch2
                     #define ADC_CH3 			V_INPUT			// ADC 3rd used channel, ex. ch3
                     #define ADC_CH4 			IRON_TEMP		// ADC 4th used channel, ex. ch7
