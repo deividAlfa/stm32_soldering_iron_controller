@@ -71,7 +71,7 @@ Open it, make any small change, ex. take an unused pin and set is as GPIO_Input,
 This will trigger the code generation.
 Close saving changes and the code will be generated.
 
-Add the new folder to the include search path!
+Add the new folders to the include search path!
 Right click on project -> Properties -> C/C++ Build -> Settings ->  Tool Settings -> MCU GCC Compiler -> Include paths
 
 On the upper menu, Configuration, Select [All configurations]
