@@ -21,6 +21,7 @@
 * Tested on STM32F072 (on a QUICKO T12 board).
 * Included config for STM32F103 but needs testing
 * Should be easily ported to other stm32f0xx/stm32f1xx MCUs.
+* Already compiled bins in the Builds folder! (Test at your own risk) 
 * Intended to serve as an unified codebase that's easier to share across different boards / hardware
 
 <a id="warning"></a>
@@ -93,7 +94,7 @@ Open setup.h and define your board. There are 3 included, uncomment the correct 
     //#define YOUR_CUSTOM_CONFIG
     
    If your board use the same MCU but different pinout, you will need to adjust the .ioc and the setup.h config!
-      As long as you use the same PIN labels, you will only need to touch setup.h.
+   As long as you use the same PIN labels, you will only need to touch setup.h.
      
 ## Building
 
@@ -105,9 +106,11 @@ Click in the right arrow of the build button (Hammer icon), select Release, then
 Videos of the complete build steps here:
 
 STM32F072
+
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/dtz3Nw_tk-4/0.jpg)](https://www.youtube.com/watch?v=dtz3Nw_tk-4 "STM32F072 Build")
 
 STM32F103
+
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/fdoPI83p_gw/0.jpg)](https://www.youtube.com/watch?v=fdoPI83p_gw "STM32F103 Build")
 
 
