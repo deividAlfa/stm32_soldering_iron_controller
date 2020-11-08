@@ -17,7 +17,7 @@
 
 <a id="status"></a>
 ## Status
-
+* Developed on STM32CubeIDE - download and use that. This IDE includes the MX code generator
 * Tested on STM32F072 (on a QUICKO T12 board).
 * Included config for STM32F103 but needs testing
 * Should be easily ported to other stm32f0xx/stm32f1xx MCUs.
@@ -240,9 +240,6 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
               Check the Clock config in CUBEMX!
             
  
-* Developed on STM32CubeIDE - download and use that. This IDE includes the MX code generator
-* Being STM32 there is a code generation aspect for the chip pinout
-
 <a id="history"></a>
 ## History
 * Original version by PTDreamer
