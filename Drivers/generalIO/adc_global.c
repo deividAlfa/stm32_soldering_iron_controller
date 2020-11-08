@@ -6,7 +6,6 @@
  */
 
 #include "adc_global.h"
-#include "setup.h"
 
 //From setup.h
 adc_measures_t adc_measures[Adc_Buffer_Size];

@@ -10,7 +10,7 @@
 uint16_t getSupplyVoltage_v_x10() {
 	uint32_t temp;
 	static RollingTypeDef_t data = {
-		adc_buffer: 			&adc_measures[0].supply,
+		adc_buffer: 			&adc_measures[0].V_INPUT,
 		adc_buffer_size: 		Adc_Buffer_Size,
 		adc_buffer_elements:	Adc_Buffer_Elements,
 		rolling_buffer_size: 	RollingBufferSize,
@@ -40,7 +40,7 @@ uint16_t getSupplyVoltage_v_x10() {
 
 uint16_t getReferenceVoltage_mv_x10() {
 	static RollingTypeDef_t data = {
-		adc_buffer: 			&adc_measures[0].reference,
+		adc_buffer: 			&adc_measures[0].VREF,
 		adc_buffer_size: 		Adc_Buffer_Size,
 		adc_buffer_elements:	Adc_Buffer_Elements,
 		rolling_buffer_size: 	RollingBufferSize,

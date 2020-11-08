@@ -176,7 +176,7 @@ void main_screenUpdate(screen_t *scr) {
 			buzzer_alarm_start();
 		}
 	}
-	else if((t < NO_IRON_ADC) && !hasIron && ((HAL_GetTick()-lastNoIron)>No_Iron_Delay) ){
+	else if((t < NO_IRON_ADC) && !hasIron && ((HAL_GetTick()-lastNoIron)>No_Iron_Delay_mS) ){
 		UG_FillScreen(C_BLACK);
 		ironTempLabelWidget->enabled = 1;
 		ironTempWidget->enabled = 1;

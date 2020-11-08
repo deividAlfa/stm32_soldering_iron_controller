@@ -10,16 +10,16 @@
 
 
 #include "main.h"
-#include "setup.h"
 
 typedef struct {
-	uint16_t reference;
-	uint16_t cold_junction;
-	uint16_t supply;
-	uint16_t iron;
+	uint16_t ADC_CH1;
+	uint16_t ADC_CH2;
+	uint16_t ADC_CH3;
+	uint16_t ADC_CH4;
 	//uint16_t int_temp;
 	//uint16_t int_ref;
 } adc_measures_t;
+
 
 typedef struct{
 	  uint16_t	*adc_buffer;

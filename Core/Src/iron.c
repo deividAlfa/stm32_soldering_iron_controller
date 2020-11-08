@@ -194,7 +194,7 @@ void handleIron(void) {
 	uint32_t CurrentTime = HAL_GetTick();
 
 	static RollingTypeDef_t data = {
-		adc_buffer: 			(uint16_t*)&adc_measures[0].iron,
+		adc_buffer: 			(uint16_t*)&adc_measures[0].IRON_TEMP,
 		adc_buffer_size: 		Adc_Buffer_Size,
 		adc_buffer_elements:	Adc_Buffer_Elements,
 		rolling_buffer_size: 	RollingBufferSize,
@@ -252,8 +252,8 @@ void handleIron(void) {
 
 	readTipTemperatureCompensated(1);
 	Iron.Status.TempMeasureState = iron_temp_measure_idle;
-	if(CurrTemp_Save_Time){
-		if(Iron.Temp.SetTemperatureChanged && (CurrentTime - ((uint32_t)Iron.Temp.LastSetTemperatureTime*1000) > CurrTemp_Save_Time)) {
+	if(CurrTemp_Save_Time_S){
+		if(Iron.Temp.SetTemperatureChanged && (CurrentTime - ((uint32_t)Iron.Temp.LastSetTemperatureTime*1000) > CurrTemp_Save_Time_S*1000)) {
 			Iron.Temp.SetTemperatureChanged = 0;
 			if(systemSettings.setTemperature != Iron.Temp.UserCurrentSetTemperature) {
 				systemSettings.setTemperature = Iron.Temp.CurrentSetTemperature;

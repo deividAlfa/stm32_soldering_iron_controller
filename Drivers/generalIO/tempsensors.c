@@ -66,7 +66,7 @@ int16_t readColdJunctionSensorTemp_C_x10(void) {
 	int16_t p1, p2;
 	int16_t temp;
 	static RollingTypeDef_t data = {
-			adc_buffer: (uint16_t*) &adc_measures[0].cold_junction,
+			adc_buffer: (uint16_t*) &adc_measures[0].NTC,
 			adc_buffer_size: Adc_Buffer_Size,
 			adc_buffer_elements: Adc_Buffer_Elements,
 			rolling_buffer_size: RollingBufferSize,

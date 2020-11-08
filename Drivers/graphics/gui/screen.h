@@ -9,7 +9,6 @@
 #define GRAPHICS_GUI_SCREEN_H_
 
 #include "main.h"
-#include "setup.h"
 #include "iron.h"
 #include "pid.h"
 #include "settings.h"
