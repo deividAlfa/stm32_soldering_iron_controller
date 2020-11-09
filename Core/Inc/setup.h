@@ -33,15 +33,6 @@
 #define SH1106_FIX							// For 1.3" OLED
 //#define JBC
 
-//#define T12_STM32F072
-//#define T12_STM32F103
-//#define T12_STM32F_CUSTOM_
-
-#ifdef T12_STM32F072
-//-----------------------------
-// For STM32F072 in Quicko T12
-//-----------------------------
-
 #define BASE_TIMER			htim3			// 1mS base timer for timing functions
 #define PWM_TIMER 			htim17			// PWM Timer
 #define PWM_CHANNEL 		TIM_CHANNEL_1	// PWM Timer Channel
@@ -53,46 +44,6 @@
 #define ADC_CH2 			NTC				// ADC 2nd used channel
 #define ADC_CH3 			V_INPUT			// ADC 3rd used channel
 #define ADC_CH4 			IRON_TEMP		// ADC 4th used channel
-
-#elif defined T12_STM32F103
-//-----------------------------
-// For STM32F103, original controller from PTDreamer
-//-----------------------------
-
-#define BASE_TIMER			htim3			// 1mS base timer for timing functions
-#define PWM_TIMER 			htim4			// PWM Timer
-#define PWM_CHANNEL 		TIM_CHANNEL_3	// PWM Timer Channel
-//#define CHxN								// Using CHxN Output type
-#define CHx								// Using CHx Output type
-#define ADC_DEVICE 			hadc1			// ADC device
-#define SPI_DEVICE 			hspi1			// SPI device
-#define ADC_CH1 			IRON_TEMP		// ADC 1st used channel
-#define ADC_CH2 			VREF			// ADC 2nd used channel
-#define ADC_CH3 			NTC				// ADC 3rd used channel
-#define ADC_CH4 			V_INPUT			// ADC 4th used channel
-
-#elif defined T12_STM32F_CUSTOM_
-//-----------------------------
-// For STM32___, Your custom board
-//-----------------------------
-
-#define BASE_TIMER			htim?			// 1mS base timer for timing functions
-#define PWM_TIMER 			htim?		// PWM Timer
-#define PWM_CHANNEL 		TIM_CHANNEL_?	// PWM Timer Channel
-//#define CHxN								// Using CHxN Output type
-#define CHx									// Using CHx Output type
-#define ADC_DEVICE 			hadc?			// ADC device
-#define SPI_DEVICE 			hspi?			// SPI device
-#define ADC_CH1 			VREF			// ADC 1st used channel
-#define ADC_CH2 			NTC				// ADC 2nd used channel
-#define ADC_CH3 			V_INPUT			// ADC 3rd used channel
-#define ADC_CH4 			IRON_TEMP		// ADC 4th used channel
-
-#else
-
-	#error You must configure settings first in setup.h
-
-#endif
 
 
 #define _Error_Handler(__FILE__, __LINE__); Error_Handler();
