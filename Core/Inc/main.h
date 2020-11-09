@@ -74,8 +74,6 @@ void Error_Handler(void);
 #define V_INPUT_GPIO_Port GPIOA
 #define IRON_TEMP_Pin GPIO_PIN_5
 #define IRON_TEMP_GPIO_Port GPIOA
-#define LED_Pin GPIO_PIN_0
-#define LED_GPIO_Port GPIOB
 #define OLED_DC_Pin GPIO_PIN_11
 #define OLED_DC_GPIO_Port GPIOB
 #define OLED_RST_Pin GPIO_PIN_12
