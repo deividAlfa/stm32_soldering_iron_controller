@@ -53,6 +53,9 @@ typedef struct
 #ifdef USE_FONT_6X8
    extern const UG_FONT FONT_6X8;
 #endif
+#ifdef USE_FONT_6X8_reduced
+   extern const UG_FONT FONT_6X8_reduced;
+#endif
 #ifdef USE_FONT_6X10
    extern const UG_FONT FONT_6X10;
 #endif
@@ -71,6 +74,9 @@ typedef struct
 #ifdef USE_FONT_8X14
    extern const UG_FONT FONT_8X14;
 #endif
+#ifdef USE_FONT_8X14_reduced
+   extern const UG_FONT FONT_8X14_reduced;
+#endif
 #ifdef USE_FONT_10X16
    extern const UG_FONT FONT_10X16;
 #endif
@@ -82,6 +88,9 @@ typedef struct
 #endif
 #ifdef USE_FONT_16X26
    extern const UG_FONT FONT_16X26;
+#endif
+#ifdef USE_FONT_16X26_reduced
+   extern const UG_FONT FONT_16X26_reduced;
 #endif
 #ifdef USE_FONT_22X36
    extern const UG_FONT FONT_22X36;
@@ -187,7 +196,7 @@ typedef struct
 /* -------------------------------------------------------------------------------- */
 typedef struct
 {
-   uint8_t *p;
+   const uint8_t *p;
    UG_U16 width;
    UG_U16 height;
    UG_U8 bpp;
@@ -910,7 +919,7 @@ void UG_FontSetVSpace( UG_U16 s );
 /* Miscellaneous functions */
 void UG_WaitForUpdate( void );
 void UG_Update( void );
-void UG_DrawBMP( UG_S16 xp, UG_S16 yp, UG_BMP* bmp );
+void UG_DrawBMP( UG_S16 xp, UG_S16 yp, const UG_BMP* bmp );
 void UG_TouchUpdate( UG_S16 xp, UG_S16 yp, UG_U8 state );
 
 /* Driver functions */

@@ -40,7 +40,7 @@ typedef enum {
 /**
  * @brief  Rotary main working structure
  */
-typedef struct {
+volatile typedef struct {
 	int32_t Absolute;        /*!< Absolute rotation from beginning, for public use */
 	int32_t Diff;            /*!< Rotary difference from last check, for public use */
 	RE_Rotation_t Rotation; /*!< Increment, Decrement or nothing, for public use */

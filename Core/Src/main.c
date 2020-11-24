@@ -19,6 +19,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "dma.h"
+#include "spi.h"
+#include "tim.h"
+#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -54,30 +59,14 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-ADC_HandleTypeDef hadc;
-DMA_HandleTypeDef hdma_adc;
-
-SPI_HandleTypeDef hspi2;
-DMA_HandleTypeDef hdma_spi2_tx;
-
-TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim17;
 
 /* USER CODE BEGIN PV */
-
+RE_Rotation_t RotationData;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-static void MX_DMA_Init(void);
-static void MX_ADC_Init(void);
-static void MX_SPI2_Init(void);
-static void MX_TIM3_Init(void);
-static void MX_TIM17_Init(void);
 /* USER CODE BEGIN PFP */
-void Enable_Soft_SPI_SPI(void);
-void CheckReset(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -93,6 +82,8 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
+	 __HAL_DBGMCU_FREEZE_TIM17();
+	 __HAL_DBGMCU_FREEZE_TIM15();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -116,31 +107,22 @@ int main(void)
   MX_DMA_Init();
   MX_ADC_Init();
   MX_SPI2_Init();
-  MX_TIM3_Init();
   MX_TIM17_Init();
+  MX_TIM15_Init();
   /* USER CODE BEGIN 2 */
 
 #ifdef Soft_SPI
-  Enable_Soft_SPI_SPI();
-#endif
-
-
-
-
-  HAL_TIM_Base_Start_IT(&BASE_TIMER);
-  #ifdef Soft_SPI
+  Enable_Soft_SPI();
   ssd1306_init();
-  #else
+#else
   ssd1306_init(&SPI_DEVICE);
-  #endif
+#endif
   guiInit(&PWM_TIMER);
-  CheckReset();
   restoreSettings();
-  setupPIDFromStruct();
   ADC_Init(&ADC_DEVICE);
-  RE_Init(&RE1_Data, ROT_ENC_L_GPIO_Port, ROT_ENC_L_Pin, ROT_ENC_R_GPIO_Port, ROT_ENC_R_Pin, ROT_ENC_BUTTON_GPIO_Port, ROT_ENC_BUTTON_Pin);
+  RE_Init((RE_State_t *)&RE1_Data, ROT_ENC_L_GPIO_Port, ROT_ENC_L_Pin, ROT_ENC_R_GPIO_Port, ROT_ENC_R_Pin, ROT_ENC_BUTTON_GPIO_Port, ROT_ENC_BUTTON_Pin);
   buzzer_init();
-  ironInit(&PWM_TIMER,PWM_CHANNEL);
+  ironInit(&DELAY_TIMER, &PWM_TIMER,PWM_CHANNEL);
 
   /* USER CODE END 2 */
 
@@ -150,14 +132,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  handleIron();
 	  handle_buzzer();
-	  if(Iron.Status.ProcessUpdate) {
-  		Iron.Status.ProcessUpdate=0;
-		RE_Rotation_t r = RE_Get(&RE1_Data);
-		oled_processInput(r, &RE1_Data);
+	  if(Iron.OledUpdate) {
+  		Iron.OledUpdate=0;
+		RotationData = RE_Get(&RE1_Data);
+		oled_processInput(RotationData, &RE1_Data);
 		oled_update();
-  		oled_draw();
 	  }
   }
   /* USER CODE END 3 */
@@ -198,393 +178,27 @@ void SystemClock_Config(void)
   }
 }
 
-/**
-  * @brief ADC Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_ADC_Init(void)
-{
-
-  /* USER CODE BEGIN ADC_Init 0 */
-
-  /* USER CODE END ADC_Init 0 */
-
-  ADC_ChannelConfTypeDef sConfig = {0};
-
-  /* USER CODE BEGIN ADC_Init 1 */
-
-  /* USER CODE END ADC_Init 1 */
-  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
-  */
-  hadc.Instance = ADC1;
-  hadc.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-  hadc.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc.Init.ScanConvMode = ADC_SCAN_DIRECTION_FORWARD;
-  hadc.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-  hadc.Init.LowPowerAutoWait = DISABLE;
-  hadc.Init.LowPowerAutoPowerOff = DISABLE;
-  hadc.Init.ContinuousConvMode = ENABLE;
-  hadc.Init.DiscontinuousConvMode = DISABLE;
-  hadc.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-  hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc.Init.DMAContinuousRequests = ENABLE;
-  hadc.Init.Overrun = ADC_OVR_DATA_PRESERVED;
-  if (HAL_ADC_Init(&hadc) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure for the selected ADC regular channel to be converted.
-  */
-  sConfig.Channel = ADC_CHANNEL_1;
-  sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
-  sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure for the selected ADC regular channel to be converted.
-  */
-  sConfig.Channel = ADC_CHANNEL_2;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure for the selected ADC regular channel to be converted.
-  */
-  sConfig.Channel = ADC_CHANNEL_3;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure for the selected ADC regular channel to be converted.
-  */
-  sConfig.Channel = ADC_CHANNEL_5;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN ADC_Init 2 */
-
-  /* USER CODE END ADC_Init 2 */
-
-}
-
-/**
-  * @brief SPI2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI2_Init(void)
-{
-
-  /* USER CODE BEGIN SPI2_Init 0 */
-
-  /* USER CODE END SPI2_Init 0 */
-
-  /* USER CODE BEGIN SPI2_Init 1 */
-
-  /* USER CODE END SPI2_Init 1 */
-  /* SPI2 parameter configuration*/
-  hspi2.Instance = SPI2;
-  hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_1LINE;
-  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
-  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi2.Init.CRCPolynomial = 7;
-  hspi2.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
-  hspi2.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-  if (HAL_SPI_Init(&hspi2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI2_Init 2 */
-
-  /* USER CODE END SPI2_Init 2 */
-
-}
-
-/**
-  * @brief TIM3 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM3_Init(void)
-{
-
-  /* USER CODE BEGIN TIM3_Init 0 */
-
-  /* USER CODE END TIM3_Init 0 */
-
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-  /* USER CODE BEGIN TIM3_Init 1 */
-
-  /* USER CODE END TIM3_Init 1 */
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 6000;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 8;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM3_Init 2 */
-
-  /* USER CODE END TIM3_Init 2 */
-
-}
-
-/**
-  * @brief TIM17 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM17_Init(void)
-{
-
-  /* USER CODE BEGIN TIM17_Init 0 */
-
-  /* USER CODE END TIM17_Init 0 */
-
-  TIM_OC_InitTypeDef sConfigOC = {0};
-  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
-
-  /* USER CODE BEGIN TIM17_Init 1 */
-
-  /* USER CODE END TIM17_Init 1 */
-  htim17.Instance = TIM17;
-  htim17.Init.Prescaler = 480;
-  htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim17.Init.Period = 2000;
-  htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim17.Init.RepetitionCounter = 0;
-  htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim17) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_Init(&htim17) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-  if (HAL_TIM_PWM_ConfigChannel(&htim17, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-  sBreakDeadTimeConfig.DeadTime = 0;
-  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-  if (HAL_TIMEx_ConfigBreakDeadTime(&htim17, &sBreakDeadTimeConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM17_Init 2 */
-
-  /* USER CODE END TIM17_Init 2 */
-  HAL_TIM_MspPostInit(&htim17);
-
-}
-
-/**
-  * Enable DMA controller clock
-  */
-static void MX_DMA_Init(void)
-{
-
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
-
-  /* DMA interrupt init */
-  /* DMA1_Channel1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 1, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-  /* DMA1_Channel4_5_6_7_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel4_5_6_7_IRQn, 1, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel4_5_6_7_IRQn);
-
-}
-
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GPIO_Init(void)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, OLED_DC_Pin|OLED_RST_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : OLED_CS_Pin */
-  GPIO_InitStruct.Pin = OLED_CS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(OLED_CS_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : OLED_DC_Pin OLED_RST_Pin */
-  GPIO_InitStruct.Pin = OLED_DC_Pin|OLED_RST_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : ROT_ENC_R_Pin ROT_ENC_L_Pin ROT_ENC_BUTTON_Pin */
-  GPIO_InitStruct.Pin = ROT_ENC_R_Pin|ROT_ENC_L_Pin|ROT_ENC_BUTTON_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : WAKE_Pin */
-  GPIO_InitStruct.Pin = WAKE_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(WAKE_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : BUZZER_Pin */
-  GPIO_InitStruct.Pin = BUZZER_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(BUZZER_GPIO_Port, &GPIO_InitStruct);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
-
-}
-
 /* USER CODE BEGIN 4 */
 
-void Enable_Soft_SPI_SPI(void){
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-	HAL_SPI_MspDeInit(&SPI_DEVICE);
-	 /*Configure GPIO pins : SCK_Pin */
-	 GPIO_InitStruct.Pin = 	SCK_Pin;
-	 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	 GPIO_InitStruct.Pull = GPIO_NOPULL;
-	 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	 HAL_GPIO_Init(SCK_GPIO_Port, &GPIO_InitStruct);
-
-	 /*Configure GPIO pins : SDO_Pin */
-	 GPIO_InitStruct.Pin = 	SDO_Pin;
-	 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	 GPIO_InitStruct.Pull = GPIO_NOPULL;
-	 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	 HAL_GPIO_Init(SDO_GPIO_Port, &GPIO_InitStruct);
-}
 
 
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *_hspi){
-	static uint8_t OledRow=0;
 
-	if(_hspi != &SPI_DEVICE){		return; 	}
-	if(OledRow>7){															//We sent the last row of the OLED buffer data. Return without retriggering DMA.
-				OledRow=0;
-				oled_status=oled_idle;
-				//HAL_SPI_DMAStop(&SPI_DEVICE);
-				return;
-		}
-	oled_status=oled_sending_cmd;
-	write_cmd(0xB0|OledRow);
-	#ifdef SH1106_FIX
-	write_cmd(0x02);
-	#else
-	write_cmd(0x00);
-	#endif
-	write_cmd(0x10);
-	oled_status=oled_sending_data;
-	Oled_Clear_CS();
-	Oled_Set_DC();
-	if(HAL_SPI_Transmit_DMA(&SPI_DEVICE,(uint8_t*)OledDmaBf+ OledRow++ * 128, 128) != HAL_OK){
-		Error_Handler();
+
+
+
+// Called from SysTick IRQ every 1mS
+void Program_Handler(void) {
+	static uint16_t OledUpdateCount=0,PIDUpdateCount=0;
+
+	if(++PIDUpdateCount>=PID_Refresh_ms){		//Timer for updating PID calculation
+		Iron.PIDUpdate=1;
+	}
+
+	if(++OledUpdateCount>=Process_Refresh_ms){		// Timer for updating the oled and other routines
+		OledUpdateCount=0;
+		Iron.OledUpdate = 1;
 	}
 }
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim) {
-	static uint16_t UpdateCount=0,PIDUpdateCount=0;
-	//Timer set every 1mS
-
-	if(_htim == &BASE_TIMER)  {
-
-		if(++PIDUpdateCount>=PID_Refresh_ms){		//Timer for updating Tip temperature and PID calculation
-			PIDUpdateCount=0;
-			if(Iron.Status.TempMeasureState == iron_temp_measure_idle){
-				Iron.Status.TempMeasureState = iron_temp_measure_requested;
-			}
-		}
-
-		if(++UpdateCount>=Process_Refresh_ms){		// Timer for updating the oled and other routines
-			UpdateCount=0;
-			Iron.Status.ProcessUpdate = 1;
-		}
-	}
-}
-
-
-void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* _hadc){
-}
-
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
-	if(_hadc != &ADC_DEVICE){
-		return;
-	}
-	// DMA callback is called every 300uS or less.
-	// No sense of keeping the DMA in circular mode.
-	// We trigger the ADC DMA conversion every PID set in the TMR3 callback
-	ADC_Stop_DMA();
-	adc_dma_status = adc_dma_idle;
-	if(Iron.Status.TempMeasureState == iron_temp_measure_started){
-		Iron.Status.TempMeasureState = iron_temp_measure_ready;
-	}
-}
-
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if((GPIO_Pin == ROT_ENC_BUTTON_Pin) || (GPIO_Pin == ROT_ENC_R_Pin) || (GPIO_Pin == ROT_ENC_L_Pin)) {
@@ -592,45 +206,48 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	}
 
 	if(GPIO_Pin==WAKE_Pin){										// If handle moves
-		if(Iron.Status.CurrentMode!=mode_boost){				// Reset idle timer
-			Iron.Status.CurrentModeTimer=HAL_GetTick();			// Unless we are in boost mode (let the timer expire)
-			if(!Iron.Status.Active){							// Enable active state
-				Iron.Status.Active=1;
+		if(Iron.CurrentMode!=mode_boost){				// Reset idle timer
+			Iron.CurrentModeTimer=HAL_GetTick();			// Unless we are in boost mode (let the timer expire)
+			if(!Iron.Active){							// Enable active state
+				Iron.Active=1;
 			}
 		}
 
 	}
 }
 
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim){
+	if(_htim == Iron.Pwm_Timer){									// PWM output low
+		if(ADC_Status==ADC_InitTip){								// ADC ready?
+			ADC_Status = ADC_SamplingTip;							// Update status
+			__HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);	// Clear Delay Timer flag
+			__HAL_TIM_SET_COUNTER(Iron.Delay_Timer,0);				// Clear Delay Timer counter
+			__HAL_TIM_ENABLE(Iron.Delay_Timer);						// Enable Delay Timer and start counting
+																	// It will trigger the ADC when it overflows and disable by itself (One-pulse mode).
+		}
+	}
+}
 
-void CheckReset(void){
-	if(!BUTTON_input){
-	 setContrast(255);
-	 UG_FillScreen(C_BLACK);
-	 UG_FontSelect(&FONT_8X14);
-	 UG_SetForecolor(C_WHITE);
-	 UG_SetBackcolor(C_BLACK);
-	 UG_PutString(10,20,"HOLD BUTTON");
-	 UG_PutString(18,32,"TO RESET");
-	 UG_PutString(16,44,"DEFAULTS!!");
-	 update_display();
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
+	if(_hadc == &ADC_DEVICE){
+		ADC_Stop_DMA();								// Reset the ADC
+		handle_ADC();								// Process the data.
+		switch (ADC_Status){
+			case ADC_SamplingTip:					// Finished sampling tip. Set new PWM Duty.
+				ADC_Status = ADC_StartOthers;		// Set the ADC status
+				__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Duty);
+				handleIron();						// Update Iron process
+				break;
 
-	 uint16_t ResetTimer= HAL_GetTick();
-	 while(!BUTTON_input){
-		 if((HAL_GetTick()-ResetTimer)>5000){
-			 resetSettings();
-			 UG_FillScreen(C_BLACK);
-			 UG_PutString(40,15,"RESET!");
-			 UG_PutString(0,40,"RELEASE BUTTON");
-			 UG_Update();
-			 update_display();
-			 while(!BUTTON_input){;}
-			 ResetTimer= HAL_GetTick();
-			 while((HAL_GetTick()-ResetTimer)<1000){;}
-			 NVIC_SystemReset();
-		 }
-	  }
-   }
+			case ADC_SamplingOthers:				// Finished sampling secondary channels
+				ADC_Status = ADC_StartTip;			// Set the ADC status
+				break;
+
+			default:
+				Error_Handler();
+		}
+		ADC_Start_DMA();							// Start ADC with new new status
+	}
 }
 
 /* USER CODE END 4 */
@@ -643,7 +260,7 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-
+	while(1);
   /* USER CODE END Error_Handler_Debug */
 }
 

@@ -12,22 +12,16 @@
 #include "pid.h"
 
 typedef void (*setTemperatureReachedCallback)(uint16_t);
-typedef enum {iron_temp_measure_idle, iron_temp_measure_pwm_stopped, iron_temp_measure_requested, iron_temp_measure_started, iron_temp_measure_ready} iron_temp_measure_state_t;
+typedef enum {IRON_measure_idle, IRON_measure_ready} IRON_measure_state_t;
 
 
-typedef enum {mode_standby, mode_sleep, mode_set, mode_boost} iron_mode_t;
+typedef enum {mode_standby=0, mode_sleep, mode_normal, mode_boost} iron_mode_t;
 typedef void (*currentModeChanged)(iron_mode_t);
 
-typedef struct ironBoost_t {
-	uint16_t temperature;
-	uint16_t time;
-} ironBoost_t;
-
-typedef struct ironSleep_t {
-	uint16_t sleepTime;
-	uint16_t standbyTime;
-	uint16_t sleepTemperature;
-} ironSleep_t;
+typedef struct {
+	uint16_t Temperature;
+	uint16_t Time;
+} ironSettings_t;
 
 typedef struct tipData {
 	uint16_t calADC_At_200;
@@ -40,39 +34,34 @@ typedef struct tipData {
 
 typedef struct {
 
-	TIM_HandleTypeDef 	*Pwm_Timer;
-	uint32_t 		Pwm_Channel;
-	uint8_t 		CurrentIronPower;
+	TIM_HandleTypeDef 		*Pwm_Timer;
+	uint32_t 				Pwm_Channel;
+	uint16_t				Pwm_Duty;
+	TIM_HandleTypeDef 		*Delay_Timer;
+	uint8_t 				CurrentIronPower;
 
-	struct{
-		uint8_t		TemperatureReachedFlag;
-		uint16_t 	CurrentSetTemperature;
-		uint16_t 	UserCurrentSetTemperature;
-		uint32_t 	LastSetTemperatureTime;
-		uint8_t 	SetTemperatureChanged;
-		uint16_t 	Temp_Adc_Avg;
-		uint16_t 	TempSetPoint;
-	}Temp;
-	struct{
-		uint8_t 	Enabled ;
-		uint16_t 	SetPoint;
-	}Debug;
-	struct{
-		uint8_t 	isOn;
-		uint8_t 	Active;
-		uint32_t 	PwmStoppedSince;
-		uint32_t 	StartOfNoActivityTime;
-		uint8_t 	ProcessUpdate;
-		iron_temp_measure_state_t TempMeasureState;
-		iron_mode_t	CurrentMode;
-		uint32_t 	CurrentModeTimer;
-	} Status;
-	ironSleep_t 	CurrentSleepSettings;
-	ironBoost_t 	CurrentBoostSettings;
+	uint16_t 				CurrentTemperature;
+	uint16_t 				UserTemperature;
+	uint32_t 				LastChangeTemperatureTime;
+	bool					TemperatureChanged;
+
+	bool 					Debug_Enabled ;
+	uint16_t 				Debug_Temperature;
+
+	uint8_t 				Cal_TemperatureReachedFlag;
+
+	bool 					Active;
+	uint32_t 				StartOfNoActivityTime;
+	bool 					PIDUpdate;
+	bool 					OledUpdate;
+	IRON_measure_state_t 	TempMeasureState;
+	iron_mode_t				CurrentMode;
+	uint32_t 				CurrentModeTimer;
 
 }iron_t;
 
 extern volatile iron_t Iron;
+
 void setCurrentMode(iron_mode_t mode);
 void setSetTemperature(uint16_t temperature);
 void setCurrentTemperature(uint16_t temperature);
@@ -82,13 +71,10 @@ uint16_t getCurrentTemperature();
 uint8_t getCurrentPower();
 void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback);
 void addModeChangedCallback(currentModeChanged callback);
-void applyBoostSettings();
-void applySleepSettings();
 void handleIron(void);
-void ironInit(TIM_HandleTypeDef *timer, uint32_t channel);
-void turnIronOn();
-void turnIronOff();
+void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32_t pwmchannel);
 uint8_t getIronOn();
-void setDebugSetPoint(uint16_t value);
-void setDebugMode(uint8_t value);
+void DebugSetTemp(uint16_t value);
+void DebugMode(uint8_t value);
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim);
 #endif /* IRON_H_ */

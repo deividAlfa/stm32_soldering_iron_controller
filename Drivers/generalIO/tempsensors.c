@@ -65,44 +65,33 @@ int NTC_table[257] = {
 int16_t readColdJunctionSensorTemp_C_x10(void) {
 	int16_t p1, p2;
 	int16_t temp;
-	static RollingTypeDef_t data = {
-			adc_buffer: (uint16_t*) &adc_measures[0].NTC,
-			adc_buffer_size: Adc_Buffer_Size,
-			adc_buffer_elements: Adc_Buffer_Elements,
-			rolling_buffer_size: RollingBufferSize,
-			rolling_buffer_index: 0,
-			last_avg: 0,
-			init: 0
-	};
-
-	if (!data.init) {
-		uint16_t x = data.rolling_buffer_size;
-		for (x = 0; x < data.rolling_buffer_size; x++) {
-			data.rolling_buffer[x] = 0;
-		}
-		data.init = 1;
-	}
-
-	RollingUpdate(&data);	//Update average
-
+	int16_t lastavg=NTC.last_avg;
 	/* Estimate the interpolating point before and after the ADC value. */
-	p1 = NTC_table[(data.last_avg >> 4)];
-	p2 = NTC_table[(data.last_avg >> 4) + 1];
+	p1 = NTC_table[(lastavg >> 4)];
+	p2 = NTC_table[(lastavg >> 4) + 1];
 
 	/* Interpolate between both points. */
-	temp = p1 - ((p1 - p2) * (data.last_avg & 0x000F)) / 16;
+	temp = p1 - ((p1 - p2) * (lastavg & 0x000F)) / 16;
 
 	return (int16_t) temp;
 }
-
+// Read tip filtered
 uint16_t readTipTemperatureCompensated(uint8_t new) {
 	static uint16_t last_value;
 	if (!new)
 		return last_value;
-	last_value = adc2Human(Iron.Temp.Temp_Adc_Avg);
+	readTipTemperatureCompensatedRaw(New);
+	last_value = adc2Human(TIP.last_avg);
 	return last_value;
 }
-
+// Read tip unfiltered
+uint16_t readTipTemperatureCompensatedRaw(uint8_t new) {
+	static uint16_t last_value;
+	if (!new)
+		return last_value;
+	last_value = adc2Human(TIP.last_RawAvg);
+	return last_value;
+}
 void setCurrentTip(uint8_t tip) {
 	currentTipData = &systemSettings.ironTips[tip];
 	currentPID = currentTipData->PID;

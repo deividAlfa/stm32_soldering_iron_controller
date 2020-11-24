@@ -16,7 +16,7 @@
 #include "ugui.h"
 
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
-typedef enum widgetFieldType {field_float, field_integer, field_uinteger16, field_bmp, field_string}widgetFieldType;
+typedef enum widgetFieldType {field_float, field_integer, field_uinteger16, field_int32, field_bmp, field_string}widgetFieldType;
 typedef enum widgetTextJustifyType {justify_left, justify_right}widgetTextJustifyType;
 typedef enum widgetType {widget_combo, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button}widgetType;
 enum {screen_splash, screen_main, screen_settings, screen_last_scrollable, screen_debug, screen_debug2, screen_edit_pid, screen_edit_sleep, screen_edit_contrast, screen_edit_max_power, screen_edit_boost, screen_edit_iron_tips, screen_edit_iron_tip, screen_edit_tip_name, screen_edit_calibration_wait, screen_edit_calibration_input, screen_LAST};

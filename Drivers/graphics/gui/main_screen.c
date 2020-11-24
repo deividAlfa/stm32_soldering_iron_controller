@@ -24,9 +24,9 @@ static widget_t *SetPointWidget;
 static widget_t *SetModeWidget;
 static int16_t temp;
 static int8_t UpdateReadings;
-static uint16_t lastTipTemp;
-static uint16_t lastAmbTemp;
-static uint16_t lastPwr;
+static int32_t lastTipTemp;
+static int32_t lastAmbTemp;
+static int32_t lastPwr;
 static uint16_t lastVin;
 char *s;
 /*
@@ -54,7 +54,6 @@ void setTemp(uint16_t *value) {
 	m_temp = *value;
 	setSetTemperature(m_temp);
 }
-
 void * getTemp() {
 	m_temp = getSetTemperature();
 	return &m_temp;
@@ -85,12 +84,12 @@ void * getTip() {
 static int tempProcessInput(widget_t* w, RE_Rotation_t r, RE_State_t * s) {
 	switch (w->editable.selectable.state) {
 		case widget_selected:
-			if(r == Click && getCurrentMode() != mode_set)
-				setCurrentMode(mode_set);
+			if(r == Click && getCurrentMode() != mode_normal)
+				setCurrentMode(mode_normal);
 			break;
 		case widget_edit:
-			if(r != Rotate_Nothing && r != LongClick && getCurrentMode() != mode_set) {
-				setCurrentMode(mode_set);
+			if(r != Rotate_Nothing && r != LongClick && getCurrentMode() != mode_normal) {
+				setCurrentMode(mode_normal);
 				return -1;
 			}
 			break;
@@ -105,10 +104,19 @@ static int tempProcessInput(widget_t* w, RE_Rotation_t r, RE_State_t * s) {
 
 static void * main_screen_getIronTemp() {
 	if(UpdateReadings){
-		lastTipTemp = readTipTemperatureCompensated(0);
+		lastTipTemp = readTipTemperatureCompensated(Old);
 	}
 	return &lastTipTemp;
 }
+#ifdef TEST
+static int32_t lastTipTempRaw;
+static void * main_screen_getIronTempRaw() {
+	if(UpdateReadings){
+		lastTipTempRaw = readTipTemperatureCompensatedRaw(Old);
+	}
+	return &lastTipTempRaw;
+}
+#endif
 
 static void * main_screen_getVin() {
 	if(UpdateReadings){
@@ -143,7 +151,6 @@ static void * main_screen_getIronPower() {
 	return &lastPwr;
 }
 
-
 static void main_screen_init(screen_t *scr) {
 	UG_FontSetHSpace(0);
 	UG_FontSetVSpace(0);
@@ -152,7 +159,6 @@ static void main_screen_init(screen_t *scr) {
 }
 void main_screenUpdate(screen_t *scr) {
 	static uint32_t lastNoIron=0,lastUpdateTick=0;
-	uint16_t t = Iron.Temp.Temp_Adc_Avg;
 	if(UpdateReadings){
 		UpdateReadings = 0;
 	}
@@ -160,30 +166,40 @@ void main_screenUpdate(screen_t *scr) {
 		UpdateReadings=1;						//Update temperature readings slower than the rest of the gui
 		lastUpdateTick=HAL_GetTick();
 	}
-	if(t > NO_IRON_ADC){
-		if(!hasIron) {
-			lastNoIron=HAL_GetTick();
-		}
-		else{
+	if(TIP.last_RawAvg > NO_IRON_ADC){
+		lastNoIron=HAL_GetTick();
+
+		if(hasIron){
 			hasIron = 0;
 			UG_FillScreen(C_BLACK);
+												//Hide controls and deselect them
 			ironTempLabelWidget->enabled = 0;
 			ironTempWidget->enabled = 0;
 			noIronWidget->enabled = 1;
-			//TipSelectWidget->enabled = 0;
-			//SetPointWidget->enabled = 0;
-			//SetModeWidget->enabled = 0;
+			TipSelectWidget->enabled = 0;
+			SetPointWidget->enabled = 0;
+			SetModeWidget->enabled = 0;
+
+			if(TipSelectWidget->editable.selectable.state==widget_edit){
+				TipSelectWidget->editable.selectable.state=widget_selected;
+			}
+			if(SetPointWidget->editable.selectable.state==widget_edit){
+				SetPointWidget->editable.selectable.state=widget_selected;
+			}
+			if(SetModeWidget->editable.selectable.state==widget_edit){
+				SetModeWidget->editable.selectable.state=widget_selected;
+			}
 			buzzer_alarm_start();
 		}
 	}
-	else if((t < NO_IRON_ADC) && !hasIron && ((HAL_GetTick()-lastNoIron)>No_Iron_Delay_mS) ){
+	else if((TIP.last_RawAvg < NO_IRON_ADC) && !hasIron && ((HAL_GetTick()-lastNoIron)>No_Iron_Delay_mS) ){
 		UG_FillScreen(C_BLACK);
 		ironTempLabelWidget->enabled = 1;
 		ironTempWidget->enabled = 1;
 		noIronWidget->enabled = 0;
-		//TipSelectWidget->enabled = 1;
-		//SetPointWidget->enabled = 1;
-		//SetModeWidget->enabled = 1;
+		TipSelectWidget->enabled = 1;
+		SetPointWidget->enabled = 1;
+		SetModeWidget->enabled = 1;
 		buzzer_alarm_stop();
 		hasIron = 1;
 	}
@@ -205,7 +221,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 30;
 	widget->posY = 18;
-	widget->font_size = &FONT_16X26;
+	widget->font_size =  &FONT_16X26_reduced;
 	widget->displayWidget.getData = &main_screen_getIronTemp;
 	widget->displayWidget.number_of_dec = 0;
 	widget->displayWidget.type = field_uinteger16;
@@ -213,13 +229,27 @@ void main_screen_setup(screen_t *scr) {
 	widget->displayWidget.justify = justify_right;
 	ironTempWidget = widget;
 
+#ifdef TEST
+	//iron tip temperature display
+	widget = screen_addWidget(scr);
+	widgetDefaultsInit(widget, widget_display);
+	widget->posX = 0;
+	widget->posY = 30;
+	widget->font_size = &FONT_8X14_reduced;
+	widget->displayWidget.getData = &main_screen_getIronTempRaw;
+	widget->displayWidget.number_of_dec = 0;
+	widget->displayWidget.type = field_uinteger16;
+	widget->reservedChars = 3;
+	widget->displayWidget.justify = justify_right;
+	ironTempWidget = widget;
+#endif
 	//ºC label next to iron tip temperature
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
-	strcpy(widget->displayString, "\247C");
+	strcpy(widget->displayString, "~C");
 	widget->posX = 50 + 3 * 12 -5 + 3;
 	widget->posY = 18;
-	widget->font_size = &FONT_16X26;
+	widget->font_size =  &FONT_16X26_reduced;
 	widget->reservedChars = 2;
 	widget->draw = &default_widgetDraw;
 	ironTempLabelWidget = widget;
@@ -229,7 +259,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 93;
 	widget->posY = 0;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = &FONT_8X14_reduced;
 	widget->displayWidget.getData = &main_screen_getIronPower;
 	widget->displayWidget.number_of_dec = 0;
 	widget->displayWidget.type = field_uinteger16;
@@ -242,7 +272,7 @@ void main_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, "%");
 	widget->posX = 119;
 	widget->posY = 0;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = &FONT_8X14_reduced;
 	widget->reservedChars = 1;
 	widget->draw = &default_widgetDraw;
 
@@ -252,11 +282,11 @@ void main_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, "NO IRON");
 	widget->posX = 7;
 	widget->posY = 18 ;
-	widget->font_size = &FONT_16X26;
+	widget->font_size =  &FONT_16X26_reduced;
 	widget->reservedChars = 7;
 	widget->draw = &default_widgetDraw;
-	noIronWidget = widget;
 	widget->enabled = 0;
+	noIronWidget = widget;
 
 	//Thermometer bmp next to Ambient temperature
 	widget = screen_addWidget(scr);
@@ -275,7 +305,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 64;
 	widget->posY = 0;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = &FONT_8X14_reduced;
 	widget->displayWidget.getData = &main_screen_getAmbTemp;
 	widget->displayWidget.number_of_dec = 0;
 	widget->displayWidget.type = field_uinteger16;
@@ -286,7 +316,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_display);
 	widget->posX = 0;
 	widget->posY = 0;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = &FONT_8X14_reduced;
 	widget->displayWidget.getData = &main_screen_getVin;
 	widget->displayWidget.number_of_dec = 1;
 	widget->displayWidget.type = field_uinteger16;
@@ -300,7 +330,7 @@ void main_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, "V");
 	widget->posX = 33;
 	widget->posY = 0;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = &FONT_8X14_reduced;
 	widget->reservedChars = 1;
 	widget->draw = &default_widgetDraw;
 
@@ -310,7 +340,7 @@ void main_screen_setup(screen_t *scr) {
 	widget->editable.selectable.processInput = (int (*)(widget_t*, RE_Rotation_t, RE_State_t *))&tempProcessInput;
 	widget->posX = 36;
 	widget->posY = 50;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = &FONT_8X14_reduced;
 	widget->editable.inputData.getData = &getTemp;
 	widget->editable.inputData.number_of_dec = 0;
 	widget->editable.inputData.type = field_uinteger16;
@@ -331,7 +361,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_multi_option);
 	widget->posX = 1;
 	widget->posY = 50;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = &FONT_8X14_reduced;
 	widget->multiOptionWidget.editable.inputData.getData = &getMode;
 	widget->multiOptionWidget.editable.inputData.number_of_dec = 0;
 	widget->multiOptionWidget.editable.inputData.type = field_uinteger16;
@@ -339,9 +369,7 @@ void main_screen_setup(screen_t *scr) {
 	widget->multiOptionWidget.editable.step = 0;
 	widget->multiOptionWidget.editable.selectable.tab = 2;
 	widget->multiOptionWidget.editable.setData = (void (*)(void *))&setMode;
-
 	widget->reservedChars = 4;
-
 	widget->multiOptionWidget.options = modestr;
 	widget->multiOptionWidget.numberOfOptions = 4;
 	widget->multiOptionWidget.currentOption = 2;
@@ -353,7 +381,7 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(widget, widget_multi_option);
 	widget->posX = 93;
 	widget->posY = 50;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = &FONT_8X14_reduced;
 	widget->multiOptionWidget.editable.inputData.getData = &getTip;
 	widget->multiOptionWidget.editable.inputData.number_of_dec = 0;
 	widget->multiOptionWidget.editable.inputData.type = field_uinteger16;
@@ -361,9 +389,7 @@ void main_screen_setup(screen_t *scr) {
 	widget->multiOptionWidget.editable.step = 0;
 	widget->multiOptionWidget.editable.selectable.tab = 1;
 	widget->multiOptionWidget.editable.setData = (void (*)(void *))&setTip;
-
 	widget->reservedChars = 4;
-
 	widget->multiOptionWidget.options = tipstr;
 	widget->multiOptionWidget.numberOfOptions = systemSettings.currentNumberOfTips;
 	tipsWidget = &widget->multiOptionWidget;

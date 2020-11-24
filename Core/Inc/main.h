@@ -34,6 +34,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "setup.h"
 
 
@@ -51,15 +52,20 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+#ifdef DEBUG
+	#define GET_MACRO( _0, _1, NAME, ... ) NAME
+	#define Error_Handler(...) GET_MACRO( _0, ##__VA_ARGS__, Error_Handler1, Error_Handler0 )()
+	#define Error_Handler0() _Error_Handler(__BASE_FILE__, __LINE__ )
+	#define Error_Handler1(unused) _Error_Handler( char * file, int line )
+	void _Error_Handler(char *, int);
+#endif
 /* USER CODE END EM */
-
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+void Program_Handler(void);
 
 /* USER CODE END EFP */
 

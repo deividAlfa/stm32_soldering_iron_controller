@@ -40,7 +40,7 @@ void ssd1306_init(void);
 void ssd1306_init(SPI_HandleTypeDef *hspi);
 
 #endif
-
+void Enable_Soft_SPI_SPI(void);
 void write_data(uint8_t *data);
 void write_cmd(uint8_t data);
 void send_display_bf(uint8_t *oled_buffer);

@@ -70,8 +70,6 @@ void guiInit(TIM_HandleTypeDef *tim) {
 
 	UG_Init(&user_gui, pset, 128, 64);
 	oled_init();
-	oled_draw();
-	UG_Update();
-	update_display();
+	oled_update();
     setPWM_tim(tim);
 }

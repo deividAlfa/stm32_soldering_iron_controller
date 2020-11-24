@@ -43,8 +43,8 @@ static void setMeasuredTemp(void *temp) {
 static void setCalState(state_t s) {
 	current_state = s;
 	if(current_state != cal_end) {
+		setCurrentMode(mode_normal);
 		setSetTemperature(state_temps[(int)s]);
-		setCurrentMode(mode_set);
 		sprintf(waitStr, "Setting temp.to %dC", state_temps[(int)s]);
 		measuredTemp = state_temps[(int)s];
 	}
@@ -78,7 +78,7 @@ static int okAction(widget_t *w) {
 		return screen_main;
 	}
 	measured_temps[(int)current_state] = measuredTemp - (readColdJunctionSensorTemp_C_x10() / 10);
-	adcAtTemp[(int)current_state] = Iron.Temp.Temp_Adc_Avg;
+	adcAtTemp[(int)current_state] = TIP.last_avg;
 	setCalState(++current_state);
 	return screen_edit_calibration_wait;
 }
@@ -110,7 +110,7 @@ static void waitOnEnter(screen_t *scr) {
 		waitWidget->posX = 10;
 		ironModeBackup = getCurrentMode();
 		tempSetBackup = getSetTemperature();
-		setCurrentMode(mode_set);
+		setCurrentMode(mode_normal);
 		currentPID = cal_pid;
 		setupPIDFromStruct();
 		setCalState(cal_200);
@@ -120,8 +120,8 @@ static void waitOnExit(screen_t *scr) {
 	if(scr != calWaitScreen && scr != calInputScreen) {
 		tempReady = 0;
 		current_state = cal_200;
-		setSetTemperature(tempSetBackup);
 		setCurrentMode(ironModeBackup);
+		setSetTemperature(tempSetBackup);
 		currentPID = systemSettings.ironTips[systemSettings.currentTip].PID;
 		setupPIDFromStruct();
 	}
@@ -141,7 +141,7 @@ void calibration_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, s);
 	widget->posX = 10;
 	widget->posY = 16;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = &FONT_8X14_reduced;
 	waitWidget = widget;
 
 	widget = screen_addWidget(scr);
@@ -149,12 +149,12 @@ void calibration_screen_setup(screen_t *scr) {
 	waitStr = widget->displayString;
 	widget->posX = 0;
 	widget->posY = 30;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = &FONT_6X8_reduced;
 	waitTemp = widget;
 
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8;
+	widget->font_size = &FONT_6X8_reduced;
 	widget->posX = 90;
 	widget->posY = 56;
 	s = "CANCEL";
@@ -177,20 +177,20 @@ void calibration_screen_setup(screen_t *scr) {
 	strcpy(widget->displayString, s);
 	widget->posX = 10;
 	widget->posY = 16;
-	widget->font_size = &FONT_6X8;
+	widget->font_size = &FONT_6X8_reduced;
 
 	widget = screen_addWidget(sc);
 	widgetDefaultsInit(widget, widget_editable);
 	widget->posX = 55;
 	widget->posY = 30;
-	widget->font_size = &FONT_8X14;
+	widget->font_size = &FONT_8X14_reduced;
 	widget->editable.inputData.getData = &getMeasuredTemp;
 	widget->editable.setData = &setMeasuredTemp;
 	widget->reservedChars = 3;
 	widget->editable.selectable.tab = 0;
 	widget = screen_addWidget(sc);
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8;
+	widget->font_size = &FONT_6X8_reduced;
 	widget->posX = 90;
 	widget->posY = 56;
 	s = "CANCEL";
@@ -201,7 +201,7 @@ void calibration_screen_setup(screen_t *scr) {
 
 	widget = screen_addWidget(sc);
 	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8;
+	widget->font_size = &FONT_6X8_reduced;
 	widget->posX = 20;
 	widget->posY = 56;
 	s = "OK";

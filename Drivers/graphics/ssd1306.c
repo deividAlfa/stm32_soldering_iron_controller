@@ -4,14 +4,32 @@
 
 
 
-static uint8_t m_contrast = 0xFF;
-
+static uint8_t OledContrast;
 volatile uint8_t OledBuffer[128*8]; // 128x64 1BPP OLED
 volatile uint8_t *OledDmaBf;
 volatile oled_status_t oled_status=oled_idle;
+static SPI_HandleTypeDef *spi_device;
 
 #ifdef Soft_SPI
 
+void Enable_Soft_SPI_SPI(void){
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+	HAL_SPI_MspDeInit(&SPI_DEVICE);
+	 /*Configure GPIO pins : SCK_Pin */
+	 GPIO_InitStruct.Pin = 	SCK_Pin;
+	 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	 GPIO_InitStruct.Pull = GPIO_NOPULL;
+	 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	 HAL_GPIO_Init(SCK_GPIO_Port, &GPIO_InitStruct);
+
+	 /*Configure GPIO pins : SDO_Pin */
+	 GPIO_InitStruct.Pin = 	SDO_Pin;
+	 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	 GPIO_InitStruct.Pull = GPIO_NOPULL;
+	 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	 HAL_GPIO_Init(SDO_GPIO_Port, &GPIO_InitStruct);
+}
 
 #define spidelay() asm("NOP")
 //#define spidelay() HAL_Delay(1)
@@ -103,18 +121,17 @@ void send_display_bf(uint8_t *oled_buffer)
 
 #else
 
-static SPI_HandleTypeDef * m_hspi;
-
+// Send data in blocking mode (Not used in screen update)
 void write_data(uint8_t *data) {
-	while(oled_status!=oled_idle);	//Wait for DMA to finish
+	while(oled_status!=oled_idle);	// Wait for DMA to finish
 	Oled_Set_CS();
 	Oled_Set_DC();
 	Oled_Clear_CS();
-	HAL_SPI_Transmit(m_hspi, data, 128, 1000);
+	HAL_SPI_Transmit(spi_device, data, 128, 1000);
 	Oled_Set_CS();
 }
 
-
+// Send command in blocking mode
 void write_cmd(uint8_t data) {
 	while(oled_status==oled_sending_data);	//Wait for DMA to finish
 	// Now, else we are in idle (oled_idle) or DMA wants to send a cmd (oled_sending_cmd)
@@ -122,23 +139,16 @@ void write_cmd(uint8_t data) {
 	Oled_Set_CS();
 	Oled_Clear_DC();
 	Oled_Clear_CS();
-	HAL_SPI_Transmit(m_hspi, &data, 1, 1000);
+	HAL_SPI_Transmit(spi_device, &data, 1, 1000);
 	Oled_Set_CS();
 }
 
-
+// Trigger DMA
 void update_display( void ){
-		while(oled_status!=oled_idle);	//Wait for DMA to finish sending the buffer ( 1mS at most )
-	    OledDmaBf = OledBuffer;
-		HAL_SPI_TxCpltCallback(m_hspi); // Call the DMA callback function to send the frame
+		if(oled_status!=oled_idle) { return; }		// If OLED busy, skip update
+		HAL_SPI_TxCpltCallback(spi_device); // Call the DMA callback function to send the frame
 }
 
-
-void send_display_bf(uint8_t *oled_buffer){
-   while(oled_status!=oled_idle);	//Wait for DMA to finish sending the buffer ( 1mS at most )
-   OledDmaBf = oled_buffer;
-   HAL_SPI_TxCpltCallback(m_hspi);
-}
 #endif
 
 
@@ -165,12 +175,12 @@ void pset(UG_S16 x, UG_S16 y, UG_COLOR c){
 void setContrast(uint8_t value) {
 	write_cmd(0x81);         // Set Contrast Control
 	write_cmd(value);         //   Default => 0xFF
-	m_contrast = value;
+	OledContrast = value;
 }
 
 
 uint8_t getContrast() {
-	return m_contrast;
+	return OledContrast;
 }
 
 
@@ -181,7 +191,7 @@ void ssd1306_init(void){
 #else
 
 void ssd1306_init(SPI_HandleTypeDef *hspi){
-	m_hspi = hspi;
+	spi_device = hspi;
 #endif
 
 	Oled_Clear_RES();//RST
@@ -217,7 +227,7 @@ void ssd1306_init(SPI_HandleTypeDef *hspi){
    write_cmd(0xDA);         // Set COM Pins Hardware Configuration
    write_cmd(0x02|0x10);   //   Default => 0x12 (0x10)
 
-   setContrast(m_contrast);
+   setContrast(0xFF);		// Init in max contrast
 
    write_cmd(0xD9);         // Set Pre-Charge Period
    write_cmd(0x22);         //   Default => 0x22 (2 Display Clocks [Phase 2] / 2 Display Clocks [Phase 1])
@@ -231,4 +241,32 @@ void ssd1306_init(SPI_HandleTypeDef *hspi){
    write_cmd(0xA6|0x00);   // Set Inverse Display On/Off
 
    write_cmd(0xAE|0x01);   // Set Display On/Off
+}
+
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *_hspi){
+	static uint8_t OledRow=0;
+
+	if(_hspi == spi_device){
+		if(OledRow>7){
+			OledRow=0;					// We sent the last row of the OLED buffer data
+			oled_status=oled_idle;
+			return;						// Return without retriggering DMA.
+		}
+		oled_status=oled_sending_cmd;
+		write_cmd(0xB0|OledRow);
+		#ifdef SH1106_FIX
+		write_cmd(0x02);
+		#else
+		write_cmd(0x00);
+		#endif
+		write_cmd(0x10);
+		oled_status=oled_sending_data;
+		Oled_Clear_CS();
+		Oled_Set_DC();
+
+		// Send next OLED row
+		if(HAL_SPI_Transmit_DMA(spi_device, (uint8_t*)&OledBuffer[0]+(OledRow++ * 128), 128) != HAL_OK){
+			Error_Handler();
+		}
+	}
 }

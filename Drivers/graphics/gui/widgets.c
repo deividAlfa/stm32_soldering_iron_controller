@@ -60,7 +60,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	w->type = t;
 	w->draw = &default_widgetDraw;
 	w->enabled = 1;
-	w->font_size = &FONT_8X14;
+	w->font_size = &FONT_8X14_reduced;
 	w->inverted = 0;
 	w->posX = 0;
 	w->posY = 0;
@@ -133,6 +133,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 
 
 static void insertDot(char *str, uint8_t dec) {
+	char pos=0;
 	if(!dec){
 		return;
 	}
@@ -141,47 +142,98 @@ static void insertDot(char *str, uint8_t dec) {
 	}
 	str[strlen(str) - dec - 1] = '.';
 
-	if(str[strlen(str) - dec - 2] == ' '){
-		str[strlen(str) - dec - 2] = '0';
+	if(str[strlen(str) - dec - 2] == ' '){			// If no number before '.'
+		str[strlen(str) - dec - 2] = '0';			// Put a zero
+	}
+	for(int x = 0; x < (int)strlen(str); x++) {		// Find '.' and fill zeros if spaces are found until the first number
+		if(!pos){
+			if(str[x] == '.'){ pos =1; }
+		}
+		else{
+			if(str[x] ==' '){ str[x] ='0'; }
+			else{
+				break;						// Found a number
+			}
+		}
 	}
 }
 
 void default_widgetUpdate(widget_t *widget) {
-	void * data;
+	void *data;
+	int32_t val_ui;
+	int8_t val_ui_size, decimals;
+	char *str;
+
 	displayOnly_wiget_t *dis = extractDisplayPartFromWidget(widget);
 	if(!dis)
 		return;
 	data = dis->getData();
 	UG_FontSelect(widget->font_size);
-	uint16_t val_ui16;
 
-	char *str;
 	switch (widget->type) {
 	case widget_multi_option:
 		strcpy(widget->displayString, widget->multiOptionWidget.options[*(uint8_t*)data]);
 		widget->multiOptionWidget.currentOption = *(uint8_t*)data;
 		break;
-	default:
-		switch (dis->type) {
-		case field_uinteger16:
-			val_ui16 = *((uint16_t*)(data));
 
-			if(widget->displayWidget.justify == justify_right){
-				sprintf(widget->displayString,"%*d", (widget->reservedChars - dis->number_of_dec), val_ui16);
+	default:
+		// To keep the compiler happy ensuring that displayString is not overflowed
+		if( widget->reservedChars > (sizeof(widget->displayString) -1) ){
+			widget->reservedChars = (sizeof(widget->displayString) -1);
+		}
+		// Get the data
+		if(dis->type==field_uinteger16){
+			val_ui = *(uint16_t*)data;
+		}
+		else if(dis->type==field_int32){
+			val_ui = *(int32_t*)data;
+		}
+		else{
+			break;
+		}
+		if(dis->number_of_dec){														// If decimals used
+			if(dis->number_of_dec>(sizeof(widget->displayString)-2)){				// If decimals larger than display string length
+				decimals = (sizeof(widget->displayString)-2);						// Reduce decimals
 			}
 			else{
-				sprintf(widget->displayString,"%d", val_ui16);
+				decimals = dis->number_of_dec;										// Else, leave all the decimals
+			}
+			if(val_ui){																// If val_ui has value
+				val_ui_size = snprintf(NULL, 0, "%ld", val_ui); 					// Get val_ui length
+				if( (val_ui_size + decimals) > (sizeof(widget->displayString)-2) ){	// If val_ui length + decimals larger than displayString size
+					if(val_ui_size>(sizeof(widget->displayString)-2)){				// If val_ui length already larger than the string size
+						decimals = 0;												// Don't use decimals
+					}
+					else{															// else, reduce number of decimals to fit in displayString
+						decimals = (sizeof(widget->displayString)-2) - val_ui_size;	// (-2 to leave room "." + string termination)
+					}
+				}
+			}
+		}
+		else{
+			decimals = 0;															// Don't use decimals
+		}
+
+		switch (dis->type) {
+		case field_uinteger16:
+		case field_int32:
+			if(widget->displayWidget.justify == justify_right){
+				snprintf(widget->displayString,sizeof(widget->displayString),"%*ld", (widget->reservedChars - decimals), val_ui);
+			}
+			else{
+				snprintf(widget->displayString,sizeof(widget->displayString),"%ld", val_ui);
 				}
 			insertDot(widget->displayString, dis->number_of_dec);
 			break;
-			case field_string:
-				str = (char*)(data);
-				strcpy(widget->displayString, str);
-				break;
-			default:
-				break;
+
+		case field_string:
+			str = (char*)(data);
+			strncpy(widget->displayString, str, sizeof(widget->displayString));
+			break;
+
+		default:
+			break;
 		}
-		break;
 	}
 }
 void default_widgetDraw(widget_t *widget) {

@@ -41,7 +41,7 @@ screen_t *oled_addScreen(uint8_t index) {
 void oled_draw() {
 
 #ifndef Soft_SPI
-	while(oled_status!=oled_idle);	//Wait for DMA to finish sending the buffer ( 1mS at most )
+	if(oled_status!=oled_idle) { return; }		// If Oled busy, skip update
 #endif
 
 	current_screen->draw(current_screen);
@@ -52,6 +52,7 @@ void oled_draw() {
 void oled_update() {
 	if(current_screen->update)
 		current_screen->update(current_screen);
+	oled_draw();
 }
 
 void oled_init() {
