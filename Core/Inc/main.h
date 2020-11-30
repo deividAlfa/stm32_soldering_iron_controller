@@ -42,7 +42,14 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+extern ADC_HandleTypeDef hadc;
+extern DMA_HandleTypeDef hdma_adc;
+extern SPI_HandleTypeDef hspi2;
+extern DMA_HandleTypeDef hdma_spi2_tx;
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim15;
+extern TIM_HandleTypeDef htim17;
+extern DMA_HandleTypeDef hdma_memtomem_dma1_channel2;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -60,6 +67,8 @@ extern "C" {
 	void _Error_Handler(char *, int);
 #endif
 /* USER CODE END EM */
+
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
@@ -90,16 +99,12 @@ void Program_Handler(void);
 #define SDO_GPIO_Port GPIOB
 #define ROT_ENC_R_Pin GPIO_PIN_8
 #define ROT_ENC_R_GPIO_Port GPIOA
-#define ROT_ENC_R_EXTI_IRQn EXTI4_15_IRQn
 #define ROT_ENC_L_Pin GPIO_PIN_9
 #define ROT_ENC_L_GPIO_Port GPIOA
-#define ROT_ENC_L_EXTI_IRQn EXTI4_15_IRQn
 #define WAKE_Pin GPIO_PIN_10
 #define WAKE_GPIO_Port GPIOA
-#define WAKE_EXTI_IRQn EXTI4_15_IRQn
 #define ROT_ENC_BUTTON_Pin GPIO_PIN_11
 #define ROT_ENC_BUTTON_GPIO_Port GPIOA
-#define ROT_ENC_BUTTON_EXTI_IRQn EXTI4_15_IRQn
 #define BUZZER_Pin GPIO_PIN_12
 #define BUZZER_GPIO_Port GPIOA
 #define PWM_OUTPUT_Pin GPIO_PIN_7
