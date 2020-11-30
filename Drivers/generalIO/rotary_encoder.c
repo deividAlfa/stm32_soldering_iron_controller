@@ -8,7 +8,7 @@
 
 #include "rotary_encoder.h"
 volatile RE_State_t RE1_Data;
-
+static uint32_t was_pushed_time = 0;
 
 /* Return with status macro */
 #define RETURN_WITH_STATUS(p, s) (p)->Rotation = s; return s
@@ -41,11 +41,11 @@ RE_Rotation_t RE_Get(RE_State_t* data) {
 
 	/* Check */
 	if(data->pv_click == RE_BT_CLICKED) {
-		data->pv_click = RE_BT_HIDLE;
+		data->pv_click = RE_BT_UNRELEASED;
 		RETURN_WITH_STATUS(data, Click);
 	}
 	else if(data->pv_click == RE_BT_LONG_CLICK) {
-		data->pv_click = RE_BT_HIDLE;
+		data->pv_click = RE_BT_UNRELEASED;
 		RETURN_WITH_STATUS(data, LongClick);
 	}
 	else if (data->Diff < 0) {
@@ -68,14 +68,15 @@ void RE_SetMode(RE_State_t* data, RE_Mode_t mode) {
 }
 
 void RE_Process(RE_State_t* data) {
-	static uint32_t long_press_time = 0;
 	uint8_t now_a;
 	uint8_t now_b;
 	uint8_t now_button;
+	uint32_t pressed_time;
 	/* Read inputs */
 	now_a = HAL_GPIO_ReadPin(data->GPIO_A, data->GPIO_PIN_A);
 	now_b = HAL_GPIO_ReadPin(data->GPIO_B, data->GPIO_PIN_B);
 	now_button = HAL_GPIO_ReadPin(data->GPIO_BUTTON, data->GPIO_PIN_BUTTON);
+	pressed_time = HAL_GetTick() - was_pushed_time;
 	if (now_a && now_b) {
 		if(data->halfPointReached) {
 			data->halfPointReached = 0;
@@ -112,14 +113,18 @@ void RE_Process(RE_State_t* data) {
 	else if(data->pv_click != RE_BT_DRAG) {
 		if((data->pv_click == RE_BT_HIDLE) && (now_button == 0)) {
 			data->pv_click = RE_BT_PRESSED;
-			long_press_time = HAL_GetTick();
+			was_pushed_time = HAL_GetTick();
 		}
-		if((data->pv_click == RE_BT_PRESSED) && (now_button == 1)) {
-			if(HAL_GetTick() - long_press_time > 1000)
+		else if(data->pv_click == RE_BT_PRESSED) {
+			if((now_button == 0)&&(pressed_time > 1000)){
 				data->pv_click = RE_BT_LONG_CLICK;
-			else if(HAL_GetTick() - long_press_time > 100)
+			}
+			else if((now_button == 1)&&(pressed_time > 10)){
 				data->pv_click = RE_BT_CLICKED;
-			else
+			}
+
+		}
+		if((data->pv_click == RE_BT_UNRELEASED) && (now_button == 1) ) {
 				data->pv_click = RE_BT_HIDLE;
 		}
 	}

@@ -80,6 +80,9 @@ typedef struct
 #ifdef USE_FONT_10X16
    extern const UG_FONT FONT_10X16;
 #endif
+#ifdef USE_FONT_10X16_reduced
+   extern const UG_FONT FONT_10X16_reduced;
+#endif
 #ifdef USE_FONT_12X16
    extern const UG_FONT FONT_12X16;
 #endif
@@ -94,6 +97,9 @@ typedef struct
 #endif
 #ifdef USE_FONT_22X36
    extern const UG_FONT FONT_22X36;
+#endif
+#ifdef USE_FONT_22X36_reduced
+   extern const UG_FONT FONT_22X36_reduced;
 #endif
 #ifdef USE_FONT_24X40
    extern const UG_FONT FONT_24X40;

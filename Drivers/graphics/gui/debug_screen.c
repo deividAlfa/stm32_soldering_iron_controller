@@ -22,15 +22,15 @@ static void * debug_screen_getADC1_1_raw() {
 }
 
 static void * debug_screen_getP() {
-	temp = getPID_P()* 1000000;
+	temp = getPID_P()* 1000;
 	return &temp;
 }
 static void * debug_screen_getI() {
-	temp = getPID_I()* 1000000;
+	temp = getPID_I()* 1000;
 	return &temp;
 }
 static void * debug_screen_getD() {
-	temp = getPID_D()* 1000000;
+	temp = getPID_D()* 1000;
 	return &temp;
 }
 static void * debug_screen_getError() {
@@ -38,9 +38,10 @@ static void * debug_screen_getError() {
 	return &temp;
 }
 static void * debug_screen_getOutput() {
-	temp = getOutput()*100;
+	temp = Iron.Pwm_Out;
 	return &temp;
 }
+
 static void debug_screen_init(screen_t *scr) {
 	UG_FontSetHSpace(0);
 	UG_FontSetVSpace(0);
@@ -56,10 +57,10 @@ void debug_screen_setup(screen_t *scr) {
 	scr->processInput = &default_screenProcessInput;
 	scr->init = &debug_screen_init;
 	scr->update = &default_screenUpdate;
-
+	widget_t *widget;
 	//ADC iron display
 
-	widget_t *widget = screen_addWidget(scr);
+	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
 	strcpy(widget->displayString, "ADC:       Raw:");
 	widget->posX =0;
@@ -141,11 +142,11 @@ void debug_screen_setup(screen_t *scr) {
 
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
-	strcpy(widget->displayString, "ERR:        OUT:   %");
+	strcpy(widget->displayString, "ERR:       OUT:");
 	widget->posX = 0;
 	widget->posY = 50;
 	widget->font_size = &FONT_6X8_reduced;
-	widget->reservedChars = 6;
+	widget->reservedChars = 1;
 
 	//ERROR
 
@@ -158,20 +159,20 @@ void debug_screen_setup(screen_t *scr) {
 	widget->displayWidget.number_of_dec = 0;
 	widget->displayWidget.type = field_int32;
 	widget->displayWidget.justify = justify_right;
-	widget->reservedChars = 6;
+	widget->reservedChars = 5;
 
 	//OUTPUT
 
 	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_display);
-	widget->posX = 94;
+	widget->posX = 90;
 	widget->posY = 50;
 	widget->font_size = &FONT_6X8_reduced;
 	widget->displayWidget.getData = &debug_screen_getOutput;
 	widget->displayWidget.number_of_dec = 0;
 	widget->displayWidget.type = field_int32;
 	widget->displayWidget.justify = justify_right;
-	widget->reservedChars = 3;
+	widget->reservedChars = 5;
 
 
 }

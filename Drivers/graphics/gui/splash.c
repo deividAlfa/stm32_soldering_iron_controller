@@ -7,7 +7,7 @@
 
 #include "splash.h"
 #include "oled.h"
-#define SPLASH_TIMEOUT 1
+#define SPLASH_TIMEOUT 1000
 
 static int splash_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *);
 static void splash_init(screen_t * scr);

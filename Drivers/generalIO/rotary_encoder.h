@@ -35,6 +35,7 @@ typedef enum {
 	RE_BT_CLICKED,
 	RE_BT_LONG_CLICK,
 	RE_BT_DRAG,
+	RE_BT_UNRELEASED,
 	RE_BT_HIDLE
 } RE_Click_t;
 /**

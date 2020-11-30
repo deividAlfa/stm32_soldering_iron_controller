@@ -26,28 +26,28 @@ ADCDataTypeDef_t TIP = {
 		last_RawAvg: 0,
 		EMA_of_EMA:100<<12,
 		EMA_of_Input:100<<12,
-		Filter:1
+		Filter:1				//EMA type filtering
 };
 #endif
 
 #ifdef ADC_VIN
 ADCDataTypeDef_t VIN = {
 		adc_buffer: &ADC_measures[0].VIN,
-		Filter:0
+		Filter:1				//EMA type filtering
 };
 #endif
 
 #ifdef ADC_NTC
 ADCDataTypeDef_t NTC = {
 		adc_buffer: &ADC_measures[0].NTC,
-		Filter:0
+		Filter:1				//EMA type filtering
 };
 #endif
 
 #ifdef ADC_VREF
 ADCDataTypeDef_t VREF = {
 		adc_buffer: &ADC_measures[0].VREF,
-		Filter:0
+		Filter:1				//EMA type filtering
 };
 #endif
 

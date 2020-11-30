@@ -16,7 +16,7 @@
 #define New 1
 #define Old 0
 
-int16_t readColdJunctionSensorTemp_C_x10(void);
+int16_t  readColdJunctionSensorTemp_C_x10(void);
 uint16_t coldJunctionTemp_mC_To_uV(int tempX10);
 uint16_t readIntTemp_mC(void);
 uint16_t readTipSensorADC_Avg(void);
@@ -27,8 +27,8 @@ void setCurrentTip(uint8_t tip);
 tipData * getCurrentTip();
 
 long map(long x, long in_min, long in_max, long out_min, long out_max);
-uint16_t adc2Human(uint16_t);
-uint16_t human2adc(uint16_t);
+uint16_t adc2Human(uint16_t adc_value);
+uint16_t human2adc(uint16_t t);
 
 
 

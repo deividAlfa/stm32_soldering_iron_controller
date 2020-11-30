@@ -11,9 +11,9 @@
 #include "screen.h"
 
 screen_t *oled_addScreen(uint8_t index);
-void oled_draw();
-void oled_init();
-void oled_processInput(RE_Rotation_t input, RE_State_t *);
-void oled_update();
-
+void oled_draw(void);
+void oled_init(RE_Rotation_t (*Rotation)(RE_State_t*), RE_State_t *State);
+void oled_processInput(void);
+void oled_update(void);
+void oled_handle(void);
 #endif /* GRAPHICS_GUI_OLED_H_ */

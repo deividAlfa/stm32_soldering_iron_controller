@@ -45,6 +45,7 @@ extern "C" {
 extern ADC_HandleTypeDef hadc;
 extern DMA_HandleTypeDef hdma_adc;
 extern SPI_HandleTypeDef hspi2;
+extern IWDG_HandleTypeDef hiwdg;
 extern DMA_HandleTypeDef hdma_spi2_tx;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim15;
@@ -103,6 +104,7 @@ void Program_Handler(void);
 #define ROT_ENC_L_GPIO_Port GPIOA
 #define WAKE_Pin GPIO_PIN_10
 #define WAKE_GPIO_Port GPIOA
+#define WAKE_EXTI_IRQn EXTI4_15_IRQn
 #define ROT_ENC_BUTTON_Pin GPIO_PIN_11
 #define ROT_ENC_BUTTON_GPIO_Port GPIOA
 #define BUZZER_Pin GPIO_PIN_12

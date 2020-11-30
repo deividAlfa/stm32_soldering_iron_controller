@@ -26,7 +26,7 @@ displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget) {
 	}
 }
 
-editable_wiget_t * extractEditablePartFromWidget(widget_t *widget) {
+editable_widget_t * extractEditablePartFromWidget(widget_t *widget) {
 	switch (widget->type) {
 		case widget_editable:
 			return &widget->editable;
@@ -72,8 +72,12 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 		sel->previous_state = widget_idle;
 		sel->state = widget_idle;
 		sel->tab = 0;
+		sel->force_state = 0;
+		sel->NoHighlight = 0;
 		sel->processInput = &default_widgetProcessInput;
 		sel->longPressAction = NULL;
+		sel->onEditAction = NULL;
+		sel->onSelectAction = NULL;
 	}
 	switch (t) {
 		case widget_bmp:
@@ -85,6 +89,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 			w->displayWidget.type = field_uinteger16;
 			w->displayWidget.update = &default_widgetUpdate;
 			w->displayWidget.justify = justify_left;
+			w->displayWidget.hasEndStr = 0;
 			break;
 		case widget_editable:
 			w->editable.big_step = 10;
@@ -157,11 +162,10 @@ static void insertDot(char *str, uint8_t dec) {
 		}
 	}
 }
-
 void default_widgetUpdate(widget_t *widget) {
 	void *data;
 	int32_t val_ui;
-	int8_t val_ui_size, decimals;
+	volatile int8_t val_ui_size, decimals,endStrLen;
 	char *str;
 
 	displayOnly_wiget_t *dis = extractDisplayPartFromWidget(widget);
@@ -177,53 +181,61 @@ void default_widgetUpdate(widget_t *widget) {
 		break;
 
 	default:
-		// To keep the compiler happy ensuring that displayString is not overflowed
-		if( widget->reservedChars > (sizeof(widget->displayString) -1) ){
-			widget->reservedChars = (sizeof(widget->displayString) -1);
-		}
-		// Get the data
-		if(dis->type==field_uinteger16){
-			val_ui = *(uint16_t*)data;
-		}
-		else if(dis->type==field_int32){
-			val_ui = *(int32_t*)data;
-		}
-		else{
-			break;
-		}
-		if(dis->number_of_dec){														// If decimals used
-			if(dis->number_of_dec>(sizeof(widget->displayString)-2)){				// If decimals larger than display string length
-				decimals = (sizeof(widget->displayString)-2);						// Reduce decimals
-			}
-			else{
-				decimals = dis->number_of_dec;										// Else, leave all the decimals
-			}
-			if(val_ui){																// If val_ui has value
-				val_ui_size = snprintf(NULL, 0, "%ld", val_ui); 					// Get val_ui length
-				if( (val_ui_size + decimals) > (sizeof(widget->displayString)-2) ){	// If val_ui length + decimals larger than displayString size
-					if(val_ui_size>(sizeof(widget->displayString)-2)){				// If val_ui length already larger than the string size
-						decimals = 0;												// Don't use decimals
-					}
-					else{															// else, reduce number of decimals to fit in displayString
-						decimals = (sizeof(widget->displayString)-2) - val_ui_size;	// (-2 to leave room "." + string termination)
-					}
-				}
-			}
-		}
-		else{
-			decimals = 0;															// Don't use decimals
-		}
-
 		switch (dis->type) {
 		case field_uinteger16:
 		case field_int32:
+			// To keep the compiler happy ensuring that displayString is not overflowed
+			if(dis->hasEndStr==1){
+				endStrLen = strlen(widget->endString);
+			}
+			else{
+				endStrLen=0;
+			}
+			if( widget->reservedChars > (sizeof(widget->displayString) -1) ){
+				widget->reservedChars = (sizeof(widget->displayString) -1);
+			}
+			// Get the data
+			if(dis->type==field_uinteger16){
+				val_ui = *(uint16_t*)data;
+			}
+			else if(dis->type==field_int32){
+				val_ui = *(int32_t*)data;
+			}
+			else{
+				break;
+			}
+			if(dis->number_of_dec){														// If decimals used
+				if((dis->number_of_dec+endStrLen)>widget->reservedChars){		// If decimals larger than display string length (-2 for '.' + string termination)
+					decimals = widget->reservedChars - endStrLen;				// Reduce decimals
+				}
+				else{
+					decimals = dis->number_of_dec;										// Else, leave all the decimals
+				}
+				if(val_ui){																// If val_ui has value
+					val_ui_size = snprintf(NULL, 0, "%ld", val_ui); 					// Get val_ui length
+					if( (val_ui_size + decimals+endStrLen) > widget->reservedChars ){	// If val_ui length + decimals larger than displayString size
+						if((val_ui_size + endStrLen)>widget->reservedChars){	// If val_ui + endStrLen length already larger than displayString size
+							decimals = 0;												// Don't use decimals
+						}
+						else{
+							decimals = widget->reservedChars - (val_ui_size + endStrLen);// else, reduce number of decimals to fit in displayString
+						}
+					}
+				}
+			}
+			else{
+				decimals = 0;															// Don't use decimals
+			}
 			if(widget->displayWidget.justify == justify_right){
-				snprintf(widget->displayString,sizeof(widget->displayString),"%*ld", (widget->reservedChars - decimals), val_ui);
+				snprintf(widget->displayString,sizeof(widget->displayString),"%*ld", (widget->reservedChars - decimals-endStrLen), val_ui);
 			}
 			else{
 				snprintf(widget->displayString,sizeof(widget->displayString),"%ld", val_ui);
 				}
-			insertDot(widget->displayString, dis->number_of_dec);
+			insertDot(widget->displayString, decimals);
+			if(endStrLen){
+				strcat(widget->displayString, widget->endString);
+			}
 			break;
 
 		case field_string:
@@ -261,6 +273,7 @@ void default_widgetDraw(widget_t *widget) {
 			draw_frame = 1;
 			color = C_BLACK;
 		}
+		if(!sel->NoHighlight){	// If not forced in no highlight mode
 			switch (sel->state) {
 				case widget_edit:
 					UG_SetBackcolor ( C_WHITE ) ;
@@ -275,6 +288,12 @@ void default_widgetDraw(widget_t *widget) {
 					UG_SetForecolor ( C_WHITE ) ;
 					break;
 			}
+		}
+		else{								// Else, show always not highlighted
+			draw_frame = 0;
+			UG_SetBackcolor ( C_BLACK ) ;
+			UG_SetForecolor ( C_WHITE ) ;
+		}
 	}
 	UG_FontSelect(widget->font_size);
 	char space[sizeof(widget->displayString)] = "           ";
@@ -291,8 +310,15 @@ void default_widgetDraw(widget_t *widget) {
 		UG_PutString(widget->posX ,widget->posY , space);
 		widget->displayString[widget->reservedChars] = (char)'\0';
 		UG_PutString(widget->posX ,widget->posY , widget->displayString);
-		if(extractSelectablePartFromWidget(widget)->state == widget_edit)
-			UG_PutChar(widget->displayString[extractEditablePartFromWidget(widget)->current_edit], widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit, widget->posY, C_BLACK, C_WHITE);
+		if(extractSelectablePartFromWidget(widget)->state == widget_edit){
+			UG_PutChar(widget->displayString[extractEditablePartFromWidget(widget)->current_edit], widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit, widget->posY,  C_WHITE, C_BLACK);
+			UG_DrawLine(widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit+1,widget->posY+ widget->font_size->char_height,widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height, C_WHITE);
+			UG_DrawLine(widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit+1,widget->posY+ widget->font_size->char_height+1,widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height+1, C_WHITE);
+			if(extractEditablePartFromWidget(widget)->current_edit){
+				UG_DrawLine(widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+1,widget->posY+ widget->font_size->char_height,widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height, C_BLACK);
+				UG_DrawLine(widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+1,widget->posY+ widget->font_size->char_height+1,widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height+1, C_BLACK);
+			}
+		}
 	}
 	else
 		UG_PutString(widget->posX ,widget->posY , widget->displayString);
@@ -316,13 +342,15 @@ void comboBoxDraw(widget_t *widget) {
 		if(item->enabled)
 			++scroll;
 	}
+	UG_SetBackcolor ( C_BLACK ) ;
+	UG_SetForecolor ( C_WHITE ) ;
 	UG_FontSelect(widget->font_size);
 	for(uint8_t x = 0; x < yDim / height; ++x) {
 		UG_FillFrame(0, x * height + widget->posY -1, UG_GetXDim(), x * height + widget->posY + widget->font_size->char_height, C_BLACK);
 		if(item == widget->comboBoxWidget.currentItem) {
 			UG_DrawFrame(0, x * height + widget->posY -1, UG_GetXDim() -1, x * height + widget->posY + widget->font_size->char_height, C_WHITE);
 		}
-		UG_PutString(UG_GetXDim() / 2 - (strlen(item->text) / 2 * widget->font_size->char_width) ,x * height + widget->posY, item->text);
+		UG_PutString( (UG_GetXDim()-(strlen(item->text)* widget->font_size->char_width))/2 ,x * height + widget->posY, item->text);
 		do {
 			item = item->next_item;
 		}while(item && !item->enabled);
@@ -399,8 +427,15 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 						return widget->buttonWidget.action(widget);
 					if(extractDisplayPartFromWidget(widget)->type == field_string)
 						extractEditablePartFromWidget(widget)->current_edit = 0;
-					sel->state = widget_edit;
-					sel->previous_state = widget_selected;
+					if(!sel->force_state){
+						sel->state = widget_edit;
+						sel->previous_state = widget_selected;
+						break;
+					}
+					else if(sel->onEditAction){
+						return sel->onEditAction(widget);
+					}
+
 					break;
 				case widget_edit:
 					if(extractDisplayPartFromWidget(widget)->type == field_string) {
@@ -409,11 +444,19 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 						{
 							sel->state = widget_selected;
 							sel->previous_state = widget_edit;
+							UG_DrawLine(widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+1,widget->posY+ widget->font_size->char_height,widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height, C_BLACK);
+							UG_DrawLine(widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+1,widget->posY+ widget->font_size->char_height+1,widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height+1, C_BLACK);
 						}
 					}
 					else {
-						sel->state = widget_selected;
-						sel->previous_state = widget_edit;
+						if(!sel->force_state){
+							sel->state = widget_selected;
+							sel->previous_state = widget_edit;
+							break;
+						}
+						else if(sel->onSelectAction){
+							return sel->onSelectAction(widget);
+						}
 					}
 					break;
 				default:
@@ -463,19 +506,19 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 				str = (char*)widget->editable.inputData.getData();
 				strcpy(widget->displayString, str);
 				widget->displayString[extractEditablePartFromWidget(widget)->current_edit] += inc;
-				if(widget->displayString[extractEditablePartFromWidget(widget)->current_edit] < 48) {
+				if(widget->displayString[extractEditablePartFromWidget(widget)->current_edit] < 0x20) {
 					if(inc > 0) {
-						widget->displayString[extractEditablePartFromWidget(widget)->current_edit] = 48;
+						widget->displayString[extractEditablePartFromWidget(widget)->current_edit] = 0x20;
 					}
 					else
-						widget->displayString[extractEditablePartFromWidget(widget)->current_edit] = 122;
+						widget->displayString[extractEditablePartFromWidget(widget)->current_edit] = 0x7e;
 				}
-				if(widget->displayString[extractEditablePartFromWidget(widget)->current_edit] > 122) {
+				if(widget->displayString[extractEditablePartFromWidget(widget)->current_edit] > 0x7e) {
 					if(inc > 0) {
-						widget->displayString[extractEditablePartFromWidget(widget)->current_edit] = 48;
+						widget->displayString[extractEditablePartFromWidget(widget)->current_edit] = 0x20;
 					}
 					else
-						widget->displayString[extractEditablePartFromWidget(widget)->current_edit] = 122;
+						widget->displayString[extractEditablePartFromWidget(widget)->current_edit] = 0x7e;
 				}
 
 				widget->editable.setData(widget->displayString);

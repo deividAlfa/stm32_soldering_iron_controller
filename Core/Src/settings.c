@@ -7,16 +7,32 @@
 
 #include "settings.h"
 #include <string.h>
-#define FLASH_ADDR (0x8000000|64512)/*Flash start OR'ed with the maximum amount of flash - 256 bytes*/
+#define FLASH_ADDR (0x8000000|65024)/*Flash start OR'ed with the maximum amount of flash - 512 bytes*/
+void Checksum_error(void);
+void Flash_error(void);
+void Button_reset(void);
+void Diag_init(void);
+void ErrCountDown(uint8_t Start,uint8_t xpos, uint8_t ypos);
+
 void saveSettings() {
+	uint16_t *data = (uint16_t*) &systemSettings;
+	uint32_t error=0;
+	// Calculate new checksum
+	systemSettings.checksum=ChecksumSettings();
+
 	HAL_FLASH_Unlock(); //unlock flash writing
 	FLASH_EraseInitTypeDef erase;
 	erase.NbPages = 1;
 	erase.PageAddress = FLASH_ADDR;
 	erase.TypeErase = FLASH_TYPEERASE_PAGES;
-	uint32_t error;
+
 	HAL_FLASHEx_Erase(&erase, &error);
-	uint16_t *data = (uint16_t*) &systemSettings;
+	if(error!=0xFFFFFFFF){
+		Flash_error();
+		HAL_FLASH_Lock();
+		return;
+	}
+
 	for (uint16_t i = 0; i < (sizeof(systemSettings) / 2); i++) {
 		HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, FLASH_ADDR + (i * 2), data[i]);
 	}
@@ -25,20 +41,37 @@ void saveSettings() {
 
 void restoreSettings() {
 	uint16_t *data = (uint16_t*) &systemSettings;
-
-	CheckReset();
-
-	for (uint16_t i = 0; i < (sizeof(systemSettings) / 2); i++) {
+	volatile uint16_t checksum;
+#ifdef NOSAVESETTINGS				// Stop erasing the flash every time while in debug mode
+	resetSettings();
+	currentPID = systemSettings.ironTips[systemSettings.currentTip].PID;
+	setupPIDFromStruct();
+	return;
+#endif
+	Button_reset();
+	for (uint16_t i = 0; i < (sizeof(systemSettings) / 2); i++) {		// Load data from flash
 		data[i] = *(uint16_t *) (FLASH_ADDR + (i * 2));
 	}
-	if (systemSettings.version != SETTINGSVERSION) {
-		resetSettings();
-		saveSettings();
+	checksum=ChecksumSettings();										// Compare loaded checksum with calculated checksum
+	if( (systemSettings.version != SETTINGSVERSION) || (checksum!=systemSettings.checksum) ){
+		Checksum_error();
 	}
 	currentPID = systemSettings.ironTips[systemSettings.currentTip].PID;
 	setupPIDFromStruct();
 }
-
+__attribute__((optimize("O0")))
+uint16_t ChecksumSettings(void){
+	uint16_t *data = (uint16_t*) &systemSettings;
+	volatile uint16_t i;
+	volatile uint16_t checksum=0,oldchecksum;
+	oldchecksum=systemSettings.checksum;
+	systemSettings.checksum = 0;
+	for (i= 0; i < (sizeof(systemSettings) / 2); i++) {
+		checksum += data[i];
+	}
+	systemSettings.checksum=oldchecksum;
+	return checksum;
+}
 
 void resetSettings() {
 	systemSettings.version = SETTINGSVERSION;
@@ -48,7 +81,14 @@ void resetSettings() {
 	systemSettings.sleep.Time = 120;
 	systemSettings.sleep.Temperature = 200;
 	systemSettings.standby.Time = 300;
-	systemSettings.UserTemperature = 320;
+	systemSettings.UserSetTemperature = 320;
+	systemSettings.pwmPeriod=19999;
+	systemSettings.pwmDelay=99;
+	systemSettings.noIronValue=3500;
+	systemSettings.noIronDelay=500;
+	systemSettings.guiUpdateDelay=200;
+	systemSettings.tempUnit=Unit_Celsius;
+	systemSettings.saveSettingsDelay=10;
 
 #ifdef JBC
 	for(uint8_t x = 0; x < 10; ++x) {
@@ -71,7 +111,7 @@ void resetSettings() {
 
 	strcpy(systemSettings.ironTips[0].name, "DFLT");
 
-	for(uint8_t x = 0; x < 10; ++x) {
+	for(uint8_t x = 0; x < ( sizeof(systemSettings.ironTips)/sizeof(systemSettings.ironTips[0])); ++x) {
 		systemSettings.ironTips[x].calADC_At_200 = 1300;
 		systemSettings.ironTips[x].calADC_At_300 = 2000;
 		systemSettings.ironTips[x].calADC_At_400 = 3000;
@@ -118,37 +158,96 @@ void resetSettings() {
 	systemSettings.ironTips[3].PID.Kd = 0;
 	systemSettings.ironTips[3].PID.maxI = 200;
 	systemSettings.ironTips[3].PID.minI = -50;
-
 #endif
 }
 
-void CheckReset(void){
-	if(!BUTTON_input){
-	 setContrast(255);
-	 UG_FillScreen(C_BLACK);
-	 UG_FontSelect(&FONT_8X14_reduced);
-	 UG_SetForecolor(C_WHITE);
-	 UG_SetBackcolor(C_BLACK);
-	 UG_PutString(10,20,"HOLD BUTTON");
-	 UG_PutString(20,32,"TO RESET");
-	 UG_PutString(18,44,"DEFAULTS!!");
-	 update_display();
 
-	 uint16_t ResetTimer= HAL_GetTick();
-	 while(!BUTTON_input){
-		 if((HAL_GetTick()-ResetTimer)>5000){
-			 resetSettings();
-			 saveSettings();
-			 UG_FillScreen(C_BLACK);
-			 UG_PutString(40,15,"RESET!");
-			 UG_PutString(0,40,"RELEASE BUTTON");
-			 UG_Update();
-			 update_display();
-			 while(!BUTTON_input){;}
-			 ResetTimer= HAL_GetTick();
-			 while((HAL_GetTick()-ResetTimer)<1000){;}
-			 NVIC_SystemReset();
-		 }
-	  }
-   }
+
+void Diag_init(void){
+	setContrast(255);
+	UG_FillScreen(C_BLACK);
+	UG_FontSelect(&FONT_10X16_reduced);
+	UG_SetForecolor(C_WHITE);
+	UG_SetBackcolor(C_BLACK);
+}
+void Flash_error(void){
+	Diag_init();
+	UG_PutString(2,0,"ERROR WHILE");//11
+	UG_PutString(24,16,"WRITING");//10
+	UG_PutString(19,32,"SETTINGS");//7
+	update_display();
+
+	// Long delay with countdown to show the error before resuming
+	ErrCountDown(5,117,50);	// Not critical error. Continue
+}
+
+void Checksum_error(void){
+	Diag_init();
+	UG_PutString(8,0,"CHKSUM ERR");//10
+	UG_PutString(13,16,"RESETTING");//9
+	UG_PutString(19,32,"DEFAULTS");//10
+	update_display();
+	ErrCountDown(2,117,50);
+	resetSettings();
+	saveSettings();
+}
+
+void Button_reset(void){
+	uint16_t ResetTimer= HAL_GetTick();
+	if(!BUTTON_input){
+		Diag_init();
+		UG_PutString(2,10,"HOLD BUTTON");//11
+		UG_PutString(19,26,"TO RESET");//8
+		UG_PutString(8,42,"DEFAULTS!!");//10
+		update_display();
+		while(!BUTTON_input){
+			HAL_IWDG_Refresh(&hiwdg);
+			if((HAL_GetTick()-ResetTimer)>5000){
+				resetSettings();
+				saveSettings();
+				UG_FillScreen(C_BLACK);
+				UG_PutString(13,10,"RESETTED!");//9
+				UG_PutString(24,26,"RELEASE");//7
+				UG_PutString(8,42,"BUTTON NOW");// 10
+				UG_Update();
+				update_display();
+				while(!BUTTON_input){
+					HAL_IWDG_Refresh(&hiwdg);
+				}
+				ResetTimer= HAL_GetTick();
+				while((HAL_GetTick()-ResetTimer)<1000){
+					HAL_IWDG_Refresh(&hiwdg);
+
+				}
+				NVIC_SystemReset();
+			}
+		}
+	}
+}
+//Simple function. Max 99 seconds countdown.
+void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
+	uint32_t timErr = 0;
+	char str[3];
+	char cleanStr[3]= {' ', ' ', 0};
+	uint8_t length;
+	if(Start>99){Start=99;}
+	if(Start>9){
+		length=2;
+	}
+	else{
+		length=1;
+		cleanStr[1]=0;
+	}
+
+	HAL_Delay(20);				// Dirty fix to ensure Oled DMA transfer has ended before writing to the buffer
+	while(Start){
+		timErr=HAL_GetTick();
+		UG_PutString(xpos,ypos,&cleanStr[0]);
+		sprintf(&str[0],"%*d",length-1,Start--);
+		UG_PutString(xpos,ypos,&str[0]);
+		update_display();
+		while( (HAL_GetTick()-timErr)<999 ){
+			HAL_IWDG_Refresh(&hiwdg);			// Clear watchdog
+		}
+	}
 }

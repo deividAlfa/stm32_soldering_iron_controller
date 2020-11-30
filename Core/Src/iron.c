@@ -7,14 +7,15 @@
 
 #include "iron.h"
 #include <stdlib.h>
-#include "tempsensors.h"
 #include "buzzer.h"
 #include "settings.h"
 #include "main.h"
 
+#ifdef TEST
+volatile TempControl_t TempControl = { 0 };
+#endif
 
 volatile iron_t Iron = { 0 };
-
 typedef struct setTemperatureReachedCallbackStruct_t setTemperatureReachedCallbackStruct_t;
 
 struct setTemperatureReachedCallbackStruct_t {
@@ -29,6 +30,7 @@ struct currentModeChangedCallbackStruct_t {
 };
 static currentModeChangedCallbackStruct_t *currentModeChangedCallbacks = NULL;
 static setTemperatureReachedCallbackStruct_t *temperatureReachedCallbacks = NULL;
+
 
 
 static void temperatureReached(uint16_t temp) {
@@ -54,108 +56,165 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 	Iron.Pwm_Timer		= pwmtimer;
 	Iron.Delay_Timer	= delaytimer;
 	Iron.Pwm_Channel 	= pwmchannel;
-	Iron.CurrentMode 	= mode_normal;
-	Iron.UserTemperature = systemSettings.UserTemperature;		// Load system temperature setting into userTemperature
-	Iron.CurrentTemperature = Iron.UserTemperature;				// Set userTemperature as the CurrentTemperature
-    setCurrentTip(systemSettings.currentTip);					// Load TIP
-
-#ifdef	PWM_CHx													// Start PWM
-	HAL_TIM_PWM_Start_IT(pwmtimer, pwmchannel);					// CHx Output
+	Iron.Pwm_Out 		= 0;											// PWM disabled
+	Iron.isPresent		= 1;											// Set detected by default (to not show ERROR screen at boot)
+	Iron.UserSetTemperature = systemSettings.UserSetTemperature;		// Load system temperature setting into UserSetTemperature
+	setCurrentMode(mode_normal);										// Set normal mode
+	setCurrentTip(systemSettings.currentTip);							// Load TIP
+#ifdef	PWM_CHx															// Start PWM
+	HAL_TIM_PWM_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);				// PWM output uses CHx channel
 #else
-	HAL_TIMEx_PWMN_Start_IT(pwmtimer, pwmchannel);				// CHxN Output
+	HAL_TIMEx_PWMN_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);			// PWM output uses CHxN channel
 #endif
+	ApplyPwmSettings();													// Apply PWM settings
+	// Now the PWM and ADC are working in the background.
+
+
 }
 
 
 void handleIron(void) {
-
+	static uint32_t previouschecksum=0, newchecksum=0, checksumtime=0;
+	double set;
 	uint32_t CurrentTime = HAL_GetTick();
 
+
+
+
+	// No iron detection
+	if(TIP.last_RawAvg>systemSettings.noIronValue) { SetIronPresence(0); }
+	else{ SetIronPresence(1); }
+
+	// Iron wake signal flag (for gui displaying the pulse icon)
+	if(Iron.hasMoved){
+		if((CurrentTime-Iron.LastMovedTime)>50){
+			Iron.hasMoved = 0;
+		}
+	}
 	// Update Tip temperature in human readable format
 	readTipTemperatureCompensated(New);
 
-	// Check for storing the temperature
-	if(CurrTemp_Save_Time_s){
-		if( Iron.TemperatureChanged && (CurrentTime - (Iron.LastChangeTemperatureTime) > CurrTemp_Save_Time_s*1000) 	) {
-				systemSettings.UserTemperature = Iron.UserTemperature;
-				saveSettings();
+	// Check changes in system settings
+	if(CurrentTime-checksumtime>499){								// Check checksum every 500mS
+		newchecksum=ChecksumSettings();								// Calculate system checksum
+		if(systemSettings.checksum!=newchecksum){					// If latest checksum is not the same as the system settings's checksum
+			if(previouschecksum!=newchecksum){						// If different from the previous calculated checksum.
+				previouschecksum=newchecksum;						// A change was done recently
+				Iron.LastSysChangeTime=CurrentTime;					// Reset timer (we don't save anything until we pass a certain time without changes)
+			}
+			// If different from the previous calculated checksum, and timer expired (No changes for a long time)
+			else if((CurrentTime-Iron.LastSysChangeTime)>((uint32_t)systemSettings.saveSettingsDelay*1000)){
+				saveSettings();															// Save
+			}
 		}
 	}
+
+	// Failure flag
+	if(Iron.FailState){
+		return;			// Do nothing if in failure state (PWM already disabled)
+	}
+
+	// Controls inactivity timer and enters low power modes
 	switch (Iron.CurrentMode) {
 		case mode_boost:
 			if(CurrentTime - Iron.CurrentModeTimer > ((uint32_t)systemSettings.boost.Time*1000))
 				setCurrentMode(mode_normal);
 			break;
 		case mode_normal:
-			if(systemSettings.sleep.Time && ((CurrentTime - Iron.CurrentModeTimer)> ((uint32_t)systemSettings.sleep.Time*1000)) ) {
-				Iron.Active=0;
+			if(systemSettings.sleep.Time && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.sleep.Time*1000) ) {
 				setCurrentMode(mode_sleep);
-				buzzer_short_beep();
 			}
 			break;
 		case mode_sleep:
-			if(Iron.Active) {
-				setCurrentMode(mode_normal);
-				buzzer_short_beep();
-			}
-			else if(systemSettings.standby.Time && ((CurrentTime - Iron.CurrentModeTimer) > systemSettings.standby.Time*1000) ) {
+			if(systemSettings.standby.Time && ((CurrentTime - Iron.CurrentModeTimer) > (uint32_t)systemSettings.standby.Time*1000) ) {
 				setCurrentMode(mode_standby);
-				buzzer_long_beep();
-			}
-			break;
-		case mode_standby:
-			if(Iron.Active) {
-				setCurrentMode(mode_normal);
-				buzzer_short_beep();
 			}
 			break;
 		default:
 			break;
 	}
+
+	// Disables PID calculation if no iron is detected
+	if(!Iron.isPresent){							// If iron not present
+		Iron.CurrentIronPower = 0;					// Indicate 0.1% power
+		Iron.Pwm_Out = Iron.Pwm_Max/1000;				// Set 0.1% power (to maintain no iron detection)
+		return;
+	}
+
+	// Only continue if PID update flag is set
 	if(!Iron.PIDUpdate){
 		return;
 	}
-	  double set;
-	  if(Iron.Debug_Enabled){
-		  set = calculatePID(Iron.Debug_Temperature, TIP.last_avg);
+
+
+	// If in debug mode, use debug setpoint value
+	if(Iron.Debug_Enabled){
+	  set = calculatePID(Iron.Debug_SetTemperature, TIP.last_avg);
+	}
+	// Else use current setpoint value
+	else{
+	  // Disable output if requested temperature is below 100ºC
+	  if(Iron.CurrentSetTemperature>99){
+		  set = calculatePID(human2adc(Iron.CurrentSetTemperature), TIP.last_avg);
 	  }
 	  else{
-		  if(Iron.CurrentTemperature>1){
-			  set = calculatePID(human2adc(Iron.CurrentTemperature), TIP.last_avg);
-		  }
-		  else{
-			  set=0;
-		  }
+		  set=0;
 	  }
-	  if(set==0){ Iron.CurrentIronPower = 0;  }
-	  else{ Iron.CurrentIronPower = set * 100; }
+	}
+	// If PID output negative, set to 0
+	if(set < 0){ set = 0; }
+	// If positive PID output, calculate PWM duty and power output.
+	if(set){
+	  Iron.CurrentIronPower = set*100;
+	  Iron.Pwm_Out = set*(float)Iron.Pwm_Max;	// Set PWM Duty. The ADC will load it after sampling the tip.
+	}
+	// Else, set both to 0
+	else{
+	  Iron.CurrentIronPower = 0;
+	  Iron.Pwm_Out = 0;
+	}
+	// For calibration process
+	if(( Iron.CurrentSetTemperature == readTipTemperatureCompensated(0)) && !Iron.Cal_TemperatureReachedFlag) {
+		  temperatureReached( Iron.CurrentSetTemperature);
+		  Iron.Cal_TemperatureReachedFlag = 1;
+	  }
 
-	  set = set * (float)(PWM_DUTY);
-
-	  if(set < 0){ set = 0; }
-	  Iron.Pwm_Duty = set;											// Set PWM Duty. The ADC will load it after sampling the tip.
-	  if(( Iron.CurrentTemperature == readTipTemperatureCompensated(0)) && !Iron.Cal_TemperatureReachedFlag) {
-	  		  temperatureReached( Iron.CurrentTemperature);
-	  		  Iron.Cal_TemperatureReachedFlag = 1;
-	  	  }
 }
 
+// Applies the PWM settings from the system settings
+void ApplyPwmSettings(void){
+	__HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.pwmPeriod);
+	__HAL_TIM_SET_AUTORELOAD(Iron.Delay_Timer,systemSettings.pwmDelay);
+	Iron.Pwm_Max = systemSettings.pwmPeriod - (systemSettings.pwmDelay+(uint16_t)ADC_MEASURE_TIME);
+}
+// Sets no Iron detection threshold
+void setNoIronValue(uint16_t noiron){
+	systemSettings.noIronValue=noiron;
+}
+// Sets the temperature unit used (Celsius,Farenheit, Kelvin)
+void setTempUnit(TempUnit_t unit){
+	systemSettings.tempUnit = unit;
+}
+// Change the iron operating mode
 void setCurrentMode(iron_mode_t mode) {
 	Iron.CurrentModeTimer = HAL_GetTick();
 	switch (mode) {
 		case mode_boost:
-			Iron.CurrentTemperature = systemSettings.boost.Temperature;
+			Iron.CurrentSetTemperature = systemSettings.boost.Temperature;
 			break;
 		case mode_normal:
-			Iron.CurrentTemperature = Iron.UserTemperature;
+			if((Iron.CurrentMode==mode_sleep) || (Iron.CurrentMode==mode_standby)){
+				buzzer_short_beep();
+			}
+			Iron.CurrentSetTemperature = Iron.UserSetTemperature;
 			break;
 		case mode_sleep:
-			Iron.Active=0;
-			Iron.CurrentTemperature = systemSettings.sleep.Temperature;
+			buzzer_short_beep();
+			Iron.CurrentSetTemperature = systemSettings.sleep.Temperature;
 			break;
 		case mode_standby:
-			Iron.Active=0;
-			Iron.CurrentTemperature = 0;
+			buzzer_long_beep();
+			Iron.CurrentSetTemperature = 0;
 			break;
 		default:
 			break;
@@ -163,40 +222,97 @@ void setCurrentMode(iron_mode_t mode) {
 	Iron.CurrentMode = mode;
 	modeChanged(mode);
 }
-
-
-void DebugSetTemp(uint16_t value) {
-	Iron.Debug_Temperature = value;
+// Called from program timer if WAKE change is detected
+void IronWake(void){
+	if((Iron.CurrentMode==mode_sleep) || (Iron.CurrentMode==mode_standby)){
+		setCurrentMode(mode_normal);				// Back to normal mode
+	}
+	else if(Iron.CurrentMode==mode_normal){
+		Iron.CurrentModeTimer = HAL_GetTick();		// Clear timer to avoid entering sleep mode
+	}
+	Iron.LastMovedTime = HAL_GetTick();
+	Iron.hasMoved=1;
+}
+// Sets the presence of the iron. Handles alarm output
+void SetIronPresence(bool isPresent){
+	uint32_t CurrentTime = HAL_GetTick();
+	if(Iron.isPresent){								// Was present
+		if(!isPresent){								// But no longer
+			Iron.LastNoPresentTime = CurrentTime;	// Start alarm and save last detected time
+			buzzer_alarm_start();
+			Iron.isPresent = 0;
+		}
+	}
+	else{											// Wasn't present
+		if(isPresent && (CurrentTime-Iron.LastNoPresentTime)>systemSettings.noIronDelay ){	// But now it is back
+			buzzer_alarm_stop();					// Stop alarm							// If enough time passed since last detection
+			Iron.isPresent = 1;
+		}
+		else if(!isPresent){
+			Iron.LastNoPresentTime = CurrentTime;	// Still not present, save last detected time
+		}
+	}
 }
 
+// Returns the actual status of the iron presence.
+bool GetIronPresence(void){
+	return Iron.isPresent;
+}
+
+// Sets Failure state
+void SetFailState(bool FailState) {
+	Iron.FailState = FailState;
+	if(FailState){
+		Iron.CurrentIronPower = 1;
+		Iron.Pwm_Out = 0;
+		__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);
+	}
+	else{
+	}
+}
+
+// Gets Failure state
+bool getFailState() {
+	return Iron.FailState;
+}
+
+
+// Sets the debug temperature
+void DebugSetTemp(uint16_t value) {
+	Iron.Debug_SetTemperature = value;
+}
+// Handles the debug activation/deactivation
 void DebugMode(uint8_t value) {
 	Iron.Debug_Enabled = value;
 }
 
+// Sets the user temperature
 void setSetTemperature(uint16_t temperature) {
-	if(systemSettings.UserTemperature != temperature){
-		Iron.TemperatureChanged=1;
+	if(Iron.UserSetTemperature != temperature){
+		Iron.CurrentSetTemperature = temperature;
+		Iron.UserSetTemperature = temperature;
+		systemSettings.UserSetTemperature = temperature;
+		Iron.Cal_TemperatureReachedFlag = 0;
+		resetPID();
 	}
-	Iron.CurrentTemperature = temperature;
-	Iron.UserTemperature = temperature;
-	Iron.Cal_TemperatureReachedFlag = 0;
-	Iron.LastChangeTemperatureTime = HAL_GetTick();
-	resetPID();
 }
 
+// Returns the actual set temperature
+uint16_t getSetTemperature() {
+	return Iron.CurrentSetTemperature;
+}
+
+// Returns the actual working mode of the iron
 iron_mode_t getCurrentMode() {
 	return Iron.CurrentMode;
 }
 
-uint16_t getSetTemperature() {
-	return Iron.CurrentTemperature;
-}
-
+// Returns the output power
 uint8_t getCurrentPower() {
 	return Iron.CurrentIronPower;
 }
 
-
+// Adds a callback to be called when the set temperature is reached
 void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback) {
 	setTemperatureReachedCallbackStruct_t *s = malloc(sizeof(setTemperatureReachedCallbackStruct_t));
 	if(!s){
@@ -215,6 +331,7 @@ void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback) {
 	last->next = s;
 }
 
+// Adds a callback to be called when the iron working mode is changed
 void addModeChangedCallback(currentModeChanged callback) {
 	currentModeChangedCallbackStruct_t *s = malloc(sizeof(currentModeChangedCallbackStruct_t));
 	s->callback = callback;
@@ -230,4 +347,3 @@ void addModeChangedCallback(currentModeChanged callback) {
 		last = s;
 	}
 }
-

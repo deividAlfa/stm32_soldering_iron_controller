@@ -11,6 +11,6 @@
 #include "oled.h"
 #include "screen.h"
 
-void guiInit(TIM_HandleTypeDef *tim);
+void guiInit(void);
 void guiDraw();
 #endif /* GRAPHICS_GUI_GUI_H_ */

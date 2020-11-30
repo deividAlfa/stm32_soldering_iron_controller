@@ -23,8 +23,11 @@ typedef enum {
 #define Oled_Clear_DC() HAL_GPIO_WritePin(OLED_DC_GPIO_Port, OLED_DC_Pin,GPIO_PIN_RESET)
 #define Oled_Set_RES() HAL_GPIO_WritePin(OLED_RST_GPIO_Port, OLED_RST_Pin,GPIO_PIN_SET)
 #define Oled_Clear_RES() HAL_GPIO_WritePin(OLED_RST_GPIO_Port, OLED_RST_Pin,GPIO_PIN_RESET)
+#define BLACK 0
+#define WHITE 1
+#define ClearBuffer()  FillBuffer(BLACK)
 
-extern volatile unsigned char OledBuffer[]; // 128x64 1BPP OLED
+extern volatile uint8_t OledBuffer[]; // 128x64 1BPP OLED
 extern volatile oled_status_t oled_status;
 extern volatile uint8_t *OledDmaBf;
 
@@ -41,11 +44,13 @@ void ssd1306_init(SPI_HandleTypeDef *hspi);
 
 #endif
 void Enable_Soft_SPI_SPI(void);
-void write_data(uint8_t *data);
+void write_data(uint8_t data);
 void write_cmd(uint8_t data);
 void send_display_bf(uint8_t *oled_buffer);
 void pset(UG_S16 x, UG_S16 y, UG_COLOR c);
-void update_display( void );
+void update_display(void);
+void update_display_ErrorHandler(void);
 void setContrast(uint8_t value);
 uint8_t getContrast();
+void FillBuffer(bool color);
 #endif /* GRAPHICS_SSD1306_H_ */

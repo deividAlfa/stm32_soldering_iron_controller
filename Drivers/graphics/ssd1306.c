@@ -6,10 +6,11 @@
 
 static uint8_t OledContrast;
 volatile uint8_t OledBuffer[128*8]; // 128x64 1BPP OLED
-volatile uint8_t *OledDmaBf;
+volatile uint8_t *OledDmaBf = &OledBuffer[0];
 volatile oled_status_t oled_status=oled_idle;
 static SPI_HandleTypeDef *spi_device;
-
+volatile uint32_t oled_black=0;
+volatile uint32_t oled_white=0xFFFFFFFF;
 #ifdef Soft_SPI
 
 void Enable_Soft_SPI_SPI(void){
@@ -42,13 +43,11 @@ void spi_send(uint8_t SPIData){
 		    	HAL_GPIO_WritePin(SDO_GPIO_Port, SDO_Pin, GPIO_PIN_SET);
 		    else
 		    	HAL_GPIO_WritePin(SDO_GPIO_Port, SDO_Pin, GPIO_PIN_RESET);
-		    HAL_GPIO_WritePin(SCK_GPIO_Port, SCK_Pin, GPIO_PIN_SET);
-		    HAL_GPIO_WritePin(SCK_GPIO_Port, SCK_Pin, GPIO_PIN_RESET);
-		    SPIData <<= 1;                                      // Rotate to get the next bit
-
+		    	HAL_GPIO_WritePin(SCK_GPIO_Port, SCK_Pin, GPIO_PIN_SET);
+		    	HAL_GPIO_WritePin(SCK_GPIO_Port, SCK_Pin, GPIO_PIN_RESET);
+		    	SPIData <<= 1;                                      // Rotate to get the next bit
 		  }
 }
-
 
 void write_data(uint8_t *data) {
 	uint8_t spiBytes=0;
@@ -74,7 +73,6 @@ void write_byte(uint8_t data) {
 
 	Oled_Set_CS();
 }
-
 
 void write_cmd(uint8_t data) {
 	Oled_Set_CS();	spidelay();
@@ -103,31 +101,18 @@ void update_display( void )
 }
 
 
-void send_display_bf(uint8_t *oled_buffer)
-{
-   unsigned int p;
-   for(p=0;p<8;p++){
-	   write_cmd(0xB0|p);
-
-#ifdef SH1106_FIX
-      write_cmd(0x02);
-#else
-      write_cmd(0x00);
-#endif
-      write_cmd(0x10);
-      write_data(oled_buffer + p * 128);
-   }
-}
 
 #else
 
 // Send data in blocking mode (Not used in screen update)
-void write_data(uint8_t *data) {
+void write_data(uint8_t data) {
 	while(oled_status!=oled_idle);	// Wait for DMA to finish
 	Oled_Set_CS();
 	Oled_Set_DC();
 	Oled_Clear_CS();
-	HAL_SPI_Transmit(spi_device, data, 128, 1000);
+	if(HAL_SPI_Transmit(spi_device, &data, 1, 1000)!=HAL_OK){
+		Error_Handler();
+	}
 	Oled_Set_CS();
 }
 
@@ -139,18 +124,43 @@ void write_cmd(uint8_t data) {
 	Oled_Set_CS();
 	Oled_Clear_DC();
 	Oled_Clear_CS();
-	HAL_SPI_Transmit(spi_device, &data, 1, 1000);
+	if(HAL_SPI_Transmit(spi_device, &data, 1, 1000)!=HAL_OK){
+		Error_Handler();
+	}
 	Oled_Set_CS();
 }
 
 // Trigger DMA
 void update_display( void ){
-		if(oled_status!=oled_idle) { return; }		// If OLED busy, skip update
-		HAL_SPI_TxCpltCallback(spi_device); // Call the DMA callback function to send the frame
+		if(oled_status!=oled_idle) { return; }	// If OLED busy, skip update
+		HAL_SPI_TxCpltCallback(spi_device); 	// Call the DMA callback function to send the frame
 }
 
 #endif
 
+
+// Manual screen update for hard error handlers (crashes)
+void update_display_ErrorHandler(void){
+	uint8_t p;
+	HAL_SPI_Abort(spi_device);	// Abort SPI DMA
+	HAL_DMA_PollForTransfer(spi_device->hdmatx, HAL_DMA_FULL_TRANSFER, 3000);	//Wait for DMA to finish
+	oled_status=oled_idle;		// Force oled idle status
+	for(p=0;p<8;p++){
+		write_cmd(0xB0|p);		// Send display buffer in blocking SPI mode
+
+#ifdef SH1106_FIX
+		write_cmd(0x02);
+#else
+		write_cmd(0x00);
+#endif
+		write_cmd(0x10);
+		Oled_Clear_CS();
+		Oled_Set_DC();
+		if(HAL_SPI_Transmit(spi_device, (uint8_t*)OledDmaBf + (p * 128), 128, 1000)!=HAL_OK){
+			while(1);			// If error happens at this stage, just do nothing
+		}
+   }
+}
 
 void pset(UG_S16 x, UG_S16 y, UG_COLOR c){
    unsigned int p;
@@ -195,78 +205,67 @@ void ssd1306_init(SPI_HandleTypeDef *hspi){
 #endif
 
 	Oled_Clear_RES();//RST
-	HAL_Delay(100);
+	HAL_Delay(0);			//	HAL Adds+1 = 1mS
 	Oled_Set_RES();//RST
+	HAL_IWDG_Refresh(&hiwdg);							// Clear watchdog
 	HAL_Delay(100);
 
-   write_cmd(0xAE| 0x00);  // Display Off (0x00/0x01)
+	write_cmd(0xAE| 0x00);  // Display Off (0x00/0x01)
 
-   write_cmd(0xD5);         // Set Display Clock Divide Ratio / Oscillator Frequency
-   //write_cmd(0x80);         // Set Clock as 100 Frames/Sec
-   write_cmd(0b11110000);         // Set Clock as 100 Frames/Sec
+	write_cmd(0xD5);         // Set Display Clock Divide Ratio / Oscillator Frequency
+	//write_cmd(0x80);         // Set Clock as 100 Frames/Sec
+	write_cmd(0b11110000);         // Set Clock as 100 Frames/Sec
 
-   write_cmd(0xA8);         // Set Multiplex Ratio
-   write_cmd(0x3F);         //   Default => 0x3F (1/64 Duty)
+	write_cmd(0xA8);         // Set Multiplex Ratio
+	write_cmd(0x3F);         //   Default => 0x3F (1/64 Duty)
 
-   write_cmd(0xD3);         // Set Display Offset
-   write_cmd(0x00);         //   Default => 0x00
+	write_cmd(0xD3);         // Set Display Offset
+	write_cmd(0x00);         //   Default => 0x00
 
-   write_cmd(0x40|0x00);   // Set Display Start Line
+	write_cmd(0x40|0x00);   // Set Display Start Line
 
-   write_cmd(0x8D);         // Set Charge Pump
-   write_cmd(0x10|0x04);   //   Default => 0x10
-  // write_cmd_2(0x10|0x04);   //   Default => 0x10
+	write_cmd(0x8D);         // Set Charge Pump
+	write_cmd(0x10|0x04);   //   Default => 0x10
+	// write_cmd_2(0x10|0x04);   //   Default => 0x10
 
-   write_cmd(0x20);         // Set Memory Addressing Mode
-   write_cmd(0x02);         //   Default => 0x02
+	write_cmd(0x20);         // Set Memory Addressing Mode
+	write_cmd(0x02);         //   Default => 0x02
 
-   write_cmd(0xA0|0x01);   // Set Segment Re-Map
+	write_cmd(0xA0|0x01);   // Set Segment Re-Map
 
-   write_cmd(0xC0|0x08);   // Set COM Output Scan Direction
+	write_cmd(0xC0|0x08);   // Set COM Output Scan Direction
 
-   write_cmd(0xDA);         // Set COM Pins Hardware Configuration
-   write_cmd(0x02|0x10);   //   Default => 0x12 (0x10)
+	write_cmd(0xDA);         // Set COM Pins Hardware Configuration
+	write_cmd(0x02|0x10);   //   Default => 0x12 (0x10)
 
-   setContrast(0xFF);		// Init in max contrast
+	setContrast(0xFF);		// Init in max contrast
 
-   write_cmd(0xD9);         // Set Pre-Charge Period
-   write_cmd(0x22);         //   Default => 0x22 (2 Display Clocks [Phase 2] / 2 Display Clocks [Phase 1])
- //  write_cmd_2(0xF1);         //   Default => 0x22 (2 Display Clocks [Phase 2] / 2 Display Clocks [Phase 1])
+	write_cmd(0xD9);         // Set Pre-Charge Period
+	write_cmd(0x22);         //   Default => 0x22 (2 Display Clocks [Phase 2] / 2 Display Clocks [Phase 1])
+	//  write_cmd_2(0xF1);         //   Default => 0x22 (2 Display Clocks [Phase 2] / 2 Display Clocks [Phase 1])
 
-   write_cmd(0xDB);         // Set VCOMH Deselect Level
-   write_cmd(0x30);         //   Default => 0x20 (0.77*VCC)
+	write_cmd(0xDB);         // Set VCOMH Deselect Level
+	write_cmd(0x30);         //   Default => 0x20 (0.77*VCC)
 
-   write_cmd(0xA4|0x00);   // Set Entire Display On/Off
+	write_cmd(0xA4|0x00);   // Set Entire Display On/Off
 
-   write_cmd(0xA6|0x00);   // Set Inverse Display On/Off
+	write_cmd(0xA6|0x00);   // Set Inverse Display On/Off
 
-   write_cmd(0xAE|0x01);   // Set Display On/Off
+	ClearBuffer();					// Clear buffer
+	update_display();				// Update display CGRAM
+	while(oled_status!=oled_idle);	// Wait for DMA completion
+
+	write_cmd(0xAE|0x01);   // Set Display On/Off
 }
 
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *_hspi){
-	static uint8_t OledRow=0;
-
-	if(_hspi == spi_device){
-		if(OledRow>7){
-			OledRow=0;					// We sent the last row of the OLED buffer data
-			oled_status=oled_idle;
-			return;						// Return without retriggering DMA.
-		}
-		oled_status=oled_sending_cmd;
-		write_cmd(0xB0|OledRow);
-		#ifdef SH1106_FIX
-		write_cmd(0x02);
-		#else
-		write_cmd(0x00);
-		#endif
-		write_cmd(0x10);
-		oled_status=oled_sending_data;
-		Oled_Clear_CS();
-		Oled_Set_DC();
-
-		// Send next OLED row
-		if(HAL_SPI_Transmit_DMA(spi_device, (uint8_t*)&OledBuffer[0]+(OledRow++ * 128), 128) != HAL_OK){
-			Error_Handler();
-		}
+//Clear buffer using DMA for fast filling
+void FillBuffer(bool color){
+	while(oled_status!=oled_idle);
+	if(!color){
+		HAL_DMA_Start(&hdma_memtomem_dma1_channel2,(uint32_t)&oled_black,(uint32_t)&OledBuffer[0],sizeof(OledBuffer)/sizeof(uint32_t));
 	}
+	else{
+		HAL_DMA_Start(&hdma_memtomem_dma1_channel2,(uint32_t)&oled_white,(uint32_t)&OledBuffer[0],sizeof(OledBuffer)/sizeof(uint32_t));
+	}
+	HAL_DMA_PollForTransfer(&hdma_memtomem_dma1_channel2, HAL_DMA_FULL_TRANSFER, 3000);
 }

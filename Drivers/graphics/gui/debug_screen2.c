@@ -9,13 +9,9 @@
 #include "oled.h"
 
 uint16_t temp;
-static TIM_HandleTypeDef *PWMTIM;
 uint16_t debugTemperature = 0;
 static pid_values_t cal_pid;
 
-void setPWM_tim(TIM_HandleTypeDef *tim){
-	PWMTIM = tim;
-}
 
 static void * debug_screen_getADC1_1() {
 	temp = TIP.last_avg;
@@ -87,12 +83,12 @@ void debug_screen2_setup(screen_t *scr) {
 	scr->onExit = &on_Exit;
 	scr->init = &debug_screen_init;
 	scr->update = &default_screenUpdate;
-
+	widget_t *widget;
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	//ADC iron display
 
-	widget_t *widget = screen_addWidget(scr);
+	widget = screen_addWidget(scr);
 	widgetDefaultsInit(widget, widget_label);
 	strcpy(widget->displayString, "ADC:       Raw:");
 	widget->posX =0;

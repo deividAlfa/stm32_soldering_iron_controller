@@ -61,7 +61,6 @@ int NTC_table[257] = {
 };
 
 
-
 int16_t readColdJunctionSensorTemp_C_x10(void) {
 	int16_t p1, p2;
 	int16_t temp;
@@ -100,10 +99,11 @@ void setCurrentTip(uint8_t tip) {
 tipData* getCurrentTip() {
 	return currentTipData;
 }
-// Translate the human readable temperature into internal value
+// Translate the human readable t into internal value
 uint16_t human2adc(uint16_t t) {
 	uint16_t temp = t;
 	int16_t ambientTemperature = readColdJunctionSensorTemp_C_x10() / 10;
+
 	if (ambientTemperature > 50)
 		ambientTemperature = 50;
 	if (t > ambientTemperature)

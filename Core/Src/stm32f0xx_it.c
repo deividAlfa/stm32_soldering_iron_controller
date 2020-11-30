@@ -23,6 +23,8 @@
 #include "stm32f0xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "ssd1306.h"
+#include "iron.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -85,11 +87,20 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
+	SetFailState(1);
+	UG_FillScreen(C_BLACK);
+	UG_FontSelect(&FONT_10X16_reduced);
+	UG_SetForecolor(C_WHITE);
+	UG_SetBackcolor(C_BLACK);
+	UG_PutString(8,15,"HARD FAULT");//10
+	UG_PutString(24,31,"ERROR!!");//7
+	update_display_ErrorHandler();
 
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+	  HAL_IWDG_Refresh(&hiwdg);							// Clear watchdog
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
@@ -149,10 +160,7 @@ void EXTI4_15_IRQHandler(void)
   /* USER CODE BEGIN EXTI4_15_IRQn 0 */
 
   /* USER CODE END EXTI4_15_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_9);
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_10);
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_11);
   /* USER CODE BEGIN EXTI4_15_IRQn 1 */
 
   /* USER CODE END EXTI4_15_IRQn 1 */

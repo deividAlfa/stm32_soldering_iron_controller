@@ -23,9 +23,9 @@
 
 /*
 uint16_t freeram(void){
-	 uint16_t ram=1;
+	 uint16_t ram=9000;
 	 uint8_t* ptr;
-	 while(ram<20000){
+	 while(1){
 		 ptr=malloc(ram);
 		 if(ptr==NULL){
 			 return ram;
@@ -38,7 +38,7 @@ uint16_t freeram(void){
 }
 */
 
-void guiInit(TIM_HandleTypeDef *tim) {
+void guiInit(void) {
 	screen_t *scr;
 	//volatile uint16_t  free;
 
@@ -69,7 +69,4 @@ void guiInit(TIM_HandleTypeDef *tim) {
 	//free=freeram();
 
 	UG_Init(&user_gui, pset, 128, 64);
-	oled_init();
-	oled_update();
-    setPWM_tim(tim);
 }

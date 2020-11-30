@@ -14,12 +14,11 @@
 #include "rotary_encoder.h"
 #include "ssd1306.h"
 #include "ugui.h"
-
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
 typedef enum widgetFieldType {field_float, field_integer, field_uinteger16, field_int32, field_bmp, field_string}widgetFieldType;
 typedef enum widgetTextJustifyType {justify_left, justify_right}widgetTextJustifyType;
 typedef enum widgetType {widget_combo, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button}widgetType;
-enum {screen_splash, screen_main, screen_settings, screen_last_scrollable, screen_debug, screen_debug2, screen_edit_pid, screen_edit_sleep, screen_edit_contrast, screen_edit_max_power, screen_edit_boost, screen_edit_iron_tips, screen_edit_iron_tip, screen_edit_tip_name, screen_edit_calibration_wait, screen_edit_calibration_input, screen_LAST};
+enum {screen_splash, screen_main, screen_settings, screen_last_scrollable, screen_debug, screen_debug2, screen_edit_pid, screen_edit_contrast, screen_edit_max_power, screen_edit_sleep, screen_edit_boost,/*screen_advanced, screen_adv_pwm,screen_adv_tip,screen_adv_misc,*/screen_edit_iron_tips, screen_edit_iron_tip, screen_edit_tip_name, screen_edit_calibration_wait, screen_edit_calibration_input, screen_LAST};
 
 typedef struct widget_t widget_t;
 typedef struct comboBox_item_t comboBox_item_t;
@@ -29,6 +28,10 @@ typedef struct selectable_widget_t {
 	widgetStateType previous_state;
 	int (*processInput)(widget_t*, RE_Rotation_t, RE_State_t *);
 	int (*longPressAction)(widget_t*);
+	int (*onEditAction)(widget_t*);
+	int (*onSelectAction)(widget_t*);
+	bool force_state;
+	bool NoHighlight;
 	int tab;
 } selectable_widget_t;
 typedef struct comboBox_widget_t {
@@ -42,7 +45,7 @@ typedef struct comboBox_item_t {
 	char *text;
 	comboBox_item_t *next_item;
 	uint8_t action_screen;
-	uint8_t enabled;
+	bool enabled;
 } comboBox_item_t;
 
 typedef struct displayOnly_widget_t {
@@ -51,6 +54,7 @@ typedef struct displayOnly_widget_t {
 	widgetTextJustifyType justify;
 	uint8_t	number_of_dec;
 	void (*update)(widget_t*);
+	bool hasEndStr;
 } displayOnly_wiget_t;
 
 typedef struct editable_t {
@@ -62,10 +66,10 @@ typedef struct editable_t {
 	uint16_t max_value;
 	uint16_t min_value;
 	uint8_t current_edit;
-} editable_wiget_t;
+} editable_widget_t;
 
 typedef struct multi_option_widget_t {
-	editable_wiget_t editable;
+	editable_widget_t editable;
 	uint8_t numberOfOptions;
 	uint8_t defaultOption;
 	uint8_t currentOption;
@@ -87,20 +91,21 @@ typedef struct button_widget_t {
 
 struct widget_t
 {
-	uint8_t inverted;
+	bool inverted;
 	char displayString[20];
+	char endString[5];
 	uint8_t reservedChars;
 	uint8_t posX;
 	uint8_t posY;
 	const UG_FONT *font_size;
 	widget_t *next_widget;
-	uint8_t enabled;
+	bool enabled;
 	widgetType type;
 	struct screen_t *parent;
 	void (*draw)(widget_t*);
 	union {
 		label_wiget_t label;
-		editable_wiget_t editable;
+		editable_widget_t editable;
 		displayOnly_wiget_t displayWidget;
 		bmp_wiget_t displayBmp;
 		multi_option_widget_t multiOptionWidget;
@@ -110,7 +115,7 @@ struct widget_t
 };
 
 displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget);
-editable_wiget_t * extractEditablePartFromWidget(widget_t *widget);
+editable_widget_t * extractEditablePartFromWidget(widget_t *widget);
 selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget);
 void widgetDefaultsInit(widget_t *w, widgetType t);
 void default_widgetDraw(widget_t *widget);

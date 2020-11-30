@@ -17,7 +17,7 @@
 //#define  USE_FONT_5X8
 //#define  USE_FONT_5X12
 //#define  USE_FONT_6X8
-#define  USE_FONT_6X8_reduced
+#define  USE_FONT_6X8_reduced 		// ASCII chars 0x20-0x7E(numbers, symbols, uppercase and lowercase letters),'*' drawed as '°'
 //#define  USE_FONT_6X10
 //#define  USE_FONT_7X12
 //#define  USE_FONT_8X8
@@ -25,12 +25,14 @@
 //#define  USE_FONT_8X12
 //#define  USE_FONT_8X12
 //#define  USE_FONT_8X14
-#define  USE_FONT_8X14_reduced
+#define  USE_FONT_8X14_reduced 		// ASCII chars 0x20-0x7E(numbers, symbols, UPPERCASE and lowercase letters), '*' drawed as '°'
 //#define  USE_FONT_10X16
+#define  USE_FONT_10X16_reduced 	// ASCII chars 0x20-0x7E(numbers, symbols, UPPERCASE and lowercase letters)) '*' drawed as '°'
 //#define  USE_FONT_12X16
 //#define  USE_FONT_12X20
 //#define  USE_FONT_16X26
-#define  USE_FONT_16X26_reduced
+//#define  USE_FONT_16X26_reduced 	// ASCII chars 0x20-0x5A(numbers, symbols, UPPERCASE letters), '*' drawed as '°'
+#define  USE_FONT_22X36_reduced 	// Very reduced due high size. ASCII chars 0x20-0x39(numbers, symbols) C='#', F='$', K='%', E=''', R=')',O='('
 //#define  USE_FONT_22X36
 //#define  USE_FONT_24X40
 //#define  USE_FONT_32X53
