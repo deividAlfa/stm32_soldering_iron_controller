@@ -59,7 +59,6 @@ static void setCalState(state_t s) {
 			t->calADC_At_200 = adcCal[cal_200];
 			t->calADC_At_300 = adcCal[cal_300];
 			t->calADC_At_400 = adcCal[cal_400];
-			saveSettings();
 		}
 		else {
 			strcpy(waitWidget->displayString, "Cal failed");

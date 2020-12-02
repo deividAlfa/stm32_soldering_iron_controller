@@ -2254,7 +2254,7 @@ __UG_FONT_DATA unsigned char font_8x12[][12]={
 
 
 #ifdef USE_FONT_8X12_CYRILLIC
-__UG_FONT_DATA unsigned char font_8x12[][12]={
+__UG_FONT_DATA unsigned char font_8x12_cyrillic[][12]={
 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // 0x00
 {0x00, 0x7E, 0xC3, 0x81, 0xA5, 0x81, 0xBD, 0x99, 0xC3, 0x7E, 0x00, 0x00}, // 0x01
 {0x00, 0x7E, 0xFF, 0xFF, 0xDB, 0xFF, 0xC3, 0xE7, 0xFF, 0x7E, 0x00, 0x00}, // 0x02
@@ -4928,7 +4928,7 @@ __UG_FONT_DATA unsigned char font_32x53[][212]={
    const UG_FONT FONT_8X12 = {(unsigned char*)font_8x12,FONT_TYPE_1BPP,8,12,0,255,NULL};
 #endif
 #ifdef USE_FONT_8X12_CYRILLIC
-   const UG_FONT FONT_8X12 = {(unsigned char*)font_8x12,FONT_TYPE_1BPP,8,12,0,255,NULL};
+   const UG_FONT FONT_8X12_cyrillic = {(unsigned char*)font_8x12_cyrillic,FONT_TYPE_1BPP,8,12,0,255,NULL};
 #endif
 #ifdef USE_FONT_8X14
    const UG_FONT FONT_8X14 = {(unsigned char*)font_8x14,FONT_TYPE_1BPP,8,14,0,255,NULL};

@@ -64,7 +64,6 @@ static void setCalcAt400(uint16_t *val) {
 	getCurrentTip()->calADC_At_400 = *val;
 }
 static int saveDebug(widget_t *w) {
-	saveSettings();
 	return screen_main;
 }
 static int cancelDebug(widget_t *w) {

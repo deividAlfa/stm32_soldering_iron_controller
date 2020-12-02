@@ -81,7 +81,6 @@ void *getMode() {
 void setTip(uint16_t *value) {
 	m_tip = *value;
 	systemSettings.currentTip = m_tip;
-	saveSettings();
 	setCurrentTip(m_tip);
 }
 
@@ -285,6 +284,9 @@ void main_screen_setup(screen_t *scr) {
 	widget->posX = 17;
 	widget->posY = 17;
 	widget->font_size =  &FONT_22X36_reduced;
+
+	//widget->font_size =  &FONT_24X40;//PRUEBA
+	//widget->posX = 0;
 	widget->displayWidget.getData = &main_screen_getIronTemp;
 	widget->displayWidget.number_of_dec = 0;
 	widget->displayWidget.type = field_uinteger16;

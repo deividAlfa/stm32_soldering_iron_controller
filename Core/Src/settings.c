@@ -59,7 +59,6 @@ void restoreSettings() {
 	currentPID = systemSettings.ironTips[systemSettings.currentTip].PID;
 	setupPIDFromStruct();
 }
-__attribute__((optimize("O0")))
 uint16_t ChecksumSettings(void){
 	uint16_t *data = (uint16_t*) &systemSettings;
 	volatile uint16_t i;

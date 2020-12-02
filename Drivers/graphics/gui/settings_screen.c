@@ -69,13 +69,11 @@ static int saveTip(widget_t *w) {
 	if(strcmp(tipCombo->comboBoxWidget.currentItem->text, "ADD NEW") == 0) {
 		strcpy(systemSettings.ironTips[systemSettings.currentNumberOfTips].name, str);
 		++systemSettings.currentNumberOfTips;
-		saveSettings();
 	}
 	else {
 		for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++ x) {
 			if(strcmp(tipCombo->comboBoxWidget.currentItem->text, systemSettings.ironTips[x].name) == 0) {
 				strcpy(systemSettings.ironTips[x].name, str);
-				saveSettings();
 				break;
 			}
 		}
@@ -97,7 +95,6 @@ static int delTip(widget_t *w) {
 		systemSettings.ironTips[x] = systemSettings.ironTips[x + 1];
 	}
 	--systemSettings.currentNumberOfTips;
-	saveSettings();
 	return screen_edit_iron_tips;
 }
 
