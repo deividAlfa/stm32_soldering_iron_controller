@@ -8,65 +8,35 @@
 #include "gui.h"
 #include "main_screen.h"
 #include "debug_screen.h"
-#include "debug_screen2.h"
 #include "splash.h"
 #include "settings_screen.h"
 #include "calibration_screen.h"
+#include "tiptype_screen.h"
 #include "oled.h"
+#include "screen.h"
 
-
-/* To debug free ram
- *
- *  oled_addscreen calls several malloc(), each screen can take from ~400 bytes up to a few KB!
- *  So if you get Hard faults after touching the screens, check this!
-*/
-
-/*
-uint16_t freeram(void){
-	 uint16_t ram=9000;
-	 uint8_t* ptr;
-	 while(1){
-		 ptr=malloc(ram);
-		 if(ptr==NULL){
-			 return ram;
-		 }
-		 else{
-			 free(ptr);
-			 ram+=100;
-		 }
-	  }
-}
-*/
 
 void guiInit(void) {
-	screen_t *scr;
-	//volatile uint16_t  free;
 
-	//free=freeram();
+	oled_addScreen(&Screen_splash, screen_splash);
+	splash_setup(&Screen_splash);
 
-	scr = oled_addScreen(screen_splash);
-	splash_setup(scr);
-	//free=freeram();
+	oled_addScreen(&Screen_main,screen_main);
+	main_screen_setup(&Screen_main);
 
-	scr  = oled_addScreen(screen_main);
-	main_screen_setup(scr);
-	//free=freeram();
+	oled_addScreen(&Screen_settings,screen_settings);
+	settings_screen_setup(&Screen_settings);
 
-	scr = oled_addScreen(screen_debug);
-	debug_screen_setup(scr);
-	//free=freeram();
+	oled_addScreen(&Screen_debug,screen_debug);
+	debug_screen_setup(&Screen_debug);
 
-	scr = oled_addScreen(screen_debug2);
-	debug_screen2_setup(scr);
-	//free=freeram();
+	oled_addScreen(&Screen_debug2,screen_debug2);
+	debug2_screen_setup(&Screen_debug2);
 
-	scr = oled_addScreen(screen_settings);
-	settings_screen_setup(scr);
-	//free=freeram();
+	oled_addScreen(&Screen_edit_calibration_wait,screen_edit_calibration_wait);
+	calibration_screen_setup(&Screen_edit_calibration_wait);
 
-	scr = oled_addScreen(screen_edit_calibration_wait);
-	calibration_screen_setup(scr);
-	//free=freeram();
-
+	oled_addScreen(&Screen_tiptype,screen_tiptype);
+	tiptype_screen_setup(&Screen_tiptype);
 	UG_Init(&user_gui, pset, 128, 64);
 }

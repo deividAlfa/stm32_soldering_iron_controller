@@ -11,8 +11,6 @@
 #define temp_maxC  480                 // Maximum calibration temperature in degrees of Celsius
 static tipData *currentTipData;
 
-
-
 /* Table of ADC sum value, corresponding to temperature. Starting from higher value to lower.
    Next parameters had been used to build table:
      R1(T1): 10kOhm(25°С)
@@ -26,7 +24,7 @@ static tipData *currentTipData;
 	 Source: http://www.sebulli.com/ntc/index.php
 */
 
-int NTC_table[257] = {
+const int NTC_table[257] = {
   3525, 2945, 2365, 2077, 1891, 1755, 1650,
   1565, 1493, 1431, 1377, 1330, 1287, 1248,
   1213, 1181, 1151, 1123, 1097, 1072, 1050,
@@ -60,8 +58,7 @@ int NTC_table[257] = {
   -710, -796
 };
 
-
-int16_t readColdJunctionSensorTemp_C_x10(void) {
+int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
 	int16_t p1, p2;
 	int16_t temp;
 	int16_t lastavg=NTC.last_avg;
@@ -71,91 +68,99 @@ int16_t readColdJunctionSensorTemp_C_x10(void) {
 
 	/* Interpolate between both points. */
 	temp = p1 - ((p1 - p2) * (lastavg & 0x000F)) / 16;
-
-	return (int16_t) temp;
+	if(tempUnit==Unit_Farenheit){
+		temp=TempConversion(temp,toFarenheit);
+		temp+=(320-32);	//TempConversion works in x1, not x10, so subtract 32, add 32x10
+	}
+	return temp;
 }
 // Read tip filtered
-uint16_t readTipTemperatureCompensated(uint8_t new) {
+uint16_t readTipTemperatureCompensated(bool new) {
 	static uint16_t last_value;
-	if (!new)
-		return last_value;
-	readTipTemperatureCompensatedRaw(New);
-	last_value = adc2Human(TIP.last_avg);
+	if(new){
+		readTipTemperatureCompensatedRaw(New);
+		last_value = adc2Human(TIP.last_avg,1,systemSettings.tempUnit);
+	}
 	return last_value;
 }
 // Read tip unfiltered
-uint16_t readTipTemperatureCompensatedRaw(uint8_t new) {
+uint16_t readTipTemperatureCompensatedRaw(bool new) {
 	static uint16_t last_value;
-	if (!new)
-		return last_value;
-	last_value = adc2Human(TIP.last_RawAvg);
+	if (new){
+		last_value = adc2Human(TIP.last_RawAvg,1,systemSettings.tempUnit);
+	}
 	return last_value;
 }
 void setCurrentTip(uint8_t tip) {
 	currentTipData = &systemSettings.ironTips[tip];
 	currentPID = currentTipData->PID;
+	setupPIDFromStruct();
 }
 
 tipData* getCurrentTip() {
 	return currentTipData;
 }
+
 // Translate the human readable t into internal value
-uint16_t human2adc(uint16_t t) {
-	uint16_t temp = t;
-	int16_t ambientTemperature = readColdJunctionSensorTemp_C_x10() / 10;
+uint16_t human2adc(int16_t t) {
+	volatile int16_t temp = t;
+	volatile int16_t tH;
+	volatile int16_t ambTemp = readColdJunctionSensorTemp_x10(Unit_Celsius) / 10;
 
-	if (ambientTemperature > 50)
-		ambientTemperature = 50;
-	if (t > ambientTemperature)
-		t = t - ambientTemperature;
-	if (t < temp_minC)
-		t = temp_minC;
-	if (t > temp_maxC)
-		t = temp_maxC;
-	if (t >= currentTipData->calADC_At_300)
-		temp = map(t, 300, 400, currentTipData->calADC_At_300,
-				currentTipData->calADC_At_400);
-	else
-		temp = map(t, 200, 300, currentTipData->calADC_At_200,
-				currentTipData->calADC_At_300);
+	// If using Farenheit, convert to Celsius
+	if(systemSettings.tempUnit==Unit_Farenheit){
+		t = TempConversion(t,toCelsius);
+	}
+	t-=ambTemp;
+	if (t < temp_minC){ return 0; } // If requested temp below min, return 0
+	else if (t > temp_maxC){ t = temp_maxC; } // If requested over max, apply limit
 
-	uint16_t tH = adc2Human(temp) - ambientTemperature;
-	if (tH == t)
-		return temp;
+	// If t>300, map between ADC values Cal_300 - Cal_400
+	if (t >= 300){
+		temp = map(t, 300, 400, currentTipData->calADC_At_300, currentTipData->calADC_At_400);
+	}
+	// If t>200, map between ADC values Cal_200 - Cal_300
+	else if(t >= 200){
+		temp = map(t, 200, 300, currentTipData->calADC_At_200, currentTipData->calADC_At_300);
+	}
+	// If t<200, map between ADC values ambTemp - Cal_200
+	else{
+		temp = map(t, ambTemp, 200, 0, currentTipData->calADC_At_200);
+	}
+
+	tH = adc2Human(temp,0,Unit_Celsius);
 	if (tH < t) {
-		for (uint16_t x = 0; x < 1000; ++x) {
-			++temp;
-			tH = adc2Human(temp) - ambientTemperature;
-			if (tH >= t)
-				return temp;
+		while(tH < t){
+			tH = adc2Human(++temp,0,Unit_Celsius);
 		}
 	}
-	if (tH > t) {
-		for (uint16_t x = 0; x < 1000; ++x) {
-			--temp;
-			tH = adc2Human(temp) - ambientTemperature;
-			if (tH <= t)
-				return temp;
+	else if (tH > t) {
+		while(tH > t){
+			tH = adc2Human(--temp,0,Unit_Celsius);
 		}
 	}
 	return temp;
 }
-// Translate temperature from internal units to the human readable value (Celsius or Farenheit)
-uint16_t adc2Human(uint16_t adc_value) {
+
+// Translate temperature from internal units to the human readable value
+int16_t adc2Human(uint16_t adc_value,bool correction, bool tempUnit) {
 	int16_t tempH = 0;
-	int16_t ambientTemperature;
-	ambientTemperature = readColdJunctionSensorTemp_C_x10() / 10;
-	if (adc_value < currentTipData->calADC_At_200) {
-		tempH = map(adc_value, 0, currentTipData->calADC_At_200,
-				ambientTemperature, 200);
-	} else if (adc_value >= currentTipData->calADC_At_300) {
-		tempH = map(adc_value, currentTipData->calADC_At_300,
-				currentTipData->calADC_At_400, 300, 400);
-	} else {
-		tempH = map(adc_value, currentTipData->calADC_At_200,
-				currentTipData->calADC_At_300, 200, 300);
+	int16_t ambTemp;
+	ambTemp = readColdJunctionSensorTemp_x10(Unit_Celsius) / 10;
+	if (adc_value >= currentTipData->calADC_At_300) {
+		tempH = map(adc_value, currentTipData->calADC_At_300, currentTipData->calADC_At_400, 300, 400);
 	}
-	return tempH + ambientTemperature;
+	else if(adc_value >= currentTipData->calADC_At_200){
+		tempH = map(adc_value, currentTipData->calADC_At_200, currentTipData->calADC_At_300, 200, 300);
+	}
+	else{
+		tempH = map(adc_value, 0, currentTipData->calADC_At_200, ambTemp, 200);
+	}
+	if(correction){ tempH+= ambTemp; }
+	if(tempUnit==Unit_Farenheit){
+		tempH=TempConversion(tempH,toFarenheit);
+	}
+	return tempH;
 }
 
 long map(long x, long in_min, long in_max, long out_min, long out_max) {
@@ -164,4 +169,19 @@ long map(long x, long in_min, long in_max, long out_min, long out_max) {
 	if (ret < 0)
 		ret = 0;
 	return ret;
+}
+
+// Fixed point calculation
+// 2E20*1.8 = 1887437 , 2E20/1.8 = 582542
+// So (temp*1887437)>>20 == temp*1.8 (Real: 1,800000191)
+// (temp*582542)>>20 == temp/1.8 (Real: 1,800000687)
+// Max input = 1100°C / 3700°F, otherwise we will overflow the signed int32
+int16_t TempConversion(int16_t temperature, bool conversion){
+	if(conversion==toFarenheit){	// Input==Celsius, Output==Farenheit
+		temperature=(((int32_t)temperature*1887437)>>20)+32;// F = (C*1.8)+32
+	}
+	else{// Input==Farenheit, Output==Celsius
+		temperature=(((int32_t)temperature-32)*582542)>>20;// C = (F-32)/1.8
+	}
+	return temperature;
 }

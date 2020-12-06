@@ -11,5 +11,5 @@
 #include "screen.h"
 
 void debug_screen_setup(screen_t *scr);
-void setPWM_tim(TIM_HandleTypeDef *);
+void debug2_screen_setup(screen_t *scr);
 #endif /* GRAPHICS_GUI_DEBUG_SCREEN_H_ */

@@ -10,23 +10,34 @@
 #include "oled.h"
 
 typedef enum {cal_200, cal_300, cal_400, cal_end}state_t;
+static uint16_t backupTemp;
 static uint16_t state_temps[3] = {200, 300, 400};
 static uint16_t measured_temps[3];
 static uint16_t adcAtTemp[3];
 static state_t current_state = cal_200;
 static uint8_t tempReady = 0;
-static char *waitStr;
 static uint16_t measuredTemp = 0;
-static widget_t *waitWidget = NULL;
-static widget_t *cancelButton = NULL;
-static widget_t *waitTemp = NULL;
-static iron_mode_t ironModeBackup;
-static uint16_t tempSetBackup;
 static uint16_t adcCal[3];
 static uint8_t processCalibration();
-static pid_values_t cal_pid;
-static screen_t *calInputScreen;
-static screen_t *calWaitScreen;
+const pid_values_t cal_pid = {
+		max:	1,
+		min:	0,
+		Kp:		0.0003,
+		Ki:		0.0025,
+		Kd:		0,
+		maxI:	200,
+		minI:	-50,
+};
+
+
+static widget_t Widget_CAL_Wait;
+static widget_t Widget_CAL_WaitTemp;
+static widget_t Widget_CAL_Cancel;
+static widget_t Widget_CAL_Input_MeasuredTemp_label;
+static widget_t Widget_CAL_Input_MeasuredTemp_edit;
+static widget_t Widget_CAL_Input_Cancel;
+static widget_t Widget_CAL_Input_OK;
+
 
 static void tempReached(uint16_t temp) {
 	if(temp == state_temps[(int)current_state])
@@ -40,28 +51,27 @@ static void *getMeasuredTemp() {
 static void setMeasuredTemp(void *temp) {
 	measuredTemp = *(uint16_t*)temp;
 }
+
 static void setCalState(state_t s) {
 	current_state = s;
 	if(current_state != cal_end) {
 		setCurrentMode(mode_normal);
 		setSetTemperature(state_temps[(int)s]);
-		sprintf(waitStr, "Setting temp.to %dC", state_temps[(int)s]);
+		sprintf(Widget_CAL_WaitTemp.displayString, "HEATING: %d*C", state_temps[(int)s]);
 		measuredTemp = state_temps[(int)s];
 	}
 	else {
-		waitTemp->enabled = 0;
-		strcpy(cancelButton->displayString, "Finish");
+		Widget_CAL_WaitTemp.enabled = 0;
 		uint8_t result = processCalibration();
-		waitWidget->posX = 20;
 		if(result) {
-			strcpy(waitWidget->displayString, "Cal succeed");
+			strcpy(Widget_CAL_Wait.displayString, "SUCEED!");
 			tipData * t = getCurrentTip();
 			t->calADC_At_200 = adcCal[cal_200];
 			t->calADC_At_300 = adcCal[cal_300];
 			t->calADC_At_400 = adcCal[cal_400];
 		}
 		else {
-			strcpy(waitWidget->displayString, "Cal failed");
+			strcpy(Widget_CAL_Wait.displayString, "FAILED!");
 		}
 	}
 }
@@ -76,7 +86,7 @@ static int okAction(widget_t *w) {
 		current_state = cal_200;
 		return screen_main;
 	}
-	measured_temps[(int)current_state] = measuredTemp - (readColdJunctionSensorTemp_C_x10() / 10);
+	measured_temps[(int)current_state] = measuredTemp - (readColdJunctionSensorTemp_x10(Unit_Celsius) / 10);
 	adcAtTemp[(int)current_state] = TIP.last_avg;
 	setCalState(++current_state);
 	return screen_edit_calibration_wait;
@@ -100,127 +110,128 @@ int waitProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
 	return default_screenProcessInput(scr, input, s);
 }
 static void waitOnEnter(screen_t *scr) {
-	if(scr != calInputScreen) {
+	if(scr != &Screen_edit_calibration_input) {
+		Widget_CAL_WaitTemp.enabled = 1;
+		strcpy(Widget_CAL_Wait.displayString, "WAIT...");
 		UG_FontSetHSpace(0);
 		UG_FontSetVSpace(0);
-		waitTemp->enabled = 1;
+		Iron.isCalibrating=1;
 		tempReady = 0;
-		strcpy(waitWidget->displayString, "Please wait!");
-		waitWidget->posX = 10;
-		ironModeBackup = getCurrentMode();
-		tempSetBackup = getSetTemperature();
 		setCurrentMode(mode_normal);
+		backupTemp = getSetTemperature();
 		currentPID = cal_pid;
 		setupPIDFromStruct();
 		setCalState(cal_200);
 	}
 }
 static void waitOnExit(screen_t *scr) {
-	if(scr != calWaitScreen && scr != calInputScreen) {
+	if(scr != &Screen_edit_calibration_wait && scr != &Screen_edit_calibration_input) {
 		tempReady = 0;
 		current_state = cal_200;
-		setCurrentMode(ironModeBackup);
-		setSetTemperature(tempSetBackup);
+		setSetTemperature(backupTemp);
+		setCurrentMode(mode_normal);
 		currentPID = systemSettings.ironTips[systemSettings.currentTip].PID;
 		setupPIDFromStruct();
+		Iron.isCalibrating=0;
 	}
 }
 
 void calibration_screen_setup(screen_t *scr) {
+
+	screen_t* sc;
+	widget_t* w;
 	scr->draw = &default_screenDraw;
 	scr->processInput = &waitProcessInput;
 	scr->init = &waitCalibration_screen_init;
 	scr->update = &default_screenUpdate;
 	scr->onEnter = &waitOnEnter;
 	scr->onExit = &waitOnExit;
-	calWaitScreen = scr;
-	widget_t *widget = screen_addWidget(scr);
-	widgetDefaultsInit(widget, widget_label);
-	char *s = "Please wait!";
-	strcpy(widget->displayString, s);
-	widget->posX = 10;
-	widget->posY = 16;
-	widget->font_size = &FONT_8X14_reduced;
-	waitWidget = widget;
 
-	widget = screen_addWidget(scr);
-	widgetDefaultsInit(widget, widget_label);
-	waitStr = widget->displayString;
-	widget->posX = 0;
-	widget->posY = 30;
-	widget->font_size = &FONT_6X8_reduced;
-	waitTemp = widget;
+	addSetTemperatureReachedCallback(tempReachedCallback);
 
-	widget = screen_addWidget(scr);
-	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8_reduced;
-	widget->posX = 90;
-	widget->posY = 56;
-	s = "CANCEL";
-	strcpy(widget->displayString, s);
-	widget->reservedChars = 6;
-	widget->buttonWidget.selectable.tab = 0;
-	widget->buttonWidget.action = &cancelAction;
-	cancelButton = widget;
+	w = &Widget_CAL_Wait;
+	screen_addWidget(w,scr);
+	widgetDefaultsInit(w, widget_label);
+	w->posX = 0;
+	w->posY = 50;
+	w->font_size = &FONT_8X14_reduced;
 
-	screen_t *sc = oled_addScreen(screen_edit_calibration_input);
+	w = &Widget_CAL_WaitTemp;
+	screen_addWidget(w,scr);
+	widgetDefaultsInit(w, widget_label);
+	w->posX = 6;
+	w->posY = 17;
+	w->font_size = &FONT_8X14_reduced;
+
+	w = &Widget_CAL_Cancel;
+	screen_addWidget(w,scr);
+	widgetDefaultsInit(w, widget_button);
+	w->font_size = &FONT_8X14_reduced;
+	w->posX = 94;
+	w->posY = 50;
+	strcpy(w->displayString, "BACK");
+	w->reservedChars = 4;
+	w->buttonWidget.selectable.tab = 0;
+	w->buttonWidget.action = &cancelAction;
+
+	oled_addScreen(&Screen_edit_calibration_input, screen_edit_calibration_input);
+	sc = &Screen_edit_calibration_input;
 	sc->draw = &default_screenDraw;
 	sc->processInput = &default_screenProcessInput;
 	sc->init = &inputCalibration_screen_init;
 	sc->update = &default_screenUpdate;
 	sc->onExit = &waitOnExit;
-	calInputScreen = sc;
-	widget = screen_addWidget(sc);
-	widgetDefaultsInit(widget, widget_label);
-	s = "Set measured temp.";
-	strcpy(widget->displayString, s);
-	widget->posX = 10;
-	widget->posY = 16;
-	widget->font_size = &FONT_6X8_reduced;
 
-	widget = screen_addWidget(sc);
-	widgetDefaultsInit(widget, widget_editable);
-	widget->posX = 55;
-	widget->posY = 30;
-	widget->font_size = &FONT_8X14_reduced;
-	widget->editable.inputData.getData = &getMeasuredTemp;
-	widget->editable.setData = &setMeasuredTemp;
-	widget->reservedChars = 3;
-	widget->editable.selectable.tab = 0;
-	widget = screen_addWidget(sc);
-	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8_reduced;
-	widget->posX = 90;
-	widget->posY = 56;
-	s = "CANCEL";
-	strcpy(widget->displayString, s);
-	widget->reservedChars = 6;
-	widget->buttonWidget.selectable.tab = 1;
-	widget->buttonWidget.action = &cancelAction;
+	w=&Widget_CAL_Input_MeasuredTemp_label;
+	screen_addWidget(w,sc);
+	widgetDefaultsInit(w, widget_label);
+	strcpy(w->displayString, "MEASURED:");
+	w->posX = 0;
+	w->posY = 17;
+	w->font_size = &FONT_8X14_reduced;
 
-	widget = screen_addWidget(sc);
-	widgetDefaultsInit(widget, widget_button);
-	widget->font_size = &FONT_6X8_reduced;
-	widget->posX = 20;
-	widget->posY = 56;
-	s = "OK";
-	strcpy(widget->displayString, s);
-	widget->reservedChars = 6;
-	widget->buttonWidget.selectable.tab = 2;
-	widget->buttonWidget.action = &okAction;
-	addSetTemperatureReachedCallback(tempReachedCallback);
-	cal_pid.Kp = systemSettings.ironTips[0].PID.Kp;
-	cal_pid.Ki = systemSettings.ironTips[0].PID.Ki;
-	cal_pid.Kd = systemSettings.ironTips[0].PID.Kd;
-	cal_pid.min = systemSettings.ironTips[0].PID.min;
-	cal_pid.max = systemSettings.ironTips[0].PID.max;
-	cal_pid.maxI = systemSettings.ironTips[0].PID.maxI;
-	cal_pid.minI = systemSettings.ironTips[0].PID.minI;
+	w=&Widget_CAL_Input_MeasuredTemp_edit;
+	screen_addWidget(w,sc);
+	widgetDefaultsInit(w, widget_editable);
+	w->posX = 86;
+	w->posY = 17;
+	w->font_size = &FONT_8X14_reduced;
+	w->editable.inputData.getData = &getMeasuredTemp;
+	w->editable.setData = &setMeasuredTemp;
+	w->reservedChars = 5;
+	w->displayWidget.hasEndStr = 1;
+	strcpy(w->endString, "*C");
+	w->editable.selectable.tab = 0;
+
+	w=&Widget_CAL_Input_OK;
+	screen_addWidget(w,sc);
+	widgetDefaultsInit(w, widget_button);
+	w->font_size = &FONT_8X14_reduced;
+	w->posX = 94;
+	w->posY = 50;
+	strcpy(w->displayString, "SAVE");
+	w->reservedChars = 4;
+	w->buttonWidget.selectable.tab = 1;
+	w->buttonWidget.action = &okAction;
+
+
+	w=&Widget_CAL_Input_Cancel;
+	screen_addWidget(w,sc);
+	widgetDefaultsInit(w, widget_button);
+	w->font_size = &FONT_8X14_reduced;
+	w->posX = 1;
+	w->posY = 50;
+	strcpy(w->displayString, "CANCEL");
+	w->reservedChars = 6;
+	w->buttonWidget.selectable.tab = 2;
+	w->buttonWidget.action = &cancelAction;
+
+
 }
 
 static uint8_t processCalibration() {
 	  uint16_t delta = state_temps[1] - state_temps[0]; delta >>= 1;
-	  uint16_t ambient = readColdJunctionSensorTemp_C_x10() / 10;
+	  uint16_t ambient = readColdJunctionSensorTemp_x10(Unit_Celsius) / 10;
 
 	  if ((measured_temps[cal_300] > measured_temps[cal_200]) && ((measured_temps[cal_200] + delta) < measured_temps[cal_300]))
 	    adcCal[cal_300] = map(state_temps[cal_300], measured_temps[cal_200], measured_temps[cal_300], adcAtTemp[cal_200], adcAtTemp[cal_300]);
@@ -245,4 +256,6 @@ static uint8_t processCalibration() {
 	    adcCal[2] = map(state_temps[2], measured_temps[0], measured_temps[2], adcAtTemp[0], adcAtTemp[2]);
 	  }
 	return 1;
+
 }
+

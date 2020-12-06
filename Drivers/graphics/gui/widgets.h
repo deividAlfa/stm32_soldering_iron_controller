@@ -15,11 +15,9 @@
 #include "ssd1306.h"
 #include "ugui.h"
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
-typedef enum widgetFieldType {field_float, field_integer, field_uinteger16, field_int32, field_bmp, field_string}widgetFieldType;
+typedef enum widgetFieldType {field_float, field_integer, field_integer16,field_uinteger16, field_int32, field_bmp, field_string}widgetFieldType;
 typedef enum widgetTextJustifyType {justify_left, justify_right}widgetTextJustifyType;
 typedef enum widgetType {widget_combo, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button}widgetType;
-enum {screen_splash, screen_main, screen_settings, screen_last_scrollable, screen_debug, screen_debug2, screen_edit_pid, screen_edit_contrast, screen_edit_max_power, screen_edit_sleep, screen_edit_boost,/*screen_advanced, screen_adv_pwm,screen_adv_tip,screen_adv_misc,*/screen_edit_iron_tips, screen_edit_iron_tip, screen_edit_tip_name, screen_edit_calibration_wait, screen_edit_calibration_input, screen_LAST};
-
 typedef struct widget_t widget_t;
 typedef struct comboBox_item_t comboBox_item_t;
 
@@ -77,7 +75,7 @@ typedef struct multi_option_widget_t {
 } multi_option_widget_t;
 
 typedef struct bmp_wiget_t {
-	UG_BMP bmp;
+	UG_BMP_MONO* bmp;
 } bmp_wiget_t;
 
 typedef struct label_wiget_t {
@@ -87,12 +85,13 @@ typedef struct label_wiget_t {
 typedef struct button_widget_t {
 	int (*action)(widget_t*);
 	selectable_widget_t selectable;
+	UG_BMP_MONO* bmp;
 } button_widget_t;
 
 struct widget_t
 {
 	bool inverted;
-	char displayString[20];
+	char displayString[18];
 	char endString[5];
 	uint8_t reservedChars;
 	uint8_t posX;
@@ -123,6 +122,6 @@ void default_widgetUpdate(widget_t *widget);
 int default_widgetProcessInput(widget_t *, RE_Rotation_t, RE_State_t *);
 int comboBoxProcessInput(widget_t *, RE_Rotation_t, RE_State_t *);
 void comboBoxDraw(widget_t *widget);
-comboBox_item_t *comboAddItem(widget_t *combo, char *label, uint8_t actionScreen);
+void comboAddItem(comboBox_item_t* item,widget_t *combo, char *label, uint8_t actionScreen);
 
 #endif /* GRAPHICS_GUI_WIDGETS_H_ */

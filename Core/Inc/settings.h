@@ -17,15 +17,17 @@
 #include <stdint.h>
 
 #define SETTINGSVERSION 10 /*Change this if you change the struct below to prevent people getting out of sync*/
-
-struct systemSettings {		//Size: 480 Bytes (Reserved in flash: 512)
-	uint16_t checksum;
+#define FLASH_ADDR (0x8000000|(65536-024))/*Last 1KB flash (Minimum erase size, page size=1KB)*/
+enum {Tip_T12=0,Tip_JBC=1,Tip_T12_config=128,Tip_JBC_config=129,Tip_None=0xff};
+typedef struct{
+	uint32_t checksum;
 	uint8_t version;				//Used to track if a reset is needed on firmware upgrade
 	uint8_t contrast;
+	uint8_t OledFix;
 	ironSettings_t boost;
 	ironSettings_t sleep;
 	ironSettings_t standby;
-	tipData ironTips[7];
+	tipData ironTips[10];
 	uint8_t currentNumberOfTips;
 	uint8_t currentTip;
 	uint16_t UserSetTemperature;
@@ -35,12 +37,15 @@ struct systemSettings {		//Size: 480 Bytes (Reserved in flash: 512)
 	uint16_t noIronDelay;
 	uint16_t guiUpdateDelay;
 	uint8_t tempUnit;
+	uint8_t TipType;
 	uint8_t saveSettingsDelay;
-} systemSettings;
-
+}systemSettings_t;
+extern systemSettings_t systemSettings;
+extern systemSettings_t* flashSettings;
 void saveSettings();
 void restoreSettings();
-uint16_t ChecksumSettings(void);
+uint32_t ChecksumSettings(systemSettings_t* Settings);
 void resetSettings();
+void resetTips(void);
 
 #endif /* SETTINGS_H_ */

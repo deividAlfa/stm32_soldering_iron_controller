@@ -11,7 +11,7 @@
 #include <math.h>
 #include "oled.h"
 
-widget_t *screen_addWidget(screen_t *scr) {
+void screen_addWidget(widget_t *widget, screen_t *scr) {
 	widget_t *last_widget = NULL;
 	if(scr->widgets) {
 		last_widget = scr->widgets;
@@ -19,16 +19,12 @@ widget_t *screen_addWidget(screen_t *scr) {
 			last_widget = last_widget->next_widget;
 	}
 
-	widget_t *new_widget = malloc(sizeof(widget_t));
-	if(new_widget == NULL)
-		Error_Handler();
-	new_widget->next_widget = NULL;
-	new_widget->parent = scr;
+	widget->next_widget = NULL;
+	widget->parent = scr;
 	if(last_widget)
-		last_widget->next_widget = new_widget;
+		last_widget->next_widget = widget;
 	else
-		scr->widgets = new_widget;
-	return new_widget;
+		scr->widgets = widget;
 }
 
 widget_t * screen_tabToWidget(screen_t * scr, uint8_t tab) {
@@ -48,6 +44,7 @@ widget_t * screen_tabToWidget(screen_t * scr, uint8_t tab) {
 
 int default_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	int ret = -1;
+	/*				// Disable Rotate-while-click Screen change
 	if(input == Rotate_Increment_while_click) {
 		uint8_t i = scr->index;
 		++i;
@@ -62,6 +59,7 @@ int default_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *
 			i = screen_last_scrollable - 1;
 		return i;
 	}
+	*/
 	selectable_widget_t *sel = extractSelectablePartFromWidget(scr->current_widget);
 	if(sel) {
 		if(sel->processInput) {

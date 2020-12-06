@@ -35,6 +35,7 @@ extern "C" {
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "setup.h"
 
 
@@ -46,6 +47,7 @@ extern ADC_HandleTypeDef hadc;
 extern DMA_HandleTypeDef hdma_adc;
 extern SPI_HandleTypeDef hspi2;
 extern IWDG_HandleTypeDef hiwdg;
+extern CRC_HandleTypeDef hcrc;
 extern DMA_HandleTypeDef hdma_spi2_tx;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim15;

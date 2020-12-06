@@ -9,6 +9,28 @@
 #define GRAPHICS_GUI_MAIN_SCREEN_H_
 
 #include "screen.h"
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
+widget_t Vsupply;
 
 void main_screen_setup(screen_t *scr);
 void main_screen_draw(screen_t *scr);

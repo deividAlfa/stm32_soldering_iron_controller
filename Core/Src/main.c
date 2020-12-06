@@ -57,11 +57,14 @@
 ADC_HandleTypeDef hadc;
 DMA_HandleTypeDef hdma_adc;
 
+CRC_HandleTypeDef hcrc;
+
 IWDG_HandleTypeDef hiwdg;
 
 SPI_HandleTypeDef hspi2;
 DMA_HandleTypeDef hdma_spi2_tx;
 
+TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim15;
 TIM_HandleTypeDef htim17;
 
@@ -80,6 +83,8 @@ static void MX_SPI2_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_TIM15_Init(void);
 static void MX_IWDG_Init(void);
+static void MX_CRC_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 /* USER CODE END PFP */
 
@@ -139,6 +144,8 @@ int main(void)
   MX_TIM17_Init();
   MX_TIM15_Init();
   MX_IWDG_Init();
+  MX_CRC_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
 
@@ -267,6 +274,37 @@ static void MX_ADC_Init(void)
 }
 
 /**
+  * @brief CRC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CRC_Init(void)
+{
+
+  /* USER CODE BEGIN CRC_Init 0 */
+
+  /* USER CODE END CRC_Init 0 */
+
+  /* USER CODE BEGIN CRC_Init 1 */
+
+  /* USER CODE END CRC_Init 1 */
+  hcrc.Instance = CRC;
+  hcrc.Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_ENABLE;
+  hcrc.Init.DefaultInitValueUse = DEFAULT_INIT_VALUE_ENABLE;
+  hcrc.Init.InputDataInversionMode = CRC_INPUTDATA_INVERSION_NONE;
+  hcrc.Init.OutputDataInversionMode = CRC_OUTPUTDATA_INVERSION_DISABLE;
+  hcrc.InputDataFormat = CRC_INPUTDATA_FORMAT_WORDS;
+  if (HAL_CRC_Init(&hcrc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CRC_Init 2 */
+
+  /* USER CODE END CRC_Init 2 */
+
+}
+
+/**
   * @brief IWDG Initialization Function
   * @param None
   * @retval None
@@ -332,6 +370,51 @@ static void MX_SPI2_Init(void)
   /* USER CODE BEGIN SPI2_Init 2 */
 
   /* USER CODE END SPI2_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 4294967295;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+__HAL_TIM_ENABLE(&htim2);
+  /* USER CODE END TIM2_Init 2 */
 
 }
 
@@ -527,7 +610,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : WAKE_Pin */
   GPIO_InitStruct.Pin = WAKE_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(WAKE_GPIO_Port, &GPIO_InitStruct);
 
@@ -613,13 +696,7 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *_hspi){
 			return;													// Return without retriggering DMA.
 		}
 		oled_status=oled_sending_cmd;
-		write_cmd(0xB0|OledRow);									// Set the OLED Row address
-		#ifdef SH1106_FIX
-		write_cmd(0x02);
-		#else
-		write_cmd(0x00);
-		#endif
-		write_cmd(0x10);
+		setOledRow(OledRow);
 		oled_status=oled_sending_data;								// Update status
 		Oled_Clear_CS();
 		Oled_Set_DC();

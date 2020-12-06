@@ -28,7 +28,7 @@ typedef struct tipData {
 	pid_values_t PID;
 } tipData;
 
-typedef enum {Unit_Celsius,Unit_Farenheit,Unit_Kelvin}TempUnit_t;
+typedef enum {Unit_Celsius,Unit_Farenheit}TempUnit_t;
 
 typedef struct {
 
@@ -50,36 +50,23 @@ typedef struct {
 	uint32_t 				CurrentModeTimer;			// Time since actual mode was set
 	bool 					Cal_TemperatureReachedFlag;	// Flag for temperature calibration
 	bool					TemperatureChanged;			// Flag to indicate UserSetTemperature was changed (For saving purposes)
+	bool					TemperatureUnitChanged;		// Flag to indicate temperature unit was changed (Celsius, Farenheit)
 	bool 					Debug_Enabled ;				// Flag to indicate Debug is enabled
 	bool 					isPresent;					// Flag to indicate the presence of the iron
+	bool 					isCalibrating;				// Flag to indicate calibration state (don't save temperature settings)
 	bool 					PIDUpdate;					// Flag to indicate PID calculation must be updated
 	bool 					OledUpdate;					// Flag to indicate OLED screen must be updated
 	bool 					hasMoved;					// Flag to indicate handle movement
 	bool 					FailState;					// Flag to indicate a serious failure, totally disables the PWM until the flag is manually cleared
 }iron_t;
 
-typedef struct
-{
-	float fSetTemperature;			// Set Temperature (°C)
-	float fActualTemperature;		// Actual (measured) Tip Temperature (°C)
 
-	// Improved Take-Back-Half algorithm.
-	float fGamma;
-	float fBeta1;
-	float fBeta2;
-	float fTimeStep;
-
-	float fTemperaturePrev;
-	float fTemperatureErrorPrevZC;
-	float fHeaterControl;
-	float fHeaterControlPrevZC;
-}	TempControl_t;
 extern volatile iron_t Iron;
 void IronWake(void);
 void SetIronPresence(bool isPresent);
 bool GetIronPresence(void);
 void SetFailState(bool FailState);
-bool getFailState(void);
+bool GetFailState(void);
 void setCurrentMode(iron_mode_t mode);
 void setSetTemperature(uint16_t temperature);
 void setCurrentTemperature(uint16_t temperature);
@@ -88,7 +75,11 @@ uint16_t getSetTemperature();
 uint16_t getCurrentTemperature();
 uint8_t getCurrentPower();
 void ApplyPwmSettings(void);
+void setTempUnit(TempUnit_t unit);
+void SetPwmPeriod(uint16_t period);
+void SetPwmDelay(uint16_t delay);
 void setNoIronValue(uint16_t noiron);
+void switchSysTempUnit(void);
 void setTempUnit(TempUnit_t unit);
 void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback);
 void addModeChangedCallback(currentModeChanged callback);

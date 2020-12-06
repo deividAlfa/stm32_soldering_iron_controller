@@ -18,36 +18,26 @@ RE_Rotation_t (*RE_GetData)(RE_State_t*);
 RE_Rotation_t RE_Rotation;
 
 
-
-
-
-
-
-
-screen_t *oled_addScreen(uint8_t index) {
-	screen_t *ret = malloc(sizeof(screen_t));
-	if(!ret)
-		Error_Handler();
-	ret->index = index;
-	ret->next_screen = NULL;
-	ret->init = NULL;
-	ret->draw = NULL;
-	ret->onExit = NULL;
-	ret->onEnter = NULL;
-	ret->processInput = NULL;
-	ret->widgets = NULL;
-	ret->current_widget = NULL;
+void oled_addScreen(screen_t *screen, uint8_t index) {
+	screen->index = index;
+	screen->next_screen = NULL;
+	screen->init = NULL;
+	screen->draw = NULL;
+	screen->onExit = NULL;
+	screen->onEnter = NULL;
+	screen->processInput = NULL;
+	screen->widgets = NULL;
+	screen->current_widget = NULL;
 	if(screens == NULL) {
-		screens = ret;
+		screens = screen;
 	}
 	else {
 		screen_t *temp = screens;
 		while(temp->next_screen) {
 			temp = temp->next_screen;
 		}
-		temp->next_screen = ret;
+		temp->next_screen = screen;
 	}
-	return ret;
 }
 
 void oled_draw() {
@@ -57,7 +47,6 @@ void oled_draw() {
 #endif
 
 	current_screen->draw(current_screen);
-	UG_Update();
 	update_display();
 }
 
@@ -66,7 +55,7 @@ void oled_update() {
 		current_screen->update(current_screen);
 	oled_draw();
 }
-//int (*processInput)(widget_t*, RE_Rotation_t, RE_State_t *);
+
 void oled_init(RE_Rotation_t (*GetData)(RE_State_t*), RE_State_t *State) {
 	RE_State = State;
 	RE_GetData = GetData;

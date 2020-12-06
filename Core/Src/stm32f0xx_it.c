@@ -88,7 +88,7 @@ void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
 	SetFailState(1);
-	UG_FillScreen(C_BLACK);
+	ClearBuffer();
 	UG_FontSelect(&FONT_10X16_reduced);
 	UG_SetForecolor(C_WHITE);
 	UG_SetBackcolor(C_BLACK);
@@ -96,10 +96,14 @@ void HardFault_Handler(void)
 	UG_PutString(24,31,"ERROR!!");//7
 	update_display_ErrorHandler();
 
+	uint32_t x=0;
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+	  if(++x>(uint32_t)6000000){ // ~5s delay before rebooting (Interrupts no longer work here)
+		  NVIC_SystemReset();
+	  }
 	  HAL_IWDG_Refresh(&hiwdg);							// Clear watchdog
     /* USER CODE END W1_HardFault_IRQn 0 */
   }

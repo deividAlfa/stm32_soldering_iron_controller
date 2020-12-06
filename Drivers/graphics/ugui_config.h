@@ -1,6 +1,7 @@
 #ifndef __UGUI_CONFIG_H
 #define __UGUI_CONFIG_H
-#include "stdint.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 /* -------------------------------------------------------------------------------- */
 /* -- CONFIG SECTION                                                             -- */
@@ -9,7 +10,9 @@
 //#define USE_MULTITASKING    
 
 /* Enable color mode */
-#define USE_COLOR_RGB888   // RGB = 0xFF,0xFF,0xFF
+
+#define USE_MONOCHROME   	 //
+//#define USE_COLOR_RGB888   // RGB = 0xFF,0xFF,0xFF
 //#define USE_COLOR_RGB565   // RGB = 0bRRRRRGGGGGGBBBBB 
 
 /* Enable needed fonts here */
@@ -47,15 +50,6 @@ typedef int16_t      UG_S16;
 typedef uint32_t     UG_U32;
 typedef int32_t      UG_S32;
 
-
-/* Example for dsPIC33
-typedef unsigned char         UG_U8;
-typedef signed char           UG_S8;
-typedef unsigned int          UG_U16;
-typedef signed int            UG_S16;
-typedef unsigned long int     UG_U32;
-typedef signed long int       UG_S32;
-*/
 
 /* -------------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------------- */

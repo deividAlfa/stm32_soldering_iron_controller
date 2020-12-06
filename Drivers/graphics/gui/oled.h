@@ -10,7 +10,7 @@
 
 #include "screen.h"
 
-screen_t *oled_addScreen(uint8_t index);
+void oled_addScreen(screen_t *screen, uint8_t index);
 void oled_draw(void);
 void oled_init(RE_Rotation_t (*Rotation)(RE_State_t*), RE_State_t *State);
 void oled_processInput(void);

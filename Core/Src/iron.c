@@ -10,12 +10,9 @@
 #include "buzzer.h"
 #include "settings.h"
 #include "main.h"
+#include "tempsensors.h"
 
-#ifdef TEST
-volatile TempControl_t TempControl = { 0 };
-#endif
-
-volatile iron_t Iron = { 0 };
+volatile iron_t Iron;
 typedef struct setTemperatureReachedCallbackStruct_t setTemperatureReachedCallbackStruct_t;
 
 struct setTemperatureReachedCallbackStruct_t {
@@ -58,7 +55,6 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 	Iron.Pwm_Channel 	= pwmchannel;
 	Iron.Pwm_Out 		= 0;											// PWM disabled
 	Iron.isPresent		= 1;											// Set detected by default (to not show ERROR screen at boot)
-	Iron.UserSetTemperature = systemSettings.UserSetTemperature;		// Load system temperature setting into UserSetTemperature
 	setCurrentMode(mode_normal);										// Set normal mode
 	setCurrentTip(systemSettings.currentTip);							// Load TIP
 #ifdef	PWM_CHx															// Start PWM
@@ -72,14 +68,20 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 
 }
 
-
 void handleIron(void) {
 	static uint32_t previouschecksum=0, newchecksum=0, checksumtime=0;
-	double set;
 	uint32_t CurrentTime = HAL_GetTick();
+	double set;
 
-
-
+	// Totally disabled if tip is not defined
+	if((systemSettings.TipType!=Tip_T12)&&(systemSettings.TipType!=Tip_JBC)){
+		SetFailState(1);
+	}
+	// Temperature unit change adjustments
+	if(Iron.TemperatureUnitChanged){
+		Iron.TemperatureUnitChanged=0;
+		switchSysTempUnit();
+	}
 
 	// No iron detection
 	if(TIP.last_RawAvg>systemSettings.noIronValue) { SetIronPresence(0); }
@@ -95,16 +97,19 @@ void handleIron(void) {
 	readTipTemperatureCompensated(New);
 
 	// Check changes in system settings
-	if(CurrentTime-checksumtime>499){								// Check checksum every 500mS
-		newchecksum=ChecksumSettings();								// Calculate system checksum
-		if(systemSettings.checksum!=newchecksum){					// If latest checksum is not the same as the system settings's checksum
-			if(previouschecksum!=newchecksum){						// If different from the previous calculated checksum.
-				previouschecksum=newchecksum;						// A change was done recently
-				Iron.LastSysChangeTime=CurrentTime;					// Reset timer (we don't save anything until we pass a certain time without changes)
-			}
-			// If different from the previous calculated checksum, and timer expired (No changes for a long time)
-			else if((CurrentTime-Iron.LastSysChangeTime)>((uint32_t)systemSettings.saveSettingsDelay*1000)){
-				saveSettings();															// Save
+	if(CurrentTime-checksumtime>499 ){								// Check checksum every 500mS
+		checksumtime=CurrentTime;
+		if(!Iron.isCalibrating && systemSettings.saveSettingsDelay){	// Don't save while in calibration mode, 0=don't dave
+			newchecksum=ChecksumSettings(&systemSettings);				// Calculate system checksum
+			if(systemSettings.checksum!=newchecksum){					// If latest checksum is not the same as the system settings's checksum
+				if(previouschecksum!=newchecksum){						// If different from the previous calculated checksum.
+					previouschecksum=newchecksum;						// A change was done recently
+					Iron.LastSysChangeTime=CurrentTime;					// Reset timer (we don't save anything until we pass a certain time without changes)
+				}
+				// If different from the previous calculated checksum, and timer expired (No changes for a long time)
+				else if((CurrentTime-Iron.LastSysChangeTime)>((uint32_t)systemSettings.saveSettingsDelay*1000)){
+					saveSettings();															// Save
+				}
 			}
 		}
 	}
@@ -121,7 +126,7 @@ void handleIron(void) {
 				setCurrentMode(mode_normal);
 			break;
 		case mode_normal:
-			if(systemSettings.sleep.Time && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.sleep.Time*1000) ) {
+			if(!Iron.isCalibrating&&systemSettings.sleep.Time && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.sleep.Time*1000) ) {
 				setCurrentMode(mode_sleep);
 			}
 			break;
@@ -155,7 +160,11 @@ void handleIron(void) {
 	else{
 	  // Disable output if requested temperature is below 100ºC
 	  if(Iron.CurrentSetTemperature>99){
-		  set = calculatePID(human2adc(Iron.CurrentSetTemperature), TIP.last_avg);
+		  uint16_t t=human2adc(Iron.CurrentSetTemperature);
+		  if(t){
+			  set = calculatePID(t, TIP.last_avg);
+		  }
+		  else{ set=0; }
 	  }
 	  else{
 		  set=0;
@@ -180,6 +189,44 @@ void handleIron(void) {
 	  }
 
 }
+// Round to 10
+uint16_t round_10(uint16_t input){
+	if((input%10)>5){
+		input+=(10-input%10);	// ex. 640°F=337°C->340°C)
+	}
+	else{
+		input-=input%10;		// ex. 300°C=572°F->570°F
+	}
+	return input;
+}
+// Changes the system temperature unit
+void switchSysTempUnit(void){
+	uint16_t tmp;
+	if(systemSettings.tempUnit==Unit_Farenheit){
+		tmp = TempConversion(systemSettings.UserSetTemperature,toFarenheit);
+		systemSettings.UserSetTemperature = round_10(tmp);
+		tmp = TempConversion(systemSettings.boost.Temperature,toFarenheit);
+		systemSettings.boost.Temperature = round_10(tmp);
+		tmp = TempConversion(systemSettings.sleep.Temperature,toFarenheit);
+		systemSettings.sleep.Temperature = round_10(tmp);
+	}
+	else{
+		tmp = TempConversion(systemSettings.UserSetTemperature,toCelsius);
+		systemSettings.UserSetTemperature = round_10(tmp);
+		tmp = TempConversion(systemSettings.boost.Temperature,toCelsius);
+		systemSettings.boost.Temperature = round_10(tmp);
+		tmp = TempConversion(systemSettings.sleep.Temperature,toCelsius);
+		systemSettings.sleep.Temperature = round_10(tmp);
+	}
+	setCurrentMode(mode_normal);
+}
+// Sets the temperature unit used (Celsius,Farenheit)
+void setTempUnit(TempUnit_t unit){
+	if(systemSettings.tempUnit!=unit){
+		Iron.TemperatureUnitChanged=1;
+		systemSettings.tempUnit = unit;
+	}
+}
 
 // Applies the PWM settings from the system settings
 void ApplyPwmSettings(void){
@@ -190,10 +237,6 @@ void ApplyPwmSettings(void){
 // Sets no Iron detection threshold
 void setNoIronValue(uint16_t noiron){
 	systemSettings.noIronValue=noiron;
-}
-// Sets the temperature unit used (Celsius,Farenheit, Kelvin)
-void setTempUnit(TempUnit_t unit){
-	systemSettings.tempUnit = unit;
 }
 // Change the iron operating mode
 void setCurrentMode(iron_mode_t mode) {
@@ -206,7 +249,7 @@ void setCurrentMode(iron_mode_t mode) {
 			if((Iron.CurrentMode==mode_sleep) || (Iron.CurrentMode==mode_standby)){
 				buzzer_short_beep();
 			}
-			Iron.CurrentSetTemperature = Iron.UserSetTemperature;
+			Iron.CurrentSetTemperature = systemSettings.UserSetTemperature;
 			break;
 		case mode_sleep:
 			buzzer_short_beep();
@@ -262,17 +305,16 @@ bool GetIronPresence(void){
 // Sets Failure state
 void SetFailState(bool FailState) {
 	Iron.FailState = FailState;
-	if(FailState){
-		Iron.CurrentIronPower = 1;
-		Iron.Pwm_Out = 0;
-		__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);
+	if(FailState){	// Totally disable PWM Output
+		__HAL_TIM_MOE_DISABLE_UNCONDITIONALLY(Iron.Pwm_Timer);
 	}
-	else{
+	else{			// Enable PWM Output
+		__HAL_TIM_MOE_ENABLE(Iron.Pwm_Timer);
 	}
 }
 
 // Gets Failure state
-bool getFailState() {
+bool GetFailState() {
 	return Iron.FailState;
 }
 
@@ -290,7 +332,6 @@ void DebugMode(uint8_t value) {
 void setSetTemperature(uint16_t temperature) {
 	if(Iron.UserSetTemperature != temperature){
 		Iron.CurrentSetTemperature = temperature;
-		Iron.UserSetTemperature = temperature;
 		systemSettings.UserSetTemperature = temperature;
 		Iron.Cal_TemperatureReachedFlag = 0;
 		resetPID();

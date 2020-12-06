@@ -81,7 +81,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 	}
 	switch (t) {
 		case widget_bmp:
-			w->displayBmp.bmp.p = NULL;
+			w->displayBmp.bmp = NULL;
 			break;
 		case widget_display:
 			w->displayWidget.getData = NULL;
@@ -127,6 +127,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 			w->comboBoxWidget.selectable.processInput = &comboBoxProcessInput;
 			break;
 		case widget_button:
+			w->buttonWidget.bmp = NULL;
 			w->buttonWidget.action = NULL;
 			break;
 		case widget_label:
@@ -162,9 +163,10 @@ static void insertDot(char *str, uint8_t dec) {
 		}
 	}
 }
+__attribute__((optimize("O0")))
 void default_widgetUpdate(widget_t *widget) {
 	void *data;
-	int32_t val_ui;
+	volatile int32_t val_ui;
 	volatile int8_t val_ui_size, decimals,endStrLen;
 	char *str;
 
@@ -182,6 +184,7 @@ void default_widgetUpdate(widget_t *widget) {
 
 	default:
 		switch (dis->type) {
+		case field_integer16:
 		case field_uinteger16:
 		case field_int32:
 			// To keep the compiler happy ensuring that displayString is not overflowed
@@ -195,7 +198,10 @@ void default_widgetUpdate(widget_t *widget) {
 				widget->reservedChars = (sizeof(widget->displayString) -1);
 			}
 			// Get the data
-			if(dis->type==field_uinteger16){
+			if(dis->type==field_integer16){
+				val_ui = *(int16_t*)data;
+			}
+			else if(dis->type==field_uinteger16){
 				val_ui = *(uint16_t*)data;
 			}
 			else if(dis->type==field_int32){
@@ -263,7 +269,7 @@ void default_widgetDraw(widget_t *widget) {
 	UG_COLOR color;
 	uint8_t draw_frame = 0;
 	if(widget->type == widget_bmp) {
-		UG_DrawBMP(widget->posX ,widget->posY , &widget->displayBmp.bmp);
+		UG_DrawBMP_MONO(widget->posX ,widget->posY , widget->displayBmp.bmp);
 		return;
 	}
 
@@ -297,7 +303,7 @@ void default_widgetDraw(widget_t *widget) {
 	}
 	UG_FontSelect(widget->font_size);
 	char space[sizeof(widget->displayString)] = "           ";
-	if((widget->type != widget_label) && (extractDisplayPartFromWidget(widget)->type != field_string)) {
+	if((widget->type != widget_label) && (extractDisplayPartFromWidget(widget)->type != field_string)&&(!widget->buttonWidget.bmp) ){
 		space[widget->reservedChars] = (char)'\0';
 		UG_PutString(widget->posX ,widget->posY , space);
 		widget->displayString[widget->reservedChars] = (char)'\0';
@@ -319,14 +325,24 @@ void default_widgetDraw(widget_t *widget) {
 				UG_DrawLine(widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+1,widget->posY+ widget->font_size->char_height+1,widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height+1, C_BLACK);
 			}
 		}
+	}	// BMP button
+	if( (widget->type == widget_button) && (widget->buttonWidget.bmp) ){
+		UG_DrawBMP_MONO(widget->posX ,widget->posY , widget->buttonWidget.bmp);
+		if(draw_frame) {
+			UG_DrawFrame(widget->posX - 2, widget->posY - 2,
+			widget->posX + widget->buttonWidget.bmp->width + 1,
+			widget->posY + widget->buttonWidget.bmp->height + 1, color);
+		}
+		return;
 	}
-	else
-		UG_PutString(widget->posX ,widget->posY , widget->displayString);
+	// string button or label
+	UG_PutString(widget->posX ,widget->posY , widget->displayString);
 	if(draw_frame) {
 		UG_DrawFrame(widget->posX - 1, widget->posY - 1,
-											widget->posX + widget->reservedChars * widget->font_size->char_width + 1,
-											widget->posY + widget->font_size->char_height -1, color);
+		widget->posX + widget->reservedChars * widget->font_size->char_width + 1,
+		widget->posY + widget->font_size->char_height -1, color);
 	}
+
 }
 
 void comboBoxDraw(widget_t *widget) {
@@ -370,6 +386,7 @@ uint8_t comboItemToIndex(widget_t *combo, comboBox_item_t *item) {
 	}
 	return index;
 }
+
 int comboBoxProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t *state) {
 	uint8_t firstIndex = widget->comboBoxWidget.currentScroll;
 	uint16_t yDim = UG_GetYDim() - widget->posY;
@@ -380,31 +397,80 @@ int comboBoxProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t *stat
 	if(input == Click)
 		return widget->comboBoxWidget.currentItem->action_screen;
 	else if(input == Rotate_Increment) {
+		//Set comboBox item to next comboBox
 		comboBox_item_t *current = widget->comboBoxWidget.currentItem->next_item;
+		// if comboBox is disabled, skip. While comboBox still valid
 		while(current && !current->enabled) {
 			current = current->next_item;
 		}
+		// If comboBox valid(didn't reach end)
 		if(current) {
 			widget->comboBoxWidget.currentItem = current;
 			uint8_t index = comboItemToIndex(widget, current);
 			if(index > lastIndex)
 				++widget->comboBoxWidget.currentScroll;
 		}
+		/*
+		 * Enable to allow circular mode(go to start after reaching the end )
+		 */
+		/*
+		//Else, we reached the end of comboBox list
+		else{
+			// Search and select the first comboBox
+			while(widget->comboBoxWidget.currentItem != widget->comboBoxWidget.items){
+				do {
+					current = widget->comboBoxWidget.items;
+					while(current->next_item != widget->comboBoxWidget.currentItem) {
+						current = current->next_item;
+					}
+					widget->comboBoxWidget.currentItem = current;
+				}while(!current->enabled);
+				uint8_t index = comboItemToIndex(widget, current);
+				if(index < firstIndex){
+					--widget->comboBoxWidget.currentScroll;
+				}
+			}
+		}
+		*/
 	}
 	else if(input == Rotate_Decrement) {
-		if(widget->comboBoxWidget.currentItem == widget->comboBoxWidget.items)
-			return -1;
 		comboBox_item_t *current = NULL;
-		do {
-			current = widget->comboBoxWidget.items;
-			while(current->next_item != widget->comboBoxWidget.currentItem) {
-				current = current->next_item;
+		// If comboBox is the first element
+		if(widget->comboBoxWidget.currentItem == widget->comboBoxWidget.items){
+			/*
+			 * Enable to allow circular mode(go to end after reaching the start )
+			 */
+		/*
+			// Pointer to next comboBox element
+			current = widget->comboBoxWidget.currentItem->next_item;
+			// Search and set the last comboBox
+			while(current->next_item){
+				do{
+					current = current->next_item;
+				}while(!current->enabled&&current);
+
+				if(current) {
+					uint8_t index = comboItemToIndex(widget, current);
+					if(index > lastIndex){
+						++widget->comboBoxWidget.currentScroll;
+					}
+					widget->comboBoxWidget.currentItem = current;
+				}
 			}
-			widget->comboBoxWidget.currentItem = current;
-		}while(!current->enabled);
-		uint8_t index = comboItemToIndex(widget, current);
-		if(index < firstIndex)
-			--widget->comboBoxWidget.currentScroll;
+		*/
+		}
+		else{
+			do {
+				current = widget->comboBoxWidget.items;
+				while(current->next_item != widget->comboBoxWidget.currentItem) {
+					current = current->next_item;
+				}
+				widget->comboBoxWidget.currentItem = current;
+			}while(!current->enabled);
+			uint8_t index = comboItemToIndex(widget, current);
+			if(index < firstIndex)
+				--widget->comboBoxWidget.currentScroll;
+		}
 	}
 	return -1;
 }
@@ -591,24 +657,22 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 	return -2;
 }
 
-comboBox_item_t *comboAddItem(widget_t *combo, char *label, uint8_t actionScreen) {
-	comboBox_item_t *item = malloc(sizeof(comboBox_item_t));
-	if(!item)
-		return NULL;
+void comboAddItem(comboBox_item_t* item,widget_t *combo, char *label, uint8_t actionScreen) {
 	item->text = label;
 	item->next_item = NULL;
 	item->action_screen = actionScreen;
 	item->enabled = 1;
 
 	comboBox_item_t *last = combo->comboBoxWidget.items;
+
 	if(!last) {
 		combo->comboBoxWidget.items = item;
 		combo->comboBoxWidget.currentItem = item;
-		return item;
+		return;
 	}
 	while(last->next_item){
 		last = last->next_item;
 	}
 	last->next_item = item;
-	return item;
 }
+

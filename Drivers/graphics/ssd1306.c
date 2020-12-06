@@ -1,16 +1,13 @@
 #include "ssd1306.h"
-#define SH1106_FIX
+#include "settings.h"
 
 
 
-
-static uint8_t OledContrast;
-volatile uint8_t OledBuffer[128*8]; // 128x64 1BPP OLED
+// Need to be aligned to 32bi(4byte) boundary, FillBuffer() uses 32bit tranfer for increased speed
+__attribute__((aligned(4))) volatile uint8_t OledBuffer[128*8]; // 128x64 1BPP OLED
 volatile uint8_t *OledDmaBf = &OledBuffer[0];
 volatile oled_status_t oled_status=oled_idle;
 static SPI_HandleTypeDef *spi_device;
-volatile uint32_t oled_black=0;
-volatile uint32_t oled_white=0xFFFFFFFF;
 #ifdef Soft_SPI
 
 void Enable_Soft_SPI_SPI(void){
@@ -32,8 +29,6 @@ void Enable_Soft_SPI_SPI(void){
 	 HAL_GPIO_Init(SDO_GPIO_Port, &GPIO_InitStruct);
 }
 
-#define spidelay() asm("NOP")
-//#define spidelay() HAL_Delay(1)
 void spi_send(uint8_t SPIData){
 	unsigned char SPICount;                               // Counter used to clock out the data
 
@@ -87,15 +82,7 @@ void update_display( void )
 {
 	unsigned int p;
 	for(p=0;p<8;p++){
-		write_cmd(0xB0|p);
-
-#ifdef SH1106_FIX
-		write_cmd(0x02);
-
-#else
-		write_cmd(0x00);
-#endif
-		write_cmd(0x10);
+		setOledRow(p);
 		write_data(OledBuffer + p * 128);
    }
 }
@@ -146,14 +133,7 @@ void update_display_ErrorHandler(void){
 	HAL_DMA_PollForTransfer(spi_device->hdmatx, HAL_DMA_FULL_TRANSFER, 3000);	//Wait for DMA to finish
 	oled_status=oled_idle;		// Force oled idle status
 	for(p=0;p<8;p++){
-		write_cmd(0xB0|p);		// Send display buffer in blocking SPI mode
-
-#ifdef SH1106_FIX
-		write_cmd(0x02);
-#else
-		write_cmd(0x00);
-#endif
-		write_cmd(0x10);
+		setOledRow(p);
 		Oled_Clear_CS();
 		Oled_Set_DC();
 		if(HAL_SPI_Transmit(spi_device, (uint8_t*)OledDmaBf + (p * 128), 128, 1000)!=HAL_OK){
@@ -162,11 +142,11 @@ void update_display_ErrorHandler(void){
    }
 }
 
-void pset(UG_S16 x, UG_S16 y, UG_COLOR c){
+void pset(UG_U16 x, UG_U16 y, UG_COLOR c){
    unsigned int p;
 
-   if ( x > 127 ) return;
-   p = y>>3; // :8
+   if((x>127)||(y>63)) return;
+   p = y>>3; // y/8
    p = p<<7; // *128
    p +=x;
 
@@ -180,17 +160,16 @@ void pset(UG_S16 x, UG_S16 y, UG_COLOR c){
    }
 }
 
-
+void setOledRow(uint8_t row){
+	write_cmd(0xB0|row);									// Set the OLED Row address
+	if(systemSettings.OledFix){	write_cmd(0x02); }
+	else{ write_cmd(0x00); }
+	write_cmd(0x10);
+}
 
 void setContrast(uint8_t value) {
 	write_cmd(0x81);         // Set Contrast Control
 	write_cmd(value);         //   Default => 0xFF
-	OledContrast = value;
-}
-
-
-uint8_t getContrast() {
-	return OledContrast;
 }
 
 
@@ -259,13 +238,9 @@ void ssd1306_init(SPI_HandleTypeDef *hspi){
 }
 
 //Clear buffer using DMA for fast filling
-void FillBuffer(bool color){
+void ClearBuffer(void){
+	 uint32_t oled_fill=0;
 	while(oled_status!=oled_idle);
-	if(!color){
-		HAL_DMA_Start(&hdma_memtomem_dma1_channel2,(uint32_t)&oled_black,(uint32_t)&OledBuffer[0],sizeof(OledBuffer)/sizeof(uint32_t));
-	}
-	else{
-		HAL_DMA_Start(&hdma_memtomem_dma1_channel2,(uint32_t)&oled_white,(uint32_t)&OledBuffer[0],sizeof(OledBuffer)/sizeof(uint32_t));
-	}
+	HAL_DMA_Start(&hdma_memtomem_dma1_channel2,(uint32_t)&oled_fill,(uint32_t)OledDmaBf,sizeof(OledBuffer)/sizeof(uint32_t));
 	HAL_DMA_PollForTransfer(&hdma_memtomem_dma1_channel2, HAL_DMA_FULL_TRANSFER, 3000);
 }

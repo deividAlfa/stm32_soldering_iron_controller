@@ -21,8 +21,7 @@
 
 											// If your screen doesn't work, and want to discard a SPI problem
 //#define Soft_SPI							// Uncomment to disable Hardware SPI with DMA and use software SPI
-#define SH1106_FIX							// For 1.3" OLED
-//#define JBC
+
 
 
 /*
@@ -75,7 +74,7 @@
  *		 <····· PWM_DUTY ···><····· MEASURE TIME ·····>(19.8+0.2 mS)
  *   	 ___________________						    ________________________________________
  * PWM _|		 			|__________________________|
- *  				   		 <  Dead Time >	_________		________________
+ *  				   		 < Delay Time >	_________		________________
  * ADC ____________________________________|  ADC ON |_____| 	ADC ON		|
  		            		^			   ^		 ^     ^				^ADC interrupt. Update averages. Restart ADC in trigger mode.
  * 							| 	 80uS	   |   60uS  |	   |_ ADC manual conversion for the rest of channels(not requiring measure during low PWM output)
@@ -84,28 +83,6 @@
  * 							|________________________________ Tim17 PWM compare interrupt. Inits Tim15 and starts it (Dead time)
 */
 
-
-
-/*	Deprecated. See:
-	systemSettings.pwmPeriod=19999;
-	systemSettings.pwmDelay=99;
-	systemSettings.noIronValue=3500;
-	systemSettings.noIronDelay=500;
-	systemSettings.guiUpdateDelay=200;
-	systemSettings.tempUnit=Unit_Celsius;
-	systemSettings.saveSettingsDelay=10;
-
-	They can't be changed by user yet, pending implementation in the menu. No enough ram in 16KB devices
-*/
-/*
-#define GUI_Update_ms 			200			// Graphic values refresh interval (Temperatures, voltages, etc)
-#define NoIronDetection			3800		// ADC value to consider there's no iron plugged in
-#define NoIronResetTime			100			// In mS. Time to reset the iron absence flag after it's been detected again.
-											// Increase if it bounces between "NO IRON" and "iron temperature" when no iron is connected
-#define CurrTemp_Save_Time_s	10			// Minimum time in secs for saving temperature setpoint changes to store the value in flash. Warning, too often will degrade the flash quickly!
-#define PWM_PERIOD			20000 -1		// in uS. PWM Frequency. F = 48MHz / (48pre*20000period) = 50Hz
-#define DEAD_TIME			80 - 1			// in uS. After PWM Stopped, delay before starting ADC conversion for the iron tip. Cannot be higher that Measure Time
-*/
 
 
 #endif
