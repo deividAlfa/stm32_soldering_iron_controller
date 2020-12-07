@@ -7,54 +7,49 @@
 
 #include "settings_screen.h"
 #include "oled.h"
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Settings screen variables
+//-------------------------------------------------------------------------------------------------------------------------------
+static char t[sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0])][sizeof(systemSettings.ironTips[0].name)];
+static uint16_t temp;
+char str[5];
+static char *oledFixstr[] = {" No", "Yes" };
+static char *tempstr[] = {"*C", "*F" };
+bool TempUnit;
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Settings screen widgets
+//-------------------------------------------------------------------------------------------------------------------------------
 static widget_t Widget_IronTips_Name_back;
 static widget_t Widget_IronTips_Name_save;
 static widget_t Widget_IronTips_Name_delete;
 static widget_t Widget_IronTips_Name_edit;
-static widget_t Widget_IronTips_Name_label;
 static widget_t Widget_Misc_OK;
 static widget_t Widget_TempUnit_edit;
-static widget_t Widget_TempUnit_label;
 static widget_t Widget_Gui_Upd_edit;
-static widget_t Widget_Gui_Upd_label;
 static widget_t Widget_Save_Delay_edit;
-static widget_t Widget_Save_Delay_label;
 static widget_t Widget_Detection_OK;
 static widget_t Widget_NoIron_Delay_edit;
-static widget_t Widget_NoIron_Delay_label;
 static widget_t Widget_ADC_Limit_edit;
-static widget_t Widget_ADC_Limit_label;
 static widget_t Widget_PWM_OK;
 static widget_t Widget_ADC_Delay_edit;
-static widget_t Widget_ADC_Delay_label;
 static widget_t Widget_PWM_Period_edit;
-static widget_t Widget_PWM_Period_label;
 static widget_t Widget_Boost_OK;
 static widget_t Widget_Boost_Temp_edit;
-static widget_t Widget_Boost_Temp_label;
 static widget_t Widget_Boost_Time_edit;
-static widget_t Widget_Boost_Time_label;
 static widget_t Widget_Sleep_OK;
 static widget_t Widget_Stby_Time_edit;
-static widget_t Widget_Stby_Time_label;
 static widget_t Widget_Sleep_Temp_edit;
-static widget_t Widget_Sleep_Temp_label;
 static widget_t Widget_Sleep_Time_edit;
-static widget_t Widget_Sleep_Time_label;
 static widget_t Widget_Power_edit;
-static widget_t Widget_Power_label;
 static widget_t Widget_Contrast_edit;
-static widget_t Widget_Contrast_label;
-static widget_t Widget_OledFix_label;
 static widget_t Widget_OledFix_edit;
 static widget_t Widget_Screen_OK;
 static widget_t Widget_PID_OK;
 static widget_t Widget_PID_Kd_edit;
-static widget_t Widget_PID_Kd_label;
 static widget_t Widget_PID_Ki_edit;
-static widget_t Widget_PID_Ki_label;
 static widget_t Widget_PID_Kp_edit;
-static widget_t Widget_PID_Kp_label;
 
 static widget_t Widget_Settings_combo;
 static comboBox_item_t Settings_Combo_PID;
@@ -73,14 +68,10 @@ static widget_t Widget_IronTips_Combo;
 static comboBox_item_t IronTips[ sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]) ];
 static comboBox_item_t IronTips_addNewTip;
 static comboBox_item_t IronTips_Exit;
-static char t[sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0])][sizeof(systemSettings.ironTips[0].name)];
 
-static uint16_t temp;
-char str[5];
-static char *oledFixstr[] = {" No", "Yes" };
-static char *tempstr[] = {"*C", "*F" };
-bool TempUnit;
-
+//-------------------------------------------------------------------------------------------------------------------------------
+// Settings screen widgets functions
+//-------------------------------------------------------------------------------------------------------------------------------
 static void edit_iron_tip_screen_init(screen_t *scr) {
 	if(strcmp(Widget_IronTips_Combo.comboBoxWidget.currentItem->text, "ADD NEW") == 0) {
 		strcpy(str, "    ");
@@ -339,7 +330,9 @@ static void tempUnitChanged(void) {
 		Widget_Sleep_Temp_edit.editable.step = 10;
 	}
 }
-
+//-------------------------------------------------------------------------------------------------------------------------------
+// Settings screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
 void settings_screenUpdate(screen_t *scr) {
 	if(TempUnit != systemSettings.tempUnit){
 		tempUnitChanged();
@@ -361,7 +354,108 @@ int settings_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t 
 	}
 	return (default_screenProcessInput(scr, input, state));
 }
+//-------------------------------------------------------------------------------------------------------------------------------
+// PID screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+void pid_screenDraw(screen_t *scr){
+	UG_FontSelect(&FONT_8X14_reduced);
+	UG_PutString(15,1,"Kp:");//12
+	UG_PutString(15,17,"Ki:");//12
+	UG_PutString(15,33,"Kd:");//12
+	default_screenDraw(scr);
+}
 
+//-------------------------------------------------------------------------------------------------------------------------------
+// Screen screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+void screen_screenDraw(screen_t *scr){
+	UG_FontSelect(&FONT_8X14_reduced);
+	UG_PutString(0,17,"Brightness:");//12
+	UG_PutString(0,33,"Oled fix:");//12
+	default_screenDraw(scr);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Sleep screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+void sleep_screenDraw(screen_t *scr){
+	UG_FontSelect(&FONT_8X14_reduced);
+	UG_PutString(0,1,"Sleep Time:");//12
+	UG_PutString(0,17,"Sleep Temp:");//12
+	UG_PutString(0,33,"StdBy Time:");//12
+	default_screenDraw(scr);
+
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Boost screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+void boost_screenDraw(screen_t *scr){
+	UG_FontSelect(&FONT_8X14_reduced);
+	UG_PutString(0,17,"Boost Time:");//12
+	UG_PutString(0,33,"Boost Temp:");//12
+	default_screenDraw(scr);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// PWM screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+void pwm_screenDraw(screen_t *scr){
+	UG_FontSelect(&FONT_8X14_reduced);
+	UG_PutString(0,1,"Max power");//12
+	UG_PutString(0,17,"PWM Period:");//12
+	UG_PutString(0,33,"ADC Delay:");//12
+	default_screenDraw(scr);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Detection screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+void detection_screenDraw(screen_t *scr){
+	UG_FontSelect(&FONT_8X14_reduced);
+	UG_PutString(0,17,"ADC limit:");//12
+	UG_PutString(0,33,"Delay:");//12
+	default_screenDraw(scr);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Misc screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+void misc_screenDraw(screen_t *scr){
+	UG_FontSelect(&FONT_8X14_reduced);
+	UG_PutString(0,1,"Save Delay:");//12
+	UG_PutString(0,17,"GuiUpdate:");//12
+	UG_PutString(0,33,"Temp Unit:");//12
+	default_screenDraw(scr);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Edit Tip screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+void edittipname_screenDraw(screen_t *scr){
+	static bool prevState;
+	if(strcmp(str, "    ") == 0) {
+		if(!prevState){
+			prevState=1;
+			Widget_IronTips_Name_save.enabled=0;
+			ClearBuffer();
+		}
+	}
+	else{
+		if(prevState){
+			prevState=0;
+			Widget_IronTips_Name_save.enabled=1;
+			ClearBuffer();
+		}
+	}
+	UG_FontSelect(&FONT_10X16_reduced);
+	UG_PutString(0,17,"NAME:");//12
+	default_screenDraw(scr);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Settings screen setup
+//-------------------------------------------------------------------------------------------------------------------------------
 void settings_screen_setup(screen_t *scr) {
 	screen_t* sc;
 	widget_t* w;
@@ -372,6 +466,9 @@ void settings_screen_setup(screen_t *scr) {
 	scr->init = &settings_screen_init;
 	scr->update = &settings_screenUpdate;
 
+	//###############################
+	// Settings screen comboBox
+	//###############################
 	w = &Widget_Settings_combo;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_combo);
@@ -390,25 +487,17 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddItem(&Settings_Combo_CALIBRATION, w, "CALIBRATION", screen_edit_calibration_wait);
 	comboAddItem(&Settings_Combo_EXIT, w, "EXIT", screen_main);
 
-	//###################################################################################################################
+	//###############################
 	// PID Control screen
-	//###################################################################################################################
+	//###############################
 	sc=&Screen_edit_pid;
 	oled_addScreen(sc,screen_edit_pid);
-	sc->draw = &default_screenDraw;
+	sc->draw = &pid_screenDraw;
 	sc->processInput = &default_screenProcessInput;
 	sc->init = &default_init;
 	sc->update = &default_screenUpdate;
 
-	w = &Widget_PID_Kp_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Kp:");
-	w->posX = 15;
-	w->posY = 1;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 3;
-
+	// Kp edit
 	w = &Widget_PID_Kp_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -425,15 +514,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->reservedChars = 6;
 	w->displayWidget.justify = justify_right;
 
-	w = &Widget_PID_Ki_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Ki:");
-	w->posX = 15;
-	w->posY = 17;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 3;
-
+	// Ki edit
 	w = &Widget_PID_Ki_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -450,15 +531,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->reservedChars = 6;
 	w->displayWidget.justify = justify_right;
 
-	w = &Widget_PID_Kd_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Kd:");
-	w->posX = 15;
-	w->posY = 33;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 3;
-
+	// Kd edit
 	w = &Widget_PID_Kd_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -475,6 +548,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->reservedChars = 6;
 	w->displayWidget.justify = justify_right;
 
+	// OK Button
 	w = &Widget_PID_OK;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
@@ -486,25 +560,17 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 3;
 	w->buttonWidget.action = &returnSettingsScreen;
 
-	//###################################################################################################################
+	//###############################
 	// Edit Screen screen
-	//###################################################################################################################
+	//###############################
 	sc=&Screen_edit_contrast;
 	oled_addScreen(sc,screen_edit_screen);
-	sc->draw = &default_screenDraw;
+	sc->draw = &screen_screenDraw;
 	sc->processInput = &default_screenProcessInput;
 	sc->init = &default_init;
 	sc->update = &default_screenUpdate;
 
-	w = &Widget_Contrast_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Brightness:");
-	w->posX = 0;
-	w->posY = 17;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars =3;
-
+	// Brightness edit
 	w = &Widget_Contrast_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -522,17 +588,8 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 0;
 	w->reservedChars = 3;
-	w->displayWidget.justify =justify_right;
 
-	w = &Widget_OledFix_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Oled fix:");
-	w->posX = 0;
-	w->posY = 33;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars =3;
-
+	// Oled Fix edit
 	w = &Widget_OledFix_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_multi_option);
@@ -555,6 +612,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 1;
 	w->editable.min_value = 0;
 
+	// OK Button
 	w = &Widget_Screen_OK;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
@@ -566,26 +624,17 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 2;
 	w->buttonWidget.action = &returnSettingsScreen;
 
-
-	//###################################################################################################################
+	//###############################
 	// Edit sleep screen
-	//###################################################################################################################
+	//###############################
 	sc=&Screen_edit_sleep;
 	oled_addScreen(sc,screen_edit_sleep);
-	sc->draw = &default_screenDraw;
+	sc->draw = &sleep_screenDraw;
 	sc->processInput = &default_screenProcessInput;
 	sc->init = &default_init;
 	sc->update = &default_screenUpdate;
 
-	w = &Widget_Sleep_Time_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Sleep Time:");
-	w->posX = 0;
-	w->posY = 1;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 14;
-	//
+	// Sleep time
 	w = &Widget_Sleep_Time_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -606,15 +655,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->reservedChars = 4;
 	w->displayWidget.justify =justify_right;
 
-	w = &Widget_Sleep_Temp_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Sleep Temp:");
-	w->posX = 0;
-	w->posY = 17;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 3;
-
+	// Sleep temp
 	w = &Widget_Sleep_Temp_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -632,15 +673,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->displayWidget.hasEndStr = 1;
 	w->displayWidget.justify =justify_right;
 
-	w = &Widget_Stby_Time_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "StdBy Time:");
-	w->posX = 0;
-	w->posY = 33;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 16;
-
+	// StandBy time
 	w = &Widget_Stby_Time_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -661,6 +694,7 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->endString, "s");
 	w->displayWidget.justify =justify_right;
 
+	// OK Button
 	w = &Widget_Sleep_OK;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
@@ -672,26 +706,17 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 3;
 	w->buttonWidget.action = &returnSettingsScreen;
 
-
-	//###################################################################################################################
+	//###############################
 	// Edit boost screen
-	//###################################################################################################################
+	//###############################
 	sc=&Screen_edit_boost;
 	oled_addScreen(sc,screen_edit_boost);
-	sc->draw = &default_screenDraw;
+	sc->draw = &boost_screenDraw;
 	sc->processInput = &default_screenProcessInput;
 	sc->init = &default_init;
 	sc->update = &default_screenUpdate;
 
-	w = &Widget_Boost_Time_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Boost Time:");
-	w->posX = 0;
-	w->posY = 17;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 14;
-	//
+	// Boost time
 	w = &Widget_Boost_Time_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -712,15 +737,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->reservedChars = 4;
 	w->displayWidget.justify =justify_right;
 
-	w = &Widget_Boost_Temp_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Boost Temp:");
-	w->posX = 0;
-	w->posY = 33;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 3;
-
+	// Boost temp
 	w = &Widget_Boost_Temp_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -749,25 +766,17 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 2;
 	w->buttonWidget.action = &returnSettingsScreen;
 
-	//###################################################################################################################
+	//###############################
 	// PWM screen
-	//###################################################################################################################
+	//###############################
 	sc=&Screen_edit_pwm;
 	oled_addScreen(sc, screen_edit_pwm);
-	sc->draw = &default_screenDraw;
+	sc->draw = &pwm_screenDraw;
 	sc->processInput = &default_screenProcessInput;
 	sc->init = &default_init;
 	sc->update = &default_screenUpdate;
 
-	w = &Widget_Power_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Max power:");
-	w->posX = 0;
-	w->posY = 1;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars =3;
-
+	// Max Power
 	w = &Widget_Power_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -788,16 +797,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->reservedChars = 4;
 	w->displayWidget.justify =justify_right;
 
-	w = &Widget_PWM_Period_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "PWM Period:");
-	w->posX = 0;
-	w->posY = 17;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 14;
-	//
-
+	// PWM Period
 	w = &Widget_PWM_Period_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -818,15 +818,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->reservedChars = 4;
 	w->displayWidget.justify =justify_right;
 
-	w = &Widget_ADC_Delay_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "ADC Delay:");
-	w->posX = 0;
-	w->posY = 33;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 3;
-
+	// ADC Delay
 	w = &Widget_ADC_Delay_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -847,6 +839,7 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->endString, "uS");
 	w->displayWidget.justify =justify_right;
 
+	// OK Button
 	w = &Widget_PWM_OK;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
@@ -858,24 +851,17 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 3;
 	w->buttonWidget.action = &returnSettingsScreen;
 
-
+	//###############################
 	// Iron detection Screen
+	//###############################
 	sc=&Screen_edit_detection;
 	oled_addScreen(sc, screen_edit_detection);
-	sc->draw = &default_screenDraw;
+	sc->draw = &detection_screenDraw;
 	sc->processInput = &default_screenProcessInput;
 	sc->init = &default_init;
 	sc->update = &default_screenUpdate;
 
-	w = &Widget_ADC_Limit_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "ADC limit:");
-	w->posX = 0;
-	w->posY = 17;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 14;
-	//
+	// ADC Limit
 	w = &Widget_ADC_Limit_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -895,15 +881,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->reservedChars = 4;
 	w->displayWidget.justify =justify_right;
 
-	w = &Widget_NoIron_Delay_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Delay:");
-	w->posX = 0;
-	w->posY = 33;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 3;
-
+	// No Iron delay
 	w = &Widget_NoIron_Delay_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -924,6 +902,7 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->endString, "mS");
 	w->displayWidget.justify =justify_right;
 
+	// OK Button
 	w = &Widget_Detection_OK;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
@@ -935,25 +914,17 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 2;
 	w->buttonWidget.action = &returnSettingsScreen;
 
-	//###################################################################################################################
+	//###############################
 	// MISC Screen
-	//###################################################################################################################
+	//###############################
 	sc=&Screen_edit_misc;
 	oled_addScreen(sc,screen_edit_misc);
-	sc->draw = &default_screenDraw;
+	sc->draw = &misc_screenDraw;
 	sc->processInput = &default_screenProcessInput;
 	sc->init = &default_init;
 	sc->update = &default_screenUpdate;
 
-	w = &Widget_Save_Delay_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Save Delay:");
-	w->posX = 0;
-	w->posY = 1;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 14;
-
+	// Save Delay
 	w = &Widget_Save_Delay_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -974,15 +945,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->reservedChars = 3;
 	w->displayWidget.justify =justify_right;
 
-	w = &Widget_Gui_Upd_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "GuiUpdate:");
-	w->posX = 0;
-	w->posY = 17;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 14;
-	//
+	// Gui Update mS
 	w = &Widget_Gui_Upd_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -1003,15 +966,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->reservedChars = 5;
 	w->displayWidget.justify =justify_right;
 
-	w = &Widget_TempUnit_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "Temp Unit:");
-	w->posX = 0;
-	w->posY = 33;
-	w->font_size = &FONT_8X14_reduced;
-	w->reservedChars = 3;
-
+	// Temp unit
 	w = &Widget_TempUnit_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_multi_option);
@@ -1031,6 +986,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->multiOptionWidget.options = tempstr;
 	w->multiOptionWidget.numberOfOptions = 2;
 
+	// OK Button
 	w = &Widget_Misc_OK;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
@@ -1042,9 +998,9 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 3;
 	w->buttonWidget.action = &returnSettingsScreen;
 
-	//###################################################################################################################
+	//###############################
 	// Edit iron tips screen
-	//###################################################################################################################
+	//###############################
 	sc=&Screen_edit_iron_tips;
 	oled_addScreen(sc, screen_edit_iron_tips);
 	sc->draw = &default_screenDraw;
@@ -1052,6 +1008,7 @@ void settings_screen_setup(screen_t *scr) {
 	sc->init = &edit_iron_screen_init;
 	sc->update = &default_screenUpdate;
 
+	// Iron Tips ComboBox
 	w = &Widget_IronTips_Combo;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_combo);
@@ -1067,26 +1024,17 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddItem(&IronTips_Exit, w, "EXIT", screen_settings);
 	sc->current_widget = w;
 
-	//###################################################################################################################
+	//###############################
 	//Screen edit iron tip
-	//###################################################################################################################
+	//###############################
 	sc=&Screen_edit_tip_name;
 	oled_addScreen(sc, screen_edit_tip_name);
-	sc->draw = &default_screenDraw;
+	sc->draw = &edittipname_screenDraw;
 	sc->processInput = &default_screenProcessInput;
 	sc->init = &edit_iron_tip_screen_init;
 	sc->update = &default_screenUpdate;
 
-
-	w = &Widget_IronTips_Name_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "NAME:");
-	w->posX = 0;
-	w->posY = 17;
-	w->font_size = &FONT_10X16_reduced;
-	w->reservedChars = 5;
-
+	// Name Edit
 	w = &Widget_IronTips_Name_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
@@ -1103,6 +1051,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 9999;
 	w->reservedChars = 4;
 
+	// Name Save
 	w = &Widget_IronTips_Name_save;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
@@ -1114,6 +1063,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 3;
 	w->buttonWidget.action = &saveTip;
 
+	// Name Back
 	w = &Widget_IronTips_Name_back;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
@@ -1125,15 +1075,15 @@ void settings_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 1;
 	w->buttonWidget.action = &cancelTip;
 
+	// Name Delete
 	w = &Widget_IronTips_Name_delete;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
 	w->font_size = &FONT_8X14_reduced;
-	w->posX = 40;
+	w->posX = 48;
 	w->posY = 50;
-	strcpy(w->displayString, "DELETE");
-	w->reservedChars = 6;
+	strcpy(w->displayString, "DEL.");
+	w->reservedChars = 4;
 	w->buttonWidget.selectable.tab = 2;
-	w->buttonWidget.action = &delTip;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 	w->buttonWidget.action = &delTip;
+	w->buttonWidget.action = &delTip;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 	w->buttonWidget.action = &delTip;
 }

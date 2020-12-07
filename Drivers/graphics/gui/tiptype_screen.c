@@ -9,17 +9,26 @@
 #include "oled.h"
 #include "settings.h"
 #include "iron.h"
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Tip Type variables
+//-------------------------------------------------------------------------------------------------------------------------------
 static uint8_t setup=0;
 static uint16_t temp;
 static bool FirstBoot=0;
 volatile static uint8_t tip;
 static char *tipstr[] = {"T12", "JBC" };
 
-static widget_t Widget_tiptype_label;
+//-------------------------------------------------------------------------------------------------------------------------------
+// Tip Type widgets
+//-------------------------------------------------------------------------------------------------------------------------------
 static widget_t Widget_tiptype_edit;
 static widget_t Widget_tiptype_OK;
 static widget_t Widget_tiptype_CANCEL;
 
+//-------------------------------------------------------------------------------------------------------------------------------
+// Tip Type widget functions
+//-------------------------------------------------------------------------------------------------------------------------------
 static void * getTipType() {
 	temp = tip;
 	return &temp;
@@ -48,6 +57,9 @@ static int tiptype_CANCEL(widget_t *w) {
 	return screen_settings;
 }
 
+//-------------------------------------------------------------------------------------------------------------------------------
+// Tip Type screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
 void tiptype_draw(screen_t * scr) {
 	switch(setup){
 	case 0:
@@ -94,6 +106,8 @@ void tiptype_draw(screen_t * scr) {
 		setup++;
 		return;
 	default:
+		UG_FontSelect(&FONT_10X16_reduced);
+		UG_PutString(0,17,"TIP TYPE:");//12
 		default_screenDraw(scr);
 	}
 }
@@ -124,7 +138,6 @@ int tiptype_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state)
 	}
 	return (default_screenProcessInput(scr, input, state));
 }
-
 void tiptype_init(screen_t * scr) {
 	tip=systemSettings.TipType;
 	setup=1;					// 1st state for the setup warning
@@ -139,25 +152,17 @@ void tiptype_init(screen_t * scr) {
 	default_init(scr);
 }
 
+//-------------------------------------------------------------------------------------------------------------------------------
+// Tip type screen setup
+//-------------------------------------------------------------------------------------------------------------------------------
 void tiptype_screen_setup(screen_t *scr) {
 	widget_t* w;
-	//###################################################################################################################
-	// Edit iron type screen
-	//###################################################################################################################
 	scr->processInput = &tiptype_processInput;
 	scr->init = &tiptype_init;
 	scr->draw = &tiptype_draw;
 	scr->update = &default_screenUpdate;
-	w = &Widget_tiptype_label;
-	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "TIP TYPE:");
-	w->posX = 0;
-	w->posY = 17;
-	w->font_size = &FONT_10X16_reduced;
-	w->reservedChars =3;
 
-
+	// Tip type select
 	w = &Widget_tiptype_edit;
 	screen_addWidget(w,scr);
 	widgetDefaultsInit(w, widget_multi_option);
@@ -177,6 +182,7 @@ void tiptype_screen_setup(screen_t *scr) {
 	w->multiOptionWidget.options = tipstr;
 	w->multiOptionWidget.numberOfOptions = 2;
 
+	// OK Button
 	w = &Widget_tiptype_OK;
 	screen_addWidget(w,scr);
 	widgetDefaultsInit(w, widget_button);
@@ -188,6 +194,7 @@ void tiptype_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 1;
 	w->buttonWidget.action = &tiptype_OK;
 
+	// CANCEL Button
 	w = &Widget_tiptype_CANCEL;
 	screen_addWidget(w,scr);
 	widgetDefaultsInit(w, widget_button);

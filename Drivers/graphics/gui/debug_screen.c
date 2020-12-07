@@ -8,30 +8,33 @@
 #include "debug_screen.h"
 #include "oled.h"
 
-static widget_t Debug_ADC_Label;
+//-------------------------------------------------------------------------------------------------------------------------------
+// Debug screen variables
+//-------------------------------------------------------------------------------------------------------------------------------
+int32_t temp;
+uint16_t debugTemperature = 0;
+static pid_values_t cal_pid;
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Debug screen widgets
+//-------------------------------------------------------------------------------------------------------------------------------
 static widget_t Debug_ADC_Val;
 static widget_t Debug_ADC_ValRaw;
-static widget_t Debug2_ADC_Label;
 static widget_t Debug2_ADC_Val;
 static widget_t Debug2_ADC_ValRaw;
-static widget_t Debug_PID_label;
 static widget_t Debug_PID_P;
 static widget_t Debug_PID_I;
 static widget_t Debug_PID_D;
-static widget_t Debug_PID_label2;
 static widget_t Debug_PID_Err;
 static widget_t Debug_PID_Out;
-static widget_t Debug_SetPoint_label;
 static widget_t Debug_SetPoint_edit;
 static widget_t Debug_Cal200_edit;
 static widget_t Debug_Cal300_edit;
 static widget_t Debug_Cal400_edit;
 
-int32_t temp;
-uint16_t debugTemperature = 0;
-static pid_values_t cal_pid;
-
-
+//-------------------------------------------------------------------------------------------------------------------------------
+// Debug screen widgets functions
+//-------------------------------------------------------------------------------------------------------------------------------
 static void * debug_screen_getADC1() {
 	temp = TIP.last_avg;
 	return &temp;
@@ -106,6 +109,10 @@ static void * debug_screen_getOutput() {
 	temp = Iron.Pwm_Out;
 	return &temp;
 }
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Debug screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
 int debug_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	if(input==LongClick){
 		return screen_debug2;
@@ -119,28 +126,38 @@ int debug2_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *s
 	}
 	return (default_screenProcessInput(scr, input, state));
 }
+//-------------------------------------------------------------------------------------------------------------------------------
+// Debug screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+void debug_screenDraw(screen_t *scr){
+	UG_FontSelect(&FONT_6X8_reduced);
+	UG_PutString(0,0,"ADC:       Raw:");//12
+	UG_PutString(12,20,"P:      I:      D:");//12
+	UG_PutString(0,50,"ERR:       OUT:");//12
+	default_screenDraw(scr);
+}
 
-//temp_adc
-//kp ki kd
-//error
-//present output
+//-------------------------------------------------------------------------------------------------------------------------------
+// Debug2 screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+void debug2_screenDraw(screen_t *scr){
+	UG_FontSelect(&FONT_6X8_reduced);
+	UG_PutString(0,0,"ADC:       Raw:");//12
+	UG_PutString(4,20,"SetP C200 C300 C400");//12
+	default_screenDraw(scr);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Debug screen setup
+//-------------------------------------------------------------------------------------------------------------------------------
 void debug_screen_setup(screen_t *scr) {
-	scr->draw = &default_screenDraw;
+	scr->draw = &debug_screenDraw;
 	scr->processInput = &debug_screenProcessInput;
 	scr->init = &debug_screen_init;
 	scr->update = &default_screenUpdate;
 	widget_t *w;
-	//ADC iron display
 
-	w = &Debug_ADC_Label;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "ADC:       Raw:");
-	w->posX =0;
-	w->posY = 0;
-	w->font_size = &FONT_6X8_reduced;
-	w->reservedChars = 6;
-
+	//ADC1 display, filtered
 	w = &Debug_ADC_Val;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_display);
@@ -152,6 +169,7 @@ void debug_screen_setup(screen_t *scr) {
 	w->displayWidget.type = field_uinteger16;
 	w->reservedChars = 4;
 
+	//ADC1 display, unfiltered
 	w = &Debug_ADC_ValRaw;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_display);
@@ -163,20 +181,7 @@ void debug_screen_setup(screen_t *scr) {
 	w->displayWidget.type = field_uinteger16;
 	w->reservedChars = 4;
 
-
-
-	//PID label
-	w = &Debug_PID_label;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "P:      I:      D:");
-	w->posX = 12;
-	w->posY = 20;
-	w->font_size = &FONT_6X8_reduced;
-	w->reservedChars = 18;
-
 	//P TERM
-
 	w = &Debug_PID_P;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_display);
@@ -203,7 +208,6 @@ void debug_screen_setup(screen_t *scr) {
 	w->displayWidget.justify = justify_right;
 
 	//D TERM
-
 	w = &Debug_PID_D;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_display);
@@ -216,20 +220,7 @@ void debug_screen_setup(screen_t *scr) {
 	w->displayWidget.justify = justify_right;
 	w->reservedChars = 6;
 
-
-	// labels
-
-	w = &Debug_PID_label2;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "ERR:       OUT:");
-	w->posX = 0;
-	w->posY = 50;
-	w->font_size = &FONT_6X8_reduced;
-	w->reservedChars = 1;
-
 	//ERROR
-
 	w = &Debug_PID_Err;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_display);
@@ -243,7 +234,6 @@ void debug_screen_setup(screen_t *scr) {
 	w->reservedChars = 5;
 
 	//OUTPUT
-
 	w = &Debug_PID_Out;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_display);
@@ -255,12 +245,13 @@ void debug_screen_setup(screen_t *scr) {
 	w->displayWidget.type = field_int32;
 	w->displayWidget.justify = justify_right;
 	w->reservedChars = 5;
-
-
 }
 
+//-------------------------------------------------------------------------------------------------------------------------------
+// Debug2 screen setup
+//-------------------------------------------------------------------------------------------------------------------------------
 void debug2_screen_setup(screen_t *scr) {
-	scr->draw = &default_screenDraw;
+	scr->draw = &debug2_screenDraw;
 	scr->processInput = &debug2_screenProcessInput;
 	scr->onEnter = &on_Enter;
 	scr->onExit = &on_Exit;
@@ -268,18 +259,7 @@ void debug2_screen_setup(screen_t *scr) {
 	scr->update = &default_screenUpdate;
 	widget_t *w;
 
-	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	//ADC iron display
-
-	w = &Debug2_ADC_Label;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "ADC:       Raw:");
-	w->posX =0;
-	w->posY = 0;
-	w->font_size = &FONT_6X8_reduced;
-	w->reservedChars = 6;
-
+	//ADC1 display, filtered
 	w = &Debug2_ADC_Val;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_display);
@@ -291,6 +271,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->displayWidget.type = field_uinteger16;
 	w->reservedChars = 4;
 
+	//ADC1 display, unfiltered
 	w = &Debug2_ADC_ValRaw;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_display);
@@ -302,19 +283,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->displayWidget.type = field_uinteger16;
 	w->reservedChars = 4;
 
-
-	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	// SetPoint display
-
-	w = &Debug_SetPoint_label;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "SetP C200 C300 C400");
-	w->posX =4;
-	w->posY = 20;
-	w->font_size = &FONT_6X8_reduced;
-	w->reservedChars = 19;
-
+	//Debug setpoint
 	w = &Debug_SetPoint_edit;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_editable);
@@ -330,9 +299,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->editable.setData = (void (*)(void *))&setDebugTemperature;
 	w->reservedChars = 4;
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Cal at 200
-
+	// Cal at 200
 	w = &Debug_Cal200_edit;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_editable);
@@ -348,9 +315,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->editable.setData = (void (*)(void *))&setCalcAt200;
 	w->reservedChars = 4;
 
-	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// Cal at 300
-
 	w = &Debug_Cal300_edit;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_editable);
@@ -366,9 +331,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->editable.setData = (void (*)(void *))&setCalcAt300;
 	w->reservedChars = 4;
 
-	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// Cal at 400
-
 	w = &Debug_Cal400_edit;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_editable);
@@ -383,5 +346,4 @@ void debug2_screen_setup(screen_t *scr) {
 	w->editable.selectable.tab = 3;
 	w->editable.setData = (void (*)(void *))&setCalcAt400;
 	w->reservedChars = 4;
-
 }

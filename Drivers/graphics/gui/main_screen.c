@@ -167,7 +167,9 @@ static void tempUnitChanged(void) {
 		Widget_SetPoint.editable.step = 5;
 	}
 }
-
+//-------------------------------------------------------------------------------------------------------------------------------
+// Main screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
 static void main_screen_init(screen_t *scr) {
 	tempUnitChanged();
 	UG_FontSetHSpace(0);
@@ -243,6 +245,10 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 	}
 	return (default_screenProcessInput(scr,input,state));
 }
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Main screen setup
+//-------------------------------------------------------------------------------------------------------------------------------
 void main_screen_setup(screen_t *scr) {
 	for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++x) {
 		tipstr[x] = systemSettings.ironTips[x].name;

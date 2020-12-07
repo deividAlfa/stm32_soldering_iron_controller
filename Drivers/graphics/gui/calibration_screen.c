@@ -33,7 +33,7 @@ const pid_values_t cal_pid = {
 static widget_t Widget_CAL_Wait;
 static widget_t Widget_CAL_WaitTemp;
 static widget_t Widget_CAL_Cancel;
-static widget_t Widget_CAL_Input_MeasuredTemp_label;
+//static widget_t Widget_CAL_Input_MeasuredTemp_label;
 static widget_t Widget_CAL_Input_MeasuredTemp_edit;
 static widget_t Widget_CAL_Input_Cancel;
 static widget_t Widget_CAL_Input_OK;
@@ -135,7 +135,14 @@ static void waitOnExit(screen_t *scr) {
 		Iron.isCalibrating=0;
 	}
 }
-
+//-------------------------------------------------------------------------------------------------------------------------------
+// Edit Tip screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+void editcalibration_screenDraw(screen_t *scr){
+	UG_FontSelect(&FONT_8X14_reduced);
+	UG_PutString(0,17,"MEASURED:");//12
+	default_screenDraw(scr);
+}
 void calibration_screen_setup(screen_t *scr) {
 
 	screen_t* sc;
@@ -176,12 +183,12 @@ void calibration_screen_setup(screen_t *scr) {
 
 	oled_addScreen(&Screen_edit_calibration_input, screen_edit_calibration_input);
 	sc = &Screen_edit_calibration_input;
-	sc->draw = &default_screenDraw;
+	sc->draw = &editcalibration_screenDraw;
 	sc->processInput = &default_screenProcessInput;
 	sc->init = &inputCalibration_screen_init;
 	sc->update = &default_screenUpdate;
 	sc->onExit = &waitOnExit;
-
+/*
 	w=&Widget_CAL_Input_MeasuredTemp_label;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_label);
@@ -189,7 +196,7 @@ void calibration_screen_setup(screen_t *scr) {
 	w->posX = 0;
 	w->posY = 17;
 	w->font_size = &FONT_8X14_reduced;
-
+*/
 	w=&Widget_CAL_Input_MeasuredTemp_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
