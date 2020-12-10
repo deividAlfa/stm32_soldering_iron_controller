@@ -40,8 +40,12 @@ typedef struct
    UG_U16 end_char;
    UG_U8  *widths;
 } UG_FONT;
-#ifdef USE_FONT_TEST
-	extern const UG_FONT font_test;
+
+#ifdef USE_FONT_IRON_TEMP
+	extern const UG_FONT font_iron_temp;
+#endif
+#ifdef USE_FONT_NO_IRON
+	extern const UG_FONT font_no_iron;
 #endif
 
 #ifdef USE_FONT_6X8_reduced

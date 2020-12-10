@@ -313,10 +313,9 @@ void main_screen_setup(screen_t *scr) {
 	w=&Widget_IronTemp;
 	screen_addWidget(w,scr);
 	widgetDefaultsInit(w, widget_display);
-	w->posX = 22;
-	w->posY = 13;
-//	w->font_size =  &FONT_22X36_reduced;
-	w->font_size =  &font_test;
+	w->posX = 16;
+	w->posY = 12;
+	w->font_size =  &font_iron_temp;
 	w->displayWidget.getData = &main_screen_getIronTemp;
 	w->displayWidget.number_of_dec = 0;
 	w->displayWidget.type = field_uinteger16;
@@ -330,9 +329,8 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(w, widget_label);
 	strcpy(w->displayString, "NO IRON");
 	w->posX = 0;
-	w->posY = 13 ;
-//	w->font_size =  &FONT_22X36_reduced;
-	w->font_size =  &font_test;
+	w->posY = 17 ;
+	w->font_size =  &font_no_iron;
 	w->reservedChars = 7;
 	w->draw = &default_widgetDraw;
 	w->enabled = 0;

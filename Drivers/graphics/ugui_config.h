@@ -20,7 +20,8 @@
 #define  USE_FONT_8X14_reduced 		// ASCII chars 0x20-0x7E(numbers, symbols, UPPERCASE and lowercase letters), '*' drawed as '°'
 #define  USE_FONT_10X16_reduced 	// ASCII chars 0x20-0x7E(numbers, symbols, UPPERCASE and lowercase letters)) '*' drawed as '°'
 //#define  USE_FONT_16X26_reduced 	// ASCII chars 0x20-0x5A(numbers, symbols, UPPERCASE letters), '*' drawed as '°'
-#define USE_FONT_TEST
+#define USE_FONT_IRON_TEMP
+#define USE_FONT_NO_IRON
 /* Specify platform-dependent integer types here */
 
 #define __UG_FONT_DATA const
