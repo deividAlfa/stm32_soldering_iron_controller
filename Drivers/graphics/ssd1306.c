@@ -1,13 +1,13 @@
 #include "ssd1306.h"
 #include "settings.h"
 
-
-
-// Need to be aligned to 32bi(4byte) boundary, FillBuffer() uses 32bit tranfer for increased speed
+// Need to be aligned to 32bit(4byte) boundary, as FillBuffer() uses 32bit tranfer for increased speed
 __attribute__((aligned(4))) volatile uint8_t OledBuffer[128*8]; // 128x64 1BPP OLED
+
 volatile uint8_t *OledDmaBf = &OledBuffer[0];
 volatile oled_status_t oled_status=oled_idle;
 static SPI_HandleTypeDef *spi_device;
+
 #ifdef Soft_SPI
 
 void Enable_Soft_SPI_SPI(void){
@@ -117,7 +117,7 @@ void write_cmd(uint8_t data) {
 	Oled_Set_CS();
 }
 
-// Trigger DMA
+// Trigger DMA transfer
 void update_display( void ){
 		if(oled_status!=oled_idle) { return; }	// If OLED busy, skip update
 		HAL_SPI_TxCpltCallback(spi_device); 	// Call the DMA callback function to send the frame
@@ -125,13 +125,16 @@ void update_display( void ){
 
 #endif
 
-
-// Manual screen update for hard error handlers (crashes)
-void update_display_ErrorHandler(void){
-	uint8_t p;
+// Abort DMA transfers and reset status
+void display_abort(void){
 	HAL_SPI_Abort(spi_device);	// Abort SPI DMA
 	HAL_DMA_PollForTransfer(spi_device->hdmatx, HAL_DMA_FULL_TRANSFER, 3000);	//Wait for DMA to finish
 	oled_status=oled_idle;		// Force oled idle status
+}
+
+// Screen update for hard error handlers (crashes) not using DMA
+void update_display_ErrorHandler(void){
+	uint8_t p;
 	for(p=0;p<8;p++){
 		setOledRow(p);
 		Oled_Clear_CS();
@@ -142,6 +145,7 @@ void update_display_ErrorHandler(void){
    }
 }
 
+// Function for drawing a pixel in display buffer
 void pset(UG_U16 x, UG_U16 y, UG_COLOR c){
    unsigned int p;
 
@@ -182,65 +186,65 @@ void ssd1306_init(void){
 void ssd1306_init(SPI_HandleTypeDef *hspi){
 	spi_device = hspi;
 #endif
-
-	Oled_Clear_RES();//RST
-	HAL_Delay(0);			//	HAL Adds+1 = 1mS
-	Oled_Set_RES();//RST
-	HAL_IWDG_Refresh(&hiwdg);							// Clear watchdog
-	HAL_Delay(100);
-
-	write_cmd(0xAE| 0x00);  // Display Off (0x00/0x01)
-
-	write_cmd(0xD5);         // Set Display Clock Divide Ratio / Oscillator Frequency
-	//write_cmd(0x80);         // Set Clock as 100 Frames/Sec
-	write_cmd(0b11110000);         // Set Clock as 100 Frames/Sec
-
-	write_cmd(0xA8);         // Set Multiplex Ratio
-	write_cmd(0x3F);         //   Default => 0x3F (1/64 Duty)
-
-	write_cmd(0xD3);         // Set Display Offset
-	write_cmd(0x00);         //   Default => 0x00
-
-	write_cmd(0x40|0x00);   // Set Display Start Line
-
-	write_cmd(0x8D);         // Set Charge Pump
-	write_cmd(0x10|0x04);   //   Default => 0x10
-	// write_cmd_2(0x10|0x04);   //   Default => 0x10
-
-	write_cmd(0x20);         // Set Memory Addressing Mode
-	write_cmd(0x02);         //   Default => 0x02
-
-	write_cmd(0xA0|0x01);   // Set Segment Re-Map
-
-	write_cmd(0xC0|0x08);   // Set COM Output Scan Direction
-
-	write_cmd(0xDA);         // Set COM Pins Hardware Configuration
-	write_cmd(0x02|0x10);   //   Default => 0x12 (0x10)
-
-	setContrast(0xFF);		// Init in max contrast
-
-	write_cmd(0xD9);         // Set Pre-Charge Period
-	write_cmd(0x22);         //   Default => 0x22 (2 Display Clocks [Phase 2] / 2 Display Clocks [Phase 1])
-	//  write_cmd_2(0xF1);         //   Default => 0x22 (2 Display Clocks [Phase 2] / 2 Display Clocks [Phase 1])
-
-	write_cmd(0xDB);         // Set VCOMH Deselect Level
-	write_cmd(0x30);         //   Default => 0x20 (0.77*VCC)
-
-	write_cmd(0xA4|0x00);   // Set Entire Display On/Off
-
-	write_cmd(0xA6|0x00);   // Set Inverse Display On/Off
-
-	ClearBuffer();					// Clear buffer
-	update_display();				// Update display CGRAM
+	Oled_Clear_RES();			// Enable RST
+	HAL_Delay(0);				// HAL Adds+1 = 1mS
+	Oled_Set_RES();				// Disable RST
+	HAL_IWDG_Refresh(&hiwdg);	// Clear watchdog
+	HAL_Delay(100);				// 100mS wait for internal initialization
+	write_cmd(0xAE);  			// Display Off
+	write_cmd(0xD5);         	// Set Display Clock Divide Ratio / Oscillator Frequency
+	write_cmd(0b11110000);      // Set Clock as 100 Frames/Sec
+	write_cmd(0xA8);         	// Set Multiplex Ratio
+	write_cmd(0x3F);         	// Default => 0x3F (1/64 Duty)
+	write_cmd(0xD3);         	// Set Display Offset
+	write_cmd(0x00);         	// Default => 0x00
+	write_cmd(0x40|0x00);   	// Set Display Start Line
+	write_cmd(0x8D);         	// Set Charge Pump
+	write_cmd(0x10|0x04);   	// Default => 0x10
+	write_cmd(0x20);         	// Set Memory Addressing Mode
+	write_cmd(0x02);         	// Default => 0x02
+	write_cmd(0xA0|0x01);   	// Set Segment Re-Map
+	write_cmd(0xC0|0x08);   	// Set COM Output Scan Direction
+	write_cmd(0xDA);         	// Set COM Pins Hardware Configuration
+	write_cmd(0x02|0x10);   	// Default => 0x12 (0x10)
+	setContrast(0xFF);			// Init in max contrast
+	write_cmd(0xD9);         	// Set Pre-Charge Period
+	write_cmd(0x22);         	// Default => 0x22 (2 Display Clocks [Phase 2] / 2 Display Clocks [Phase 1])
+//  write_cmd_2(0xF1);         	// Default => 0x22 (2 Display Clocks [Phase 2] / 2 Display Clocks [Phase 1])
+	write_cmd(0xDB);         	// Set VCOMH Deselect Level
+	write_cmd(0x30);         	// Default => 0x20 (0.77*VCC)
+	write_cmd(0xA4|0x00);   	// Set Entire Display On/Off
+	write_cmd(0xA6|0x00);   	// Set Inverse Display On/Off
+	FillBuffer(C_BLACK,fill_dma);	// Clear buffer
+	update_display();			// Update display CGRAM
 	while(oled_status!=oled_idle);	// Wait for DMA completion
-
-	write_cmd(0xAE|0x01);   // Set Display On/Off
+	write_cmd(0xAF);   			// Set Display On
 }
 
-//Clear buffer using DMA for fast filling
-void ClearBuffer(void){
-	 uint32_t oled_fill=0;
-	while(oled_status!=oled_idle);
-	HAL_DMA_Start(&hdma_memtomem_dma1_channel2,(uint32_t)&oled_fill,(uint32_t)OledDmaBf,sizeof(OledBuffer)/sizeof(uint32_t));
-	HAL_DMA_PollForTransfer(&hdma_memtomem_dma1_channel2, HAL_DMA_FULL_TRANSFER, 3000);
+/*
+*	Clear buffer with 32bit-transfer for fast filling (ensure that Oled buffer is 32-bit aligned!)
+* 	128 * 8 = 1KB, / 4byte DMA txfer = 256 clock cycles (in theory)
+* 	Args:
+* 			color: 	0 = black, 1 = white
+* 			mode: 	0 = Use software(fail-safe), 1= Use DMA (normal operation)
+*/
+
+void FillBuffer(bool color, bool mode){
+	uint32_t oled_fill;
+
+	while(oled_status!=oled_idle);				// Don't wirte to buffer while screen buffger is being transfered
+
+	if(color==C_WHITE){ oled_fill=0xffffffff; }	// Fill color = white
+	else{ oled_fill=0; }						// Fill color = black
+
+	if(mode==fill_dma){							// use DMA, pointing to
+		 HAL_DMA_Start(&hdma_memtomem_dma1_channel2,(uint32_t)&oled_fill,(uint32_t)OledDmaBf,sizeof(OledBuffer)/sizeof(uint32_t));
+		 HAL_DMA_PollForTransfer(&hdma_memtomem_dma1_channel2, HAL_DMA_FULL_TRANSFER, 3000);
+	}
+	else{										// use software
+		uint32_t* bf=(uint32_t*)OledDmaBf;		// Pointer to oled buffer using 32bit data for faster operation
+		for(uint16_t x=0;x<((128*8)/4);x++){	// Write to oled buffer
+			bf[x]=oled_fill;
+		}
+	}
 }

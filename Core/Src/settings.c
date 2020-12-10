@@ -181,7 +181,7 @@ void resetTips(void){
 void Diag_init(void){
 	systemSettings.OledFix = 1;
 	setContrast(255);
-	ClearBuffer();
+	FillBuffer(C_BLACK,fill_soft);
 	UG_FontSelect(&FONT_10X16_reduced);
 	UG_SetForecolor(C_WHITE);
 	UG_SetBackcolor(C_BLACK);
@@ -221,7 +221,7 @@ void Button_reset(void){
 		while(!BUTTON_input){
 			HAL_IWDG_Refresh(&hiwdg);
 			if((HAL_GetTick()-ResetTimer)>5000){
-				ClearBuffer();
+				FillBuffer(C_BLACK,fill_dma);
 				UG_PutString(27,15,"RELEASE");//7
 				UG_PutString(12,31,"BUTTON NOW");// 10
 				update_display();

@@ -17,6 +17,7 @@
 
 
 void guiInit(void) {
+	UG_Init(&user_gui, pset, 128, 64);
 
 	oled_addScreen(&Screen_splash, screen_splash);
 	splash_setup(&Screen_splash);
@@ -38,5 +39,4 @@ void guiInit(void) {
 
 	oled_addScreen(&Screen_tiptype,screen_tiptype);
 	tiptype_screen_setup(&Screen_tiptype);
-	UG_Init(&user_gui, pset, 128, 64);
 }

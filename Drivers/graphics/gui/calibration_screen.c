@@ -139,6 +139,8 @@ static void waitOnExit(screen_t *scr) {
 // Edit Tip screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void editcalibration_screenDraw(screen_t *scr){
+	UG_SetForecolor(C_WHITE);
+	UG_SetBackcolor(C_BLACK);
 	UG_FontSelect(&FONT_8X14_reduced);
 	UG_PutString(0,17,"MEASURED:");//12
 	default_screenDraw(scr);

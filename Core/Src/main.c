@@ -91,8 +91,6 @@ static void MX_TIM2_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void Init(void){
-	 ADC_Init(&ADC_DEVICE);
-	  buzzer_init();
 	  guiInit();
 	#ifdef Soft_SPI
 	  Enable_Soft_SPI();
@@ -100,6 +98,8 @@ void Init(void){
 	#else
 	  ssd1306_init(&SPI_DEVICE);
 	#endif
+	 ADC_Init(&ADC_DEVICE);
+	  buzzer_init();
 	  restoreSettings();
 	  ironInit(&DELAY_TIMER, &PWM_TIMER,PWM_CHANNEL);
 	  RE_Init((RE_State_t *)&RE1_Data, ROT_ENC_L_GPIO_Port, ROT_ENC_L_Pin, ROT_ENC_R_GPIO_Port, ROT_ENC_R_Pin, ROT_ENC_BUTTON_GPIO_Port, ROT_ENC_BUTTON_Pin);
@@ -700,14 +700,12 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *_hspi){
 		oled_status=oled_sending_data;								// Update status
 		Oled_Clear_CS();
 		Oled_Set_DC();
-
 		// Send next OLED row
 		if(HAL_SPI_Transmit_DMA(&SPI_DEVICE,(uint8_t *) OledDmaBf+(128*OledRow++), 128) != HAL_OK){
 			Error_Handler();
 		}
 	}
 }
-
 /* USER CODE END 4 */
 
 /**
@@ -718,7 +716,23 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-	while(1);
+#ifdef DEBUG
+	char chars[6];
+	SetFailState(1);
+	FillBuffer(C_BLACK,fill_soft);
+	UG_FontSelect(&FONT_6X8_reduced);
+	UG_SetForecolor(C_WHITE);
+	UG_SetBackcolor(C_BLACK);
+	UG_PutString(0,0,"ERROR IN:");//11
+	UG_PutString(0,10,file);//1
+	UG_PutString(0,50,"LINE:");//1
+	sprintf(&chars[0],"%d",line);
+	UG_PutString(30,50,&chars[0]);//1
+	update_display_ErrorHandler();
+#endif
+	while(1){
+		HAL_IWDG_Refresh(&hiwdg);							// Clear watchdog
+	}
   /* USER CODE END Error_Handler_Debug */
 }
 

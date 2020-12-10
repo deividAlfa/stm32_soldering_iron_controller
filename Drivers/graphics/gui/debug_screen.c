@@ -14,7 +14,6 @@
 int32_t temp;
 uint16_t debugTemperature = 0;
 static pid_values_t cal_pid;
-
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -31,7 +30,7 @@ static widget_t Debug_SetPoint_edit;
 static widget_t Debug_Cal200_edit;
 static widget_t Debug_Cal300_edit;
 static widget_t Debug_Cal400_edit;
-
+static widget_t Widget_Power;
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug screen widgets functions
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -41,6 +40,13 @@ static void * debug_screen_getADC1() {
 }
 static void * debug_screen_getADC1_raw() {
 	temp = TIP.last_RawAvg;
+	return &temp;
+}
+
+static void * debug_screen_getIronPower() {
+	//if(UpdateReadings){
+		temp = getCurrentPower();
+	//}
 	return &temp;
 }
 
@@ -130,6 +136,8 @@ int debug2_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *s
 // Debug screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void debug_screenDraw(screen_t *scr){
+	UG_SetForecolor(C_WHITE);
+	UG_SetBackcolor(C_BLACK);
 	UG_FontSelect(&FONT_6X8_reduced);
 	UG_PutString(0,0,"ADC:       Raw:");//12
 	UG_PutString(12,20,"P:      I:      D:");//12
@@ -141,6 +149,8 @@ void debug_screenDraw(screen_t *scr){
 // Debug2 screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void debug2_screenDraw(screen_t *scr){
+	UG_SetForecolor(C_WHITE);
+	UG_SetBackcolor(C_BLACK);
 	UG_FontSelect(&FONT_6X8_reduced);
 	UG_PutString(0,0,"ADC:       Raw:");//12
 	UG_PutString(4,20,"SetP C200 C300 C400");//12
@@ -259,6 +269,21 @@ void debug2_screen_setup(screen_t *scr) {
 	scr->update = &default_screenUpdate;
 	widget_t *w;
 
+	//power display
+	w=&Widget_Power;
+	screen_addWidget(w,scr);
+	widgetDefaultsInit(w, widget_display);
+	w->posX = 93;
+	w->posY = 50;
+	w->font_size = &FONT_8X14_reduced;
+	w->displayWidget.getData = &debug_screen_getIronPower;
+	w->displayWidget.number_of_dec = 0;
+	w->displayWidget.type = field_uinteger16;
+	w->reservedChars = 4;
+	w->displayWidget.justify = justify_right;
+	w->displayWidget.hasEndStr = 1;
+	strcpy(w->endString, "%");
+
 	//ADC1 display, filtered
 	w = &Debug2_ADC_Val;
 	screen_addWidget(w, scr);
@@ -294,7 +319,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->editable.inputData.number_of_dec = 0;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 100;
-	w->editable.step = 50;
+	w->editable.step = 10;
 	w->editable.selectable.tab = 0;
 	w->editable.setData = (void (*)(void *))&setDebugTemperature;
 	w->reservedChars = 4;
@@ -310,7 +335,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->editable.inputData.number_of_dec = 0;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 100;
-	w->editable.step = 1;
+	w->editable.step = 20;
 	w->editable.selectable.tab = 1;
 	w->editable.setData = (void (*)(void *))&setCalcAt200;
 	w->reservedChars = 4;
@@ -326,7 +351,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->editable.inputData.number_of_dec = 0;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 100;
-	w->editable.step = 1;
+	w->editable.step = 10;
 	w->editable.selectable.tab = 2;
 	w->editable.setData = (void (*)(void *))&setCalcAt300;
 	w->reservedChars = 4;
@@ -342,7 +367,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->editable.inputData.number_of_dec = 0;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 100;
-	w->editable.step = 1;
+	w->editable.step = 10;
 	w->editable.selectable.tab = 3;
 	w->editable.setData = (void (*)(void *))&setCalcAt400;
 	w->reservedChars = 4;

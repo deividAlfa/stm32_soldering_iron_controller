@@ -4,9 +4,9 @@
 /*
  * Setup.h file
 */
+// This is left here just to have it handy for copying when debugging a specific function
+// Don't uncomment!!
 //               __attribute__((optimize("O0")))
-
-//#warning OJO no se cargan las opciones pid al cambiar de punta!
 
 /*
  * ******************************
@@ -15,7 +15,7 @@
  */
 
 #define Adc_Buffer_Size 		16	+2		// ADC DMA buffer size Buffer[ADC_Buffer_Size][Adc_Buffer_Elements](+2 to compensate min/max value discard in filtering)
-#define PID_Refresh_ms			100			// PID calculation interval
+#define PID_Refresh_ms			0			// PID calculation interval
 #define USE_FILTER							// Comment to totally disable filtering (Only make average of the last buffer)
 #define FILTER_N				3			// For filter coefficient (Higher, more filtering, also more delay in the filter output, can make the system oscillate)
 

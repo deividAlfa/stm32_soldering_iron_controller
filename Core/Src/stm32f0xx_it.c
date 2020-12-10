@@ -87,8 +87,9 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
+	display_abort();
 	SetFailState(1);
-	ClearBuffer();
+	FillBuffer(C_BLACK,fill_soft);
 	UG_FontSelect(&FONT_10X16_reduced);
 	UG_SetForecolor(C_WHITE);
 	UG_SetBackcolor(C_BLACK);

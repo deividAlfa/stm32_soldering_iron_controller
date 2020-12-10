@@ -17,6 +17,8 @@ typedef enum {
 	oled_sending_cmd,
 } oled_status_t;
 
+enum { fill_soft, fill_dma };
+
 #define Oled_Set_CS() HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin,GPIO_PIN_SET)
 #define Oled_Clear_CS() HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin,GPIO_PIN_RESET)
 #define Oled_Set_DC() HAL_GPIO_WritePin(OLED_DC_GPIO_Port, OLED_DC_Pin,GPIO_PIN_SET)
@@ -48,9 +50,10 @@ void write_cmd(uint8_t data);
 void send_display_bf(uint8_t *oled_buffer);
 void pset(UG_U16 x, UG_U16 y, UG_COLOR c);
 void update_display(void);
+void display_abort(void);
 void update_display_ErrorHandler(void);
 void setContrast(uint8_t value);
 void setOledRow(uint8_t row);
 uint8_t getContrast();
-void ClearBuffer(void);
+void FillBuffer(bool color, bool mode);
 #endif /* GRAPHICS_SSD1306_H_ */

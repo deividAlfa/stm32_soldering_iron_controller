@@ -147,7 +147,8 @@ void handleIron(void) {
 	}
 
 	// Only continue if PID update flag is set
-	if(!Iron.PIDUpdate){
+	// Don't calculate PID for the first second after boot, as the filters haven't got enough data yet
+	if(!Iron.PIDUpdate || HAL_GetTick()<1000){
 		return;
 	}
 

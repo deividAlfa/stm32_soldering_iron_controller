@@ -163,7 +163,6 @@ static void insertDot(char *str, uint8_t dec) {
 		}
 	}
 }
-__attribute__((optimize("O0")))
 void default_widgetUpdate(widget_t *widget) {
 	void *data;
 	volatile int32_t val_ui;

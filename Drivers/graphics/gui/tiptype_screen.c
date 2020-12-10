@@ -61,11 +61,13 @@ static int tiptype_CANCEL(widget_t *w) {
 // Tip Type screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void tiptype_draw(screen_t * scr) {
+	UG_SetForecolor(C_WHITE);
+	UG_SetBackcolor(C_BLACK);
 	switch(setup){
 	case 0:
 		return;
 	case 1:
-		ClearBuffer();
+		FillBuffer(C_BLACK,fill_dma);
 		UG_FontSelect(&FONT_8X14_reduced);
 		UG_PutString(10,0,"MAKE SURE YOU");//13
 		UG_PutString(9,14,"SET THE RIGHT");//13
@@ -77,7 +79,7 @@ void tiptype_draw(screen_t * scr) {
 	case 2:
 		return;
 	case 3:
-		ClearBuffer();
+		FillBuffer(C_BLACK,fill_dma);
 		UG_FontSelect(&FONT_8X14_reduced);
 		UG_PutString(2,0,"A WRONG SETTING");//15
 		UG_PutString(6,14,"WILL BURN YOUR");//14
@@ -90,7 +92,7 @@ void tiptype_draw(screen_t * scr) {
 	case 4:
 		return;
 	case 5:
-		ClearBuffer();
+		FillBuffer(C_BLACK,fill_dma);
 		UG_FontSelect(&FONT_8X14_reduced);
 		UG_PutString(15,0,"CHANGING TIP");//12
 		UG_PutString(2,14,"TYPE WILL ERASE");//15
@@ -102,7 +104,7 @@ void tiptype_draw(screen_t * scr) {
 	case 6:
 		return;
 	case 7:
-		ClearBuffer();
+		FillBuffer(C_BLACK,fill_dma);
 		setup++;
 		return;
 	default:

@@ -438,14 +438,14 @@ void edittipname_screenDraw(screen_t *scr){
 		if(!prevState){
 			prevState=1;
 			Widget_IronTips_Name_save.enabled=0;
-			ClearBuffer();
+			FillBuffer(C_BLACK,fill_dma);
 		}
 	}
 	else{
 		if(prevState){
 			prevState=0;
 			Widget_IronTips_Name_save.enabled=1;
-			ClearBuffer();
+			FillBuffer(C_BLACK,fill_dma);
 		}
 	}
 	UG_FontSelect(&FONT_10X16_reduced);
