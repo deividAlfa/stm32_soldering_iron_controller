@@ -7,6 +7,7 @@
 
 #include "buzzer.h"
 #include "iron.h"
+#include "settings.h"
 #include "main.h"
 
 typedef enum {STATE_SB, STATE_LB, STATE_AL, STATE_IDLE} buzzer_state_type;
@@ -29,12 +30,12 @@ void buzzer_init() {
 
 void buzzer_short_beep() {
 	buzzer_state = STATE_SB;
-	BUZZER_ON;
+	if(!systemSettings.buzzDisable){ BUZZER_ON; }
 	last_time = HAL_GetTick();
 }
 void buzzer_long_beep() {
 	buzzer_state = STATE_LB;
-	BUZZER_ON;
+	if(!systemSettings.buzzDisable){ BUZZER_ON; }
 	last_time = HAL_GetTick();
 }
 void buzzer_alarm_start(){
@@ -61,7 +62,7 @@ void handle_buzzer() {
 		break;
 	case STATE_AL:
 		if (delta > ALARM) {
-			BUZZER_TOGGLE;
+			if(!systemSettings.buzzDisable){ BUZZER_TOGGLE; }
 			last_time = HAL_GetTick();
 		}
 		break;

@@ -8,8 +8,6 @@
 #ifndef GENERALIO_BUZZER_H_
 #define GENERALIO_BUZZER_H_
 
-#include "main.h"
-
 #define SHORT_BEEP 	100
 #define LONG_BEEP	1500
 #define ALARM		800

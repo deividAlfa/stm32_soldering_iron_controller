@@ -36,9 +36,11 @@ typedef struct{
 	uint16_t noIronValue;
 	uint16_t noIronDelay;
 	uint16_t guiUpdateDelay;
-	uint8_t tempUnit;
 	uint8_t TipType;
 	uint8_t saveSettingsDelay;
+	uint8_t bootMode;
+	bool tempUnit;
+	bool buzzDisable;
 }systemSettings_t;
 extern systemSettings_t systemSettings;
 extern systemSettings_t* flashSettings;
