@@ -5,7 +5,7 @@
 * [Status](#status)
 * [Warning](#warning)
 * [Backup First!](#backup-first)
-* [Setup instructions](#Setup_instructions)
+* ~~[Setup instructions](#Setup_instructions)~~ Needs Update!
 * [Creating a .ioc file from scratch](#Creating_ioc)
 * [History](#history)
   * [Working](#working)
@@ -15,13 +15,16 @@
 
 <!-- /MarkdownTOC -->
 
+Video can be seen there: (Project in active development, the features will change continuously)
+[![IMAGE ALT TEXT](https://img.youtube.com/vi/XhJvmsmOdC0/0.jpg)](https://www.youtube.com/watch?v=XhJvmsmOdC0 "Quicko T12 custom firmware")
+
 <a id="status"></a>
 ## Status
 * Developed on STM32CubeIDE - download and use that. This IDE includes the MX code generator
 * Tested on STM32F072 (on a QUICKO T12 board).
-* Included config for STM32F103 but needs testing
+* ~~Included config for STM32F103 but needs testing~~ No longer until fw is ready 
 * Should be easily ported to other stm32f0xx/stm32f1xx MCUs.
-* Already compiled bins in the Builds folder! (Test at your own risk) 
+* Already compiled bins in Debug folder! (Test at your own risk) 
 * Intended to serve as an unified codebase that's easier to share across different boards / hardware
 
 <a id="warning"></a>
@@ -48,7 +51,7 @@ Keep in mind that there are many versions of the hardware PCB, KSGER and friends
 Any difference in the pinout will require firmware tuning!
 Although that is one of the proposits of this fork, to ease that part.
 
-<a id="Setup_instructions"></a>
+~<a id="Setup_instructions"></a>~ Needs update!
 ## Setup instructions
 DEFINE YOUR HARDWARE FIRST!!
 
