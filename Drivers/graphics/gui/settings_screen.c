@@ -239,19 +239,27 @@ static void setKd(uint16_t *val) {
 }
 
 static void * getPwmPeriod() {
-	temp=(systemSettings.pwmPeriod+1)/1000;
+	temp=(systemSettings.pwmPeriod+1)/100;
+	if(temp<501){
+		Widget_ADC_Delay_edit.editable.max_value = temp-1;
+	}
+	else{
+		Widget_ADC_Delay_edit.editable.max_value = 500;
+	}
 	return &temp;
 }
 static void setPwmPeriod(uint16_t *val) {
-	systemSettings.pwmPeriod = (*val*1000)-1;
+	systemSettings.pwmPeriod = (*val*100)-1;
 	ApplyPwmSettings();
 }
 static void * getPwmDelay() {
-	temp=systemSettings.pwmDelay+1;
+	temp=(systemSettings.pwmDelay+1)/100;
+
+
 	return &temp;
 }
 static void setPwmDelay(uint16_t *val) {
-	systemSettings.pwmDelay=*val-1;
+	systemSettings.pwmDelay=(*val*100)-1;
 	ApplyPwmSettings();
 }
 
@@ -801,7 +809,7 @@ void settings_screen_setup(screen_t *scr) {
 	w = &Widget_PWM_Period_edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
-	w->posX = 94;
+	w->posX = 86;
 	w->posY = 17;
 	w->font_size = &FONT_8X14_reduced;
 	w->editable.inputData.getData = &getPwmPeriod;
@@ -811,11 +819,11 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.step = 1;
 	w->editable.selectable.tab = 1;
 	w->editable.setData = (void (*)(void *))&setPwmPeriod;
-	w->editable.max_value = 65;
-	w->editable.min_value = 1;
+	w->editable.max_value = 650;
+	w->editable.min_value = 20;
 	w->displayWidget.hasEndStr = 1;
 	strcpy(w->endString, "mS");
-	w->reservedChars = 4;
+	w->reservedChars = 5;
 	w->displayWidget.justify =justify_right;
 
 	// ADC Delay
@@ -828,15 +836,15 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.inputData.getData = &getPwmDelay;
 	w->editable.inputData.number_of_dec = 0;
 	w->editable.inputData.type = field_uinteger16;
-	w->editable.big_step = 100;
-	w->editable.step = 20;
+	w->editable.big_step = 5;
+	w->editable.step = 1;
 	w->editable.selectable.tab = 2;
 	w->editable.setData = (void (*)(void *))&setPwmDelay;
 	w->reservedChars = 5;
-	w->editable.max_value = 900;
-	w->editable.min_value = 80;
+	w->editable.max_value = 500;
+	w->editable.min_value = 1;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "uS");
+	strcpy(w->endString, "mS");
 	w->displayWidget.justify =justify_right;
 
 	// OK Button

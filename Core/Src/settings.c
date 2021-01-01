@@ -96,7 +96,7 @@ void resetSettings() {
 	systemSettings.standby.Time = 300;
 	systemSettings.UserSetTemperature = 320;
 	systemSettings.pwmPeriod=19999;
-	systemSettings.pwmDelay=99;
+	systemSettings.pwmDelay=1999;
 	systemSettings.noIronDelay=500;
 	systemSettings.guiUpdateDelay=200;
 	systemSettings.tempUnit=Unit_Celsius;

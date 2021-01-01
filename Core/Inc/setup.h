@@ -16,7 +16,7 @@
 
 #define Adc_Buffer_Size 		16	+2		// ADC DMA buffer size Buffer[ADC_Buffer_Size][Adc_Buffer_Elements](+2 to compensate min/max value discard in filtering)
 #define PID_Refresh_ms			0			// PID calculation interval
-#define USE_FILTER							// Comment to totally disable filtering (Only make average of the last buffer)
+//#define USE_FILTER							// Comment to totally disable filtering (Only make average of the last buffer)
 #define FILTER_N				3			// For filter coefficient (Higher, more filtering, also more delay in the filter output, can make the system oscillate)
 
 											// If your screen doesn't work, and want to discard a SPI problem
