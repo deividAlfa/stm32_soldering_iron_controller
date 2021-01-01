@@ -265,7 +265,7 @@ void default_widgetDraw(widget_t *widget) {
 		UG_SetBackcolor ( C_WHITE ) ;
 		UG_SetForecolor ( C_BLACK ) ;
 	}
-	UG_COLOR color;
+	UG_COLOR color = C_BLACK;
 	uint8_t draw_frame = 0;
 	if(widget->type == widget_bmp) {
 		UG_DrawBMP_MONO(widget->posX ,widget->posY , widget->displayBmp.bmp);
