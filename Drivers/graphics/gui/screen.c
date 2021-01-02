@@ -88,8 +88,10 @@ void default_screenUpdate(screen_t *scr) {
 		displayOnly_wiget_t *dis;
 		while(last_widget) {
 			dis = extractDisplayPartFromWidget(last_widget);
-			if(dis->update) {
+			if(dis!=NULL){
+				if(dis->update){
 					dis->update(last_widget);
+				}
 			}
 			last_widget = last_widget->next_widget;
 		}

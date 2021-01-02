@@ -29,7 +29,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
-
+void FatalError(uint8_t type);
 /* USER CODE END TD */
 
 /* Private define ------------------------------------------------------------*/
@@ -74,7 +74,7 @@ extern TIM_HandleTypeDef htim17;
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
-
+	FatalError(1);
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
 
@@ -87,26 +87,12 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-	display_abort();
-	SetFailState(1);
-	FillBuffer(C_BLACK,fill_soft);
-	UG_FontSelect(&FONT_10X16_reduced);
-	UG_SetForecolor(C_WHITE);
-	UG_SetBackcolor(C_BLACK);
-	UG_PutString(8,15,"HARD FAULT");//10
-	UG_PutString(24,31,"ERROR!!");//7
-	update_display_ErrorHandler();
-
-	uint32_t x=0;
+	FatalError(2);
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
-	  if(++x>(uint32_t)6000000){ // ~5s delay before rebooting (Interrupts no longer work here)
-		  NVIC_SystemReset();
-	  }
-	  HAL_IWDG_Refresh(&hiwdg);							// Clear watchdog
-    /* USER CODE END W1_HardFault_IRQn 0 */
+	/* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
 
@@ -214,6 +200,42 @@ void TIM17_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+void FatalError(uint8_t type){
+	display_abort();
+	SetFailState(1);
+	FillBuffer(C_BLACK,fill_soft);
+	UG_FontSelect(&FONT_10X16_reduced);
+	UG_SetForecolor(C_WHITE);
+	UG_SetBackcolor(C_BLACK);
+	switch(type){
+	case 1:
+		UG_PutString(2,15,"NMI HANDLER");//10
+		break;
+	case 2:
+		UG_PutString(8,15,"HARD FAULT");//10
+		break;
+	case 3:
+		UG_PutString(8,15,"MEM MANAGE");//10
+		break;
+	case 4:
+		UG_PutString(11,15,"BUS FAULT");//9
+		break;
+	case 5:
+		UG_PutString(2,15,"USAGE FAULT");//11
+		break;
+	default:
+		break;
+	}
+	UG_PutString(24,31,"ERROR!!");//7
+	update_display_ErrorHandler();
+	uint32_t x=0;
+	while(1){
+		if(++x>(uint32_t)6000000){ // ~5s delay before rebooting (Interrupts no longer work here)
+			NVIC_SystemReset();
+		}
+		HAL_IWDG_Refresh(&hiwdg);
+	}
 
+}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
