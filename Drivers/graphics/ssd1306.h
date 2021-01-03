@@ -40,10 +40,17 @@ void spi_send(uint8_t SPIData);
 void ssd1306_init(void);
 
 #else
-
-void ssd1306_init(SPI_HandleTypeDef *hspi);
-
+#ifdef Soft_SPI
+void ssd1306_init(DMA_HandleTypeDef *dma);
+#elif defined OLED_SPI
+void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma);
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *device);
+#elif defined OLED_I2C
+void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma);
+void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device);
 #endif
+#endif
+void FatalError(uint8_t type);
 void Enable_Soft_SPI_SPI(void);
 void write_data(uint8_t data);
 void write_cmd(uint8_t data);
@@ -56,4 +63,5 @@ void setContrast(uint8_t value);
 void setOledRow(uint8_t row);
 uint8_t getContrast();
 void FillBuffer(bool color, bool mode);
+
 #endif /* GRAPHICS_SSD1306_H_ */

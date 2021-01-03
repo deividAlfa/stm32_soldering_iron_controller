@@ -15,8 +15,8 @@
 
 
 
-volatile adc_measures_t ADC_measures[Adc_Buffer_Size] = { 0 };
-volatile uint16_t Tip_measures[Adc_Buffer_Size] = { 0 };
+volatile adc_measures_t ADC_measures[ADC_BFSIZ] = { 0 };
+volatile uint16_t Tip_measures[ADC_BFSIZ] = { 0 };
 ADC_Status_t ADC_Status = ADC_Idle;
 
 #ifdef ADC_TIP
@@ -80,31 +80,42 @@ void ADC_Start_DMA(){
 	if( (ADC_Status!=ADC_StartTip) && (ADC_Status!=ADC_StartOthers)){
 		return;
 	}
-
-
-	adc_device->Instance->CHSELR &= ~(0x7FFFF);		// Disable all regular channels
-	sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
+	#ifdef STM32F072xB
+		adc_device->Instance->CHSELR &= ~(0x7FFFF);		// Disable all regular channels
+		sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
+	#endif
 
 	if(ADC_Status == ADC_StartOthers){
-
+			#ifdef STM32F103xB
+				adc_device->Init.NbrOfConversion = ADC_AuxNum;
+			#endif
 			adc_device->Init.ExternalTrigConv = ADC_SOFTWARE_START;						// Set software trigger
 			if (HAL_ADC_Init(adc_device) != HAL_OK) { Error_Handler(); }
 			ADC_Status = ADC_SamplingOthers;
 			sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;							// More sampling time to compensate high input impedances
 
 			#ifdef ADC_VREF
-			sConfig.Channel = ADC_VREF;
-			if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
+				#ifdef STM32F103xB
+					sConfig.Rank = ADC_REGULAR_RANK_1;
+				#endif
+				sConfig.Channel = ADC_VREF;
+				if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
 			#endif
 
 			#ifdef ADC_NTC
-			sConfig.Channel = ADC_NTC;
-			if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
+				#ifdef STM32F103xB
+					sConfig.Rank = ADC_REGULAR_RANK_2;
+				#endif
+				sConfig.Channel = ADC_NTC;
+				if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
 			#endif
 
 			#ifdef ADC_VIN
-			sConfig.Channel = ADC_VIN;
-			if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
+				#ifdef STM32F103xB
+					sConfig.Rank = ADC_REGULAR_RANK_3;
+				#endif
+				sConfig.Channel = ADC_VIN;
+				if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
 			#endif
 
 			// Start ADC (Will be triggered by TIM15), Only Tip measurement
@@ -115,15 +126,21 @@ void ADC_Start_DMA(){
 	else if(ADC_Status == ADC_StartTip){
 
 			ADC_Status = ADC_InitTip;
-			adc_device->Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T15_TRGO;		// Set trigger by Timer15 TRGO
+			#ifdef STM32F103xB
+				adc_device->Init.NbrOfConversion = 1;
+			#endif
+			adc_device->Init.ExternalTrigConv = ADC_TRGO;		// Set trigger by Timer15 TRGO
 			if (HAL_ADC_Init(adc_device) != HAL_OK) { Error_Handler(); }
 
 			#ifdef ADC_TIP
-			sConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
-			sConfig.Channel = ADC_TIP;
-			if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
+				sConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
+				#ifdef STM32F103xB
+					sConfig.Rank = ADC_REGULAR_RANK_1;
+				#endif
+				sConfig.Channel = ADC_TIP;
+				if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
 			#else
-			#error ADC_IRON not configured properly
+				#error ADC_IRON not configured properly
 			#endif
 			// Start ADC, start conversion, other measurements (non time-critical)
 			if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)Tip_measures, sizeof(Tip_measures)/ sizeof(uint16_t) )!=HAL_OK){
@@ -131,6 +148,7 @@ void ADC_Start_DMA(){
 			}
 	}
 }
+
 
 void ADC_Stop_DMA(void){
 	HAL_ADC_Stop_DMA(adc_device);
@@ -154,7 +172,7 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 	}
 	// Make the average of the ADC buffer
 	adc_sum = 0;
-	for(uint16_t x = 0; x < Adc_Buffer_Size; x++) {
+	for(uint16_t x = 0; x < ADC_BFSIZ; x++) {
 		adc_sum += *inputBuffer;
 		if(*inputBuffer > max){
 			max = *inputBuffer;
@@ -168,7 +186,7 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 	adc_sum -=  (min + max);
 
 	// Calculate average
-	avg_data = adc_sum / (Adc_Buffer_Size -2) ;
+	avg_data = adc_sum / (ADC_BFSIZ -2) ;
 #ifdef USE_FILTER							// Global filter flag (setup.h)
 	if(InputData->Filter){					// Filtering enabled for this data?
 
@@ -236,3 +254,24 @@ void handle_ADC(void){
 }
 
 
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
+	if(_hadc != adc_device){ return; }
+	ADC_Stop_DMA();												// Reset the ADC
+	handle_ADC();												// Process the data.
+	switch (ADC_Status){
+		case ADC_SamplingTip:									// Finished sampling tip
+			ADC_Status = ADC_StartOthers;						// Set the ADC status
+			handleIron();
+			__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);	//Load calculated PWM Duty
+			HAL_IWDG_Refresh(&hiwdg);							// Clear watchdog
+			break;
+
+		case ADC_SamplingOthers:								// Finished sampling secondary channels
+			ADC_Status = ADC_StartTip;							// Set the ADC status
+			break;
+
+		default:
+			Error_Handler();
+	}
+	ADC_Start_DMA();											// Start ADC with new new status
+}
