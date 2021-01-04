@@ -47,7 +47,7 @@ void saveSettings() {
 		}
 
 	//Store settings
-	HAL_IWDG_Refresh(&hiwdg);
+	HAL_IWDG_Refresh(&HIWDG);
 	for (uint16_t i = 0; i < sizeof(systemSettings) / 2; i++) {
 		if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (((uint32_t)flashSettings)+(i*2)), *(((uint16_t*)&systemSettings)+i) ) != HAL_OK){
 			Flash_error();
@@ -81,7 +81,7 @@ void restoreSettings() {
 
 uint32_t ChecksumSettings(systemSettings_t* Settings){
 	uint32_t checksum;
-	checksum = HAL_CRC_Calculate(&hcrc, ((uint32_t*)&Settings->version), (sizeof(*Settings)-sizeof(Settings->checksum))/sizeof(uint32_t) );
+	checksum = HAL_CRC_Calculate(&HCRC, ((uint32_t*)&Settings->version), (sizeof(*Settings)-sizeof(Settings->checksum))/sizeof(uint32_t) );
 	return checksum;
 }
 
@@ -193,7 +193,7 @@ void Flash_error(void){
 	UG_PutString(32,32,"FLASH!");//6
 	update_display();
 	while(1){
-		HAL_IWDG_Refresh(&hiwdg);
+		HAL_IWDG_Refresh(&HIWDG);
 	}
 }
 
@@ -218,14 +218,14 @@ void Button_reset(void){
 		UG_PutString(22,42,"DEFAULTS");//8
 		update_display();
 		while(!BUTTON_input){
-			HAL_IWDG_Refresh(&hiwdg);
+			HAL_IWDG_Refresh(&HIWDG);
 			if((HAL_GetTick()-ResetTimer)>5000){
 				FillBuffer(C_BLACK,fill_dma);
 				UG_PutString(27,15,"RELEASE");//7
 				UG_PutString(12,31,"BUTTON NOW");// 10
 				update_display();
 				while(!BUTTON_input){
-					HAL_IWDG_Refresh(&hiwdg);
+					HAL_IWDG_Refresh(&HIWDG);
 				}
 				resetSettings();
 				saveSettings();
@@ -256,7 +256,7 @@ void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
 		UG_PutString(xpos,ypos,&str[0]);
 		update_display();
 		while( (HAL_GetTick()-timErr)<999 ){
-			HAL_IWDG_Refresh(&hiwdg);			// Clear watchdog
+			HAL_IWDG_Refresh(&HIWDG);			// Clear watchdog
 		}
 	}
 }

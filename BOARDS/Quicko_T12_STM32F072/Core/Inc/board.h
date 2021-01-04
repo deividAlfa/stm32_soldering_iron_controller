@@ -56,29 +56,16 @@
 #define ADC_VIN				ADC_CHANNEL_3	                    //  CH3 = VIN
 #define ADC_TIP				ADC_CHANNEL_5	                    //  CH5 = IRON TIP (Sampled independently)
 
-
-//#define NOSAVESETTINGS		// Don't use flash to save or load settings. Always use defaults (for debugging purposes)
+/********************************
+ * 			Misc		*
+ ********************************/
+#define HIWDG				hiwdg								// iwdg used
+#define HCRC				hcrc								// crc used
+//#define NOSAVESETTINGS										// Don't use flash to save or load settings. Always use defaults (for debugging purposes)
 
 // To stop peripherals when debugging
 #define DebugOpts()			__HAL_DBGMCU_FREEZE_IWDG();\
 							__HAL_DBGMCU_FREEZE_TIM16();\
 							__HAL_DBGMCU_FREEZE_TIM17()
-/*
-/*
- *
- *		 <·············· PERIOD ······················>(200mS)
- *		 <····· PWM_DUTY ···><····· MEASURE TIME ·····>(10mS+60uS)
- *   	 ___________________						    ________________________________________
- * PWM _|		 			|__________________________|
- *  				   		 < Delay Time >	_________		________________
- * ADC ____________________________________|  ADC ON |_____| 	ADC ON		|
- 		            		^			   ^		 ^     ^				^ADC interrupt. Update averages. Restart ADC in trigger mode.
- * 							| 	 10mS	   |   60uS  |	   |_ ADC manual conversion for the rest of channels(not requiring measure during low PWM output)
- * 							|			   |		 |_______ ADC interrupt. Update averages. Handle Iron. Start ADC Manual conversion.
- * 							|			   |_________________ Tim15 fires ADC via TRGO and disables (One pulse mode). Measure tip only
- * 							|________________________________ Tim17 PWM compare interrupt. Inits Tim15 and starts it (Dead time)
-*/
-
-
 
 #endif

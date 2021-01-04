@@ -28,7 +28,6 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f0xx_hal.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -43,16 +42,8 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-extern ADC_HandleTypeDef hadc;
-extern DMA_HandleTypeDef hdma_adc;
-extern SPI_HandleTypeDef hspi2;
-extern IWDG_HandleTypeDef hiwdg;
-extern CRC_HandleTypeDef hcrc;
-extern DMA_HandleTypeDef hdma_spi2_tx;
-extern TIM_HandleTypeDef htim2;
-extern TIM_HandleTypeDef htim15;
-extern TIM_HandleTypeDef htim17;
-extern DMA_HandleTypeDef hdma_memtomem_dma1_channel2;
+extern IWDG_HandleTypeDef HIWDG;
+extern CRC_HandleTypeDef HCRC;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -62,6 +53,9 @@ extern DMA_HandleTypeDef hdma_memtomem_dma1_channel2;
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
+
+// STM32CUBE IDE removed line printing in Error Handler. This macro restores it.
+// Credits: https://community.st.com/s/question/0D50X00009XkffVSAR/stm32cubemx-v421-errorhandler-definition-issues-in-mainh
 #ifdef DEBUG
 	#define GET_MACRO( _0, _1, NAME, ... ) NAME
 	#define Error_Handler(...) GET_MACRO( _0, ##__VA_ARGS__, Error_Handler1, Error_Handler0 )()
@@ -78,7 +72,6 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void Program_Handler(void);
-
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -96,10 +89,10 @@ void Program_Handler(void);
 #define OLED_DC_GPIO_Port GPIOB
 #define OLED_RST_Pin GPIO_PIN_12
 #define OLED_RST_GPIO_Port GPIOB
-#define SCK_Pin GPIO_PIN_13
-#define SCK_GPIO_Port GPIOB
-#define SDO_Pin GPIO_PIN_15
-#define SDO_GPIO_Port GPIOB
+#define OLED_SCL_Pin GPIO_PIN_13
+#define OLED_SCL_GPIO_Port GPIOB
+#define OLED_SDA_Pin GPIO_PIN_15
+#define OLED_SDA_GPIO_Port GPIOB
 #define ROT_ENC_R_Pin GPIO_PIN_8
 #define ROT_ENC_R_GPIO_Port GPIOA
 #define ROT_ENC_L_Pin GPIO_PIN_9

@@ -58,16 +58,18 @@ RE_Rotation_t RotationData;
 volatile uint32_t Timing_Start=0, Timing_End=0;
 /* USER CODE END PV */
 
-/* Private function prototypes -----------------------------------------------*//* USER CODE BEGIN PFP */
+/* Private function prototypes -----------------------------------------------*/
+
+/* USER CODE BEGIN PFP */
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 void Init(void){
 	  guiInit();
-#ifdef Soft_SPI
-	  Enable_Soft_SPI();
-	  ssd1306_init();
+#if defined OLED_SOFT_SPI || defined OLED_SOFT_I2C
+	  ssd1306_init(&FILL_DMA);
 #elif defined OLED_SPI || defined OLED_I2C
 	  ssd1306_init(&OLED_DEVICE, &FILL_DMA);
 #endif
@@ -78,6 +80,7 @@ void Init(void){
 	  RE_Init((RE_State_t *)&RE1_Data, ROT_ENC_L_GPIO_Port, ROT_ENC_L_Pin, ROT_ENC_R_GPIO_Port, ROT_ENC_R_Pin, ROT_ENC_BUTTON_GPIO_Port, ROT_ENC_BUTTON_Pin);
 	  oled_init(&RE_Get,&RE1_Data);
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -177,10 +180,17 @@ void Error_Handler(void)
 	UG_PutString(0,50,"LINE:");//1
 	sprintf(&chars[0],"%d",line);
 	UG_PutString(30,50,&chars[0]);//1
+
+	#if defined OLED_I2C || defined OLED_SPI
 	update_display_ErrorHandler();
+
+	#elif defined OLED_SOFT_I2C || defined OLED_SOFT_SPI
+	update_display();
+	#endif
+
 #endif
 	while(1){
-		HAL_IWDG_Refresh(&hiwdg);							// Clear watchdog
+		HAL_IWDG_Refresh(&HIWDG);							// Clear watchdog
 	}
   /* USER CODE END Error_Handler_Debug */
 }

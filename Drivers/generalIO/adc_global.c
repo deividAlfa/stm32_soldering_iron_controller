@@ -263,7 +263,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
 			ADC_Status = ADC_StartOthers;						// Set the ADC status
 			handleIron();
 			__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);	//Load calculated PWM Duty
-			HAL_IWDG_Refresh(&hiwdg);							// Clear watchdog
+			HAL_IWDG_Refresh(&HIWDG);							// Clear watchdog
 			break;
 
 		case ADC_SamplingOthers:								// Finished sampling secondary channels

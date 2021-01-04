@@ -28,33 +28,32 @@ enum { fill_soft, fill_dma };
 #define BLACK 0
 #define WHITE 1
 
-extern volatile uint8_t OledBuffer[]; // 128x64 1BPP OLED
+extern volatile uint8_t OledBuffer[128*8]; // 128x64 1BPP OLED
 extern volatile oled_status_t oled_status;
 extern volatile uint8_t *OledDmaBf;
 
 
-#ifdef Soft_SPI
-
-void write_byte(uint8_t data);
-void spi_send(uint8_t SPIData);
-void ssd1306_init(void);
-
-#else
-#ifdef Soft_SPI
+#ifdef OLED_SOFT_SPI
+void Enable_Soft_SPI(void);
 void ssd1306_init(DMA_HandleTypeDef *dma);
+void spi_send(uint8_t* bf, uint16_t count);
+
+#elif defined OLED_SOFT_I2C
+void Enable_Soft_I2C(void);
+void ssd1306_init(DMA_HandleTypeDef *dma);
+void i2c_send(bool isCMD, uint8_t* bf, uint16_t count);
 #elif defined OLED_SPI
 void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma);
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *device);
+
 #elif defined OLED_I2C
 void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma);
 void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device);
 #endif
-#endif
+
 void FatalError(uint8_t type);
-void Enable_Soft_SPI_SPI(void);
-void write_data(uint8_t data);
-void write_cmd(uint8_t data);
-void send_display_bf(uint8_t *oled_buffer);
+void write_data(uint8_t* data, uint16_t count);
+void write_cmd(uint8_t cmd);
 void pset(UG_U16 x, UG_U16 y, UG_COLOR c);
 void update_display(void);
 void display_abort(void);
