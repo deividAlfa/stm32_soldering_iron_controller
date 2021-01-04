@@ -118,8 +118,8 @@ void resetTips(void){
 			systemSettings.ironTips[x].calADC_At_300 = 2200;
 			systemSettings.ironTips[x].calADC_At_400 = 3000;
 			systemSettings.ironTips[x].PID.Kp = 0.0045;
-			systemSettings.ironTips[x].PID.Ki = 0.0025;
-			systemSettings.ironTips[x].PID.Kd = 0.0010;
+			systemSettings.ironTips[x].PID.Ki = 0.0030;
+			systemSettings.ironTips[x].PID.Kd = 0.0015;
 			systemSettings.ironTips[x].PID.min = 0;
 			systemSettings.ironTips[x].PID.max = 1;
 			systemSettings.ironTips[x].PID.maxI = 200;

@@ -39,7 +39,6 @@ typedef struct {
 	TIM_HandleTypeDef 		*Delay_Timer;				// Pointer to the Delay timer
 	uint8_t 				CurrentIronPower;			// Last output power
 	uint16_t 				CurrentSetTemperature;		// Actual set temperature (Setpoint)
-	uint16_t 				UserSetTemperature;			// Normal mode temperature
 	uint16_t 				Debug_SetTemperature;		// Debug mode temperature
 	uint32_t 				LastSysChangeTime;			// Last time a system setting was changed
 	uint32_t 				StartOfNoActivityTime;		// Last time since no activity in handle sensor

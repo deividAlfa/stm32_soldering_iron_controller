@@ -50,13 +50,13 @@ static void modeChanged(iron_mode_t newMode) {
 
 
 void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32_t pwmchannel) {
-	Iron.Pwm_Timer		= pwmtimer;
-	Iron.Delay_Timer	= delaytimer;
-	Iron.Pwm_Channel 	= pwmchannel;
-	Iron.Pwm_Out 		= 0;											// PWM disabled
-	Iron.isPresent		= 1;											// Set detected by default (to not show ERROR screen at boot)
-	setCurrentMode(systemSettings.bootMode);							// Set mode
+	Iron.Pwm_Timer			= pwmtimer;
+	Iron.Delay_Timer		= delaytimer;
+	Iron.Pwm_Channel 		= pwmchannel;
+	Iron.Pwm_Out 			= 0;										// PWM disabled
+	Iron.isPresent			= 1;										// Set detected by default (to not show ERROR screen at boot)
 	setCurrentTip(systemSettings.currentTip);							// Load TIP
+	setCurrentMode(systemSettings.bootMode);							// Set mode
 #ifdef	PWM_CHx															// Start PWM
 	HAL_TIM_PWM_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);				// PWM output uses CHx channel
 #else
@@ -333,9 +333,9 @@ void DebugMode(uint8_t value) {
 
 // Sets the user temperature
 void setSetTemperature(uint16_t temperature) {
-	if(Iron.UserSetTemperature != temperature){
-		Iron.CurrentSetTemperature = temperature;
+	if(systemSettings.UserSetTemperature != temperature){
 		systemSettings.UserSetTemperature = temperature;
+		Iron.CurrentSetTemperature=temperature;
 		Iron.Cal_TemperatureReachedFlag = 0;
 		resetPID();
 	}

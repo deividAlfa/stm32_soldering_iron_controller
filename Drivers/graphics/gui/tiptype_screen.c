@@ -43,6 +43,8 @@ static int tiptype_OK(widget_t *w) {
 	resetTips();
 	saveSettings();
 	SetFailState(0);
+	currentPID = systemSettings.ironTips[systemSettings.currentTip].PID;
+	setupPIDFromStruct();
 	if(FirstBoot){
 		Widget_tiptype_CANCEL.enabled = 1;
 		FirstBoot = 0;
