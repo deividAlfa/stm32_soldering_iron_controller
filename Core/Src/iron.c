@@ -80,7 +80,7 @@ void handleIron(void) {
 	// Temperature unit change adjustments
 	if(Iron.TemperatureUnitChanged){
 		Iron.TemperatureUnitChanged=0;
-		switchSysTempUnit();
+		switchTempUnit();
 	}
 
 	// No iron detection
@@ -119,6 +119,12 @@ void handleIron(void) {
 		return;			// Do nothing if in failure state (PWM already disabled)
 	}
 
+	// Disables PID calculation if no iron is detected
+	if(!Iron.isPresent){							// If iron not present
+		Iron.CurrentIronPower = 0;					// Indicate 0.1% power
+		Iron.Pwm_Out = Iron.Pwm_Max/1000;			// Set 0.1% power (to maintain no iron detection)
+		return;
+	}
 	// Controls inactivity timer and enters low power modes
 	switch (Iron.CurrentMode) {
 		case mode_boost:
@@ -139,12 +145,6 @@ void handleIron(void) {
 			break;
 	}
 
-	// Disables PID calculation if no iron is detected
-	if(!Iron.isPresent){							// If iron not present
-		Iron.CurrentIronPower = 0;					// Indicate 0.1% power
-		Iron.Pwm_Out = Iron.Pwm_Max/1000;				// Set 0.1% power (to maintain no iron detection)
-		return;
-	}
 
 	// Only continue if PID update flag is set
 	// Don't calculate PID for the first second after boot, as the filters haven't got enough data yet
@@ -184,7 +184,9 @@ void handleIron(void) {
 	  Iron.Pwm_Out = 0;
 	}
 	// For calibration process
-	if(( Iron.CurrentSetTemperature == readTipTemperatureCompensated(0)) && !Iron.Cal_TemperatureReachedFlag) {
+	if(	  ( (readTipTemperatureCompensated(0)>=(Iron.CurrentSetTemperature-5)) &&	// Add +-3ºC play
+			(readTipTemperatureCompensated(0)<=(Iron.CurrentSetTemperature+5))  )
+			 && !Iron.Cal_TemperatureReachedFlag) {
 		  temperatureReached( Iron.CurrentSetTemperature);
 		  Iron.Cal_TemperatureReachedFlag = 1;
 	  }
@@ -201,7 +203,7 @@ uint16_t round_10(uint16_t input){
 	return input;
 }
 // Changes the system temperature unit
-void switchSysTempUnit(void){
+void switchTempUnit(void){
 	uint16_t tmp;
 	if(systemSettings.tempUnit==Unit_Farenheit){
 		tmp = TempConversion(systemSettings.UserSetTemperature,toFarenheit);
@@ -247,23 +249,22 @@ void setCurrentMode(iron_mode_t mode) {
 			Iron.CurrentSetTemperature = systemSettings.boost.Temperature;
 			break;
 		case mode_normal:
-			if((Iron.CurrentMode==mode_sleep) || (Iron.CurrentMode==mode_standby)){
-				buzzer_short_beep();
-			}
 			Iron.CurrentSetTemperature = systemSettings.UserSetTemperature;
 			break;
 		case mode_sleep:
-			buzzer_short_beep();
 			Iron.CurrentSetTemperature = systemSettings.sleep.Temperature;
 			break;
 		case mode_standby:
-			buzzer_long_beep();
+		default:
+			mode=mode_standby;
 			Iron.CurrentSetTemperature = 0;
 			break;
-		default:
-			break;
 	}
-	Iron.CurrentMode = mode;
+	if(Iron.CurrentMode != mode){
+		Iron.CurrentMode = mode;
+		buzzer_long_beep();
+		Iron.Cal_TemperatureReachedFlag = 0;
+	}
 	modeChanged(mode);
 }
 // Called from program timer if WAKE change is detected
@@ -291,6 +292,7 @@ void SetIronPresence(bool isPresent){
 		if(isPresent && (CurrentTime-Iron.LastNoPresentTime)>systemSettings.noIronDelay ){	// But now it is back
 			buzzer_alarm_stop();					// Stop alarm							// If enough time passed since last detection
 			Iron.isPresent = 1;
+			setCurrentMode(mode_normal);
 		}
 		else if(!isPresent){
 			Iron.LastNoPresentTime = CurrentTime;	// Still not present, save last detected time

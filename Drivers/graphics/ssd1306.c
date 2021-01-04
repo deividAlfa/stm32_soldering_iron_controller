@@ -1,5 +1,6 @@
 #include "ssd1306.h"
 #include "settings.h"
+#include "buzzer.h"
 
 // Need to be aligned to 32bit(4byte) boundary, as FillBuffer() uses 32bit tranfer for increased speed
 __attribute__((aligned(4))) volatile uint8_t OledBuffer[128*8]; // 128x64 1BPP OLED
@@ -336,6 +337,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 void FatalError(uint8_t type){
 	display_abort();
 	SetFailState(1);
+	buzzer_fatal_beep();
 	FillBuffer(C_BLACK,fill_soft);
 	UG_FontSelect(&FONT_10X16_reduced);
 	UG_SetForecolor(C_WHITE);

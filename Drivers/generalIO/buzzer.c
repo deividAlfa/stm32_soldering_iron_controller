@@ -10,7 +10,7 @@
 #include "settings.h"
 #include "main.h"
 
-typedef enum {STATE_SB, STATE_LB, STATE_AL, STATE_IDLE} buzzer_state_type;
+typedef enum {STATE_SB, STATE_LB, STATE_FB, STATE_AL_H,STATE_AL_L, STATE_IDLE} buzzer_state_type;
 
 static buzzer_state_type buzzer_state = STATE_IDLE;
 static uint32_t last_time;
@@ -29,17 +29,28 @@ void buzzer_init() {
 }
 
 void buzzer_short_beep() {
+	if(systemSettings.buzzDisable){ return; }
 	buzzer_state = STATE_SB;
-	if(!systemSettings.buzzDisable){ BUZZER_ON; }
+	BUZZER_ON;
 	last_time = HAL_GetTick();
 }
 void buzzer_long_beep() {
+	if(systemSettings.buzzDisable){ return; }
 	buzzer_state = STATE_LB;
-	if(!systemSettings.buzzDisable){ BUZZER_ON; }
+	BUZZER_ON;
+	last_time = HAL_GetTick();
+}
+void buzzer_fatal_beep() {
+	if(systemSettings.buzzDisable){ return; }
+	buzzer_state = STATE_FB;
+	BUZZER_ON;
 	last_time = HAL_GetTick();
 }
 void buzzer_alarm_start(){
-	buzzer_state = STATE_AL;
+	if(systemSettings.buzzDisable){ return; }
+	buzzer_state = STATE_AL_H;
+	BUZZER_ON;
+	last_time = HAL_GetTick();
 }
 void buzzer_alarm_stop() {
 	buzzer_state = STATE_IDLE;
@@ -47,6 +58,13 @@ void buzzer_alarm_stop() {
 }
 void handle_buzzer() {
 	uint32_t delta = HAL_GetTick() - last_time;
+	if(systemSettings.buzzDisable){
+		if(buzzer_state != STATE_IDLE){
+			buzzer_state = STATE_IDLE;
+			BUZZER_OFF;
+		}
+		return;
+	}
 	switch (buzzer_state) {
 	case STATE_SB:
 		if (delta > SHORT_BEEP) {
@@ -60,13 +78,31 @@ void handle_buzzer() {
 			buzzer_state = STATE_IDLE;
 		}
 		break;
-	case STATE_AL:
-		if (delta > ALARM) {
-			if(!systemSettings.buzzDisable){ BUZZER_TOGGLE; }
+	case STATE_FB:
+		if (delta > FATAL_BEEP) {
+			BUZZER_OFF;
+			buzzer_state = STATE_IDLE;
+		}
+		break;
+	case STATE_AL_H:
+		if(delta > ALARM_HIGH){
+				buzzer_state=STATE_AL_L;
+				BUZZER_OFF;
+				last_time = HAL_GetTick();
+		}
+		break;
+	case STATE_AL_L:
+		if(delta > ALARM_LOW){
+			buzzer_state=STATE_AL_H;
+			BUZZER_ON;
 			last_time = HAL_GetTick();
 		}
 		break;
+	case STATE_IDLE:
+		break;
 	default:
-			break;
+		BUZZER_OFF;
+		buzzer_state = STATE_IDLE;
+		break;
 	}
 }
