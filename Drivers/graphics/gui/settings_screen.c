@@ -549,8 +549,8 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.inputData.getData = &getKd;
 	w->editable.inputData.number_of_dec = 2;
 	w->editable.inputData.type = field_uinteger16;
-	w->editable.big_step = 100;
-	w->editable.step = 10;
+	w->editable.big_step = 200;
+	w->editable.step = 100;
 	w->editable.selectable.tab = 2;
 	w->editable.setData = (void (*)(void *))&setKd;
 	w->reservedChars = 6;

@@ -113,47 +113,31 @@ void resetTips(void){
 	if(systemSettings.TipType==Tip_T12){
 
 		systemSettings.noIronValue=4000;
-		strcpy(systemSettings.ironTips[0].name, "DFLT");
 		for(uint8_t x = 0; x < ( sizeof(systemSettings.ironTips)/sizeof(systemSettings.ironTips[0])); ++x) {
 			systemSettings.ironTips[x].calADC_At_200 = 1300;
-			systemSettings.ironTips[x].calADC_At_300 = 2000;
+			systemSettings.ironTips[x].calADC_At_300 = 2200;
 			systemSettings.ironTips[x].calADC_At_400 = 3000;
-			systemSettings.ironTips[x].PID.Kp = 0.0003;
-			systemSettings.ironTips[x].PID.Kd = 0;
+			systemSettings.ironTips[x].PID.Kp = 0.0045;
 			systemSettings.ironTips[x].PID.Ki = 0.0025;
+			systemSettings.ironTips[x].PID.Kd = 0.0010;
 			systemSettings.ironTips[x].PID.min = 0;
 			systemSettings.ironTips[x].PID.max = 1;
 			systemSettings.ironTips[x].PID.maxI = 200;
 			systemSettings.ironTips[x].PID.minI = -50;
 		}
-		systemSettings.currentNumberOfTips = 4;
+		systemSettings.currentNumberOfTips = 5;
 		systemSettings.currentTip = 0;
+		strcpy(systemSettings.ironTips[0].name, "DFLT");
+		strcpy(systemSettings.ironTips[1].name, "B   ");
+		strcpy(systemSettings.ironTips[2].name, "BC2 ");
+		strcpy(systemSettings.ironTips[3].name, "D24 ");
 
-		strcpy(systemSettings.ironTips[1].name, "B  ");
-		systemSettings.ironTips[1].calADC_At_200 = 1221;
-		systemSettings.ironTips[1].calADC_At_300 = 1904;
-		systemSettings.ironTips[1].calADC_At_400 = 2586;
-		systemSettings.ironTips[1].PID.Kp = 0.0040069999999999999;
-		systemSettings.ironTips[1].PID.Ki = 0.003106000000000002;
-		systemSettings.ironTips[1].PID.Kd = 0.00007;
-
-		strcpy(systemSettings.ironTips[2].name, "BC2");
-		systemSettings.ironTips[2].calADC_At_200 = 1463;
-		systemSettings.ironTips[2].calADC_At_300 = 2313;
-		systemSettings.ironTips[2].calADC_At_400 = 3162;
-		systemSettings.ironTips[2].PID.Kp = 0.003056;
-		systemSettings.ironTips[2].PID.Ki = 0.0025000000000000001;
-		systemSettings.ironTips[2].PID.Kd = 0;
-
-		strcpy(systemSettings.ironTips[3].name, "D24");
-		systemSettings.ironTips[3].calADC_At_200 = 900;
-		systemSettings.ironTips[3].calADC_At_300 = 1932;
-		systemSettings.ironTips[3].calADC_At_400 = 3598;
-		systemSettings.ironTips[3].PID.Kp = 0.002;
-		systemSettings.ironTips[3].PID.Ki = 0.0025000000000000001;
-		systemSettings.ironTips[3].PID.Kd = 0;
+		strcpy(systemSettings.ironTips[4].name, "C245");
+		systemSettings.ironTips[4].calADC_At_200 = 1400;
+		systemSettings.ironTips[4].calADC_At_300 = 2300;
+		systemSettings.ironTips[4].calADC_At_400 = 3150;
 	}
-	else {
+	else if(systemSettings.TipType==Tip_JBC){
 		systemSettings.noIronValue=1200;
 		for(uint8_t x = 0; x < ( sizeof(systemSettings.ironTips)/sizeof(systemSettings.ironTips[0])); ++x) {
 			systemSettings.ironTips[x].calADC_At_200 = 390;
@@ -171,12 +155,25 @@ void resetTips(void){
 		systemSettings.currentTip = 0;
 		// By default take JBC values
 		// T12 won't burn if using JBC settings. But JBC will do if using T12 settings!
-		if(systemSettings.TipType!=Tip_JBC){
-			strcpy(systemSettings.ironTips[0].name, "NONE");
+		strcpy(systemSettings.ironTips[0].name, "010");
+	}
+	else{														// Unknown tip type! What happened?
+		systemSettings.noIronValue=4100;
+		for(uint8_t x = 0; x < ( sizeof(systemSettings.ironTips)/sizeof(systemSettings.ironTips[0])); ++x) {
+			systemSettings.ironTips[x].calADC_At_200 = 100;
+			systemSettings.ironTips[x].calADC_At_300 = 200;
+			systemSettings.ironTips[x].calADC_At_400 = 300;
+			systemSettings.ironTips[x].PID.Kp = 0;
+			systemSettings.ironTips[x].PID.Ki = 0;
+			systemSettings.ironTips[x].PID.Kd = 0;
+			systemSettings.ironTips[x].PID.min = 0;
+			systemSettings.ironTips[x].PID.max = 0;
+			systemSettings.ironTips[x].PID.maxI = 0;
+			systemSettings.ironTips[x].PID.minI = 0;
 		}
-		else{
-			strcpy(systemSettings.ironTips[0].name, "010");
-		}
+		systemSettings.currentNumberOfTips = 1;
+		systemSettings.currentTip = 0;
+		strcpy(systemSettings.ironTips[0].name, "ERR ");
 	}
 }
 
@@ -255,7 +252,7 @@ void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
 	while(Start){
 		timErr=HAL_GetTick();
 		UG_PutString(xpos,ypos,&cleanStr[0]);
-		sprintf(&str[0],"%*d",length-1,Start--);
+		sprintf(&str[0],"%*u",length-1,Start--);
 		UG_PutString(xpos,ypos,&str[0]);
 		update_display();
 		while( (HAL_GetTick()-timErr)<999 ){

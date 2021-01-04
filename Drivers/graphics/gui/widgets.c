@@ -253,7 +253,7 @@ void default_widgetUpdate(widget_t *widget) {
 		}
 	}
 }
-__attribute__((optimize("O0")))//TODO Causa error handler si se optimiza
+
 void default_widgetDraw(widget_t *widget) {
 	if(!widget->enabled)
 		return;
