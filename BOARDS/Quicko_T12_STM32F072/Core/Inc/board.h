@@ -57,8 +57,13 @@
 #define ADC_TIP				ADC_CHANNEL_5	                    //  CH5 = IRON TIP (Sampled independently)
 
 
-//#define NOSAVESETTINGS		// Don't use flash to save or load settings. Always use defaults (debugging purposes)
+//#define NOSAVESETTINGS		// Don't use flash to save or load settings. Always use defaults (for debugging purposes)
 
+// To stop peripherals when debugging
+#define DebugOpts()			__HAL_DBGMCU_FREEZE_IWDG();\
+							__HAL_DBGMCU_FREEZE_TIM16();\
+							__HAL_DBGMCU_FREEZE_TIM17()
+/*
 /*
  *
  *		 <·············· PERIOD ······················>(200mS)
