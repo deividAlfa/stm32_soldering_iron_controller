@@ -134,7 +134,7 @@ void cal_screenUpdate(screen_t *scr){
 		if((HAL_GetTick()-lastUpdateTick)>systemSettings.guiUpdateDelay){
 			lastUpdateTick=HAL_GetTick();
 			lastTipTemp = readTipTemperatureCompensatedRaw(Old);
-			sprintf(Widget_CAL_Wait.displayString, "WAIT...   %u*C",lastTipTemp);
+			sprintf(Widget_CAL_Wait.displayString, "WAIT...   %3u*C",lastTipTemp);
 		}
 	}
 	default_screenUpdate(scr);

@@ -38,6 +38,7 @@ editable_widget_t * extractEditablePartFromWidget(widget_t *widget) {
 			break;
 	}
 }
+
 selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget) {
 	if(!widget)
 		return NULL;
@@ -48,6 +49,7 @@ selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget) {
 		case widget_multi_option:
 			return &widget->multiOptionWidget.editable.selectable;
 		case widget_button:
+		case widget_bmp_button:
 			return &widget->buttonWidget.selectable;
 		case widget_combo:
 			return &widget->comboBoxWidget.selectable;
@@ -126,8 +128,10 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 			w->comboBoxWidget.currentScroll = 0;
 			w->comboBoxWidget.selectable.processInput = &comboBoxProcessInput;
 			break;
-		case widget_button:
+
+		case widget_bmp_button:
 			w->buttonWidget.bmp = NULL;
+		case widget_button:
 			w->buttonWidget.action = NULL;
 			break;
 		case widget_label:
@@ -253,10 +257,18 @@ void default_widgetUpdate(widget_t *widget) {
 		}
 	}
 }
-__attribute__((optimize("O0")))//TODO: Hard Fault if optimized
+
 void default_widgetDraw(widget_t *widget) {
-	if(!widget->enabled)
-		return;
+	UG_COLOR color = C_BLACK;
+	uint8_t draw_frame = 0;
+	uint8_t c;
+	char space[sizeof(widget->displayString)];
+	for(c=0;c<sizeof(widget->displayString)-1;c++){
+		space[c]=' ';										// Fill with spaces
+	}
+	space[c]=0;												// Null termination
+
+	if(!widget->enabled){ return; }
 	UG_FontSetHSpace(0);
 	UG_FontSetVSpace(0);
 	if(!widget->inverted) {
@@ -266,14 +278,12 @@ void default_widgetDraw(widget_t *widget) {
 		UG_SetBackcolor ( C_WHITE ) ;
 		UG_SetForecolor ( C_BLACK ) ;
 	}
-	UG_COLOR color = C_BLACK;
-	uint8_t draw_frame = 0;
 	if(widget->type == widget_bmp) {
 		UG_DrawBMP_MONO(widget->posX ,widget->posY , widget->displayBmp.bmp);
 		return;
 	}
 
-	if((widget->type == widget_editable || widget->type == widget_multi_option || widget->type == widget_button)) {
+	if((widget->type == widget_editable || widget->type == widget_multi_option || widget->type == widget_button || widget->type == widget_bmp_button)) {
 		selectable_widget_t *sel = extractSelectablePartFromWidget(widget);
 		if((sel->state != widget_selected) && (sel->previous_state == widget_selected)) {
 			draw_frame = 1;
@@ -302,31 +312,18 @@ void default_widgetDraw(widget_t *widget) {
 		}
 	}
 	UG_FontSelect(widget->font_size);
-	char space[sizeof(widget->displayString)] = "           ";
-	if((widget->type != widget_label) && (extractDisplayPartFromWidget(widget)->type != field_string)&&(!widget->buttonWidget.bmp) ){
-		space[widget->reservedChars] = (char)'\0';
-		UG_PutString(widget->posX ,widget->posY , space);
-		widget->displayString[widget->reservedChars] = (char)'\0';
-		UG_PutString(widget->posX ,widget->posY , widget->displayString);
-	}
-	else if(extractDisplayPartFromWidget(widget)->type == field_string) {
-		UG_SetBackcolor ( C_BLACK ) ;
-		UG_SetForecolor ( C_WHITE ) ;
-		space[widget->reservedChars] = (char)'\0';
-		UG_PutString(widget->posX ,widget->posY , space);
-		widget->displayString[widget->reservedChars] = (char)'\0';
-		UG_PutString(widget->posX ,widget->posY , widget->displayString);
-		if(extractSelectablePartFromWidget(widget)->state == widget_edit){
-			UG_PutChar(widget->displayString[extractEditablePartFromWidget(widget)->current_edit], widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit, widget->posY,  C_WHITE, C_BLACK);
-			UG_DrawLine(widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit+1,widget->posY+ widget->font_size->char_height,widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height, C_WHITE);
-			UG_DrawLine(widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit+1,widget->posY+ widget->font_size->char_height+1,widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height+1, C_WHITE);
-			if(extractEditablePartFromWidget(widget)->current_edit){
-				UG_DrawLine(widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+1,widget->posY+ widget->font_size->char_height,widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height, C_BLACK);
-				UG_DrawLine(widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+1,widget->posY+ widget->font_size->char_height+1,widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height+1, C_BLACK);
-			}
+	//widget_combo, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button, widget_bmp_button
+
+	if((widget->type == widget_display)||(widget->type == widget_editable)||(widget->type == widget_multi_option)){
+		if(extractDisplayPartFromWidget(widget)->type != field_string){
+			space[widget->reservedChars] = (char)'\0';
+			UG_PutString(widget->posX ,widget->posY , space);
+			widget->displayString[widget->reservedChars] = (char)'\0';
+			UG_PutString(widget->posX ,widget->posY , widget->displayString);
 		}
-	}	// BMP button
-	if( (widget->type == widget_button) && (widget->buttonWidget.bmp) ){
+	}
+	// BMP button
+	if(widget->type == widget_bmp_button){
 		UG_DrawBMP_MONO(widget->posX ,widget->posY , widget->buttonWidget.bmp);
 		if(draw_frame) {
 			UG_DrawFrame(widget->posX - 2, widget->posY - 2,
@@ -335,8 +332,30 @@ void default_widgetDraw(widget_t *widget) {
 		}
 		return;
 	}
-	// string button or label
-	UG_PutString(widget->posX ,widget->posY , widget->displayString);
+	if( (widget->type == widget_display)||(widget->type == widget_editable)||(widget->type == widget_multi_option) ) {
+		if((extractDisplayPartFromWidget(widget)->type == field_string)) {
+			UG_SetBackcolor ( C_BLACK ) ;
+			UG_SetForecolor ( C_WHITE ) ;
+			space[widget->reservedChars] = (char)'\0';
+			UG_PutString(widget->posX ,widget->posY , space);
+			widget->displayString[widget->reservedChars] = (char)'\0';
+			UG_PutString(widget->posX ,widget->posY , widget->displayString);
+			if((widget->type == widget_editable) && (extractSelectablePartFromWidget(widget)->state == widget_edit)){
+				UG_PutChar(widget->displayString[extractEditablePartFromWidget(widget)->current_edit], widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit, widget->posY,  C_WHITE, C_BLACK);
+				UG_DrawLine(widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit+1,widget->posY+ widget->font_size->char_height,widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height, C_WHITE);
+				UG_DrawLine(widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit+1,widget->posY+ widget->font_size->char_height+1,widget->posX + widget->font_size->char_width * extractEditablePartFromWidget(widget)->current_edit+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height+1, C_WHITE);
+				if(extractEditablePartFromWidget(widget)->current_edit){
+					UG_DrawLine(widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+1,widget->posY+ widget->font_size->char_height,widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height, C_BLACK);
+					UG_DrawLine(widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+1,widget->posY+ widget->font_size->char_height+1,widget->posX + widget->font_size->char_width * (extractEditablePartFromWidget(widget)->current_edit-1)+widget->font_size->char_width-3,widget->posY+ widget->font_size->char_height+1, C_BLACK);
+				}
+			}
+		}
+	}
+	// Text button, label or editable widget
+	//widget_combo, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button, widget_bmp_button}widgetType;
+	if( (widget->type == widget_button) ||(widget->type == widget_label)){
+		UG_PutString(widget->posX ,widget->posY , widget->displayString);
+	}
 	if(draw_frame) {
 		UG_DrawFrame(widget->posX - 1, widget->posY - 1,
 		widget->posX + widget->reservedChars * widget->font_size->char_width + 1,
@@ -489,7 +508,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 		if(input == Click) {
 			switch (sel->state) {
 				case widget_selected:
-					if(widget->type == widget_button)
+					if((widget->type == widget_button)||(widget->type == widget_bmp_button))
 						return widget->buttonWidget.action(widget);
 					if(extractDisplayPartFromWidget(widget)->type == field_string)
 						extractEditablePartFromWidget(widget)->current_edit = 0;

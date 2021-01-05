@@ -86,6 +86,9 @@ uint16_t readTipTemperatureCompensated(bool new) {
 	if(new){
 		readTipTemperatureCompensatedRaw(New);
 		last_value = adc2Human(TIP.last_avg,1,systemSettings.tempUnit);
+		if(last_value>530){
+			last_value=530;
+		}
 	}
 	return last_value;
 }
@@ -94,6 +97,9 @@ uint16_t readTipTemperatureCompensatedRaw(bool new) {
 	static uint16_t last_value;
 	if (new){
 		last_value = adc2Human(TIP.last_RawAvg,1,systemSettings.tempUnit);
+		if(last_value>530){
+			last_value=530;
+		}
 	}
 	return last_value;
 }

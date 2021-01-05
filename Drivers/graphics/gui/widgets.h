@@ -17,7 +17,7 @@
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
 typedef enum widgetFieldType {field_float, field_integer, field_integer16,field_uinteger16, field_int32, field_bmp, field_string}widgetFieldType;
 typedef enum widgetTextJustifyType {justify_left, justify_right}widgetTextJustifyType;
-typedef enum widgetType {widget_combo, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button}widgetType;
+typedef enum widgetType {widget_combo, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button, widget_bmp_button}widgetType;
 typedef struct widget_t widget_t;
 typedef struct comboBox_item_t comboBox_item_t;
 

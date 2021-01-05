@@ -355,7 +355,7 @@ void main_screen_setup(screen_t *scr) {
 	// Settings Button
 	w=&Widget_SettingsBtn;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_button);
+	widgetDefaultsInit(w, widget_bmp_button);
 	w->posX = 2;
 	w->posY = 50;
 	w->buttonWidget.bmp = &settings;
