@@ -23,7 +23,7 @@ Video can be seen there: (Project in active development, the features will chang
 * Developed on STM32CubeIDE - download and use that. This IDE includes the MX code generator
 * Tested on QUICKO T12 with STM32F072 and STM32F103.
 * Should be easily ported to other stm32f0xx/stm32f1xx MCUs.
-* Already compiled bins in Debug folder! (Test at your own risk) 
+* Already compiled bins in each board folder (Test at your own risk) 
 * Intended to serve as an unified codebase that's easier to share across different boards / hardware. Very few files need to be changed.
 
 <a id="warning"></a>
