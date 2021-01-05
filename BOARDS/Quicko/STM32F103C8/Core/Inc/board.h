@@ -74,6 +74,7 @@
  ********************************/
 #define HIWDG				hiwdg								// iwdg used
 #define HCRC				hcrc								// crc used
+#define FLASH_SZ			64									// Flash Size (KB)
 //#define NOSAVESETTINGS										// Don't use flash to save or load settings. Always use defaults (for debugging purposes)
 
 // To stop peripherals when debugging
