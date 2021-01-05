@@ -19,7 +19,7 @@ volatile adc_measures_t ADC_measures[ADC_BFSIZ] = { 0 };
 volatile uint16_t Tip_measures[ADC_BFSIZ] = { 0 };
 ADC_Status_t ADC_Status = ADC_Idle;
 
-#ifdef ADC_TIP
+
 ADCDataTypeDef_t TIP = {
 		adc_buffer: &Tip_measures[0],
 		last_avg: 100,
@@ -28,23 +28,22 @@ ADCDataTypeDef_t TIP = {
 		EMA_of_Input:100<<12,
 		Filter:1				//EMA type filtering
 };
-#endif
 
-#ifdef ADC_VIN
+#ifdef USE_VIN
 ADCDataTypeDef_t VIN = {
 		adc_buffer: &ADC_measures[0].VIN,
 		Filter:1				//EMA type filtering
 };
 #endif
 
-#ifdef ADC_NTC
+#ifdef USE_NTC
 ADCDataTypeDef_t NTC = {
 		adc_buffer: &ADC_measures[0].NTC,
 		Filter:1				//EMA type filtering
 };
 #endif
 
-#ifdef ADC_VREF
+#ifdef USE_VREF
 ADCDataTypeDef_t VREF = {
 		adc_buffer: &ADC_measures[0].VREF,
 		Filter:1				//EMA type filtering
@@ -94,27 +93,27 @@ void ADC_Start_DMA(){
 			ADC_Status = ADC_SamplingOthers;
 			sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;							// More sampling time to compensate high input impedances
 
-			#ifdef ADC_VREF
+			#ifdef ADC_CH_1ST
 				#ifdef STM32F103xB
 					sConfig.Rank = ADC_REGULAR_RANK_1;
 				#endif
-				sConfig.Channel = ADC_VREF;
+				sConfig.Channel = ADC_CH_1ST;
 				if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
 			#endif
 
-			#ifdef ADC_NTC
+			#ifdef ADC_CH_2ND
 				#ifdef STM32F103xB
 					sConfig.Rank = ADC_REGULAR_RANK_2;
 				#endif
-				sConfig.Channel = ADC_NTC;
+				sConfig.Channel = ADC_CH_2ND;
 				if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
 			#endif
 
-			#ifdef ADC_VIN
+			#ifdef ADC_CH_3RD
 				#ifdef STM32F103xB
 					sConfig.Rank = ADC_REGULAR_RANK_3;
 				#endif
-				sConfig.Channel = ADC_VIN;
+				sConfig.Channel = ADC_CH_3RD;
 				if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
 			#endif
 
@@ -140,7 +139,7 @@ void ADC_Start_DMA(){
 				sConfig.Channel = ADC_TIP;
 				if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
 			#else
-				#error ADC_IRON not configured properly
+				#error ADC_TIP not configured properly in board.h
 			#endif
 			// Start ADC, start conversion, other measurements (non time-critical)
 			if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)Tip_measures, sizeof(Tip_measures)/ sizeof(uint16_t) )!=HAL_OK){
@@ -236,18 +235,16 @@ uint16_t ADC_to_mV (uint16_t adc){
 void handle_ADC(void){
 
 	if(ADC_Status == ADC_SamplingTip){
-		#ifdef ADC_TIP
 		DoAverage(&TIP);
-		#endif
 	}
 	else if(ADC_Status == ADC_SamplingOthers){
-		#ifdef ADC_VREF
+		#ifdef USE_VREF
 		DoAverage(&VREF);
 		#endif
-		#ifdef ADC_NTC
+		#ifdef USE_NTC
 		DoAverage(&NTC);
 		#endif
-		#ifdef ADC_VIN
+		#ifdef USE_VIN
 		DoAverage(&VIN);
 		#endif
 	}

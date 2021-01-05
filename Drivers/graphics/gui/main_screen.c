@@ -41,22 +41,30 @@ UG_BMP_MONO settings = {
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
+#ifdef USE_NTC
+static widget_t Widget_AmbTemp;
+#endif
+#ifdef USE_VIN
 static widget_t Widget_Vsupply;
-static widget_t Widget_Power;
+#endif
 static widget_t Widget_IronTemp;
+static widget_t Widget_Power;
 static widget_t Widget_noIron;
 static widget_t Widget_TipSelect;
 static widget_t Widget_SetPoint;
-static widget_t Widget_AmbTemp;
 static widget_t Widget_Mode;
 static widget_t Widget_PulseIcon;
 static widget_t Widget_SettingsBtn;
 static uint32_t lastUpdateTick;
 static bool UpdateReadings;
 static int16_t lastTipTemp;
-static int16_t lastAmbTemp;
 static int8_t lastPwr;
+#ifdef USE_NTC
+static int16_t lastAmbTemp;
+#endif
+#ifdef USE_VIN
 static uint16_t lastVin;
+#endif
 static bool NoIronPrevState=0, PulsePrevState=0;
 static bool TempUnit;
 
@@ -95,13 +103,15 @@ static void * main_screen_getIronTemp() {
 	return &lastTipTemp;
 }
 
+#ifdef USE_VIN
 static void * main_screen_getVin() {
 	if(UpdateReadings){
 		lastVin = getSupplyVoltage_v_x10();
 	}
 	return &lastVin;
 }
-
+#endif
+#ifdef USE_NTC
 static void * main_screen_getAmbTemp() {
 
 	if(UpdateReadings){
@@ -115,6 +125,7 @@ static void * main_screen_getAmbTemp() {
 		}
 	return &lastAmbTemp;
 }
+#endif
 
 static void * main_screen_getIronPower() {
 	if(UpdateReadings){
@@ -134,7 +145,9 @@ static void tempUnitChanged(void) {
 	TempUnit = systemSettings.tempUnit;
 	if(TempUnit==Unit_Farenheit){
 		strcpy(Widget_IronTemp.endString, "*F");
+		#ifdef USE_NTC
 		strcpy(Widget_AmbTemp.endString, "*F");		// '*' shown as '°' in all fonts
+		#endif
 		strcpy(Widget_SetPoint.endString, "*F");
 		Widget_SetPoint.editable.max_value=900;
 		Widget_SetPoint.editable.min_value=350;
@@ -143,7 +156,9 @@ static void tempUnitChanged(void) {
 	}
 	else{
 		strcpy(Widget_IronTemp.endString, "*C");
+		#ifdef USE_NTC
 		strcpy(Widget_AmbTemp.endString, "*C");		// '*' shown as '°' in all fonts
+		#endif
 		strcpy(Widget_SetPoint.endString, "*C");
 		Widget_SetPoint.editable.max_value=480;
 		Widget_SetPoint.editable.min_value=180;
@@ -231,11 +246,11 @@ void main_screenUpdate(screen_t *scr) {
 	default_screenUpdate(scr);
 }
 void main_screen_draw(screen_t *scr){
+	#ifdef USE_NTC
 	uint8_t x = strlen(Widget_AmbTemp.displayString);
-	UG_SetForecolor(C_WHITE);
-	UG_SetBackcolor(C_BLACK);
 	x*=Widget_AmbTemp.font_size->char_width;
 	Widget_AmbTemp.posX = ( ((UG_GetXDim()-x)/2)-1+4 );	// Center the AmbTemp widget
+	#endif
 	default_screenDraw(scr);
 	//UG_DrawLine(0, 0, UG_GetXDim()-1, 0, C_WHITE );
 	//UG_DrawLine(0, 15, UG_GetXDim()-1, 15, C_WHITE );
@@ -265,6 +280,7 @@ void main_screen_setup(screen_t *scr) {
 	scr->update = &main_screenUpdate;
 	widget_t *w;
 
+	#ifdef USE_VIN
 	//V input display
 	w = &Widget_Vsupply;
 	screen_addWidget(w, scr);
@@ -279,7 +295,8 @@ void main_screen_setup(screen_t *scr) {
 	w->displayWidget.justify = justify_right;
 	w->displayWidget.hasEndStr = 1;
 	strcpy(w->endString, "V");
-
+	#endif
+	#ifdef USE_NTC
 	//Ambient temperature display
 	w=&Widget_AmbTemp;
 	screen_addWidget(w,scr);
@@ -292,7 +309,7 @@ void main_screen_setup(screen_t *scr) {
 	w->displayWidget.type = field_integer16;
 	w->reservedChars = 5;
 	w->displayWidget.hasEndStr = 1;
-
+	#endif
 	//power display
 	w=&Widget_Power;
 	screen_addWidget(w,scr);

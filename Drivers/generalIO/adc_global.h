@@ -44,16 +44,16 @@ typedef struct {
 	#endif
 } adc_measures_t;
 
-#ifdef ADC_TIP
+
 				extern ADCDataTypeDef_t TIP;
-#endif
-#ifdef ADC_VIN
+
+#ifdef USE_VIN
 				extern ADCDataTypeDef_t VIN;
 #endif
-#ifdef ADC_NTC
+#ifdef USE_NTC
 				extern ADCDataTypeDef_t NTC;
 #endif
-#ifdef ADC_VREF
+#ifdef USE_VREF
 				extern ADCDataTypeDef_t VREF;
 #endif
 

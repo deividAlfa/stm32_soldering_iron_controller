@@ -15,10 +15,6 @@ typedef enum {STATE_SB, STATE_LB, STATE_FB, STATE_AL_H,STATE_AL_L, STATE_IDLE} b
 static buzzer_state_type buzzer_state = STATE_IDLE;
 static uint32_t last_time;
 
-#define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET)
-#define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET)
-#define BUZZER_TOGGLE HAL_GPIO_TogglePin(BUZZER_GPIO_Port, BUZZER_Pin)
-
 static void tempReachedCall(uint16_t temp) {
 	buzzer_short_beep();
 }

@@ -5,8 +5,8 @@
  *      Author: jose
  */
 
-#include "adc_global.h"
-
+#include "voltagesensors.h"
+#ifdef USE_VIN
 uint16_t getSupplyVoltage_v_x10() {
 	uint32_t temp;
 
@@ -20,10 +20,12 @@ uint16_t getSupplyVoltage_v_x10() {
 	temp+=50;												// Round number
 	return (temp/100);										// Return Supply  V*10
 }
+#endif
 
+#ifdef USE_VREF
 uint16_t getReferenceVoltage_mv_x10() {
 
 	return ADC_to_mV(VREF.last_avg);
 
 }
-
+#endif

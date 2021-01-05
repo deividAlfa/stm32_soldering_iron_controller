@@ -24,6 +24,7 @@ static tipData *currentTipData;
 	 Source: http://www.sebulli.com/ntc/index.php
 */
 
+#ifdef USE_NTC
 const int NTC_table[257] = {
   3525, 2945, 2365, 2077, 1891, 1755, 1650,
   1565, 1493, 1431, 1377, 1330, 1287, 1248,
@@ -57,10 +58,11 @@ const int NTC_table[257] = {
   -428, -449, -472, -499, -531, -571, -624,
   -710, -796
 };
-
+#endif
 int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
-	int16_t p1, p2;
 	int16_t temp;
+#ifdef USE_NTC
+	int16_t p1, p2;
 	int16_t lastavg=NTC.last_avg;
 	/* Estimate the interpolating point before and after the ADC value. */
 	p1 = NTC_table[(lastavg >> 4)];
@@ -73,6 +75,10 @@ int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
 		temp+=(320-32);	//TempConversion works in x1, not x10, so subtract 32, add 32x10
 	}
 	return temp;
+#else
+	temp=350;				// If no NTC is used, assume 35ºC
+	return temp;
+#endif
 }
 // Read tip filtered
 uint16_t readTipTemperatureCompensated(bool new) {

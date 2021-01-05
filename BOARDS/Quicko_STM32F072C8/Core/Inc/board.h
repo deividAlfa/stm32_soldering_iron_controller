@@ -18,51 +18,54 @@
 /********************************
  * 			Display Settings    *
  ********************************/
-#define OLED_SPI
-//#define OLED_I2C
-//#define OLED_SOFT_SPI
-//#define OLED_SOFT_I2C
-#define OLED_DEVICE			hspi2							    // SPI handler
+#define OLED_SPI												// Hardware DMA SPI
+//#define OLED_I2C												// Hardware DMA I2C
+//#define OLED_SOFT_SPI											// Software bitbang SPI
+//#define OLED_SOFT_I2C											// Software bitbang I2C
+#define OLED_DEVICE			hspi2							    // SPI / I2C handler if used
 #define OLED_ADDRESS 		(0x3c<<1)						    // Only used for i2c
 #define FILL_DMA			hdma_memtomem_dma1_channel2		    // DMA mem2mem for filling
 
 /********************************
  * 			PWM Settings        *
  ********************************/
-#define DELAY_TIMER			htim3			                    // Timer for the dead time
-#define PWM_TIMER 			htim4			                    // PWM Timer
-#define PWM_CHANNEL 		TIM_CHANNEL_2	                    // PWM Timer Channel
-//#define PWM_CHxN							                    // Using CHxN Output type
-#define PWM_CHx								                    // Using CHx Output type
+#define DELAY_TIMER			htim15			                    // Timer for the dead time
+#define PWM_TIMER 			htim17			                    // PWM Timer
+#define PWM_CHANNEL 		TIM_CHANNEL_1	                    // PWM Timer Channel
+#define CHxN								                    // Using CHxN Output type
+//#define CHx								                    // Using CHx Output type
 
 /********************************
- * 			Display Settings    *
+ * 			ADC Settings		*
  ********************************/
-#define OLED_SPI
-//#define OLED_I2C
-#define OLED_DEVICE			hspi2							    // SPI handler
-#define OLED_ADDRESS 		(0x3c<<1)						    // Only used for i2c
-#define FILL_DMA			hdma_memtomem_dma1_channel2		    // DMA mem2mem for filling
-
-/********************************
- * 			ADC Settings        *
- ********************************/
-#define ADC_DEVICE 			hadc1			                    // ADC device
-#define ADC_MEASURE_TIME	60 				                    // in uS
-#define ADC_TRGO			ADC_EXTERNALTRIGCONV_T3_TRGO		// TRGO source for ADC trigger
-#define ADC_BFSIZ 	        16	+2		                        // ADC DMA buffer size Buffer[ADC_BFSIZ][Adc_Buffer_Elements](+2 to compensate min/max value discard in filtering)
+#define ADC_DEVICE 			hadc			                    // ADC device
+#define ADC_MEASURE_TIME	60				                    // in uS. Time to subtract from the Period where PWM output will be low, so the ADC can measure the tip (Measured 26uS)
+#define ADC_TRGO			ADC_EXTERNALTRIGCONV_T15_TRGO		// TRGO source for ADC trigger
+#define ADC_BFSIZ 		    16	+2		                        // ADC DMA buffer size Buffer[ADC_BFSIZ][Adc_Buffer_Elements](+2 to compensate min/max value discard in filtering)
 
 // Order for secondary measurements, ADC channels not requiring sampling in the PWM low period. Order as ADC rank order (usually ch0-ch18)
 #define ADC_1st				VREF			                    // ADC 1st used channel (CH1)
 #define ADC_2nd				NTC				                    // ADC 2nd used channel (CH2)
 #define ADC_3rd				VIN				                    // ADC 3rd used channel (CH3)
-#define ADC_AuxNum			3				                    // Number of secondary elements
+#define ADC_AuxNum			3				                    // Number of secondary elementsç
 
-                                                                // Channel assignment
-#define ADC_VREF			ADC_CHANNEL_1	                    //  CH1 = VREF
-#define ADC_NTC				ADC_CHANNEL_2	                    //  CH2 = NTC
-#define ADC_VIN				ADC_CHANNEL_3	                    //  CH3 = VIN
+// Channel assignment
+#define ADC_CH_1ST			ADC_CHANNEL_1	                    //  CH1 = VREF
+#define ADC_CH_2ND			ADC_CHANNEL_2	                    //  CH2 = NTC
+#define ADC_CH_3RD			ADC_CHANNEL_3	                    //  CH3 = VIN
 #define ADC_TIP				ADC_CHANNEL_5	                    //  CH5 = IRON TIP (Sampled independently)
+
+// To enable specific functions in code
+//#define USE_VREF
+#define USE_VIN
+#define USE_TIP
+#define USE_NTC
+/********************************
+ * 			Buzzer				*
+ ********************************/
+#define BUZZER_ON 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET)
+#define BUZZER_OFF 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET)
+#define BUZZER_TOGGLE 		HAL_GPIO_TogglePin(BUZZER_GPIO_Port, BUZZER_Pin)
 
 /********************************
  * 			Misc		*
@@ -73,7 +76,7 @@
 
 // To stop peripherals when debugging
 #define DebugOpts()			__HAL_DBGMCU_FREEZE_IWDG();\
-							__HAL_DBGMCU_FREEZE_TIM3();\
-							__HAL_DBGMCU_FREEZE_TIM4()
+							__HAL_DBGMCU_FREEZE_TIM16();\
+							__HAL_DBGMCU_FREEZE_TIM17()
 
 #endif
