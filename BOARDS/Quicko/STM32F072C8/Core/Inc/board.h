@@ -61,7 +61,6 @@
 // To enable specific functions in code
 //#define USE_VREF
 #define USE_VIN
-#define USE_TIP
 #define USE_NTC
 /********************************
  * 			Buzzer				*

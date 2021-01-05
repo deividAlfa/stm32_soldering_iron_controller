@@ -56,23 +56,22 @@
 #define ADC_AuxNum			2				                    // Number of secondary elements
 
 // Channel assignment
-#define ADC_CH_1ST			ADC_CHANNEL_2	                    //  CH2 = NTC
-#define ADC_CH_2ND			ADC_CHANNEL_7	                    //  CH3 = VIN
-//#define ADC_CH_3RD		ADC_CHANNEL_8						//  CH3 = VREF
-#define ADC_TIP				ADC_CHANNEL_9	                    //  CH5 = IRON TIP (Sampled independently)
+#define ADC_CH_1ST			ADC_CHANNEL_5	                    //  CH5 = NTC
+#define ADC_CH_2ND			ADC_CHANNEL_8	                    //  CH8 = VIN
+//#define ADC_CH_3RD		ADC_CHANNEL_						//  NO VREF
+#define ADC_TIP				ADC_CHANNEL_9	                    //  CH9 = IRON TIP (Sampled independently)
 
 // To enable specific functions in code
 //#define USE_VREF
 #define USE_VIN
-#define USE_TIP
 #define USE_NTC
 /********************************
  * 			Buzzer				*
  ********************************/
-#define BUZZER_ON 			HAL_GPIO_WritePin(BUZ0_GPIO_Port, BUZ0_Pin, GPIO_PIN_SET);\
+#define BUZZER_OFF 			HAL_GPIO_WritePin(BUZ0_GPIO_Port, BUZ0_Pin, GPIO_PIN_SET);\
 							HAL_GPIO_WritePin(BUZ1_GPIO_Port, BUZ1_Pin, GPIO_PIN_SET);
 
-#define BUZZER_OFF 			HAL_GPIO_WritePin(BUZ0_GPIO_Port, BUZ0_Pin, GPIO_PIN_RESET);\
+#define BUZZER_ON 			HAL_GPIO_WritePin(BUZ0_GPIO_Port, BUZ0_Pin, GPIO_PIN_RESET);\
 							HAL_GPIO_WritePin(BUZ1_GPIO_Port, BUZ1_Pin, GPIO_PIN_RESET);
 
 #define BUZZER_TOGGLE 		HAL_GPIO_TogglePin(BUZ0_GPIO_Port, BUZ0_Pin);\
