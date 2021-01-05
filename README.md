@@ -105,7 +105,22 @@ Video of building steps:
 
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/8oeGVSSxudk/0.jpg)](https://www.youtube.com/watch?v=8oeGVSSxudk "Firmware build")
 
-Keep in mind that the flash is almost full, so it will not build in debug mode unless you change Build optimizations to -Os(Optimize for size)
+Keep in mind that the flash is almost full, so it will not fit with optimizations disabled.
+
+It needs to have build optimizations to -Os(Optimize for size).
+
+To debug a specific function you can use the "__attribute" directive, found at the start of board.h.
+Copy that line before the function like this:
+
+**__attribute__((optimize("O0"))) void ThisFunctionIsNotOptimized(...)**
+
+If you want to retarget the project, you can't mix the files, it will make a conflict.
+Delete these files:
+- /Core/Inc/\*stm32\*
+- /Core/Src/\*stm32\*
+- /Core/Startup/\*
+
+And then copy the board profile files overwriting any files.
 
 <a id="Creating_ioc"></a>
 ## Creating a .ioc file from scratch
@@ -219,7 +234,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
             * Trigger event selection: Update Event (UG bit from TIMx_EGR)
             * Set Prescaler for 10uS period at input. 
               Ex @ 48MHz, Prescaler: 479 (479+1=480)            
-            * NVIC settings: Enable TIMx Global interrupt.
+            * NVIC settings: Interrupts disabled.
               Consider that some timers will run at CPU speed, while other may take a slower clock, depending on the bus.
               Check the Clock config in CUBEMX!
             
@@ -234,7 +249,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
             - Mode: PWM Generation. Select CHx(N), as assigned to PIN. Ensure to select "N" if the pin has it!
             - Set Prescaler for 10uS period at input. 
               Ex @ 48MHz, Prescaler: 479 (479+1=480)
-            - NVIC settings: Enable TIMx Global interrupt.
+            - NVIC settings: Depending on the timer type, enable TIMx "Capture compare" if available, else use "Global interrupt".
               Consider that some timers will run at CPU speed while other may take a slower clock.
               Check the Clock config in CUBEMX!
             
