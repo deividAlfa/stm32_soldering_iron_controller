@@ -19,14 +19,35 @@ static DMA_HandleTypeDef *oledFillDMA;
 
 #ifdef OLED_SOFT_I2C
 void Enable_Soft_I2C(void){
-	//HAL_I2C_MspDeInit(&OLED_DEVICE);
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	/*Configure GPIO pins : SCL_Pin */
+	GPIO_InitStruct.Pin = 	OLED_SCL_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	HAL_GPIO_Init(OLED_SCL_GPIO_Port, &GPIO_InitStruct);
+
+	/*Configure GPIO pins : SDA_Pin */
+	GPIO_InitStruct.Pin = 	OLED_SDA_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	HAL_GPIO_Init(OLED_SDA_GPIO_Port, &GPIO_InitStruct);
+
+	Oled_Clear_SDA();
+	HAL_Delay(1);
+	Oled_Clear_SCL();
+	HAL_Delay(1);
+	Oled_Set_SCL();			//Force stop condition on init
+	HAL_Delay(1);
+	Oled_Set_SDA();
+	HAL_Delay(1);
+}
 #endif
 
 #ifdef OLED_SOFT_SPI
 void Enable_Soft_SPI(void){
 	//HAL_SPI_MspDeInit(&OLED_DEVICE);
-#endif
-
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 	/*Configure GPIO pins : SCL_Pin */
 	GPIO_InitStruct.Pin = 	OLED_SCL_Pin;
@@ -41,7 +62,11 @@ void Enable_Soft_SPI(void){
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 	HAL_GPIO_Init(OLED_SDA_GPIO_Port, &GPIO_InitStruct);
+
 }
+#endif
+
+
 #endif
 
 #ifdef OLED_SOFT_SPI
@@ -51,32 +76,33 @@ void spi_send(uint8_t* bf, uint16_t count){
 	while(count--){
 		data = *bf++;
 		if(data==0){
-			OLED_SDA_GPIO_Port->BRR = (uint32_t)OLED_SDA_Pin;
+			Oled_Clear_SDA();
 			for(shift = 0; shift < 8; shift++){
-				OLED_SCL_GPIO_Port->BSRR = (uint32_t)OLED_SCL_Pin;
-				OLED_SCL_GPIO_Port->BRR = (uint32_t)OLED_SCL_Pin;
+				Oled_Set_SCL();
+				Oled_Clear_SCL();
 			}
 		}
 
 		else if(data==0xFF){
-			OLED_SDA_GPIO_Port->BSRR = (uint32_t)OLED_SDA_Pin;
+			Oled_Set_SDA();
 			for(shift = 0; shift < 8; shift++){
-				OLED_SCL_GPIO_Port->BSRR = (uint32_t)OLED_SCL_Pin;
-				OLED_SCL_GPIO_Port->BRR = (uint32_t)OLED_SCL_Pin;
+				Oled_Set_SCL();
+				Oled_Clear_SCL();
 			}
 		}
 
 		else{
 			for(shift = 0; shift < 8; shift++){
 				if(data & 0x80){
-					OLED_SDA_GPIO_Port->BSRR = (uint32_t)OLED_SDA_Pin;
+					Oled_Set_SDA();
 				}
 				else{
-					OLED_SDA_GPIO_Port->BRR = (uint32_t)OLED_SDA_Pin;
+					Oled_Clear_SDA();
 				}
-				OLED_SCL_GPIO_Port->BSRR = (uint32_t)OLED_SCL_Pin;
+
+				Oled_Set_SCL();
 				data <<= 1;
-				OLED_SCL_GPIO_Port->BRR = (uint32_t)OLED_SCL_Pin;
+				Oled_Clear_SCL();
 			}
 		}
 	}
@@ -84,58 +110,136 @@ void spi_send(uint8_t* bf, uint16_t count){
 #endif
 
 #ifdef OLED_SOFT_I2C
-void i2c_send(uint8_t SPIData, bool mode){//TODO
-	unsigned char SPICount;                               // Counter used to clock out the data
-
-	for (SPICount = 0; SPICount < 8; SPICount++)          // Prepare to clock out the Address byte
-		  {
-		    if (SPIData & 0x80)                                 // Check for a 1
-		    	HAL_GPIO_WritePin(SDO_GPIO_Port, SDO_Pin, GPIO_PIN_SET);
-		    else
-		    	HAL_GPIO_WritePin(SDO_GPIO_Port, SDO_Pin, GPIO_PIN_RESET);
-		    	HAL_GPIO_WritePin(SCK_GPIO_Port, SCK_Pin, GPIO_PIN_SET);
-		    	HAL_GPIO_WritePin(SCK_GPIO_Port, SCK_Pin, GPIO_PIN_RESET);
-		    	SPIData <<= 1;                                      // Rotate to get the next bit
-		  }
+void i2cWait(void){
+	asm(	"nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n\
+			 nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n\
+			 nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop");
 }
-#endif
-
-
-// Send data in blocking mode (Not used in screen update)
+void i2cStart(void){						// 	Start condition, SDA transition to low with SCL high
+	Oled_Set_SCL();
+	i2cWait();
+	Oled_Clear_SDA();
+	i2cWait();
+	Oled_Clear_SCL();
+	i2cWait();
+}
+void i2cStop(void){						// 	Stop condition, SCL transition to high with SDA low
+	Oled_Clear_SDA();
+	i2cWait();
+	Oled_Set_SCL();
+	i2cWait();
+	Oled_Set_SDA();
+	i2cWait();
+}
 __attribute__((section(".RamFunc")))
-void write_data(uint8_t* data, uint16_t count) {
-	while(oled_status!=oled_idle);	// Wait for DMA to finish
-
-#ifdef OLED_SOFT_SPI
-	Oled_Clear_CS();
-	spi_send(data,count);
-	Oled_Set_CS();
-
-#elif defined OLED_SOFT_I2C
-	i2c_send(data,count);//TODO
-
-#elif defined OLED_SPI
-	Oled_Clear_CS();
-	if(HAL_SPI_Transmit(oledDevice, data, count, 1000)!=HAL_OK){
-		Error_Handler();
+void i2cBegin(bool isCmd){
+	uint8_t bf[2]= { OLED_ADDRESS, 0x00 };
+	if(!isCmd){
+		bf[1] = 0x40;
 	}
-	Oled_Set_CS();
-
-#elif defined OLED_I2C
-	if(HAL_I2C_Mem_Write(m_hi2c, OLED_ADDRESS, 0x40, 1, data, count, 100) ){
-		Error_Handler();
+	for(uint8_t d=0;d<2;d++){
+		uint8_t data = bf[d];
+		for(uint8_t shift = 0; shift < 8; shift++){
+			if(data & 0x80){
+				Oled_Set_SDA();
+				i2cWait();
+			}
+			else{
+				Oled_Clear_SDA();
+				i2cWait();
+			}
+			Oled_Set_SCL();
+			i2cWait();
+			Oled_Clear_SCL();
+			data <<= 1;
+		}
+		i2cWait();
+		Oled_Set_SCL();
+		i2cWait();
+		//Oled_Set_SDA();										// As we don't care the ACK, don't release SDA
+		//i2cWait();
+		//Get ACK here
+		Oled_Clear_SCL();
 	}
+}
+__attribute__((section(".RamFunc")))
+void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
+	volatile uint8_t shift,data;
+	//bool ack=0;
+	i2cStart();
+	i2cBegin(isCmd);
+	while(count--){
+		data = *bf++;
+		if(data==0){
+			Oled_Clear_SDA();
+			i2cWait();
+			for(shift = 0; shift < 8; shift++){
+				Oled_Set_SCL();
+				i2cWait();
+				Oled_Clear_SCL();
+			}
+			i2cWait();
+			Oled_Set_SCL();
+			i2cWait();
+			//Oled_Set_SDA();										// As we don't care the ACK, don't release SDA
+			//i2cWait();
+			//Get ACK here
+			Oled_Clear_SCL();
+		}
+
+		else if(data==0xFF){
+			Oled_Set_SDA();
+			i2cWait();
+			for(shift = 0; shift < 8; shift++){
+				Oled_Set_SCL();
+				i2cWait();
+				Oled_Clear_SCL();
+			}
+			i2cWait();
+			Oled_Set_SCL();
+			i2cWait();
+			//Oled_Set_SDA();										// As we don't care the ACK, don't release SDA
+			//i2cWait();
+			//Get ACK here
+			Oled_Clear_SCL();
+		}
+
+		else{
+			for(shift = 0; shift < 8; shift++){
+				if(data & 0x80){
+					Oled_Set_SDA();
+					i2cWait();
+				}
+				else{
+					Oled_Clear_SDA();
+					i2cWait();
+				}
+				Oled_Set_SCL();
+				i2cWait();
+				Oled_Clear_SCL();
+				data <<= 1;
+			}
+			i2cWait();
+			Oled_Set_SCL();
+			i2cWait();
+			//Oled_Set_SDA();										// As we don't care the ACK, don't release SDA
+			//i2cWait();
+			//Get ACK here
+			Oled_Clear_SCL();
+		}
+
+	}
+	i2cStop();
+}
 #endif
 
-}
 
 // Send command in blocking mode
-__attribute__((section(".RamFunc")))
 void write_cmd(uint8_t cmd) {
 	while(oled_status==oled_sending_data);	//Wait for DMA to finish
 	// Now, else we are in idle (oled_idle) or DMA wants to send a cmd (oled_sending_cmd)
 #if defined OLED_SOFT_I2C
-	i2c_send(&cmd,1);//TODO
+	i2cSend(&cmd,1,i2cCmd);
 #elif defined OLED_SPI || defined OLED_SOFT_SPI
 	Oled_Clear_CS();
 	Oled_Clear_DC();
@@ -162,16 +266,16 @@ void update_display( void ){
 
 		#if defined OLED_SOFT_SPI || defined OLED_SOFT_I2C
 		for(uint8_t row=0;row<8;row++){
+			HAL_IWDG_Refresh(&HIWDG);
 			setOledRow(row);
 			#if defined OLED_SOFT_SPI
 			Oled_Clear_CS();
 			spi_send((uint8_t *)&OledBuffer[128*row],128);
 			Oled_Set_CS();
 			#elif defined OLED_SOFT_I2C
-			i2c_send((uint8_t *)&OledBuffer[128*row],128);//TODO
+			i2cSend((uint8_t *)&OledBuffer[128*row],128,i2cData);
 			#endif
 		}
-
 #elif defined OLED_SPI
 		HAL_SPI_TxCpltCallback(oledDevice); 	// Call the DMA callback function to send the frame
 #elif defined OLED_I2C
@@ -222,12 +326,10 @@ void pset(UG_U16 x, UG_U16 y, UG_COLOR c){
    p = p<<7; // *128
    p +=x;
 
-   if( c )
-   {
+   if(c){
       OledBuffer[p] |= 1<<(y%8);
    }
-   else
-   {
+   else{
       OledBuffer[p] &= ~(1<<(y%8));
    }
 }
@@ -296,6 +398,7 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 	write_cmd(0xA4|0x00);   	// Set Entire Display On/Off
 	write_cmd(0xA6|0x00);   	// Set Inverse Display On/Off
 	FillBuffer(C_BLACK,fill_dma);	// Clear buffer
+	write_cmd(0xAF);   			// Set Display On
 	update_display();			// Update display CGRAM
 	while(oled_status!=oled_idle);	// Wait for DMA completion
 	write_cmd(0xAF);   			// Set Display On

@@ -15,8 +15,16 @@
 //#define USE_FILTER							                // Comment to totally disable filtering (Only make average of the last buffer)
 //#define FILTER_N				3			                    // For filter coefficient (Higher, more filtering, also more delay in the filter output, can make the system oscillate)
 
-                                                                // If your screen doesn't work, and want to discard a SPI problem
-//#define Soft_SPI							                    // Uncomment to disable Hardware SPI with DMA and use software SPI
+/********************************
+ * 			Display Settings    *
+ ********************************/
+#define OLED_SPI
+//#define OLED_I2C
+//#define OLED_SOFT_SPI
+//#define OLED_SOFT_I2C
+#define OLED_DEVICE			hspi2							    // SPI handler
+#define OLED_ADDRESS 		(0x3c<<1)						    // Only used for i2c
+#define FILL_DMA			hdma_memtomem_dma1_channel2		    // DMA mem2mem for filling
 
 /********************************
  * 			PWM Settings        *

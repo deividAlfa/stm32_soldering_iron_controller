@@ -19,12 +19,21 @@ typedef enum {
 
 enum { fill_soft, fill_dma };
 
-#define Oled_Set_CS() HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin,GPIO_PIN_SET)
-#define Oled_Clear_CS() HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin,GPIO_PIN_RESET)
-#define Oled_Set_DC() HAL_GPIO_WritePin(OLED_DC_GPIO_Port, OLED_DC_Pin,GPIO_PIN_SET)
-#define Oled_Clear_DC() HAL_GPIO_WritePin(OLED_DC_GPIO_Port, OLED_DC_Pin,GPIO_PIN_RESET)
-#define Oled_Set_RES() HAL_GPIO_WritePin(OLED_RST_GPIO_Port, OLED_RST_Pin,GPIO_PIN_SET)
-#define Oled_Clear_RES() HAL_GPIO_WritePin(OLED_RST_GPIO_Port, OLED_RST_Pin,GPIO_PIN_RESET)
+#define Oled_Set_SCL() 		OLED_SCL_GPIO_Port->BSRR = (uint32_t)OLED_SCL_Pin
+#define Oled_Clear_SCL() 	OLED_SCL_GPIO_Port->BRR = (uint32_t)OLED_SCL_Pin
+
+#define Oled_Set_SDA() 		OLED_SDA_GPIO_Port->BSRR = (uint32_t)OLED_SDA_Pin
+#define Oled_Clear_SDA() 	OLED_SDA_GPIO_Port->BRR = (uint32_t)OLED_SDA_Pin
+
+#define Oled_Set_CS() 		OLED_CS_GPIO_Port->BSRR = (uint32_t)OLED_CS_Pin
+#define Oled_Clear_CS() 	OLED_CS_GPIO_Port->BRR = (uint32_t)OLED_CS_Pin
+
+#define Oled_Set_DC() 		OLED_DC_GPIO_Port->BSRR = (uint32_t)OLED_DC_Pin
+#define Oled_Clear_DC() 	OLED_DC_GPIO_Port->BRR = (uint32_t)OLED_DC_Pin
+
+#define Oled_Set_RES() 		OLED_RST_GPIO_Port->BSRR = (uint32_t)OLED_RST_Pin
+#define Oled_Clear_RES() 	OLED_RST_GPIO_Port->BRR = (uint32_t)OLED_RST_Pin
+
 #define BLACK 0
 #define WHITE 1
 
@@ -39,9 +48,16 @@ void ssd1306_init(DMA_HandleTypeDef *dma);
 void spi_send(uint8_t* bf, uint16_t count);
 
 #elif defined OLED_SOFT_I2C
+#define i2cData 0
+#define i2cCmd 	1
 void Enable_Soft_I2C(void);
 void ssd1306_init(DMA_HandleTypeDef *dma);
-void i2c_send(bool isCMD, uint8_t* bf, uint16_t count);
+void i2cStart(void);
+void i2cStop(void);
+void i2cBegin(bool isCmd);
+void i2cSend(uint8_t* bf, uint16_t count, bool isCmd);
+void i2cWait(void);
+
 #elif defined OLED_SPI
 void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma);
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *device);
