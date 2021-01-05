@@ -15,9 +15,6 @@
 //#define USE_FILTER							                // Comment to totally disable filtering (Only make average of the last buffer)
 //#define FILTER_N				3			                    // For filter coefficient (Higher, more filtering, also more delay in the filter output, can make the system oscillate)
 
-                                                                // If your screen doesn't work, and want to discard a SPI problem
-//#define Soft_SPI							                    // Uncomment to disable Hardware SPI with DMA and use software SPI
-
 /********************************
  * 			PWM Settings        *
  ********************************/
