@@ -21,22 +21,25 @@
 /********************************
  * 			PWM Settings        *
  ********************************/
-#define DELAY_TIMER			htim3			                    // Timer for the dead time
-#define PWM_TIMER 			htim1			                    // PWM Timer
-#define PWM_CHANNEL 		TIM_CHANNEL_2	                    // PWM Timer Channel
-#define PWM_CHxN							                    // Using CHxN Output type
-//#define PWM_CHx								                    // Using CHx Output type
+#define DELAY_TIMER			htim4			                    // Timer for the dead time
+#define PWM_TIMER 			htim3			                    // PWM Timer
+#define PWM_CHANNEL 		TIM_CHANNEL_1	                    // PWM Timer Channel
+//#define PWM_CHxN							                    // Using CHxN Output type
+#define PWM_CHx								                    // Using CHx Output type
 
 /********************************
  * 			Display Settings    *
  ********************************/
-//#define OLED_SPI												// Hardware DMA SPI
+#define OLED_SPI												// Hardware DMA SPI
 //#define OLED_I2C												// Hardware DMA I2C
 //#define OLED_SOFT_SPI											// Software bitbang SPI
-#define OLED_SOFT_I2C											// Software bitbang I2C
-//#define OLED_DEVICE		hspi2							// SPI / I2C handler if used
+//#define OLED_SOFT_I2C											// Software bitbang I2C
+#define OLED_DEVICE			hspi2								// SPI / I2C handler if used
 #define OLED_ADDRESS 		(0x3c<<1)						    // Only used for i2c
 #define FILL_DMA			hdma_memtomem_dma1_channel2		    // DMA mem2mem for filling
+#define USE_RST
+#define USE_DC
+//#define USE_CS
 
 /********************************
  * 			ADC Settings        *
@@ -67,27 +70,24 @@
  * 			Buzzer				*
  ********************************/
 #define BUZZER_ON 			HAL_GPIO_WritePin(BUZ0_GPIO_Port, BUZ0_Pin, GPIO_PIN_SET);\
-							HAL_GPIO_WritePin(BUZ1_GPIO_Port, BUZ1_Pin, GPIO_PIN_SET);\
-							HAL_GPIO_WritePin(BUZ2_GPIO_Port, BUZ2_Pin, GPIO_PIN_SET)
+							HAL_GPIO_WritePin(BUZ1_GPIO_Port, BUZ1_Pin, GPIO_PIN_SET);
 
 #define BUZZER_OFF 			HAL_GPIO_WritePin(BUZ0_GPIO_Port, BUZ0_Pin, GPIO_PIN_RESET);\
-							HAL_GPIO_WritePin(BUZ1_GPIO_Port, BUZ1_Pin, GPIO_PIN_RESET);\
-							HAL_GPIO_WritePin(BUZ2_GPIO_Port, BUZ2_Pin, GPIO_PIN_RESET)
+							HAL_GPIO_WritePin(BUZ1_GPIO_Port, BUZ1_Pin, GPIO_PIN_RESET);
 
 #define BUZZER_TOGGLE 		HAL_GPIO_TogglePin(BUZ0_GPIO_Port, BUZ0_Pin);\
-							HAL_GPIO_TogglePin(BUZ1_GPIO_Port, BUZ1_Pin);\
-							HAL_GPIO_TogglePin(BUZ2_GPIO_Port, BUZ2_Pin)
+							HAL_GPIO_TogglePin(BUZ1_GPIO_Port, BUZ1_Pin);
 
 /********************************
  * 			Misc		*
  ********************************/
 #define HIWDG				hiwdg							// iwdg used
 #define HCRC				hcrc							// crc used
-#define NOSAVESETTINGS										// Don't use flash to save or load settings. Always use defaults (for debugging purposes)
+//#define NOSAVESETTINGS									// Don't use flash to save or load settings. Always use defaults (for debugging purposes)
 
 // To stop peripherals when debugging
 #define DebugOpts()			__HAL_DBGMCU_FREEZE_IWDG();\
-							__HAL_DBGMCU_FREEZE_TIM1();\
-							__HAL_DBGMCU_FREEZE_TIM3()
+							__HAL_DBGMCU_FREEZE_TIM3();\
+							__HAL_DBGMCU_FREEZE_TIM4()
 
 #endif

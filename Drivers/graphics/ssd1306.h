@@ -25,14 +25,20 @@ enum { fill_soft, fill_dma };
 #define Oled_Set_SDA() 		OLED_SDA_GPIO_Port->BSRR = (uint32_t)OLED_SDA_Pin
 #define Oled_Clear_SDA() 	OLED_SDA_GPIO_Port->BRR = (uint32_t)OLED_SDA_Pin
 
+#ifdef USE_CS
 #define Oled_Set_CS() 		OLED_CS_GPIO_Port->BSRR = (uint32_t)OLED_CS_Pin
 #define Oled_Clear_CS() 	OLED_CS_GPIO_Port->BRR = (uint32_t)OLED_CS_Pin
+#endif
 
+#ifdef USE_DC
 #define Oled_Set_DC() 		OLED_DC_GPIO_Port->BSRR = (uint32_t)OLED_DC_Pin
 #define Oled_Clear_DC() 	OLED_DC_GPIO_Port->BRR = (uint32_t)OLED_DC_Pin
+#endif
 
+#ifdef USE_RST
 #define Oled_Set_RES() 		OLED_RST_GPIO_Port->BSRR = (uint32_t)OLED_RST_Pin
 #define Oled_Clear_RES() 	OLED_RST_GPIO_Port->BRR = (uint32_t)OLED_RST_Pin
+#endif
 
 #define BLACK 0
 #define WHITE 1
