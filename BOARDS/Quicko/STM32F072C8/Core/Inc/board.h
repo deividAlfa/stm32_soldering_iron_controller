@@ -35,8 +35,8 @@
 #define DELAY_TIMER			htim15			                    // Timer for the dead time
 #define PWM_TIMER 			htim17			                    // PWM Timer
 #define PWM_CHANNEL 		TIM_CHANNEL_1	                    // PWM Timer Channel
-#define CHxN								                    // Using CHxN Output type
-//#define CHx								                    // Using CHx Output type
+#define PWM_CHxN								                    // Using CHxN Output type
+//#define PWM_CHx								                    // Using CHx Output type
 
 /********************************
  * 			ADC Settings		*
@@ -79,7 +79,7 @@
 
 // To stop peripherals when debugging
 #define DebugOpts()			__HAL_DBGMCU_FREEZE_IWDG();\
-							__HAL_DBGMCU_FREEZE_TIM16();\
+							__HAL_DBGMCU_FREEZE_TIM15();\
 							__HAL_DBGMCU_FREEZE_TIM17()
 
 #endif

@@ -85,7 +85,7 @@ void ADC_Start_DMA(){
 	#endif
 
 	if(ADC_Status == ADC_StartOthers){
-			#ifdef STM32F103xB
+			#if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
 				adc_device->Init.NbrOfConversion = ADC_AuxNum;
 			#endif
 			adc_device->Init.ExternalTrigConv = ADC_SOFTWARE_START;						// Set software trigger
@@ -94,7 +94,7 @@ void ADC_Start_DMA(){
 			sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;							// More sampling time to compensate high input impedances
 
 			#ifdef ADC_CH_1ST
-				#ifdef STM32F103xB
+				#if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
 					sConfig.Rank = ADC_REGULAR_RANK_1;
 				#endif
 				sConfig.Channel = ADC_CH_1ST;
@@ -102,7 +102,7 @@ void ADC_Start_DMA(){
 			#endif
 
 			#ifdef ADC_CH_2ND
-				#ifdef STM32F103xB
+				#if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
 					sConfig.Rank = ADC_REGULAR_RANK_2;
 				#endif
 				sConfig.Channel = ADC_CH_2ND;
@@ -110,7 +110,7 @@ void ADC_Start_DMA(){
 			#endif
 
 			#ifdef ADC_CH_3RD
-				#ifdef STM32F103xB
+				#if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
 					sConfig.Rank = ADC_REGULAR_RANK_3;
 				#endif
 				sConfig.Channel = ADC_CH_3RD;
@@ -125,7 +125,7 @@ void ADC_Start_DMA(){
 	else if(ADC_Status == ADC_StartTip){
 
 			ADC_Status = ADC_InitTip;
-			#ifdef STM32F103xB
+			#if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
 				adc_device->Init.NbrOfConversion = 1;
 			#endif
 			adc_device->Init.ExternalTrigConv = ADC_TRGO;		// Set trigger by Timer15 TRGO
@@ -133,7 +133,7 @@ void ADC_Start_DMA(){
 
 			#ifdef ADC_TIP
 				sConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
-				#ifdef STM32F103xB
+				#if defined STM32F101xB || defined STM32F102xB|| defined STM32F103xB
 					sConfig.Rank = ADC_REGULAR_RANK_1;
 				#endif
 				sConfig.Channel = ADC_TIP;

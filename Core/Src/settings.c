@@ -103,7 +103,7 @@ void resetSettings() {
 	systemSettings.saveSettingsDelay=10;
 	systemSettings.TipType=Tip_None;
 	systemSettings.bootMode=mode_normal;
-	systemSettings.buzzDisable=0;
+	systemSettings.buzzDisable=1;
 	resetTips();
 }
 
@@ -114,9 +114,9 @@ void resetTips(void){
 
 		systemSettings.noIronValue=4000;
 		for(uint8_t x = 0; x < ( sizeof(systemSettings.ironTips)/sizeof(systemSettings.ironTips[0])); ++x) {
-			systemSettings.ironTips[x].calADC_At_200 = 1300;
-			systemSettings.ironTips[x].calADC_At_300 = 2200;
-			systemSettings.ironTips[x].calADC_At_400 = 3000;
+			systemSettings.ironTips[x].calADC_At_200 = 900;
+			systemSettings.ironTips[x].calADC_At_300 = 1500;			// These values are way lower, but better to be safe than sorry
+			systemSettings.ironTips[x].calADC_At_400 = 2000;			// User needs to calibrate its station
 			systemSettings.ironTips[x].PID.Kp = 0.0045;
 			systemSettings.ironTips[x].PID.Ki = 0.0030;
 			systemSettings.ironTips[x].PID.Kd = 0.0015;
@@ -132,7 +132,7 @@ void resetTips(void){
 		strcpy(systemSettings.ironTips[2].name, "BC2 ");
 		strcpy(systemSettings.ironTips[3].name, "D24 ");
 
-		strcpy(systemSettings.ironTips[4].name, "C245");
+		strcpy(systemSettings.ironTips[4].name, "C245");				// Fake JBC tip with similar T12 sensor but gives little higher output
 		systemSettings.ironTips[4].calADC_At_200 = 1400;
 		systemSettings.ironTips[4].calADC_At_300 = 2300;
 		systemSettings.ironTips[4].calADC_At_400 = 3150;
@@ -157,7 +157,7 @@ void resetTips(void){
 		// T12 won't burn if using JBC settings. But JBC will do if using T12 settings!
 		strcpy(systemSettings.ironTips[0].name, "010");
 	}
-	else{														// Unknown tip type! What happened?
+	else{														// Unknown tip type! Put safe values?
 		systemSettings.noIronValue=4100;
 		for(uint8_t x = 0; x < ( sizeof(systemSettings.ironTips)/sizeof(systemSettings.ironTips[0])); ++x) {
 			systemSettings.ironTips[x].calADC_At_200 = 100;

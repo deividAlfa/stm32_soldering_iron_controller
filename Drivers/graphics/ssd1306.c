@@ -458,18 +458,20 @@ void display_abort(void){
 
 // Screen update for hard error handlers (crashes) not using DMA
 void update_display_ErrorHandler(void){
-	#ifdef USE_CS
-	Oled_Clear_CS();
-	#endif
 	for(uint8_t row=0;row<8;row++){
 		setOledRow(row);
 
 		#if defined OLED_SPI
+		#ifdef USE_CS
+		Oled_Clear_CS();
+		#endif
 		Oled_Set_DC();
 		if(HAL_SPI_Transmit(oledDevice, (uint8_t*)OledPtr + (row * 128), 128, 1000)!=HAL_OK){
 			while(1);			// If error happens at this stage, just do nothing
 		}
-
+		#ifdef USE_CS
+		Oled_Set_CS();
+		#endif
 		#elif defined OLED_I2C
 		if(HAL_I2C_Mem_Write(oledDevice, OLED_ADDRESS, 0x40, 1, (uint8_t*)OledPtr + (row * 128), 128, 1000)!=HAL_OK){
 			while(1);			// If error happens at this stage, just do nothing
@@ -538,7 +540,6 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 }
 
 #endif
-
 void FatalError(uint8_t type){
 
 	#if defined OLED_I2C || defined OLED_SPI
@@ -552,25 +553,46 @@ void FatalError(uint8_t type){
 	UG_SetForecolor(C_WHITE);
 	UG_SetBackcolor(C_BLACK);
 	switch(type){
-	case 1:
-		UG_PutString(2,15,"NMI HANDLER");//10
-		break;
-	case 2:
-		UG_PutString(8,15,"HARD FAULT");//10
-		break;
-	case 3:
-		UG_PutString(8,15,"MEM MANAGE");//10
-		break;
-	case 4:
-		UG_PutString(11,15,"BUS FAULT");//9
-		break;
-	case 5:
-		UG_PutString(2,15,"USAGE FAULT");//11
-		break;
-	default:
-		break;
+		case error_NMI:
+			UG_PutString(2,15,"NMI HANDLER");//10
+			break;
+		case error_HARDFAULT:
+			UG_PutString(8,15,"HARD FAULT");//10
+			break;
+		case error_MEMMANAGE:
+			UG_PutString(8,15,"MEM MANAGE");//10
+			break;
+		case error_BUSFAULT:
+			UG_PutString(11,15,"BUS FAULT");//9
+			break;
+		case error_USAGEFAULT:
+			UG_PutString(2,15,"USAGE FAULT");//11
+			break;
+		case error_OVERRUN25:
+			UG_PutString(28,0,"OVERRUN");//7
+			UG_PutString(38,15,">25*C");//5
+			break;
+		case error_OVERRUN50:
+			UG_PutString(28,0,"OVERRUN");//7
+			UG_PutString(38,17,">50*C");//5
+			break;
+		case error_OVERRUN75:
+			UG_PutString(28,0,"OVERRUN");//7
+			UG_PutString(38,17,">75*C");//5
+			break;
+		case error_OVERRUN100:
+			UG_PutString(28,0,"OVERRUN");//7
+			UG_PutString(33,17,">100*C");//6
+			break;
+		case error_OVERRUN_UNKNOWN:
+			UG_PutString(28,0,"OVERRUN");//7
+			UG_PutString(23,17,">UNKNOWN");//8
+			break;
+		default:
+			UG_PutString(2,15,"UNDEFINED");//11
+			break;
 	}
-	UG_PutString(24,31,"ERROR!!");//7
+	UG_PutString(24,33,"ERROR!!");//7
 
 	#if defined OLED_I2C || defined OLED_SPI
 	update_display_ErrorHandler();

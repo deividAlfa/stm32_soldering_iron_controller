@@ -59,8 +59,11 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 	setCurrentMode(systemSettings.bootMode);							// Set mode
 #ifdef	PWM_CHx															// Start PWM
 	HAL_TIM_PWM_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);				// PWM output uses CHx channel
-#else
+
+#elif defined PWM_CHxN
 	HAL_TIMEx_PWMN_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);			// PWM output uses CHxN channel
+#else
+	#error No PWM ouput set (See PWM_CHx / PWM_CHxN in board.h)
 #endif
 	ApplyPwmSettings();													// Apply PWM settings
 	// Now the PWM and ADC are working in the background.
@@ -77,6 +80,65 @@ void handleIron(void) {
 	if((systemSettings.TipType!=Tip_T12)&&(systemSettings.TipType!=Tip_JBC)){
 		SetFailState(1);
 	}
+	if(!Iron.OverrunTriggered && Iron.isPresent){							// If overrun not triggered yet and iron detected
+		if(Iron.Pwm_Out!=0){												// If PWM is active
+			for(int8_t c=overrun_100;c>=overrun_ok;c--){					// Check for overrun
+				Iron.OverrunLevel=c;
+				if(TIP.last_avg > human2adc(Iron.CurrentSetTemperature+(25*c)) ){
+					break;													// Stop at the first overrun condition
+				}
+			}
+			if(Iron.OverrunLevel!=overrun_ok){										// Overrun detected?
+				if(Iron.prevOverrunLevel==overrun_ok){								// First overrun detection?
+					Iron.prevOverrunLevel=Iron.OverrunLevel;						// Yes, store in prev level
+					Iron.OverrunTimer=HAL_GetTick();								// Store time
+				}
+				else{																// Was already triggered
+					switch(Iron.OverrunLevel){
+						case overrun_ok:											// No problem (<25ºC difference)
+							break;													// (Never used here)
+						case overrun_25:											// Temp >25°C over setpoint
+							if(HAL_GetTick()>(Iron.OverrunTimer+20000)){			// 20 second limit
+								Iron.OverrunTriggered=1;
+								FatalError(error_OVERRUN25);
+							}
+							break;
+						case overrun_50:											// Temp >50°C over setpoint
+							if(HAL_GetTick()>(Iron.OverrunTimer+10000)){			// 10 second limit
+								Iron.OverrunTriggered=1;
+								FatalError(error_OVERRUN50);
+							}
+							break;
+						case overrun_75:											// Temp >75°C over setpoint
+							if(HAL_GetTick()>(Iron.OverrunTimer+3000)){				// 3 second limit
+								Iron.OverrunTriggered=1;
+								FatalError(error_OVERRUN75);
+							}
+							break;
+						case overrun_100:											// Temp >100°C over setpoint
+							if(HAL_GetTick()>(Iron.OverrunTimer+1000)){				// 3 second limit
+								Iron.OverrunTriggered=1;
+								FatalError(error_OVERRUN100);
+							}
+							break;
+						default:													// Unknown overrun state
+							Iron.OverrunTriggered=1;
+							FatalError(error_OVERRUN_UNKNOWN);
+							break;
+					}
+				}
+			}
+			else{
+				Iron.prevOverrunLevel=overrun_ok;							// No, clear prev level
+			}
+		}
+	}
+
+	// Failure flag
+	if(Iron.FailState){
+		return;																		// Do nothing if in failure state (PWM already disabled)
+	}
+
 	// Temperature unit change adjustments
 	if(Iron.TemperatureUnitChanged){
 		Iron.TemperatureUnitChanged=0;
@@ -84,8 +146,12 @@ void handleIron(void) {
 	}
 
 	// No iron detection
-	if(TIP.last_RawAvg>systemSettings.noIronValue) { SetIronPresence(0); }
-	else{ SetIronPresence(1); }
+	if(TIP.last_RawAvg>systemSettings.noIronValue) {
+		SetIronPresence(0);
+	}
+	else{
+		SetIronPresence(1);
+	}
 
 	// Iron wake signal flag (for gui displaying the pulse icon)
 	if(Iron.hasMoved){
@@ -99,7 +165,7 @@ void handleIron(void) {
 	// Check changes in system settings
 	if(CurrentTime-checksumtime>499 ){								// Check checksum every 500mS
 		checksumtime=CurrentTime;
-		if(!Iron.isCalibrating && systemSettings.saveSettingsDelay){	// Don't save while in calibration mode, 0=don't dave
+		if(!Iron.isCalibrating && systemSettings.saveSettingsDelay){	// Don't save while in calibration mode, 0=don't save
 			newchecksum=ChecksumSettings(&systemSettings);				// Calculate system checksum
 			if(systemSettings.checksum!=newchecksum){					// If latest checksum is not the same as the system settings's checksum
 				if(previouschecksum!=newchecksum){						// If different from the previous calculated checksum.
@@ -114,15 +180,11 @@ void handleIron(void) {
 		}
 	}
 
-	// Failure flag
-	if(Iron.FailState){
-		return;			// Do nothing if in failure state (PWM already disabled)
-	}
-
 	// Disables PID calculation if no iron is detected
 	if(!Iron.isPresent){							// If iron not present
 		Iron.CurrentIronPower = 0;					// Indicate 0.1% power
-		Iron.Pwm_Out = Iron.Pwm_Max/1000;			// Set 0.1% power (to maintain no iron detection)
+		Iron.Pwm_Out = 0;			// Set 0.1% power (1024 to be a fast bit shifting operation) (to maintain no iron detection)
+		Iron.prevOverrunLevel=overrun_ok;			// Reset previous overrun
 		return;
 	}
 	// Controls inactivity timer and enters low power modes
@@ -181,8 +243,9 @@ void handleIron(void) {
 	// Else, set both to 0
 	else{
 	  Iron.CurrentIronPower = 0;
-	  Iron.Pwm_Out = 0;
+	  Iron.Pwm_Out = 0;			// Min 0.x% to keep detecting iron?
 	}
+
 	// For calibration process
 	if(	  ( (readTipTemperatureCompensated(0)>=(Iron.CurrentSetTemperature-5)) &&	// Add +-3ºC play
 			(readTipTemperatureCompensated(0)<=(Iron.CurrentSetTemperature+5))  )

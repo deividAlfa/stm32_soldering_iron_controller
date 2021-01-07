@@ -73,7 +73,7 @@ extern TIM_HandleTypeDef htim17;
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
-	FatalError(1);
+	FatalError(error_NMI);
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
 
@@ -86,7 +86,7 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-	FatalError(2);
+	FatalError(error_HARDFAULT);
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {

@@ -17,6 +17,19 @@ typedef enum {
 	oled_sending_cmd,
 } oled_status_t;
 
+typedef enum{
+	error_NMI,
+	error_HARDFAULT,
+	error_MEMMANAGE,
+	error_BUSFAULT,
+	error_USAGEFAULT,
+	error_OVERRUN25,
+	error_OVERRUN50,
+	error_OVERRUN75,
+	error_OVERRUN100,
+	error_OVERRUN_UNKNOWN,
+}FatalErrors;
+
 enum { fill_soft, fill_dma };
 
 #define Oled_Set_SCL() 		OLED_SCL_GPIO_Port->BSRR = (uint32_t)OLED_SCL_Pin

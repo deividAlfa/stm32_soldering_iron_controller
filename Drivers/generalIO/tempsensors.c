@@ -97,8 +97,15 @@ uint16_t readTipTemperatureCompensatedRaw(bool new) {
 	static uint16_t last_value;
 	if (new){
 		last_value = adc2Human(TIP.last_RawAvg,1,systemSettings.tempUnit);
-		if(last_value>530){
-			last_value=530;
+		if(systemSettings.TipType==Unit_Celsius){
+			if(last_value>999){
+				last_value=999;								// Limit output
+			}
+		}
+		if(systemSettings.TipType==Unit_Farenheit){
+			if(last_value>537){
+				last_value=537;								// Limit output (537C=999F)
+			}
 		}
 	}
 	return last_value;
