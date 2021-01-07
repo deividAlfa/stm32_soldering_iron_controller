@@ -142,7 +142,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t) {
 }
 
 
-static void insertDot(char *str, uint8_t dec) {
+static void insertDot(char *str, uint8_t dec) {//TODO Fix PID screen values >"99.9" appear as "1000.x"
 	char pos=0;
 	if(!dec){
 		return;
