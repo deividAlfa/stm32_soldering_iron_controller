@@ -111,7 +111,6 @@ void resetSettings() {
 void resetTips(void){
 
 	if(systemSettings.TipType==Tip_T12){
-
 		systemSettings.noIronValue=4000;
 		for(uint8_t x = 0; x < ( sizeof(systemSettings.ironTips)/sizeof(systemSettings.ironTips[0])); ++x) {
 			systemSettings.ironTips[x].calADC_At_200 = 900;
