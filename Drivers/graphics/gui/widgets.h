@@ -17,7 +17,7 @@
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
 typedef enum widgetFieldType {field_float, field_integer, field_integer16,field_uinteger16, field_int32, field_bmp, field_string}widgetFieldType;
 typedef enum widgetTextJustifyType {justify_left, justify_right}widgetTextJustifyType;
-typedef enum widgetType {widget_combo, combo_Screen, combo_Option, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button, widget_bmp_button}widgetType;
+typedef enum widgetType {widget_combo, combo_Screen, combo_Option, combo_Action, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button, widget_bmp_button}widgetType;
 typedef struct widget_t widget_t;
 typedef struct comboBox_item_t comboBox_item_t;
 
@@ -46,6 +46,7 @@ typedef struct comboBox_item_t {
 	union{
 		widget_t *widget;
 		uint8_t action_screen;
+		void (*action)();
 	};
 	bool enabled;
 } comboBox_item_t;
@@ -129,5 +130,6 @@ int comboBoxProcessInput(widget_t *, RE_Rotation_t, RE_State_t *);
 void comboBoxDraw(widget_t *widget);
 void comboAddScreen(comboBox_item_t* item,widget_t *combo, char *label, uint8_t actionScreen);
 void comboAddOption(comboBox_item_t* item, widget_t *combo, char *label, widget_t *widget);
+void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, void (*action)());
 void comboResetIndex(widget_t *combo);
 #endif /* GRAPHICS_GUI_WIDGETS_H_ */

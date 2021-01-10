@@ -23,7 +23,12 @@ void splash_setup(screen_t * scr) {
 
 int splash_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	if(HAL_GetTick() - splash_time > SPLASH_TIMEOUT){
-		return screen_main;
+		if(systemSettings.TipType==Tip_None){
+			return screen_irontype;
+		}
+		else{
+			return screen_main;
+		}
 	}
 	return -1;
 }

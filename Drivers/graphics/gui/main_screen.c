@@ -256,12 +256,6 @@ void main_screen_draw(screen_t *scr){
 	//UG_DrawLine(0, 15, UG_GetXDim()-1, 15, C_WHITE );
 }
 
-int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
-	if(systemSettings.TipType==Tip_None){
-		return screen_irontype;
-	}
-	return (default_screenProcessInput(scr,input,state));
-}
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen setup
@@ -275,7 +269,7 @@ void main_screen_setup(screen_t *scr) {
 
 //	scr->draw = &default_screenDraw;
 	scr->draw = &main_screen_draw;
-	scr->processInput = &main_screenProcessInput;
+	scr->processInput = &default_screenProcessInput;
 	scr->init = &main_screen_init;
 	scr->update = &main_screenUpdate;
 	widget_t *w;

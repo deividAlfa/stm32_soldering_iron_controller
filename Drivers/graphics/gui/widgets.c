@@ -383,7 +383,7 @@ void comboBoxDraw(widget_t *widget) {
 	UG_FontSelect(widget->font_size);
 	for(uint8_t y = 0; y < yDim / height; ++y) {
 		UG_FillFrame(0, y * height + widget->posY, UG_GetXDim(), y * height + widget->posY + widget->font_size->char_height, C_BLACK);
-		if (item->type==combo_Screen){																										// If screen combo item, just draw the label
+		if ((item->type==combo_Screen)||(item->type==combo_Action)){																										// If screen combo item, just draw the label
 			UG_PutString( (UG_GetXDim()-(strlen(item->text)* widget->font_size->char_width))/2 ,y * height + widget->posY +1, item->text);
 		}
 		else if (item->type==combo_Option){																									// If option combo item
@@ -442,6 +442,9 @@ int comboBoxProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t *stat
 				sel->state=widget_idle;																				// Change to idle
 			}
 			return -1;																								// Do nothing else
+		}
+		if (widget->comboBoxWidget.currentItem->type==combo_Action){												// If combo option type
+			widget->comboBoxWidget.currentItem->action();
 		}
 		else if (widget->comboBoxWidget.currentItem->type==combo_Screen){											// If combo screen type
 			return widget->comboBoxWidget.currentItem->action_screen;												// Return screen index
@@ -746,6 +749,27 @@ void comboAddOption(comboBox_item_t* item, widget_t *combo, char *label, widget_
 		item->next_item = NULL;
 		item->widget = widget;
 		item->type = combo_Option;
+		item->enabled = 1;
+		comboBox_item_t *last = combo->comboBoxWidget.items;
+
+		if(!last) {
+			combo->comboBoxWidget.items = item;
+			combo->comboBoxWidget.currentItem = item;
+			return;
+		}
+		while(last->next_item){
+			last = last->next_item;
+		}
+		last->next_item = item;
+	}
+}
+void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, void (*action)()){
+
+	if(action){												// If not null
+		item->text = label;
+		item->next_item = NULL;
+		item->action = action;
+		item->type = combo_Action;
 		item->enabled = 1;
 		comboBox_item_t *last = combo->comboBoxWidget.items;
 

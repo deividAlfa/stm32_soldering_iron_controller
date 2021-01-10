@@ -227,7 +227,7 @@ void Checksum_error(void){
 	UG_PutString(17,16,"RESTORING");//9
 	UG_PutString(12,32,"DEFAULTS...");//10
 	update_display();
-	ErrCountDown(5,117,50);
+	ErrCountDown(3,117,50);
 	resetSettings();
 	saveSettings();
 }
@@ -260,7 +260,7 @@ void Button_reset(void){
 void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
 	uint32_t timErr = 0;
 	char str[3];
-	char cleanStr[3]= {' ', ' ', 0};
+	char cleanStr[3]= "  ";
 	uint8_t length;
 	if(Start>99){Start=99;}
 	if(Start>9){
