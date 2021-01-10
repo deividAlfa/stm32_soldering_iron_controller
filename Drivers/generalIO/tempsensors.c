@@ -71,8 +71,7 @@ int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
 	/* Interpolate between both points. */
 	temp = p1 - ((p1 - p2) * (lastavg & 0x000F)) / 16;
 	if(tempUnit==Unit_Farenheit){
-		temp=TempConversion(temp,toFarenheit);
-		temp+=(320-32);	//TempConversion works in x1, not x10, so subtract 32, add 32x10
+		temp=TempConversion(temp, toFarenheit, 1);
 	}
 	return temp;
 #else
@@ -128,7 +127,7 @@ uint16_t human2adc(int16_t t) {
 
 	// If using Farenheit, convert to Celsius
 	if(systemSettings.tempUnit==Unit_Farenheit){
-		t = TempConversion(t,toCelsius);
+		t = TempConversion(t,toCelsius,0);
 	}
 	t-=ambTemp;
 	if (t < temp_minC){ return 0; } // If requested temp below min, return 0
@@ -177,7 +176,7 @@ int16_t adc2Human(uint16_t adc_value,bool correction, bool tempUnit) {
 	}
 	if(correction){ tempH+= ambTemp; }
 	if(tempUnit==Unit_Farenheit){
-		tempH=TempConversion(tempH,toFarenheit);
+		tempH=TempConversion(tempH,toFarenheit,0);
 	}
 	return tempH;
 }
@@ -195,12 +194,24 @@ long map(long x, long in_min, long in_max, long out_min, long out_max) {
 // So (temp*1887437)>>20 == temp*1.8 (Real: 1,800000191)
 // (temp*582542)>>20 == temp/1.8 (Real: 1,800000687)
 // Max input = 1100°C / 3700°F, otherwise we will overflow the signed int32
-int16_t TempConversion(int16_t temperature, bool conversion){
+int16_t TempConversion(int16_t temperature, bool conversion, bool x10mode){
 	if(conversion==toFarenheit){	// Input==Celsius, Output==Farenheit
-		temperature=(((int32_t)temperature*1887437)>>20)+32;// F = (C*1.8)+32
+		temperature=(((int32_t)temperature*1887437)>>20);// F = (C*1.8)+32
+		if(x10mode){
+			temperature += 320;
+		}
+		else{
+			temperature += 32;
+		}
 	}
 	else{// Input==Farenheit, Output==Celsius
-		temperature=(((int32_t)temperature-32)*582542)>>20;// C = (F-32)/1.8
+		if(x10mode){
+			temperature -= 320;
+		}
+		else{
+			temperature -= 32;
+		}
+		temperature=((int32_t)temperature*582542)>>20;// C = (F-32)/1.8
 	}
 	return temperature;
 }

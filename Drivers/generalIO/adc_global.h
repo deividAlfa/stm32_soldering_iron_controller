@@ -62,7 +62,8 @@ typedef struct {
 typedef enum { ADC_Idle, ADC_StartTip, ADC_InitTip, ADC_SamplingTip, ADC_StartOthers, ADC_SamplingOthers } ADC_Status_t;
 
 extern ADC_Status_t ADC_Status;
-//extern adc_measures_t adc_measures[ADC_BFSIZ];
+extern volatile uint16_t Tip_measures[ADC_BFSIZ];
+extern adc_measures_t adc_measures[ADC_BFSIZ];
 
 uint16_t ADC_to_mV (uint16_t adc);
 void handle_ADC(void);

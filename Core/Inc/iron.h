@@ -87,6 +87,7 @@ iron_mode_t getCurrentMode();
 uint16_t getSetTemperature();
 uint16_t getCurrentTemperature();
 uint8_t getCurrentPower();
+void initTimers(void);
 void ApplyPwmSettings(void);
 void setTempUnit(TempUnit_t unit);
 void SetPwmPeriod(uint16_t period);

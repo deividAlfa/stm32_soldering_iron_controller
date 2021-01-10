@@ -55,7 +55,6 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 RE_Rotation_t RotationData;
-volatile uint32_t Timing_Start=0, Timing_End=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -136,12 +135,20 @@ void Program_Handler(void) {
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	/*
-	if((GPIO_Pin == ROT_ENC_BUTTON_Pin) || (GPIO_Pin == ROT_ENC_R_Pin) || (GPIO_Pin == ROT_ENC_L_Pin)) {
+	 
+	// This is no longer used, as checking the inputs in interrupt mode can't properly time button time until the key is released
+	// Now it's handled in ProgramTimer
+	// Code is left just in case
+	 
+		if((GPIO_Pin == ROT_ENC_BUTTON_Pin) || (GPIO_Pin == ROT_ENC_R_Pin) || (GPIO_Pin == ROT_ENC_L_Pin)) {
 		RE_Process(&RE1_Data);
-	}
-	*/
-	if(GPIO_Pin==WAKE_Pin){							// If handle moves
-		IronWake();
+		if(systemSettings.wakeEncoder){					// If system setting set  to wake on encoder activity
+			IronWake();
+		}
+	}*/
+	
+	if(GPIO_Pin==WAKE_Pin){								// If handle moves
+		IronWake(0);
 	}
 }
 
@@ -157,6 +164,20 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim){
 	}
 }
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
+	if(_htim == Iron.Delay_Timer){									// Delay Timer?
+		if(ADC_Status==ADC_SamplingTip){							// ADC ready?
+			__HAL_TIM_DISABLE(Iron.Delay_Timer);
+			__HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);	// Clear Delay Timer flag
+			if(HAL_ADC_Start_DMA(&ADC_DEVICE, (uint32_t*)Tip_measures, sizeof(Tip_measures)/ sizeof(uint16_t) )!=HAL_OK){	// Start ADC conversion
+				Error_Handler();
+			}
+		}
+		else{
+			Error_Handler();										// If ADC_Status!=ADC_SamplingTip, lose of ADC_Status control happened somewhere
+		}
+	}
+}
 /* USER CODE END 4 */
 
 /**

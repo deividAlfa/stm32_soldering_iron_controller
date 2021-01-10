@@ -492,51 +492,52 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 
 	static uint8_t OledRow=0;
 
-	if(device != oledDevice){ return; }
+	if(device == oledDevice){
 
-	#ifdef USE_CS
-	Oled_Set_CS();
+		#ifdef USE_CS
+		Oled_Set_CS();
+		#endif
+
+		if(OledRow>7){
+			OledRow=0;												// We sent the last row of the OLED buffer data
+			oled_status=oled_idle;
+			return;													// Return without retriggering DMA.
+		}
+		oled_status=oled_sending_cmd;
+
+	#ifdef OLED_SPI
+		setOledRow(OledRow);
+
+		#ifdef USE_CS
+		Oled_Clear_CS();
+		#endif
+
+		Oled_Set_DC();
+		oled_status=oled_sending_data;								// Update status
+		// Send next OLED row
+		if(HAL_SPI_Transmit_DMA(oledDevice,(uint8_t *) OledPtr+(128*OledRow++), 128) != HAL_OK){
+			Error_Handler();
+		}
+	}
+	#elif defined OLED_I2C
+
+		static uint8_t cmd[3]={0,0,0x10};
+
+		cmd[0] = (0xB0|oledRow);
+
+		if(systemSettings.OledFix){ cmd[1] = 0x02; }
+		else{ 						cmd[1] = 0x00; }
+
+		if(HAL_I2C_Mem_Write(oledDevice, OLED_ADDRESS, 0x00, 1, &cmd[0], 3, 50)){
+			Error_Handler();
+		}
+		oled_status=oled_sending_data;								// Update status
+		if( HAL_I2C_Mem_Write_DMA(oledDevice, OLED_ADDRESS, 0x40, 1, OledPtr+(128*oledRow++), 128)){
+			Error_Handler();
+		}
+
+	}
 	#endif
-
-	if(OledRow>7){
-		OledRow=0;												// We sent the last row of the OLED buffer data
-		oled_status=oled_idle;
-		return;													// Return without retriggering DMA.
-	}
-	oled_status=oled_sending_cmd;
-
-#ifdef OLED_SPI
-	setOledRow(OledRow);
-
-	#ifdef USE_CS
-	Oled_Clear_CS();
-	#endif
-
-	Oled_Set_DC();
-	oled_status=oled_sending_data;								// Update status
-	// Send next OLED row
-	if(HAL_SPI_Transmit_DMA(oledDevice,(uint8_t *) OledPtr+(128*OledRow++), 128) != HAL_OK){
-		Error_Handler();
-	}
-
-#elif defined OLED_I2C
-
-	static uint8_t cmd[3]={0,0,0x10};
-
-	cmd[0] = (0xB0|oledRow);
-
-	if(systemSettings.OledFix){ cmd[1] = 0x02; }
-	else{ 						cmd[1] = 0x00; }
-
-	if(HAL_I2C_Mem_Write(oledDevice, OLED_ADDRESS, 0x00, 1, &cmd[0], 3, 50)){
-		Error_Handler();
-	}
-	oled_status=oled_sending_data;								// Update status
-	if( HAL_I2C_Mem_Write_DMA(oledDevice, OLED_ADDRESS, 0x40, 1, OledPtr+(128*oledRow++), 128)){
-		Error_Handler();
-	}
-#endif
-
 }
 
 #endif

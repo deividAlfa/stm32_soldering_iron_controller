@@ -57,18 +57,19 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 	Iron.isPresent			= 1;										// Set detected by default (to not show ERROR screen at boot)
 	setCurrentTip(systemSettings.currentTip);							// Load TIP
 	setCurrentMode(systemSettings.initMode);							// Set mode
+	initTimers();														// Initialize timers
+
 #ifdef	PWM_CHx															// Start PWM
 	HAL_TIM_PWM_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);				// PWM output uses CHx channel
-
 #elif defined PWM_CHxN
 	HAL_TIMEx_PWMN_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);			// PWM output uses CHxN channel
 #else
 	#error No PWM ouput set (See PWM_CHx / PWM_CHxN in board.h)
 #endif
-	ApplyPwmSettings();													// Apply PWM settings
+	HAL_TIM_Base_Start_IT(Iron.Delay_Timer);							// Configure and start Delay timer in interrupt mode
+	__HAL_TIM_DISABLE(Iron.Delay_Timer);								// Stop timer
+
 	// Now the PWM and ADC are working in the background.
-
-
 }
 
 void handleIron(void) {
@@ -190,16 +191,16 @@ void handleIron(void) {
 	// Controls inactivity timer and enters low power modes
 	switch (Iron.CurrentMode) {
 		case mode_boost:
-			if(CurrentTime - Iron.CurrentModeTimer > ((uint32_t)systemSettings.boost.Time*1000))
+			if(CurrentTime - Iron.CurrentModeTimer > ((uint32_t)systemSettings.boost.Time*60000))
 				setCurrentMode(mode_normal);
 			break;
 		case mode_normal:
-			if(!Iron.isCalibrating&&systemSettings.sleep.Time && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.sleep.Time*1000) ) {
+			if(!Iron.isCalibrating&&systemSettings.sleep.Time && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.sleep.Time*60000) ) {
 				setCurrentMode(mode_sleep);
 			}
 			break;
 		case mode_sleep:
-			if(systemSettings.standby.Time && ((CurrentTime - Iron.CurrentModeTimer) > (uint32_t)systemSettings.standby.Time*1000) ) {
+			if(systemSettings.standby.Time && ((CurrentTime - Iron.CurrentModeTimer) > (uint32_t)systemSettings.standby.Time*60000) ) {
 				setCurrentMode(mode_standby);
 			}
 			break;
@@ -269,19 +270,19 @@ uint16_t round_10(uint16_t input){
 void switchTempUnit(void){
 	uint16_t tmp;
 	if(systemSettings.tempUnit==Unit_Farenheit){
-		tmp = TempConversion(systemSettings.UserSetTemperature,toFarenheit);
+		tmp = TempConversion(systemSettings.UserSetTemperature,toFarenheit,0);
 		systemSettings.UserSetTemperature = round_10(tmp);
-		tmp = TempConversion(systemSettings.boost.Temperature,toFarenheit);
+		tmp = TempConversion(systemSettings.boost.Temperature,toFarenheit,0);
 		systemSettings.boost.Temperature = round_10(tmp);
-		tmp = TempConversion(systemSettings.sleep.Temperature,toFarenheit);
+		tmp = TempConversion(systemSettings.sleep.Temperature,toFarenheit,0);
 		systemSettings.sleep.Temperature = round_10(tmp);
 	}
 	else{
-		tmp = TempConversion(systemSettings.UserSetTemperature,toCelsius);
+		tmp = TempConversion(systemSettings.UserSetTemperature,toCelsius,0);
 		systemSettings.UserSetTemperature = round_10(tmp);
-		tmp = TempConversion(systemSettings.boost.Temperature,toCelsius);
+		tmp = TempConversion(systemSettings.boost.Temperature,toCelsius,0);
 		systemSettings.boost.Temperature = round_10(tmp);
-		tmp = TempConversion(systemSettings.sleep.Temperature,toCelsius);
+		tmp = TempConversion(systemSettings.sleep.Temperature,toCelsius,0);
 		systemSettings.sleep.Temperature = round_10(tmp);
 	}
 	setCurrentMode(mode_normal);
@@ -294,6 +295,29 @@ void setTempUnit(TempUnit_t unit){
 	}
 }
 
+// This function sets the prescaler settings depending on the system, core clock
+// and loads the stored period
+void initTimers(void){
+
+	// Delay timer config
+	//
+	Iron.Delay_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;				//10uS input clock
+	Iron.Delay_Timer->Init.Period = systemSettings.pwmDelay;
+	if (HAL_TIM_Base_Init(Iron.Delay_Timer) != HAL_OK){
+		Error_Handler();
+	}
+
+	// PWM timer config
+	//
+	Iron.Pwm_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;				//10uS input clock
+	Iron.Pwm_Timer->Init.Period = systemSettings.pwmPeriod;
+	if (HAL_TIM_Base_Init(Iron.Pwm_Timer) != HAL_OK){
+		Error_Handler();
+	}
+
+	__HAL_TIM_CLEAR_FLAG(Iron.Pwm_Timer,TIM_FLAG_UPDATE | TIM_FLAG_COM | TIM_FLAG_CC1 | TIM_FLAG_CC2 | TIM_FLAG_CC3 | TIM_FLAG_CC4 );	// Clear all flags
+	__HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE | TIM_FLAG_COM | TIM_FLAG_CC1 | TIM_FLAG_CC2 | TIM_FLAG_CC3 | TIM_FLAG_CC4 );	// Clear all flags
+}
 // Applies the PWM settings from the system settings
 void ApplyPwmSettings(void){
 	__HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.pwmPeriod);

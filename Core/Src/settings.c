@@ -89,11 +89,11 @@ void resetSettings() {
 	systemSettings.version = SETTINGSVERSION;
 	systemSettings.contrast = 0xFF;
 	systemSettings.OledFix = 1;
-	systemSettings.boost.Time = 30;
+	systemSettings.boost.Time = 1;
 	systemSettings.boost.Temperature = 400;
-	systemSettings.sleep.Time = 120;
+	systemSettings.sleep.Time = 5;
 	systemSettings.sleep.Temperature = 150;
-	systemSettings.standby.Time = 300;
+	systemSettings.standby.Time = 10;
 	systemSettings.UserSetTemperature = 320;
 	systemSettings.pwmPeriod=19999;
 	systemSettings.pwmDelay=1999;

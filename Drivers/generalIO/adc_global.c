@@ -88,10 +88,10 @@ void ADC_Start_DMA(){
 			#if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
 				adc_device->Init.NbrOfConversion = ADC_AuxNum;
 			#endif
-			adc_device->Init.ExternalTrigConv = ADC_SOFTWARE_START;						// Set software trigger
+			adc_device->Init.ExternalTrigConv = ADC_SOFTWARE_START;								// Set software trigger
 			if (HAL_ADC_Init(adc_device) != HAL_OK) { Error_Handler(); }
 			ADC_Status = ADC_SamplingOthers;
-			sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;							// More sampling time to compensate high input impedances
+			sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;									// More sampling time to compensate high input impedances
 
 			#ifdef ADC_CH_1ST
 				#if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
@@ -117,7 +117,7 @@ void ADC_Start_DMA(){
 				if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
 			#endif
 
-			// Start ADC (Will be triggered by TIM15), Only Tip measurement
+			// Start ADC conversion now
 			if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)ADC_measures, sizeof(ADC_measures)/ sizeof(uint16_t) )!=HAL_OK){
 				Error_Handler();
 			}
@@ -128,7 +128,7 @@ void ADC_Start_DMA(){
 			#if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
 				adc_device->Init.NbrOfConversion = 1;
 			#endif
-			adc_device->Init.ExternalTrigConv = ADC_TRGO;		// Set trigger by Timer15 TRGO
+			adc_device->Init.ExternalTrigConv = ADC_SOFTWARE_START;								// Set trigger by software
 			if (HAL_ADC_Init(adc_device) != HAL_OK) { Error_Handler(); }
 
 			#ifdef ADC_TIP
@@ -141,10 +141,7 @@ void ADC_Start_DMA(){
 			#else
 				#error ADC_TIP not configured properly in board.h
 			#endif
-			// Start ADC, start conversion, other measurements (non time-critical)
-			if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)Tip_measures, sizeof(Tip_measures)/ sizeof(uint16_t) )!=HAL_OK){
-				Error_Handler();
-			}
+			//
 	}
 }
 
@@ -252,23 +249,24 @@ void handle_ADC(void){
 
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
-	if(_hadc != adc_device){ return; }
-	ADC_Stop_DMA();												// Reset the ADC
-	handle_ADC();												// Process the data.
-	switch (ADC_Status){
-		case ADC_SamplingTip:									// Finished sampling tip
-			ADC_Status = ADC_StartOthers;						// Set the ADC status
-			handleIron();
-			__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);	//Load calculated PWM Duty
-			HAL_IWDG_Refresh(&HIWDG);							// Clear watchdog
-			break;
+	if(_hadc == adc_device){
+		ADC_Stop_DMA();												// Reset the ADC
+		handle_ADC();												// Process the data.
+		switch (ADC_Status){
+			case ADC_SamplingTip:									// Finished sampling tip
+				ADC_Status = ADC_StartOthers;						// Set the ADC status
+				handleIron();
+				__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);	//Load calculated PWM Duty
+				HAL_IWDG_Refresh(&HIWDG);							// Clear watchdog
+				break;
 
-		case ADC_SamplingOthers:								// Finished sampling secondary channels
-			ADC_Status = ADC_StartTip;							// Set the ADC status
-			break;
+			case ADC_SamplingOthers:								// Finished sampling secondary channels
+				ADC_Status = ADC_StartTip;							// Set the ADC status
+				break;
 
-		default:
-			Error_Handler();
+			default:
+				Error_Handler();
+		}
+		ADC_Start_DMA();											// Start ADC with new new status
 	}
-	ADC_Start_DMA();											// Start ADC with new new status
 }

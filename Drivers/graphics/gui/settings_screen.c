@@ -564,7 +564,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_PID_KP, w, 	"Kp", 	&Widget_PID_Kp);
 	comboAddOption(&comboitem_PID_KI, w, 	"Ki", 	&Widget_PID_Ki);
 	comboAddOption(&comboitem_PID_KD, w, 	"Kd", 	&Widget_PID_Kd);
-	comboAddScreen(&comboitem_PID_Back, w, 	"EXIT", screen_settingsmenu);
+	comboAddScreen(&comboitem_PID_Back, w, 	"BACK", screen_settingsmenu);
 
 
 
@@ -584,13 +584,13 @@ void settings_screen_setup(screen_t *scr) {
 	w->posX = 94;
 	w->editable.inputData.getData = &getSleepTime;
 	w->editable.inputData.type = field_uinteger16;
-	w->editable.big_step = 20;
-	w->editable.step = 10;
+	w->editable.big_step = 5;
+	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setSleepTime;
 	w->editable.max_value = 600;
 	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="s";
+	w->endString="m";
 	w->reservedChars = 4;
 	w->displayWidget.justify =justify_right;
 
@@ -615,13 +615,13 @@ void settings_screen_setup(screen_t *scr) {
 	w->posX = 94;
 	w->editable.inputData.getData = &getBoostTime;
 	w->editable.inputData.type = field_uinteger16;
-	w->editable.big_step = 20;
-	w->editable.step = 5;
+	w->editable.big_step = 5;
+	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setBoostTime;
 	w->editable.max_value = 600;
 	w->editable.min_value = 5;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="s";
+	w->endString="m";
 	w->reservedChars = 4;
 	w->displayWidget.justify =justify_right;
 
@@ -646,14 +646,14 @@ void settings_screen_setup(screen_t *scr) {
 	w->posX = 94;
 	w->editable.inputData.getData = &getStandByTime;
 	w->editable.inputData.type = field_uinteger16;
-	w->editable.big_step = 20;
-	w->editable.step = 10;
+	w->editable.big_step = 5;
+	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setStandByTime;
 	w->reservedChars = 4;
 	w->editable.max_value = 600;
 	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="s";
+	w->endString="m";
 	w->displayWidget.justify =justify_right;
 
 	//********[ Power Widget ]***********************************************************
@@ -686,8 +686,8 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_IRON_BoostTime, w, 	"Bst Time", 	&Widget_IRON_BoostTime);
 	comboAddOption(&comboitem_IRON_BoostTemp, w, 	"Bst Temp", 	&Widget_IRON_BoostTemp);
 	comboAddOption(&comboitem_IRON_StbyTime, w, 	"Sby Time", 	&Widget_IRON_StbyTime);
-	comboAddOption(&comboitem_IRON_Power, w, 		"Max Pwr",	&Widget_IRON_Power);
-	comboAddScreen(&comboitem_IRON_Back, w, 		"EXIT", 		screen_settingsmenu);
+	comboAddOption(&comboitem_IRON_Power, w, 		"Max Pwr",		&Widget_IRON_Power);
+	comboAddScreen(&comboitem_IRON_Back, w, 		"BACK", 		screen_settingsmenu);
 
 
 
@@ -843,10 +843,10 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_SYSTEM_InitMode, w, 		"Init Mode", 	&Widget_SYSTEM_InitMode);
 	comboAddOption(&comboitem_SYSTEM_EncWake, w, 		"Enc. Wake", 	&Widget_SYSTEM_EncWake);
 	comboAddOption(&comboitem_SYSTEM_Buzzer, w, 		"Buzzer", 		&Widget_SYSTEM_Buzzer);
-	comboAddOption(&comboitem_SYSTEM_TempUnit, w, 		"Temp Unit:", 	&Widget_SYSTEM_TempUnit);
+	comboAddOption(&comboitem_SYSTEM_TempUnit, w, 		"Temp Unit", 	&Widget_SYSTEM_TempUnit);
 	comboAddOption(&comboitem_SYSTEM_GuiUpd, w, 		"Gui Upd", 		&Widget_SYSTEM_GuiUpd);
 	comboAddOption(&comboitem_SYSTEM_SaveInterval, w, 	"Save Delay",	&Widget_SYSTEM_SaveInterval);
-	comboAddScreen(&comboitem_SYSTEM_Back, w, 			"EXIT", 		screen_settingsmenu);
+	comboAddScreen(&comboitem_SYSTEM_Back, w, 			"BACK", 		screen_settingsmenu);
 
 
 
@@ -936,7 +936,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_ADVANCED_ADCLimit, w, 		"ADC Limit", 		&Widget_ADVANCED_ADCLimit);
 	comboAddOption(&comboitem_ADVANCED_NoIronDelay, w, 		"Det. Delay",		&Widget_ADVANCED_NoIronDelay);
 	comboAddScreen(&comboitem_ADVANCED_Reset, w, 			"Reset Settings",	screen_reset);
-	comboAddScreen(&comboitem_ADVANCED_Back, w, 			"EXIT", 			screen_settingsmenu);
+	comboAddScreen(&comboitem_ADVANCED_Back, w, 			"BACK", 			screen_settingsmenu);
 
 	//########################################## RESET SCREEN ##########################################
 	//
