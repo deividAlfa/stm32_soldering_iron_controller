@@ -465,7 +465,7 @@ void edittipname_screenDraw(screen_t *scr){
 //-------------------------------------------------------------------------------------------------------------------------------
 void Reset_onEnter(screen_t *scr){
 	UG_FontSelect(&FONT_8X14_reduced);
-	UG_PutString(0,17,"RESET SETTINGS?");//12
+	UG_PutString(7,17,"FACTORY RESET?");//12
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -934,7 +934,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_ADVANCED_ADCDelay, w, 		"ADC Delay", 		&Widget_ADVANCED_ADCDelay);
 	comboAddOption(&comboitem_ADVANCED_ADCLimit, w, 		"ADC Limit", 		&Widget_ADVANCED_ADCLimit);
 	comboAddOption(&comboitem_ADVANCED_NoIronDelay, w, 		"Det. Delay",		&Widget_ADVANCED_NoIronDelay);
-	comboAddScreen(&comboitem_ADVANCED_Reset, w, 			"Reset Settings",	screen_reset);
+	comboAddScreen(&comboitem_ADVANCED_Reset, w, 			"Factory Reset",	screen_reset);
 	comboAddScreen(&comboitem_ADVANCED_Back, w, 			"BACK", 			screen_settingsmenu);
 
 	//########################################## RESET SCREEN ##########################################
