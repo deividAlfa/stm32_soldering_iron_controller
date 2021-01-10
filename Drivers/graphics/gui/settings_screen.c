@@ -72,7 +72,8 @@ static comboBox_item_t Widget_Settings_opts_combo_opt3;
 static comboBox_item_t Widget_Settings_opts_combo_opt4;
 static comboBox_item_t Widget_Settings_opts_combo_opt5;
 static comboBox_item_t Widget_Settings_opts_combo_exit;
-static widget_t Widget_testopts_opt1;
+static widget_t Widget_testopts_num;
+static widget_t Widget_testopts_multimode;
 
 static widget_t Widget_IronTips_Combo;
 static comboBox_item_t IronTips[ sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]) ];
@@ -627,14 +628,11 @@ void settings_screen_setup(screen_t *scr) {
 	w->posY = 33;
 	w->font_size = &FONT_8X14_reduced;
 	w->editable.inputData.getData = &getOledFix;
-	w->editable.inputData.number_of_dec = 0;
 	w->editable.inputData.type = field_uinteger16;
-	w->editable.big_step = 20;
-	w->editable.step = 5;
+	w->editable.big_step = 1;
+	w->editable.step = 1;
 	w->editable.selectable.tab = 1;
 	w->editable.setData = (void (*)(void *))&setOledFix;
-	w->editable.max_value = 1;
-	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 0;
 	w->reservedChars = 3;
 	w->multiOptionWidget.options = oledFixstr;
@@ -1086,7 +1084,7 @@ void settings_screen_setup(screen_t *scr) {
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
 	w->font_size = &FONT_8X14_reduced;
-	w->posX = 1;
+	w->posX = 2;
 	w->posY = 50;
 	strcpy(w->displayString, "SAVE");
 	w->reservedChars = 4;
@@ -1129,7 +1127,7 @@ void settings_screen_setup(screen_t *scr) {
 	sc->update = &default_screenUpdate;
 	sc->onExit = &settings_screen_test_exit;
 
-	w = &Widget_testopts_opt1;
+	w = &Widget_testopts_num;
 	widgetDefaultsInit(w, widget_editable);
 	w->posX = 102;
 	w->font_size = &FONT_8X14_reduced;
@@ -1145,6 +1143,23 @@ void settings_screen_setup(screen_t *scr) {
 	w->displayWidget.hasEndStr = 0;
 	strcpy(w->displayString,"255");
 	w->reservedChars = 3;
+	w = &Widget_testopts_multimode;
+	widgetDefaultsInit(w, widget_multi_option);
+	w->posX = 110;
+	w->posY = 33;
+	w->font_size = &FONT_8X14_reduced;
+	w->editable.inputData.getData = &getTmpUnit;
+	w->editable.inputData.number_of_dec = 0;
+	w->editable.inputData.type = field_uinteger16;
+	w->editable.big_step = 1;
+	w->editable.step = 1;
+	w->editable.selectable.tab = 2;
+	w->editable.setData = (void (*)(void *))&setTmpUnit;
+	w->reservedChars = 2;
+	w->editable.max_value = Unit_Farenheit;
+	w->editable.min_value = Unit_Celsius;
+	w->multiOptionWidget.options = tempstr;
+	w->multiOptionWidget.numberOfOptions = 2;
 
 	w = &Widget_Settings_opts_combo;
 	screen_addWidget(w, sc);
@@ -1154,9 +1169,8 @@ void settings_screen_setup(screen_t *scr) {
 	w->font_size = &FONT_8X14_reduced;
 	comboAddScreen(&Widget_Settings_opts_combo_opt1, w, "OPT1", screen_settings);
 	comboAddScreen(&Widget_Settings_opts_combo_opt2, w, "OPT2", screen_settings);
-	//comboAddOption(&Widget_Settings_opts_combo_opt3, w, "CONTRAST", &Widget_testopts_opt1);
-	comboAddOption(&Widget_Settings_opts_combo_opt3, w, "CONTRAST", &Widget_Contrast_edit);
-	comboAddScreen(&Widget_Settings_opts_combo_opt4, w, "OPT4", screen_settings);
-	comboAddOption(&Widget_Settings_opts_combo_opt5, w, "VALUE", &Widget_testopts_opt1);
+	comboAddOption(&Widget_Settings_opts_combo_opt3, w, "NUM:", &Widget_testopts_num);
+	comboAddOption(&Widget_Settings_opts_combo_opt4, w, "M.MODE:", &Widget_testopts_multimode);
+	comboAddScreen(&Widget_Settings_opts_combo_opt5, w, "OPT5", screen_settings);
 	comboAddScreen(&Widget_Settings_opts_combo_exit, w, "EXIT", screen_settings);
 }

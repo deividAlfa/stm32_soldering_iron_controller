@@ -326,9 +326,9 @@ void default_widgetDraw(widget_t *widget) {
 	if(widget->type == widget_bmp_button){
 		UG_DrawBMP_MONO(widget->posX ,widget->posY , widget->buttonWidget.bmp);
 		if(draw_frame) {
-			UG_DrawFrame(widget->posX - 2, widget->posY - 2,
+			UG_DrawRoundFrame(widget->posX - 2, widget->posY - 2,
 			widget->posX + widget->buttonWidget.bmp->width + 1,
-			widget->posY + widget->buttonWidget.bmp->height + 1, color);
+			widget->posY + widget->buttonWidget.bmp->height + 1, 2, color);
 		}
 		return;
 	}
@@ -357,19 +357,23 @@ void default_widgetDraw(widget_t *widget) {
 		UG_PutString(widget->posX ,widget->posY , widget->displayString);
 	}
 	if(draw_frame) {
+		UG_DrawRoundFrame(widget->posX - 2, widget->posY - 1,
+				widget->posX + widget->reservedChars * widget->font_size->char_width + 1,
+				widget->posY + widget->font_size->char_height -1, 2, color);
+		/*
 		UG_DrawFrame(widget->posX - 1, widget->posY - 1,
 		widget->posX + widget->reservedChars * widget->font_size->char_width + 1,
 		widget->posY + widget->font_size->char_height -1, color);
+		*/
 	}
 
 }
 void comboBoxDraw(widget_t *widget) {
 	uint16_t yDim = UG_GetYDim() - widget->posY;
-	uint16_t height = widget->font_size->char_height+2;		//2 to allow separation between items
+	uint16_t height = widget->font_size->char_height+2;		//+2 to allow separation between items
 	comboBox_item_t *item = widget->comboBoxWidget.items;
 	uint8_t scroll = 0; ;
-	selectable_widget_t *w;
-	if(!item){ return; }									// If null item
+	if(!item){ return; }										// If null item return (would cause hard fault if widget not properly initialized)
 	while(scroll < widget->comboBoxWidget.currentScroll) {
 		if(!item->next_item)
 			break;
@@ -391,13 +395,14 @@ void comboBoxDraw(widget_t *widget) {
 			item->widget->posY=y * height + widget->posY+1;																					// Set widget Ypos same as the current combo option
 			default_widgetUpdate(item->widget);																								// Update widget
 			default_widgetDraw(item->widget);																								// Draw widget
-			if(extractSelectablePartFromWidget(item->widget)->state==widget_edit){															// Restore color (Edit widget inverts color)
+			if(extractSelectablePartFromWidget(item->widget)->state==widget_edit){															// Restore color (Edit mode widget inverts colors)
 				UG_SetBackcolor ( C_BLACK ) ;
 				UG_SetForecolor ( C_WHITE ) ;
 			}
 		}
 		if(item == widget->comboBoxWidget.currentItem) {																					// Draw the frame if the current combo item is selected
-			UG_DrawFrame(0, y * height + widget->posY, UG_GetXDim() -1, y * height + widget->posY + widget->font_size->char_height, C_WHITE);
+			UG_DrawRoundFrame(0, y * height + widget->posY, UG_GetXDim() -1, y * height + widget->posY + widget->font_size->char_height, 2, C_WHITE );
+			//UG_DrawFrame(0, y * height + widget->posY, UG_GetXDim() -1, y * height + widget->posY + widget->font_size->char_height, C_WHITE);
 		}
 
 		do {

@@ -387,7 +387,7 @@ void main_screen_setup(screen_t *scr) {
 	screen_addWidget(w,scr);
 	widgetDefaultsInit(w, widget_editable);
 	w->editable.selectable.processInput = (int (*)(widget_t*, RE_Rotation_t, RE_State_t *))&tempProcessInput;
-	w->posX = 17;
+	w->posX = 19;
 	w->posY = 50;
 	w->font_size = &FONT_8X14_reduced;
 	w->editable.inputData.getData = &getTemp;

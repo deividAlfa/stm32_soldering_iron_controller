@@ -203,7 +203,7 @@ void tiptype_screen_setup(screen_t *scr) {
 	screen_addWidget(w,scr);
 	widgetDefaultsInit(w, widget_button);
 	w->font_size = &FONT_8X14_reduced;
-	w->posX = 1;
+	w->posX = 2;
 	w->posY = 50;
 	strcpy(w->displayString, "CANCEL");
 	w->reservedChars = 6;
