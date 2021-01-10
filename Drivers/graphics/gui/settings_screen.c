@@ -840,7 +840,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_SYSTEM_Contrast,w, 		"Contrast", 	&Widget_SYSTEM_Contrast);
 	comboAddOption(&comboitem_SYSTEM_OledFix, w, 		"Oled Fix", 	&Widget_SYSTEM_OledFix);
 	comboAddOption(&comboitem_SYSTEM_InitMode, w, 		"Init Mode", 	&Widget_SYSTEM_InitMode);
-	comboAddOption(&comboitem_SYSTEM_EncWake, w, 		"Btn Wake", 	&Widget_SYSTEM_EncWake);
+	comboAddOption(&comboitem_SYSTEM_EncWake, w, 		"Button Wake", 	&Widget_SYSTEM_EncWake);
 	comboAddOption(&comboitem_SYSTEM_Buzzer, w, 		"Buzzer", 		&Widget_SYSTEM_Buzzer);
 	comboAddOption(&comboitem_SYSTEM_TempUnit, w, 		"Temp Unit", 	&Widget_SYSTEM_TempUnit);
 	comboAddOption(&comboitem_SYSTEM_GuiUpd, w, 		"Gui Upd", 		&Widget_SYSTEM_GuiUpd);
