@@ -3,31 +3,74 @@
 <!-- MarkdownTOC -->
 
 * [Status](#status)
+* [Compatibility](#Compatibility)
 * [Warning](#warning)
 * [Backup First!](#backup-first)
 * [Setup instructions](#Setup_instructions)
+* [Working with board profiles](#boards)
+* [Building](#build)
 * [Creating a .ioc file from scratch](#Creating_ioc)
-* [History](#history)
-  * [Working](#working)
-  * [Todo](#todo)
-* [Where are Docs?](#where-are-docs)
-* [Compatibility](#compatibility)
+* [Additional Documentation](#docs)
+* [Pending or non working features](#pending)
 
 <!-- /MarkdownTOC -->
 
 Video can be seen there: (Project in active development, the features will change continuously)
-[![IMAGE ALT TEXT](https://img.youtube.com/vi/XhJvmsmOdC0/0.jpg)](https://www.youtube.com/watch?v=XhJvmsmOdC0 "Quicko T12 custom firmware")
+[![IMAGE ALT TEXT](https://img.youtube.com/vi/l7mDah2jRSI/0.jpg)](https://www.youtube.com/watch?v=l7mDah2jRSI "STM32 T12 custom firmware")
+
+
+
 
 <a id="status"></a>
 ## Status
-* Developed on STM32CubeIDE - download and use that. This IDE includes the MX code generator
-* Tested on QUICKO T12 with STM32F072 and STM32F103.
-* Should be easily ported to other stm32f0xx/stm32f1xx MCUs.
+* Developed on STM32Cube IDE - download and use that for compiling.
+* Basic configuration is easily done in CubeMx (Included in STM32Cube IDE)
 * Already compiled bins in each board folder (Test at your own risk) 
-* Intended to serve as an unified codebase that's easier to share across different boards / hardware. Very few files need to be changed.
+* Intended to serve as an unified codebase that's easier to share across different boards / hardware.
+* Different hardware support based on profiles, very few files need to be changed.
+* Supports all display modes:
+
+  	Boards where the display is connected to dedicated hardware:
+  	- Hardware SPI with DMA
+  	- Hardware I2C with DMA
+ 
+  	Boards where the display is not connected to dedicated hardware:
+  	- Software SPI
+  	- Software I2C 
+
+
+
+
+<a id="compatibility"></a>
+## Compatibility
+
+The actual requirements are 16KB RAM and 64KB flash. Don't even try if your MCU has less than that.
+
+The BOARDS folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.  
+
+These board profiles are being tested:
+* Quicko T12[STABLE]: Profiles for STN32F072C8/CB and STN32F103C8/CB versions. 
+* KSGER v2.1s[WIP](64pin "blue" board): Profiles for STN32F101RB and STN32F103RB versions. 
+* KSGER v3.1 [WIP](64pin "black" board): Profiles for STN32F101RB and STN32F103RB versions.
+
+
+
 
 <a id="warning"></a>
 ## Warning
+
+#### Temperature accuracy
+
+Buying a cheap high temperature meter is highly recommended!
+
+These boards can have pretty different readings and tolerances. It can even change a lot between T12 tips.
+
+So the factory calibration is set lower than real intentionally to avoid possible overheating problems.
+
+Once you set the firmware, go to calibration and set there the real temp meassured with the external probe.
+
+
+#### Hardware issues
 
 Newer hardware is often inferior! With bad low quality component(s) such as:
 
@@ -39,21 +82,39 @@ Which can then result in bad performance / bad temperature regulation.
 * It is recommended to check these above suspect components. And if necessary order better alternatives parts and replace them (before proceeding further).
 * This is especially true for many of the newer v2.1 boards and v3.x boards by KSGER.
 
+
+
+
 <a id="backup-first"></a>
 ## Backup First!
-Usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.
+Be warned, usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.
 
-The simplest way to not loose the originl FW is actually to buy a new MCU, then remove the original MCU with hot air, or chipquik, or bizmuth low temperature solder, and store it in a safe place in case you want to revert back.
+The simplest way to not loose the original FW is actually to buy a new MCU, replace it, and store the original MCU in a safe place.
 
-Keep in mind that there are many versions of the hardware PCB, KSGER and friends keeps changing them all the time, so it might not work even in the MCU is the same.
+Keep in mind that there are many revisions, specially with KSGER, that can make the firmware not compatible even sharing the same MCU. 
 
 Any difference in the pinout will require firmware tuning, although easing that that is one of the main proposits of this firmware.
 
+There are some hacks / vulnerabilities that can be used to backup protected firmware, more details here:
+
+**[STM32 power glitching timing attack](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/tools/software/STM32CubeIDE#option-2-power-glitching-timing-attack
+)**
+
+
 <a id="Setup_instructions"></a>
 ## Setup instructions
-Clone or download the source.
+Download the binary already compiled from the /BOARDS folder, flash it using stlink, and it would be done.
 
-The source is stripped from ST own libraries ans unnecesary stuff, only includes the very basic code owning to the project.
+There's no support for custom bootloaders, and there won't be, as flash is almost full in 64KB devices.
+
+Use one of these ST-LINK clones ($3 or less)
+
+
+
+
+If you want to build your own, clone or download the source.
+
+The source is stripped from ST own libraries and unnecesary stuff, only includes the very basic code owning to the project.
 
 CubeMX will add the STM32 and CMSIS libraries automatically after a code generation.
 
@@ -86,14 +147,21 @@ Ensure these are present:
     (STM32Fxxx matches your current mcu family, ex. STM32F0xx, STM32F1xx)
 ![Alt text](/Readme_files/Includes.jpg?raw=true "Title")
 
-<a id="board_h"></a>
-## Configuring board.h
+
+
+
+<a id="boards"></a>
+## Working with board profiles
 If you use an existing project template and modify it, the changes must be reflected in /Core/Inc/board.h.
 All the project code takes the data from there. The file it's pretty much self-explaining.
 
 So, any changes you make in CubeMX, ex. use PWM timer6 intead timer2, or SPI1 instead SPI2...all that should be configured in their respective define.
-Remember that the GPIO changes need no changes as long as the name is the same.
-     
+As long as the GPIO names are called the same way, no further changes are needed.
+
+
+
+
+<a id="build"></a>     
 ## Building
 
 Click in the right arrow of the build button (Hammer icon), select Release, then click on the build button and should build right away.
@@ -105,22 +173,31 @@ Video of building steps:
 
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/8oeGVSSxudk/0.jpg)](https://www.youtube.com/watch?v=8oeGVSSxudk "Firmware build")
 
-Keep in mind that the flash is almost full, so it will not fit with optimizations disabled.
+Keep in mind that in 64KB devices the flash is almost full and will not fit unless optimization is set to "Optimize for size".
 
-It needs to have build optimizations to -Os(Optimize for size).
+To debug MCUs where the flash space is unsufficient to store a unoptimized build, you can selectively disable build optimizations.
 
-To debug a specific function you can use the "__attribute" directive, found at the start of board.h.
+A line of code can be found at the start of board.h: "__attribute__((optimize("O0")))"
+
 Copy that line before the function like this:
 
-**__attribute__((optimize("O0"))) void ThisFunctionIsNotOptimized(...)**
+	 __attribute__((optimize("O0"))) void ThisFunctionWillNotBeOptimized(...)
+	 
 
-If you want to retarget the project, you can't mix the files, it will make a conflict.
-You can run the included script "Clean_Profile.bat", or by manually delete these files:
-- /Core/Inc/\*stm32\*
-- /Core/Src/\*stm32\*
-- /Core/Startup/\*
+If you want to retarget the project, avoid mixing different profile files.
 
-And then copy the board profile files overwriting any files.
+Run the included script "Clean_Profile.bat", or manually delete these files:
+
+	/Core/Inc/*stm32*
+	/Core/Src/*stm32*
+	/Core/Src/system_stm32*
+	/Core/Startup/*
+
+
+And then copy the board profile files overwriting any existing files.
+
+
+
 
 <a id="Creating_ioc"></a>
 ## Creating a .ioc file from scratch
@@ -133,8 +210,11 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
            Ensure that NVIC interrupt is enabled for it!
           
         -  Buzzer signal: GPIO Output, User label: BUZZER,  No pull
-        -  DMA stream mem2mem, Mode: Normal, Size: Word, increase only dest address. 
-
+        -  DMA stream mem2mem, Mode: Normal, Size: Word, increase only dest address.
+         
+	* CRC
+        -  Enabled, default settings
+        
 	* ENCODER
         -  Rotatory encoder right signal: GPIO INPUT, name: ROT_ENC_R
         -  Rotatory encoder left signal: GPIO INPUT, name: ROT_ENC_L
@@ -145,19 +225,30 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
         -  Oled CS signal: GPIO Output, name: OLED_CS
         -  Oled DC signal: GPIO Output, name: OLED_DC
         -  Oled RESET signal: GPIO Output, name: OLED_RST
-        
-    * SPI
+    
+    * Software SPI/I2C (If used)
         -  GPIO Settings:
-             * Oled SPI CLOCK signal: SPI*_SCK
-                User Label: SCK
+             * Oled CLOCK signal
+                User Label: OLED_SCL
                 No pull
                 Speed: High
-             * Oled SPI DATA signal: SPI*_MOSI
-                User Label: SDO
+             * Oled DATA signal
+                User Label: OLED_SDA
+                No pull
+                Speed: High
+
+    * Hardware SPI (If used)
+        -  GPIO Settings:
+             * Oled SPI CLOCK signal
+                User Label: OLED_SCL (Don't care actually)
+                No pull
+                Speed: High
+             * Oled SPI MOSI signal
+                User Label: OLED_SDA (Don't care actually)
                 No pull
                 Speed: High
         -  Parameter settings:
-             * Mode: Half-Duplex master
+             * Mode: Half-Duplex master or master transmit only
              * NSS: Disabled
              * Data size: 8
              * MSB First
@@ -177,10 +268,35 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
             * DMAx channel interrupt enabled.
             * SPIx global interrupt disabled
             
+   	* Hardware I2C (If used)
+         -  GPIO Settings:
+             * Oled I2C CLOCK signal
+                User Label: OLED_SCL (Don't care actually)
+                No pull
+                Speed: High
+             * Oled I2C DATA signal
+                User Label: OLED_SDA (Don't care actually)
+                No pull
+                Speed: High
+        -  Parameter settings:
+             * I2C Speed Mode: Fast mode or Fast-mode Plus (The fastest the better).
+               (Try lower speeds if it doen't work)
+             * I2C Clock Speed: 100KHz...1MHz
+             * Slave features: Don't care.
+        - DMA Settings:
+            * I2Cx_Tx
+            * Direction: Memory to pheripheral
+            * Piority: Low
+            * DMA request mode: Normal
+            * Data width: Byte in both
+        - NVIC Settings:
+            * DMAx channel interrupt enabled.
+            * I2Cx global interrupt disabled
+            
     * ADC
        -   GPIO config:
             * NTC pin label: NTC
-            * V Supply pin label: VIN
+            * V Supply pin label: VINPUT
             * VRef pin label: VREF
             * Iron Temp pin label: IRON
         - Parameter settings:
@@ -240,7 +356,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
             
     * PWM
         - GPIO:
-           * User label: PWM_OUTPUT
+           * User label: PWM_OUTPUT (Don't care actually)
            * Mode: TIMxCHx(N) ("x" and "N" depends on the selected pin)
            
         - TIMER: Select timer assigned to the pin.
@@ -256,48 +372,25 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
             - NVIC settings: Depending on the timer type, enable TIMx "Capture compare" if available, else use "Global interrupt".
               Consider that some timers will run at CPU speed while other may take a slower clock.
               Check the Clock config in CUBEMX!
+       
+       
+       
             
- 
-<a id="history"></a>
-## History
-* Original version by PTDreamer
-* Fixed a lot of bugs, lots of small improvements, specially the SPI DMA transfer
-* Much easier to port between devices
-* Commentary of changes in the forum thread - [Posts starting here](https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle/msg3284800/#msg3284800)
+<a id="pending"></a>
+### Pending or non working features
+* I2C eeprom not implemented yet. Internal flash storage is used. (1KB free needed)
+* RTC clock is not implemented and probably never will.
 
-**WARNING:** Tip temperature measurement is still unreliable, this firmware might heat up your iron far above the temperature on display. Use with caution and at own risk!
 
-<a id="working"></a>
-### Working
-* OLED Display
-* Rotary Encoder
-* Buzzer
-* Wake switch
-* Supply voltage sensor
-* Ambient temperature sensor (might need calibration)
-* Tip temperature read out (might also need calibration)
-* T12 PWM Control (might burn your tip)
 
-<a id="todo"></a>
-### Todo
-* I2C eeprom
-* 
-<a id="where-are-docs"></a>
-## Where are Docs?
 
-* Docs have been split out into seperate 'docs' repo. Because the size of assets kept ballooning in git
-* This repo is just only for source code now. This is simply code fork of PTDreamer meant for v2.1s Hardware
+<a id="docs"></a>
+## Additional Documentation
 
-Well which Docs are you looking for?
+* Dreamcat4 has made a great research and documentation of T12 and STM32 related stuff:
+* **[Dreamcat4 documentation repo](https://github.com/dreamcat4/t12-t245-controllers-docs)**
+* **[Backup of original PTDreamer Blog](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/research/ptdreamer)** 
 
-* **[New Docs, Full Repo](https://github.com/dreamcat4/t12-t245-controllers-docs)**
-* **[Backup of PTDreamer Blog](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/research/ptdreamer)** 
-* **[Hardware Compatibility Docs](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/controllers/stm32-t12-oled)**
-* **[How to Compile & Flash This Code with Official ST Toolchain](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/tools/software/STM32CubeIDE)**
-* *Docs for Compiling / Flashing with VSCode and PlatformIO* - TBD. Not done.
-
-<a id="compatibility"></a>
-## Compatibility
 
 
 
