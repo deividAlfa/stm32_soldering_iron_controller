@@ -416,7 +416,7 @@ void main_screen_setup(screen_t *scr) {
 	screen_addWidget(w,scr);
 	widgetDefaultsInit(w, widget_bmp);
 	w->posX = 0;
-	w->posY = 24;
+	w->posY = 22;
 	w->displayBmp.bmp = &pulse;
 	w->enabled = 0;
 

@@ -74,21 +74,21 @@ void default_screenDraw(screen_t *scr) {
 	if(scr->widgets) {
 		last_widget = scr->widgets;
 		while(last_widget) {
-			if(last_widget->draw)
+			if(last_widget->draw){
 				last_widget->draw(last_widget);
+			}
 			last_widget = last_widget->next_widget;
 		}
 	}
 }
 
 void default_screenUpdate(screen_t *scr) {
-	widget_t *last_widget = NULL;
 	if(scr->widgets) {
-		last_widget = scr->widgets;
+		widget_t *last_widget = scr->widgets;
 		displayOnly_wiget_t *dis;
 		while(last_widget) {
 			dis = extractDisplayPartFromWidget(last_widget);
-			if(dis!=NULL){
+			if(dis){
 				if(dis->update){
 					dis->update(last_widget);
 				}
