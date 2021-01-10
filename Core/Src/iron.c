@@ -56,7 +56,7 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 	Iron.Pwm_Out 			= 0;										// PWM disabled
 	Iron.isPresent			= 1;										// Set detected by default (to not show ERROR screen at boot)
 	setCurrentTip(systemSettings.currentTip);							// Load TIP
-	setCurrentMode(systemSettings.bootMode);							// Set mode
+	setCurrentMode(systemSettings.initMode);							// Set mode
 #ifdef	PWM_CHx															// Start PWM
 	HAL_TIM_PWM_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);				// PWM output uses CHx channel
 

@@ -102,8 +102,8 @@ void resetSettings() {
 	systemSettings.tempUnit=Unit_Celsius;
 	systemSettings.saveSettingsDelay=10;
 	systemSettings.TipType=Tip_None;
-	systemSettings.bootMode=mode_normal;
-	systemSettings.buzzDisable=1;
+	systemSettings.initMode=mode_normal;
+	systemSettings.buzzEnable=0;
 	resetTips();
 }
 

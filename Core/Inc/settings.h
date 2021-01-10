@@ -39,9 +39,9 @@ typedef struct{
 	uint16_t guiUpdateDelay;
 	uint8_t TipType;
 	uint8_t saveSettingsDelay;
-	uint8_t bootMode;
+	uint8_t initMode;
 	bool tempUnit;
-	bool buzzDisable;
+	bool buzzEnable;
 }systemSettings_t;
 extern systemSettings_t systemSettings;
 extern systemSettings_t* flashSettings;

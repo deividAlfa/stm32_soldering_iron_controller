@@ -135,7 +135,7 @@ static void * main_screen_getIronPower() {
 }
 
 static int enterSettings(widget_t *w) {
-	return screen_settings;
+	return screen_settingsmenu;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------

@@ -70,7 +70,7 @@ static void setCalState(state_t s) {
 }
 
 static int cancelAction(widget_t* w) {
-	return screen_settings;
+	return screen_settingsmenu;
 }
 
 static int okAction(widget_t *w) {

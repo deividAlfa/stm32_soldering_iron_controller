@@ -50,13 +50,13 @@ static int tiptype_OK(widget_t *w) {
 		FirstBoot = 0;
 		return screen_main;
 	}
-	return screen_settings;
+	return screen_settingsmenu;
 }
 
 static int tiptype_CANCEL(widget_t *w) {
 	setup=0;
 	SetFailState(0);
-	return screen_settings;
+	return screen_settingsmenu;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -119,7 +119,7 @@ void tiptype_draw(screen_t * scr) {
 int tiptype_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	switch(setup){
 		case 0:
-			return screen_settings;
+			return screen_settingsmenu;
 		case 1:
 			return -1;
 		case 2:
