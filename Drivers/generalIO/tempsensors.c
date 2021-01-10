@@ -54,8 +54,15 @@ uint16_t readTipTemperatureCompensated(bool new) {
 	if(new){
 		readTipTemperatureCompensatedRaw(New);
 		last_value = adc2Human(TIP.last_avg,1,systemSettings.tempUnit);
-		if(last_value>530){
-			last_value=530;
+		if(systemSettings.TipType==Unit_Celsius){
+			if(last_value>999){
+				last_value=999;								// Limit output
+			}
+		}
+		else if(systemSettings.TipType==Unit_Farenheit){
+			if(last_value>537){
+				last_value=537;								// Limit output (537C=999F)
+			}
 		}
 	}
 	return last_value;
@@ -70,7 +77,7 @@ uint16_t readTipTemperatureCompensatedRaw(bool new) {
 				last_value=999;								// Limit output
 			}
 		}
-		if(systemSettings.TipType==Unit_Farenheit){
+		else if(systemSettings.TipType==Unit_Farenheit){
 			if(last_value>537){
 				last_value=537;								// Limit output (537C=999F)
 			}

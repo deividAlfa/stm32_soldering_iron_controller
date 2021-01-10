@@ -535,8 +535,9 @@ int comboBoxProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t *stat
 }
 //returns -1 if processed, -2 if not processed, or next screen
 int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t *state) {
-	if(input == Rotate_Nothing)
+	if(input == Rotate_Nothing){
 		return -1;
+	}
 	selectable_widget_t *sel = extractSelectablePartFromWidget(widget);
 	if(sel) {
 		if(input == LongClick) {
@@ -592,7 +593,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 		if((widget->type == widget_editable) && (extractSelectablePartFromWidget(widget)->state == widget_edit)) {
 			uint16_t ui16;
 			char *str;
-			int8_t inc;
+			int16_t inc;
 			if(fabs(state->Diff) > 2) {
 				inc = widget->editable.big_step;
 				if(state->Diff < 0)

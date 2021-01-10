@@ -84,7 +84,7 @@ void irontype_draw(screen_t * scr) {
 		FillBuffer(C_BLACK,fill_dma);
 		UG_FontSelect(&FONT_8X14_reduced);
 		UG_PutString(2,0,"A WRONG SETTING");//15
-		UG_PutString(6,14,"WILL BURN YOUR");//14
+		UG_PutString(10,14,"CAN BURN YOUR");//13
 		UG_PutString(42,28,"TIP!!");//5
 		UG_FontSelect(&FONT_6X8_reduced);
 		UG_PutString(0,50,"PUSH BTN TO CONTINUE");//10
@@ -96,7 +96,7 @@ void irontype_draw(screen_t * scr) {
 	case 5:
 		FillBuffer(C_BLACK,fill_dma);
 		UG_FontSelect(&FONT_8X14_reduced);
-		UG_PutString(7,0,"(CHANGING TYPE");//12
+		UG_PutString(7,0,"(CHANGING IRON");//12
 		UG_PutString(2,14,"TYPE WILL ERASE");//15
 		UG_PutString(11,28,"THE TIP DATA)");//13
 		UG_FontSelect(&FONT_6X8_reduced);

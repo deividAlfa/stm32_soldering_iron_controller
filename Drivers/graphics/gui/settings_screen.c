@@ -346,7 +346,6 @@ static void * getNoIronADC() {
 }
 static void setNoIronADC(uint16_t *val) {
 	systemSettings.noIronValue = *val;
-
 }
 static void * getBuzzEnable() {
 	temp = systemSettings.buzzEnable;
@@ -917,7 +916,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.step = 50;
 	w->editable.setData = (void (*)(void *))&setNoIronDelay;
 	w->reservedChars = 5;
-	w->editable.max_value = 1000;
+	w->editable.max_value = 950;
 	w->editable.min_value = 100;
 	w->displayWidget.hasEndStr = 1;
 	w->endString="mS";
