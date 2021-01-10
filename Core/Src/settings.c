@@ -104,6 +104,7 @@ void resetSettings() {
 	systemSettings.TipType=Tip_None;
 	systemSettings.initMode=mode_normal;
 	systemSettings.buzzEnable=0;
+	systemSettings.wakeEncoder=0;
 	resetTips();
 }
 

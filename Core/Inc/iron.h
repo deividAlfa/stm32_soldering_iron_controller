@@ -75,7 +75,7 @@ typedef struct {
 
 #define IRON_MIN			2048						// OUT= PWM_MAX/IRON_MIN
 extern volatile iron_t Iron;
-void IronWake(void);
+void IronWake(bool source);
 void SetIronPresence(bool isPresent);
 bool GetIronPresence(void);
 void SetFailState(bool FailState);

@@ -42,6 +42,7 @@ typedef struct{
 	uint8_t initMode;
 	bool tempUnit;
 	bool buzzEnable;
+	bool wakeEncoder;
 }systemSettings_t;
 extern systemSettings_t systemSettings;
 extern systemSettings_t* flashSettings;

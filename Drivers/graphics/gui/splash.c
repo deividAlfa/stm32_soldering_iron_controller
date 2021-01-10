@@ -9,15 +9,7 @@
 #include "oled.h"
 #define SPLASH_TIMEOUT 1000
 
-//widget_t splash_widget;
-
-screen_t splash_screen = {
-
-	processInput:	splash_processInput,
-	init:			splash_init,
-	draw:			splash_draw,
-};
-
+screen_t splash_screen;
 
 
 static uint32_t splash_time;
@@ -25,7 +17,7 @@ void splash_setup(screen_t * scr) {
 
 	scr->processInput = &splash_processInput;
 	scr->init = &splash_init;
-	scr->draw = &splash_draw;
+	scr->draw = &default_screenDraw;
 	scr->update = NULL;
 }
 
@@ -178,13 +170,10 @@ UG_BMP_MONO splash = {
 };
 
 void splash_init(screen_t * scr) {
-	splash_time = HAL_GetTick();
-}
-
-void splash_draw(screen_t * scr) {
 	static bool done=0;
 	if(!done){
 		done=1;
+		splash_time = HAL_GetTick();
 		UG_DrawBMP_MONO(0,0, &splash);
 	}
 }

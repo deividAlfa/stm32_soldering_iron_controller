@@ -210,12 +210,9 @@ void default_widgetUpdate(widget_t *widget) {
 			else if(dis->type==field_int32){
 				val_ui = *(int32_t*)data;
 			}
-			else{
-				break;
-			}
 			if(dis->number_of_dec){														// If decimals used
-				if((dis->number_of_dec+endStrLen)>widget->reservedChars){		// If decimals larger than display string length (-2 for '.' + string termination)
-					decimals = widget->reservedChars - endStrLen;				// Reduce decimals
+				if((dis->number_of_dec+endStrLen)>widget->reservedChars){				// If decimals larger than display string length (-2 for '.' + string termination)
+					decimals = widget->reservedChars - endStrLen;						// Reduce decimals
 				}
 				else{
 					decimals = dis->number_of_dec;										// Else, leave all the decimals
@@ -720,28 +717,30 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 }
 
 void comboAddScreen(comboBox_item_t* item,widget_t *combo, char *label, uint8_t actionScreen){
-	item->text = label;
-	item->next_item = NULL;
-	item->action_screen = actionScreen;
-	item->type = combo_Screen;
-	item->enabled = 1;
+	if(combo->type==widget_combo){
+		item->text = label;
+		item->next_item = NULL;
+		item->action_screen = actionScreen;
+		item->type = combo_Screen;
+		item->enabled = 1;
 
-	comboBox_item_t *last = combo->comboBoxWidget.items;
+		comboBox_item_t *last = combo->comboBoxWidget.items;
 
-	if(!last) {
-		combo->comboBoxWidget.items = item;
-		combo->comboBoxWidget.currentItem = item;
-		return;
+		if(!last) {
+			combo->comboBoxWidget.items = item;
+			combo->comboBoxWidget.currentItem = item;
+			return;
+		}
+		while(last->next_item){
+			last = last->next_item;
+		}
+		last->next_item = item;
 	}
-	while(last->next_item){
-		last = last->next_item;
-	}
-	last->next_item = item;
 }
 
 void comboAddOption(comboBox_item_t* item, widget_t *combo, char *label, widget_t *widget){
 
-	if( (widget->type==widget_editable) || (widget->type==widget_multi_option) ){				// Only add Editable  or multioption widgets
+	if( (widget->type==widget_editable) || (widget->type==widget_multi_option) ){				// Only allow Editable  or multioption widgets
 		item->text = label;
 		item->next_item = NULL;
 		item->widget = widget;

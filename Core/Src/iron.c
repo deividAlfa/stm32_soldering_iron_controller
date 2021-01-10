@@ -331,15 +331,17 @@ void setCurrentMode(iron_mode_t mode) {
 	modeChanged(mode);
 }
 // Called from program timer if WAKE change is detected
-void IronWake(void){
+void IronWake(bool source){													// source: 0 = handle, 1=encoder
 	if((Iron.CurrentMode==mode_sleep) || (Iron.CurrentMode==mode_standby)){
 		setCurrentMode(mode_normal);				// Back to normal mode
 	}
 	else if(Iron.CurrentMode==mode_normal){
 		Iron.CurrentModeTimer = HAL_GetTick();		// Clear timer to avoid entering sleep mode
 	}
-	Iron.LastMovedTime = HAL_GetTick();
-	Iron.hasMoved=1;
+	if(!source){
+		Iron.LastMovedTime = HAL_GetTick();
+		Iron.hasMoved=1;
+	}
 }
 // Sets the presence of the iron. Handles alarm output
 void SetIronPresence(bool isPresent){
