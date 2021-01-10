@@ -80,56 +80,56 @@ void handleIron(void) {
 	if((systemSettings.TipType!=Tip_T12)&&(systemSettings.TipType!=Tip_JBC)){
 		SetFailState(1);
 	}
-	if(!Iron.OverrunTriggered && Iron.isPresent){							// If overrun not triggered yet and iron detected
+	if(!Iron.RunawayTriggered && Iron.isPresent){							// If overrun not triggered yet and iron detected
 		if(Iron.Pwm_Out!=0){												// If PWM is active
-			for(int8_t c=overrun_100;c>=overrun_ok;c--){					// Check for overrun
-				Iron.OverrunLevel=c;
+			for(int8_t c=runaway_100;c>=runaway_ok;c--){					// Check for overrun
+				Iron.RunawayLevel=c;
 				if(TIP.last_avg > human2adc(Iron.CurrentSetTemperature+(25*c)) ){
 					break;													// Stop at the first overrun condition
 				}
 			}
-			if(Iron.OverrunLevel!=overrun_ok){										// Overrun detected?
-				if(Iron.prevOverrunLevel==overrun_ok){								// First overrun detection?
-					Iron.prevOverrunLevel=Iron.OverrunLevel;						// Yes, store in prev level
-					Iron.OverrunTimer=HAL_GetTick();								// Store time
+			if(Iron.RunawayLevel!=runaway_ok){										// Runaway detected?
+				if(Iron.prevRunawayLevel==runaway_ok){								// First overrun detection?
+					Iron.prevRunawayLevel=Iron.RunawayLevel;						// Yes, store in prev level
+					Iron.RunawayTimer=HAL_GetTick();								// Store time
 				}
 				else{																// Was already triggered
-					switch(Iron.OverrunLevel){
-						case overrun_ok:											// No problem (<25ºC difference)
+					switch(Iron.RunawayLevel){
+						case runaway_ok:											// No problem (<25ºC difference)
 							break;													// (Never used here)
-						case overrun_25:											// Temp >25°C over setpoint
-							if(HAL_GetTick()>(Iron.OverrunTimer+20000)){			// 20 second limit
-								Iron.OverrunTriggered=1;
-								FatalError(error_OVERRUN25);
+						case runaway_25:											// Temp >25°C over setpoint
+							if(HAL_GetTick()>(Iron.RunawayTimer+20000)){			// 20 second limit
+								Iron.RunawayTriggered=1;
+								FatalError(error_RUNAWAY25);
 							}
 							break;
-						case overrun_50:											// Temp >50°C over setpoint
-							if(HAL_GetTick()>(Iron.OverrunTimer+10000)){			// 10 second limit
-								Iron.OverrunTriggered=1;
-								FatalError(error_OVERRUN50);
+						case runaway_50:											// Temp >50°C over setpoint
+							if(HAL_GetTick()>(Iron.RunawayTimer+10000)){			// 10 second limit
+								Iron.RunawayTriggered=1;
+								FatalError(error_RUNAWAY50);
 							}
 							break;
-						case overrun_75:											// Temp >75°C over setpoint
-							if(HAL_GetTick()>(Iron.OverrunTimer+3000)){				// 3 second limit
-								Iron.OverrunTriggered=1;
-								FatalError(error_OVERRUN75);
+						case runaway_75:											// Temp >75°C over setpoint
+							if(HAL_GetTick()>(Iron.RunawayTimer+3000)){				// 3 second limit
+								Iron.RunawayTriggered=1;
+								FatalError(error_RUNAWAY75);
 							}
 							break;
-						case overrun_100:											// Temp >100°C over setpoint
-							if(HAL_GetTick()>(Iron.OverrunTimer+1000)){				// 3 second limit
-								Iron.OverrunTriggered=1;
-								FatalError(error_OVERRUN100);
+						case runaway_100:											// Temp >100°C over setpoint
+							if(HAL_GetTick()>(Iron.RunawayTimer+1000)){				// 3 second limit
+								Iron.RunawayTriggered=1;
+								FatalError(error_RUNAWAY100);
 							}
 							break;
 						default:													// Unknown overrun state
-							Iron.OverrunTriggered=1;
-							FatalError(error_OVERRUN_UNKNOWN);
+							Iron.RunawayTriggered=1;
+							FatalError(error_RUNAWAY_UNKNOWN);
 							break;
 					}
 				}
 			}
 			else{
-				Iron.prevOverrunLevel=overrun_ok;							// No, clear prev level
+				Iron.prevRunawayLevel=runaway_ok;							// No, clear prev level
 			}
 		}
 	}
@@ -184,7 +184,7 @@ void handleIron(void) {
 	if(!Iron.isPresent){							// If iron not present
 		Iron.CurrentIronPower = 0;					// Indicate 0.1% power
 		Iron.Pwm_Out = 0;			// Set 0.1% power (1024 to be a fast bit shifting operation) (to maintain no iron detection)
-		Iron.prevOverrunLevel=overrun_ok;			// Reset previous overrun
+		Iron.prevRunawayLevel=runaway_ok;			// Reset previous overrun
 		return;
 	}
 	// Controls inactivity timer and enters low power modes

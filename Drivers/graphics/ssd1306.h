@@ -23,11 +23,11 @@ typedef enum{
 	error_MEMMANAGE,
 	error_BUSFAULT,
 	error_USAGEFAULT,
-	error_OVERRUN25,
-	error_OVERRUN50,
-	error_OVERRUN75,
-	error_OVERRUN100,
-	error_OVERRUN_UNKNOWN,
+	error_RUNAWAY25,
+	error_RUNAWAY50,
+	error_RUNAWAY75,
+	error_RUNAWAY100,
+	error_RUNAWAY_UNKNOWN,
 }FatalErrors;
 
 enum { fill_soft, fill_dma };

@@ -109,7 +109,9 @@ void resetSettings() {
 
 
 void resetTips(void){
-
+#ifdef NOSAVESETTINGS
+	systemSettings.TipType=Tip_T12;										// Force T12 when debugging
+#endif
 	if(systemSettings.TipType==Tip_T12){
 		systemSettings.noIronValue=4000;
 		for(uint8_t x = 0; x < ( sizeof(systemSettings.ironTips)/sizeof(systemSettings.ironTips[0])); ++x) {

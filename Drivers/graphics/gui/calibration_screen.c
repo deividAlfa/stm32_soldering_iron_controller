@@ -209,7 +209,7 @@ void calibration_screen_setup(screen_t *scr) {
 	w->editable.setData = &setMeasuredTemp;
 	w->reservedChars = 5;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "*C");
+	w->endString = "*C";
 	w->editable.selectable.tab = 0;
 
 	w=&Widget_CAL_Input_OK;

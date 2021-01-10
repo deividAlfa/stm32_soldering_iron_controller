@@ -17,7 +17,7 @@
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
 typedef enum widgetFieldType {field_float, field_integer, field_integer16,field_uinteger16, field_int32, field_bmp, field_string}widgetFieldType;
 typedef enum widgetTextJustifyType {justify_left, justify_right}widgetTextJustifyType;
-typedef enum widgetType {widget_combo, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button, widget_bmp_button}widgetType;
+typedef enum widgetType {widget_combo, combo_Screen, combo_Option, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button, widget_bmp_button}widgetType;
 typedef struct widget_t widget_t;
 typedef struct comboBox_item_t comboBox_item_t;
 
@@ -42,7 +42,11 @@ typedef struct comboBox_widget_t {
 typedef struct comboBox_item_t {
 	char *text;
 	comboBox_item_t *next_item;
-	uint8_t action_screen;
+	uint8_t type;
+	union{
+		widget_t *widget;
+		uint8_t action_screen;
+	};
 	bool enabled;
 } comboBox_item_t;
 
@@ -59,10 +63,10 @@ typedef struct editable_t {
 	displayOnly_wiget_t inputData;
 	selectable_widget_t selectable;
 	void (*setData)(void *);
-	uint8_t step;
-	uint8_t big_step;
-	uint16_t max_value;
-	uint16_t min_value;
+	uint16_t step;
+	uint16_t big_step;
+	uint32_t max_value;
+	uint32_t min_value;
 	uint8_t current_edit;
 } editable_widget_t;
 
@@ -88,11 +92,12 @@ typedef struct button_widget_t {
 	UG_BMP_MONO* bmp;
 } button_widget_t;
 
+
 struct widget_t
 {
 	bool inverted;
 	char displayString[18];
-	char endString[5];
+	const char* endString;
 	uint8_t reservedChars;
 	uint8_t posX;
 	uint8_t posY;
@@ -122,6 +127,7 @@ void default_widgetUpdate(widget_t *widget);
 int default_widgetProcessInput(widget_t *, RE_Rotation_t, RE_State_t *);
 int comboBoxProcessInput(widget_t *, RE_Rotation_t, RE_State_t *);
 void comboBoxDraw(widget_t *widget);
-void comboAddItem(comboBox_item_t* item,widget_t *combo, char *label, uint8_t actionScreen);
-
+void comboAddScreen(comboBox_item_t* item,widget_t *combo, char *label, uint8_t actionScreen);
+void comboAddOption(comboBox_item_t* item, widget_t *combo, char *label, widget_t *widget);
+void comboResetIndex(widget_t *combo);
 #endif /* GRAPHICS_GUI_WIDGETS_H_ */

@@ -15,12 +15,12 @@ typedef enum {IRON_measure_idle, IRON_measure_ready} IRON_measure_state_t;
 typedef enum {mode_standby=0, mode_sleep, mode_normal, mode_boost} iron_mode_t;
 
 typedef enum{
-	overrun_ok=0,
-	overrun_25=1,
-	overrun_50=2,
-	overrun_75=3,
-	overrun_100=4,
-	overrun_max=5,
+	runaway_ok=0,
+	runaway_25=1,
+	runaway_50=2,
+	runaway_75=3,
+	runaway_100=4,
+	runaway_max=5,
 }overrunLevels;
 
 typedef void (*currentModeChanged)(iron_mode_t);
@@ -67,10 +67,10 @@ typedef struct {
 	bool 					OledUpdate;					// Flag to indicate OLED screen must be updated
 	bool 					hasMoved;					// Flag to indicate handle movement
 	bool 					FailState;					// Flag to indicate a serious failure, totally disables the PWM until the flag is manually cleared
-	uint32_t 				OverrunTimer;				// Overrun timer
-	uint8_t 				OverrunLevel;				// Overrun actual level
-	uint8_t 				prevOverrunLevel;			// Overrun previous level
-	bool 					OverrunTriggered;			// Overrun triggered flag
+	uint32_t 				RunawayTimer;				// Runaway timer
+	uint8_t 				RunawayLevel;				// Runaway actual level
+	uint8_t 				prevRunawayLevel;			// Runaway previous level
+	bool 					RunawayTriggered;			// Runaway triggered flag
 }iron_t;
 
 #define IRON_MIN			2048						// OUT= PWM_MAX/IRON_MIN

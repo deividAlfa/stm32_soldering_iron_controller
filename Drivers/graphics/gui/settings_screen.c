@@ -62,7 +62,17 @@ static comboBox_item_t Settings_Combo_MISC;
 static comboBox_item_t Settings_Combo_TIPTYPE;
 static comboBox_item_t Settings_Combo_TIPS;
 static comboBox_item_t Settings_Combo_CALIBRATION;
+static comboBox_item_t Settings_Combo_TESTOPTS;
 static comboBox_item_t Settings_Combo_EXIT;
+
+static widget_t Widget_Settings_opts_combo;
+static comboBox_item_t Widget_Settings_opts_combo_opt1;
+static comboBox_item_t Widget_Settings_opts_combo_opt2;
+static comboBox_item_t Widget_Settings_opts_combo_opt3;
+static comboBox_item_t Widget_Settings_opts_combo_opt4;
+static comboBox_item_t Widget_Settings_opts_combo_opt5;
+static comboBox_item_t Widget_Settings_opts_combo_exit;
+static widget_t Widget_testopts_opt1;
 
 static widget_t Widget_IronTips_Combo;
 static comboBox_item_t IronTips[ sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]) ];
@@ -314,8 +324,8 @@ static void setNoIronADC(uint16_t *val) {
 static void tempUnitChanged(void) {
 	TempUnit = systemSettings.tempUnit;
 	if(TempUnit==Unit_Farenheit){
-		strcpy(Widget_Boost_Temp_edit.endString, "F");
-		strcpy(Widget_Sleep_Temp_edit.endString, "F");
+		Widget_Boost_Temp_edit.endString="*F";
+		Widget_Sleep_Temp_edit.endString="*F";
 		Widget_Boost_Temp_edit.editable.max_value=900;
 		Widget_Boost_Temp_edit.editable.min_value=400;
 		Widget_Boost_Temp_edit.editable.big_step = 50;
@@ -326,8 +336,8 @@ static void tempUnitChanged(void) {
 		Widget_Sleep_Temp_edit.editable.step = 10;
 	}
 	else{
-		strcpy(Widget_Boost_Temp_edit.endString, "C");
-		strcpy(Widget_Sleep_Temp_edit.endString, "C");
+		Widget_Boost_Temp_edit.endString="*C";
+		Widget_Sleep_Temp_edit.endString="*C";
 		Widget_Boost_Temp_edit.editable.max_value=480;
 		Widget_Boost_Temp_edit.editable.min_value=200;
 		Widget_Boost_Temp_edit.editable.big_step = 50;
@@ -361,6 +371,16 @@ int settings_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t 
 		return screen_debug;
 	}
 	return (default_screenProcessInput(scr, input, state));
+}
+static void settings_screen_exit(screen_t *scr) {
+	//comboResetIndex(&Widget_Settings_combo);
+}
+//-------------------------------------------------------------------------------------------------------------------------------
+// TEST screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+
+static void settings_screen_test_exit(screen_t *scr) {
+	comboResetIndex(&Widget_Settings_opts_combo);
 }
 //-------------------------------------------------------------------------------------------------------------------------------
 // PID screen functions
@@ -473,6 +493,7 @@ void settings_screen_setup(screen_t *scr) {
 	scr->processInput = &settings_screenProcessInput;
 	scr->init = &settings_screen_init;
 	scr->update = &settings_screenUpdate;
+	scr->onExit = &settings_screen_exit;
 
 	//###############################
 	// Settings screen comboBox
@@ -480,20 +501,21 @@ void settings_screen_setup(screen_t *scr) {
 	w = &Widget_Settings_combo;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_combo);
-	w->posY = 5;
+	w->posY = 0;
 	w->posX = 0;
-	w->font_size = &FONT_10X16_reduced;
-	comboAddItem(&Settings_Combo_PID, w, "PID", screen_edit_pid);
-	comboAddItem(&Settings_Combo_SCREEN, w, "SCREEN", screen_edit_screen);
-	comboAddItem(&Settings_Combo_SLEEP, w, "SLEEP", screen_edit_sleep);
-	comboAddItem(&Settings_Combo_BOOST, w, "BOOST", screen_edit_boost);
-	comboAddItem(&Settings_Combo_PWM, w, "PWM", screen_edit_pwm);
-	comboAddItem(&Settings_Combo_DETECTION, w, "DETECTION", screen_edit_detection);
-	comboAddItem(&Settings_Combo_MISC, w, "MISC", screen_edit_misc);
-	comboAddItem(&Settings_Combo_TIPTYPE, w, "TIP TYPE", screen_tiptype);
-	comboAddItem(&Settings_Combo_TIPS, w, "TIPS", screen_edit_iron_tips);
-	comboAddItem(&Settings_Combo_CALIBRATION, w, "CALIBRATION", screen_edit_calibration_wait);
-	comboAddItem(&Settings_Combo_EXIT, w, "EXIT", screen_main);
+	w->font_size = &FONT_8X14_reduced;
+	comboAddScreen(&Settings_Combo_PID, w, "PID", screen_edit_pid);
+	comboAddScreen(&Settings_Combo_SCREEN, w, "SCREEN", screen_edit_screen);
+	comboAddScreen(&Settings_Combo_SLEEP, w, "SLEEP", screen_edit_sleep);
+	comboAddScreen(&Settings_Combo_BOOST, w, "BOOST", screen_edit_boost);
+	comboAddScreen(&Settings_Combo_PWM, w, "PWM", screen_edit_pwm);
+	comboAddScreen(&Settings_Combo_DETECTION, w, "DETECTION", screen_edit_detection);
+	comboAddScreen(&Settings_Combo_MISC, w, "MISC", screen_edit_misc);
+	comboAddScreen(&Settings_Combo_TIPTYPE, w, "TIP TYPE", screen_tiptype);
+	comboAddScreen(&Settings_Combo_TIPS, w, "TIPS", screen_edit_iron_tips);
+	comboAddScreen(&Settings_Combo_CALIBRATION, w, "CALIBRATION", screen_edit_calibration_wait);
+	comboAddScreen(&Settings_Combo_TESTOPTS, w, "TEST OPTS", screen_edit_test_opts);
+	comboAddScreen(&Settings_Combo_EXIT, w, "EXIT", screen_main);
 
 	//###############################
 	// PID Control screen
@@ -659,7 +681,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 600;
 	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "s");
+	w->endString="s";
 	w->reservedChars = 4;
 	w->displayWidget.justify =justify_right;
 
@@ -699,7 +721,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 600;
 	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "s");
+	w->endString="s";
 	w->displayWidget.justify =justify_right;
 
 	// OK Button
@@ -741,7 +763,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 600;
 	w->editable.min_value = 5;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "s");
+	w->endString="s";
 	w->reservedChars = 4;
 	w->displayWidget.justify =justify_right;
 
@@ -801,7 +823,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 100;
 	w->editable.min_value = 5;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "%");
+	w->endString="%";
 	w->reservedChars = 4;
 	w->displayWidget.justify =justify_right;
 
@@ -822,7 +844,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 650;
 	w->editable.min_value = 20;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "mS");
+	w->endString="mS";
 	w->reservedChars = 5;
 	w->displayWidget.justify =justify_right;
 
@@ -844,7 +866,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 500;
 	w->editable.min_value = 1;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "mS");
+	w->endString="mS";
 	w->displayWidget.justify =justify_right;
 
 	// OK Button
@@ -907,7 +929,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 1000;
 	w->editable.min_value = 100;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "mS");
+	w->endString="mS";
 	w->displayWidget.justify =justify_right;
 
 	// OK Button
@@ -949,7 +971,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 60;
 	w->editable.min_value = 1;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "s");
+	w->endString="s";
 	w->reservedChars = 3;
 	w->displayWidget.justify =justify_right;
 
@@ -970,7 +992,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 500;
 	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "mS");
+	w->endString="mS";
 	w->reservedChars = 5;
 	w->displayWidget.justify =justify_right;
 
@@ -1026,10 +1048,10 @@ void settings_screen_setup(screen_t *scr) {
 
 	for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++x) {
 		t[x][0] = '\0';
-		comboAddItem(&IronTips[x],w, &t[x][0], screen_edit_tip_name);
+		comboAddScreen(&IronTips[x],w, &t[x][0], screen_edit_tip_name);
 	}
-	comboAddItem(&IronTips_addNewTip, w, "ADD NEW", screen_edit_tip_name);
-	comboAddItem(&IronTips_Exit, w, "EXIT", screen_settings);
+	comboAddScreen(&IronTips_addNewTip, w, "ADD NEW", screen_edit_tip_name);
+	comboAddScreen(&IronTips_Exit, w, "EXIT", screen_settings);
 	sc->current_widget = w;
 
 	//###############################
@@ -1093,5 +1115,48 @@ void settings_screen_setup(screen_t *scr) {
 	strcpy(w->displayString, "DEL.");
 	w->reservedChars = 4;
 	w->buttonWidget.selectable.tab = 2;
-	w->buttonWidget.action = &delTip;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 	w->buttonWidget.action = &delTip;
+	w->buttonWidget.action = &delTip;
+	w->buttonWidget.action = &delTip;
+
+	//###############################
+	// TEST screen
+	//###############################
+	sc=&Screen_edit_test_opts;
+	oled_addScreen(sc,screen_edit_test_opts);
+	sc->draw = &default_screenDraw;
+	sc->processInput = &default_screenProcessInput;
+	sc->init = &default_init;
+	sc->update = &default_screenUpdate;
+	sc->onExit = &settings_screen_test_exit;
+
+	w = &Widget_testopts_opt1;
+	widgetDefaultsInit(w, widget_editable);
+	w->posX = 102;
+	w->font_size = &FONT_8X14_reduced;
+	w->editable.inputData.getData = &getContrast_;
+	w->editable.inputData.number_of_dec = 0;
+	w->editable.inputData.type = field_uinteger16;
+	w->editable.big_step = 20;
+	w->editable.step = 5;
+	w->editable.selectable.tab = 0;
+	w->editable.setData = (void (*)(void *))&setContrast_;
+	w->editable.max_value = 255;
+	w->editable.min_value = 0;
+	w->displayWidget.hasEndStr = 0;
+	strcpy(w->displayString,"255");
+	w->reservedChars = 3;
+
+	w = &Widget_Settings_opts_combo;
+	screen_addWidget(w, sc);
+	widgetDefaultsInit(w, widget_combo);
+	w->posY = 0;
+	w->posX = 0;
+	w->font_size = &FONT_8X14_reduced;
+	comboAddScreen(&Widget_Settings_opts_combo_opt1, w, "OPT1", screen_settings);
+	comboAddScreen(&Widget_Settings_opts_combo_opt2, w, "OPT2", screen_settings);
+	//comboAddOption(&Widget_Settings_opts_combo_opt3, w, "CONTRAST", &Widget_testopts_opt1);
+	comboAddOption(&Widget_Settings_opts_combo_opt3, w, "CONTRAST", &Widget_Contrast_edit);
+	comboAddScreen(&Widget_Settings_opts_combo_opt4, w, "OPT4", screen_settings);
+	comboAddOption(&Widget_Settings_opts_combo_opt5, w, "VALUE", &Widget_testopts_opt1);
+	comboAddScreen(&Widget_Settings_opts_combo_exit, w, "EXIT", screen_settings);
 }

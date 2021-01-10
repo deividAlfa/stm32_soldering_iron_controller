@@ -282,7 +282,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->reservedChars = 4;
 	w->displayWidget.justify = justify_right;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "%");
+	w->endString = "%";
 
 	//ADC1 display, filtered
 	w = &Debug2_ADC_Val;

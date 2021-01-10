@@ -568,24 +568,24 @@ void FatalError(uint8_t type){
 		case error_USAGEFAULT:
 			UG_PutString(2,15,"USAGE FAULT");//11
 			break;
-		case error_OVERRUN25:
-			UG_PutString(28,0,"OVERRUN");//7
+		case error_RUNAWAY25:
+			UG_PutString(0,0,"TEMP RUNAWAY");//12
 			UG_PutString(38,15,">25*C");//5
 			break;
-		case error_OVERRUN50:
-			UG_PutString(28,0,"OVERRUN");//7
+		case error_RUNAWAY50:
+			UG_PutString(0,0,"TEMP RUNAWAY");//12
 			UG_PutString(38,17,">50*C");//5
 			break;
-		case error_OVERRUN75:
-			UG_PutString(28,0,"OVERRUN");//7
+		case error_RUNAWAY75:
+			UG_PutString(0,0,"TEMP RUNAWAY");//12
 			UG_PutString(38,17,">75*C");//5
 			break;
-		case error_OVERRUN100:
-			UG_PutString(28,0,"OVERRUN");//7
+		case error_RUNAWAY100:
+			UG_PutString(0,0,"TEMP RUNAWAY");//12
 			UG_PutString(33,17,">100*C");//6
 			break;
-		case error_OVERRUN_UNKNOWN:
-			UG_PutString(28,0,"OVERRUN");//7
+		case error_RUNAWAY_UNKNOWN:
+			UG_PutString(0,0,"TEMP RUNAWAY");//12
 			UG_PutString(23,17,">UNKNOWN");//8
 			break;
 		default:
@@ -603,7 +603,7 @@ void FatalError(uint8_t type){
 
 	uint32_t x=0;
 	while(1){
-		if(++x>(uint32_t)6000000){ // ~5s delay before rebooting (Interrupts no longer work here)
+ 		if(++x>(uint32_t)6000000){ // ~5s delay before rebooting (Interrupts no longer work here)
 			NVIC_SystemReset();
 		}
 		HAL_IWDG_Refresh(&HIWDG);

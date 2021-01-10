@@ -144,22 +144,22 @@ static int enterSettings(widget_t *w) {
 static void tempUnitChanged(void) {
 	TempUnit = systemSettings.tempUnit;
 	if(TempUnit==Unit_Farenheit){
-		strcpy(Widget_IronTemp.endString, "*F");
+		Widget_IronTemp.endString="*F";
 		#ifdef USE_NTC
-		strcpy(Widget_AmbTemp.endString, "*F");		// '*' shown as '°' in all fonts
+		Widget_AmbTemp.endString="*F";						// '*' shown as '°' in all fonts
 		#endif
-		strcpy(Widget_SetPoint.endString, "*F");
+		Widget_SetPoint.endString="*F";
 		Widget_SetPoint.editable.max_value=900;
 		Widget_SetPoint.editable.min_value=350;
 		Widget_SetPoint.editable.big_step = 20;
 		Widget_SetPoint.editable.step = 10;
 	}
 	else{
-		strcpy(Widget_IronTemp.endString, "*C");
+		Widget_IronTemp.endString="*C";
 		#ifdef USE_NTC
-		strcpy(Widget_AmbTemp.endString, "*C");		// '*' shown as '°' in all fonts
+		Widget_AmbTemp.endString="*C";					// '*' shown as '°' in all fonts
 		#endif
-		strcpy(Widget_SetPoint.endString, "*C");
+		Widget_SetPoint.endString="*C";
 		Widget_SetPoint.editable.max_value=480;
 		Widget_SetPoint.editable.min_value=180;
 		Widget_SetPoint.editable.big_step = 10;
@@ -294,7 +294,7 @@ void main_screen_setup(screen_t *scr) {
 	w->reservedChars = 5;
 	w->displayWidget.justify = justify_right;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "V");
+	w->endString="V";
 	#endif
 	#ifdef USE_NTC
 	//Ambient temperature display
@@ -323,7 +323,7 @@ void main_screen_setup(screen_t *scr) {
 	w->reservedChars = 4;
 	w->displayWidget.justify = justify_right;
 	w->displayWidget.hasEndStr = 1;
-	strcpy(w->endString, "%");
+	w->endString="%";
 
 
 	//iron tip temperature display
