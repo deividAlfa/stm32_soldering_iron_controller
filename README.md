@@ -195,12 +195,10 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
             * Overrun behavior: Overrun data preserved
             * Low Power Auto Wait: Disabled
             * Low Power Auto Power Off: Disabled
-            * Sampling time: 13.5 cycles
-            * External Trigger Conversion Source: Regular Conversion Launched by software
+            * Sampling time: Don't care, adjusted within the program.
+            * External Trigger Conversion Source: Don't care, adjusted within the program.
             * External trigger Conversion Edge: None
-            * Watchdog disabled
-            * IF ADJUSTABLE regular channels:
-              Set channels 1 to 4 to the inputs, all 13.5 cycles.
+            * Watchdog disabled.
             
             * IMPORTANT: Configure in board.h the order of the channels and set their labels accordingly!
               The ADC channel order goes from 0 to 15 (unless otherwise set in regular config), skipping the disabled channels.
@@ -231,12 +229,14 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
             * Internal clock division: No division
             * Auto-reload preload: Enable
             * Master/Slave mode: Disable
-            * Trigger event selection: Update Event (UG bit from TIMx_EGR)
-            * Set Prescaler for 10uS period at input. 
-              Ex @ 48MHz, Prescaler: 479 (479+1=480)            
-            * NVIC settings: Interrupts disabled.
-              Consider that some timers will run at CPU speed, while other may take a slower clock, depending on the bus.
-              Check the Clock config in CUBEMX!
+            * Trigger event selection: Reset
+            * Prescaler: Don't care, adjusted within the program.
+                         Consider that the routine is designed for the timer running at CPU speed. Some timers may take haf the clock speed, depending on the bus!
+                         If the timer uses FCY/2, use #define DELAY_TIMER_HALFCLOCK in board.h!
+                         Check the Clock config in CUBEMX!
+            * Period: Don't care, it's adjusted within the program.
+            * NVIC settings: General enabled.
+              
             
     * PWM
         - GPIO:
@@ -247,8 +247,12 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:
             - Check Activated 
             - Select channel assigned to the pin
             - Mode: PWM Generation. Select CHx(N), as assigned to PIN. Ensure to select "N" if the pin has it!
-            - Set Prescaler for 10uS period at input. 
-              Ex @ 48MHz, Prescaler: 479 (479+1=480)
+            - Prescaler: Don't care, it's adjusted within the program.
+                         Consider that the routine is designed for the timer running at CPU speed. Some timers may take haf the clock speed, depending on the bus!
+                         If the timer uses FCY/2, use #define PWM_TIMER_HALFCLOCK in board.h!
+                         Check the Clock config in CUBEMX!
+            - Period: Don't care, it's adjusted within the program.
+            - Pulse: Don't care, it's adjusted within the program.
             - NVIC settings: Depending on the timer type, enable TIMx "Capture compare" if available, else use "Global interrupt".
               Consider that some timers will run at CPU speed while other may take a slower clock.
               Check the Clock config in CUBEMX!
