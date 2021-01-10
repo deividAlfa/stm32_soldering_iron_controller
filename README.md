@@ -115,7 +115,7 @@ Copy that line before the function like this:
 **__attribute__((optimize("O0"))) void ThisFunctionIsNotOptimized(...)**
 
 If you want to retarget the project, you can't mix the files, it will make a conflict.
-Delete these files:
+You can run the included script "Clean_Profile.bat", or by manually delete these files:
 - /Core/Inc/\*stm32\*
 - /Core/Src/\*stm32\*
 - /Core/Startup/\*
