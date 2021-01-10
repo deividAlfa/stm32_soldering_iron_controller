@@ -367,8 +367,8 @@ static int cancelReset(widget_t *w) {
 }
 static int doReset(widget_t *w) {
 	resetSettings();
+	saveSettings();
 	HAL_Delay(500);
-	//return screen_splash;
 	NVIC_SystemReset();
 }
 static void setEncWake(uint16_t *val) {
