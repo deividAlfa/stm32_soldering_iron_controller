@@ -11,19 +11,6 @@
 #define temp_maxC  480                 // Maximum calibration temperature in degrees of Celsius
 static tipData *currentTipData;
 
-/* Table of ADC sum value, corresponding to temperature. Starting from higher value to lower.
-   Next parameters had been used to build table:
-     R1(T1): 10kOhm(25°С)
-     R/T characteristics table used: EPCOS R/T:7003; B25/100:3625K
-     Scheme: A
-     Ra: 10kOhm
-     U0/Uref: 3.3V/3.3V
-     In the temperature range from -20°C to 125°C the error
-     caused by the usage of a table is 0.143°C
-
-	 Source: http://www.sebulli.com/ntc/index.php
-*/
-
 #ifdef USE_NTC
 const int NTC_TABLE;					// Defined in board.h
 #endif

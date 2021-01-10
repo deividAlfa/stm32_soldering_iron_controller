@@ -107,11 +107,11 @@ void irontype_draw(screen_t * scr) {
 		return;
 	case 7:
 		FillBuffer(C_BLACK,fill_dma);
+		UG_FontSelect(&FONT_10X16_reduced);
+		UG_PutString(23,0,"IRON TYPE");//9
 		setup++;
 		return;
 	default:
-		UG_FontSelect(&FONT_10X16_reduced);
-		UG_PutString(23,0,"IRON TYPE");//9
 		default_screenDraw(scr);
 	}
 }
