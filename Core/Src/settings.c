@@ -139,7 +139,28 @@ void resetTips(void){
 		systemSettings.ironTips[4].calADC_At_300 = 2300;
 		systemSettings.ironTips[4].calADC_At_400 = 3150;
 	}
-	else if(systemSettings.TipType==Tip_JBC){
+	else if(systemSettings.TipType==Tip_C245){
+		systemSettings.noIronValue=1200;
+		for(uint8_t x = 0; x < ( sizeof(systemSettings.ironTips)/sizeof(systemSettings.ironTips[0])); ++x) {
+			systemSettings.ironTips[x].calADC_At_200 = 390;
+			systemSettings.ironTips[x].calADC_At_300 = 625;
+			systemSettings.ironTips[x].calADC_At_400 = 883;
+			systemSettings.ironTips[x].PID.Kp = 0.0028;
+			systemSettings.ironTips[x].PID.Ki = 0.0018;
+			systemSettings.ironTips[x].PID.Kd = 0.00007;
+			systemSettings.ironTips[x].PID.min = 0;
+			systemSettings.ironTips[x].PID.max = 1;
+			systemSettings.ironTips[x].PID.maxI = 200;
+			systemSettings.ironTips[x].PID.minI = -50;
+		}
+		systemSettings.currentNumberOfTips = 1;
+		systemSettings.currentTip = 0;
+		// By default take JBC values
+		// T12 won't burn if using JBC settings. But JBC will do if using T12 settings!
+		strcpy(systemSettings.ironTips[0].name, "010");
+	}
+
+	else if(systemSettings.TipType==Tip_C210){
 		systemSettings.noIronValue=1200;
 		for(uint8_t x = 0; x < ( sizeof(systemSettings.ironTips)/sizeof(systemSettings.ironTips[0])); ++x) {
 			systemSettings.ironTips[x].calADC_At_200 = 390;

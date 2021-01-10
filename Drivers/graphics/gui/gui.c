@@ -11,7 +11,7 @@
 #include "splash.h"
 #include "settings_screen.h"
 #include "calibration_screen.h"
-#include "tiptype_screen.h"
+#include "irontype_screen.h"
 #include "oled.h"
 #include "screen.h"
 
@@ -37,6 +37,6 @@ void guiInit(void) {
 	oled_addScreen(&Screen_edit_calibration_wait,screen_edit_calibration_wait);
 	calibration_screen_setup(&Screen_edit_calibration_wait);
 
-	oled_addScreen(&Screen_tiptype,screen_tiptype);
-	tiptype_screen_setup(&Screen_tiptype);
+	oled_addScreen(&Screen_irontype,screen_irontype);
+	irontype_screen_setup(&Screen_irontype);
 }

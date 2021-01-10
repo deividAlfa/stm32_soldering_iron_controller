@@ -78,7 +78,7 @@ void handleIron(void) {
 	double set;
 
 	// Totally disabled if tip is not defined
-	if((systemSettings.TipType!=Tip_T12)&&(systemSettings.TipType!=Tip_JBC)){
+	if((systemSettings.TipType!=Tip_T12)&&(systemSettings.TipType!=Tip_C245)&&(systemSettings.TipType!=Tip_C210)){
 		SetFailState(1);
 	}
 	if(!Iron.RunawayTriggered && Iron.isPresent){							// If overrun not triggered yet and iron detected

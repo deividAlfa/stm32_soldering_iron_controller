@@ -19,7 +19,7 @@
 #define SETTINGSVERSION 11 /*Change this if you change the struct below to prevent people getting out of sync*/
 #define FLASH_ADDR (0x8000000 + ((FLASH_SZ-1)*1024))	// Last 1KB flash (Minimum erase size, page size=1KB)
 
-enum {Tip_T12=0,Tip_JBC=1,Tip_None=0xff};
+enum {Tip_T12=0,Tip_C245=1,Tip_C210=2,Tip_None=0xff};
 typedef struct{
 	uint32_t checksum;
 	uint8_t version;				//Used to track if a reset is needed on firmware upgrade

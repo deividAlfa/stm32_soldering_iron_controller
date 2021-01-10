@@ -258,7 +258,7 @@ void main_screen_draw(screen_t *scr){
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
 	if(systemSettings.TipType==Tip_None){
-		return screen_tiptype;
+		return screen_irontype;
 	}
 	return (default_screenProcessInput(scr,input,state));
 }

@@ -495,7 +495,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddScreen(&Settings_Combo_IRON, w, 		"IRON", 		screen_iron);
 	comboAddScreen(&Settings_Combo_SYSTEM, w, 		"SYSTEM", 		screen_system);
 	comboAddScreen(&Settings_Combo_ADVANCED, w, 	"ADVANCED", 	screen_advanced);
-	comboAddScreen(&Settings_Combo_TIPTYPE, w, 		"IRON TYPE", 	screen_tiptype);
+	comboAddScreen(&Settings_Combo_TIPTYPE, w, 		"IRON TYPE", 	screen_irontype);
 	comboAddScreen(&Settings_Combo_TIPS, w, 		"EDIT TIPS", 	screen_edit_iron_tips);
 	comboAddScreen(&Settings_Combo_CALIBRATION, w, 	"CALIBRATION", 	screen_edit_calibration_wait);
 	comboAddScreen(&Settings_Combo_DEBUG, w, 		"DEBUG", 		screen_debug);

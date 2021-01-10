@@ -23,7 +23,7 @@
 
 enum {	screen_splash, screen_main, screen_settingsmenu, screen_last_scrollable,
 		screen_debug, screen_debug2, screen_pid, screen_system, screen_iron,
-		screen_advanced, screen_edit_pwm, screen_edit_detection,screen_edit_misc,screen_tiptype, screen_edit_iron_tips,
+		screen_advanced, screen_edit_pwm, screen_edit_detection,screen_edit_misc,screen_irontype, screen_edit_iron_tips,
 		screen_edit_iron_tip, screen_edit_tip_name, screen_edit_calibration_wait,screen_edit_test_opts, screen_edit_calibration_input, screen_reset};
 
 typedef struct screen_t screen_t;
@@ -50,7 +50,7 @@ screen_t Screen_pid;
 screen_t Screen_system;
 screen_t Screen_iron;
 screen_t Screen_advanced;
-screen_t Screen_tiptype;
+screen_t Screen_irontype;
 screen_t Screen_edit_iron_tips;
 screen_t Screen_edit_iron_tip;
 screen_t Screen_edit_tip_name;
