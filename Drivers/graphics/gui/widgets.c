@@ -1,8 +1,8 @@
 /*
  * widgets.c
  *
- *  Created on: Aug 11, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #include "widgets.h"
@@ -444,7 +444,7 @@ int comboBoxProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t *stat
 			return -1;																								// Do nothing else
 		}
 		if (widget->comboBoxWidget.currentItem->type==combo_Action){												// If combo option type
-			widget->comboBoxWidget.currentItem->action();
+			return widget->comboBoxWidget.currentItem->action();
 		}
 		else if (widget->comboBoxWidget.currentItem->type==combo_Screen){											// If combo screen type
 			return widget->comboBoxWidget.currentItem->action_screen;												// Return screen index
@@ -763,7 +763,7 @@ void comboAddOption(comboBox_item_t* item, widget_t *combo, char *label, widget_
 		last->next_item = item;
 	}
 }
-void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, void (*action)()){
+void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, int(*action)()){
 
 	if(action){												// If not null
 		item->text = label;

@@ -1,8 +1,8 @@
 /*
  * oled.c
  *
- *  Created on: Aug 1, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 
@@ -73,7 +73,7 @@ static RE_State_t* RE_State;
 
 void oled_processInput(void) {
 	RE_Rotation = (*RE_GetData)(RE_State);
-	if(systemSettings.wakeEncoder){					// If system setting set  to wake on encoder activity
+	if(systemSettings.settings.wakeOnButton){					// If system setting set  to wake on encoder activity
 		if(RE_Rotation!=Rotate_Nothing){
 			IronWake(1);
 		}
@@ -85,9 +85,9 @@ void oled_processInput(void) {
 			if(scr->index == ret) {
 				FillBuffer(C_BLACK,fill_dma);
 				if(current_screen->onExit)
-					current_screen->onExit(scr);
+					current_screen->onExit(current_screen);
 				if(scr->onEnter)
-					scr->onEnter(current_screen);
+					scr->onEnter(scr);
 				scr->init(scr);
 				if(scr->update)
 					scr->update(scr);

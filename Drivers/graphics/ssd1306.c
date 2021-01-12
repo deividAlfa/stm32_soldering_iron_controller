@@ -1,6 +1,7 @@
 #include "ssd1306.h"
 #include "settings.h"
 #include "buzzer.h"
+#include "iron.h"
 
 // Need to be aligned to 32bit(4byte) boundary, as FillBuffer() uses 32bit tranfer for increased speed
 __attribute__((aligned(4))) volatile uint8_t OledBuffer[128*8]; // 128x64 1BPP OLED
@@ -314,7 +315,7 @@ void pset(UG_U16 x, UG_U16 y, UG_COLOR c){
 
 void setOledRow(uint8_t row){
 	write_cmd(0xB0|row);									// Set the OLED Row address
-	if(systemSettings.OledFix){	write_cmd(0x02); }
+	if(systemSettings.settings.OledFix){	write_cmd(0x02); }
 	else{ write_cmd(0x00); }
 	write_cmd(0x10);
 }
@@ -525,7 +526,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 
 		cmd[0] = (0xB0|oledRow);
 
-		if(systemSettings.OledFix){ cmd[1] = 0x02; }
+		if(systemSettings.settings.OledFix){ cmd[1] = 0x02; }
 		else{ 						cmd[1] = 0x00; }
 
 		if(HAL_I2C_Mem_Write(oledDevice, OLED_ADDRESS, 0x00, 1, &cmd[0], 3, 50)){

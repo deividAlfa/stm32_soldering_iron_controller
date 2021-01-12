@@ -1,8 +1,8 @@
 /*
  * rotary_encoder.h
  *
- *  Created on: Jul 18, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #ifndef GENERALIO_ROTARY_ENCODER_H_

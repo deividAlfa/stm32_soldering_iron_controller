@@ -1,8 +1,8 @@
 /*
  * widgets.h
  *
- *  Created on: Aug 11, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #ifndef GRAPHICS_GUI_WIDGETS_H_
@@ -46,7 +46,7 @@ typedef struct comboBox_item_t {
 	union{
 		widget_t *widget;
 		uint8_t action_screen;
-		void (*action)();
+		int (*action)();
 	};
 	bool enabled;
 } comboBox_item_t;
@@ -130,6 +130,6 @@ int comboBoxProcessInput(widget_t *, RE_Rotation_t, RE_State_t *);
 void comboBoxDraw(widget_t *widget);
 void comboAddScreen(comboBox_item_t* item,widget_t *combo, char *label, uint8_t actionScreen);
 void comboAddOption(comboBox_item_t* item, widget_t *combo, char *label, widget_t *widget);
-void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, void (*action)());
+void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, int(*action)());
 void comboResetIndex(widget_t *combo);
 #endif /* GRAPHICS_GUI_WIDGETS_H_ */

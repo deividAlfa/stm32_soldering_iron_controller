@@ -1,13 +1,14 @@
 /*
  * iron.h
  *
- *  Created on: Sep 14, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #ifndef IRON_H_
 #define IRON_H_
 #include "pid.h"
+#include "settings.h"
 typedef void (*setTemperatureReachedCallback)(uint16_t);
 typedef enum {IRON_measure_idle, IRON_measure_ready} IRON_measure_state_t;
 
@@ -25,18 +26,6 @@ typedef enum{
 
 typedef void (*currentModeChanged)(iron_mode_t);
 
-typedef struct {
-	uint16_t Temperature;
-	uint16_t Time;
-} ironSettings_t;
-
-typedef struct tipData {
-	uint16_t calADC_At_200;
-	uint16_t calADC_At_300;
-	uint16_t calADC_At_400;
-	char name[5];
-	pid_values_t PID;
-} tipData;
 
 typedef enum {Unit_Celsius,Unit_Farenheit}TempUnit_t;
 

@@ -1,17 +1,16 @@
 /*
  * gui.c
  *
- *  Created on: Aug 1, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
+#include "boot_screen.h"
 #include "gui.h"
 #include "main_screen.h"
 #include "debug_screen.h"
-#include "splash.h"
 #include "settings_screen.h"
 #include "calibration_screen.h"
-#include "irontype_screen.h"
 #include "oled.h"
 #include "screen.h"
 
@@ -19,8 +18,8 @@
 void guiInit(void) {
 	UG_Init(&user_gui, pset, 128, 64);
 
-	oled_addScreen(&Screen_splash, screen_splash);
-	splash_setup(&Screen_splash);
+	oled_addScreen(&Screen_boot, screen_boot);
+	boot_screen_setup(&Screen_boot);
 
 	oled_addScreen(&Screen_main,screen_main);
 	main_screen_setup(&Screen_main);
@@ -36,7 +35,4 @@ void guiInit(void) {
 
 	oled_addScreen(&Screen_edit_calibration_wait,screen_edit_calibration_wait);
 	calibration_screen_setup(&Screen_edit_calibration_wait);
-
-	oled_addScreen(&Screen_irontype,screen_irontype);
-	irontype_screen_setup(&Screen_irontype);
 }

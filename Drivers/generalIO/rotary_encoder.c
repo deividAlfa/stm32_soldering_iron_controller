@@ -2,8 +2,8 @@
  * rotary_encoder.c
 
  *
- *  Created on: Jul 18, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #include "rotary_encoder.h"

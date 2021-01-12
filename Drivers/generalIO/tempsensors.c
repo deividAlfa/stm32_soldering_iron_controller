@@ -1,8 +1,8 @@
 /*
  * tempsensors.c
  *
- *  Created on: Jul 21, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #include "tempsensors.h"
@@ -40,16 +40,9 @@ uint16_t readTipTemperatureCompensated(bool new) {
 	static uint16_t last_value;
 	if(new){
 		readTipTemperatureCompensatedRaw(New);
-		last_value = adc2Human(TIP.last_avg,1,systemSettings.tempUnit);
-		if(systemSettings.tempUnit==Unit_Celsius){
-			if(last_value>999){
-				last_value=999;								// Limit output
-			}
-		}
-		else if(systemSettings.tempUnit==Unit_Farenheit){
-			if(last_value>537){
-				last_value=537;								// Limit output (537C=999F)
-			}
+		last_value = adc2Human(TIP.last_avg,1,systemSettings.settings.tempUnit);
+		if(last_value>999){
+			last_value=999;								// Limit output
 		}
 	}
 	return last_value;
@@ -58,22 +51,15 @@ uint16_t readTipTemperatureCompensated(bool new) {
 uint16_t readTipTemperatureCompensatedRaw(bool new) {
 	static uint16_t last_value;
 	if (new){
-		last_value = adc2Human(TIP.last_RawAvg,1,systemSettings.tempUnit);
-		if(systemSettings.tempUnit==Unit_Celsius){
-			if(last_value>999){
-				last_value=999;								// Limit output
-			}
-		}
-		else if(systemSettings.tempUnit==Unit_Farenheit){
-			if(last_value>537){
-				last_value=537;								// Limit output (537C=999F)
-			}
+		last_value = adc2Human(TIP.last_RawAvg,1,systemSettings.settings.tempUnit);
+		if(last_value>999){
+			last_value=999;								// Limit output
 		}
 	}
 	return last_value;
 }
 void setCurrentTip(uint8_t tip) {
-	currentTipData = &systemSettings.ironTips[tip];
+	currentTipData = &systemSettings.Profile.tip[tip];
 	currentPID = currentTipData->PID;
 	setupPIDFromStruct();
 }
@@ -89,7 +75,7 @@ uint16_t human2adc(int16_t t) {
 	volatile int16_t ambTemp = readColdJunctionSensorTemp_x10(Unit_Celsius) / 10;
 
 	// If using Farenheit, convert to Celsius
-	if(systemSettings.tempUnit==Unit_Farenheit){
+	if(systemSettings.settings.tempUnit==Unit_Farenheit){
 		t = TempConversion(t,toCelsius,0);
 	}
 	t-=ambTemp;

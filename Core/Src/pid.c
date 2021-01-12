@@ -1,12 +1,13 @@
 /*
  * pid.c
  *
- *  Created on: Sep 11, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #include "pid.h"
 #include "tempsensors.h"
+#include "settings.h"
 
 static double max, min, Kp, Kd, Ki, pre_error, integral, mset, mpv, maxI, minI;
 static double p, i, d, currentOutput;

@@ -1,14 +1,15 @@
 /*
  * pid.h
  *
- *  Created on: Sep 11, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #ifndef PID_H_
 #define PID_H_
 
 #include "main.h"
+
 typedef struct pid_values {
 	double max;
 	double min;

@@ -1,8 +1,8 @@
 /*
  * buzzer.c
  *
- *  Created on: Jul 18, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #include "buzzer.h"
@@ -25,25 +25,25 @@ void buzzer_init() {
 }
 
 void buzzer_short_beep() {
-	if(!systemSettings.buzzEnable){ return; }
+	if(!systemSettings.settings.buzzEnable){ return; }
 	buzzer_state = STATE_SB;
 	BUZZER_ON;
 	last_time = HAL_GetTick();
 }
 void buzzer_long_beep() {
-	if(!systemSettings.buzzEnable){ return; }
+	if(!systemSettings.settings.buzzEnable){ return; }
 	buzzer_state = STATE_LB;
 	BUZZER_ON;
 	last_time = HAL_GetTick();
 }
 void buzzer_fatal_beep() {
-	if(!systemSettings.buzzEnable){ return; }
+	if(!systemSettings.settings.buzzEnable){ return; }
 	buzzer_state = STATE_FB;
 	BUZZER_ON;
 	last_time = HAL_GetTick();
 }
 void buzzer_alarm_start(){
-	if(!systemSettings.buzzEnable){ return; }
+	if(!systemSettings.settings.buzzEnable){ return; }
 	buzzer_state = STATE_AL_H;
 	BUZZER_ON;
 	last_time = HAL_GetTick();
@@ -54,7 +54,7 @@ void buzzer_alarm_stop() {
 }
 void handle_buzzer() {
 	uint32_t delta = HAL_GetTick() - last_time;
-	if(!systemSettings.buzzEnable){
+	if(!systemSettings.settings.buzzEnable){
 		if(buzzer_state != STATE_IDLE){
 			buzzer_state = STATE_IDLE;
 			BUZZER_OFF;

@@ -1,8 +1,8 @@
 /*
  * adc_global.h
  *
- *  Created on: Jul 27, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #ifndef GENERALIO_ADC_GLOBAL_H_

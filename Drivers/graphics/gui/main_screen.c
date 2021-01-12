@@ -1,8 +1,8 @@
 /*
  * main_screen.c
  *
- *  Created on: Aug 2, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #include "main_screen.h"
@@ -13,7 +13,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 static uint16_t temp;
 static char *modestr[] = {"SBY", "SLP", "", "BST"};
-static char *tipstr[sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0])];
+static char *tipName[TipSize];
 #define toSystem	0
 #define fromSystem	1
 
@@ -88,11 +88,11 @@ static void *getMode() {
 }
 
 static void setTip(uint16_t *value) {
-	systemSettings.currentTip = *value;
+	systemSettings.Profile.currentTip = *value;
 	setCurrentTip(*value);
 }
 static void * getTip() {
-	temp = systemSettings.currentTip;
+	temp = systemSettings.Profile.currentTip;
 	return &temp;
 }
 
@@ -142,7 +142,7 @@ static int enterSettings(widget_t *w) {
 // Main screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 static void tempUnitChanged(void) {
-	TempUnit = systemSettings.tempUnit;
+	TempUnit = systemSettings.settings.tempUnit;
 	if(TempUnit==Unit_Farenheit){
 		Widget_IronTemp.endString="*F";
 		#ifdef USE_NTC
@@ -189,19 +189,20 @@ static void main_screen_init(screen_t *scr) {
 	tempUnitChanged();
 	UG_FontSetHSpace(0);
 	UG_FontSetVSpace(0);
-	Widget_TipSelect.multiOptionWidget.numberOfOptions = systemSettings.currentNumberOfTips;
+	Widget_TipSelect.multiOptionWidget.numberOfOptions = systemSettings.Profile.currentNumberOfTips;
 	default_init(scr);
 }
 
 void main_screenUpdate(screen_t *scr) {
 	bool clearScreen=0;
-	if(TempUnit != systemSettings.tempUnit){
+	//Widget_TipSelect.multiOptionWidget.numberOfOptions  = systemSettings.Profile.currentNumberOfTips;
+	if(TempUnit != systemSettings.settings.tempUnit){
 		tempUnitChanged();
 	}
 	if(UpdateReadings){
 		UpdateReadings = 0;
 	}
-	if((HAL_GetTick()-lastUpdateTick)>systemSettings.guiUpdateDelay){
+	if((HAL_GetTick()-lastUpdateTick)>systemSettings.settings.guiUpdateDelay){
 		UpdateReadings=1;						//Update realtime readings slower than the rest of the GUI
 		lastUpdateTick=HAL_GetTick();
 	}
@@ -263,13 +264,12 @@ void main_screen_draw(screen_t *scr){
 void main_screen_setup(screen_t *scr) {
 
 	//
-	for(int x = 0; x < sizeof(systemSettings.ironTips) / sizeof(systemSettings.ironTips[0]); ++x) {
-		tipstr[x] = systemSettings.ironTips[x].name;
+	for(int x = 0; x < TipSize; x++) {	//TODO ++x?
+		tipName[x] = systemSettings.Profile.tip[x].name;
 	}
 
-//	scr->draw = &default_screenDraw;
+	screen_setDefaults(scr);
 	scr->draw = &main_screen_draw;
-	scr->processInput = &default_screenProcessInput;
 	scr->init = &main_screen_init;
 	scr->update = &main_screenUpdate;
 	widget_t *w;
@@ -371,8 +371,7 @@ void main_screen_setup(screen_t *scr) {
 	w->multiOptionWidget.editable.selectable.tab = 2;
 	w->multiOptionWidget.editable.setData = (void (*)(void *))&setTip;
 	w->reservedChars = 4;
-	w->multiOptionWidget.options = tipstr;
-	w->multiOptionWidget.numberOfOptions = systemSettings.currentNumberOfTips;
+	w->multiOptionWidget.options = tipName;
 	w->multiOptionWidget.currentOption = 0;
 	w->multiOptionWidget.defaultOption = 0;
 

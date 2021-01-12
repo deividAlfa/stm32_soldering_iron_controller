@@ -1,8 +1,8 @@
 /*
  * debug_screen.c
  *
- *  Created on: Aug 2, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #include "debug_screen.h"
@@ -13,7 +13,6 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 int32_t temp;
 uint16_t debugTemperature = 0;
-static pid_values_t cal_pid;
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -57,14 +56,9 @@ static void debug_screen_init(screen_t *scr) {
 }
 static void on_Exit(screen_t *scr) {
 	DebugMode(RESET);
-	currentPID = systemSettings.ironTips[systemSettings.currentTip].PID;
 }
 static void on_Enter(screen_t *scr) {
-	DebugMode(1);
-	cal_pid.Kp = 0.002;
-	cal_pid.Ki = 0.00025;
-	cal_pid.Kd = 0;
-	currentPID = cal_pid;
+	DebugMode(SET);
 }
 static void * getDebugTemperature() {
 	return &debugTemperature;
@@ -161,10 +155,10 @@ void debug2_screenDraw(screen_t *scr){
 // Debug screen setup
 //-------------------------------------------------------------------------------------------------------------------------------
 void debug_screen_setup(screen_t *scr) {
+	screen_setDefaults(scr);
 	scr->draw = &debug_screenDraw;
 	scr->processInput = &debug_screenProcessInput;
 	scr->init = &debug_screen_init;
-	scr->update = &default_screenUpdate;
 	widget_t *w;
 
 	//ADC1 display, filtered
@@ -261,6 +255,7 @@ void debug_screen_setup(screen_t *scr) {
 // Debug2 screen setup
 //-------------------------------------------------------------------------------------------------------------------------------
 void debug2_screen_setup(screen_t *scr) {
+	screen_setDefaults(scr);
 	scr->draw = &debug2_screenDraw;
 	scr->processInput = &debug2_screenProcessInput;
 	scr->onEnter = &on_Enter;

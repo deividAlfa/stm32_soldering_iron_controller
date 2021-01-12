@@ -1,14 +1,11 @@
 /*
  * screen.cpp
  *
- *  Created on: Jul 31, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #include "screen.h"
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include "oled.h"
 
 void screen_addWidget(widget_t *widget, screen_t *scr) {
@@ -130,4 +127,17 @@ void default_init(screen_t *scr) {
 		}
 		w = w->next_widget;
 	}
+}
+
+void default_onExit(screen_t *scr) {
+	lastscr=scr;
+}
+
+void screen_setDefaults(screen_t *scr) {
+	scr->processInput = &default_screenProcessInput;
+	scr->init = &default_init;
+	scr->draw = &default_screenDraw;
+	scr->update = &default_screenUpdate;
+	scr->onEnter = NULL;
+	scr->onExit = &default_onExit;
 }

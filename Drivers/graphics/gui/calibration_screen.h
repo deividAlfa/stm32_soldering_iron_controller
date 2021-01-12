@@ -1,8 +1,8 @@
 /*
  * calibration_screen.h
  *
- *  Created on: Sep 21, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #ifndef GRAPHICS_GUI_CALIBRATION_SCREEN_H_

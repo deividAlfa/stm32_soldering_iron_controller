@@ -1,8 +1,8 @@
 /*
  * calibration_screen.c
  *
- *  Created on: Sep 21, 2017
- *      Author: jose
+ *  Created on: Jan 12, 2021
+ *      Author: David		Original work by Jose (PTDreamer), 2017
  */
 
 #include "calibration_screen.h"
@@ -131,7 +131,7 @@ static void waitOnExit(screen_t *scr) {
 
 void cal_screenUpdate(screen_t *scr){
 	if(current_state != cal_end) {
-		if((HAL_GetTick()-lastUpdateTick)>systemSettings.guiUpdateDelay){
+		if((HAL_GetTick()-lastUpdateTick)>systemSettings.settings.guiUpdateDelay){
 			lastUpdateTick=HAL_GetTick();
 			lastTipTemp = readTipTemperatureCompensatedRaw(Old);
 			sprintf(Widget_CAL_Wait.displayString, "WAIT...   %3u*C",lastTipTemp);
@@ -147,9 +147,9 @@ void editcalibration_screenDraw(screen_t *scr){
 }
 void calibration_screen_setup(screen_t *scr) {
 
-	screen_t* sc;
 	widget_t* w;
-	scr->draw = &default_screenDraw;
+	screen_t* sc;
+	screen_setDefaults(scr);
 	scr->processInput = &waitProcessInput;
 	scr->init = &waitCalibration_screen_init;
 	scr->update = &cal_screenUpdate;
@@ -183,12 +183,11 @@ void calibration_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 0;
 	w->buttonWidget.action = &cancelAction;
 
-	oled_addScreen(&Screen_edit_calibration_input, screen_edit_calibration_input);
 	sc = &Screen_edit_calibration_input;
+	oled_addScreen(&Screen_edit_calibration_input, screen_edit_calibration_input);
+	screen_setDefaults(sc);
 	sc->draw = &editcalibration_screenDraw;
-	sc->processInput = &default_screenProcessInput;
 	sc->init = &inputCalibration_screen_init;
-	sc->update = &default_screenUpdate;
 	sc->onExit = &waitOnExit;
 /*
 	w=&Widget_CAL_Input_MeasuredTemp_label;
