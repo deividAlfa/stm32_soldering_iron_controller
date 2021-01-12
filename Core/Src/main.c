@@ -188,7 +188,7 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-#ifdef DEBUG
+#ifdef DEBUG_ERROR
 	char chars[6];
 	SetFailState(1);
 	buzzer_fatal_beep();

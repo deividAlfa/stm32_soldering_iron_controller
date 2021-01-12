@@ -48,7 +48,7 @@ extern CRC_HandleTypeDef HCRC;
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+#define DEBUG_ERROR
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -56,7 +56,7 @@ extern CRC_HandleTypeDef HCRC;
 
 // STM32CUBE IDE removed line printing in Error Handler. This macro restores it.
 // Credits: https://community.st.com/s/question/0D50X00009XkffVSAR/stm32cubemx-v421-errorhandler-definition-issues-in-mainh
-#ifdef DEBUG
+#ifdef DEBUG_ERROR
 	#define GET_MACRO( _0, _1, NAME, ... ) NAME
 	#define Error_Handler(...) GET_MACRO( _0, ##__VA_ARGS__, Error_Handler1, Error_Handler0 )()
 	#define Error_Handler0() _Error_Handler(__BASE_FILE__, __LINE__ )
