@@ -499,6 +499,8 @@ void edit_tip_onEnter(screen_t *scr){
 	Widget_IRONTIPS_Back.buttonWidget.selectable.state=widget_idle;
 	Widget_IRONTIPS_Delete.buttonWidget.selectable.state=widget_idle;
 	scr->current_widget=&Widget_IRONTIPS_Edit;
+	UG_FontSelect(&FONT_10X16_reduced);
+	UG_PutString(20,17,"NAME:");//12
 }
 
 void edit_tip_screen_init(screen_t *scr) {
