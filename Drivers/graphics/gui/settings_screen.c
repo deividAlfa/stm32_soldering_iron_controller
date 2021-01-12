@@ -863,11 +863,11 @@ void settings_screen_setup(screen_t *scr) {
 	w->posX = 102;
 	w->editable.inputData.getData = &getContrast_;
 	w->editable.inputData.type = field_uinteger16;
-	w->editable.big_step = 20;
-	w->editable.step = 5;
+	w->editable.big_step = 25;
+	w->editable.step = 25;
 	w->editable.setData = (void (*)(void *))&setContrast_;
 	w->editable.max_value = 255;
-	w->editable.min_value = 0;
+	w->editable.min_value = 5;
 	w->displayWidget.hasEndStr = 0;
 	w->reservedChars = 3;
 
