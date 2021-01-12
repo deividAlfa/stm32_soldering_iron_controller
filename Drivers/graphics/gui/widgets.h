@@ -28,13 +28,12 @@ typedef struct selectable_widget_t {
 	int (*longPressAction)(widget_t*);
 	int (*onEditAction)(widget_t*);
 	int (*onSelectAction)(widget_t*);
-	bool force_state;
-	bool NoHighlight;
 	int tab;
 } selectable_widget_t;
+
 typedef struct comboBox_widget_t {
 	selectable_widget_t selectable;
-	comboBox_item_t *items;
+	comboBox_item_t *first;
 	uint8_t currentScroll;
 	comboBox_item_t *currentItem;
 } comboBox_widget_t;
@@ -42,13 +41,15 @@ typedef struct comboBox_widget_t {
 typedef struct comboBox_item_t {
 	char *text;
 	comboBox_item_t *next_item;
-	uint8_t type;
+	struct{
+		unsigned enabled:1;
+		unsigned type:4;
+	};
 	union{
 		widget_t *widget;
 		uint8_t action_screen;
 		int (*action)();
 	};
-	bool enabled;
 } comboBox_item_t;
 
 typedef struct displayOnly_widget_t {
@@ -130,6 +131,6 @@ int comboBoxProcessInput(widget_t *, RE_Rotation_t, RE_State_t *);
 void comboBoxDraw(widget_t *widget);
 void comboAddScreen(comboBox_item_t* item,widget_t *combo, char *label, uint8_t actionScreen);
 void comboAddOption(comboBox_item_t* item, widget_t *combo, char *label, widget_t *widget);
-void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, int(*action)());
+void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, int (*action)());
 void comboResetIndex(widget_t *combo);
 #endif /* GRAPHICS_GUI_WIDGETS_H_ */

@@ -370,7 +370,7 @@ void main_screen_setup(screen_t *scr) {
 	w->multiOptionWidget.editable.step = 0;
 	w->multiOptionWidget.editable.selectable.tab = 2;
 	w->multiOptionWidget.editable.setData = (void (*)(void *))&setTip;
-	w->reservedChars = 4;
+	w->reservedChars = TipCharSize-1;
 	w->multiOptionWidget.options = tipName;
 	w->multiOptionWidget.currentOption = 0;
 	w->multiOptionWidget.defaultOption = 0;
@@ -379,7 +379,7 @@ void main_screen_setup(screen_t *scr) {
 	w=&Widget_SetPoint;
 	screen_addWidget(w,scr);
 	widgetDefaultsInit(w, widget_editable);
-	w->editable.selectable.processInput = (int (*)(widget_t*, RE_Rotation_t, RE_State_t *))&tempProcessInput;
+	w->editable.selectable.processInput = &tempProcessInput;
 	w->posX = 19;
 	w->posY = 50;
 	w->font_size = &FONT_8X14_reduced;

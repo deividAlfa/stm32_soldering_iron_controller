@@ -10,9 +10,10 @@
 
 #include "main.h"
 #include "pid.h"
-#define ProfileNumber	3
-#define TipSize			10
-#define TipCharSize		5
+
+#define ProfileSize		3		// Number of profiles
+#define TipSize			10		// Number of tips for each profile
+#define TipCharSize		5		// String size for each tip name
 
 #define SETTINGSVERSION 11 /*Change this if you change the struct below to prevent people getting out of sync*/
 #define FLASH_ADDR (0x8000000 + ((FLASH_SZ-2)*1024))	// Last 2KB flash (Minimum erase size, page size=2KB)
@@ -24,7 +25,8 @@ enum{
 	Profile_C210	= 2,
 	Profile_None	= 0xff,
 };
-extern char* profileStr[ProfileNumber];
+
+extern char* profileStr[ProfileSize];
 
 typedef struct ironSettings_t{
 	uint16_t Temperature;
@@ -71,8 +73,8 @@ typedef struct{
 typedef struct{
 	settings_t settings;
 	uint32_t settingsChecksum;
-	Profile_t Profile[ProfileNumber];
-	uint32_t ProfileChecksum[ProfileNumber];
+	Profile_t Profile[ProfileSize];
+	uint32_t ProfileChecksum[ProfileSize];
 }flashSettings_t;
 
 

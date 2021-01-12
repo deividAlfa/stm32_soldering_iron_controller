@@ -171,7 +171,7 @@ void boot_screen_setup(screen_t *scr) {
 	w->editable.step = 1;
 	w->editable.selectable.tab = 0;
 	w->editable.setData = (void (*)(void *))&setProfile;
-	w->editable.max_value = ProfileNumber-1;
+	w->editable.max_value = ProfileSize-1;
 	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 0;
 	w->reservedChars = 4;

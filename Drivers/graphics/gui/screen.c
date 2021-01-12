@@ -129,15 +129,11 @@ void default_init(screen_t *scr) {
 	}
 }
 
-void default_onExit(screen_t *scr) {
-	lastscr=scr;
-}
-
 void screen_setDefaults(screen_t *scr) {
 	scr->processInput = &default_screenProcessInput;
 	scr->init = &default_init;
 	scr->draw = &default_screenDraw;
 	scr->update = &default_screenUpdate;
 	scr->onEnter = NULL;
-	scr->onExit = &default_onExit;
+	scr->onExit = NULL;
 }

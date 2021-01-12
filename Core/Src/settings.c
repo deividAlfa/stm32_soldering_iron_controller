@@ -12,7 +12,7 @@
 #include "ssd1306.h"
 #include "tempsensors.h"
 
-char* profileStr[ProfileNumber] = {" T12", "C245", "C210" };
+char* profileStr[ProfileSize] = {" T12", "C245", "C210" };
 
 __attribute__((aligned(4))) systemSettings_t systemSettings;
 flashSettings_t* flashSettings = (flashSettings_t*)FLASH_ADDR;
@@ -51,7 +51,7 @@ void saveSettings(bool wipeAllProfileData) {
 		}
 	}
 	else{																								// Wipe all tip data
-		for(uint8_t x=0;x<ProfileNumber;x++){
+		for(uint8_t x=0;x<ProfileSize;x++){
 			flashBuffer.Profile[x].notInitialized=1;													// Set all flash to "1"
 			flashBuffer.ProfileChecksum[x]=0xFF;
 			memset(&flashBuffer.Profile[x],0xFF,sizeof(Profile_t));

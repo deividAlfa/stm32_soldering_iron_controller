@@ -122,43 +122,7 @@ static widget_t Widget_Reset_CANCEL;
 //-------------------------------------------------------------------------------------------------------------------------------
 // Settings screen widgets functions
 //-------------------------------------------------------------------------------------------------------------------------------
-static void edit_iron_tip_screen_init(screen_t *scr) {
-	if(strcmp(comboWidget_Settings_IRONTIPS.comboBoxWidget.currentItem->text, "ADD NEW") == 0) {
-		strcpy(str, "    ");
-		Widget_IRONTIPS_Delete.enabled = 0;
-	}
-	else {
-		strcpy(str, comboWidget_Settings_IRONTIPS.comboBoxWidget.currentItem->text);
-		if(systemSettings.Profile.currentNumberOfTips>1){
-			Widget_IRONTIPS_Delete.enabled = 1;
-		}
-		else{
-			Widget_IRONTIPS_Delete.enabled = 0;
-		}
-	}
-	default_init(scr);
-}
-static void edit_iron_screen_init(screen_t *scr) {
-	comboBox_item_t *i =comboWidget_Settings_IRONTIPS.comboBoxWidget.items;
-	for(int x = 0; x < TipSize; x++) {//TODO ++x?
-		if(x < systemSettings.Profile.currentNumberOfTips) {
-			strcpy(i->text, systemSettings.Profile.tip[x].name);
-			i->enabled = 1;
-		}
-		else
-			i->enabled = 0;
-		i = i->next_item;
-	}
-	comboWidget_Settings_IRONTIPS.comboBoxWidget.currentItem = comboWidget_Settings_IRONTIPS.comboBoxWidget.items;
-	comboWidget_Settings_IRONTIPS.comboBoxWidget.currentScroll = 0;
-	if(systemSettings.Profile.currentNumberOfTips >= TipSize) {
-		comboitem_IRONTIPS_addNewTip.enabled = 0;
-	}
 
-	else{
-		comboitem_IRONTIPS_addNewTip.enabled = 1;
-	}
-}
 static void *getTipStr() {
 	return str;
 }
@@ -512,33 +476,69 @@ static void settings_screen_OnEnter(screen_t *scr) {
 //-------------------------------------------------------------------------------------------------------------------------------
 // Edit Tip screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
-void edittipname_screenDraw(screen_t *scr){
-	static bool prevState;
-	if(strcmp(str, "    ") == 0) {
-		if(!prevState){
-			prevState=1;
+void edit_tip_screenDraw(screen_t *scr){
+	if((strcmp(str, "    ") == 0) || (strcmp(str, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name) == 0) ) {
+		if(Widget_IRONTIPS_Save.enabled){
 			Widget_IRONTIPS_Save.enabled=0;
 			FillBuffer(C_BLACK,fill_dma);
+			UG_FontSelect(&FONT_10X16_reduced);
+			UG_PutString(20,17,"NAME:");//12
 		}
 	}
 	else{
-		if(prevState){
-			prevState=0;
+		if(!Widget_IRONTIPS_Save.enabled){
 			Widget_IRONTIPS_Save.enabled=1;
-			FillBuffer(C_BLACK,fill_dma);
 		}
 	}
-	UG_FontSelect(&FONT_10X16_reduced);
-	UG_PutString(0,17,"NAME:");//12
+
 	default_screenDraw(scr);
 }
-void edit_iron_tip_onEnter(screen_t *scr){
+void edit_tip_onEnter(screen_t *scr){
 	Widget_IRONTIPS_Edit.editable.selectable.state=widget_selected;
 	Widget_IRONTIPS_Save.buttonWidget.selectable.state=widget_idle;
 	Widget_IRONTIPS_Back.buttonWidget.selectable.state=widget_idle;
 	Widget_IRONTIPS_Delete.buttonWidget.selectable.state=widget_idle;
 	scr->current_widget=&Widget_IRONTIPS_Edit;
 }
+
+void edit_tip_screen_init(screen_t *scr) {
+	if(strcmp(comboWidget_Settings_IRONTIPS.comboBoxWidget.currentItem->text, "ADD NEW") == 0) {
+		strcpy(str, "    ");
+		Widget_IRONTIPS_Delete.enabled = 0;
+	}
+	else {
+		strcpy(str, comboWidget_Settings_IRONTIPS.comboBoxWidget.currentItem->text);
+		if(systemSettings.Profile.currentNumberOfTips>1){
+			Widget_IRONTIPS_Delete.enabled = 1;
+		}
+		else{
+			Widget_IRONTIPS_Delete.enabled = 0;
+		}
+	}
+	default_init(scr);
+}
+void edit_iron_screen_init(screen_t *scr) {
+	comboBox_item_t *i =comboWidget_Settings_IRONTIPS.comboBoxWidget.first;
+	for(int x = 0; x < TipSize; x++) {//TODO ++x?
+		if(x < systemSettings.Profile.currentNumberOfTips) {
+			strcpy(i->text, systemSettings.Profile.tip[x].name);
+			i->enabled = 1;
+		}
+		else
+			i->enabled = 0;
+		i = i->next_item;
+	}
+	comboWidget_Settings_IRONTIPS.comboBoxWidget.currentItem = comboWidget_Settings_IRONTIPS.comboBoxWidget.first;
+	comboWidget_Settings_IRONTIPS.comboBoxWidget.currentScroll = 0;
+	if(systemSettings.Profile.currentNumberOfTips >= TipSize) {
+		comboitem_IRONTIPS_addNewTip.enabled = 0;
+	}
+
+	else{
+		comboitem_IRONTIPS_addNewTip.enabled = 1;
+	}
+}
+
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -603,7 +603,6 @@ void SYSTEM_onExit(screen_t *scr){
 		loadProfile(profile);
 		saveSettings(0);									// Save
 	}
-	default_onExit(scr);
 }
 //-------------------------------------------------------------------------------------------------------------------------------
 // ADVANCED screen functions
@@ -633,9 +632,6 @@ void settings_screen_setup(screen_t *scr) {
 	w = &comboWidget_Settings;
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_combo);
-	w->posY = 0;
-	w->posX = 0;
-	w->font_size = &FONT_8X14_reduced;
 	comboAddScreen(&Settings_Combo_PID, w, 			"PID", 			screen_pid);
 	comboAddScreen(&Settings_Combo_IRON, w, 		"IRON", 		screen_iron);
 	comboAddScreen(&Settings_Combo_SYSTEM, w, 		"SYSTEM", 		screen_system);
@@ -818,9 +814,6 @@ void settings_screen_setup(screen_t *scr) {
 	w = &comboWidget_Settings_IRON;
 	screen_addWidget(w, sc);
 	widgetDefaultsInit(w, widget_combo);
-	w->posY = 0;
-	w->posX = 0;
-	w->font_size = &FONT_8X14_reduced;
 	comboAddOption(&comboitem_IRON_SleepTime, w,	"Slp Time", 	&Widget_IRON_SleepTime);
 	comboAddOption(&comboitem_IRON_SleepTemp, w, 	"Slp Temp", 	&Widget_IRON_SleepTemp);
 	comboAddOption(&comboitem_IRON_BoostTime, w, 	"Bst Time", 	&Widget_IRON_BoostTime);
@@ -849,7 +842,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.big_step = 1;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setProfile;
-	w->editable.max_value = ProfileNumber-1;
+	w->editable.max_value = ProfileSize-1;
 	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 0;
 	w->reservedChars = 4;
@@ -991,9 +984,6 @@ void settings_screen_setup(screen_t *scr) {
 	w = &comboWidget_Settings_SYSTEM;
 	screen_addWidget(w, sc);
 	widgetDefaultsInit(w, widget_combo);
-	w->posY = 0;
-	w->posX = 0;
-	w->font_size = &FONT_8X14_reduced;
 	comboAddOption(&comboitem_SYSTEM_Profile,w, 		"Profile", 		&Widget_SYSTEM_Profile);
 	comboAddOption(&comboitem_SYSTEM_Contrast,w, 		"Contrast", 	&Widget_SYSTEM_Contrast);
 	comboAddOption(&comboitem_SYSTEM_OledFix, w, 		"Oled Fix", 	&Widget_SYSTEM_OledFix);
@@ -1083,9 +1073,6 @@ void settings_screen_setup(screen_t *scr) {
 	w = &comboWidget_Settings_ADVANCED;
 	screen_addWidget(w, sc);
 	widgetDefaultsInit(w, widget_combo);
-	w->posY = 0;
-	w->posX = 0;
-	w->font_size = &FONT_8X14_reduced;
 	comboAddOption(&comboitem_ADVANCED_PWMPeriod,w, 		"PWM Time", 		&Widget_ADVANCED_PWMPeriod);
 	comboAddOption(&comboitem_ADVANCED_ADCDelay, w, 		"ADC Delay", 		&Widget_ADVANCED_ADCDelay);
 	comboAddOption(&comboitem_ADVANCED_ADCLimit, w, 		"ADC Limit", 		&Widget_ADVANCED_ADCLimit);
@@ -1100,18 +1087,18 @@ void settings_screen_setup(screen_t *scr) {
 	screen_setDefaults(sc);
 	sc->onEnter = &Reset_onEnter;
 
-
+	//========[ RESET OPTIONS COMBO ]===========================================================
+	//
 	w = &comboWidget_Settings_RESET;
 	screen_addWidget(w, sc);
 	widgetDefaultsInit(w, widget_combo);
-	w->posY = 0;
-	w->posX = 0;
-	w->font_size = &FONT_8X14_reduced;
 	comboAddAction(&comboitem_RESET_SETTINGS,w, 	"RESET: Settings", 	&goSettingsReset );
 	comboAddAction(&comboitem_RESET_TIP,w, 			"RESET: Profile ", 	&goProfileReset );
 	comboAddAction(&comboitem_RESET_ALLTIP,w, 		"RESET: Profiles", 	&goAllProfileReset );
-	comboAddAction(&comboitem_RESET_EVERYTHING,w, 	"RESET: ALL!    ", 	&goFactoryReset);
+	comboAddAction(&comboitem_RESET_EVERYTHING,w, 	"RESET: ALL DATA", 	&goFactoryReset);
 	comboAddScreen(&comboitem_RESET_Back,w, 		"BACK", 			screen_advanced);
+
+
 
 	//########################################## RESET CONFIRMATION SCREEN ##########################################
 	//
@@ -1126,7 +1113,6 @@ void settings_screen_setup(screen_t *scr) {
 	w = &Widget_Reset_OK;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_8X14_reduced;
 	w->posX = 2;
 	w->posY = 50;
 	strcpy(w->displayString, "RESET");
@@ -1139,7 +1125,6 @@ void settings_screen_setup(screen_t *scr) {
 	w = &Widget_Reset_CANCEL;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_8X14_reduced;
 	w->posX = 78;
 	w->posY = 50;
 	strcpy(w->displayString, "CANCEL");
@@ -1154,21 +1139,13 @@ void settings_screen_setup(screen_t *scr) {
 	oled_addScreen(sc, screen_edit_iron_tips);
 	screen_setDefaults(sc);
 	sc->init = &edit_iron_screen_init;
-	sc->update = &default_screenUpdate;
-
-
-
 
 	//========[ IRON TIPS COMBO ]===========================================================
 	//
 	w = &comboWidget_Settings_IRONTIPS;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_combo);
-	w->posY = 0;
-	w->posX = 0;
-	w->font_size = &FONT_8X14_reduced;
-
-	for(int x = 0; x < TipSize; x++) {		//TODO ++x?
+	for(int x = 0; x < TipSize; x++) {
 		t[x][0] = '\0';
 		comboAddScreen(&comboitem_IRONTIPS[x],w, &t[x][0], screen_edit_tip_name);
 	}
@@ -1183,16 +1160,16 @@ void settings_screen_setup(screen_t *scr) {
 	sc=&Screen_edit_tip_name;
 	oled_addScreen(sc, screen_edit_tip_name);
 	screen_setDefaults(sc);
-	sc->draw = &edittipname_screenDraw;
-	sc->init = &edit_iron_tip_screen_init;
-	sc->onEnter = &edit_iron_tip_onEnter;
+	sc->draw = &edit_tip_screenDraw;
+	sc->init = &edit_tip_screen_init;
+	sc->onEnter = &edit_tip_onEnter;
 
 	//********[ Name Edit Widget ]***********************************************************
 	//
 	w = &Widget_IRONTIPS_Edit;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
-	w->posX = 50;
+	w->posX = 75;
 	w->posY = 17;
 	w->font_size = &FONT_10X16_reduced;
 	w->editable.inputData.getData = &getTipStr;
@@ -1203,14 +1180,13 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.selectable.tab = 0;
 	w->editable.setData = (void (*)(void *))&setTipStr;
 	w->editable.max_value = 9999;
-	w->reservedChars = 4;
+	w->reservedChars = TipCharSize-1;
 
 	//********[ Name Save Button Widget ]***********************************************************
 	//
 	w = &Widget_IRONTIPS_Save;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_8X14_reduced;
 	w->posX = 2;
 	w->posY = 50;
 	strcpy(w->displayString, "SAVE");
@@ -1223,7 +1199,6 @@ void settings_screen_setup(screen_t *scr) {
 	w = &Widget_IRONTIPS_Back;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_8X14_reduced;
 	w->posX = 94;
 	w->posY = 50;
 	strcpy(w->displayString, "BACK");
@@ -1236,13 +1211,10 @@ void settings_screen_setup(screen_t *scr) {
 	w = &Widget_IRONTIPS_Delete;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
-	w->font_size = &FONT_8X14_reduced;
 	w->posX = 48;
 	w->posY = 50;
 	strcpy(w->displayString, "DEL.");
 	w->reservedChars = 4;
 	w->buttonWidget.selectable.tab = 2;
 	w->buttonWidget.action = &delTip;
-	w->buttonWidget.action = &delTip;
-
 }

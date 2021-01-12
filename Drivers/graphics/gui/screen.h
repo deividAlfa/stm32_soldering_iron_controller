@@ -68,7 +68,6 @@ void screen_addWidget(widget_t *widget, screen_t *scr);
 void default_screenDraw(screen_t *scr);
 int default_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *);
 void default_screenUpdate(screen_t *scr);
-void default_onExit(screen_t *scr);
 void screen_setDefaults(screen_t *scr);
 void default_init(screen_t *scr);
 
