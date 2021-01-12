@@ -57,6 +57,10 @@ void saveSettings(bool wipeAllProfileData) {
 			memset(&flashBuffer.Profile[x],0xFF,sizeof(Profile_t));
 		}
 	}
+
+	//Clear watchdog before unlocking flash
+	HAL_IWDG_Refresh(&HIWDG);
+
 	HAL_FLASH_Unlock(); //unlock flash writing
 	FLASH_EraseInitTypeDef erase;
 	erase.NbPages = 1;
@@ -79,8 +83,10 @@ void saveSettings(bool wipeAllProfileData) {
 			}
 		}
 
-	//Store settings
+	//Clear watchdog before writing
 	HAL_IWDG_Refresh(&HIWDG);
+
+	//Store settings
 	for (uint16_t i = 0; i < sizeof(flashSettings_t) / 2; i++) {
 		if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (((uint32_t)flashSettings+i*2)), *(((uint16_t*)&flashBuffer)+i) ) != HAL_OK){
 			Flash_error();
@@ -88,11 +94,6 @@ void saveSettings(bool wipeAllProfileData) {
 	}
 	HAL_FLASH_Lock();
 
-	// Check that settings data has the same CRC as systemSettings and the stored checksum is valid
-	if(		(systemSettings.settingsChecksum != ChecksumSettings(&flashSettings->settings)) ||
-			(systemSettings.settingsChecksum != flashSettings->settingsChecksum) ){
-		Flash_error();
-	}
 	if(!wipeAllProfileData){
 		uint32_t ProfileFlash	= ChecksumProfile(&flashSettings->Profile[systemSettings.settings.currentProfile]);
 		uint32_t ProfileRam		= ChecksumProfile(&systemSettings.Profile);
@@ -102,6 +103,8 @@ void saveSettings(bool wipeAllProfileData) {
 			Flash_error();						// Error if data mismatch
 		}
 	}
+
+	// Check flash and system settings have same checksum
 
 	uint32_t SettingsFlash	= ChecksumSettings(&flashSettings->settings);
 	uint32_t SettingsRam	= ChecksumSettings(&systemSettings.settings);
