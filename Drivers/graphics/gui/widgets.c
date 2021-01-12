@@ -68,7 +68,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t, char* c, uint8_t len){
 	w->posY = 0;
 	w->next_widget = NULL;
 	w->displayString = c;
-	w->dispStrlen = sz;
+	w->dispStrlen = len;
 	selectable_widget_t *sel;
 	sel = extractSelectablePartFromWidget(w);
 	if(sel) {
