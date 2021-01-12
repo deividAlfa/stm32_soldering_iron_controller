@@ -16,7 +16,7 @@
 #include "ugui.h"
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
 typedef enum widgetFieldType {field_float, field_integer, field_integer16,field_uinteger16, field_int32, field_bmp, field_string}widgetFieldType;
-typedef enum widgetTextJustifyType {justify_left, justify_right}widgetTextJustifyType;
+typedef enum widgetTextJustifyType { justify_left=0, justify_right=1 }widgetTextJustifyType;
 typedef enum widgetType {widget_combo, combo_Screen, combo_Option, combo_Action, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button, widget_bmp_button}widgetType;
 typedef struct widget_t widget_t;
 typedef struct comboBox_item_t comboBox_item_t;
@@ -54,15 +54,15 @@ typedef struct comboBox_item_t {
 
 typedef struct displayOnly_widget_t {
 	void * (*getData)();
-	widgetFieldType type;
-	widgetTextJustifyType justify;
+	uint8_t type;
 	uint8_t	number_of_dec;
 	void (*update)(widget_t*);
+	bool justify;
 	bool hasEndStr;
-} displayOnly_wiget_t;
+} displayOnly_widget_t;
 
 typedef struct editable_t {
-	displayOnly_wiget_t inputData;
+	displayOnly_widget_t inputData;
 	selectable_widget_t selectable;
 	void (*setData)(void *);
 	uint16_t step;
@@ -98,21 +98,21 @@ typedef struct button_widget_t {
 struct widget_t
 {
 	bool inverted;
-	char displayString[18];
-	const char* endString;
-	uint8_t reservedChars;
+	char* displayString;
+	uint8_t dispStrlen;
+	char* EndStr;
 	uint8_t posX;
 	uint8_t posY;
 	const UG_FONT *font_size;
 	widget_t *next_widget;
 	bool enabled;
-	widgetType type;
+	uint8_t type;
 	struct screen_t *parent;
 	void (*draw)(widget_t*);
 	union {
 		label_wiget_t label;
 		editable_widget_t editable;
-		displayOnly_wiget_t displayWidget;
+		displayOnly_widget_t displayWidget;
 		bmp_wiget_t displayBmp;
 		multi_option_widget_t multiOptionWidget;
 		comboBox_widget_t comboBoxWidget;
@@ -120,10 +120,10 @@ struct widget_t
 	};
 };
 
-displayOnly_wiget_t * extractDisplayPartFromWidget(widget_t *widget);
+displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *widget);
 editable_widget_t * extractEditablePartFromWidget(widget_t *widget);
 selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget);
-void widgetDefaultsInit(widget_t *w, widgetType t);
+void widgetDefaultsInit(widget_t *w, widgetType t, char* c, uint8_t sz);
 void default_widgetDraw(widget_t *widget);
 void default_widgetUpdate(widget_t *widget);
 int default_widgetProcessInput(widget_t *, RE_Rotation_t, RE_State_t *);

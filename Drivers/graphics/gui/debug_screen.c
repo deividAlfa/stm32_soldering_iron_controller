@@ -20,6 +20,8 @@ static widget_t Debug_ADC_Val;
 static widget_t Debug_ADC_ValRaw;
 static widget_t Debug2_ADC_Val;
 static widget_t Debug2_ADC_ValRaw;
+static char adcVal[5];
+static char adcRaw[5];
 static widget_t Debug_PID_P;
 static widget_t Debug_PID_I;
 static widget_t Debug_PID_D;
@@ -164,31 +166,32 @@ void debug_screen_setup(screen_t *scr) {
 	//ADC1 display, filtered
 	w = &Debug_ADC_Val;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	widgetDefaultsInit(w, widget_display, adcVal, 4);
 	w->posX = 24;
 	w->posY = 0;
 	w->font_size = &FONT_6X8_reduced;
 	w->displayWidget.getData = &debug_screen_getADC1;
 	w->displayWidget.number_of_dec = 0;
 	w->displayWidget.type = field_uinteger16;
-	w->reservedChars = 4;
+	
 
 	//ADC1 display, unfiltered
 	w = &Debug_ADC_ValRaw;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	widgetDefaultsInit(w, widget_display,adcRaw,4);
 	w->posX = 89;
 	w->posY = 0;
 	w->font_size = &FONT_6X8_reduced;
 	w->displayWidget.getData = &debug_screen_getADC1_raw;
 	w->displayWidget.number_of_dec = 0;
 	w->displayWidget.type = field_uinteger16;
-	w->reservedChars = 4;
+	
 
 	//P TERM
 	w = &Debug_PID_P;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	static char p[7];
+	widgetDefaultsInit(w, widget_display,p,6);
 	w->posX = 3;
 	w->posY = 33;
 	w->font_size = &FONT_6X8_reduced;
@@ -196,25 +199,27 @@ void debug_screen_setup(screen_t *scr) {
 	w->displayWidget.number_of_dec = 2;
 	w->displayWidget.type = field_int32;
 	w->displayWidget.justify = justify_right;
-	w->reservedChars = 6;
+	
 
 	//I TERM
 	w = &Debug_PID_I;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	static char i[7];
+	widgetDefaultsInit(w, widget_display,i,6);
 	w->posX = 50;
 	w->posY = 33;
 	w->font_size = &FONT_6X8_reduced;
 	w->displayWidget.getData = &debug_screen_getI;
 	w->displayWidget.number_of_dec = 2;
 	w->displayWidget.type = field_int32;
-	w->reservedChars = 6;
+	
 	w->displayWidget.justify = justify_right;
 
 	//D TERM
 	w = &Debug_PID_D;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	static char d[7];
+	widgetDefaultsInit(w, widget_display,d,6);
 	w->posX = 91;
 	w->posY = 33;
 	w->font_size = &FONT_6X8_reduced;
@@ -222,12 +227,13 @@ void debug_screen_setup(screen_t *scr) {
 	w->displayWidget.number_of_dec = 2;
 	w->displayWidget.type = field_int32;
 	w->displayWidget.justify = justify_right;
-	w->reservedChars = 6;
+	
 
 	//ERROR
 	w = &Debug_PID_Err;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	static char e[6];
+	widgetDefaultsInit(w, widget_display,e,5);
 	w->posX = 24;
 	w->posY = 50;
 	w->font_size = &FONT_6X8_reduced;
@@ -235,12 +241,13 @@ void debug_screen_setup(screen_t *scr) {
 	w->displayWidget.number_of_dec = 0;
 	w->displayWidget.type = field_int32;
 	w->displayWidget.justify = justify_right;
-	w->reservedChars = 5;
+	
 
 	//OUTPUT
 	w = &Debug_PID_Out;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	static char o[6];
+	widgetDefaultsInit(w, widget_display,o,5);
 	w->posX = 90;
 	w->posY = 50;
 	w->font_size = &FONT_6X8_reduced;
@@ -248,7 +255,7 @@ void debug_screen_setup(screen_t *scr) {
 	w->displayWidget.number_of_dec = 0;
 	w->displayWidget.type = field_int32;
 	w->displayWidget.justify = justify_right;
-	w->reservedChars = 5;
+	
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -267,62 +274,66 @@ void debug2_screen_setup(screen_t *scr) {
 	//power display
 	w=&Widget_Power;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_display);
+	static char o[5];
+	widgetDefaultsInit(w, widget_display,o,4);
 	w->posX = 93;
 	w->posY = 50;
 	w->font_size = &FONT_8X14_reduced;
 	w->displayWidget.getData = &debug_screen_getIronPower;
 	w->displayWidget.number_of_dec = 0;
 	w->displayWidget.type = field_uinteger16;
-	w->reservedChars = 4;
+	
 	w->displayWidget.justify = justify_right;
 	w->displayWidget.hasEndStr = 1;
-	w->endString = "%";
+	w->EndStr = "%";
 
 	//ADC1 display, filtered
 	w = &Debug2_ADC_Val;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	widgetDefaultsInit(w, widget_display,adcVal,4);
 	w->posX = 24;
 	w->posY = 0;
 	w->font_size = &FONT_6X8_reduced;
 	w->displayWidget.getData = &debug_screen_getADC1;
 	w->displayWidget.number_of_dec = 0;
 	w->displayWidget.type = field_uinteger16;
-	w->reservedChars = 4;
+	
 
 	//ADC1 display, unfiltered
 	w = &Debug2_ADC_ValRaw;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	widgetDefaultsInit(w, widget_display,adcRaw,4);
 	w->posX = 89;
 	w->posY = 0;
 	w->font_size = &FONT_6X8_reduced;
 	w->displayWidget.getData = &debug_screen_getADC1_raw;
 	w->displayWidget.number_of_dec = 0;
 	w->displayWidget.type = field_uinteger16;
-	w->reservedChars = 4;
+	
 
 	//Debug setpoint
 	w = &Debug_SetPoint_edit;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_editable);
+	static char setP[5];
+	widgetDefaultsInit(w, widget_editable,setP,4);
 	w->posX = 4;
 	w->posY =33;
 	w->font_size = &FONT_6X8_reduced;
 	w->editable.inputData.getData = &getDebugTemperature;
 	w->editable.inputData.number_of_dec = 0;
 	w->editable.inputData.type = field_uinteger16;
-	w->editable.big_step = 100;
-	w->editable.step = 10;
+	w->editable.big_step = 200;
+	w->editable.step = 50;
+	w->editable.max_value = 4095;
 	w->editable.selectable.tab = 0;
 	w->editable.setData = (void (*)(void *))&setDebugTemperature;
-	w->reservedChars = 4;
+	
 
 	// Cal at 200
 	w = &Debug_Cal200_edit;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_editable);
+	static char c200[5];
+	widgetDefaultsInit(w, widget_editable,c200,4);
 	w->posX = 34;
 	w->posY = 33;
 	w->font_size = &FONT_6X8_reduced;
@@ -331,14 +342,16 @@ void debug2_screen_setup(screen_t *scr) {
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 100;
 	w->editable.step = 20;
+	w->editable.max_value = 4095;
 	w->editable.selectable.tab = 1;
 	w->editable.setData = (void (*)(void *))&setCalcAt200;
-	w->reservedChars = 4;
+	
 
 	// Cal at 300
 	w = &Debug_Cal300_edit;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_editable);
+	static char c300[5];
+	widgetDefaultsInit(w, widget_editable,c300,4);
 	w->posX = 64;
 	w->posY = 33;
 	w->font_size = &FONT_6X8_reduced;
@@ -346,15 +359,17 @@ void debug2_screen_setup(screen_t *scr) {
 	w->editable.inputData.number_of_dec = 0;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 100;
-	w->editable.step = 10;
+	w->editable.step = 20;
+	w->editable.max_value = 4095;
 	w->editable.selectable.tab = 2;
 	w->editable.setData = (void (*)(void *))&setCalcAt300;
-	w->reservedChars = 4;
+	
 
 	// Cal at 400
 	w = &Debug_Cal400_edit;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_editable);
+	static char c400[5];
+	widgetDefaultsInit(w, widget_editable,c400,4);
 	w->posX = 94;
 	w->posY = 33;
 	w->font_size = &FONT_6X8_reduced;
@@ -362,8 +377,9 @@ void debug2_screen_setup(screen_t *scr) {
 	w->editable.inputData.number_of_dec = 0;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 100;
-	w->editable.step = 10;
+	w->editable.step = 20;
+	w->editable.max_value = 4095;
 	w->editable.selectable.tab = 3;
 	w->editable.setData = (void (*)(void *))&setCalcAt400;
-	w->reservedChars = 4;
+	
 }

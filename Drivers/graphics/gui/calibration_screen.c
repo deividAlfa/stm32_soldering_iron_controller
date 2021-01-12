@@ -21,9 +21,7 @@ static uint8_t tempReady;
 static uint16_t measuredTemp;
 static uint16_t adcCal[3];
 static uint8_t processCalibration();
-
 static widget_t Widget_CAL_Wait;
-static widget_t Widget_CAL_WaitTemp;
 static widget_t Widget_CAL_Cancel;
 static widget_t Widget_CAL_Input_MeasuredTemp_edit;
 static widget_t Widget_CAL_Input_Cancel;
@@ -44,27 +42,27 @@ static void setMeasuredTemp(void *temp) {
 
 static void setCalState(state_t s) {
 	current_state = s;
+	char c[20];
 	if(current_state != cal_end) {
-		Widget_CAL_WaitTemp.posX = 2;
 		setCurrentMode(mode_normal);
 		setSetTemperature(state_temps[(int)s]);
-		sprintf(Widget_CAL_WaitTemp.displayString, "CAL STEP: %3u*C", state_temps[(int)s]);
+		sprintf(c, "CAL STEP: %3u*C", state_temps[(int)s]);
+		UG_PutString(2,17,c);
 		measuredTemp = state_temps[(int)s];
 	}
 	else {
-		Widget_CAL_Wait.enabled = 0;
+		FillBuffer(C_BLACK, fill_dma);
+		Widget_CAL_Wait.enabled=0;
 		uint8_t result = processCalibration();
 		if(result) {
-			Widget_CAL_WaitTemp.posX = 31;
-			strcpy(Widget_CAL_WaitTemp.displayString, "SUCCEED!");//8 *8=64
+			UG_PutString(31,30,"SUCCEED!");
 			tipData * t = getCurrentTip();
 			t->calADC_At_200 = adcCal[cal_200];
 			t->calADC_At_300 = adcCal[cal_300];
 			t->calADC_At_400 = adcCal[cal_400];
 		}
 		else {
-			Widget_CAL_WaitTemp.posX = 35;
-			strcpy(Widget_CAL_WaitTemp.displayString, "FAILED!");//7 *8=56
+			UG_PutString(35,30,"FAILED!");
 		}
 	}
 }
@@ -112,7 +110,6 @@ static void waitOnEnter(screen_t *scr) {
 		UG_FontSetVSpace(0);
 		Iron.isCalibrating=1;
 		Widget_CAL_Wait.enabled = 1;
-		Widget_CAL_WaitTemp.enabled = 1;
 		tempReady = 0;
 		setCurrentMode(mode_normal);
 		backupTemp = getSetTemperature();
@@ -160,26 +157,19 @@ void calibration_screen_setup(screen_t *scr) {
 
 	w = &Widget_CAL_Wait;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_label);
+	static char WaitStr[20];
+	widgetDefaultsInit(w, widget_label,WaitStr, sizeof(WaitStr)-1);
 	w->posX = 2;
 	w->posY = 30;
 	w->font_size = &FONT_8X14_reduced;
 
-	w = &Widget_CAL_WaitTemp;
-	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_label);
-	w->posX = 2;
-	w->posY = 17;
-	w->font_size = &FONT_8X14_reduced;
-
 	w = &Widget_CAL_Cancel;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_button);
+	widgetDefaultsInit(w, widget_button, "BACK", 4);
 	w->font_size = &FONT_8X14_reduced;
 	w->posX = 94;
 	w->posY = 50;
-	strcpy(w->displayString, "BACK");
-	w->reservedChars = 4;
+	
 	w->buttonWidget.selectable.tab = 0;
 	w->buttonWidget.action = &cancelAction;
 
@@ -200,37 +190,36 @@ void calibration_screen_setup(screen_t *scr) {
 */
 	w=&Widget_CAL_Input_MeasuredTemp_edit;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_editable);
+	static char temp[4];
+	widgetDefaultsInit(w, widget_editable,temp,sizeof(temp)-1);
 	w->posX = 86;
 	w->posY = 17;
 	w->font_size = &FONT_8X14_reduced;
 	w->editable.inputData.getData = &getMeasuredTemp;
 	w->editable.setData = &setMeasuredTemp;
-	w->reservedChars = 5;
+	
 	w->displayWidget.hasEndStr = 1;
-	w->endString = "*C";
+	w->displayString = "*C";
 	w->editable.selectable.tab = 0;
 
 	w=&Widget_CAL_Input_OK;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button);
+	widgetDefaultsInit(w, widget_button, "SAVE", 4);
 	w->font_size = &FONT_8X14_reduced;
 	w->posX = 94;
 	w->posY = 50;
-	strcpy(w->displayString, "SAVE");
-	w->reservedChars = 4;
+	
 	w->buttonWidget.selectable.tab = 1;
 	w->buttonWidget.action = &okAction;
 
 
 	w=&Widget_CAL_Input_Cancel;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button);
+	widgetDefaultsInit(w, widget_button, "CANCEL", 6);
 	w->font_size = &FONT_8X14_reduced;
 	w->posX = 2;
 	w->posY = 50;
-	strcpy(w->displayString, "CANCEL");
-	w->reservedChars = 6;
+	
 	w->buttonWidget.selectable.tab = 2;
 	w->buttonWidget.action = &cancelAction;
 

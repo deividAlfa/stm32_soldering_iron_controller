@@ -82,7 +82,7 @@ void default_screenDraw(screen_t *scr) {
 void default_screenUpdate(screen_t *scr) {
 	if(scr->widgets) {
 		widget_t *last_widget = scr->widgets;
-		displayOnly_wiget_t *dis;
+		displayOnly_widget_t *dis;
 		while(last_widget) {
 			dis = extractDisplayPartFromWidget(last_widget);
 			if(dis){

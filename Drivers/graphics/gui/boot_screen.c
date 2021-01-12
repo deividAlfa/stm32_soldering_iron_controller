@@ -161,7 +161,7 @@ void boot_screen_setup(screen_t *scr) {
 	// Profile select
 	w = &Widget_profile_edit;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_multi_option);
+	widgetDefaultsInit(w, widget_multi_option,NULL,4);
 	w->posX = 12;
 	w->posY = 40;
 	w->font_size = &FONT_10X16_reduced;
@@ -172,9 +172,6 @@ void boot_screen_setup(screen_t *scr) {
 	w->editable.selectable.tab = 0;
 	w->editable.setData = (void (*)(void *))&setProfile;
 	w->editable.max_value = ProfileSize-1;
-	w->editable.min_value = 0;
-	w->displayWidget.hasEndStr = 0;
-	w->reservedChars = 4;
 	w->multiOptionWidget.options = profileStr;
 	w->multiOptionWidget.numberOfOptions = 3;
 	w->enabled=0;
@@ -182,12 +179,11 @@ void boot_screen_setup(screen_t *scr) {
 	// OK Button
 	w = &Widget_profile_OK;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_button);
+	widgetDefaultsInit(w, widget_button, "OK", 2);
 	w->font_size = &FONT_10X16_reduced;
 	w->posX = 95;
-	w->posY = 40                                                                                                                                                                                                                                                                                                                                                                                                                    ;
-	strcpy(w->displayString, "OK");
-	w->reservedChars = 2;
+	w->posY = 40;
+	
 	w->buttonWidget.selectable.tab = 1;
 	w->buttonWidget.action = &profile_OK;
 	w->enabled=0;

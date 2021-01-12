@@ -12,7 +12,7 @@
 // Main screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
 static uint16_t temp;
-static char *modestr[] = {"SBY", "SLP", "", "BST"};
+static char *modestr[] = {"SBY", "SLP", "   ", "BST"};
 static char *tipName[TipSize];
 #define toSystem	0
 #define fromSystem	1
@@ -33,7 +33,7 @@ const uint8_t settingsBMP[] ={
 	0b01100000,0b01100110,0b11111110,0b11111100,0b10011100,0b00001111,0b00001111,0b10011100,0b11111100,0b11111110,0b01100110,0b01100000,
 	0b00000000,0b00000110,0b00000111,0b00000011,0b00000011,0b00001111,0b00001111,0b00000011,0b00000011,0b00000111,0b00000110,0b00000000
 };
-UG_BMP_MONO settings = {
+UG_BMP_MONO settingsBtn = {
 	p:settingsBMP,
 	width: 12,
 	height: 12
@@ -144,22 +144,22 @@ static int enterSettings(widget_t *w) {
 static void tempUnitChanged(void) {
 	TempUnit = systemSettings.settings.tempUnit;
 	if(TempUnit==Unit_Farenheit){
-		Widget_IronTemp.endString="*F";
+		Widget_IronTemp.EndStr="*F";
 		#ifdef USE_NTC
-		Widget_AmbTemp.endString="*F";						// '*' shown as '°' in all fonts
+		Widget_AmbTemp.EndStr="*F";						// '*' shown as '°' in all fonts
 		#endif
-		Widget_SetPoint.endString="*F";
+		Widget_SetPoint.EndStr="*F";
 		Widget_SetPoint.editable.max_value=900;
 		Widget_SetPoint.editable.min_value=350;
 		Widget_SetPoint.editable.big_step = 20;
 		Widget_SetPoint.editable.step = 10;
 	}
 	else{
-		Widget_IronTemp.endString="*C";
+		Widget_IronTemp.EndStr="*C";
 		#ifdef USE_NTC
-		Widget_AmbTemp.endString="*C";					// '*' shown as '°' in all fonts
+		Widget_AmbTemp.EndStr="*C";					// '*' shown as '°' in all fonts
 		#endif
-		Widget_SetPoint.endString="*C";
+		Widget_SetPoint.EndStr="*C";
 		Widget_SetPoint.editable.max_value=480;
 		Widget_SetPoint.editable.min_value=180;
 		Widget_SetPoint.editable.big_step = 10;
@@ -215,9 +215,16 @@ void main_screenUpdate(screen_t *scr) {
 		Widget_SetPoint.enabled = 0;
 		Widget_Mode.enabled = 0;
 		Widget_PulseIcon.enabled=0;
+
+		Widget_TipSelect.editable.selectable.previous_state=widget_idle;
 		Widget_TipSelect.editable.selectable.state=widget_idle;
+
+		Widget_SetPoint.editable.selectable.previous_state=widget_idle;
 		Widget_SetPoint.editable.selectable.state=widget_idle;
+
+		Widget_SettingsBtn.buttonWidget.selectable.previous_state=widget_idle;
 		Widget_SettingsBtn.buttonWidget.selectable.state=widget_selected;
+
 		scr->current_widget=&Widget_SettingsBtn;
 	}
 	else if(GetIronPresence() && NoIronPrevState){
@@ -278,88 +285,92 @@ void main_screen_setup(screen_t *scr) {
 	//V input display
 	w = &Widget_Vsupply;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	static char vin[6];
+	widgetDefaultsInit(w, widget_display,vin,5);
 	w->posX = 0;
 	w->posY = 0;
 	w->font_size = &FONT_8X14_reduced;
 	w->displayWidget.getData = &main_screen_getVin;
 	w->displayWidget.number_of_dec = 1;
 	w->displayWidget.type = field_uinteger16;
-	w->reservedChars = 5;
+	
 	w->displayWidget.justify = justify_right;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="V";
+	w->EndStr="V";
 	#endif
+
 	#ifdef USE_NTC
 	//Ambient temperature display
 	w=&Widget_AmbTemp;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_display);
+	static char ntc[6];
+	widgetDefaultsInit(w, widget_display,ntc,5);
 	w->posX = 55;
 	w->posY = 0;
 	w->font_size = &FONT_8X14_reduced;
 	w->displayWidget.getData = &main_screen_getAmbTemp;
 	w->displayWidget.number_of_dec = 0;
 	w->displayWidget.type = field_integer16;
-	w->reservedChars = 5;
+	
 	w->displayWidget.hasEndStr = 1;
 	#endif
+
 	//power display
 	w=&Widget_Power;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_display);
+	static char pwr[5];
+	widgetDefaultsInit(w, widget_display,pwr,4);
 	w->posX = 95;
 	w->posY = 0;
 	w->font_size = &FONT_8X14_reduced;
 	w->displayWidget.getData = &main_screen_getIronPower;
 	w->displayWidget.number_of_dec = 0;
 	w->displayWidget.type = field_uinteger16;
-	w->reservedChars = 4;
+	
 	w->displayWidget.justify = justify_right;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="%";
+	w->EndStr="%";
 
 
 	//iron tip temperature display
 	w=&Widget_IronTemp;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_display);
+	static char irontmp[6];
+	widgetDefaultsInit(w, widget_display,irontmp,5);
 	w->posX = 17;
 	w->posY = 16;
 	w->font_size =  &font_iron_temp;
 	w->displayWidget.getData = &main_screen_getIronTemp;
 	w->displayWidget.number_of_dec = 0;
 	w->displayWidget.type = field_uinteger16;
-	w->reservedChars = 5;
 	w->displayWidget.justify = justify_right;
 	w->displayWidget.hasEndStr = 1;
 
 	// NO IRON widget
 	w=&Widget_noIron;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "NO IRON");
+	widgetDefaultsInit(w, widget_label, "NO IRON",7);
 	w->posX = 7;
 	w->posY = 17 ;
 	w->font_size =  &font_no_iron;
-	w->reservedChars = 7;
+	
 	w->draw = &default_widgetDraw;
 	w->enabled = 0;
 
 	// Settings Button
 	w=&Widget_SettingsBtn;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_bmp_button);
+	widgetDefaultsInit(w, widget_bmp_button,NULL,0);
 	w->posX = 2;
 	w->posY = 50;
-	w->buttonWidget.bmp = &settings;
+	w->buttonWidget.bmp = &settingsBtn;
 	w->buttonWidget.selectable.tab = 0;
 	w->buttonWidget.action = &enterSettings;
 
 	// Tips
 	w=&Widget_TipSelect;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_multi_option);
+	widgetDefaultsInit(w, widget_multi_option,NULL,TipCharSize-1);
 	w->posX = 64;
 	w->posY = 50;
 	w->font_size = &FONT_8X14_reduced;
@@ -370,7 +381,7 @@ void main_screen_setup(screen_t *scr) {
 	w->multiOptionWidget.editable.step = 0;
 	w->multiOptionWidget.editable.selectable.tab = 2;
 	w->multiOptionWidget.editable.setData = (void (*)(void *))&setTip;
-	w->reservedChars = TipCharSize-1;
+	
 	w->multiOptionWidget.options = tipName;
 	w->multiOptionWidget.currentOption = 0;
 	w->multiOptionWidget.defaultOption = 0;
@@ -378,7 +389,8 @@ void main_screen_setup(screen_t *scr) {
 	// Tip temperature setpoint
 	w=&Widget_SetPoint;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_editable);
+	static char setP[6];
+	widgetDefaultsInit(w, widget_editable,setP,5);
 	w->editable.selectable.processInput = &tempProcessInput;
 	w->posX = 19;
 	w->posY = 50;
@@ -388,7 +400,7 @@ void main_screen_setup(screen_t *scr) {
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.selectable.tab = 1;
 	w->editable.setData = (void (*)(void *))&setTemp;
-	w->reservedChars = 5;
+	
 	w->editable.selectable.longPressAction = &boostOn;
 	w->displayWidget.hasEndStr = 1;
 	w->displayWidget.justify = justify_right;
@@ -396,18 +408,19 @@ void main_screen_setup(screen_t *scr) {
 	// Iron mode label
 	w=&Widget_Mode;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_display);
+	char IronMode[4];
+	widgetDefaultsInit(w, widget_display,IronMode,3);
 	w->posX = 103;
 	w->posY = 50;
 	w->font_size = &FONT_8X14_reduced;
 	w->displayWidget.getData = &getMode;
 	w->displayWidget.type = field_string;
-	w->reservedChars = 3;
+	
 
 	// Wake activity signal icon
 	w=&Widget_PulseIcon;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_bmp);
+	widgetDefaultsInit(w, widget_bmp,NULL,0);
 	w->posX = 0;
 	w->posY = 22;
 	w->displayBmp.bmp = &pulse;

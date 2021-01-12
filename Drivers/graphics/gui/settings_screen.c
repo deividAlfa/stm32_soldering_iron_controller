@@ -415,26 +415,26 @@ static void * getButtonWake() {
 static void tempUnitChanged(void) {
 	TempUnit = systemSettings.settings.tempUnit;
 	if(TempUnit==Unit_Farenheit){
-		Widget_IRON_BoostTemp.endString="*F";
+		Widget_IRON_BoostTemp.EndStr="*F";
 		Widget_IRON_BoostTemp.editable.max_value=900;
 		Widget_IRON_BoostTemp.editable.min_value=400;
 		Widget_IRON_BoostTemp.editable.big_step = 50;
 		Widget_IRON_BoostTemp.editable.step = 10;
 
-		Widget_IRON_SleepTemp.endString="*F";
+		Widget_IRON_SleepTemp.EndStr="*F";
 		Widget_IRON_SleepTemp.editable.max_value=750;
 		Widget_IRON_SleepTemp.editable.min_value=300;
 		Widget_IRON_SleepTemp.editable.big_step = 50;
 		Widget_IRON_SleepTemp.editable.step = 10;
 	}
 	else{
-		Widget_IRON_BoostTemp.endString="*C";
+		Widget_IRON_BoostTemp.EndStr="*C";
 		Widget_IRON_BoostTemp.editable.max_value=480;
 		Widget_IRON_BoostTemp.editable.min_value=200;
 		Widget_IRON_BoostTemp.editable.big_step = 50;
 		Widget_IRON_BoostTemp.editable.step = 10;
 
-		Widget_IRON_SleepTemp.endString="*C";
+		Widget_IRON_SleepTemp.EndStr="*C";
 		Widget_IRON_SleepTemp.editable.max_value=400;
 		Widget_IRON_SleepTemp.editable.min_value=150;
 		Widget_IRON_SleepTemp.editable.big_step = 50;
@@ -476,8 +476,9 @@ static void settings_screen_OnEnter(screen_t *scr) {
 //-------------------------------------------------------------------------------------------------------------------------------
 // Edit Tip screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
+
 void edit_tip_screenDraw(screen_t *scr){
-	if((strcmp(str, "    ") == 0) || (strcmp(str, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name) == 0) ) {
+	if((strcmp(str, "    ") == 0) || (strcmp(str, comboWidget_Settings_IRONTIPS.comboBoxWidget.currentItem->text) == 0) ) {
 		if(Widget_IRONTIPS_Save.enabled){
 			Widget_IRONTIPS_Save.enabled=0;
 			FillBuffer(C_BLACK,fill_dma);
@@ -490,14 +491,21 @@ void edit_tip_screenDraw(screen_t *scr){
 			Widget_IRONTIPS_Save.enabled=1;
 		}
 	}
-
 	default_screenDraw(scr);
 }
 void edit_tip_onEnter(screen_t *scr){
+	Widget_IRONTIPS_Edit.editable.selectable.previous_state=widget_idle;
 	Widget_IRONTIPS_Edit.editable.selectable.state=widget_selected;
+
+	Widget_IRONTIPS_Save.buttonWidget.selectable.previous_state=widget_idle;
 	Widget_IRONTIPS_Save.buttonWidget.selectable.state=widget_idle;
+
+	Widget_IRONTIPS_Back.buttonWidget.selectable.previous_state=widget_idle;
 	Widget_IRONTIPS_Back.buttonWidget.selectable.state=widget_idle;
+
+	Widget_IRONTIPS_Delete.buttonWidget.selectable.previous_state=widget_idle;
 	Widget_IRONTIPS_Delete.buttonWidget.selectable.state=widget_idle;
+
 	scr->current_widget=&Widget_IRONTIPS_Edit;
 	UG_FontSelect(&FONT_10X16_reduced);
 	UG_PutString(20,17,"NAME:");//12
@@ -633,7 +641,7 @@ void settings_screen_setup(screen_t *scr) {
 	//
 	w = &comboWidget_Settings;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_combo);
+	widgetDefaultsInit(w, widget_combo,NULL,0);
 	comboAddScreen(&Settings_Combo_PID, w, 			"PID", 			screen_pid);
 	comboAddScreen(&Settings_Combo_IRON, w, 		"IRON", 		screen_iron);
 	comboAddScreen(&Settings_Combo_SYSTEM, w, 		"SYSTEM", 		screen_system);
@@ -654,7 +662,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ KP Widget]***********************************************************
 	//
 	w = &Widget_PID_Kp;
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_P[7];
+	widgetDefaultsInit(w, widget_editable,arr_P,6);
 	w->posX = 78;
 	w->editable.inputData.getData = &getKp;
 	w->editable.inputData.number_of_dec = 2;
@@ -662,13 +671,14 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.big_step = 200;
 	w->editable.step = 100;
 	w->editable.setData = (void (*)(void *))&setKp;
-	w->reservedChars = 6;
+	
 	w->displayWidget.justify = justify_right;
 
 	//********[ KI Widget ]***********************************************************
 	//
 	w = &Widget_PID_Ki;
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_I[7];
+	widgetDefaultsInit(w, widget_editable,arr_I,6);
 	w->posX = 78;
 	w->editable.inputData.getData = &getKi;
 	w->editable.inputData.number_of_dec = 2;
@@ -676,13 +686,14 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.big_step = 200;
 	w->editable.step = 100;
 	w->editable.setData = (void (*)(void *))&setKi;
-	w->reservedChars = 6;
+	
 	w->displayWidget.justify = justify_right;
 
 	//********[ KD Widget ]***********************************************************
 	//
 	w = &Widget_PID_Kd;
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_D[7];
+	widgetDefaultsInit(w, widget_editable,arr_D,6);
 	w->posX = 78;
 	w->editable.inputData.getData = &getKd;
 	w->editable.inputData.number_of_dec = 2;
@@ -690,14 +701,14 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.big_step = 200;
 	w->editable.step = 100;
 	w->editable.setData = (void (*)(void *))&setKd;
-	w->reservedChars = 6;
+	
 	w->displayWidget.justify = justify_right;
 
 	//========[ PID COMBO ]===========================================================
 	//
 	w = &comboWidget_Settings_PID;
 	screen_addWidget(w, sc);
-	widgetDefaultsInit(w, widget_combo);
+	widgetDefaultsInit(w, widget_combo,NULL,0);
 	w->posY = 0;
 	w->posX = 0;
 	w->font_size = &FONT_8X14_reduced;
@@ -718,87 +729,94 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Sleep Time Widget ]***********************************************************
 	//
 	w = &Widget_IRON_SleepTime;
-	widgetDefaultsInit(w, widget_editable);
-	w->posX = 94;
+	static char arr_SleepTime[7];
+	widgetDefaultsInit(w, widget_editable,arr_SleepTime,5);
+	w->posX = 86;
 	w->editable.inputData.getData = &getSleepTime;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 5;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setSleepTime;
-	w->editable.max_value = 600;
+	w->editable.max_value = 60;
 	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="m";
-	w->reservedChars = 4;
+	w->EndStr="min";
 	w->displayWidget.justify =justify_right;
+
 
 	//********[ Sleep Temp Widget ]***********************************************************
 	//
 	w = &Widget_IRON_SleepTemp;
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_SleepTemp[6];
+	widgetDefaultsInit(w, widget_editable, arr_SleepTemp,5);
 	w->posX = 86;//94
 	w->editable.inputData.getData = &getSleepTemp;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 20;
 	w->editable.step = 10;
+	w->editable.max_value = 400;
+	w->editable.min_value = 150;
 	w->editable.setData = (void (*)(void *))&setSleepTemp;
-	w->reservedChars = 5;
+	
 	w->displayWidget.hasEndStr = 1;
 	w->displayWidget.justify =justify_right;
 
 	//********[ Boost Time Widget ]***********************************************************
 	//
 	w = &Widget_IRON_BoostTime;
-	widgetDefaultsInit(w, widget_editable);
-	w->posX = 94;
+	static char arr_BoostTime[7];
+	widgetDefaultsInit(w, widget_editable,arr_BoostTime,5);
+	w->posX = 86;
 	w->editable.inputData.getData = &getBoostTime;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 5;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setBoostTime;
-	w->editable.max_value = 600;
-	w->editable.min_value = 5;
+	w->editable.max_value = 60;
+	w->editable.min_value = 1;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="m";
-	w->reservedChars = 4;
+	w->EndStr="min";
 	w->displayWidget.justify =justify_right;
 
 	//********[ Boost Temp Widget ]***********************************************************
 	//
 	w = &Widget_IRON_BoostTemp;
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_BoostTemp[6];
+	widgetDefaultsInit(w, widget_editable,arr_BoostTemp,5);
 	w->posX = 86;
 	w->editable.inputData.getData = &getBoostTemp;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 20;
 	w->editable.step = 10;
+	w->editable.max_value = 480;
+	w->editable.min_value = 300;
 	w->editable.setData = (void (*)(void *))&setBoostTemp;
-	w->reservedChars = 5;
 	w->displayWidget.hasEndStr = 1;
 	w->displayWidget.justify =justify_right;
 
 	//********[ Standby Time Widget ]***********************************************************
 	//
 	w = &Widget_IRON_StbyTime;
-	widgetDefaultsInit(w, widget_editable);
-	w->posX = 94;
+	static char arr_StbyTime[7];
+	widgetDefaultsInit(w, widget_editable,arr_StbyTime,5);
+	w->posX = 86;
 	w->editable.inputData.getData = &getStandByTime;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 5;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setStandByTime;
-	w->reservedChars = 4;
-	w->editable.max_value = 600;
+	w->editable.max_value = 60;
 	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="m";
+	w->EndStr="min";
 	w->displayWidget.justify =justify_right;
 
 	//********[ Power Widget ]***********************************************************
 	//
 	w = &Widget_IRON_Power;
-	widgetDefaultsInit(w, widget_editable);
-	w->posX = 94;
+	static char arr_Pwr[5];
+	widgetDefaultsInit(w, widget_editable,arr_Pwr,5);
+	w->posX = 86;
 	w->editable.inputData.getData = &getMaxPower;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 20;
@@ -807,15 +825,14 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 100;
 	w->editable.min_value = 5;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="%";
-	w->reservedChars = 4;
+	w->EndStr="%";
 	w->displayWidget.justify =justify_right;
 
 	//========[ IRON COMBO ]===========================================================
 	//
 	w = &comboWidget_Settings_IRON;
 	screen_addWidget(w, sc);
-	widgetDefaultsInit(w, widget_combo);
+	widgetDefaultsInit(w, widget_combo,NULL,0);
 	comboAddOption(&comboitem_IRON_SleepTime, w,	"Slp Time", 	&Widget_IRON_SleepTime);
 	comboAddOption(&comboitem_IRON_SleepTemp, w, 	"Slp Temp", 	&Widget_IRON_SleepTemp);
 	comboAddOption(&comboitem_IRON_BoostTime, w, 	"Bst Time", 	&Widget_IRON_BoostTime);
@@ -837,7 +854,7 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Profile Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_Profile;
-	widgetDefaultsInit(w, widget_multi_option);
+	widgetDefaultsInit(w, widget_multi_option,NULL,4);
 	w->posX = 94;
 	w->editable.inputData.getData = &getProfile;
 	w->editable.inputData.type = field_uinteger16;
@@ -847,14 +864,14 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = ProfileSize-1;
 	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 0;
-	w->reservedChars = 4;
 	w->multiOptionWidget.options = profileStr;
 	w->multiOptionWidget.numberOfOptions = 3;
 
 	//********[ Contrast Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_Contrast;
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_contrast[4];
+	widgetDefaultsInit(w, widget_editable,arr_contrast,3);
 	w->posX = 102;
 	w->editable.inputData.getData = &getContrast_;
 	w->editable.inputData.type = field_uinteger16;
@@ -863,13 +880,12 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.setData = (void (*)(void *))&setContrast_;
 	w->editable.max_value = 255;
 	w->editable.min_value = 5;
-	w->displayWidget.hasEndStr = 0;
-	w->reservedChars = 3;
+	
 
 	//********[ Oled Fix Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_OledFix;
-	widgetDefaultsInit(w, widget_multi_option);
+	widgetDefaultsInit(w, widget_multi_option,NULL,3);
 	w->posX = 102;
 	w->editable.inputData.getData = &getOledFix;
 	w->editable.inputData.type = field_uinteger16;
@@ -877,7 +893,6 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setOledFix;
 	w->displayWidget.hasEndStr = 0;
-	w->reservedChars = 3;
 	w->multiOptionWidget.options = OffOn;
 	w->multiOptionWidget.numberOfOptions = 2;
 	w->editable.max_value = 1;
@@ -886,7 +901,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Save Delay Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_SaveInterval;
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_savDelay[4];
+	widgetDefaultsInit(w, widget_editable,arr_savDelay,3);
 	w->posX = 102;
 	w->editable.inputData.getData = &getSavDelay;
 	w->editable.inputData.type = field_uinteger16;
@@ -896,14 +912,14 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 60;
 	w->editable.min_value = 1;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="s";
-	w->reservedChars = 3;
+	w->EndStr="s";
 	w->displayWidget.justify =justify_right;
 
 	//********[ Gui refresh rate Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_GuiUpd;
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_guiUpd[6];
+	widgetDefaultsInit(w, widget_editable,arr_guiUpd,5);
 	w->posX = 86;
 	w->editable.inputData.getData = &getGuiUpd_ms;
 	w->editable.inputData.type = field_uinteger16;
@@ -913,21 +929,20 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 500;
 	w->editable.min_value = 0;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="mS";
-	w->reservedChars = 5;
+	w->EndStr="mS";
 	w->displayWidget.justify =justify_right;
 
 	//********[ Temp display unit Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_TempUnit;
-	widgetDefaultsInit(w, widget_multi_option);
+	widgetDefaultsInit(w, widget_multi_option,NULL,2);
 	w->posX = 110;
 	w->editable.inputData.getData = &getTmpUnit;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 1;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setTmpUnit;
-	w->reservedChars = 2;
+	
 	w->editable.max_value = Unit_Farenheit;
 	w->editable.min_value = Unit_Celsius;
 	w->multiOptionWidget.options = tempUnit;
@@ -936,14 +951,14 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Buzzer Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_Buzzer;
-	widgetDefaultsInit(w, widget_multi_option);
+	widgetDefaultsInit(w, widget_multi_option,NULL,3);
 	w->posX = 102;
 	w->editable.inputData.getData = &getBuzzEnable;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 1;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setBuzzEnable;
-	w->reservedChars = 3;
+	
 	w->editable.max_value = 1;
 	w->editable.min_value = 0;
 	w->multiOptionWidget.options = OffOn;
@@ -952,14 +967,14 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Init mode Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_InitMode;
-	widgetDefaultsInit(w, widget_multi_option);
+	widgetDefaultsInit(w, widget_multi_option,NULL,3);
 	w->posX = 102;
 	w->editable.inputData.getData = &getInitMode;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 1;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setInitMode;
-	w->reservedChars = 3;
+	
 	w->editable.max_value = mode_boost;
 	w->editable.min_value = mode_standby;
 	w->multiOptionWidget.options = InitMode;
@@ -968,24 +983,24 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Encoder wake Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_ButtonWake;
-	widgetDefaultsInit(w, widget_multi_option);
+	widgetDefaultsInit(w, widget_multi_option,NULL,3);
 	w->posX = 102;
 	w->editable.inputData.getData = &getButtonWake;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 1;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setButtonWake;
-	w->reservedChars = 3;
+	
 	w->editable.max_value = 1;
 	w->editable.min_value = 0;
 	w->multiOptionWidget.options =OffOn;
-	w->multiOptionWidget.numberOfOptions = 4;
+	w->multiOptionWidget.numberOfOptions = 2;
 
 	//========[ SYSTEM COMBO ]===========================================================
 	//
 	w = &comboWidget_Settings_SYSTEM;
 	screen_addWidget(w, sc);
-	widgetDefaultsInit(w, widget_combo);
+	widgetDefaultsInit(w, widget_combo,NULL,0);
 	comboAddOption(&comboitem_SYSTEM_Profile,w, 		"Profile", 		&Widget_SYSTEM_Profile);
 	comboAddOption(&comboitem_SYSTEM_Contrast,w, 		"Contrast", 	&Widget_SYSTEM_Contrast);
 	comboAddOption(&comboitem_SYSTEM_OledFix, w, 		"Oled Fix", 	&Widget_SYSTEM_OledFix);
@@ -1008,7 +1023,8 @@ void settings_screen_setup(screen_t *scr) {
 
 	//********[ PWM Period Widget ]***********************************************************
 	w = &Widget_ADVANCED_PWMPeriod;
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_pwmP[6];
+	widgetDefaultsInit(w, widget_editable,arr_pwmP,5);
 	w->posX = 86;
 	w->editable.inputData.getData = &getPwmPeriod;
 	w->editable.inputData.type = field_uinteger16;
@@ -1018,30 +1034,32 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.max_value = 650;
 	w->editable.min_value = 20;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="mS";
-	w->reservedChars = 5;
+	w->EndStr="mS";
+	
 	w->displayWidget.justify =justify_right;
 
 	//********[ ADC Delay Widget ]***********************************************************
 	w = &Widget_ADVANCED_ADCDelay;
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_adcD[6];
+	widgetDefaultsInit(w, widget_editable,arr_adcD,5);
 	w->posX = 86;
 	w->editable.inputData.getData = &getPwmDelay;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 5;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setPwmDelay;
-	w->reservedChars = 5;
+	
 	w->editable.max_value = 500;
 	w->editable.min_value = 1;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="mS";
+	w->EndStr="mS";
 	w->displayWidget.justify =justify_right;
 
 	//********[ ADC Limit Widget ]***********************************************************
 	//
 	w = &Widget_ADVANCED_ADCLimit;
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_adcL[5];
+	widgetDefaultsInit(w, widget_editable,arr_adcL,4);
 	w->posX = 94;
 	w->editable.inputData.getData = &getNoIronADC;
 	w->editable.inputData.type = field_uinteger16;
@@ -1050,31 +1068,32 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.setData = (void (*)(void *))&setNoIronADC;
 	w->editable.max_value = 4100;
 	w->editable.min_value = 200;
-	w->reservedChars = 4;
+	
 	w->displayWidget.justify =justify_right;
 
 	//********[ No Iron Delay Widget ]***********************************************************
 	//
 	w = &Widget_ADVANCED_NoIronDelay;
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_noIron[6];
+	widgetDefaultsInit(w, widget_editable,arr_noIron,5);
 	w->posX = 86;
 	w->editable.inputData.getData = &getNoIronDelay;
 	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 100;
 	w->editable.step = 50;
 	w->editable.setData = (void (*)(void *))&setNoIronDelay;
-	w->reservedChars = 5;
+	
 	w->editable.max_value = 950;
 	w->editable.min_value = 100;
 	w->displayWidget.hasEndStr = 1;
-	w->endString="mS";
+	w->EndStr="mS";
 	w->displayWidget.justify =justify_right;
 
 	//========[ ADVANCED COMBO ]===========================================================
 	//
 	w = &comboWidget_Settings_ADVANCED;
 	screen_addWidget(w, sc);
-	widgetDefaultsInit(w, widget_combo);
+	widgetDefaultsInit(w, widget_combo,NULL,0);
 	comboAddOption(&comboitem_ADVANCED_PWMPeriod,w, 		"PWM Time", 		&Widget_ADVANCED_PWMPeriod);
 	comboAddOption(&comboitem_ADVANCED_ADCDelay, w, 		"ADC Delay", 		&Widget_ADVANCED_ADCDelay);
 	comboAddOption(&comboitem_ADVANCED_ADCLimit, w, 		"ADC Limit", 		&Widget_ADVANCED_ADCLimit);
@@ -1093,7 +1112,7 @@ void settings_screen_setup(screen_t *scr) {
 	//
 	w = &comboWidget_Settings_RESET;
 	screen_addWidget(w, sc);
-	widgetDefaultsInit(w, widget_combo);
+	widgetDefaultsInit(w, widget_combo,NULL,0);
 	comboAddAction(&comboitem_RESET_SETTINGS,w, 	"RESET: Settings", 	&goSettingsReset );
 	comboAddAction(&comboitem_RESET_TIP,w, 			"RESET: Profile ", 	&goProfileReset );
 	comboAddAction(&comboitem_RESET_ALLTIP,w, 		"RESET: Profiles", 	&goAllProfileReset );
@@ -1114,11 +1133,10 @@ void settings_screen_setup(screen_t *scr) {
 	//
 	w = &Widget_Reset_OK;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button);
+	widgetDefaultsInit(w, widget_button, "RESET",5);
 	w->posX = 2;
 	w->posY = 50;
-	strcpy(w->displayString, "RESET");
-	w->reservedChars = 5;
+	
 	w->buttonWidget.selectable.tab = 1;
 	w->buttonWidget.action = &doReset;
 
@@ -1126,11 +1144,10 @@ void settings_screen_setup(screen_t *scr) {
 	//
 	w = &Widget_Reset_CANCEL;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button);
+	widgetDefaultsInit(w, widget_button, "CANCEL", 6);
 	w->posX = 78;
 	w->posY = 50;
-	strcpy(w->displayString, "CANCEL");
-	w->reservedChars = 6;
+	
 	w->buttonWidget.selectable.tab = 0;
 	w->buttonWidget.action = &cancelReset;
 
@@ -1146,7 +1163,7 @@ void settings_screen_setup(screen_t *scr) {
 	//
 	w = &comboWidget_Settings_IRONTIPS;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_combo);
+	widgetDefaultsInit(w, widget_combo,NULL,0);
 	for(int x = 0; x < TipSize; x++) {
 		t[x][0] = '\0';
 		comboAddScreen(&comboitem_IRONTIPS[x],w, &t[x][0], screen_edit_tip_name);
@@ -1170,7 +1187,8 @@ void settings_screen_setup(screen_t *scr) {
 	//
 	w = &Widget_IRONTIPS_Edit;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_editable);
+	static char arr_tipName[TipCharSize-1];
+	widgetDefaultsInit(w, widget_editable,arr_tipName,TipCharSize-1);
 	w->posX = 75;
 	w->posY = 17;
 	w->font_size = &FONT_10X16_reduced;
@@ -1181,18 +1199,16 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.step = 1;
 	w->editable.selectable.tab = 0;
 	w->editable.setData = (void (*)(void *))&setTipStr;
-	w->editable.max_value = 9999;
-	w->reservedChars = TipCharSize-1;
+	
 
 	//********[ Name Save Button Widget ]***********************************************************
 	//
 	w = &Widget_IRONTIPS_Save;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button);
+	widgetDefaultsInit(w, widget_button,"SAVE",4);
 	w->posX = 2;
 	w->posY = 50;
-	strcpy(w->displayString, "SAVE");
-	w->reservedChars = 4;
+	
 	w->buttonWidget.selectable.tab = 3;
 	w->buttonWidget.action = &saveTip;
 
@@ -1200,11 +1216,10 @@ void settings_screen_setup(screen_t *scr) {
 	//
 	w = &Widget_IRONTIPS_Back;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button);
+	widgetDefaultsInit(w, widget_button, "BACK", 4);
 	w->posX = 94;
 	w->posY = 50;
-	strcpy(w->displayString, "BACK");
-	w->reservedChars = 4;
+	
 	w->buttonWidget.selectable.tab = 1;
 	w->buttonWidget.action = &cancelTip;
 
@@ -1212,11 +1227,10 @@ void settings_screen_setup(screen_t *scr) {
 	//
 	w = &Widget_IRONTIPS_Delete;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button);
+	widgetDefaultsInit(w, widget_button, "DEL.", 4);
 	w->posX = 48;
 	w->posY = 50;
-	strcpy(w->displayString, "DEL.");
-	w->reservedChars = 4;
+	
 	w->buttonWidget.selectable.tab = 2;
 	w->buttonWidget.action = &delTip;
 }
