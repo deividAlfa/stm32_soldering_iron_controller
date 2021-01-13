@@ -168,7 +168,7 @@ static void insertDot(char *str, uint8_t dec) {//TODO Fix PID screen values >"99
 }
 void default_widgetUpdate(widget_t *widget) {
 	void *data;
-	int32_t val_ui;
+	int32_t val_ui=0;
 	int8_t val_ui_size, decimals=0, endStrLen=0;
 	displayOnly_widget_t* dis = extractDisplayPartFromWidget(widget);
 
