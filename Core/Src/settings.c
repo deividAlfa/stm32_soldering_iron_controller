@@ -161,10 +161,11 @@ uint32_t ChecksumProfile(Profile_t* profile){
 void resetSystemSettings(void) {
 	systemSettings.settings.version = FW_Version;
 	systemSettings.settings.contrast = 255;
-	systemSettings.settings.OledFix = 1;
+	systemSettings.settings.OledOffset = 2;
 	systemSettings.settings.noIronDelay=500;
 	systemSettings.settings.guiUpdateDelay=200;
 	systemSettings.settings.tempUnit=Unit_Celsius;
+	systemSettings.settings.tempStep=5;
 	systemSettings.settings.saveSettingsDelay=5;
 	systemSettings.settings.currentProfile=Profile_None;
 	systemSettings.settings.initMode=mode_normal;
@@ -313,7 +314,6 @@ void loadProfile(uint8_t profile){
 }
 
 void Diag_init(void){
-	systemSettings.settings.OledFix = 1;
 	setContrast(255);
 	FillBuffer(C_BLACK,fill_soft);
 	UG_FontSelect(&FONT_10X16_reduced);
@@ -333,6 +333,7 @@ void Flash_error(void){
 }
 void settingsChkErr(void){
 	Diag_init();
+	systemSettings.settings.OledOffset = 2;		// Set known value
 	UG_PutString(3,0,"SETTING ERR!");//12
 	UG_PutString(18,16,"RESTORING");//9
 	UG_PutString(8,32,"DEFAULTS...");//11

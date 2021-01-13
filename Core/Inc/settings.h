@@ -15,7 +15,8 @@
 #define TipSize			10		// Number of tips for each profile
 #define TipCharSize		5		// String size for each tip name
 
-#define FW_Version 		12	 										// Change this if you change the struct below to prevent people getting out of sync
+#define SYSTEM_VERSION	"Ver: 2021-13-01"
+#define FW_Version 		20211301	 										// Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize 		2 											// In KB
 #define FLASH_ADDR 		(0x8000000 + ((FLASH_SZ-StoreSize)*1024))	// Last 2KB flash (Minimum erase size, page size=2KB)
 
@@ -57,14 +58,15 @@ __attribute__ ((aligned (4))) typedef struct{
 }Profile_t;
 
 __attribute__ ((aligned (4))) typedef struct{
-	uint8_t version;				// Used to track if a reset is needed on firmware upgrade
+	uint32_t version;				// Used to track if a reset is needed on firmware upgrade
 	uint8_t contrast;
-	uint8_t OledFix;
+	uint8_t OledOffset;
 	uint16_t noIronDelay;
 	uint16_t guiUpdateDelay;
 	uint8_t currentProfile;
 	uint8_t saveSettingsDelay;
 	uint8_t initMode;
+	uint8_t tempStep;
 	bool tempUnit;
 	bool buzzEnable;
 	bool wakeOnButton;

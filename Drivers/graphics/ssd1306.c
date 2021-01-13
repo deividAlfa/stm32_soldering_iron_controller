@@ -315,8 +315,7 @@ void pset(UG_U16 x, UG_U16 y, UG_COLOR c){
 
 void setOledRow(uint8_t row){
 	write_cmd(0xB0|row);									// Set the OLED Row address
-	if(systemSettings.settings.OledFix){	write_cmd(0x02); }
-	else{ write_cmd(0x00); }
+	write_cmd(systemSettings.settings.OledOffset);
 	write_cmd(0x10);
 }
 
@@ -408,6 +407,7 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 	write_cmd(0xA4|0x00);   	// Set Entire Display On/Off
 	write_cmd(0xA6|0x00);   	// Set Inverse Display On/Off
 	FillBuffer(C_BLACK,fill_dma);	// Clear buffer
+	systemSettings.settings.OledOffset = 2;		// Set by default while system settings are not loaded
 	write_cmd(0xAF);   			// Set Display On
 	update_display();			// Update display CGRAM
 	while(oled_status!=oled_idle);	// Wait for DMA completion
