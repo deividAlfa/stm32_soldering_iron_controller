@@ -26,33 +26,36 @@ void ErrCountDown(uint8_t Start,uint8_t xpos, uint8_t ypos);
 void saveSettings(bool wipeAllProfileData) {
 	uint32_t error=0;
 	flashSettings_t flashBuffer=*flashSettings;	//Read stored data, as everything will be erased and we don't store data for all iron tips in ram (only the current tip type)
-	// Calculate new settings checksum
+
+	// Reset flag
+	systemSettings.settings.notInitialized=0;
+
+	// Compute checksum
 	systemSettings.settingsChecksum = ChecksumSettings(&systemSettings.settings);
 
-	// Store system settings
+	// Transfer system settings to flash buffer
 	flashBuffer.settingsChecksum=systemSettings.settingsChecksum;
 	flashBuffer.settings=systemSettings.settings;
-	flashBuffer.settings.notInitialized=0;
 
-	if(!wipeAllProfileData){														// If wipe all tips is not set						// Calculate new iron tips checksum
+	if(!wipeAllProfileData){																				// If wipe all tips is not set
 		if(systemSettings.settings.currentProfile!=Profile_None){											// If current tip is initialized
 			if( 	(systemSettings.settings.currentProfile==Profile_T12)	||								// Check valid Profile
 					(systemSettings.settings.currentProfile==Profile_C210)	||
 					(systemSettings.settings.currentProfile==Profile_C245)	){
 
-				systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
-				systemSettings.Profile.notInitialized=0;
+				systemSettings.Profile.notInitialized=0;																		// Reset flag
+				systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);										// Compute checksum
 				flashBuffer.ProfileChecksum[systemSettings.settings.currentProfile]=systemSettings.ProfileChecksum;
-				memcpy(&flashBuffer.Profile[systemSettings.settings.currentProfile],&systemSettings.Profile,sizeof(Profile_t));
+				memcpy(&flashBuffer.Profile[systemSettings.settings.currentProfile],&systemSettings.Profile,sizeof(Profile_t));	// Transfer system profile to flash buffer
 			}
 			else{
-				Error_Handler();																															// Unvalid tip (uncontrolled state)
+				Error_Handler();																								// Invalid tip (uncontrolled state)
 			}
 		}
 	}
 	else{																								// Wipe all tip data
 		for(uint8_t x=0;x<ProfileSize;x++){
-			flashBuffer.Profile[x].notInitialized=1;													// Set all flash to "1"
+			flashBuffer.Profile[x].notInitialized=1;													// Set all profile data to "1"
 			flashBuffer.ProfileChecksum[x]=0xFF;
 			memset(&flashBuffer.Profile[x],0xFF,sizeof(Profile_t));
 		}

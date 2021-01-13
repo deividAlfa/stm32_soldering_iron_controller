@@ -429,15 +429,13 @@ void DebugMode(uint8_t value) {
 
 // Sets the user temperature
 void setSetTemperature(uint16_t temperature) {
-	static uint8_t prevIronType;
-	if(systemSettings.settings.currentProfile!=Profile_None){
-		if((systemSettings.Profile.UserSetTemperature != temperature)||(prevIronType!=systemSettings.settings.currentProfile)){
-			prevIronType=systemSettings.settings.currentProfile;
-			systemSettings.Profile.UserSetTemperature = temperature;
-			Iron.CurrentSetTemperature=temperature;
-			Iron.Cal_TemperatureReachedFlag = 0;
-			resetPID();
-		}
+	static uint8_t prevProfile=Profile_None;
+	if((systemSettings.Profile.UserSetTemperature != temperature)||(prevProfile!=systemSettings.settings.currentProfile)){
+		prevProfile=systemSettings.settings.currentProfile;
+		systemSettings.Profile.UserSetTemperature = temperature;
+		Iron.CurrentSetTemperature=temperature;
+		Iron.Cal_TemperatureReachedFlag = 0;
+		resetPID();
 	}
 }
 

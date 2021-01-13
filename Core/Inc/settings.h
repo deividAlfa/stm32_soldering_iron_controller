@@ -42,7 +42,7 @@ typedef struct tipData {
 	pid_values_t PID;
 }tipData;
 
-typedef struct{
+__attribute__ ((aligned (4))) typedef struct{
 	tipData tip[TipSize];
 	bool notInitialized;
 	ironSettings_t boost;
@@ -56,7 +56,7 @@ typedef struct{
 	uint16_t noIronValue;
 }Profile_t;
 
-typedef struct{
+__attribute__ ((aligned (4))) typedef struct{
 	uint8_t version;				// Used to track if a reset is needed on firmware upgrade
 	uint8_t contrast;
 	uint8_t OledFix;

@@ -35,6 +35,7 @@ static void setProfile(uint16_t *val) {
 static int profile_OK(widget_t *w) {
 	loadProfile(profile);											// Load profile
 	saveSettings(0);												// Save
+	SetFailState(0);												// Enable normal operation
 	return screen_main;
 }
 
