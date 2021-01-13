@@ -63,7 +63,7 @@ void saveSettings(bool wipeAllProfileData) {
 
 	HAL_FLASH_Unlock(); //unlock flash writing
 	FLASH_EraseInitTypeDef erase;
-	erase.NbPages = 1;
+	erase.NbPages = (1024*StoreSize)/FLASH_PAGE_SIZE;
 	erase.PageAddress = FLASH_ADDR;
 	erase.TypeErase = FLASH_TYPEERASE_PAGES;
 
@@ -134,7 +134,7 @@ void restoreSettings() {
 	systemSettings.settingsChecksum=flashSettings->settingsChecksum;					// Load stored checksum
 
 	// Compare loaded checksum with calculated checksum
-	if( (systemSettings.settings.version != SETTINGSVERSION) || (ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum) ){
+	if( (systemSettings.settings.version != FW_Version) || (ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum) ){
 		settingsChkErr();
 	}
 
@@ -156,7 +156,7 @@ uint32_t ChecksumProfile(Profile_t* profile){
 }
 
 void resetSystemSettings(void) {
-	systemSettings.settings.version = SETTINGSVERSION;
+	systemSettings.settings.version = FW_Version;
 	systemSettings.settings.contrast = 255;
 	systemSettings.settings.OledFix = 1;
 	systemSettings.settings.noIronDelay=500;
