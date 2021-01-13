@@ -58,7 +58,6 @@ typedef struct displayOnly_widget_t {
 	uint8_t	number_of_dec;
 	void (*update)(widget_t*);
 	bool justify;
-	bool hasEndStr;
 } displayOnly_widget_t;
 
 typedef struct editable_t {
@@ -123,7 +122,7 @@ struct widget_t
 displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *widget);
 editable_widget_t * extractEditablePartFromWidget(widget_t *widget);
 selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget);
-void widgetDefaultsInit(widget_t *w, widgetType t, char* c, uint8_t sz);
+void widgetDefaultsInit(widget_t *w, widgetType t, char* displaystring, char* endStr, uint8_t len);
 void default_widgetDraw(widget_t *widget);
 void default_widgetUpdate(widget_t *widget);
 int default_widgetProcessInput(widget_t *, RE_Rotation_t, RE_State_t *);

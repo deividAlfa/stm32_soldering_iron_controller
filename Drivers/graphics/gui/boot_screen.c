@@ -162,7 +162,7 @@ void boot_screen_setup(screen_t *scr) {
 	// Profile select
 	w = &Widget_profile_edit;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_multi_option,NULL,4);
+	widgetDefaultsInit(w, widget_multi_option,NULL,NULL,4);
 	w->posX = 12;
 	w->posY = 40;
 	w->font_size = &FONT_10X16_reduced;
@@ -180,11 +180,10 @@ void boot_screen_setup(screen_t *scr) {
 	// OK Button
 	w = &Widget_profile_OK;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_button, "OK", 2);
+	widgetDefaultsInit(w, widget_button, "OK",NULL, 2);
 	w->font_size = &FONT_10X16_reduced;
 	w->posX = 95;
 	w->posY = 40;
-	
 	w->buttonWidget.selectable.tab = 1;
 	w->buttonWidget.action = &profile_OK;
 	w->enabled=0;

@@ -58,7 +58,7 @@ selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget) {
 			break;
 	}
 }
-void widgetDefaultsInit(widget_t *w, widgetType t, char* c, uint8_t len){
+void widgetDefaultsInit(widget_t *w, widgetType t, char* displaystring, char* endStr, uint8_t len){
 	w->type = t;
 	w->draw = &default_widgetDraw;
 	w->enabled = 1;
@@ -67,7 +67,8 @@ void widgetDefaultsInit(widget_t *w, widgetType t, char* c, uint8_t len){
 	w->posX = 0;
 	w->posY = 0;
 	w->next_widget = NULL;
-	w->displayString = c;
+	w->displayString = displaystring;
+	w->EndStr=endStr;
 	w->dispStrlen = len;
 	selectable_widget_t *sel;
 	sel = extractSelectablePartFromWidget(w);
@@ -90,7 +91,6 @@ void widgetDefaultsInit(widget_t *w, widgetType t, char* c, uint8_t len){
 			w->displayWidget.type = field_uinteger16;
 			w->displayWidget.update = &default_widgetUpdate;
 			w->displayWidget.justify = justify_left;
-			w->displayWidget.hasEndStr = 0;
 			break;
 		case widget_editable:
 			w->editable.big_step = 10;
@@ -188,7 +188,7 @@ void default_widgetUpdate(widget_t *widget) {
 		case field_uinteger16:
 		case field_int32:
 			// To keep the compiler happy ensuring that displayString is not overflowed
-			if(dis->hasEndStr==1){
+			if(widget->EndStr){
 				endStrLen = strlen(widget->EndStr);
 			}
 			// Get the data

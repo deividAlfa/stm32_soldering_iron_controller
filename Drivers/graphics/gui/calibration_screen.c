@@ -158,18 +158,17 @@ void calibration_screen_setup(screen_t *scr) {
 	w = &Widget_CAL_Wait;
 	screen_addWidget(w,scr);
 	static char WaitStr[20];
-	widgetDefaultsInit(w, widget_label,WaitStr, sizeof(WaitStr)-1);
+	widgetDefaultsInit(w, widget_label,WaitStr,NULL, sizeof(WaitStr)-1);
 	w->posX = 2;
 	w->posY = 30;
 	w->font_size = &FONT_8X14_reduced;
 
 	w = &Widget_CAL_Cancel;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_button, "BACK", 4);
+	widgetDefaultsInit(w, widget_button, "BACK",NULL, 4);
 	w->font_size = &FONT_8X14_reduced;
 	w->posX = 94;
 	w->posY = 50;
-	
 	w->buttonWidget.selectable.tab = 0;
 	w->buttonWidget.action = &cancelAction;
 
@@ -179,51 +178,37 @@ void calibration_screen_setup(screen_t *scr) {
 	sc->draw = &editcalibration_screenDraw;
 	sc->init = &inputCalibration_screen_init;
 	sc->onExit = &waitOnExit;
-/*
-	w=&Widget_CAL_Input_MeasuredTemp_label;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_label);
-	strcpy(w->displayString, "MEASURED:");
-	w->posX = 0;
-	w->posY = 17;
-	w->font_size = &FONT_8X14_reduced;
-*/
+
 	w=&Widget_CAL_Input_MeasuredTemp_edit;
 	screen_addWidget(w,sc);
 	static char temp[4];
-	widgetDefaultsInit(w, widget_editable,temp,sizeof(temp)-1);
+	widgetDefaultsInit(w, widget_editable,temp,NULL,sizeof(temp)-1);
 	w->posX = 86;
 	w->posY = 17;
 	w->font_size = &FONT_8X14_reduced;
 	w->editable.inputData.getData = &getMeasuredTemp;
 	w->editable.setData = &setMeasuredTemp;
-	
-	w->displayWidget.hasEndStr = 1;
 	w->displayString = "*C";
 	w->editable.selectable.tab = 0;
 
 	w=&Widget_CAL_Input_OK;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button, "SAVE", 4);
+	widgetDefaultsInit(w, widget_button, "SAVE",NULL, 4);
 	w->font_size = &FONT_8X14_reduced;
 	w->posX = 94;
 	w->posY = 50;
-	
 	w->buttonWidget.selectable.tab = 1;
 	w->buttonWidget.action = &okAction;
 
 
 	w=&Widget_CAL_Input_Cancel;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button, "CANCEL", 6);
+	widgetDefaultsInit(w, widget_button, "CANCEL",NULL, 6);
 	w->font_size = &FONT_8X14_reduced;
 	w->posX = 2;
 	w->posY = 50;
-	
 	w->buttonWidget.selectable.tab = 2;
 	w->buttonWidget.action = &cancelAction;
-
-
 }
 
 static uint8_t processCalibration() {
