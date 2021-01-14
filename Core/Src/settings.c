@@ -180,7 +180,7 @@ void resetCurrentProfile(void){
 																							// TODO this is not tested with the profiles update!
 #endif
 	if(systemSettings.settings.currentProfile==Profile_T12){
-		for(uint8_t x = 0; x < TipSize; x++) {			//TODO ++x?
+		for(uint8_t x = 0; x < TipSize; x++) {
 			systemSettings.Profile.tip[x].calADC_At_200 = 900;
 			systemSettings.Profile.tip[x].calADC_At_300 = 1500;			// These values are way lower, but better to be safe than sorry
 			systemSettings.Profile.tip[x].calADC_At_400 = 2000;			// User needs to calibrate its station
@@ -217,7 +217,7 @@ void resetCurrentProfile(void){
 	}
 
 	else if(systemSettings.settings.currentProfile==Profile_C245){
-		for(uint8_t x = 0; x < TipSize; x++) {			//TODO ++x?
+		for(uint8_t x = 0; x < TipSize; x++) {
 			systemSettings.Profile.tip[x].calADC_At_200 = 390;
 			systemSettings.Profile.tip[x].calADC_At_300 = 625;
 			systemSettings.Profile.tip[x].calADC_At_400 = 883;
@@ -246,7 +246,7 @@ void resetCurrentProfile(void){
 	}
 
 	else if(systemSettings.settings.currentProfile==Profile_C210){
-		for(uint8_t x = 0; x < TipSize; x++) {			//TODO ++x?
+		for(uint8_t x = 0; x < TipSize; x++) {
 			systemSettings.Profile.tip[x].calADC_At_200 = 390;
 			systemSettings.Profile.tip[x].calADC_At_300 = 625;
 			systemSettings.Profile.tip[x].calADC_At_400 = 883;

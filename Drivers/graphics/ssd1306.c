@@ -586,6 +586,10 @@ void FatalError(uint8_t type){
 			UG_PutString(0,0,"TEMP RUNAWAY");//12
 			UG_PutString(33,17,">100*C");//6
 			break;
+		case error_RUNAWAY500:
+			UG_PutString(23,0,"EXCEEDED");//8
+			UG_PutString(33,17,"500*C!");//6
+			break;
 		case error_RUNAWAY_UNKNOWN:
 			UG_PutString(0,0,"TEMP RUNAWAY");//12
 			UG_PutString(23,17,">UNKNOWN");//8
@@ -603,11 +607,7 @@ void FatalError(uint8_t type){
 	update_display();
 	#endif
 
-	uint32_t x=0;
 	while(1){
- 		if(++x>(uint32_t)6000000){ // ~5s delay before rebooting (Interrupts no longer work here)
-			NVIC_SystemReset();
-		}
 		HAL_IWDG_Refresh(&HIWDG);
 	}
 

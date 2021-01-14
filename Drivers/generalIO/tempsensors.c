@@ -26,6 +26,9 @@ int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
 
 	/* Interpolate between both points. */
 	temp = p1 - ((p1 - p2) * (lastavg & 0x000F)) / 16;
+	if(temp>999){
+		temp=999;								// Put some limits (99.9ºC)
+	}													// Negative limit is around -77ºC, we need that to detect NTC disconnected
 	if(tempUnit==Unit_Farenheit){
 		temp=TempConversion(temp, toFarenheit, 1);
 	}
@@ -35,29 +38,28 @@ int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
 	return temp;
 #endif
 }
-// Read tip filtered
-uint16_t readTipTemperatureCompensated(bool new) {
-	static uint16_t last_value;
-	if(new){
-		readTipTemperatureCompensatedRaw(New);
-		last_value = adc2Human(TIP.last_avg,1,systemSettings.settings.tempUnit);
-		if(last_value>999){
-			last_value=999;								// Limit output
+// Read tip temperature
+uint16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
+	static uint16_t last_value_Filtered;
+	static uint16_t last_value_Raw;
+	if(update){
+		last_value_Filtered = adc2Human(TIP.last_avg,1,systemSettings.settings.tempUnit);
+		last_value_Raw = adc2Human(TIP.last_RawAvg,1,systemSettings.settings.tempUnit);
+		if(last_value_Filtered>999){
+			last_value_Filtered=999;								// Limit output
+		}
+		if(last_value_Raw>999){
+			last_value_Raw=999;								// Limit output
 		}
 	}
-	return last_value;
-}
-// Read tip unfiltered
-uint16_t readTipTemperatureCompensatedRaw(bool new) {
-	static uint16_t last_value;
-	if (new){
-		last_value = adc2Human(TIP.last_RawAvg,1,systemSettings.settings.tempUnit);
-		if(last_value>999){
-			last_value=999;								// Limit output
-		}
+	if(ReadRaw){
+		return last_value_Raw;
 	}
-	return last_value;
+	else{
+		return last_value_Filtered;
+	}
 }
+
 void setCurrentTip(uint8_t tip) {
 	currentTipData = &systemSettings.Profile.tip[tip];
 	currentPID = currentTipData->PID;

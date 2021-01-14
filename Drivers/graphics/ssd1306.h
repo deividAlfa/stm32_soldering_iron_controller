@@ -27,6 +27,7 @@ typedef enum{
 	error_RUNAWAY50,
 	error_RUNAWAY75,
 	error_RUNAWAY100,
+	error_RUNAWAY500,
 	error_RUNAWAY_UNKNOWN,
 }FatalErrors;
 

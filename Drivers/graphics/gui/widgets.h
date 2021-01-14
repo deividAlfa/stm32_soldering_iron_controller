@@ -15,7 +15,7 @@
 #include "ssd1306.h"
 #include "ugui.h"
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
-typedef enum widgetFieldType {field_float, field_integer, field_integer16,field_uinteger16, field_int32, field_bmp, field_string}widgetFieldType;
+typedef enum widgetFieldType {field_float, field_int8, field_uint8, field_int16, field_uint16, field_int32, field_uint32, field_bmp, field_string}widgetFieldType;
 typedef enum widgetTextJustifyType { justify_left=0, justify_right=1 }widgetTextJustifyType;
 typedef enum widgetType {widget_combo, combo_Screen, combo_Option, combo_Action, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button, widget_bmp_button}widgetType;
 typedef struct widget_t widget_t;
@@ -66,8 +66,8 @@ typedef struct editable_t {
 	void (*setData)(void *);
 	uint16_t step;
 	uint16_t big_step;
-	uint32_t max_value;
-	uint32_t min_value;
+	int32_t max_value;
+	int32_t min_value;
 	uint8_t current_edit;
 } editable_widget_t;
 
@@ -98,7 +98,7 @@ struct widget_t
 {
 	bool inverted;
 	char* displayString;
-	uint8_t dispStrlen;
+	uint8_t reservedChars;
 	char* EndStr;
 	uint8_t posX;
 	uint8_t posY;
@@ -122,7 +122,7 @@ struct widget_t
 displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *widget);
 editable_widget_t * extractEditablePartFromWidget(widget_t *widget);
 selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget);
-void widgetDefaultsInit(widget_t *w, widgetType t, char* displaystring, char* endStr, uint8_t len);
+void widgetDefaultsInit(widget_t *w, widgetType t);
 void default_widgetDraw(widget_t *widget);
 void default_widgetUpdate(widget_t *widget);
 int default_widgetProcessInput(widget_t *, RE_Rotation_t, RE_State_t *);

@@ -58,7 +58,7 @@ selectable_widget_t * extractSelectablePartFromWidget(widget_t *widget) {
 			break;
 	}
 }
-void widgetDefaultsInit(widget_t *w, widgetType t, char* displaystring, char* endStr, uint8_t len){
+void widgetDefaultsInit(widget_t *w, widgetType t){
 	w->type = t;
 	w->draw = &default_widgetDraw;
 	w->enabled = 1;
@@ -67,9 +67,9 @@ void widgetDefaultsInit(widget_t *w, widgetType t, char* displaystring, char* en
 	w->posX = 0;
 	w->posY = 0;
 	w->next_widget = NULL;
-	w->displayString = displaystring;
-	w->EndStr=endStr;
-	w->dispStrlen = len;
+	w->displayString = NULL;
+	w->EndStr=NULL;
+	w->reservedChars = 0;
 	selectable_widget_t *sel;
 	sel = extractSelectablePartFromWidget(w);
 	if(sel) {
@@ -88,7 +88,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t, char* displaystring, char* en
 		case widget_display:
 			w->displayWidget.getData = NULL;
 			w->displayWidget.number_of_dec = 0;
-			w->displayWidget.type = field_uinteger16;
+			w->displayWidget.type = field_uint16;
 			w->displayWidget.update = &default_widgetUpdate;
 			w->displayWidget.justify = justify_left;
 			break;
@@ -96,7 +96,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t, char* displaystring, char* en
 			w->editable.big_step = 10;
 			w->editable.inputData.getData = NULL;
 			w->editable.inputData.number_of_dec = 0;
-			w->editable.inputData.type = field_uinteger16;
+			w->editable.inputData.type = field_uint16;
 			w->editable.inputData.update = &default_widgetUpdate;
 			w->editable.setData = NULL;
 			w->editable.step = 1;
@@ -108,7 +108,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t, char* displaystring, char* en
 			w->multiOptionWidget.editable.big_step = 10;
 			w->multiOptionWidget.editable.inputData.getData = NULL;
 			w->multiOptionWidget.editable.inputData.number_of_dec = 0;
-			w->multiOptionWidget.editable.inputData.type = field_uinteger16;
+			w->multiOptionWidget.editable.inputData.type = field_uint8;
 			w->multiOptionWidget.editable.inputData.update = &default_widgetUpdate;
 			w->multiOptionWidget.editable.setData = NULL;
 			w->multiOptionWidget.editable.step = 1;
@@ -167,77 +167,116 @@ static void insertDot(char *str, uint8_t dec) {//TODO Fix PID screen values >"99
 	}
 }
 void default_widgetUpdate(widget_t *widget) {
-	void *data;
 	int32_t val_ui=0;
 	int8_t val_ui_size, decimals=0, endStrLen=0;
 	displayOnly_widget_t* dis = extractDisplayPartFromWidget(widget);
-
+	bool Right_justified = widget->displayWidget.justify;
 	if(!dis){ return; }
-
-	data = dis->getData();
 	UG_FontSelect(widget->font_size);
-
 	switch (widget->type) {
-	case widget_multi_option:
-		widget->multiOptionWidget.currentOption = *(uint8_t*)data;
-		break;
+		case widget_multi_option:
+			widget->multiOptionWidget.currentOption = *(uint8_t*)dis->getData();
+			return;
 
-	default:
-		switch (dis->type) {
-		case field_integer16:
-		case field_uinteger16:
-		case field_int32:
+		case widget_display:
+		case widget_editable:
+			if(!widget->displayString){	// If empty
+				return;
+			}
+
 			// To keep the compiler happy ensuring that displayString is not overflowed
 			if(widget->EndStr){
 				endStrLen = strlen(widget->EndStr);
 			}
-			// Get the data
-			if(dis->type==field_integer16){
-				val_ui = *(int16_t*)data;
-			}
-			else if(dis->type==field_uinteger16){
-				val_ui = *(uint16_t*)data;
-			}
-			else if(dis->type==field_int32){
-				val_ui = *(int32_t*)data;
-			}
 			if(dis->number_of_dec){														// If decimals used
-				if((dis->number_of_dec+endStrLen)>widget->dispStrlen){				// If decimals larger than display string length (-2 for '.' + string termination)
-					decimals = (widget->dispStrlen) - endStrLen;						// Reduce decimals
+				if((dis->number_of_dec+endStrLen)>widget->reservedChars){				// If decimals larger than display string length (-2 for '.' + string termination)
+					decimals = (widget->reservedChars) - endStrLen;						// Reduce decimals
 				}
 				else{
 					decimals = dis->number_of_dec;										// Else, leave all the decimals
 				}
 				if(val_ui){																// If val_ui has value
 					val_ui_size = snprintf(NULL, 0, "%ld", val_ui); 					// Get val_ui length
-					if( (val_ui_size + decimals+endStrLen) > widget->dispStrlen ){	// If val_ui length + decimals larger than displayString size
-						if((val_ui_size + endStrLen)>widget->dispStrlen){	// If val_ui + endStrLen length already larger than displayString size
+					if( (val_ui_size + decimals+endStrLen) > widget->reservedChars ){	// If val_ui length + decimals larger than displayString size
+						if((val_ui_size + endStrLen)>widget->reservedChars){	// If val_ui + endStrLen length already larger than displayString size
 							decimals = 0;												// Don't use decimals
 						}
 						else{
-							decimals = widget->dispStrlen - (val_ui_size + endStrLen);// else, reduce number of decimals to fit in displayString
+							decimals = widget->reservedChars - (val_ui_size + endStrLen);// else, reduce number of decimals to fit in displayString
 						}
 					}
 				}
 			}
-			if(widget->displayWidget.justify == justify_right){
-				snprintf(widget->displayString,widget->dispStrlen+1,"%*ld", widget->dispStrlen - decimals-endStrLen, val_ui);
-			}
-			else{
-				snprintf(widget->displayString,widget->dispStrlen+1,"%ld", val_ui);
-				}
-			insertDot(widget->displayString, decimals);
-			if(endStrLen){
-				strcat(widget->displayString, widget->EndStr);
-			}
-			break;
+			switch (dis->type) {
+				case field_string:
+					return;
+				case field_int8:
+					val_ui = *(int8_t*)dis->getData();
+					if(Right_justified){
+						snprintf(widget->displayString,widget->reservedChars+1,"%*d", widget->reservedChars - decimals-endStrLen, (int8_t)val_ui);
+					}
+					else{
+						snprintf(widget->displayString,widget->reservedChars+1,"%d", (int8_t)val_ui);
+					}
+					break;
+				case field_uint8:
+					val_ui = *(uint8_t*)dis->getData();
+					if(Right_justified){
+						snprintf(widget->displayString,widget->reservedChars+1,"%*u", widget->reservedChars - decimals-endStrLen, (uint8_t)val_ui);
+					}
+					else{
+						snprintf(widget->displayString,widget->reservedChars+1,"%u", (uint8_t)val_ui);
+					}
+					break;
+				case field_int16:
+					val_ui = *(int16_t*)dis->getData();
+					if(Right_justified){
+						snprintf(widget->displayString,widget->reservedChars+1,"%*d", widget->reservedChars - decimals-endStrLen, (int16_t)val_ui);
+					}
+					else{
+						snprintf(widget->displayString,widget->reservedChars+1,"%d", (int16_t)val_ui);
+					}
+					break;
+				case field_uint16:
+					val_ui = *(uint16_t*)dis->getData();
+					if(Right_justified){
+						snprintf(widget->displayString,widget->reservedChars+1,"%*u", widget->reservedChars - decimals-endStrLen, (uint16_t)val_ui);
+					}
+					else{
+						snprintf(widget->displayString,widget->reservedChars+1,"%u", (uint16_t)val_ui);
+					}
+					break;
+				case field_int32:
+					val_ui = *(int32_t*)dis->getData();
+					if(Right_justified){
+						snprintf(widget->displayString,widget->reservedChars+1,"%*ld", widget->reservedChars - decimals-endStrLen, (int32_t)val_ui);
+					}
+					else{
+						snprintf(widget->displayString,widget->reservedChars+1,"%ld", (int32_t)val_ui);
+					}
+					break;
+				case field_uint32:
+					val_ui = *(uint32_t*)dis->getData();
+					if(Right_justified){
+						snprintf(widget->displayString,widget->reservedChars+1,"%*lu", widget->reservedChars - decimals-endStrLen, (uint32_t)val_ui);
+					}
+					else{
+						snprintf(widget->displayString,widget->reservedChars+1,"%lu", (uint32_t)val_ui);
+					}
 
-		case field_string:
-			break;
+					break;
+				default:
+					break;
+			}
+			insertDot(widget->displayString, decimals);
+			strcat(widget->displayString, widget->EndStr);
+			if(widget->displayString[widget->reservedChars]!=0){
+				Error_Handler();
+			}
+			return;
 
 		default:
-			break;
-		}
+				break;
 	}
 }
 enum{ select_frame=0, edit_frame};
@@ -257,10 +296,10 @@ void default_widgetDraw(widget_t *widget) {
 	uint8_t cWidth=widget->font_size->char_width;
 	uint8_t wiY=widget->posY;
 	uint8_t wiX=widget->posX;
-	char space[widget->dispStrlen+1];
+	char space[widget->reservedChars+1];
 
-	if(widget->dispStrlen){
-		for(c=0;c<widget->dispStrlen;c++){
+	if(widget->reservedChars){
+		for(c=0;c<widget->reservedChars;c++){
 			space[c]=' ';										// Fill with spaces
 		}
 		space[c]=0;												// Null termination
@@ -338,7 +377,10 @@ void default_widgetDraw(widget_t *widget) {
 
 		case widget_display:
 		case widget_editable:
-			space[widget->dispStrlen] = (char)'\0';
+			if(!widget->displayString){	// If empty
+				return;
+			}
+			space[widget->reservedChars] = (char)'\0';
 			UG_PutString(wiX ,wiY , space);
 			if(dis->type == field_string){
 
@@ -347,7 +389,7 @@ void default_widgetDraw(widget_t *widget) {
 				UG_PutString(wiX ,wiY ,extractDisplayPartFromWidget(widget)->getData());
 			}
 			else{
-				widget->displayString[widget->dispStrlen] = (char)'\0';
+				widget->displayString[widget->reservedChars] = (char)'\0';
 				UG_PutString(wiX ,wiY , widget->displayString);
 
 			}
@@ -364,6 +406,9 @@ void default_widgetDraw(widget_t *widget) {
 
 		case widget_button:
 		case widget_label:
+			if(!widget->displayString){	// If empty
+				return;
+			}
 			UG_PutString(wiX ,wiY , widget->displayString);
 			break;
 
@@ -382,7 +427,7 @@ void default_widgetDraw(widget_t *widget) {
 			case widget_button:
 			case widget_label:
 			case widget_multi_option:
-				UG_DrawRoundFrame(wiX - 2, wiY - 1,	wiX + widget->dispStrlen * cWidth + 1,  wiY + cHeight -1, 2, selFrameColor);
+				UG_DrawRoundFrame(wiX - 2, wiY - 1,	wiX + widget->reservedChars * cWidth + 1,  wiY + cHeight -1, 2, selFrameColor);
 				break;
 		}
 	}
@@ -399,10 +444,10 @@ void default_widgetDraw(widget_t *widget) {
 					UG_DrawLine(wiX - 3, wiY - 1, wiX-1, wiY - 1, editFrameColor);
 					UG_DrawLine(wiX - 3, wiY + cHeight -1, wiX-1, wiY + cHeight -1, editFrameColor);
 
-					//UG_DrawLine(wiX+1 + widget->dispStrlen * cWidth + 2, wiY - 1, wiX+1 + widget->dispStrlen * cWidth + 2, wiY + cHeight - 1, editFrameColor);
-					UG_DrawLine(wiX + widget->dispStrlen * cWidth + 2, wiY - 1, wiX + widget->dispStrlen * cWidth + 2, wiY + cHeight - 1, editFrameColor);
-					UG_DrawLine(wiX + widget->dispStrlen * cWidth, wiY - 1, wiX + widget->dispStrlen * cWidth + 2, wiY - 1, editFrameColor);
-					UG_DrawLine(wiX + widget->dispStrlen * cWidth, wiY + cHeight -1, wiX + widget->dispStrlen * cWidth + 2, wiY + cHeight -1, editFrameColor);
+					//UG_DrawLine(wiX+1 + widget->reservedChars * cWidth + 2, wiY - 1, wiX+1 + widget->reservedChars * cWidth + 2, wiY + cHeight - 1, editFrameColor);
+					UG_DrawLine(wiX + widget->reservedChars * cWidth + 2, wiY - 1, wiX + widget->reservedChars * cWidth + 2, wiY + cHeight - 1, editFrameColor);
+					UG_DrawLine(wiX + widget->reservedChars * cWidth, wiY - 1, wiX + widget->reservedChars * cWidth + 2, wiY - 1, editFrameColor);
+					UG_DrawLine(wiX + widget->reservedChars * cWidth, wiY + cHeight -1, wiX + widget->reservedChars * cWidth + 2, wiY + cHeight -1, editFrameColor);
 
 					break;
 			}
@@ -417,7 +462,7 @@ void default_widgetDraw(widget_t *widget) {
 				case widget_button:
 				case widget_label:
 				case widget_multi_option:
-					UG_DrawRoundFrame(wiX - 2, wiY - 1,	wiX + widget->dispStrlen * cWidth + 1,  wiY + cHeight -1, 2, selFrameColor);
+					UG_DrawRoundFrame(wiX - 2, wiY - 1,	wiX + widget->reservedChars * cWidth + 1,  wiY + cHeight -1, 2, selFrameColor);
 					break;
 			}
 		}
@@ -433,7 +478,7 @@ void default_widgetDraw(widget_t *widget) {
 				case widget_button:
 				case widget_label:
 				case widget_multi_option:
-					UG_DrawRoundFrame(wiX - 2, wiY - 1,	wiX + widget->dispStrlen * cWidth + 1,  wiY + cHeight -1, 2, selFrameColor);
+					UG_DrawRoundFrame(wiX - 2, wiY - 1,	wiX + widget->reservedChars * cWidth + 1,  wiY + cHeight -1, 2, selFrameColor);
 					break;
 			}
 		}
@@ -446,10 +491,10 @@ void default_widgetDraw(widget_t *widget) {
 					UG_DrawLine(wiX - 3, wiY - 1, wiX-1, wiY - 1, editFrameColor);
 					UG_DrawLine(wiX - 3, wiY + cHeight -1, wiX-1, wiY + cHeight -1, editFrameColor);
 
-					//UG_DrawLine(wiX+1 + widget->dispStrlen * cWidth + 2, wiY - 1, wiX+1 + widget->dispStrlen * cWidth + 2, wiY + cHeight - 1, editFrameColor);
-					UG_DrawLine(wiX + widget->dispStrlen * cWidth + 2, wiY - 1, wiX + widget->dispStrlen * cWidth + 2, wiY + cHeight - 1, editFrameColor);
-					UG_DrawLine(wiX + widget->dispStrlen * cWidth, wiY - 1, wiX + widget->dispStrlen * cWidth + 2, wiY - 1, editFrameColor);
-					UG_DrawLine(wiX + widget->dispStrlen * cWidth, wiY + cHeight -1, wiX + widget->dispStrlen * cWidth + 2, wiY + cHeight -1, editFrameColor);
+					//UG_DrawLine(wiX+1 + widget->reservedChars * cWidth + 2, wiY - 1, wiX+1 + widget->reservedChars * cWidth + 2, wiY + cHeight - 1, editFrameColor);
+					UG_DrawLine(wiX + widget->reservedChars * cWidth + 2, wiY - 1, wiX + widget->reservedChars * cWidth + 2, wiY + cHeight - 1, editFrameColor);
+					UG_DrawLine(wiX + widget->reservedChars * cWidth, wiY - 1, wiX + widget->reservedChars * cWidth + 2, wiY - 1, editFrameColor);
+					UG_DrawLine(wiX + widget->reservedChars * cWidth, wiY + cHeight -1, wiX + widget->reservedChars * cWidth + 2, wiY + cHeight -1, editFrameColor);
 
 					break;
 			}
@@ -627,7 +672,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 				case widget_edit:
 					if(dis->type == field_string) {
 						++edit->current_edit;
-						if(edit->current_edit == widget->dispStrlen)
+						if(edit->current_edit == widget->reservedChars)
 						{
 							sel->state = widget_selected;
 							sel->previous_state = widget_edit;
@@ -649,44 +694,18 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 			return -1;
 		}
 		if((widget->type == widget_editable) && (sel->state == widget_edit)) {
-			uint16_t ui16;
+			int32_t val_ui;
 			char *str;
 			int16_t inc;
-			if(fabs(state->Diff) > 2) {
+			if(abs(state->Diff) > 2) {
 				inc = widget->editable.big_step;
 				if(state->Diff < 0)
 					inc = -1 * inc;
 			}
 			else
 				inc = widget->editable.step * state->Diff;
-			switch (widget->editable.inputData.type) {
-			case field_uinteger16:
-				ui16 = *(uint16_t*)widget->editable.inputData.getData();
-				if(inc>0){
-					if((uint16_t)(ui16 + inc)<ui16){
-						ui16 = widget->editable.max_value;		// Check we don't overflow the int
-					}
-					else{
-						ui16 = ui16 + inc;
-					}
-					if(ui16 > widget->editable.max_value){		// Check we don't pass the max value
-						ui16 = widget->editable.max_value;
-					}
-				}
-				else{
-					if((uint16_t)(ui16 + inc)>ui16){
-						ui16 = widget->editable.min_value;		// Check we don't underflow the int
-					}
-					else{
-						ui16 = ui16 + inc;
-					}
-					if(ui16 < widget->editable.min_value){		// Check we don't pass the min value
-						ui16 = widget->editable.min_value;
-					}
-				}
-				widget->editable.setData(&ui16);
-				break;
-			case field_string:
+
+			if(edit->inputData.type==field_string){
 				str = (char*)widget->editable.inputData.getData();
 				strcpy(widget->displayString, str);
 				widget->displayString[edit->current_edit] += inc;
@@ -704,11 +723,69 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 					else
 						widget->displayString[edit->current_edit] = 0x7e;
 				}
-
 				widget->editable.setData(widget->displayString);
-				break;
-			default:
-				break;
+			}
+			else{
+				if(!widget->displayString){	// If empty
+					return -1;
+				}
+				int32_t min=0,max=0;
+				switch(edit->inputData.type){
+					case field_int8:
+						val_ui = *(int8_t*)edit->inputData.getData();
+						min=-127; max=127;
+						break;
+					case field_uint8:
+						val_ui = *(uint8_t*)edit->inputData.getData();
+						min=0; max=255;
+						break;
+					case field_int16:
+						val_ui = *(int16_t*)edit->inputData.getData();
+						min=-32767; max=32767;
+						break;
+					case field_uint16:
+						val_ui = *(int16_t*)edit->inputData.getData();
+						min=0; max=65535;
+						break;
+					case field_int32:
+						val_ui = *(int32_t*)edit->inputData.getData();
+						min=-2147483647; max=2147483647;
+						break;
+					case field_uint32:
+						val_ui = *(uint32_t*)edit->inputData.getData();
+						min=0; max=4294967295;
+						break;
+					default:
+						break;
+				}
+				if((edit->inputData.type!=field_int32)||(edit->inputData.type!=field_uint32)){
+					val_ui+=inc;
+					if( (val_ui<min) || (val_ui<edit->min_value) ) {								// Check we don't exceed limits
+						val_ui = edit->min_value;		// Check we don't underflow the int
+					}
+					else if( (val_ui>max) || (val_ui>edit->max_value) ) {
+						val_ui = edit->max_value;		// Check we don't underflow the int
+					}
+				}
+				else{
+					if(inc>0){
+						if( (val_ui + inc) < val_ui || (val_ui + inc)>edit->max_value ){					// Check we don't overflow the int or exceed widget limit
+							val_ui = edit->max_value;
+						}
+						else{
+							val_ui += inc;
+						}
+					}
+					else{
+						if( (val_ui + inc) > val_ui || (val_ui + inc)<edit->min_value ){					// Check we don't overflow the int or exceed widget limit
+							val_ui = edit->min_value;
+						}
+						else{
+							val_ui += inc;
+						}
+					}
+				}
+				widget->editable.setData(&val_ui);
 			}
 			return -1;
 		}

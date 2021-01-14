@@ -53,7 +53,6 @@ screen_t Screen_iron;
 screen_t Screen_advanced;
 screen_t Screen_profile;
 screen_t Screen_edit_iron_tips;
-screen_t Screen_edit_iron_tip;
 screen_t Screen_edit_tip_name;
 screen_t Screen_edit_calibration_wait;
 screen_t Screen_edit_calibration_input;
@@ -61,7 +60,6 @@ screen_t Screen_debug;
 screen_t Screen_debug2;
 screen_t Screen_reset;
 screen_t Screen_reset_confirmation;
-screen_t *lastscr;
 
 widget_t *screen_tabToWidget(screen_t * scr, uint8_t tab);
 void screen_addWidget(widget_t *widget, screen_t *scr);

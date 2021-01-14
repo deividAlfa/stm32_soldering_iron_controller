@@ -21,7 +21,7 @@ typedef enum{
 	runaway_50=2,
 	runaway_75=3,
 	runaway_100=4,
-	runaway_max=5,
+	runaway_500=5,
 }overrunLevels;
 
 typedef void (*currentModeChanged)(iron_mode_t);
@@ -36,36 +36,34 @@ typedef struct {
 	uint16_t				Pwm_Out;					// Last PWM value calculated
 	uint16_t				Pwm_Max;					// Max PWM output value
 	TIM_HandleTypeDef 		*Delay_Timer;				// Pointer to the Delay timer
-	uint8_t 				CurrentIronPower;			// Last output power
+	int8_t 					CurrentIronPower;			// Last output power
 	uint16_t 				CurrentSetTemperature;		// Actual set temperature (Setpoint)
 	uint16_t 				Debug_SetTemperature;		// Debug mode temperature
 	uint32_t 				LastSysChangeTime;			// Last time a system setting was changed
-	uint32_t 				StartOfNoActivityTime;		// Last time since no activity in handle sensor
 	uint32_t				LastNoPresentTime;			// last time iron absence was detected
-	uint32_t				LastMovedTime;				// last time iron was moved
+	uint32_t				lastActivityTime;			// last time iron was moved
 	IRON_measure_state_t 	TempMeasureState;			// Status of ADC measuring (idle/ready)
 	iron_mode_t				CurrentMode;				// Actual working mode (Stanby, Sleep, Normal, Boost)
 	uint32_t 				CurrentModeTimer;			// Time since actual mode was set
 	bool 					Cal_TemperatureReachedFlag;	// Flag for temperature calibration
-	bool					TemperatureChanged;			// Flag to indicate UserSetTemperature was changed (For saving purposes)
-	bool					TemperatureUnitChanged;		// Flag to indicate temperature unit was changed (Celsius, Farenheit)
 	bool 					Debug_Enabled ;				// Flag to indicate Debug is enabled
 	bool 					isPresent;					// Flag to indicate the presence of the iron
 	bool 					isCalibrating;				// Flag to indicate calibration state (don't save temperature settings)
 	bool 					PIDUpdate;					// Flag to indicate PID calculation must be updated
 	bool 					OledUpdate;					// Flag to indicate OLED screen must be updated
-	bool 					hasMoved;					// Flag to indicate handle movement
+	bool 					newActivity;				// Flag to indicate handle movement
 	bool 					FailState;					// Flag to indicate a serious failure, totally disables the PWM until the flag is manually cleared
 	uint32_t 				RunawayTimer;				// Runaway timer
 	uint8_t 				RunawayLevel;				// Runaway actual level
 	uint8_t 				prevRunawayLevel;			// Runaway previous level
 	bool 					RunawayTriggered;			// Runaway triggered flag
+	bool					updatePwm;					// Set when timer values need to be updated
 }iron_t;
 
 #define IRON_MIN			2048						// OUT= PWM_MAX/IRON_MIN
 extern volatile iron_t Iron;
 void IronWake(bool source);
-void SetIronPresence(bool isPresent);
+void checkIronPresence(void);
 bool GetIronPresence(void);
 void SetFailState(bool FailState);
 bool GetFailState(void);
@@ -75,20 +73,18 @@ void setCurrentTemperature(uint16_t temperature);
 iron_mode_t getCurrentMode();
 uint16_t getSetTemperature();
 uint16_t getCurrentTemperature();
-uint8_t getCurrentPower();
+int8_t getCurrentPower();
 void initTimers(void);
-void ApplyPwmSettings(void);
-void setTempUnit(TempUnit_t unit);
-void SetPwmPeriod(uint16_t period);
-void SetPwmDelay(uint16_t delay);
+bool setPwmPeriod(uint16_t period);
+bool setPwmDelay(uint16_t delay);
 void setNoIronValue(uint16_t noiron);
-void switchTempUnit(void);
+void switchTempUnit(bool unit);
 void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback);
 void addModeChangedCallback(currentModeChanged callback);
 void handleIron(void);
 void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32_t pwmchannel);
 uint8_t getIronOn();
-void DebugSetTemp(uint16_t value);
-void DebugMode(uint8_t value);
+void setDebugTemp(uint16_t value);
+void setDebugMode(uint8_t value);
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim);
 #endif /* IRON_H_ */

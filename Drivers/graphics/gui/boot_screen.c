@@ -146,7 +146,7 @@ void boot_screen_init(screen_t * scr){
 			(profile!=Profile_C245))	{
 
 		profile=Profile_C210;							// For safety, set C210 profile by default, has the lowest Output TC
-		systemSettings.setupMode=1;
+		systemSettings.setupMode=1;						// (Failure state is set in the iron routine when unknown iron profile is detected)
 	}
 	splash_time = HAL_GetTick();
 	UG_DrawBMP_MONO(0,0, &splash);
@@ -162,12 +162,12 @@ void boot_screen_setup(screen_t *scr) {
 	// Profile select
 	w = &Widget_profile_edit;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_multi_option,NULL,NULL,4);
+	widgetDefaultsInit(w, widget_multi_option);
+	w->reservedChars=4;
 	w->posX = 12;
 	w->posY = 40;
 	w->font_size = &FONT_10X16_reduced;
 	w->editable.inputData.getData = &getProfile;
-	w->editable.inputData.type = field_uinteger16;
 	w->editable.big_step = 1;
 	w->editable.step = 1;
 	w->editable.selectable.tab = 0;
@@ -180,7 +180,9 @@ void boot_screen_setup(screen_t *scr) {
 	// OK Button
 	w = &Widget_profile_OK;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_button, "OK",NULL, 2);
+	widgetDefaultsInit(w, widget_button);
+	w->displayString="OK";
+	w->reservedChars=2;
 	w->font_size = &FONT_10X16_reduced;
 	w->posX = 95;
 	w->posY = 40;

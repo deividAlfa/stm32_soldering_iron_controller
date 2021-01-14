@@ -14,8 +14,11 @@
 #include "iron.h"
 
 
-#define New 1
-#define Old 0
+#define update_reading 1
+#define stored_reading 0
+#define read_Avg	0
+#define read_Raw	1
+
 #define toCelsius	0
 #define toFarenheit	1
 int16_t  readColdJunctionSensorTemp_C_x10(void);
@@ -23,8 +26,7 @@ uint16_t coldJunctionTemp_mC_To_uV(int tempX10);
 uint16_t readIntTemp_mC(void);
 uint16_t readTipSensorADC_Avg(void);
 int16_t readColdJunctionSensorTemp_x10(bool tempUnit);
-uint16_t readTipTemperatureCompensated(bool new);
-uint16_t readTipTemperatureCompensatedRaw(bool new);
+uint16_t readTipTemperatureCompensated(bool update, bool ReadRaw);
 uint16_t realTempToADC(uint16_t real);
 void setCurrentTip(uint8_t tip);
 tipData * getCurrentTip();

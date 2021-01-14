@@ -83,12 +83,11 @@ void oled_processInput(void) {
 		screen_t *scr = screens;
 		while(scr) {
 			if(scr->index == ret) {
-				lastscr=current_screen;
 				FillBuffer(C_BLACK,fill_dma);
 				if(current_screen->onExit)
-					current_screen->onExit(current_screen);
+					current_screen->onExit(scr);
 				if(scr->onEnter)
-					scr->onEnter(scr);
+					scr->onEnter(current_screen);
 				scr->init(scr);
 				if(scr->update)
 					scr->update(scr);
