@@ -226,6 +226,10 @@ void calibration_screen_setup(screen_t *scr) {
 static uint8_t processCalibration() {
 	  uint16_t delta = state_temps[1] - state_temps[0]; delta >>= 1;
 	  uint16_t ambient = readColdJunctionSensorTemp_x10(Unit_Celsius) / 10;
+	  
+	  if (	(measured_temps[cal_300] <= measured_temps[cal_200]) ||	(measured_temps[cal_400] <= measured_temps[cal_300]) ){
+		  return 0;
+	  }
 
 	  if ((measured_temps[cal_300] > measured_temps[cal_200]) && ((measured_temps[cal_200] + delta) < measured_temps[cal_300]))
 	    adcCal[cal_300] = map(state_temps[cal_300], measured_temps[cal_200], measured_temps[cal_300], adcAtTemp[cal_200], adcAtTemp[cal_300]);

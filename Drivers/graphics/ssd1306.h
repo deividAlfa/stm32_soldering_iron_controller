@@ -15,7 +15,8 @@ typedef enum {
 	oled_idle,
 	oled_sending_data,
 	oled_sending_cmd,
-} oled_status_t;
+} oledStatus_t;
+
 
 typedef enum{
 	error_NMI,
@@ -30,6 +31,23 @@ typedef enum{
 	error_RUNAWAY500,
 	error_RUNAWAY_UNKNOWN,
 }FatalErrors;
+
+typedef struct{
+	__attribute__((aligned(4))) volatile uint8_t buffer[128*8]; // 128x64 1BPP OLED
+	volatile uint8_t *ptr;
+	volatile uint8_t status;
+	volatile uint8_t row;
+
+	#ifdef OLED_SPI
+	SPI_HandleTypeDef *device;
+
+	#elif defined OLED_I2C
+	I2C_HandleTypeDef *device;
+	#endif
+
+	DMA_HandleTypeDef *fillDMA;
+}oled_t;
+extern oled_t oled;
 
 enum { fill_soft, fill_dma };
 
@@ -56,11 +74,6 @@ enum { fill_soft, fill_dma };
 
 #define BLACK 0
 #define WHITE 1
-
-extern volatile uint8_t OledBuffer[128*8]; // 128x64 1BPP OLED
-extern volatile oled_status_t oled_status;
-extern volatile uint8_t *OledDmaBf;
-
 
 #ifdef OLED_SOFT_SPI
 void Enable_Soft_SPI(void);
