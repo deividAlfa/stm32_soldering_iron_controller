@@ -246,11 +246,10 @@ void debug_screen_setup(screen_t *scr) {
 	//OUTPUT
 	w = &Debug_PID_Out;
 	screen_addWidget(w, scr);
-	static char out1[5];
+	static char out1[6];
 	widgetDefaultsInit(w, widget_display);
 	w->displayString=out1;
-	w->EndStr="%";
-	w->reservedChars=4;
+	w->reservedChars=5;
 	w->posX = 90;
 	w->posY = 50;
 	w->font_size = &FONT_6X8_reduced;
