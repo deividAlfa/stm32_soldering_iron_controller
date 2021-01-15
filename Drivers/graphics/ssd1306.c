@@ -607,7 +607,13 @@ void FatalError(uint8_t type){
 
 	while(1){
 		if(!BUTTON_input){
-			NVIC_SystemReset();
+			for(uint16_t i=0;i<50000;i++);
+			while(!BUTTON_input){
+				HAL_IWDG_Refresh(&HIWDG);					// Clear watchdog
+			}
+			if(BUTTON_input){
+				NVIC_SystemReset();
+			}
 		}
 		HAL_IWDG_Refresh(&HIWDG);
 	}

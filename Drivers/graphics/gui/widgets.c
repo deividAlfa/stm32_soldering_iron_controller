@@ -167,8 +167,8 @@ static void insertDot(char *str, uint8_t dec) {//TODO Fix PID screen values >"99
 	}
 }
 void default_widgetUpdate(widget_t *widget) {
-	int32_t val_ui=0;
-	int8_t val_ui_size, decimals=0, endStrLen=0;
+	int32_t val_ui;
+	uint8_t decimals=0, endStrLen=0, val_ui_size;
 	displayOnly_widget_t* dis = extractDisplayPartFromWidget(widget);
 	bool Right_justified = widget->displayWidget.justify;
 	if(!dis){ return; }
@@ -185,18 +185,20 @@ void default_widgetUpdate(widget_t *widget) {
 			}
 
 			// To keep the compiler happy ensuring that displayString is not overflowed
-			if(widget->EndStr){
-				endStrLen = strlen(widget->EndStr);
-			}
+			endStrLen = strlen(widget->EndStr);
+			decimals = dis->number_of_dec;
+
+			// TODO THIs is wrong!
+			/*
 			if(dis->number_of_dec){														// If decimals used
-				if((dis->number_of_dec+endStrLen)>widget->reservedChars){				// If decimals larger than display string length (-2 for '.' + string termination)
-					decimals = (widget->reservedChars) - endStrLen;						// Reduce decimals
+				if((dis->number_of_dec+endStrLen)>widget->reservedChars){				// If decimals larger than display string length
+					//decimals = (widget->reservedChars) - endStrLen;						// Reduce decimals
 				}
 				else{
 					decimals = dis->number_of_dec;										// Else, leave all the decimals
 				}
 				if(val_ui){																// If val_ui has value
-					val_ui_size = snprintf(NULL, 0, "%ld", val_ui); 					// Get val_ui length
+					val_ui_size = snprintf(NULL, 0, "%d", val_ui); 					// Get val_ui length
 					if( (val_ui_size + decimals+endStrLen) > widget->reservedChars ){	// If val_ui length + decimals larger than displayString size
 						if((val_ui_size + endStrLen)>widget->reservedChars){	// If val_ui + endStrLen length already larger than displayString size
 							decimals = 0;												// Don't use decimals
@@ -207,64 +209,71 @@ void default_widgetUpdate(widget_t *widget) {
 					}
 				}
 			}
+*/
 			switch (dis->type) {
 				case field_string:
 					return;
 				case field_int8:
+				{
 					val_ui = *(int8_t*)dis->getData();
+					val_ui_size = snprintf(NULL, 0, "%d", (int8_t)val_ui); 					// Get val_ui length
 					if(Right_justified){
-						snprintf(widget->displayString,widget->reservedChars+1,"%*d", widget->reservedChars - decimals-endStrLen, (int8_t)val_ui);
+						snprintf(widget->displayString,widget->reservedChars+1,"%*d", widget->reservedChars - (decimals+endStrLen), (int8_t)val_ui);
 					}
 					else{
 						snprintf(widget->displayString,widget->reservedChars+1,"%d", (int8_t)val_ui);
 					}
 					break;
+				}
 				case field_uint8:
+				{
 					val_ui = *(uint8_t*)dis->getData();
+					val_ui_size = snprintf(NULL, 0, "%u", (uint8_t)val_ui); 					// Get val_ui length
 					if(Right_justified){
-						snprintf(widget->displayString,widget->reservedChars+1,"%*u", widget->reservedChars - decimals-endStrLen, (uint8_t)val_ui);
+						snprintf(widget->displayString,widget->reservedChars+1,"%*u", widget->reservedChars - (decimals+endStrLen), (uint8_t)val_ui);
 					}
 					else{
 						snprintf(widget->displayString,widget->reservedChars+1,"%u", (uint8_t)val_ui);
 					}
 					break;
+				}
 				case field_int16:
+				{
 					val_ui = *(int16_t*)dis->getData();
+					val_ui_size = snprintf(NULL, 0, "%d", (int16_t)val_ui); 					// Get val_ui length
 					if(Right_justified){
-						snprintf(widget->displayString,widget->reservedChars+1,"%*d", widget->reservedChars - decimals-endStrLen, (int16_t)val_ui);
+						snprintf(widget->displayString,widget->reservedChars+1,"%*d", widget->reservedChars - (decimals+endStrLen), (int16_t)val_ui);
 					}
 					else{
 						snprintf(widget->displayString,widget->reservedChars+1,"%d", (int16_t)val_ui);
 					}
 					break;
+
+				}
 				case field_uint16:
+				{
 					val_ui = *(uint16_t*)dis->getData();
+					val_ui_size = snprintf(NULL, 0, "%u", (uint16_t)val_ui); 					// Get val_ui length
 					if(Right_justified){
-						snprintf(widget->displayString,widget->reservedChars+1,"%*u", widget->reservedChars - decimals-endStrLen, (uint16_t)val_ui);
+						snprintf(widget->displayString,widget->reservedChars+1,"%*u", widget->reservedChars - (decimals+endStrLen), (uint16_t)val_ui);
 					}
 					else{
 						snprintf(widget->displayString,widget->reservedChars+1,"%u", (uint16_t)val_ui);
 					}
 					break;
+				}
 				case field_int32:
+				{
 					val_ui = *(int32_t*)dis->getData();
+					val_ui_size = snprintf(NULL, 0, "%ld", (int32_t)val_ui); 					// Get val_ui length
 					if(Right_justified){
-						snprintf(widget->displayString,widget->reservedChars+1,"%*ld", widget->reservedChars - decimals-endStrLen, (int32_t)val_ui);
+						snprintf(widget->displayString,widget->reservedChars+1,"%*ld", widget->reservedChars - (decimals+endStrLen), (int32_t)val_ui);
 					}
 					else{
 						snprintf(widget->displayString,widget->reservedChars+1,"%ld", (int32_t)val_ui);
 					}
 					break;
-				case field_uint32:
-					val_ui = *(uint32_t*)dis->getData();
-					if(Right_justified){
-						snprintf(widget->displayString,widget->reservedChars+1,"%*lu", widget->reservedChars - decimals-endStrLen, (uint32_t)val_ui);
-					}
-					else{
-						snprintf(widget->displayString,widget->reservedChars+1,"%lu", (uint32_t)val_ui);
-					}
-
-					break;
+				}
 				default:
 					break;
 			}
@@ -744,7 +753,7 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 						min=-32767; max=32767;
 						break;
 					case field_uint16:
-						val_ui = *(int16_t*)edit->inputData.getData();
+						val_ui = *(uint16_t*)edit->inputData.getData();
 						min=0; max=65535;
 						break;
 					case field_int32:

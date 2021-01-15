@@ -179,7 +179,7 @@ static void * getContrast_() {
 	temp = systemSettings.settings.contrast;
 	return &temp;
 }
-static void setContrast_(uint16_t *val) {
+static void setContrast_(uint8_t *val) {
 	systemSettings.settings.contrast=*val;
 	setContrast(*val);
 }
@@ -188,7 +188,7 @@ static void * getBoostTime() {
 	temp = systemSettings.Profile.boost.Time;
 	return &temp;
 }
-static void setBoostTime(uint16_t *val) {
+static void setBoostTime(uint8_t *val) {
 	systemSettings.Profile.boost.Time = *val;
 }
 static void * getBoostTemp() {
@@ -200,7 +200,7 @@ static void setBoostTemp(uint16_t *val) {
 	systemSettings.Profile.boost.Temperature = *val;
 }
 
-static void setSleepTime(uint16_t *val) {
+static void setSleepTime(uint8_t *val) {
 	systemSettings.Profile.sleep.Time = *val;
 }
 
@@ -208,7 +208,7 @@ static void * getSleepTime() {
 	temp = systemSettings.Profile.sleep.Time;
 	return &temp;
 }
-static void setStandByTime(uint16_t *val) {
+static void setStandByTime(uint8_t *val) {
 	systemSettings.Profile.standby.Time  = *val;
 }
 static void * getStandByTime() {
