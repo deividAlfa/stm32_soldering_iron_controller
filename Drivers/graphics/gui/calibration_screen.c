@@ -55,10 +55,10 @@ static void setCalState(state_t s) {
 		if(result) {
 			Widget_CAL_WaitTemp.posX = 31;
 			strcpy(Widget_CAL_WaitTemp.displayString, "SUCCEED!");//8 *8=64
-			tipData * t = getCurrentTip();
-			t->calADC_At_200 = adcCal[cal_200];
-			t->calADC_At_300 = adcCal[cal_300];
-			t->calADC_At_400 = adcCal[cal_400];
+			tipData * Currtip = getCurrentTip();
+			Currtip->calADC_At_200 = adcCal[cal_200];
+			Currtip->calADC_At_300 = adcCal[cal_300];
+			Currtip->calADC_At_400 = adcCal[cal_400];
 		}
 		else {
 			Widget_CAL_WaitTemp.posX = 35;
@@ -123,6 +123,17 @@ static void waitOnExit(screen_t *scr) {
 		setCurrentMode(mode_normal);
 		Iron.isCalibrating=0;
 	}
+	Widget_CAL_Input_OK.buttonWidget.selectable.previous_state=widget_idle;
+	Widget_CAL_Input_OK.buttonWidget.selectable.state=widget_idle;
+
+	Widget_CAL_Input_Cancel.buttonWidget.selectable.previous_state=widget_idle;
+	Widget_CAL_Input_Cancel.buttonWidget.selectable.state=widget_idle;
+
+	Widget_CAL_Input_MeasuredTemp_edit.editable.selectable.previous_state=widget_selected;
+	Widget_CAL_Input_MeasuredTemp_edit.editable.selectable.state=widget_edit;
+
+	Screen_edit_calibration_input.current_widget=&Widget_CAL_Input_MeasuredTemp_edit;
+
 }
 
 void cal_screenUpdate(screen_t *scr){
@@ -190,7 +201,7 @@ void calibration_screen_setup(screen_t *scr) {
 	w->displayString = measuredTemp;
 	w->reservedChars = 5;
 	w->EndStr = "*C";
-	w->posX = 86;
+	w->posX = 84;
 	w->posY = 17;
 	w->font_size = &FONT_8X14_reduced;
 	w->editable.inputData.getData = &getMeasuredTemp;
@@ -227,7 +238,13 @@ static uint8_t processCalibration() {
 	  uint16_t delta = state_temps[1] - state_temps[0]; delta >>= 1;
 	  uint16_t ambient = readColdJunctionSensorTemp_x10(Unit_Celsius) / 10;
 	  
+	  //  Ensure measured temps are valid (200<300<400)
 	  if (	(measured_temps[cal_300] <= measured_temps[cal_200]) ||	(measured_temps[cal_400] <= measured_temps[cal_300]) ){
+		  return 0;
+	  }
+
+	  //  Ensure adc values are valid (200<300<400)
+	  if (	(adcAtTemp[cal_300] <=adcAtTemp[cal_200]) ||	(adcAtTemp[cal_400] <= adcAtTemp[cal_300]) ){
 		  return 0;
 	  }
 
