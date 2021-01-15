@@ -258,11 +258,11 @@ static void * getPWMPeriod() {
 static void setPWMPeriod(uint16_t *val) {
 	uint16_t period=(*val*100)-1;
 	if(!setPwmPeriod(period)){
-		if(*val<=500){
+		if(*val<=200){
 			Widget_ADVANCED_ADCDelay.editable.max_value = temp-1;
 		}
 		else{
-			Widget_ADVANCED_ADCDelay.editable.max_value = 500;
+			Widget_ADVANCED_ADCDelay.editable.max_value = 200;
 		}
 	}
 }
@@ -1080,7 +1080,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.big_step = 10;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setPWMPeriod;
-	w->editable.max_value = 650;
+	w->editable.max_value = 500;
 	w->editable.min_value = 20;
 	w->displayWidget.justify =justify_right;
 
@@ -1097,7 +1097,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.big_step = 10;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setPWMDelay;
-	w->editable.max_value = 500;
+	w->editable.max_value = 200;
 	w->editable.min_value = 1;
 	w->displayWidget.justify =justify_right;
 
