@@ -9,22 +9,22 @@
 #include "tempsensors.h"
 #include "settings.h"
 
-static double max, min, Kp, Kd, Ki, pre_error, integral, mset, mpv, maxI, minI;
-static double p, i, d, currentOutput;
+static float max, min, Kp, Kd, Ki, pre_error, integral, mset, mpv, maxI, minI;
+static float p, i, d, currentOutput;
 uint32_t lastTime;
 volatile pid_values_t currentPID;
 
-double getError() {
+float getError() {
 	return pre_error;
 }
-double getIntegral() {
+float getIntegral() {
 	return integral;
 }
 
 void setupPIDFromStruct() {
 	setupPID(currentPID.max, currentPID.min, currentPID.Kp, currentPID.Kd, currentPID.Ki, currentPID.minI, currentPID.maxI);
 }
-void setupPID(double _max, double _min, double _Kp, double _Kd, double _Ki, int16_t _minI, int16_t _maxI ) {
+void setupPID(float _max, float _min, float _Kp, float _Kd, float _Ki, int16_t _minI, int16_t _maxI ) {
 	max = _max;
 	min = _min;
 	Kp = _Kp;
@@ -41,17 +41,17 @@ void resetPID() {
 	integral = 0;
 }
 
-double calculatePID( double setpoint, double pv )
+float calculatePID( float setpoint, float pv )
 {
 	mset = setpoint;
 	mpv = pv;
-    double dt = (HAL_GetTick() - lastTime) ;
+    float dt = (HAL_GetTick() - lastTime) ;
     dt = dt / 1000;
     // Calculate error
-    double error = setpoint - pv;
+    float error = setpoint - pv;
 
     // Proportional term
-    double Pout = Kp * error;
+    float Pout = Kp * error;
 
     // Integral term
     integral += error * dt;
@@ -59,18 +59,18 @@ double calculatePID( double setpoint, double pv )
     	integral = maxI;
     else if(integral < minI)
         	integral = minI;
-    double Iout = Ki * integral;
+    float Iout = Ki * integral;
 
     // Derivative term
-    double derivative;
+    float derivative;
     	if(error == pre_error)
     		derivative = 0;
     	else
     		derivative = (error - pre_error) / dt;
-    double Dout = Kd * derivative;
+    float Dout = Kd * derivative;
 
     // Calculate total output
-    double output = Pout + Iout + Dout;
+    float output = Pout + Iout + Dout;
     p = Pout;
     i = Iout;
     d = Dout;
@@ -86,21 +86,21 @@ double calculatePID( double setpoint, double pv )
     currentOutput = output;
     return output;
 }
-double getPID_D() {
+float getPID_D() {
 	return d;
 }
-double getPID_P() {
+float getPID_P() {
 	return p;
 }
-double getPID_I() {
+float getPID_I() {
 	return i;
 }
-double getOutput() {
+float getOutput() {
 	return currentOutput;
 }
-double getPID_SetPoint() {
+float getPID_SetPoint() {
 	return mset;
 }
-double getPID_PresentValue() {
+float getPID_PresentValue() {
 	return mpv;
 }

@@ -170,7 +170,7 @@ static void * getMaxPower() {
 	return &temp;
 }
 static void setMaxPower(uint16_t *val) {
-	currentPID.max = (double)*val / 100.0;
+	currentPID.max = (float)*val / 100.0;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.max=currentPID.max;
 	setupPIDFromStruct();
 }
@@ -228,7 +228,7 @@ static void * getKp() {
 	return &temp;
 }
 static void setKp(uint16_t *val) {
-	currentPID.Kp = (double)*val / 1000000;
+	currentPID.Kp = (float)*val / 1000000;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kp=currentPID.Kp ;
 	setupPIDFromStruct();
 }
@@ -237,7 +237,7 @@ static void * getKi() {
 	return &temp;
 }
 static void setKi(uint16_t *val) {
-	currentPID.Ki = (double)*val / 1000000;
+	currentPID.Ki = (float)*val / 1000000;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Ki=currentPID.Ki;
 	setupPIDFromStruct();
 }
@@ -246,7 +246,7 @@ static void * getKd() {
 	return &temp;
 }
 static void setKd(uint16_t *val) {
-	currentPID.Kd = (double)*val / 1000000;
+	currentPID.Kd = (float)*val / 1000000;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kd=currentPID.Kd;
 	setupPIDFromStruct();
 }

@@ -64,7 +64,7 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 void handleIron(void) {
 	static uint32_t prevSysChecksum=0, newSysChecksum=0,prevTipChecksum=0, newTipChecksum=0, checksumtime=0;
 	uint32_t CurrentTime = HAL_GetTick();
-	double set;
+	float set;
 	
 	// Update Tip temperature in human readable format
 	uint16_t tipTemp = readTipTemperatureCompensated(update_reading,read_Avg);
