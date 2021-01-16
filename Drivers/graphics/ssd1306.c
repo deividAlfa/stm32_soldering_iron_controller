@@ -9,7 +9,9 @@ oled_t oled = {
 	ptr: 		&oled.buffer[0],
 	status:		oled_idle,
 	row:		0,
+#if defined OLED_SPI || defined OLED_I2C
 	device:		NULL,
+#endif
 	fillDMA:	NULL,
 };
 
@@ -278,10 +280,10 @@ void update_display( void ){
 			#endif
 
 			#if defined OLED_SOFT_SPI
-			spi_send((uint8_t *)&OledBuffer[128*row],128);
+			spi_send((uint8_t *)&oled.buffer[128*row],128);
 
 			#elif defined OLED_SOFT_I2C
-			i2cSend((uint8_t *)&OledBuffer[128*row],128,i2cData);
+			i2cSend((uint8_t *)&oled.buffer[128*row],128,i2cData);
 			#endif
 
 			#ifdef USE_CS
