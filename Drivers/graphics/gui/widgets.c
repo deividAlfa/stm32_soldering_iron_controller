@@ -404,6 +404,9 @@ void default_widgetDraw(widget_t *widget) {
 
 			}
 			if((dis->type == field_string) && (widget->type == widget_editable) && (sel->state == widget_edit) ){
+				if(sel->previous_state!=widget_edit){
+					strcpy(widget->displayString,extractDisplayPartFromWidget(widget)->getData());
+				}
 				UG_PutChar(widget->displayString[edit->current_edit], wiX + cWidth * edit->current_edit, wiY,  C_WHITE, C_BLACK);
 				UG_DrawLine(wiX + cWidth * edit->current_edit+1,wiY+ cHeight,wiX + cWidth * edit->current_edit+cWidth-3,wiY+ cHeight, C_WHITE);
 				UG_DrawLine(wiX + cWidth * edit->current_edit+1,wiY+ cHeight+1,wiX + cWidth * edit->current_edit+cWidth-3,wiY+ cHeight+1, C_WHITE);
