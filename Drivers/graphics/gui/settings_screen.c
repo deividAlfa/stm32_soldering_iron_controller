@@ -863,12 +863,12 @@ void settings_screen_setup(screen_t *scr) {
 	w = &comboWidget_Settings_IRON;
 	screen_addWidget(w, sc);
 	widgetDefaultsInit(w, widget_combo);
-	comboAddOption(&comboitem_IRON_SleepTime, w,	"Slp Time", 	&Widget_IRON_SleepTime);
-	comboAddOption(&comboitem_IRON_SleepTemp, w, 	"Slp Temp", 	&Widget_IRON_SleepTemp);
-	comboAddOption(&comboitem_IRON_BoostTime, w, 	"Bst Time", 	&Widget_IRON_BoostTime);
-	comboAddOption(&comboitem_IRON_BoostTemp, w, 	"Bst Temp", 	&Widget_IRON_BoostTemp);
-	comboAddOption(&comboitem_IRON_StbyTime, w, 	"Sby Time", 	&Widget_IRON_StbyTime);
-	comboAddOption(&comboitem_IRON_Power, w, 		"Max Pwr",		&Widget_IRON_Power);
+	comboAddOption(&comboitem_IRON_SleepTime, w,	"Sleep Time", 	&Widget_IRON_SleepTime);
+	comboAddOption(&comboitem_IRON_SleepTemp, w, 	"Sleep Temp", 	&Widget_IRON_SleepTemp);
+	comboAddOption(&comboitem_IRON_BoostTime, w, 	"Boost Time", 	&Widget_IRON_BoostTime);
+	comboAddOption(&comboitem_IRON_BoostTemp, w, 	"Boost Temp", 	&Widget_IRON_BoostTemp);
+	comboAddOption(&comboitem_IRON_StbyTime, w, 	"Stdby Time", 	&Widget_IRON_StbyTime);
+	comboAddOption(&comboitem_IRON_Power, w, 		"Max. Power",		&Widget_IRON_Power);
 	comboAddScreen(&comboitem_IRON_Back, w, 		"BACK", 		screen_settingsmenu);
 
 
@@ -1048,13 +1048,13 @@ void settings_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(w, widget_combo);
 	comboAddOption(&comboitem_SYSTEM_Profile,w, 		"Profile", 		&Widget_SYSTEM_Profile);
 	comboAddOption(&comboitem_SYSTEM_Contrast,w, 		"Contrast", 	&Widget_SYSTEM_Contrast);
-	comboAddOption(&comboitem_SYSTEM_OledFix, w, 		"Oled Offset", 	&Widget_SYSTEM_OledOffset);
-	comboAddOption(&comboitem_SYSTEM_InitMode, w, 		"Init Mode", 	&Widget_SYSTEM_InitMode);
+	comboAddOption(&comboitem_SYSTEM_OledFix, w, 		"OLED Offset", 	&Widget_SYSTEM_OledOffset);
+	comboAddOption(&comboitem_SYSTEM_InitMode, w, 		"Boot Mode", 	&Widget_SYSTEM_InitMode);
 	comboAddOption(&comboitem_SYSTEM_ButtonWake, w, 	"Button Wake", 	&Widget_SYSTEM_ButtonWake);
 	comboAddOption(&comboitem_SYSTEM_Buzzer, w, 		"Buzzer", 		&Widget_SYSTEM_Buzzer);
-	comboAddOption(&comboitem_SYSTEM_TempUnit, w, 		"Temp Unit", 	&Widget_SYSTEM_TempUnit);
-	comboAddOption(&comboitem_SYSTEM_TempStep, w, 		"Temp step",	&Widget_SYSTEM_TempStep);
-	comboAddOption(&comboitem_SYSTEM_GuiUpd, w, 		"Gui Upd", 		&Widget_SYSTEM_GuiUpd);
+	comboAddOption(&comboitem_SYSTEM_TempUnit, w, 		"Temp. Unit", 	&Widget_SYSTEM_TempUnit);
+	comboAddOption(&comboitem_SYSTEM_TempStep, w, 		"Temp. step",	&Widget_SYSTEM_TempStep);
+	comboAddOption(&comboitem_SYSTEM_GuiUpd, w, 		"GUI update", 	&Widget_SYSTEM_GuiUpd);
 	comboAddOption(&comboitem_SYSTEM_SaveInterval, w, 	"Save Delay",	&Widget_SYSTEM_SaveInterval);
 	comboAddScreen(&comboitem_SYSTEM_Back, w, 			"BACK", 		screen_settingsmenu);
 
@@ -1143,8 +1143,8 @@ void settings_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(w, widget_combo);
 	comboAddOption(&comboitem_ADVANCED_PWMPeriod,w, 		"PWM Time", 		&Widget_ADVANCED_PWMPeriod);
 	comboAddOption(&comboitem_ADVANCED_ADCDelay, w, 		"ADC Delay", 		&Widget_ADVANCED_ADCDelay);
-	comboAddOption(&comboitem_ADVANCED_ADCLimit, w, 		"ADC Limit", 		&Widget_ADVANCED_ADCLimit);
-	comboAddOption(&comboitem_ADVANCED_NoIronDelay, w, 		"Det. Delay",		&Widget_ADVANCED_NoIronDelay);
+	comboAddOption(&comboitem_ADVANCED_ADCLimit, w, 		"Det. Limit",		&Widget_ADVANCED_ADCLimit);
+	comboAddOption(&comboitem_ADVANCED_NoIronDelay, w, 		"Det. Time",		&Widget_ADVANCED_NoIronDelay);
 	comboAddScreen(&comboitem_ADVANCED_Reset, w, 			"Reset Menu",		screen_reset);
 	comboAddScreen(&comboitem_ADVANCED_Back, w, 			"BACK", 			screen_settingsmenu);
 
