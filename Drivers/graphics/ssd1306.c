@@ -113,12 +113,12 @@ void spi_send(uint8_t* bf, uint16_t count){
 #endif
 
 #ifdef OLED_SOFT_I2C
-void i2cWait(void){
+void i2cWait(void){													// This is pretty adjusted for max speed without errors. Might need more time in specific boards/displays
 	asm(	"nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n\
 			 nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n\
 			 nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop");
 }
-void i2cStart(void){						// 	Start condition, SDA transition to low with SCL high
+void i2cStart(void){												// 	Start condition, SDA transition to low with SCL high
 	Oled_Set_SCL();
 	i2cWait();
 	Oled_Clear_SDA();
@@ -126,7 +126,7 @@ void i2cStart(void){						// 	Start condition, SDA transition to low with SCL hi
 	Oled_Clear_SCL();
 	i2cWait();
 }
-void i2cStop(void){						// 	Stop condition, SCL transition to high with SDA low
+void i2cStop(void){													// 	Stop condition, SCL transition to high with SDA low
 	Oled_Clear_SDA();
 	i2cWait();
 	Oled_Set_SCL();
@@ -159,7 +159,7 @@ void i2cBegin(bool isCmd){
 		i2cWait();
 		Oled_Set_SCL();
 		i2cWait();
-		//Oled_Set_SDA();										// As we don't care the ACK, don't release SDA
+		//Oled_Set_SDA();											// As we don't care about the ACK, don't release SDA
 		//i2cWait();
 		//Get ACK here
 		Oled_Clear_SCL();
@@ -173,8 +173,13 @@ void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
 	i2cBegin(isCmd);
 	while(count--){
 		data = *bf++;
-		if(data==0){
-			Oled_Clear_SDA();
+		if( (data==0)||(data==0xFF)){								// If data 0 or 0xff, we don't have to toggle data line, send the data fast
+			if(data==0){											// Just toggling clock line
+				Oled_Clear_SDA();
+			}
+			else{
+				Oled_Set_SDA();
+			}
 			i2cWait();
 			for(shift = 0; shift < 8; shift++){
 				Oled_Set_SCL();
@@ -184,29 +189,11 @@ void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
 			i2cWait();
 			Oled_Set_SCL();
 			i2cWait();
-			//Oled_Set_SDA();										// As we don't care the ACK, don't release SDA
+			//Oled_Set_SDA();										// As we don't care about the ACK, don't release SDA
 			//i2cWait();
 			//Get ACK here
 			Oled_Clear_SCL();
 		}
-
-		else if(data==0xFF){
-			Oled_Set_SDA();
-			i2cWait();
-			for(shift = 0; shift < 8; shift++){
-				Oled_Set_SCL();
-				i2cWait();
-				Oled_Clear_SCL();
-			}
-			i2cWait();
-			Oled_Set_SCL();
-			i2cWait();
-			//Oled_Set_SDA();										// As we don't care the ACK, don't release SDA
-			//i2cWait();
-			//Get ACK here
-			Oled_Clear_SCL();
-		}
-
 		else{
 			for(shift = 0; shift < 8; shift++){
 				if(data & 0x80){
@@ -225,7 +212,7 @@ void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
 			i2cWait();
 			Oled_Set_SCL();
 			i2cWait();
-			//Oled_Set_SDA();										// As we don't care the ACK, don't release SDA
+			//Oled_Set_SDA();										// As we don't care about the ACK, don't release SDA
 			//i2cWait();
 			//Get ACK here
 			Oled_Clear_SCL();
