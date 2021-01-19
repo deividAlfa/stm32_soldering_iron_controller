@@ -75,7 +75,7 @@ void oled_processInput(void) {
 	RE_Rotation = (*RE_GetData)(RE_State);
 	if(systemSettings.settings.wakeOnButton){					// If system setting set  to wake on encoder activity
 		if(RE_Rotation!=Rotate_Nothing){
-			IronWake(1);
+			IronWake(source_wakeButton);
 		}
 	}
 	int ret = current_screen->processInput(current_screen, RE_Rotation, RE_State);

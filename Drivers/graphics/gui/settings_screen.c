@@ -402,29 +402,25 @@ static int doReset(widget_t *w) {
 		CurrentProfile=systemSettings.settings.currentProfile;				// Store current profile
 		resetSystemSettings();												// Reset system settings
 		systemSettings.settings.currentProfile=CurrentProfile;				// Restore profile
-		saveSettings(0);													// Save settings preserving tip data
-		HAL_Delay(500);
+		saveSettings(saveKeepingProfiles);													// Save settings preserving tip data
 		NVIC_SystemReset();
 		break;
 
 	case 1:																	// Reset current profile
 		resetCurrentProfile();												// Set current profile to defaults
-		saveSettings(0);													// Save settings preserving tip data
-		HAL_Delay(500);
+		saveSettings(saveKeepingProfiles);													// Save settings preserving tip data
 		NVIC_SystemReset();
 		break;
 
 	case 2:																	// Reset all Profiles
 		systemSettings.settings.currentProfile=profile_None;				// Set factory value
-		saveSettings(1);													// Save settings, but wiping all tip data
-		HAL_Delay(500);
+		saveSettings(saveWipingProfiles);													// Save settings, but wiping all tip data
 		NVIC_SystemReset();
 		break;
 
 	case 3:																	// Reset everything
 		resetSystemSettings();												// Reset system settings
-		saveSettings(1);													// Save settings wiping all tip data
-		HAL_Delay(500);
+		saveSettings(saveWipingProfiles);													// Save settings wiping all tip data
 		NVIC_SystemReset();
 		break;
 
@@ -657,14 +653,14 @@ void IRON_onEnter(screen_t *scr){
 void SYSTEM_onEnter(screen_t *scr){
 	comboResetIndex(&comboWidget_Settings_SYSTEM);
 	if(ChecksumProfile(&systemSettings.Profile)!=systemSettings.ProfileChecksum){	// If there's unsaved profile data
-		saveSettings(0);															// Save settings
+		saveSettings(saveKeepingProfiles);															// Save settings
 	}
 	profile=systemSettings.settings.currentProfile;
 }
 void SYSTEM_onExit(screen_t *scr){
 	if(profile!=systemSettings.settings.currentProfile){	// If profile changed
 		loadProfile(profile);
-		saveSettings(0);									// Save
+		saveSettings(saveKeepingProfiles);									// Save
 	}
 }
 //-------------------------------------------------------------------------------------------------------------------------------

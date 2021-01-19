@@ -127,7 +127,7 @@ void restoreSettings() {
 
 	if(flashSettings->settings.initialized==notInitialized){											// If flash not initialized (Erased flash is always read "1")
 		resetSystemSettings();
-		saveSettings(1);
+		saveSettings(saveWipingProfiles);
 	}
 	else{
 		Button_reset();																	// Check for button reset
@@ -215,7 +215,6 @@ void resetCurrentProfile(void){
 		systemSettings.Profile.pwmPeriod=19999;
 		systemSettings.Profile.pwmDelay=1999;
 		systemSettings.Profile.noIronValue=4000;
-		//saveSettings(0);
 	}
 
 	else if(systemSettings.settings.currentProfile==profile_C245){
@@ -244,7 +243,6 @@ void resetCurrentProfile(void){
 		systemSettings.Profile.pwmPeriod=19999;
 		systemSettings.Profile.pwmDelay=1999;
 		systemSettings.Profile.noIronValue=4000;
-		//saveSettings(0);
 	}
 
 	else if(systemSettings.settings.currentProfile==profile_C210){
@@ -273,8 +271,6 @@ void resetCurrentProfile(void){
 		systemSettings.Profile.pwmPeriod=19999;
 		systemSettings.Profile.pwmDelay=1999;
 		systemSettings.Profile.noIronValue=1200;
-
-		//saveSettings(0);
 	}
 	else if(systemSettings.settings.currentProfile==profile_None){
 		asm("nop");																		// We shouldn't get here
@@ -349,11 +345,11 @@ void settingsChkErr(void){
 		uint8_t tip = systemSettings.settings.currentProfile;		// save current tip
 		resetSystemSettings();									// reset settings
 		systemSettings.settings.currentProfile=tip;				// Restore tip type
-		saveSettings(0);									// Save settings preserving tip data
+		saveSettings(saveKeepingProfiles);									// Save settings preserving tip data
 	}
 	else{
 		resetSystemSettings();									// Reset settings
-		saveSettings(1);									// Save wiping tip data
+		saveSettings(saveKeepingProfiles);									// Save wiping tip data
 	}
 }
 
@@ -386,7 +382,7 @@ void Button_reset(void){
 					HAL_IWDG_Refresh(&HIWDG);
 				}
 				resetSystemSettings();
-				saveSettings(1);
+				saveSettings(saveKeepingProfiles);
 			}
 		}
 	}

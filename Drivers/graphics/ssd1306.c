@@ -535,7 +535,7 @@ void FatalError(uint8_t type){
 	display_abort();
 	#endif
 
-	SetFailState(1);
+	SetFailState(failureState_On);
 	buzzer_fatal_beep();
 	FillBuffer(C_BLACK,fill_soft);
 	UG_FontSelect(&FONT_10X16_reduced);

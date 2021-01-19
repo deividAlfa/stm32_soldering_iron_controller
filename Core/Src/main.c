@@ -649,7 +649,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	}*/
 	
 	if(GPIO_Pin==WAKE_Pin){								// If handle moves
-		IronWake(0);
+		if(systemSettings.settings.WakeInputMode==wakeInputmode_stand){
+			if(WAKE_input()){
+				setCurrentMode(mode_normal);
+			}
+			else{
+				setCurrentMode(mode_standby);
+			}
+		}
+		else{
+			IronWake(source_wakeInput);
+		}
 	}
 }
 
@@ -688,7 +698,7 @@ void Error_Handler(void)
   /* User can add his own implementation to report the HAL error return state */
 #ifdef DEBUG_ERROR
 	char chars[6];
-	SetFailState(1);
+	SetFailState(failureState_On);
 	buzzer_fatal_beep();
 	FillBuffer(C_BLACK,fill_soft);
 	UG_FontSelect(&FONT_6X8_reduced);
@@ -709,12 +719,12 @@ void Error_Handler(void)
 
 #endif
 	while(1){
-		if(!BUTTON_input){
+		if(!BUTTON_input()){
 			for(uint16_t i=0;i<50000;i++);
-			while(!BUTTON_input){
+			while(!BUTTON_input()){
 				HAL_IWDG_Refresh(&HIWDG);					// Clear watchdog
 			}
-			if(BUTTON_input){
+			if(BUTTON_input()){
 				NVIC_SystemReset();
 			}
 		}

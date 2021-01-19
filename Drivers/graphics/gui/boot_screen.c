@@ -34,8 +34,9 @@ static void setProfile(uint16_t *val) {
 }
 static int profile_OK(widget_t *w) {
 	loadProfile(profile);											// Load profile
-	saveSettings(0);												// Save
-	SetFailState(0);												// Enable normal operation
+	saveSettings(saveKeepingProfiles);								// Save
+	SetFailState(failureState_Off);									// Enable normal operation
+	systemSettings.setupMode=setup_Off;								// Reset setup mode
 	return screen_main;
 }
 
@@ -146,7 +147,7 @@ void boot_screen_init(screen_t * scr){
 			(profile!=profile_C245))	{
 
 		profile=profile_C210;							// For safety, set C210 profile by default, has the lowest Output TC
-		systemSettings.setupMode=1;						// (Failure state is set in the iron routine when unknown iron profile is detected)
+		systemSettings.setupMode=setup_On;						// (Failure state is set in the iron routine when unknown iron profile is detected)
 	}
 	splash_time = HAL_GetTick();
 	UG_DrawBMP_MONO(0,0, &splash);
