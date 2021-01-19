@@ -18,6 +18,7 @@ char str[5];
 static char *OffOn[] = {"OFF", " ON" };
 static char *tempUnit[] = {"*C", "*F" };
 static char *wakeMode[] = {"SHAKE", "STAND" };
+static char *encMode[] = {"NORMAL", "INVERT" };
 static char *InitMode[] = {"SBY","SLP"," ON", "BST"};
 
 bool TempUnit;
@@ -318,6 +319,13 @@ static void * getWakeMode() {
 }
 static void setWakeMode(uint16_t *val) {
 	systemSettings.settings.WakeInputMode= * val;
+	if(*val==wakeInputmode_stand){
+		comboitem_SYSTEM_ButtonWake.enabled=0;
+		systemSettings.settings.wakeOnButton=wakeButton_Off;
+	}
+	else{
+		comboitem_SYSTEM_ButtonWake.enabled=1;
+	}
 }
 
 static void * getEncoderMode() {
@@ -968,15 +976,15 @@ void settings_screen_setup(screen_t *scr) {
 	//
 	w = &Widget_SYSTEM_EncoderMode;
 	widgetDefaultsInit(w, widget_multi_option);
-	w->reservedChars=3;
-	w->posX = 102;
+	w->reservedChars=6;
+	w->posX = 79;
 	w->editable.inputData.getData = &getEncoderMode;
 	w->editable.big_step = 1;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setEncoderMode;
 	w->editable.max_value = encoder_reverse;
 	w->editable.min_value = encoder_normal;
-	w->multiOptionWidget.options = OffOn;
+	w->multiOptionWidget.options = encMode;
 	w->multiOptionWidget.numberOfOptions = 2;
 
 	//********[ Save Delay Widget ]***********************************************************
@@ -1100,9 +1108,9 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_SYSTEM_Profile,w, 		"Profile", 		&Widget_SYSTEM_Profile);
 	comboAddOption(&comboitem_SYSTEM_Contrast,w, 		"Contrast", 	&Widget_SYSTEM_Contrast);
 	comboAddOption(&comboitem_SYSTEM_OledOffset, w, 	"OLED Offset", 	&Widget_SYSTEM_OledOffset);
-	comboAddOption(&comboitem_SYSTEM_EncoderMode, w, 	"Encoder inv.",	&Widget_SYSTEM_EncoderMode);
-	comboAddOption(&comboitem_SYSTEM_InitMode, w, 		"PowerOn Mode", &Widget_SYSTEM_InitMode);
-	comboAddOption(&comboitem_SYSTEM_WakeMode, w, 		"Wake input", 	&Widget_SYSTEM_WakeMode);
+	comboAddOption(&comboitem_SYSTEM_EncoderMode, w, 	"Encoder",	&Widget_SYSTEM_EncoderMode);
+	comboAddOption(&comboitem_SYSTEM_InitMode, w, 		"Boot Mode", &Widget_SYSTEM_InitMode);
+	comboAddOption(&comboitem_SYSTEM_WakeMode, w, 		"Wake mode", 	&Widget_SYSTEM_WakeMode);
 	comboAddOption(&comboitem_SYSTEM_ButtonWake, w, 	"Button Wake", 	&Widget_SYSTEM_ButtonWake);
 	comboAddOption(&comboitem_SYSTEM_Buzzer, w, 		"Buzzer", 		&Widget_SYSTEM_Buzzer);
 	comboAddOption(&comboitem_SYSTEM_TempUnit, w, 		"Temp. Unit", 	&Widget_SYSTEM_TempUnit);
