@@ -28,7 +28,7 @@ void saveSettings(bool wipeAllProfileData) {
 	flashSettings_t flashBuffer=*flashSettings;	//Read stored data, as everything will be erased and we don't store data for all iron tips in ram (only the current tip type)
 
 	// Reset flag
-	systemSettings.settings.notInitialized=0;
+	systemSettings.settings.initialized=initialized;
 
 	// Compute checksum
 	systemSettings.settingsChecksum = ChecksumSettings(&systemSettings.settings);
@@ -38,15 +38,15 @@ void saveSettings(bool wipeAllProfileData) {
 	flashBuffer.settings=systemSettings.settings;
 
 	if(!wipeAllProfileData){																				// If wipe all tips is not set
-		if(systemSettings.settings.currentProfile!=Profile_None){											// If current tip is initialized
-			if( 	(systemSettings.settings.currentProfile==Profile_T12)	||								// Check valid Profile
-					(systemSettings.settings.currentProfile==Profile_C210)	||
-					(systemSettings.settings.currentProfile==Profile_C245)	){
+		if(systemSettings.settings.currentProfile!=profile_None){											// If current tip is initialized
+			if( 	(systemSettings.settings.currentProfile==profile_T12)	||								// Check valid Profile
+					(systemSettings.settings.currentProfile==profile_C210)	||
+					(systemSettings.settings.currentProfile==profile_C245)	){
 
-				systemSettings.Profile.notInitialized=0;																		// Reset flag
+				systemSettings.Profile.initialized=initialized;																		// Reset flag
 				systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);										// Compute checksum
 				flashBuffer.ProfileChecksum[systemSettings.settings.currentProfile]=systemSettings.ProfileChecksum;
-				memcpy(&flashBuffer.Profile[systemSettings.settings.currentProfile],&systemSettings.Profile,sizeof(Profile_t));	// Transfer system profile to flash buffer
+				memcpy(&flashBuffer.Profile[systemSettings.settings.currentProfile],&systemSettings.Profile,sizeof(profile_t));	// Transfer system profile to flash buffer
 			}
 			else{
 				Error_Handler();																								// Invalid tip (uncontrolled state)
@@ -55,9 +55,9 @@ void saveSettings(bool wipeAllProfileData) {
 	}
 	else{																								// Wipe all tip data
 		for(uint8_t x=0;x<ProfileSize;x++){
-			flashBuffer.Profile[x].notInitialized=1;													// Set all profile data to "1"
+			flashBuffer.Profile[x].initialized=notInitialized;													// Set all profile data to "1"
 			flashBuffer.ProfileChecksum[x]=0xFF;
-			memset(&flashBuffer.Profile[x],0xFF,sizeof(Profile_t));
+			memset(&flashBuffer.Profile[x],0xFF,sizeof(profile_t));
 		}
 	}
 
@@ -125,7 +125,7 @@ void restoreSettings() {
 	return;
 #endif
 
-	if(flashSettings->settings.notInitialized){											// If flash not initialized (Erased flash is always read "1")
+	if(flashSettings->settings.initialized==notInitialized){											// If flash not initialized (Erased flash is always read "1")
 		resetSystemSettings();
 		saveSettings(1);
 	}
@@ -152,34 +152,36 @@ uint32_t ChecksumSettings(settings_t* settings){
 	return checksum;
 }
 
-uint32_t ChecksumProfile(Profile_t* profile){
+uint32_t ChecksumProfile(profile_t* profile){
 	uint32_t checksum;
-	checksum = HAL_CRC_Calculate(&HCRC, (uint32_t*)profile, sizeof(Profile_t)/sizeof(uint32_t));
+	checksum = HAL_CRC_Calculate(&HCRC, (uint32_t*)profile, sizeof(profile_t)/sizeof(uint32_t));
 	return checksum;
 }
 
 void resetSystemSettings(void) {
-	systemSettings.settings.version = FW_Version;
-	systemSettings.settings.contrast = 255;
-	systemSettings.settings.OledOffset = 2;
-	systemSettings.settings.noIronDelay=500;
-	systemSettings.settings.guiUpdateDelay=200;
-	systemSettings.settings.tempUnit=Unit_Celsius;
-	systemSettings.settings.tempStep=5;
-	systemSettings.settings.saveSettingsDelay=5;
-	systemSettings.settings.currentProfile=Profile_None;
-	systemSettings.settings.initMode=mode_normal;
-	systemSettings.settings.buzzEnable=0;
-	systemSettings.settings.wakeOnButton=0;
+	systemSettings.settings.version 			= FW_Version;
+	systemSettings.settings.contrast 			= 255;
+	systemSettings.settings.OledOffset 			= 2;
+	systemSettings.settings.noIronDelay			= 500;
+	systemSettings.settings.guiUpdateDelay		= 200;
+	systemSettings.settings.tempUnit			= mode_Celsius;
+	systemSettings.settings.tempStep			= 5;
+	systemSettings.settings.saveSettingsDelay	= 5;
+	systemSettings.settings.currentProfile		= profile_None;
+	systemSettings.settings.initMode			= mode_normal;
+	systemSettings.settings.buzzerMode			= buzzer_Off;
+	systemSettings.settings.wakeOnButton		= wakeButton_Off;
+	systemSettings.settings.WakeInputMode		= wakeInputmode_shake;
+	systemSettings.settings.EncoderInvert		= encoder_normal;
 }
 
 
 void resetCurrentProfile(void){
 #ifdef NOSAVESETTINGS
-	systemSettings.settings.currentProfile=Profile_T12;										// Force T12 when debugging
+	systemSettings.settings.currentProfile=profile_T12;										// Force T12 when debugging
 																							// TODO this is not tested with the profiles update!
 #endif
-	if(systemSettings.settings.currentProfile==Profile_T12){
+	if(systemSettings.settings.currentProfile==profile_T12){
 		for(uint8_t x = 0; x < TipSize; x++) {
 			systemSettings.Profile.tip[x].calADC_At_200 = 900;
 			systemSettings.Profile.tip[x].calADC_At_300 = 1500;			// These values are way lower, but better to be safe than sorry
@@ -216,7 +218,7 @@ void resetCurrentProfile(void){
 		//saveSettings(0);
 	}
 
-	else if(systemSettings.settings.currentProfile==Profile_C245){
+	else if(systemSettings.settings.currentProfile==profile_C245){
 		for(uint8_t x = 0; x < TipSize; x++) {
 			systemSettings.Profile.tip[x].calADC_At_200 = 390;
 			systemSettings.Profile.tip[x].calADC_At_300 = 625;
@@ -245,7 +247,7 @@ void resetCurrentProfile(void){
 		//saveSettings(0);
 	}
 
-	else if(systemSettings.settings.currentProfile==Profile_C210){
+	else if(systemSettings.settings.currentProfile==profile_C210){
 		for(uint8_t x = 0; x < TipSize; x++) {
 			systemSettings.Profile.tip[x].calADC_At_200 = 390;
 			systemSettings.Profile.tip[x].calADC_At_300 = 625;
@@ -274,7 +276,7 @@ void resetCurrentProfile(void){
 
 		//saveSettings(0);
 	}
-	else if(systemSettings.settings.currentProfile==Profile_None){
+	else if(systemSettings.settings.currentProfile==profile_None){
 		asm("nop");																		// We shouldn't get here
 		return;
 	}
@@ -284,16 +286,16 @@ void resetCurrentProfile(void){
 }
 
 void loadProfile(uint8_t profile){
-	if(	(profile==Profile_T12)	||														// If current tip type is valid
-		(profile==Profile_C210)	||
-		(profile==Profile_C245)	){
+	if(	(profile==profile_T12)	||														// If current tip type is valid
+		(profile==profile_C210)	||
+		(profile==profile_C245)	){
 
 		systemSettings.settings.currentProfile=profile;									// Set system profile
 
 		systemSettings.Profile = flashSettings->Profile[profile];						// Load stored tip data
 		systemSettings.ProfileChecksum = flashSettings->ProfileChecksum[profile];		// Load stored checksum
 
-		if(systemSettings.Profile.notInitialized){										// Check if initialized
+		if(systemSettings.Profile.initialized==notInitialized){										// Check if initialized
 			resetCurrentProfile();														// Load defaults if not
 			systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);	// Compute checksum
 		}
@@ -304,7 +306,7 @@ void loadProfile(uint8_t profile){
 		setSetTemperature(systemSettings.Profile.UserSetTemperature);					// Load user set temperature
 		setCurrentTip(systemSettings.Profile.currentTip);								// Load TIP data
 	}
-	else if(profile==Profile_None){
+	else if(profile==profile_None){
 		systemSettings.settings.currentProfile=profile;									// Set system profile
 		return;																			// Profiles not initialized, load nothing
 	}
@@ -340,9 +342,9 @@ void settingsChkErr(void){
 	update_display();
 	ErrCountDown(3,117,50);
 
-	if(	(systemSettings.settings.currentProfile==Profile_T12)		||		// I current tip type is valid
-		(systemSettings.settings.currentProfile==Profile_C210)	||
-		(systemSettings.settings.currentProfile==Profile_C245)	){
+	if(	(systemSettings.settings.currentProfile==profile_T12)		||		// I current tip type is valid
+		(systemSettings.settings.currentProfile==profile_C210)	||
+		(systemSettings.settings.currentProfile==profile_C245)	){
 
 		uint8_t tip = systemSettings.settings.currentProfile;		// save current tip
 		resetSystemSettings();									// reset settings
@@ -367,20 +369,20 @@ void ProfileChkErr(void){
 
 void Button_reset(void){
 	uint16_t ResetTimer= HAL_GetTick();
-	if(!BUTTON_input){
+	if(!BUTTON_input()){
 		Diag_init();
 		UG_PutString(8,10,"HOLD BUTTON");//11
 		UG_PutString(13,26,"TO RESTORE");//10
 		UG_PutString(23,42,"DEFAULTS");//8
 		update_display();
-		while(!BUTTON_input){
+		while(!BUTTON_input()){
 			HAL_IWDG_Refresh(&HIWDG);
 			if((HAL_GetTick()-ResetTimer)>5000){
 				FillBuffer(C_BLACK,fill_dma);
 				UG_PutString(28,15,"RELEASE");//7
 				UG_PutString(13,31,"BUTTON NOW");// 10
 				update_display();
-				while(!BUTTON_input){
+				while(!BUTTON_input()){
 					HAL_IWDG_Refresh(&HIWDG);
 				}
 				resetSystemSettings();

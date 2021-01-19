@@ -63,7 +63,6 @@ void widgetDefaultsInit(widget_t *w, widgetType t){
 	w->draw = &default_widgetDraw;
 	w->enabled = 1;
 	w->font_size = &FONT_8X14_reduced;
-	w->inverted = 0;
 	w->posX = 0;
 	w->posY = 0;
 	w->next_widget = NULL;
@@ -78,8 +77,6 @@ void widgetDefaultsInit(widget_t *w, widgetType t){
 		sel->tab = 0;
 		sel->processInput = &default_widgetProcessInput;
 		sel->longPressAction = NULL;
-		sel->onEditAction = NULL;
-		sel->onSelectAction = NULL;
 	}
 	switch (t) {
 		case widget_bmp:
@@ -319,15 +316,8 @@ void default_widgetDraw(widget_t *widget) {
 	UG_FontSetHSpace(0);
 	UG_FontSetVSpace(0);
 
-	if(!widget->inverted){
-		UG_SetBackcolor ( C_BLACK ) ;
-		UG_SetForecolor ( C_WHITE ) ;
-	}
-	else{
-		UG_SetBackcolor ( C_WHITE ) ;
-		UG_SetForecolor ( C_BLACK ) ;
-	}
-
+	UG_SetBackcolor ( C_BLACK ) ;
+	UG_SetForecolor ( C_WHITE ) ;
 	if(sel) {
 		switch (sel->state) {
 			case widget_edit:
@@ -393,12 +383,13 @@ void default_widgetDraw(widget_t *widget) {
 			space[widget->reservedChars] = (char)'\0';
 			UG_PutString(wiX ,wiY , space);
 			if(dis->type == field_string){
-
 				UG_SetBackcolor ( C_BLACK ) ;
 				UG_SetForecolor ( C_WHITE ) ;
-				UG_PutString(wiX ,wiY ,extractDisplayPartFromWidget(widget)->getData());
+				//strWidth=UG_GetStringWidth(dis->getData());
+				UG_PutString(wiX ,wiY ,dis->getData());
 			}
 			else{
+				//strWidth=UG_GetStringWidth(widget->displayString);
 				widget->displayString[widget->reservedChars] = (char)'\0';
 				UG_PutString(wiX ,wiY , widget->displayString);
 
@@ -677,9 +668,6 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 					}
 					sel->state = widget_edit;
 					sel->previous_state = widget_selected;
-					if(sel->onEditAction){
-						return sel->onEditAction(widget);
-					}
 					break;
 
 				case widget_edit:
@@ -696,9 +684,6 @@ int default_widgetProcessInput(widget_t *widget, RE_Rotation_t input, RE_State_t
 					else {
 						sel->state = widget_selected;
 						sel->previous_state = widget_edit;
-						if(sel->onSelectAction){
-							return sel->onSelectAction(widget);
-						}
 					}
 					break;
 				default:

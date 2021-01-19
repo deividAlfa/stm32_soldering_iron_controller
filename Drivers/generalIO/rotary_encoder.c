@@ -7,6 +7,7 @@
  */
 
 #include "rotary_encoder.h"
+#include "settings.h"
 volatile RE_State_t RE1_Data;
 static uint32_t was_pushed_time = 0;
 
@@ -103,10 +104,22 @@ void RE_Process(RE_State_t* data) {
 		}
 	}
 	else if(!data->halfPointReached) {
-		if(now_a)
-			data->direction = 1;
-		else if (now_b)
-			data->direction = 0;
+		if(now_a){
+			if(systemSettings.settings.EncoderInvert==encoder_normal){
+				data->direction = 1;
+			}
+			else{
+				data->direction = 0;
+			}
+		}
+		else if(now_b){
+			if(systemSettings.settings.EncoderInvert==encoder_normal){
+				data->direction = 0;
+			}
+			else{
+				data->direction = 1;
+			}
+		}
 	}
 	if((data->pv_click == RE_BT_DRAG) && (now_button == 1))
 		data->pv_click = RE_BT_HIDLE;

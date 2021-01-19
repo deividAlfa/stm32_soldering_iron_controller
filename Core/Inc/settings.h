@@ -21,12 +21,71 @@
 #define FLASH_ADDR 		(0x8000000 + ((FLASH_SZ-StoreSize)*1024))	// Last 2KB flash (Minimum erase size, page size=2KB)
 
 enum{
+	wakeInputmode_shake	= 0,
+	wakeInputmode_stand	= 1,
 
-	Profile_T12		= 0,
-	Profile_C245	= 1,
-	Profile_C210	= 2,
-	Profile_None	= 0xff,
+	wakeButton_Off	= 0,
+	wakeButton_On	= 1,
+
+	source_wakeInput	= 0,
+	source_wakeButton	= 1,
+
+	failureState_Off	= 0,
+	failureState_On		= 1,
+
+	PWM_unchanged	= 0,
+	PWM_changed		= 1,
+
+	runaway_ok		= 0,
+	runaway_25		= 1,
+	runaway_50		= 2,
+	runaway_75		= 3,
+	runaway_100		= 4,
+	runaway_500		= 5,
+
+	runaway_triggered 	= 1,
+
+	notPresent		= 0,
+	isPresent		= 1,
+
+	debug_Off		= 0,
+	debug_On		= 1,
+
+	calibration_Off	= 0,
+	calibration_On	= 1,
+
+	saveKeepingProfiles	= 0,
+	saveWipingProfiles	= 1,
+
+	setup_Off		= 0,
+	setup_On		= 1,
+
+	encoder_normal	= 0,
+	encoder_reverse	= 1,
+
+	mode_Celsius	= 0,
+	mode_Farenheit	= 1,
+
+	mode_standby	= 0,
+	mode_sleep		= 1,
+	mode_normal		= 2,
+	mode_boost		= 3,
+
+	initialized		= 0,
+	notInitialized	= 1,
+
+
+	buzzer_Off		= 0,
+	buzzer_On		= 1,
+
+	profile_T12		= 0,
+	profile_C245	= 1,
+	profile_C210	= 2,
+	profile_None	= 0xff,
 };
+
+
+
 
 extern char* profileStr[ProfileSize];
 
@@ -45,7 +104,7 @@ typedef struct tipData {
 
 __attribute__ ((aligned (4))) typedef struct{
 	tipData tip[TipSize];
-	bool notInitialized;
+	bool initialized;
 	ironSettings_t boost;
 	ironSettings_t sleep;
 	ironSettings_t standby;
@@ -55,7 +114,7 @@ __attribute__ ((aligned (4))) typedef struct{
 	uint16_t pwmPeriod;
 	uint16_t pwmDelay;
 	uint16_t noIronValue;
-}Profile_t;
+}profile_t;
 
 __attribute__ ((aligned (4))) typedef struct{
 	uint32_t version;				// Used to track if a reset is needed on firmware upgrade
@@ -68,15 +127,17 @@ __attribute__ ((aligned (4))) typedef struct{
 	uint8_t initMode;
 	uint8_t tempStep;
 	bool tempUnit;
-	bool buzzEnable;
+	bool buzzerMode;
 	bool wakeOnButton;
-	bool notInitialized;			// Always 1 if flash is erased
+	bool WakeInputMode;
+	bool EncoderInvert;
+	bool initialized;			// Always 1 if flash is erased
 }settings_t;
 
 typedef struct{
 	settings_t settings;
 	uint32_t settingsChecksum;
-	Profile_t Profile[ProfileSize];
+	profile_t Profile[ProfileSize];
 	uint32_t ProfileChecksum[ProfileSize];
 }flashSettings_t;
 
@@ -84,7 +145,7 @@ typedef struct{
 typedef struct{
 	settings_t settings;
 	uint32_t settingsChecksum;
-	Profile_t Profile;
+	profile_t Profile;
 	uint32_t ProfileChecksum;
 	bool setupMode;
 }systemSettings_t;
@@ -94,7 +155,7 @@ extern flashSettings_t* flashSettings;
 void saveSettings(bool wipeAllProfileData);
 void restoreSettings();
 uint32_t ChecksumSettings(settings_t* settings);
-uint32_t ChecksumProfile(Profile_t* profile);
+uint32_t ChecksumProfile(profile_t* profile);
 void resetSystemSettings(void);
 void resetCurrentProfile(void);
 void storeTipData(uint8_t tip);

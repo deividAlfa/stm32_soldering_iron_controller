@@ -29,7 +29,7 @@ int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
 	if(temp>999){
 		temp=999;								// Put some limits (99.9ºC)
 	}													// Negative limit is around -77ºC, we need that to detect NTC disconnected
-	if(tempUnit==Unit_Farenheit){
+	if(tempUnit==mode_Farenheit){
 		temp=TempConversion(temp, toFarenheit, 1);
 	}
 	return temp;
@@ -74,10 +74,10 @@ tipData* getCurrentTip() {
 uint16_t human2adc(int16_t t) {
 	volatile int16_t temp = t;
 	volatile int16_t tH;
-	volatile int16_t ambTemp = readColdJunctionSensorTemp_x10(Unit_Celsius) / 10;
+	volatile int16_t ambTemp = readColdJunctionSensorTemp_x10(mode_Celsius) / 10;
 
 	// If using Farenheit, convert to Celsius
-	if(systemSettings.settings.tempUnit==Unit_Farenheit){
+	if(systemSettings.settings.tempUnit==mode_Farenheit){
 		t = TempConversion(t,toCelsius,0);
 	}
 	t-=ambTemp;
@@ -97,15 +97,15 @@ uint16_t human2adc(int16_t t) {
 		temp = map(t, ambTemp, 200, 0, currentTipData->calADC_At_200);
 	}
 
-	tH = adc2Human(temp,0,Unit_Celsius);
+	tH = adc2Human(temp,0,mode_Celsius);
 	if (tH < t) {
 		while(tH < t){
-			tH = adc2Human(++temp,0,Unit_Celsius);
+			tH = adc2Human(++temp,0,mode_Celsius);
 		}
 	}
 	else if (tH > t) {
 		while(tH > t){
-			tH = adc2Human(--temp,0,Unit_Celsius);
+			tH = adc2Human(--temp,0,mode_Celsius);
 		}
 	}
 	return temp;
@@ -115,7 +115,7 @@ uint16_t human2adc(int16_t t) {
 int16_t adc2Human(uint16_t adc_value,bool correction, bool tempUnit) {
 	int16_t tempH = 0;
 	int16_t ambTemp;
-	ambTemp = readColdJunctionSensorTemp_x10(Unit_Celsius) / 10;
+	ambTemp = readColdJunctionSensorTemp_x10(mode_Celsius) / 10;
 	if (adc_value >= currentTipData->calADC_At_300) {
 		tempH = map(adc_value, currentTipData->calADC_At_300, currentTipData->calADC_At_400, 300, 400);
 	}
@@ -126,7 +126,7 @@ int16_t adc2Human(uint16_t adc_value,bool correction, bool tempUnit) {
 		tempH = map(adc_value, 0, currentTipData->calADC_At_200, ambTemp, 200);
 	}
 	if(correction){ tempH+= ambTemp; }
-	if(tempUnit==Unit_Farenheit){
+	if(tempUnit==mode_Farenheit){
 		tempH=TempConversion(tempH,toFarenheit,0);
 	}
 	return tempH;

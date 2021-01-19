@@ -26,8 +26,6 @@ typedef struct selectable_widget_t {
 	widgetStateType previous_state;
 	int (*processInput)(widget_t*, RE_Rotation_t, RE_State_t *);
 	int (*longPressAction)(widget_t*);
-	int (*onEditAction)(widget_t*);
-	int (*onSelectAction)(widget_t*);
 	int tab;
 } selectable_widget_t;
 
@@ -56,6 +54,7 @@ typedef struct displayOnly_widget_t {
 	void * (*getData)();
 	uint8_t type;
 	uint8_t	number_of_dec;
+	int32_t last_value;
 	void (*update)(widget_t*);
 	bool justify;
 } displayOnly_widget_t;
@@ -96,7 +95,6 @@ typedef struct button_widget_t {
 
 struct widget_t
 {
-	bool inverted;
 	char* displayString;
 	uint8_t reservedChars;
 	char* EndStr;
@@ -105,6 +103,7 @@ struct widget_t
 	const UG_FONT *font_size;
 	widget_t *next_widget;
 	bool enabled;
+	bool redraw;
 	uint8_t type;
 	struct screen_t *parent;
 	void (*draw)(widget_t*);

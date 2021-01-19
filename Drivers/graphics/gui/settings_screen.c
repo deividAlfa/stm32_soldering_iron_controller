@@ -17,6 +17,7 @@ static uint8_t resStatus, profile;
 char str[5];
 static char *OffOn[] = {"OFF", " ON" };
 static char *tempUnit[] = {"*C", "*F" };
+static char *wakeMode[] = {"SHAKE", "STAND" };
 static char *InitMode[] = {"SBY","SLP"," ON", "BST"};
 
 bool TempUnit;
@@ -67,7 +68,9 @@ static widget_t Widget_IRON_Power;
 static widget_t comboWidget_Settings_SYSTEM;
 static comboBox_item_t comboitem_SYSTEM_Profile;
 static comboBox_item_t comboitem_SYSTEM_Contrast;
-static comboBox_item_t comboitem_SYSTEM_OledFix;
+static comboBox_item_t comboitem_SYSTEM_OledOffset;
+static comboBox_item_t comboitem_SYSTEM_WakeMode;
+static comboBox_item_t comboitem_SYSTEM_EncoderMode;
 static comboBox_item_t comboitem_SYSTEM_TempUnit;
 static comboBox_item_t comboitem_SYSTEM_TempStep;
 static comboBox_item_t comboitem_SYSTEM_GuiUpd;
@@ -79,6 +82,8 @@ static comboBox_item_t comboitem_SYSTEM_Back;
 static widget_t Widget_SYSTEM_Profile;
 static widget_t Widget_SYSTEM_Contrast;
 static widget_t Widget_SYSTEM_OledOffset;
+static widget_t Widget_SYSTEM_WakeMode;
+static widget_t Widget_SYSTEM_EncoderMode;
 static widget_t Widget_SYSTEM_TempUnit;
 static widget_t Widget_SYSTEM_TempStep;
 static widget_t Widget_SYSTEM_GuiUpd;
@@ -152,13 +157,13 @@ static int cancelTip(widget_t *w) {
 }
 static int delTip(widget_t *w) {
 	uint8_t itemIndex = 0;
-	for(int x = 0; x < TipSize; x++) {// ++x?
+	for(int x = 0; x < TipSize; x++) {
 		if(strcmp(comboWidget_Settings_IRONTIPS.comboBoxWidget.currentItem->text, systemSettings.Profile.tip[x].name) == 0) {
 			itemIndex = x;
 			break;
 		}
 	}
-	for(int x = itemIndex; x < TipSize;x++) {		// ++x?
+	for(int x = itemIndex; x < TipSize;x++) {
 		systemSettings.Profile.tip[x] = systemSettings.Profile.tip[x+1];
 	}
 	--systemSettings.Profile.currentNumberOfTips;
@@ -307,6 +312,21 @@ static void setOledOffset(uint16_t *val) {
 	systemSettings.settings.OledOffset= * val;
 }
 
+static void * getWakeMode() {
+	temp = systemSettings.settings.WakeInputMode;
+	return &temp;
+}
+static void setWakeMode(uint16_t *val) {
+	systemSettings.settings.WakeInputMode= * val;
+}
+
+static void * getEncoderMode() {
+	temp = systemSettings.settings.EncoderInvert;
+	return &temp;
+}
+static void setEncoderMode(uint16_t *val) {
+	systemSettings.settings.EncoderInvert= * val;
+}
 static void * getGuiUpd_ms() {
 	temp = systemSettings.settings.guiUpdateDelay;
 	return &temp;
@@ -339,12 +359,12 @@ static void * getNoIronADC() {
 static void setNoIronADC(uint16_t *val) {
 	systemSettings.Profile.noIronValue = *val;
 }
-static void * getBuzzEnable() {
-	temp = systemSettings.settings.buzzEnable;
+static void * getbuzzerMode() {
+	temp = systemSettings.settings.buzzerMode;
 	return &temp;
 }
-static void setBuzzEnable(uint16_t *val) {
-	systemSettings.settings.buzzEnable = *val;
+static void setbuzzerMode(uint16_t *val) {
+	systemSettings.settings.buzzerMode = *val;
 }
 static void * getInitMode() {
 	temp = systemSettings.settings.initMode;
@@ -387,7 +407,7 @@ static int doReset(widget_t *w) {
 		break;
 
 	case 2:																	// Reset all Profiles
-		systemSettings.settings.currentProfile=Profile_None;				// Set factory value
+		systemSettings.settings.currentProfile=profile_None;				// Set factory value
 		saveSettings(1);													// Save settings, but wiping all tip data
 		HAL_Delay(500);
 		NVIC_SystemReset();
@@ -432,7 +452,7 @@ static void * getButtonWake() {
 
 static void tempUnitChanged(void) {
 	TempUnit = systemSettings.settings.tempUnit;
-	if(TempUnit==Unit_Farenheit){
+	if(TempUnit==mode_Farenheit){
 		Widget_IRON_BoostTemp.EndStr="*F";
 		Widget_IRON_BoostTemp.editable.max_value=900;
 		Widget_IRON_BoostTemp.editable.min_value=400;
@@ -928,6 +948,37 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.min_value = 0;
 	w->displayWidget.justify =justify_right;
 
+	//********[ Wake mode Widget ]***********************************************************
+	//
+	w = &Widget_SYSTEM_WakeMode;
+	widgetDefaultsInit(w, widget_multi_option);
+	w->reservedChars=5;
+	w->posX = 86;
+	w->editable.inputData.getData = &getWakeMode;
+	w->editable.big_step = 1;
+	w->editable.step = 1;
+	w->editable.setData = (void (*)(void *))&setWakeMode;
+	w->editable.max_value = wakeInputmode_stand;
+	w->editable.min_value = wakeInputmode_shake;
+	w->multiOptionWidget.options = wakeMode;
+	w->multiOptionWidget.numberOfOptions = 2;
+
+
+	//********[ Encoder inversion Widget ]***********************************************************
+	//
+	w = &Widget_SYSTEM_EncoderMode;
+	widgetDefaultsInit(w, widget_multi_option);
+	w->reservedChars=3;
+	w->posX = 102;
+	w->editable.inputData.getData = &getEncoderMode;
+	w->editable.big_step = 1;
+	w->editable.step = 1;
+	w->editable.setData = (void (*)(void *))&setEncoderMode;
+	w->editable.max_value = encoder_reverse;
+	w->editable.min_value = encoder_normal;
+	w->multiOptionWidget.options = OffOn;
+	w->multiOptionWidget.numberOfOptions = 2;
+
 	//********[ Save Delay Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_SaveInterval;
@@ -973,8 +1024,8 @@ void settings_screen_setup(screen_t *scr) {
 	w->editable.big_step = 1;
 	w->editable.step = 1;
 	w->editable.setData = (void (*)(void *))&setTmpUnit;
-	w->editable.max_value = Unit_Farenheit;
-	w->editable.min_value = Unit_Celsius;
+	w->editable.max_value = mode_Farenheit;
+	w->editable.min_value = mode_Celsius;
 	w->multiOptionWidget.options = tempUnit;
 	w->multiOptionWidget.numberOfOptions = 2;
 
@@ -1002,10 +1053,10 @@ void settings_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(w, widget_multi_option);
 	w->reservedChars=3;
 	w->posX = 102;
-	w->editable.inputData.getData = &getBuzzEnable;
+	w->editable.inputData.getData = &getbuzzerMode;
 	w->editable.big_step = 1;
 	w->editable.step = 1;
-	w->editable.setData = (void (*)(void *))&setBuzzEnable;
+	w->editable.setData = (void (*)(void *))&setbuzzerMode;
 	w->editable.max_value = 1;
 	w->editable.min_value = 0;
 	w->multiOptionWidget.options = OffOn;
@@ -1048,8 +1099,10 @@ void settings_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(w, widget_combo);
 	comboAddOption(&comboitem_SYSTEM_Profile,w, 		"Profile", 		&Widget_SYSTEM_Profile);
 	comboAddOption(&comboitem_SYSTEM_Contrast,w, 		"Contrast", 	&Widget_SYSTEM_Contrast);
-	comboAddOption(&comboitem_SYSTEM_OledFix, w, 		"OLED Offset", 	&Widget_SYSTEM_OledOffset);
-	comboAddOption(&comboitem_SYSTEM_InitMode, w, 		"Boot Mode", 	&Widget_SYSTEM_InitMode);
+	comboAddOption(&comboitem_SYSTEM_OledOffset, w, 	"OLED Offset", 	&Widget_SYSTEM_OledOffset);
+	comboAddOption(&comboitem_SYSTEM_EncoderMode, w, 	"Encoder inv.",	&Widget_SYSTEM_EncoderMode);
+	comboAddOption(&comboitem_SYSTEM_InitMode, w, 		"PowerOn Mode", &Widget_SYSTEM_InitMode);
+	comboAddOption(&comboitem_SYSTEM_WakeMode, w, 		"Wake input", 	&Widget_SYSTEM_WakeMode);
 	comboAddOption(&comboitem_SYSTEM_ButtonWake, w, 	"Button Wake", 	&Widget_SYSTEM_ButtonWake);
 	comboAddOption(&comboitem_SYSTEM_Buzzer, w, 		"Buzzer", 		&Widget_SYSTEM_Buzzer);
 	comboAddOption(&comboitem_SYSTEM_TempUnit, w, 		"Temp. Unit", 	&Widget_SYSTEM_TempUnit);

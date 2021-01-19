@@ -141,11 +141,11 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 void boot_screen_init(screen_t * scr){
 	profile=systemSettings.settings.currentProfile;
 
-	if(		(profile!=Profile_T12)	&&					// If unknown tip
-			(profile!=Profile_C210)	&&
-			(profile!=Profile_C245))	{
+	if(		(profile!=profile_T12)	&&					// If unknown tip
+			(profile!=profile_C210)	&&
+			(profile!=profile_C245))	{
 
-		profile=Profile_C210;							// For safety, set C210 profile by default, has the lowest Output TC
+		profile=profile_C210;							// For safety, set C210 profile by default, has the lowest Output TC
 		systemSettings.setupMode=1;						// (Failure state is set in the iron routine when unknown iron profile is detected)
 	}
 	splash_time = HAL_GetTick();

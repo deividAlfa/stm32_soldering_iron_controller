@@ -133,7 +133,7 @@ static int enterSettings(widget_t *w) {
 //-------------------------------------------------------------------------------------------------------------------------------
 static void tempUnitChanged(void) {
 	TempUnit = systemSettings.settings.tempUnit;
-	if(TempUnit==Unit_Farenheit){
+	if(TempUnit==mode_Farenheit){
 		Widget_IronTemp.EndStr="*F";
 		#ifdef USE_NTC
 		Widget_AmbTemp.EndStr="*F";						// '*' shown as '°' in all fonts

@@ -77,7 +77,7 @@ static int okAction(widget_t *w) {
 		current_state = cal_200;
 		return screen_main;
 	}
-	measured_temps[(int)current_state] = measuredTemp - (readColdJunctionSensorTemp_x10(Unit_Celsius) / 10);
+	measured_temps[(int)current_state] = measuredTemp - (readColdJunctionSensorTemp_x10(mode_Celsius) / 10);
 	adcAtTemp[(int)current_state] = TIP.last_avg;
 	setCalState(++current_state);
 	return screen_edit_calibration_wait;
@@ -108,7 +108,7 @@ static void waitOnEnter(screen_t *scr) {
 	if(scr != &Screen_edit_calibration_input) {
 		UG_FontSetHSpace(0);
 		UG_FontSetVSpace(0);
-		Iron.isCalibrating=1;
+		Iron.calibrating=1;
 		tempReady = 0;
 		setCurrentMode(mode_normal);
 		backupTemp = getSetTemperature();
@@ -121,7 +121,7 @@ static void waitOnExit(screen_t *scr) {
 		current_state = cal_200;
 		setSetTemperature(backupTemp);
 		setCurrentMode(mode_normal);
-		Iron.isCalibrating=0;
+		Iron.calibrating=0;
 	}
 	Widget_CAL_Input_OK.buttonWidget.selectable.previous_state=widget_idle;
 	Widget_CAL_Input_OK.buttonWidget.selectable.state=widget_idle;
@@ -236,7 +236,7 @@ void calibration_screen_setup(screen_t *scr) {
 
 static uint8_t processCalibration() {
 	  uint16_t delta = state_temps[1] - state_temps[0]; delta >>= 1;
-	  uint16_t ambient = readColdJunctionSensorTemp_x10(Unit_Celsius) / 10;
+	  uint16_t ambient = readColdJunctionSensorTemp_x10(mode_Celsius) / 10;
 	  
 	  //  Ensure measured temps are valid (200<300<400)
 	  if (	(measured_temps[cal_300] <= measured_temps[cal_200]) ||	(measured_temps[cal_400] <= measured_temps[cal_300]) ){

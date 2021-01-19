@@ -595,12 +595,12 @@ void FatalError(uint8_t type){
 	#endif
 
 	while(1){
-		if(!BUTTON_input){
+		if(!BUTTON_input()){
 			for(uint16_t i=0;i<50000;i++);
-			while(!BUTTON_input){
+			while(!BUTTON_input()){
 				HAL_IWDG_Refresh(&HIWDG);					// Clear watchdog
 			}
-			if(BUTTON_input){
+			if(BUTTON_input()){
 				NVIC_SystemReset();
 			}
 		}
