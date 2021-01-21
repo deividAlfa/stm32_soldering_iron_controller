@@ -138,7 +138,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t){
 }
 
 
-static void insertDot(char *str, uint8_t dec) {//TODO Fix PID screen values >"99.9" appear as "1000.x"
+static void insertDot(char *str, uint8_t dec) {
 	char pos=0;
 	if(!dec || str==NULL){
 		return;
@@ -327,46 +327,85 @@ void default_widgetDraw(widget_t *widget) {
 	UG_SetBackcolor ( C_BLACK ) ;
 	UG_SetForecolor ( C_WHITE ) ;
 	if(sel) {
-		switch (sel->state) {
-			case widget_edit:
-				if(sel->previous_state != widget_edit){
+		if(widget->parent->force_refresh==0){
+			switch (sel->state) {
+				case widget_edit:
+					if(sel->previous_state == widget_selected){
+						sel->previous_state = widget_edit;
+						selFrameDraw=1;
+						selFrameColor = C_BLACK;
+						editFrameDraw=1;
+						editFrameColor = C_WHITE;
+						//UG_SetBackcolor ( C_WHITE ) ;
+						//UG_SetForecolor ( C_BLACK ) ;
+					}
+					else if(sel->previous_state == widget_idle){
+						sel->previous_state = widget_edit;
+						editFrameDraw=1;
+						editFrameColor = C_WHITE;
+						//UG_SetBackcolor ( C_WHITE ) ;
+						//UG_SetForecolor ( C_BLACK ) ;
+					}
+					break;
 
-					selFrameDraw=1;
-					selFrameColor = C_BLACK;
-					editFrameDraw=1;
-					editFrameColor = C_WHITE;
-					//UG_SetBackcolor ( C_WHITE ) ;
-					//UG_SetForecolor ( C_BLACK ) ;
-				}
-				break;
+				case widget_selected:
+					if(sel->previous_state == widget_edit){
+						sel->previous_state = widget_selected;
+						selFrameDraw=1;
+						selFrameColor = C_WHITE;
+						editFrameDraw=1;
+						editFrameColor = C_BLACK;
+					}
+					else if(sel->previous_state == widget_idle){
+						sel->previous_state = widget_selected;
+						selFrameDraw=1;
+						selFrameColor = C_WHITE;
+					}
+					break;
 
-			case widget_selected:
-				if(sel->previous_state == widget_edit){
-					selFrameDraw=1;
-					selFrameColor = C_WHITE;
-					editFrameDraw=1;
-					editFrameColor = C_BLACK;
-				}
-				else if(sel->previous_state == widget_idle){
-					selFrameDraw=1;
-					selFrameColor = C_WHITE;
-				}
-				break;
+				case widget_idle:
+					if(sel->previous_state == widget_selected){
+						sel->previous_state = widget_idle;
+						selFrameDraw=1;
+						selFrameColor = C_BLACK;
+					}
+					else if(sel->previous_state == widget_edit){
+						sel->previous_state = widget_idle;
+						selFrameDraw=1;
+						selFrameColor = C_BLACK;
+						editFrameDraw=1;
+						editFrameColor = C_BLACK;
+					}
 
-			case widget_idle:
-				if(sel->previous_state != widget_idle){
-					selFrameDraw=1;
-					selFrameColor = C_BLACK;
-				}
-				break;
-			default:
-				if(sel->state != sel->previous_state){
-					selFrameDraw=1;
-					selFrameColor = C_BLACK;
-					editFrameDraw=1;
-					editFrameColor = C_BLACK;
-				}
-				break;
+					break;
+				default:
+					break;
+			}
+		}
+		else{
+			switch (sel->state) {
+				case widget_edit:
+						selFrameDraw=1;
+						selFrameColor = C_BLACK;
+						editFrameDraw=1;
+						editFrameColor = C_WHITE;
+						break;
+
+				case widget_selected:
+						selFrameDraw=1;
+						selFrameColor = C_WHITE;
+						editFrameDraw=1;
+						editFrameColor = C_BLACK;
+						break;
+				case widget_idle:
+						selFrameDraw=1;
+						selFrameColor = C_BLACK;
+						editFrameDraw=1;
+						editFrameColor = C_BLACK;
+						break;
+				default:
+					break;
+			}
 		}
 	}
 

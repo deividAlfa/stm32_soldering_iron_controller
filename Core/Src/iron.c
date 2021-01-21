@@ -64,7 +64,7 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 void handleIron(void) {
 	static uint32_t prevSysChecksum=0, newSysChecksum=0,prevTipChecksum=0, newTipChecksum=0, checksumtime=0;
 	uint32_t CurrentTime = HAL_GetTick();
-	float set;
+	float set=0;
 	
 	// Update Tip temperature in human readable format
 	uint16_t tipTemp = readTipTemperatureCompensated(update_reading,read_Avg);
@@ -154,10 +154,6 @@ void handleIron(void) {
 		  if(t){
 			  set = calculatePID(t, TIP.last_avg);
 		  }
-		  else{ set=0; }
-	  }
-	  else{
-		  set=0;
 	  }
 	}
 	// If PID output negative, set to 0
@@ -171,6 +167,7 @@ void handleIron(void) {
 	else{
 	  Iron.CurrentIronPower = 0;
 	  Iron.Pwm_Out = 0;
+	  resetPID();
 	}
 	// If by any means the PWM output is higher than max calculated, generate error
 	if(Iron.Pwm_Out >Iron.Pwm_Max){
