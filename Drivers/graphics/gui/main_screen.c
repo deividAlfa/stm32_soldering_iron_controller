@@ -76,9 +76,15 @@ static void setTemp(uint16_t *value) {
 	setSetTemperature(*value);
 }
 static void * getTemp() {
+	static uint16_t last;
 	temp = getSetTemperature();
+	if(last!=temp){
+		last=temp;
+		Widget_SetPoint.force_refresh=1;
+	}
 	return &temp;
 }
+
 static void *getMode() {
 	temp = getCurrentMode();
 	return modestr[temp];
@@ -409,7 +415,6 @@ void main_screen_setup(screen_t *scr) {
 	w->editable.inputData.type = field_uint16;
 	w->editable.selectable.tab = 1;
 	w->editable.setData = (void (*)(void *))&setTemp;
-	//w->editable.selectable.longPressAction = &boostOn;
 	w->displayWidget.justify = justify_right;
 
 	// Iron mode label

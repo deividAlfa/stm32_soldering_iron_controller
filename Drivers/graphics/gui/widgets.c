@@ -327,7 +327,7 @@ void default_widgetDraw(widget_t *widget) {
 	UG_SetBackcolor ( C_BLACK ) ;
 	UG_SetForecolor ( C_WHITE ) ;
 	if(sel) {
-		if(widget->parent->force_refresh==0){
+		if((widget->parent->force_refresh==0) && (widget->force_refresh==0)) {
 			switch (sel->state) {
 				case widget_edit:
 					if(sel->previous_state == widget_selected){
@@ -418,7 +418,7 @@ void default_widgetDraw(widget_t *widget) {
 				break;
 			}
 				widget->force_refresh=0;
-				UG_DrawBMP_MONO(wiX ,wiY , widget->displayBmp.bmp);
+				UG_DrawBMP_MONO(wiX, wiY, widget->displayBmp.bmp);
 			break;
 
 		case widget_bmp_button:
@@ -426,7 +426,7 @@ void default_widgetDraw(widget_t *widget) {
 				break;
 			}
 				widget->force_refresh=0;
-				UG_DrawBMP_MONO(wiX ,wiY , widget->buttonWidget.bmp);
+				UG_DrawBMP_MONO(wiX, wiY, widget->buttonWidget.bmp);
 			break;
 
 		case widget_display:
@@ -438,21 +438,19 @@ void default_widgetDraw(widget_t *widget) {
 			if(dis->type == field_string){
 				UG_SetBackcolor ( C_BLACK ) ;
 				UG_SetForecolor ( C_WHITE ) ;
-				//strWidth=UG_GetStringWidth(dis->getData());
 				int32_t sum=strsum(dis->getData());						// Get string sum
 				if((sum!=dis->last_value)||widget->parent->force_refresh==1){								// If different or screen force refresh
 					dis->last_value=sum;								// Store result
-					UG_FillFrame(wiX, wiY, wiX+widget->reservedChars*cWidth, wiY+cHeight, C_BLACK);	// Draw black square to erase previous data
-					UG_PutString(wiX ,wiY ,dis->getData());				// Draw string
+					UG_FillFrame(wiX, wiY, wiX+(widget->reservedChars*cWidth), wiY+cHeight, C_BLACK);	// Draw black square to erase previous data
+					UG_PutString(wiX, wiY, dis->getData());				// Draw string
 				}
 			}
 			else{
-				//strWidth=UG_GetStringWidth(widget->displayString);
 				widget->displayString[widget->reservedChars] = (char)'\0';
 				int32_t sum=strsum(widget->displayString);				// Get string sum
 				if((sum!=dis->last_value)||widget->parent->force_refresh==1){								// If different or screen force refresh
 					dis->last_value=sum;								// Store result
-					UG_FillFrame(wiX, wiY, wiX+widget->reservedChars*cWidth, wiY+cHeight, C_BLACK);	// Draw black square to erase previous data
+					UG_FillFrame(wiX, wiY, wiX+(widget->reservedChars*cWidth), wiY+cHeight, C_BLACK);	// Draw black square to erase previous data
 					UG_PutString(wiX ,wiY, widget->displayString);		// Draw string
 				}
 
@@ -461,7 +459,6 @@ void default_widgetDraw(widget_t *widget) {
 				if(sel->previous_state!=widget_edit){
 					strcpy(widget->displayString,dis->getData());
 				}
-				//UG_PutChar(widget->displayString[edit->current_edit], wiX + cWidth * edit->current_edit, wiY,  C_WHITE, C_BLACK);
 				UG_DrawLine(wiX + cWidth * edit->current_edit+1,wiY+ cHeight,wiX + cWidth * edit->current_edit+cWidth-3,wiY+ cHeight, C_WHITE);
 				UG_DrawLine(wiX + cWidth * edit->current_edit+1,wiY+ cHeight+1,wiX + cWidth * edit->current_edit+cWidth-3,wiY+ cHeight+1, C_WHITE);
 				if(edit->current_edit){
@@ -488,41 +485,24 @@ void default_widgetDraw(widget_t *widget) {
 			int32_t sum=strsum(widget->multiOptionWidget.options[widget->multiOptionWidget.currentOption]);				// Get string sum
 			if((sum!=dis->last_value)||widget->parent->force_refresh==1){												// If different or screen force refresh
 				dis->last_value=sum;																					// Store result
-				UG_FillFrame(wiX, wiY, wiX+widget->reservedChars*cWidth, wiY+cHeight, C_BLACK);							// Draw black square to erase previous data
+				UG_FillFrame(wiX, wiY, wiX+(widget->reservedChars*cWidth), wiY+cHeight, C_BLACK);							// Draw black square to erase previous data
 				UG_PutString(wiX ,wiY, widget->multiOptionWidget.options[widget->multiOptionWidget.currentOption]);		// Draw string
 			}
 			break;
 		}
 	}
-/*
-	if(selFrameDraw) {
-		switch(widget->type){
-			case widget_bmp_button:
-				UG_DrawRoundFrame(wiX - 2, wiY - 2,	wiX + widget->buttonWidget.bmp->width + 1, wiY + widget->buttonWidget.bmp->height + 1, 2, selFrameColor);
-				break;
-
-			case widget_editable:
-			case widget_button:
-			case widget_label:
-			case widget_multi_option:
-				UG_DrawRoundFrame(wiX - 2, wiY - 1,	wiX + widget->reservedChars * cWidth + 1,  wiY + cHeight -1, 2, selFrameColor);
-				break;
-		}
-	}
-
-*/
 
 	if(selFrameColor){
 		if(editFrameDraw) {
 			switch(widget->type){
 				case widget_editable:
 				case widget_multi_option:
-				//	UG_DrawLine(wiX - 4, wiY - 1, wiX - 4, wiY + cHeight -1, editFrameColor);
+					// Draws "["
 					UG_DrawLine(wiX - 3, wiY - 1, wiX - 3, wiY + cHeight -1, editFrameColor);
 					UG_DrawLine(wiX - 3, wiY - 1, wiX-1, wiY - 1, editFrameColor);
 					UG_DrawLine(wiX - 3, wiY + cHeight -1, wiX-1, wiY + cHeight -1, editFrameColor);
 
-					//UG_DrawLine(wiX+1 + widget->reservedChars * cWidth + 2, wiY - 1, wiX+1 + widget->reservedChars * cWidth + 2, wiY + cHeight - 1, editFrameColor);
+					// Draws "]"
 					UG_DrawLine(wiX + widget->reservedChars * cWidth + 2, wiY - 1, wiX + widget->reservedChars * cWidth + 2, wiY + cHeight - 1, editFrameColor);
 					UG_DrawLine(wiX + widget->reservedChars * cWidth, wiY - 1, wiX + widget->reservedChars * cWidth + 2, wiY - 1, editFrameColor);
 					UG_DrawLine(wiX + widget->reservedChars * cWidth, wiY + cHeight -1, wiX + widget->reservedChars * cWidth + 2, wiY + cHeight -1, editFrameColor);
@@ -564,12 +544,12 @@ void default_widgetDraw(widget_t *widget) {
 			switch(widget->type){
 				case widget_editable:
 				case widget_multi_option:
-					//UG_DrawLine(wiX - 4, wiY - 1, wiX - 4, wiY + cHeight -1, editFrameColor);
+					// Draws "["
 					UG_DrawLine(wiX - 3, wiY - 1, wiX - 3, wiY + cHeight -1, editFrameColor);
 					UG_DrawLine(wiX - 3, wiY - 1, wiX-1, wiY - 1, editFrameColor);
 					UG_DrawLine(wiX - 3, wiY + cHeight -1, wiX-1, wiY + cHeight -1, editFrameColor);
 
-					//UG_DrawLine(wiX+1 + widget->reservedChars * cWidth + 2, wiY - 1, wiX+1 + widget->reservedChars * cWidth + 2, wiY + cHeight - 1, editFrameColor);
+					// Draws "]"
 					UG_DrawLine(wiX + widget->reservedChars * cWidth + 2, wiY - 1, wiX + widget->reservedChars * cWidth + 2, wiY + cHeight - 1, editFrameColor);
 					UG_DrawLine(wiX + widget->reservedChars * cWidth, wiY - 1, wiX + widget->reservedChars * cWidth + 2, wiY - 1, editFrameColor);
 					UG_DrawLine(wiX + widget->reservedChars * cWidth, wiY + cHeight -1, wiX + widget->reservedChars * cWidth + 2, wiY + cHeight -1, editFrameColor);
