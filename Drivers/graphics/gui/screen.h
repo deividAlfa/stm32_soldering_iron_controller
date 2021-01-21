@@ -33,7 +33,8 @@ struct screen_t
 	struct screen_t *next_screen;
 	widget_t *widgets;
 	widget_t *current_widget;
-	uint8_t enabled;
+	bool enabled;
+	bool force_refresh;
 	int (*processInput)(struct screen_t *scr, RE_Rotation_t input, RE_State_t *);
 	void (*update)(screen_t *scr);
 	void (*draw)(screen_t *scr);

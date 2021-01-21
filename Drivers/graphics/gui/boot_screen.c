@@ -122,6 +122,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 			FillBuffer(C_BLACK,fill_dma);					// Clear screen
 			Widget_profile_edit.enabled=1;					// Enable widgets
 			Widget_profile_OK.enabled=1;
+			scr->force_refresh=1;
 			UG_FontSelect(&FONT_8X14_reduced);
 			UG_PutString(19,0,"First boot!");//11			// Draw message
 			UG_PutString(7,15,"Select profile");//14

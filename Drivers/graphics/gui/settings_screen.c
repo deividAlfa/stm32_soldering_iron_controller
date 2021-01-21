@@ -321,10 +321,12 @@ static void setWakeMode(uint16_t *val) {
 	systemSettings.settings.WakeInputMode= * val;
 	if(*val==wakeInputmode_stand){
 		comboitem_SYSTEM_ButtonWake.enabled=0;
+		Screen_settingsmenu.force_refresh=1;
 		systemSettings.settings.wakeOnButton=wakeButton_Off;
 	}
 	else{
 		comboitem_SYSTEM_ButtonWake.enabled=1;
+		Screen_settingsmenu.force_refresh=1;
 	}
 }
 
@@ -526,6 +528,7 @@ void edit_tip_screenDraw(screen_t *scr){
 	if((strcmp(str, "    ") == 0) || (strcmp(str, comboWidget_Settings_IRONTIPS.comboBoxWidget.currentItem->text) == 0) ) {
 		if(Widget_IRONTIPS_Save.enabled){
 			Widget_IRONTIPS_Save.enabled=0;
+			scr->force_refresh=1;
 			FillBuffer(C_BLACK,fill_dma);
 			UG_FontSelect(&FONT_10X16_reduced);
 			UG_PutString(20,17,"NAME:");//12
@@ -534,6 +537,7 @@ void edit_tip_screenDraw(screen_t *scr){
 	else{
 		if(!Widget_IRONTIPS_Save.enabled){
 			Widget_IRONTIPS_Save.enabled=1;
+			scr->force_refresh=1;
 		}
 	}
 	default_screenDraw(scr);

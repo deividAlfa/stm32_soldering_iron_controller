@@ -94,8 +94,13 @@ static void * getTip() {
 }
 
 static void * main_screen_getIronTemp() {
+	int16_t tmp;
 	if(UpdateReadings){
-		lastTipTemp = readTipTemperatureCompensated(stored_reading,read_Avg);
+		tmp = readTipTemperatureCompensated(stored_reading,read_Avg);
+		if(tmp!=lastTipTemp){
+			lastTipTemp = tmp;
+			Screen_main.force_refresh=1;
+		}
 	}
 	return &lastTipTemp;
 }
@@ -243,6 +248,7 @@ void main_screenUpdate(screen_t *scr) {
 	}
 	if(clearScreen){
 		FillBuffer(C_BLACK,fill_dma);
+		scr->force_refresh=1;
 	}
 
 	Widget_SetPoint.editable.step = systemSettings.settings.tempStep;

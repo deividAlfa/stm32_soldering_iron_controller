@@ -76,6 +76,7 @@ void default_screenDraw(screen_t *scr) {
 			}
 			last_widget = last_widget->next_widget;
 		}
+		scr->force_refresh=0;
 	}
 }
 
@@ -127,6 +128,7 @@ void default_init(screen_t *scr) {
 		}
 		w = w->next_widget;
 	}
+	scr->force_refresh=1;
 }
 
 void screen_setDefaults(screen_t *scr) {
@@ -136,4 +138,5 @@ void screen_setDefaults(screen_t *scr) {
 	scr->update = &default_screenUpdate;
 	scr->onEnter = NULL;
 	scr->onExit = NULL;
+	scr->force_refresh=1;
 }

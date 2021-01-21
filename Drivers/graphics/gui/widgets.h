@@ -103,8 +103,8 @@ struct widget_t
 	const UG_FONT *font_size;
 	widget_t *next_widget;
 	bool enabled;
-	bool redraw;
 	uint8_t type;
+	uint8_t force_refresh;
 	struct screen_t *parent;
 	void (*draw)(widget_t*);
 	union {
@@ -131,4 +131,5 @@ void comboAddScreen(comboBox_item_t* item,widget_t *combo, char *label, uint8_t 
 void comboAddOption(comboBox_item_t* item, widget_t *combo, char *label, widget_t *widget);
 void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, int (*action)());
 void comboResetIndex(widget_t *combo);
+int32_t strsum(char* str);
 #endif /* GRAPHICS_GUI_WIDGETS_H_ */
