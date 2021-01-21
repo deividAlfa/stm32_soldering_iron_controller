@@ -26,7 +26,7 @@ typedef struct selectable_widget_t {
 	widgetStateType previous_state;
 	int (*processInput)(widget_t*, RE_Rotation_t, RE_State_t *);
 	int (*longPressAction)(widget_t*);
-	int tab;
+	uint8_t tab;
 } selectable_widget_t;
 
 typedef struct comboBox_widget_t {
@@ -39,10 +39,8 @@ typedef struct comboBox_widget_t {
 typedef struct comboBox_item_t {
 	char *text;
 	comboBox_item_t *next_item;
-	struct{
-		unsigned enabled:1;
-		unsigned type:4;
-	};
+	uint8_t enabled;
+	uint8_t type;
 	union{
 		widget_t *widget;
 		uint8_t action_screen;
@@ -52,19 +50,19 @@ typedef struct comboBox_item_t {
 
 typedef struct displayOnly_widget_t {
 	void * (*getData)();
+	uint8_t number_of_dec;
 	uint8_t type;
-	uint8_t	number_of_dec;
 	int32_t last_value;
 	void (*update)(widget_t*);
-	bool justify;
+	uint8_t justify;
 } displayOnly_widget_t;
 
 typedef struct editable_t {
 	displayOnly_widget_t inputData;
 	selectable_widget_t selectable;
 	void (*setData)(void *);
-	uint16_t step;
-	uint16_t big_step;
+	uint8_t step;
+	uint8_t big_step;
 	int32_t max_value;
 	int32_t min_value;
 	uint8_t current_edit;
