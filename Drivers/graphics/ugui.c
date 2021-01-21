@@ -831,6 +831,8 @@ void UG_PutString( UG_U16 x, UG_U16 y, char* str )
 
 	  if(gui->font.p == font_iron_temp.p){
 		  switch(chr){
+			  case ' ':
+				  break;
 			  case 'C':
 				  chr=43;
 				  break;
@@ -852,6 +854,8 @@ void UG_PutString( UG_U16 x, UG_U16 y, char* str )
 	  }
 	  else if(gui->font.p == font_no_iron.p){
 		  switch(chr){
+			  case ' ':
+				  break;
 			  case 'I':
 				  chr=33;
 				  break;
@@ -865,9 +869,7 @@ void UG_PutString( UG_U16 x, UG_U16 y, char* str )
 		  		  chr=36;
 		  		  break;
 		  	  default:
-		  		if(chr!=' '){
-		  			continue;
-		  		}
+		  		continue;
 		  }
 	  }
 	  if (chr < gui->font.start_char || chr > gui->font.end_char) continue;
