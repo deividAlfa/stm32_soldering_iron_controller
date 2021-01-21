@@ -53,7 +53,6 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 	Iron.Pwm_Timer			= pwmtimer;
 	Iron.Delay_Timer		= delaytimer;
 	Iron.Pwm_Channel 		= pwmchannel;
-	Iron.Pwm_Out 			= 0;										// PWM disabled
 	Iron.presence			= isPresent;								// Set detected by default (to not show ERROR screen at boot)
 	setCurrentMode(systemSettings.settings.initMode);					// Set mode
 	initTimers();														// Initialize timers
@@ -62,14 +61,16 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 }
 
 void handleIron(void) {
-	static uint32_t prevSysChecksum=0, newSysChecksum=0,prevTipChecksum=0, newTipChecksum=0, checksumtime=0;
+	static uint32_t prevSysChecksum=0, newSysChecksum=0;
+	static uint32_t prevTipChecksum=0, newTipChecksum=0;
+	static uint32_t checksumtime=0;
 	uint32_t CurrentTime = HAL_GetTick();
 	float set=0;
 	
 	// Update Tip temperature in human readable format
 	uint16_t tipTemp = readTipTemperatureCompensated(update_reading,read_Avg);
 
-	// Totally disable PWM if profile is not defined
+	// Enter failure state if profile is not defined
 	if(!GetFailState()){
 		if((systemSettings.settings.currentProfile!=profile_T12)&&(systemSettings.settings.currentProfile!=profile_C245)&&(systemSettings.settings.currentProfile!=profile_C210)){
 			SetFailState(failureState_On);
@@ -78,23 +79,23 @@ void handleIron(void) {
 
 	// Check changes in system settings. Don't check if in: Calibration mode, setup mode, save delay==0 or in PWM failure state
 	if( (systemSettings.setupMode==setup_Off) && (Iron.calibrating==calibration_Off) && (systemSettings.settings.saveSettingsDelay>0) && (Iron.FailState==failureState_Off) && (CurrentTime-checksumtime>999)){
-		checksumtime=CurrentTime;														// Store time
+		checksumtime=CurrentTime;														// Store current time
 		newSysChecksum=ChecksumSettings(&systemSettings.settings);						// Calculate system checksum
-		newTipChecksum=ChecksumProfile(&systemSettings.Profile);						// Calculate tips checksum
-		if((systemSettings.settingsChecksum!=newSysChecksum)||(systemSettings.ProfileChecksum!=newTipChecksum)){ 	// If any checksum changed
-			if((prevSysChecksum!=newSysChecksum)||(prevTipChecksum!=newTipChecksum)){								// If different from the previous calculated checksum.
-				prevSysChecksum=newSysChecksum;																		// A change was done recently
+		newTipChecksum=ChecksumProfile(&systemSettings.Profile);						// Calculate tip profile checksum
+		if((systemSettings.settingsChecksum!=newSysChecksum)||(systemSettings.ProfileChecksum!=newTipChecksum)){ 	// If anything was changed (Checksum mismatch)
+			if((prevSysChecksum!=newSysChecksum)||(prevTipChecksum!=newTipChecksum)){								// If different from the previous calculated checksum (settings are being changed quickly, don't save every time).
+				prevSysChecksum=newSysChecksum;																		// Store last computed checksum
 				prevTipChecksum=newTipChecksum;
 				Iron.LastSysChangeTime=CurrentTime;																	// Reset timer (we don't save anything until we pass a certain time without changes)
 			}
-			// If different from the previous calculated checksum, and timer expired (No changes for a long time)
+			// If different from the previous calculated checksum, and timer expired (No changes for enough time)
 			else if((CurrentTime-Iron.LastSysChangeTime)>((uint32_t)systemSettings.settings.saveSettingsDelay*1000)){
-				saveSettings(saveKeepingProfiles);																					// Save settings
+				saveSettings(saveKeepingProfiles);																					// Save settings, this also updates the checksums
 			}
 		}
 	}
 
-	// No iron detection. KSGERs have NTC in the handle
+	// No iron detection.
 	checkIronPresence();
 
 	// Any flag active?
@@ -107,13 +108,15 @@ void handleIron(void) {
 		}
 		return;											// Do nothing else (PWM already disabled)
 	}
-	if(Iron.updateMode){									// If pending mode change
-		if((HAL_GetTick()-Iron.LastModeChangeTime)>500){	// Wait 500mS with steady mode (debouncing)
-			Iron.updateMode=0;								// reset flag
+
+	// Controls external mode changes
+	if(Iron.updateMode==needs_update){						// If pending mode change
+		if((HAL_GetTick()-Iron.LastModeChangeTime)>500){	// Wait 500mS with steady mode (de-bouncing)
+			Iron.updateMode=no_update;						// reset flag
 			applyCurrentMode(Iron.changeMode);				// Apply mode
 		}
-
 	}
+
 	// Controls inactivity timer and enters low power modes
 	switch (Iron.CurrentMode) {
 		case mode_boost:
@@ -123,11 +126,13 @@ void handleIron(void) {
 		case mode_normal:
 			if((Iron.calibrating==calibration_Off )&& (systemSettings.Profile.sleep.Time>0) && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.Profile.sleep.Time*60000) ) {
 				applyCurrentMode(mode_sleep);
+				buzzer_long_beep();
 			}
 			break;
 		case mode_sleep:
 			if((systemSettings.Profile.standby.Time>0) && ((CurrentTime - Iron.CurrentModeTimer) > (uint32_t)systemSettings.Profile.standby.Time*60000) ) {
 				applyCurrentMode(mode_standby);
+				buzzer_long_beep();
 			}
 			break;
 		default:
@@ -141,8 +146,8 @@ void handleIron(void) {
 	}
 
 	// If there are pending PWM settings to be applied, apply them before new calculation
-	if(Iron.updatePwm==PWM_changed){
-		Iron.updatePwm=PWM_unchanged;
+	if(Iron.updatePwm==needs_update){
+		Iron.updatePwm=no_update;
 		__HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.Profile.pwmPeriod);
 		__HAL_TIM_SET_AUTORELOAD(Iron.Delay_Timer,systemSettings.Profile.pwmDelay);
 		Iron.Pwm_Max = systemSettings.Profile.pwmPeriod - (systemSettings.Profile.pwmDelay + (uint16_t)ADC_MEASURE_TIME);
@@ -335,7 +340,7 @@ void initTimers(void){
 bool setPwmDelay(uint16_t delay){
 	if(systemSettings.Profile.pwmPeriod>(delay+100)){
 		systemSettings.Profile.pwmDelay=delay;
-		Iron.updatePwm=PWM_changed;
+		Iron.updatePwm=needs_update;
 		return 0;
 	}
 	return 1;
@@ -345,7 +350,7 @@ bool setPwmDelay(uint16_t delay){
 bool setPwmPeriod(uint16_t period){
 	if(systemSettings.Profile.pwmDelay<(period-100)){
 		systemSettings.Profile.pwmPeriod=period;
-		Iron.updatePwm=PWM_changed;
+		Iron.updatePwm=needs_update;
 		return 0;
 	}
 	return 1;
@@ -358,7 +363,7 @@ void setNoIronValue(uint16_t noiron){
 void setCurrentMode(uint8_t mode){
 	Iron.changeMode = mode;
 	Iron.LastModeChangeTime = HAL_GetTick();
-	Iron.updateMode = 1;
+	Iron.updateMode = needs_update;
 }
 
 
@@ -383,8 +388,8 @@ void applyCurrentMode(uint8_t mode) {
 	}
 	if(Iron.CurrentMode != mode){
 		Iron.CurrentMode = mode;
-		buzzer_long_beep();
 		Iron.Cal_TemperatureReachedFlag = 0;
+		buzzer_short_beep();
 	}
 	modeChanged(mode);
 }
@@ -407,19 +412,20 @@ void IronWake(bool source){													// source: 0 = handle, 1=encoder
 void checkIronPresence(void){
 	uint32_t CurrentTime = HAL_GetTick();
 	int16_t ambTemp = readColdJunctionSensorTemp_x10(mode_Celsius);
-	// If tip temperature reading too high or NTC too low (If NTC is mounted at handle, reports -70ºC or so when disconnected)
+
+	// If tip temperature reading too high or NTC too low (If NTC is mounted in the handle, open circuit reports -70ºC or so)
 	if((TIP.last_RawAvg>systemSettings.Profile.noIronValue) || (ambTemp < -600)) {
-		if(Iron.presence==isPresent){							// If it was present
+		if(Iron.presence==isPresent){
 			Iron.LastNoPresentTime = CurrentTime;	// Start alarm and save last detected time
 			buzzer_alarm_start();
 			Iron.presence = notPresent;
-			Iron.Pwm_Out = 0;						// Disable pwm
+			Iron.Pwm_Out = 0;
 		}
 	}
 	else{																						// If now present
-		if(Iron.presence==notPresent){																	// But wasn't before
+		if(Iron.presence==notPresent){															// But wasn't before
 			if((CurrentTime-Iron.LastNoPresentTime)>systemSettings.settings.noIronDelay){		// Check enough time passed
-				buzzer_alarm_stop();					// Stop alarm							// Restore normal operation
+				buzzer_alarm_stop();
 				Iron.presence = isPresent;
 				setCurrentMode(mode_normal);
 			}
@@ -437,7 +443,7 @@ void SetFailState(bool FailState) {
 	Iron.FailState = FailState;
 	if(FailState==failureState_On){	// Force PWM Output low state
 		Iron.Pwm_Out = 0;
-		__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);	// Set 0 PWM Duty
+		__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);
 	}
 }
 

@@ -33,8 +33,8 @@ enum{
 	failureState_Off	= 0,
 	failureState_On		= 1,
 
-	PWM_unchanged	= 0,
-	PWM_changed		= 1,
+	no_update	= 0,
+	needs_update		= 1,
 
 	runaway_ok		= 0,
 	runaway_25		= 1,
