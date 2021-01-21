@@ -107,21 +107,27 @@ void handleIron(void) {
 		}
 		return;											// Do nothing else (PWM already disabled)
 	}
+	if(Iron.updateMode){									// If pending mode change
+		if((HAL_GetTick()-Iron.LastModeChangeTime)>500){	// Wait 500mS with steady mode (debouncing)
+			Iron.updateMode=0;								// reset flag
+			applyCurrentMode(Iron.changeMode);				// Apply mode
+		}
 
+	}
 	// Controls inactivity timer and enters low power modes
 	switch (Iron.CurrentMode) {
 		case mode_boost:
 			if(CurrentTime - Iron.CurrentModeTimer > ((uint32_t)systemSettings.Profile.boost.Time*60000))
-				setCurrentMode(mode_normal);
+				applyCurrentMode(mode_normal);
 			break;
 		case mode_normal:
 			if((Iron.calibrating==calibration_Off )&& (systemSettings.Profile.sleep.Time>0) && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.Profile.sleep.Time*60000) ) {
-				setCurrentMode(mode_sleep);
+				applyCurrentMode(mode_sleep);
 			}
 			break;
 		case mode_sleep:
 			if((systemSettings.Profile.standby.Time>0) && ((CurrentTime - Iron.CurrentModeTimer) > (uint32_t)systemSettings.Profile.standby.Time*60000) ) {
-				setCurrentMode(mode_standby);
+				applyCurrentMode(mode_standby);
 			}
 			break;
 		default:
@@ -349,7 +355,15 @@ void setNoIronValue(uint16_t noiron){
 	systemSettings.Profile.noIronValue=noiron;
 }
 // Change the iron operating mode
-void setCurrentMode(uint8_t mode) {
+void setCurrentMode(uint8_t mode){
+	Iron.changeMode = mode;
+	Iron.LastModeChangeTime = HAL_GetTick();
+	Iron.updateMode = 1;
+}
+
+
+// Change the iron operating mode
+void applyCurrentMode(uint8_t mode) {
 	Iron.CurrentModeTimer = HAL_GetTick();
 	switch (mode) {
 		case mode_boost:
