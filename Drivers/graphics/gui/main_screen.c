@@ -378,7 +378,7 @@ void main_screen_setup(screen_t *scr) {
 	screen_addWidget(w,scr);
 	widgetDefaultsInit(w, widget_multi_option);
 	w->reservedChars=TipCharSize-1;
-	w->posX = 64;
+	w->posX = 65;
 	w->posY = 50;
 	w->font_size = &FONT_8X14_reduced;
 	w->multiOptionWidget.editable.inputData.getData = &getTip;
