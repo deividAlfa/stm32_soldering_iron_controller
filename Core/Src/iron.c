@@ -369,30 +369,31 @@ void setCurrentMode(uint8_t mode){
 
 // Change the iron operating mode
 void applyCurrentMode(uint8_t mode) {
-	Iron.CurrentModeTimer = HAL_GetTick();
-	switch (mode) {
-		case mode_boost:
-			Iron.CurrentSetTemperature = systemSettings.Profile.boost.Temperature;
-			break;
-		case mode_normal:
-			Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature;
-			break;
-		case mode_sleep:
-			Iron.CurrentSetTemperature = systemSettings.Profile.sleep.Temperature;
-			break;
-		case mode_standby:
-		default:
-			mode=mode_standby;
-			Iron.CurrentSetTemperature = 0;
-			break;
-	}
 	if(Iron.CurrentMode != mode){
+		Iron.CurrentModeTimer = HAL_GetTick();
 		Iron.CurrentMode = mode;
 		Iron.Cal_TemperatureReachedFlag = 0;
 		buzzer_short_beep();
+		switch (mode) {
+			case mode_boost:
+				Iron.CurrentSetTemperature = systemSettings.Profile.boost.Temperature;
+				break;
+			case mode_normal:
+				Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature;
+				break;
+			case mode_sleep:
+				Iron.CurrentSetTemperature = systemSettings.Profile.sleep.Temperature;
+				break;
+			case mode_standby:
+			default:
+				mode=mode_standby;
+				Iron.CurrentSetTemperature = 0;
+				break;
+		}
+		modeChanged(mode);
 	}
-	modeChanged(mode);
 }
+
 // Called from program timer if WAKE change is detected
 void IronWake(bool source){													// source: 0 = handle, 1=encoder
 	if(systemSettings.settings.WakeInputMode==wakeInputmode_shake){			// Wake only works in "Shake" mode
