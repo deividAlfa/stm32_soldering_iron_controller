@@ -22,31 +22,39 @@ ADC_Status_t ADC_Status = ADC_Idle;
 
 ADCDataTypeDef_t TIP = {
 		adc_buffer: &Tip_measures[0],
-		last_avg: 100,
+		last_avg: 1,
 		last_RawAvg: 0,
-		EMA_of_EMA:100<<12,
-		EMA_of_Input:100<<12,
-		Filter:1				//EMA type filtering
+		EMA_of_EMA:1<<12,
+		EMA_of_Input:1<<12,
 };
 
 #ifdef USE_VIN
 ADCDataTypeDef_t VIN = {
 		adc_buffer: &ADC_measures[0].VIN,
-		Filter:1				//EMA type filtering
+		last_avg: 1,
+		last_RawAvg: 0,
+		EMA_of_EMA:1<<12,
+		EMA_of_Input:1<<12,
 };
 #endif
 
 #ifdef USE_NTC
 ADCDataTypeDef_t NTC = {
 		adc_buffer: &ADC_measures[0].NTC,
-		Filter:1				//EMA type filtering
+		last_avg: 1,
+		last_RawAvg: 0,
+		EMA_of_EMA:1<<12,
+		EMA_of_Input:1<<12,
 };
 #endif
 
 #ifdef USE_VREF
 ADCDataTypeDef_t VREF = {
 		adc_buffer: &ADC_measures[0].VREF,
-		Filter:1				//EMA type filtering
+		last_avg: 1,
+		last_RawAvg: 0,
+		EMA_of_EMA:1<<12,
+		EMA_of_Input:1<<12,
 };
 #endif
 
@@ -149,9 +157,9 @@ void ADC_Start_DMA(){
 void ADC_Stop_DMA(void){
 	HAL_ADC_Stop_DMA(adc_device);
 }
+
 /*
- * Credits: https://kiritchatterjee.wordpress.com/2014/11/10/a-simple-digital-low-pass-filter-in-c/
- *
+ * Some credits: https://kiritchatterjee.wordpress.com/2014/11/10/a-simple-digital-low-pass-filter-in-c/
  */
 void DoAverage(ADCDataTypeDef_t* InputData){
 	volatile uint16_t *inputBuffer=InputData->adc_buffer;
@@ -183,32 +191,34 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 
 	// Calculate average
 	avg_data = adc_sum / (ADC_BFSIZ -2) ;
-#ifdef USE_FILTER							// Global filter flag (setup.h)
-	if(InputData->Filter){					// Filtering enabled for this data?
+	// Global filter flag (setup.h)
+	if((systemSettings.Profile.filterMode ==filter_ema) || (systemSettings.Profile.filterMode ==filter_dema)){					// Advanced filtering enabled?
+
+		if(systemSettings.Profile.filterCoef>4){						// Limit coefficient
+			systemSettings.Profile.filterCoef=4;
+		}
+		uint8_t shift = systemSettings.Profile.filterCoef;
+		//factor=0.6
+		//EMA = factor* data + (1-factor) * EMA;
 
 		// Fixed point shift
 		uint32_t RawData = avg_data<<12;
 
-		// Calc EMA of input
-		InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << FILTER_N) - InputData->EMA_of_Input) +RawData )>>FILTER_N;
+		// Compute EMA of input
+		InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) +RawData +(1<<(shift-1)))>>shift;
 
-
-		if(InputData->Filter==2){
-			// DEMA filter
-			InputData->EMA_of_EMA = ( ((InputData->EMA_of_EMA << FILTER_N) - InputData->EMA_of_EMA) + InputData->EMA_of_Input  )>>FILTER_N;
-			InputData->last_avg = ((2*InputData->EMA_of_Input)-InputData->EMA_of_EMA)>>12;
-		}
-		else{
-			// EMA Filter
+		if(systemSettings.Profile.filterMode == filter_ema){							// EMA Filter
 			InputData->last_avg = InputData->EMA_of_Input>>12;
+		}
+		else{																			// DEMA filter
+			// Compute EMA of EMA
+			InputData->EMA_of_EMA = ( ((InputData->EMA_of_EMA << shift) - InputData->EMA_of_EMA) + InputData->EMA_of_Input  ) >> shift;
+			InputData->last_avg = ((2*InputData->EMA_of_Input)-InputData->EMA_of_EMA)>>12;
 		}
 	}
 	else {
 		InputData->last_avg=avg_data;
 	}
-#else
-	InputData->last_avg=avg_data;
-#endif
 	InputData->last_RawAvg = avg_data;
 }
 
@@ -220,7 +230,8 @@ uint16_t ADC_to_mV (uint16_t adc){
 	 * divide just with bit rotation.
 	 *
 	 * So it becomes Vadc = (ADC * 845006) >>20
-	 * Max 20 bits, more will cause overflow to the 32 bit variable
+	 * Max possible input = 20 bit number, more will cause overflow to the 32 bit variable
+	 * Calculated to use  12 bit max input from ADC (4095)
 	 * Much, much faster than floats!
 	 */
 

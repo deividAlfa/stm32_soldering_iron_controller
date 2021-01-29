@@ -10,6 +10,6 @@
 
 #include "screen.h"
 
-void settings_screen_setup(screen_t *scr);
+void settings_screen_setup(void);
 
 #endif /* SETTINGS_GUI_DEBUG_SCREEN_H_ */

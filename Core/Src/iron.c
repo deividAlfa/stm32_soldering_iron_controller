@@ -54,7 +54,7 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 	Iron.Delay_Timer		= delaytimer;
 	Iron.Pwm_Channel 		= pwmchannel;
 	Iron.presence			= isPresent;								// Set detected by default (to not show ERROR screen at boot)
-	setCurrentMode(systemSettings.settings.initMode);					// Set mode
+	setCurrentMode(systemSettings.settings.initMode,forceMode);			// Set mode
 	initTimers();														// Initialize timers
 
 	// Now the PWM and ADC are working in the background.
@@ -64,6 +64,7 @@ void handleIron(void) {
 	static uint32_t prevSysChecksum=0, newSysChecksum=0;
 	static uint32_t prevTipChecksum=0, newTipChecksum=0;
 	static uint32_t checksumtime=0;
+	static uint32_t PID_time=0;
 	uint32_t CurrentTime = HAL_GetTick();
 	float set=0;
 	
@@ -109,39 +110,28 @@ void handleIron(void) {
 		return;											// Do nothing else (PWM already disabled)
 	}
 
-	// Controls external mode changes
+	// Controls external mode changes from stand changes
 	if(Iron.updateMode==needs_update){						// If pending mode change
-		if((HAL_GetTick()-Iron.LastModeChangeTime)>500){	// Wait 500mS with steady mode (de-bouncing)
+		if((CurrentTime-Iron.LastModeChangeTime)>500){	// Wait 500mS with steady mode (de-bouncing)
 			Iron.updateMode=no_update;						// reset flag
-			applyCurrentMode(Iron.changeMode);				// Apply mode
+			setCurrentMode(Iron.changeMode,noForceMode);				// Apply mode
 		}
 	}
 
 	// Controls inactivity timer and enters low power modes
-	switch (Iron.CurrentMode) {
-		case mode_boost:
-			if(CurrentTime - Iron.CurrentModeTimer > ((uint32_t)systemSettings.Profile.boost.Time*60000))
-				applyCurrentMode(mode_normal);
-			break;
-		case mode_normal:
-			if((Iron.calibrating==calibration_Off )&& (systemSettings.Profile.sleep.Time>0) && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.Profile.sleep.Time*60000) ) {
-				applyCurrentMode(mode_sleep);
-				buzzer_long_beep();
-			}
-			break;
-		case mode_sleep:
-			if((systemSettings.Profile.standby.Time>0) && ((CurrentTime - Iron.CurrentModeTimer) > (uint32_t)systemSettings.Profile.standby.Time*60000) ) {
-				applyCurrentMode(mode_standby);
-				buzzer_long_beep();
-			}
-			break;
-		default:
-			break;
+	if(Iron.CurrentMode==mode_run) {
+		if((Iron.calibrating==calibration_Off )&& (systemSettings.Profile.sleepTimeout>0) && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.Profile.sleepTimeout*60000) ) {
+			setCurrentMode(mode_sleep,forceMode);
+			buzzer_long_beep();
+		}
 	}
-
+	if((CurrentTime-PID_time)>systemSettings.Profile.PIDTime){		//Timer for updating PID calculation
+			PID_time=CurrentTime;
+			Iron.PIDUpdate=1;
+	}
 	// Only continue if PID update flag is set
 	// Don't calculate PID for the first second after boot, as the filters might not have enough data yet (Only causes problem with high EMA/DEMA coefficients)
-	if((Iron.PIDUpdate==0) || (HAL_GetTick()<1000)){
+	if((Iron.PIDUpdate==0) || (CurrentTime<1000)){
 		return;
 	}
 
@@ -208,32 +198,32 @@ void handleIron(void) {
 			if(Iron.RunawayLevel!=runaway_ok){										// Runaway detected?
 				if(Iron.prevRunawayLevel==runaway_ok){								// First overrun detection?
 					Iron.prevRunawayLevel=Iron.RunawayLevel;						// Yes, store in prev level
-					Iron.RunawayTimer=HAL_GetTick();								// Store time
+					Iron.RunawayTimer=CurrentTime;									// Store time
 				}
 				else{																// Was already triggered
 					switch(Iron.RunawayLevel){
 						case runaway_ok:											// No problem (<25ºC difference)
 							break;													// (Never used here)
 						case runaway_25:											// Temp >25°C over setpoint
-							if((HAL_GetTick()-Iron.RunawayTimer)>20000){			// 20 second limit
+							if((CurrentTime-Iron.RunawayTimer)>20000){			// 20 second limit
 								Iron.RunawayStatus=runaway_triggered;
 								FatalError(error_RUNAWAY25);
 							}
 							break;
 						case runaway_50:											// Temp >50°C over setpoint
-							if((HAL_GetTick()+Iron.RunawayTimer)>10000){			// 10 second limit
+							if((CurrentTime+Iron.RunawayTimer)>10000){			// 10 second limit
 								Iron.RunawayStatus=runaway_triggered;
 								FatalError(error_RUNAWAY50);
 							}
 							break;
 						case runaway_75:											// Temp >75°C over setpoint
-							if((HAL_GetTick()-Iron.RunawayTimer)>3000){				// 3 second limit
+							if((CurrentTime-Iron.RunawayTimer)>3000){				// 3 second limit
 								Iron.RunawayStatus=runaway_triggered;
 								FatalError(error_RUNAWAY75);
 							}
 							break;
 						case runaway_100:											// Temp >100°C over setpoint
-							if((HAL_GetTick()-Iron.RunawayTimer)>1000){				// 1 second limit
+							if((CurrentTime-Iron.RunawayTimer)>1000){				// 1 second limit
 								Iron.RunawayStatus=runaway_triggered;
 								FatalError(error_RUNAWAY100);
 							}
@@ -254,7 +244,7 @@ void handleIron(void) {
 		}
 		else{
 			Iron.prevRunawayLevel=runaway_ok;
-			Iron.RunawayTimer=HAL_GetTick();								// PWM off, reset runaway status and timer
+			Iron.RunawayTimer = CurrentTime;								// PWM off, reset runaway status and timer
 		}
 	}
 }
@@ -270,26 +260,15 @@ uint16_t round_10(uint16_t input){
 	return input;
 }
 // Changes the system temperature unit
-void switchTempUnit(bool unit){
-	uint16_t tmp;
-	systemSettings.settings.tempUnit=unit;
-	if(unit==mode_Farenheit){
-		tmp = TempConversion(systemSettings.Profile.UserSetTemperature,toFarenheit,0);
-		systemSettings.Profile.UserSetTemperature = round_10(tmp);
-		tmp = TempConversion(systemSettings.Profile.boost.Temperature,toFarenheit,0);
-		systemSettings.Profile.boost.Temperature = round_10(tmp);
-		tmp = TempConversion(systemSettings.Profile.sleep.Temperature,toFarenheit,0);
-		systemSettings.Profile.sleep.Temperature = round_10(tmp);
+void setSystemTempUnit(bool unit){
+	if(systemSettings.settings.tempUnit != unit){										// If current system unit is different
+		systemSettings.settings.tempUnit = unit;
 	}
-	else{
-		tmp = TempConversion(systemSettings.Profile.UserSetTemperature,toCelsius,0);
-		systemSettings.Profile.UserSetTemperature = round_10(tmp);
-		tmp = TempConversion(systemSettings.Profile.boost.Temperature,toCelsius,0);
-		systemSettings.Profile.boost.Temperature = round_10(tmp);
-		tmp = TempConversion(systemSettings.Profile.sleep.Temperature,toCelsius,0);
-		systemSettings.Profile.sleep.Temperature = round_10(tmp);
+	if(systemSettings.Profile.tempUnit != unit){										// If profile unit is different
+		systemSettings.Profile.tempUnit = unit;
+		systemSettings.Profile.UserSetTemperature = round_10(TempConversion(systemSettings.Profile.UserSetTemperature,unit,0));
 	}
-	setCurrentMode(mode_normal);
+	setCurrentMode(Iron.CurrentMode, forceMode);										// Reload temps
 }
 
 // This function sets the prescaler settings depending on the system, core clock
@@ -360,7 +339,7 @@ void setNoIronValue(uint16_t noiron){
 	systemSettings.Profile.noIronValue=noiron;
 }
 // Change the iron operating mode
-void setCurrentMode(uint8_t mode){
+void setModefromStand(uint8_t mode){
 	Iron.changeMode = mode;
 	Iron.LastModeChangeTime = HAL_GetTick();
 	Iron.updateMode = needs_update;
@@ -368,13 +347,15 @@ void setCurrentMode(uint8_t mode){
 
 
 // Change the iron operating mode
-void applyCurrentMode(uint8_t mode) {
-	if(Iron.CurrentMode != mode){
-		Iron.CurrentModeTimer = HAL_GetTick();
+void setCurrentMode(uint8_t mode, bool forceMode){
+	Iron.CurrentModeTimer = HAL_GetTick();					// refresh current mode timer
+
+	if((Iron.CurrentMode!=mode) || forceMode){
 		Iron.CurrentMode = mode;
 		Iron.Cal_TemperatureReachedFlag = 0;
 		buzzer_short_beep();
 		switch (mode) {
+		/*
 			case mode_boost:
 				Iron.CurrentSetTemperature = systemSettings.Profile.boost.Temperature;
 				break;
@@ -390,24 +371,32 @@ void applyCurrentMode(uint8_t mode) {
 				Iron.CurrentSetTemperature = 0;
 				break;
 		}
+		*/
+		case mode_run:
+			Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature;
+			break;
+		default:
+			mode=mode_sleep;
+		case mode_sleep:
+			Iron.CurrentSetTemperature = 0;
+			break;
+	}
 		modeChanged(mode);
 	}
 }
 
 // Called from program timer if WAKE change is detected
-void IronWake(bool source){													// source: 0 = handle, 1=encoder
-	if(systemSettings.settings.WakeInputMode==wakeInputmode_shake){			// Wake only works in "Shake" mode
-		if((Iron.CurrentMode==mode_sleep) || (Iron.CurrentMode==mode_standby)){
-			setCurrentMode(mode_normal);				// Back to normal mode
-		}
-		else if(Iron.CurrentMode==mode_normal){
-			Iron.CurrentModeTimer = HAL_GetTick();		// Clear timer to avoid entering sleep mode
-		}
-		if(source==source_wakeInput){					// Wake from handle
-			Iron.newActivity=1;							// Enable flag for oled pulse icon
-			Iron.lastActivityTime = HAL_GetTick();
+void IronWake(bool source){											// source: 0 = handle, 1=encoder
+	if(source==source_wakeButton){									// Wake from handle
+		if(!systemSettings.settings.wakeOnButton){
+			return;
 		}
 	}
+	else{
+		Iron.newActivity=1;											// Enable flag for oled pulse icon
+		Iron.lastActivityTime = HAL_GetTick();						// Store time for keeping the image on
+	}
+	setCurrentMode(mode_run,noForceMode);						// Back to normal mode
 }
 // Sets the presence of the iron. Handles alarm output
 void checkIronPresence(void){
@@ -418,9 +407,10 @@ void checkIronPresence(void){
 	if((TIP.last_RawAvg>systemSettings.Profile.noIronValue) || (ambTemp < -600)) {
 		if(Iron.presence==isPresent){
 			Iron.LastNoPresentTime = CurrentTime;	// Start alarm and save last detected time
-			buzzer_alarm_start();
 			Iron.presence = notPresent;
+			setCurrentMode(mode_sleep,forceMode);
 			Iron.Pwm_Out = 0;
+			buzzer_alarm_start();
 		}
 	}
 	else{																						// If now present
@@ -428,7 +418,7 @@ void checkIronPresence(void){
 			if((CurrentTime-Iron.LastNoPresentTime)>systemSettings.settings.noIronDelay){		// Check enough time passed
 				buzzer_alarm_stop();
 				Iron.presence = isPresent;
-				setCurrentMode(mode_normal);
+				setCurrentMode(mode_run,forceMode);
 			}
 		}
 	}

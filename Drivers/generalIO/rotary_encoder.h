@@ -17,6 +17,7 @@ typedef enum {
 	Rotate_Decrement, /*!< Encoder was decremented */
 	Rotate_Increment_while_click, /*!< Encoder was incremented */
 	Rotate_Decrement_while_click, /*!< Encoder was decremented */
+	Release, 					/*!< Encoder was decremented */
 	Click,
 	LongClick,
 	Rotate_Nothing,    /*!< Encoder stop at it was before */

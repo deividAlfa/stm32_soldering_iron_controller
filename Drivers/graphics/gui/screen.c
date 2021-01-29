@@ -30,7 +30,7 @@ widget_t * screen_tabToWidget(screen_t * scr, uint8_t tab) {
 		last_widget = scr->widgets;
 		while(last_widget) {
 			if(last_widget->type == widget_editable) {
-				if(last_widget->editable.selectable.tab == tab)
+				if(last_widget->editableWidget.selectable.tab == tab)
 					return last_widget;
 			}
 			last_widget = last_widget->next_widget;
@@ -41,22 +41,6 @@ widget_t * screen_tabToWidget(screen_t * scr, uint8_t tab) {
 
 int default_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	int ret = -1;
-	/*				// Disable Rotate-while-click Screen change
-	if(input == Rotate_Increment_while_click) {
-		uint8_t i = scr->index;
-		++i;
-		if(i == screen_last_scrollable)
-			i = 1;
-		return i;
-	}
-	else if(input == Rotate_Decrement_while_click) {
-		uint8_t i = scr->index;
-		--i;
-		if(i == 0)
-			i = screen_last_scrollable - 1;
-		return i;
-	}
-	*/
 	selectable_widget_t *sel = extractSelectablePartFromWidget(scr->current_widget);
 	if(sel) {
 		if(sel->processInput) {
@@ -69,6 +53,9 @@ int default_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *
 void default_screenDraw(screen_t *scr) {
 	widget_t *last_widget = NULL;
 	if(scr->widgets) {
+		if(scr->refresh==screen_eraseAndRefresh){
+			FillBuffer(BLACK,fill_dma);
+		}
 		last_widget = scr->widgets;
 		while(last_widget) {
 			if(last_widget->draw){
@@ -76,20 +63,17 @@ void default_screenDraw(screen_t *scr) {
 			}
 			last_widget = last_widget->next_widget;
 		}
-		scr->force_refresh=0;
+		scr->refresh=screen_idle;
 	}
+
 }
 
 void default_screenUpdate(screen_t *scr) {
 	if(scr->widgets) {
 		widget_t *last_widget = scr->widgets;
-		displayOnly_widget_t *dis;
 		while(last_widget) {
-			dis = extractDisplayPartFromWidget(last_widget);
-			if(dis){
-				if(dis->update){
-					dis->update(last_widget);
-				}
+			if(last_widget->update){
+				last_widget->update(last_widget);
 			}
 			last_widget = last_widget->next_widget;
 		}
@@ -128,7 +112,6 @@ void default_init(screen_t *scr) {
 		}
 		w = w->next_widget;
 	}
-	scr->force_refresh=1;
 }
 
 void screen_setDefaults(screen_t *scr) {
@@ -138,5 +121,4 @@ void screen_setDefaults(screen_t *scr) {
 	scr->update = &default_screenUpdate;
 	scr->onEnter = NULL;
 	scr->onExit = NULL;
-	scr->force_refresh=1;
 }

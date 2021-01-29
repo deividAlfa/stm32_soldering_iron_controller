@@ -1,4 +1,4 @@
-/*
+    /*
  * tempsensors.c
  *
  *  Created on: Jan 12, 2021
@@ -30,7 +30,7 @@ int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
 		temp=999;								// Put some limits (99.9ºC)
 	}													// Negative limit is around -77ºC, we need that to detect NTC disconnected
 	if(tempUnit==mode_Farenheit){
-		temp=TempConversion(temp, toFarenheit, 1);
+		temp=TempConversion(temp, mode_Farenheit, 1);
 	}
 	return temp;
 #else
@@ -78,7 +78,7 @@ uint16_t human2adc(int16_t t) {
 
 	// If using Farenheit, convert to Celsius
 	if(systemSettings.settings.tempUnit==mode_Farenheit){
-		t = TempConversion(t,toCelsius,0);
+		t = TempConversion(t,mode_Celsius,0);
 	}
 	t-=ambTemp;
 	if (t < temp_minC){ return 0; } // If requested temp below min, return 0
@@ -127,7 +127,7 @@ int16_t adc2Human(uint16_t adc_value,bool correction, bool tempUnit) {
 	}
 	if(correction){ tempH+= ambTemp; }
 	if(tempUnit==mode_Farenheit){
-		tempH=TempConversion(tempH,toFarenheit,0);
+		tempH=TempConversion(tempH,mode_Farenheit,0);
 	}
 	return tempH;
 }
@@ -146,7 +146,7 @@ long map(long x, long in_min, long in_max, long out_min, long out_max) {
 // (temp*582542)>>20 == temp/1.8 (Real: 1,800000687)
 // Max input = 1100°C / 3700°F, otherwise we will overflow the signed int32
 int16_t TempConversion(int16_t temperature, bool conversion, bool x10mode){
-	if(conversion==toFarenheit){	// Input==Celsius, Output==Farenheit
+	if(conversion==mode_Farenheit){	// Input==Celsius, Output==Farenheit
 		temperature=(((int32_t)temperature*1887437)>>20);// F = (C*1.8)+32
 		if(x10mode){
 			temperature += 320;

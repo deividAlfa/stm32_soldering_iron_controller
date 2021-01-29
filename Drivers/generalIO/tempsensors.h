@@ -19,8 +19,6 @@
 #define read_Avg	0
 #define read_Raw	1
 
-#define toCelsius	0
-#define toFarenheit	1
 int16_t  readColdJunctionSensorTemp_C_x10(void);
 uint16_t coldJunctionTemp_mC_To_uV(int tempX10);
 uint16_t readIntTemp_mC(void);

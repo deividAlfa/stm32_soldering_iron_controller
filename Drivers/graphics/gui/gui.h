@@ -10,6 +10,9 @@
 
 #include "oled.h"
 #include "screen.h"
+#include "gui_strings.h"
+
+extern u8g2_t u8g2;
 
 void guiInit(void);
 void guiDraw();

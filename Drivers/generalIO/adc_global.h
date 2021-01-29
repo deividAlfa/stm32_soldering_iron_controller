@@ -23,7 +23,6 @@ typedef struct{
 	volatile uint32_t	EMA_of_EMA;		// EMA of EMA (To calculate DEMA)
 	volatile uint16_t	last_avg;		// Filtered (DEMA calculation)
 	volatile uint16_t	last_RawAvg; 	// Unfiltered, for quick Iron detection
-	volatile uint8_t	Filter;			// 0=No filter,  1= EMA filter(some undershoot), 2=DEMA filter(some overshoot, might cause oscillation)
 } ADCDataTypeDef_t;
 
 

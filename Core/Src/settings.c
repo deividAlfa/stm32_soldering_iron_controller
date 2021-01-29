@@ -8,11 +8,9 @@
 #include "settings.h"
 #include "pid.h"
 #include "iron.h"
-#include "ugui.h"
+#include "gui.h"
 #include "ssd1306.h"
 #include "tempsensors.h"
-
-char* profileStr[ProfileSize] = {" T12", "C245", "C210" };
 
 __attribute__((aligned(4))) systemSettings_t systemSettings;
 flashSettings_t* flashSettings = (flashSettings_t*)FLASH_ADDR;
@@ -168,9 +166,9 @@ void resetSystemSettings(void) {
 	systemSettings.settings.tempStep			= 5;
 	systemSettings.settings.saveSettingsDelay	= 5;
 	systemSettings.settings.currentProfile		= profile_None;
-	systemSettings.settings.initMode			= mode_normal;
+	systemSettings.settings.initMode			= mode_run;
 	systemSettings.settings.buzzerMode			= buzzer_Off;
-	systemSettings.settings.wakeOnButton		= wakeButton_Off;
+	systemSettings.settings.wakeOnButton		= wakeButton_On;
 	systemSettings.settings.WakeInputMode		= wakeInputmode_shake;
 	systemSettings.settings.EncoderInvert		= encoder_normal;
 }
@@ -205,15 +203,6 @@ void resetCurrentProfile(void){
 		systemSettings.Profile.tip[4].calADC_At_300 = 2300;
 		systemSettings.Profile.tip[4].calADC_At_400 = 3150;
 
-
-		systemSettings.Profile.boost.Time = 1;
-		systemSettings.Profile.boost.Temperature = 400;
-		systemSettings.Profile.sleep.Time = 5;
-		systemSettings.Profile.sleep.Temperature = 150;
-		systemSettings.Profile.standby.Time = 10;
-		systemSettings.Profile.UserSetTemperature = 320;
-		systemSettings.Profile.pwmPeriod=19999;
-		systemSettings.Profile.pwmDelay=1999;
 		systemSettings.Profile.noIronValue=4000;
 	}
 
@@ -232,16 +221,7 @@ void resetCurrentProfile(void){
 		}
 		systemSettings.Profile.currentNumberOfTips = 1;
 		systemSettings.Profile.currentTip = 0;
-		strcpy(systemSettings.Profile.tip[0].name, "245");
-
-		systemSettings.Profile.boost.Time = 1;
-		systemSettings.Profile.boost.Temperature = 400;
-		systemSettings.Profile.sleep.Time = 5;
-		systemSettings.Profile.sleep.Temperature = 150;
-		systemSettings.Profile.standby.Time = 10;
-		systemSettings.Profile.UserSetTemperature = 320;
-		systemSettings.Profile.pwmPeriod=19999;
-		systemSettings.Profile.pwmDelay=1999;
+		strcpy(systemSettings.Profile.tip[0].name, "C245");
 		systemSettings.Profile.noIronValue=4000;
 	}
 
@@ -260,16 +240,7 @@ void resetCurrentProfile(void){
 		}
 		systemSettings.Profile.currentNumberOfTips = 1;
 		systemSettings.Profile.currentTip = 0;
-		strcpy(systemSettings.Profile.tip[0].name, "210");
-
-		systemSettings.Profile.boost.Time = 1;
-		systemSettings.Profile.boost.Temperature = 400;
-		systemSettings.Profile.sleep.Time = 5;
-		systemSettings.Profile.sleep.Temperature = 150;
-		systemSettings.Profile.standby.Time = 10;
-		systemSettings.Profile.UserSetTemperature = 320;
-		systemSettings.Profile.pwmPeriod=19999;
-		systemSettings.Profile.pwmDelay=1999;
+		strcpy(systemSettings.Profile.tip[0].name, "C210");
 		systemSettings.Profile.noIronValue=1200;
 	}
 	else if(systemSettings.settings.currentProfile==profile_None){
@@ -279,6 +250,14 @@ void resetCurrentProfile(void){
 	else{
 		Error_Handler();
 	}
+	systemSettings.Profile.sleepTimeout = 10;
+	systemSettings.Profile.UserSetTemperature = 320;
+	systemSettings.Profile.pwmPeriod=19999;
+	systemSettings.Profile.pwmDelay=1999;
+	systemSettings.Profile.filterCoef=1;
+	systemSettings.Profile.filterMode=filter_avg;
+	systemSettings.Profile.PIDTime=0;
+	systemSettings.Profile.tempUnit=mode_Celsius;
 }
 
 void loadProfile(uint8_t profile){
@@ -291,7 +270,7 @@ void loadProfile(uint8_t profile){
 		systemSettings.Profile = flashSettings->Profile[profile];						// Load stored tip data
 		systemSettings.ProfileChecksum = flashSettings->ProfileChecksum[profile];		// Load stored checksum
 
-		if(systemSettings.Profile.initialized==notInitialized){										// Check if initialized
+		if(systemSettings.Profile.initialized==notInitialized){							// Check if initialized
 			resetCurrentProfile();														// Load defaults if not
 			systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);	// Compute checksum
 		}
@@ -309,21 +288,24 @@ void loadProfile(uint8_t profile){
 	else{
 		Error_Handler();
 	}
+	if(systemSettings.settings.tempUnit != systemSettings.Profile.tempUnit){			// If stored temps are in different units
+		setSystemTempUnit(systemSettings.settings.tempUnit);								// Convert temperatures
+		systemSettings.Profile.tempUnit = systemSettings.settings.tempUnit;				// Store unit in profile
+	}
 }
 
 void Diag_init(void){
 	setContrast(255);
-	FillBuffer(C_BLACK,fill_soft);
-	UG_FontSelect(&FONT_10X16_reduced);
-	UG_SetForecolor(C_WHITE);
-	UG_SetBackcolor(C_BLACK);
+	FillBuffer(BLACK,fill_soft);
+	u8g2_SetFont(&u8g2,default_font );
+	u8g2_SetDrawColor(&u8g2, WHITE);
 }
 
 void Flash_error(void){
 	Diag_init();
-	UG_PutString(8,0,"ERROR WHILE");//11
-	UG_PutString(13,16,"WRITING TO");//10
-	UG_PutString(33,32,"FLASH!");//6
+	putStrAligned("ERROR WHILE", 0, align_center);
+	putStrAligned("WRITING TO", 16, align_center);
+	putStrAligned("FLASH!", 32, align_center);
 	update_display();
 	while(1){
 		HAL_IWDG_Refresh(&HIWDG);
@@ -332,9 +314,9 @@ void Flash_error(void){
 void settingsChkErr(void){
 	Diag_init();
 	systemSettings.settings.OledOffset = 2;		// Set known value
-	UG_PutString(3,0,"SETTING ERR!");//12
-	UG_PutString(18,16,"RESTORING");//9
-	UG_PutString(8,32,"DEFAULTS...");//11
+	putStrAligned("SETTING ERR!", 0, align_center);
+	putStrAligned("RESTORING", 16, align_center);
+	putStrAligned("DEFAULTS...", 32, align_center);
 	update_display();
 	ErrCountDown(3,117,50);
 
@@ -355,9 +337,9 @@ void settingsChkErr(void){
 
 void ProfileChkErr(void){
 	Diag_init();
-	UG_PutString(3,0,"PROFILE ERR!");//12
-	UG_PutString(18,16,"RESTORING");//9
-	UG_PutString(8,32,"DEFAULTS...");//11
+	putStrAligned("PROFILE ERR!", 0, align_center);
+	putStrAligned("RESTORING", 16, align_center);
+	putStrAligned("DEFAULTS...", 32, align_center);
 	update_display();
 	ErrCountDown(3,117,50);
 	resetCurrentProfile();							// Reset current tip type data only
@@ -367,22 +349,22 @@ void Button_reset(void){
 	uint16_t ResetTimer= HAL_GetTick();
 	if(!BUTTON_input()){
 		Diag_init();
-		UG_PutString(8,10,"HOLD BUTTON");//11
-		UG_PutString(13,26,"TO RESTORE");//10
-		UG_PutString(23,42,"DEFAULTS");//8
+		putStrAligned("HOLD BUTTON", 0, align_center);
+		putStrAligned("TO RESTORE", 16, align_center);
+		putStrAligned("DEFAULTS", 32, align_center);
 		update_display();
 		while(!BUTTON_input()){
 			HAL_IWDG_Refresh(&HIWDG);
 			if((HAL_GetTick()-ResetTimer)>5000){
-				FillBuffer(C_BLACK,fill_dma);
-				UG_PutString(28,15,"RELEASE");//7
-				UG_PutString(13,31,"BUTTON NOW");// 10
+				FillBuffer(BLACK,fill_dma);
+				putStrAligned("RELEASE", 12, align_center);
+				putStrAligned("BUTTON NOW", 28, align_center);
 				update_display();
 				while(!BUTTON_input()){
 					HAL_IWDG_Refresh(&HIWDG);
 				}
 				resetSystemSettings();
-				saveSettings(saveKeepingProfiles);
+				saveSettings(saveWipingProfiles);
 			}
 		}
 	}
@@ -390,8 +372,7 @@ void Button_reset(void){
 //Max 99 seconds countdown.
 void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
 	uint32_t timErr = 0;
-	char str[3];
-	char cleanStr[3]= "  ";
+	char str[4];
 	uint8_t length;
 	if(Start>99){Start=99;}
 	if(Start>9){
@@ -399,15 +380,14 @@ void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
 	}
 	else{
 		length=1;
-		cleanStr[1]=0;
 	}
 
 	HAL_Delay(20);				// Dirty fix to ensure Oled DMA transfer has ended before writing to the buffer
 	while(Start){
 		timErr=HAL_GetTick();
-		UG_PutString(xpos,ypos,&cleanStr[0]);
+		u8g2_DrawStr(&u8g2,xpos,ypos,"    ");
 		sprintf(&str[0],"%*u",length-1,Start--);
-		UG_PutString(xpos,ypos,&str[0]);
+		u8g2_DrawStr(&u8g2,xpos,ypos,&str[0]);
 		update_display();
 		while( (HAL_GetTick()-timErr)<999 ){
 			HAL_IWDG_Refresh(&HIWDG);			// Clear watchdog

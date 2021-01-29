@@ -2,6 +2,7 @@
 #include "settings.h"
 #include "buzzer.h"
 #include "iron.h"
+#include "gui.h"
 
 // Need to be aligned to 32bit(4byte) boundary, as FillBuffer() uses 32bit tranfer for increased speed
 
@@ -286,7 +287,7 @@ void update_display( void ){
 }
 
 // Function for drawing a pixel in display buffer
-void pset(UG_U16 x, UG_U16 y, UG_COLOR c){
+void pset(uint8_t x, uint8_t y, bool c){
    unsigned int p;
    while(oled.status!=oled_idle);	// If OLED busy, wait
 
@@ -396,11 +397,13 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 	write_cmd(0x30);         	// Default => 0x20 (0.77*VCC)
 	write_cmd(0xA4|0x00);   	// Set Entire Display On/Off
 	write_cmd(0xA6|0x00);   	// Set Inverse Display On/Off
-	FillBuffer(C_BLACK,fill_dma);	// Clear buffer
+	FillBuffer(BLACK,fill_dma);	// Clear buffer
 	systemSettings.settings.OledOffset = 2;		// Set by default while system settings are not loaded
 	write_cmd(0xAF);   			// Set Display On
 	update_display();			// Update display CGRAM
-	while(oled.status!=oled_idle);	// Wait for DMA completion
+	while(oled.status!=oled_idle){
+		asm("nop");	// Wait for DMA completion
+	}
 	write_cmd(0xAF);   			// Set Display On
 }
 
@@ -414,9 +417,11 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 
 void FillBuffer(bool color, bool mode){
 	uint32_t fillVal;
-	while(oled.status!=oled_idle);				// Don't write to buffer while screen buffer is being transfered
+	while(oled.status!=oled_idle){
+		asm("nop");				// Don't write to buffer while screen buffer is being transfered
+	}
 
-	if(color==C_WHITE){ fillVal=0xffffffff; }	// Fill color = white
+	if(color==WHITE){ fillVal=0xffffffff; }	// Fill color = white
 	else{ fillVal=0; }						// Fill color = black
 
 	if(mode==fill_dma){							// use DMA
@@ -437,7 +442,7 @@ void FillBuffer(bool color, bool mode){
 void display_abort(void){
 #if defined OLED_SPI
 	HAL_SPI_Abort(oled.device);
-
+	__HAL_UNLOCK(oled.device);
 #elif defined OLED_I2C
 	HAL_I2C_Abort(oled.device);
 #endif
@@ -458,7 +463,9 @@ void update_display_ErrorHandler(void){
 		#endif
 		Oled_Set_DC();
 		if(HAL_SPI_Transmit(oled.device, (uint8_t*)oled.ptr + (row * 128), 128, 1000)!=HAL_OK){
-			while(1);			// If error happens at this stage, just do nothing
+			while(1){						// If error happens at this stage, just do nothing
+				HAL_IWDG_Refresh(&HIWDG);
+			}
 		}
 		#ifdef USE_CS
 		Oled_Set_CS();
@@ -482,7 +489,6 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 #endif
 
 	if(device == oled.device){
-
 		#ifdef USE_CS
 		Oled_Set_CS();
 		#endif
@@ -497,6 +503,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 	#ifdef OLED_SPI
 
 		setOledRow(oled.row);
+
 		#ifdef USE_CS
 		Oled_Clear_CS();
 		#endif
@@ -537,55 +544,52 @@ void FatalError(uint8_t type){
 
 	SetFailState(failureState_On);
 	buzzer_fatal_beep();
-	FillBuffer(C_BLACK,fill_soft);
-	UG_FontSelect(&FONT_10X16_reduced);
-	UG_SetForecolor(C_WHITE);
-	UG_SetBackcolor(C_BLACK);
+	Diag_init();
 	switch(type){
-		case error_NMI:
-			UG_PutString(2,15,"NMI HANDLER");//10
+		case error_NMI://TODO UPDATE
+			u8g2_DrawStr(&u8g2, 2, 15,"NMI HANDLER");
 			break;
 		case error_HARDFAULT:
-			UG_PutString(8,15,"HARD FAULT");//10
+			u8g2_DrawStr(&u8g2, 8, 15, "HARD FAULT");
 			break;
 		case error_MEMMANAGE:
-			UG_PutString(8,15,"MEM MANAGE");//10
+			u8g2_DrawStr(&u8g2, 8, 15, "MEM MANAGE");
 			break;
 		case error_BUSFAULT:
-			UG_PutString(11,15,"BUS FAULT");//9
+			u8g2_DrawStr(&u8g2, 11, 15, "BUS FAULT");
 			break;
 		case error_USAGEFAULT:
-			UG_PutString(2,15,"USAGE FAULT");//11
+			u8g2_DrawStr(&u8g2, 2, 15, "USAGE FAULT");
 			break;
 		case error_RUNAWAY25:
-			UG_PutString(0,0,"TEMP RUNAWAY");//12
-			UG_PutString(38,15,">25*C");//5
+			u8g2_DrawStr(&u8g2, 0, 0, "TEMP RUNAWAY");
+			u8g2_DrawStr(&u8g2, 38, 17, ">25\260C");
 			break;
 		case error_RUNAWAY50:
-			UG_PutString(0,0,"TEMP RUNAWAY");//12
-			UG_PutString(38,17,">50*C");//5
+			u8g2_DrawStr(&u8g2, 0, 0, "TEMP RUNAWAY");
+			u8g2_DrawStr(&u8g2, 38, 17, ">50\260C");
 			break;
 		case error_RUNAWAY75:
-			UG_PutString(0,0,"TEMP RUNAWAY");//12
-			UG_PutString(38,17,">75*C");//5
+			u8g2_DrawStr(&u8g2, 0, 0, "TEMP RUNAWAY");
+			u8g2_DrawStr(&u8g2, 38, 17, ">75\260C");
 			break;
 		case error_RUNAWAY100:
-			UG_PutString(0,0,"TEMP RUNAWAY");//12
-			UG_PutString(33,17,">100*C");//6
+			u8g2_DrawStr(&u8g2, 0, 0, "TEMP RUNAWAY");
+			u8g2_DrawStr(&u8g2, 33, 17, ">100\260C");
 			break;
 		case error_RUNAWAY500:
-			UG_PutString(23,0,"EXCEEDED");//8
-			UG_PutString(33,17,"500*C!");//6
+			u8g2_DrawStr(&u8g2, 23, 0, "EXCEEDED");
+			u8g2_DrawStr(&u8g2, 33, 17, "500\260C!");
 			break;
 		case error_RUNAWAY_UNKNOWN:
-			UG_PutString(0,0,"TEMP RUNAWAY");//12
-			UG_PutString(23,17,">UNKNOWN");//8
+			u8g2_DrawStr(&u8g2, 0, 0, "TEMP RUNAWAY");
+			u8g2_DrawStr(&u8g2, 23, 17, "UNKNOWN");
 			break;
 		default:
-			UG_PutString(2,15,"UNDEFINED");//11
+			u8g2_DrawStr(&u8g2, 2, 15, "UNDEFINED");
 			break;
 	}
-	UG_PutString(24,33,"ERROR!!");//7
+	u8g2_DrawStr(&u8g2, 24, 33, "ERROR!!");
 
 	#if defined OLED_I2C || defined OLED_SPI
 	update_display_ErrorHandler();
@@ -607,4 +611,20 @@ void FatalError(uint8_t type){
 		HAL_IWDG_Refresh(&HIWDG);
 	}
 
+}
+
+void putStrAligned(char* str, uint8_t y, AlignType align){
+
+	if(align==align_left){
+		u8g2_DrawStr(&u8g2, 0, y, str);
+	}
+	else{
+		uint8_t len = u8g2_GetStrWidth(&u8g2, str);
+		if(align==align_center){
+			u8g2_DrawStr(&u8g2, ((OledWidth-1)-len)/2, y, str);
+		}
+		else if(align==align_right){
+			u8g2_DrawStr(&u8g2, (OledWidth-1)-len, y, str);
+		}
+	}
 }

@@ -7,14 +7,16 @@
 
 #ifndef GRAPHICS_SSD1306_H_
 #define GRAPHICS_SSD1306_H_
-#include "ugui.h"
+
+#include "u8g2.h"
 #include "main.h"
+#include "widgets.h"
 
 //For checking if SPI DMA is active. Check before drawing the buffer.
 typedef enum {
-	oled_idle,
-	oled_sending_data,
-	oled_sending_cmd,
+	oled_idle=0,
+	oled_sending_data=1,
+	oled_sending_cmd=2,
 } oledStatus_t;
 
 
@@ -32,11 +34,14 @@ typedef enum{
 	error_RUNAWAY_UNKNOWN,
 }FatalErrors;
 
+#define OledWidth	128
+#define OledHeight	64
+
 typedef struct{
-	__attribute__((aligned(4))) volatile uint8_t buffer[128*8]; // 128x64 1BPP OLED
-	volatile uint8_t *ptr;
-	volatile uint8_t status;
-	volatile uint8_t row;
+	__attribute__((aligned(4))) uint8_t buffer[128*8]; // 128x64 1BPP OLED
+	uint8_t *ptr;
+	uint8_t status;
+	uint8_t row;
 
 	#ifdef OLED_SPI
 	SPI_HandleTypeDef *device;
@@ -74,6 +79,7 @@ enum { fill_soft, fill_dma };
 
 #define BLACK 0
 #define WHITE 1
+#define XOR   2
 
 #ifdef OLED_SOFT_SPI
 void Enable_Soft_SPI(void);
@@ -103,7 +109,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device);
 void FatalError(uint8_t type);
 void write_data(uint8_t* data, uint16_t count);
 void write_cmd(uint8_t cmd);
-void pset(UG_U16 x, UG_U16 y, UG_COLOR c);
+void pset(uint8_t x, uint8_t y, bool c);
 void update_display(void);
 void display_abort(void);
 void update_display_ErrorHandler(void);
@@ -111,5 +117,6 @@ void setContrast(uint8_t value);
 void setOledRow(uint8_t row);
 uint8_t getContrast();
 void FillBuffer(bool color, bool mode);
+void putStrAligned(char* str, uint8_t y, AlignType align);
 
 #endif /* GRAPHICS_SSD1306_H_ */

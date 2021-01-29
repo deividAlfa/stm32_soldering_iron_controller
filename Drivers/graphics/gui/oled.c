@@ -45,7 +45,6 @@ void oled_draw() {
 #ifndef Soft_SPI
 	if(oled.status!=oled_idle) { return; }		// If Oled busy, skip update
 #endif
-
 	current_screen->draw(current_screen);
 	update_display();
 }
@@ -73,18 +72,13 @@ static RE_State_t* RE_State;
 
 void oled_processInput(void) {
 	RE_Rotation = (*RE_GetData)(RE_State);
-	if(systemSettings.settings.wakeOnButton){					// If system setting set  to wake on encoder activity
-		if(RE_Rotation!=Rotate_Nothing){
-			IronWake(source_wakeButton);
-		}
-	}
 	int ret = current_screen->processInput(current_screen, RE_Rotation, RE_State);
 	if(ret != -1) {
 		screen_t *scr = screens;
 		while(scr) {
 			if(scr->index == ret) {
-				FillBuffer(C_BLACK,fill_dma);
-				scr->force_refresh=1;
+				FillBuffer(BLACK, fill_dma);
+				scr->refresh=screen_blankRefresh;
 				if(current_screen->onExit)
 					current_screen->onExit(scr);
 				if(scr->onEnter)

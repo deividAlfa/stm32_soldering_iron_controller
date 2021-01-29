@@ -10,6 +10,7 @@
 
 #include "main.h"
 #include "pid.h"
+#include "board.h"
 
 #define ProfileSize		3		// Number of profiles
 #define TipSize			10		// Number of tips for each profile
@@ -66,14 +67,18 @@ enum{
 	mode_Celsius	= 0,
 	mode_Farenheit	= 1,
 
-	mode_standby	= 0,
-	mode_sleep		= 1,
-	mode_normal		= 2,
-	mode_boost		= 3,
+	mode_sleep		= 0,
+	mode_run		= 1,
 
 	initialized		= 0,
 	notInitialized	= 1,
 
+	filter_avg		= 0,
+	filter_ema		= 1,
+	filter_dema		= 2,
+
+	noForceMode		= 0,
+	forceMode		= 1,
 
 	buzzer_Off		= 0,
 	buzzer_On		= 1,
@@ -84,10 +89,6 @@ enum{
 	profile_None	= 0xff,
 };
 
-
-
-
-extern char* profileStr[ProfileSize];
 
 typedef struct ironSettings_t{
 	uint16_t Temperature;
@@ -105,15 +106,17 @@ typedef struct tipData {
 __attribute__ ((aligned (4))) typedef struct{
 	tipData tip[TipSize];
 	bool initialized;
-	ironSettings_t boost;
-	ironSettings_t sleep;
-	ironSettings_t standby;
+	uint8_t tempUnit;
 	uint8_t currentNumberOfTips;
 	uint8_t currentTip;
 	uint16_t UserSetTemperature;
+	uint16_t sleepTimeout;
 	uint16_t pwmPeriod;
 	uint16_t pwmDelay;
 	uint16_t noIronValue;
+	uint8_t filterMode;
+	uint8_t filterCoef;
+	uint16_t PIDTime;
 }profile_t;
 
 __attribute__ ((aligned (4))) typedef struct{
@@ -152,6 +155,8 @@ typedef struct{
 
 extern systemSettings_t systemSettings;
 extern flashSettings_t* flashSettings;
+
+void Diag_init(void);
 void saveSettings(bool wipeAllProfileData);
 void restoreSettings();
 uint32_t ChecksumSettings(settings_t* settings);
