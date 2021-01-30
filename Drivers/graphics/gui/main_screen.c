@@ -14,8 +14,9 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 static int32_t temp;
 static char *tipName[TipSize];
-enum mode{ main_irontemp, main_tempgraph, main_setmsg, main_msg, main_noiron, main_setpoint, main_tipselect, main_menu,  main_resume};
-enum{ msg_running, msg_sleep, msg_noiron };
+enum mode{  main_irontemp=0, main_disabled, main_ironstatus,main_setpoint, main_tipselect, main_menu,  main_setMode};
+enum{ status_running, status_sleep, status_noiron };
+enum { temp_numeric, temp_graph };
 const uint8_t pulseXBM[] ={
 	8,9,
 	0x04, 0x0A, 0x0A, 0x0A, 0x89, 0x50, 0x50, 0x50, 0x20, };
@@ -40,7 +41,7 @@ static widget_t Widget_Vsupply;
 static widget_t Widget_IronTemp;
 static widget_t Widget_TipSelect;
 static widget_t Widget_SetPoint;
-static widget_t Widget_Shortcut;
+static widget_t Widget_Menu;
 
 static struct{
 	uint32_t updateTick;
@@ -57,12 +58,16 @@ static struct{
 	uint16_t lastVin;
 	#endif
 	uint32_t drawTick;
+	uint32_t idleTick;
+	bool idle;
 	bool ActivityOn;
-	uint8_t msgStatus;
-	uint8_t mode;
-	uint8_t lastMode;
-	uint8_t lastTempMode;
-	uint8_t shortcut;
+
+	uint8_t ironStatus;
+	uint8_t prevIronStatus;
+	uint8_t setMode;
+	uint8_t currentMode;
+	bool displayMode;
+	uint8_t menuPos;
 	widget_t* Selected;
 }mainScr;
 
@@ -70,15 +75,15 @@ static struct{
 // Main screen widgets functions
 //-------------------------------------------------------------------------------------------------------------------------------
 
-static void setShortcut(uint16_t *val) {
-	if(mainScr.shortcut!=*val){
-		mainScr.shortcut=*val;
-		Screen_main.refresh=2;	// Redraw screen erasing using dma (faster than erasing each widget)
+static void setMenu(uint16_t *val) {
+	if(mainScr.menuPos!=*val){
+		mainScr.menuPos=*val;
+		Screen_main.refresh=screen_eraseAndRefresh;	// Redraw screen erasing using dma (faster than erasing each widget)
 	}
 }
 
-static void * getShortcut() {
-	temp = mainScr.shortcut;
+static void * getMenu() {
+	temp = mainScr.menuPos;
 	return &temp;
 }
 
@@ -96,7 +101,7 @@ static void setTip(uint8_t *val) {
 	if(systemSettings.Profile.currentTip != *val){
 		systemSettings.Profile.currentTip = *val;
 		setCurrentTip(*val);
-		Screen_main.refresh=2;	// Redraw screen erasing using dma (faster than erasing each widget)
+		Screen_main.refresh=screen_eraseAndRefresh;	// Redraw screen erasing using dma (faster than erasing each widget)
 	}
 }
 
@@ -110,8 +115,8 @@ static void * main_screen_getIronTemp() {
 		uint16_t t= readTipTemperatureCompensated(stored_reading,read_Avg);
 		if (mainScr.lastTip!=t){
 			mainScr.lastTip=t;
-			if(mainScr.mode==main_irontemp){
-				Screen_main.refresh=2;	// Redraw screen erasing using dma (faster than erasing each widget)
+			if(mainScr.currentMode==main_irontemp && mainScr.ironStatus==status_running){
+				Screen_main.refresh=screen_eraseAndRefresh;	// Redraw screen erasing using dma (faster than erasing each widget)
 			}
 		}
 	}
@@ -159,25 +164,30 @@ static bool updateIronPower() {
 }
 
 static void setMainWidget(widget_t* w){
+	selectable_widget_t* sel =extractSelectablePartFromWidget(w);
 	mainScr.drawTick=HAL_GetTick();
 	Screen_main.refresh=screen_eraseAndRefresh;
 	widgetDisable(mainScr.Selected);
 	mainScr.Selected=w;
 	widgetEnable(w);
 	Screen_main.current_widget=w;
-	w->editableWidget.selectable.state=widget_edit;
-	w->editableWidget.selectable.previous_state=widget_selected;
+	if(sel){
+		sel->state=widget_edit;
+		sel->previous_state=widget_selected;
+	}
 }
 
-static int ShortcutProcessInput(widget_t* w, RE_Rotation_t r, RE_State_t * s){
+static int menuProcessInput(widget_t* w, RE_Rotation_t r, RE_State_t * s){
 	if(r==Click){
-		mainScr.mode=main_resume;
-		switch(mainScr.shortcut){
+		//mainScr.mode=main_resume;
+     		switch(mainScr.menuPos){
 			case 0:
+				mainScr.setMode=main_irontemp;
+				mainScr.currentMode=main_setMode;
 				break;
 			case 1:				// TIPS
-				mainScr.mode=main_tipselect;
-				setMainWidget(&Widget_TipSelect);
+				mainScr.setMode=main_tipselect;
+				mainScr.currentMode=main_setMode;
 				return -1;
 			case 2:				// PID
 				return screen_pid;
@@ -193,12 +203,15 @@ static int ShortcutProcessInput(widget_t* w, RE_Rotation_t r, RE_State_t * s){
 				break;
 		}
 	}
+	else if(r==LongClick){
+		mainScr.setMode=main_irontemp;
+		mainScr.currentMode=main_setMode;
+	}
 	else{
 		default_widgetProcessInput(w, r, s);
 	}
 	return -1;
 }
-
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen functions
@@ -233,10 +246,7 @@ static void main_screen_init(screen_t *scr) {
 	Widget_SetPoint.editableWidget.step = systemSettings.settings.tempStep;
 	Widget_SetPoint.editableWidget.big_step = systemSettings.settings.tempStep;
 	setMainScrTempUnit();
-	mainScr.mode=main_irontemp;
-	mainScr.lastMode=main_irontemp;
-	mainScr.lastTempMode=main_irontemp;
-	setMainWidget(&Widget_IronTemp);
+	mainScr.idleTick=HAL_GetTick();
 }
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	if(mainScr.update){
@@ -248,16 +258,16 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 	}
 
 	if(!GetIronPresence()){
-		mainScr.msgStatus = msg_noiron;
+		mainScr.ironStatus = status_noiron;
 	}
 	else if(getCurrentMode()==mode_sleep){
-		mainScr.msgStatus = msg_sleep;
+		mainScr.ironStatus = status_sleep;
 	}
 	else{
-		mainScr.msgStatus = msg_running;
+		mainScr.ironStatus = status_running;
 	}
 
-	if(Iron.newActivity && !mainScr.ActivityOn && mainScr.mode==main_irontemp){
+	if(Iron.newActivity && !mainScr.ActivityOn && mainScr.currentMode==main_irontemp){
 		mainScr.ActivityOn=1;
 	}
 
@@ -270,72 +280,77 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 		}
 	}
 
-	if((input!=Rotate_Nothing)&&(input!=LongClick)){
+	if(input!=Rotate_Nothing){
 		IronWake(source_wakeButton);
-	}
-	if((mainScr.msgStatus!=msg_running)&&(mainScr.lastMode!=main_msg)){
-		mainScr.lastMode=main_msg;
-		if((mainScr.mode!=main_menu)&&(mainScr.mode!=main_tipselect)){
-			mainScr.mode=main_resume;
-		}
+		mainScr.idleTick=HAL_GetTick();
 	}
 
-	if((input==LongClick)){
-		mainScr.lastMode=mainScr.mode;
-		mainScr.mode=main_menu;
-		setMainWidget(&Widget_Shortcut);
-	}
-	switch(mainScr.mode){
 
-		case main_msg:
-			if(mainScr.msgStatus == msg_running){
-				mainScr.lastMode=mainScr.lastTempMode;
-				mainScr.mode=main_resume;
-			}
-			break;
+	switch(mainScr.currentMode){
 		case main_irontemp:
-		case main_tempgraph:
-			if((input==Rotate_Increment)||(input==Rotate_Decrement)){
-				scr->refresh=screen_eraseAndRefresh;
-				mainScr.lastMode=mainScr.mode;
-				mainScr.lastTempMode=mainScr.mode;
-				mainScr.mode=main_setpoint;
-				setMainWidget(&Widget_SetPoint);
+			if(mainScr.ironStatus!=status_running){
+				mainScr.setMode=main_disabled;
+				mainScr.currentMode=main_setMode;
+				break;
+			}
+			if((input==LongClick)){
+				mainScr.currentMode=main_setMode;
+				mainScr.setMode=main_menu;
+			}
+			else if((input==Rotate_Increment)||(input==Rotate_Decrement)){
+				mainScr.setMode=main_setpoint;
+				mainScr.currentMode=main_setMode;
 			}
 			else if(input==Click){
 				scr->refresh=screen_eraseAndRefresh;
-				mainScr.lastMode=mainScr.mode;
-				mainScr.lastTempMode=mainScr.mode;
-				if(mainScr.mode==main_tempgraph){
-					mainScr.mode=main_irontemp;
-					widgetEnable(&Widget_IronTemp);
-				}
-				else if(mainScr.mode==main_irontemp){
-					mainScr.mode=main_tempgraph;
+				if(mainScr.displayMode==temp_numeric){
+					mainScr.displayMode=temp_graph;
 					widgetDisable(&Widget_IronTemp);
 				}
+				else if(mainScr.displayMode==temp_graph){
+					mainScr.displayMode=temp_numeric;
+					widgetEnable(&Widget_IronTemp);
+				}
 			}
+			break;
 
+		case main_disabled:
+			if((HAL_GetTick()-mainScr.idleTick)>5000){
+				setContrast(0);
+			}
+			if(input!=Rotate_Nothing){
+				setContrast(systemSettings.settings.contrast);
+			}
+			if((input==LongClick)){
+				mainScr.currentMode=main_setMode;
+				mainScr.setMode=main_menu;
+			}
+			if(mainScr.ironStatus==status_running){
+				setContrast(systemSettings.settings.contrast);
+				mainScr.setMode=main_irontemp;
+				mainScr.currentMode=main_setMode;
+			}
 			break;
 
 		case main_menu:
-			if(input==Click){
-				break;
-			}
+
+			break;
 
 		case main_setpoint:
 		case main_tipselect:
 			switch((uint8_t)input){
 				case LongClick:
+					break;
+
 				case Rotate_Nothing:
-					if((HAL_GetTick()-mainScr.drawTick > 500) && (mainScr.mode==main_setpoint)){
+					if( (mainScr.currentMode==main_setpoint && HAL_GetTick()-mainScr.idleTick > 500) || (mainScr.currentMode==main_tipselect && HAL_GetTick()-mainScr.idleTick > 5000)){
 				case Click:
-						mainScr.mode=main_resume;
+						mainScr.currentMode=main_setMode;
+						mainScr.setMode=main_irontemp;
 						return -1;
 					}
 					break;
 				default:
-					mainScr.drawTick=HAL_GetTick();
 					if(input==Rotate_Increment_while_click){
 						input=Rotate_Increment;
 					}
@@ -349,22 +364,40 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			break;
 	}
 
-	if(mainScr.mode==main_resume){
+	if(mainScr.currentMode==main_setMode){
+		mainScr.idleTick=HAL_GetTick();
 		scr->refresh=screen_eraseAndRefresh;
-		widgetDisable(mainScr.Selected);
-		mainScr.mode=mainScr.lastMode;
-		if(mainScr.lastMode==main_msg){
-			return -1;
-		}
-		setMainWidget(&Widget_IronTemp);
-		if(mainScr.lastMode==main_tempgraph){
+		mainScr.currentMode=mainScr.setMode;
+		switch(mainScr.currentMode){
+		case main_disabled:
 			widgetDisable(&Widget_IronTemp);
-			return -1;
+			break;
+		case main_irontemp:
+			setMainWidget(&Widget_IronTemp);
+			if(mainScr.displayMode==temp_graph){
+				widgetDisable(&Widget_IronTemp);
+			}
+			break;
+		case main_menu:
+			setMainWidget(&Widget_Menu);
+			break;
+		case main_setpoint:
+			setMainWidget(&Widget_SetPoint);
+			break;
+		case main_tipselect:
+			setMainWidget(&Widget_TipSelect);
+			break;
+		default:
+			break;
 		}
+		return -1;
 	}
 	return default_screenProcessInput(scr, input, state);
 	//return -1;
 }
+
+
+
 uint8_t plotData[100];
 uint8_t plotX;
 uint32_t plotTime;
@@ -378,14 +411,7 @@ void main_screen_draw(screen_t *scr){
 	}
 
 	default_screenDraw(scr);
-/*
-	if(temp<=100){
-		x=0;
-	}
-	else{
-		x=temp>>8;
-	}
-	*/
+
 	if(scr_refresh>=screen_eraseAndRefresh){
 		u8g2_SetDrawColor(&u8g2, WHITE);
 		#ifdef USE_NTC
@@ -398,17 +424,17 @@ void main_screen_draw(screen_t *scr){
 		if(mainScr.ActivityOn){
 			u8g2_DrawXBMP(&u8g2, 0,OledHeight-pulseXBM[1], pulseXBM[0], pulseXBM[1], &pulseXBM[2]);
 		}
-		if((mainScr.msgStatus==msg_noiron) && (mainScr.mode==main_msg)){
+		if(mainScr.ironStatus==status_noiron && mainScr.currentMode==main_disabled){
 			u8g2_SetFont(&u8g2, u8g2_font_main_msg);
-			putStrAligned("NO IRON", Widget_TipSelect.posY, align_center);
+			putStrAligned("NO IRON", 24, align_center);
 		}
-		if((mainScr.msgStatus==msg_sleep) && (mainScr.mode==main_msg)){
+		if(mainScr.ironStatus==status_sleep && mainScr.currentMode==main_disabled){
 			u8g2_SetFont(&u8g2, u8g2_font_main_msg);
-			putStrAligned("SLEEP", Widget_TipSelect.posY, align_center);
+			putStrAligned("SLEEP", 24, align_center);
 		}
 	}
 
-	if((scr_refresh || updateIronPower())){				// Value changed or screen redrawed?
+	if( (scr_refresh || updateIronPower()) && mainScr.ironStatus==status_running ){				// Value changed or screen redrawed?
 
 		if(scr_refresh<screen_eraseAndRefresh){
 			u8g2_SetDrawColor(&u8g2,BLACK);
@@ -428,7 +454,7 @@ void main_screen_draw(screen_t *scr){
 			plotX=0;
 		}
 	}
-	if(scr_refresh && mainScr.mode==main_tempgraph){
+	if(scr_refresh && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){
 		u8g2_DrawVLine(&u8g2, 10, 22, 31);
 		for(uint8_t x=22; x<=54; x+=6){
 			u8g2_DrawHLine(&u8g2, 7, x, 3);
@@ -475,7 +501,7 @@ void main_screen_setup(screen_t *scr) {
 	w->textAlign=align_center;
 	w->dispAlign=align_center;
 	w->font=u8g2_font_iron;
-	w->posY = 18;
+	w->posY = 17;
 	w->displayWidget.getData = &main_screen_getIronTemp;
 
 	// Tip temperature setpoint
@@ -554,14 +580,14 @@ void main_screen_setup(screen_t *scr) {
 	w->enabled=0;
 	w->frameType=frame_disabled;
 
-	//********[ Shortcut Widget ]***********************************************************
+	//********[ Menu Widget ]***********************************************************
 	//
-	w = &Widget_Shortcut;
+	w = &Widget_Menu;
 	screen_addWidget(w,scr);
 	widgetDefaultsInit(w, widget_multi_option);
 	dis=extractDisplayPartFromWidget(w);
-	dis->getData = &getShortcut;
-	w->posY = Widget_TipSelect.posY;
+	dis->getData = &getMenu;
+	w->posY = 22;
 	w->dispAlign=align_center;
 	w->textAlign=align_center;
 	w->editableWidget.big_step = 1;
@@ -570,12 +596,13 @@ void main_screen_setup(screen_t *scr) {
 	w->frameType=frame_disabled;
 	w->enabled=0;
 
-	w->editableWidget.setData = (void (*)(void *))&setShortcut;
-	w->multiOptionWidget.editable.selectable.processInput=&ShortcutProcessInput;
+	w->editableWidget.setData = (void (*)(void *))&setMenu;
+	w->multiOptionWidget.editable.selectable.processInput=menuProcessInput;
 	w->editableWidget.max_value = 6;
 	w->editableWidget.min_value = 0;
-	w->multiOptionWidget.options =shortcuts;
+	w->multiOptionWidget.options =menuLabels;
 	w->multiOptionWidget.numberOfOptions = 7;
 
+	setMainWidget(&Widget_IronTemp);
 }
 

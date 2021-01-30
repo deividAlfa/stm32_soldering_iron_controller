@@ -14,4 +14,4 @@ char *wakeMode[] = 		{ "SHAKE", "STAND" };
 char *encMode[] = 		{ "FWD", "RWD" };
 char *InitMode[] = 		{ "SLP","RUN"};
 char *filterMode[] = 	{ "AVG", "EMA", "DEMA"};
-char *shortcuts[] = 	{ "BACK", "TIPS", "PID", "IRON", "SYSTEM", "EDIT", "CAL."};
+char *menuLabels[] = 	{ "BACK", "TIPS", "PID", "IRON", "SYSTEM", "EDIT", "CAL."};
