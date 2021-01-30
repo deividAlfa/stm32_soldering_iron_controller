@@ -15,8 +15,7 @@
 //For checking if SPI DMA is active. Check before drawing the buffer.
 typedef enum {
 	oled_idle=0,
-	oled_sending_data=1,
-	oled_sending_cmd=2,
+	oled_busy=1,
 } oledStatus_t;
 
 

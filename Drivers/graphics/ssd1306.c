@@ -227,17 +227,27 @@ void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
 
 // Send command in blocking mode
 void write_cmd(uint8_t cmd) {
-	while(oled.status==oled_sending_data);	//Wait for DMA to finish
+	while(oled.status==oled_busy){
+		asm("nop");	//Wait for DMA to finish
+	}
 	// Now, else we are in idle (oled_idle) or DMA wants to send a cmd (oled_sending_cmd)
 #if defined OLED_SOFT_I2C
 	i2cSend(&cmd,1,i2cCmd);
 #elif defined OLED_SPI || defined OLED_SOFT_SPI
+	if(oled.device->State != HAL_SPI_STATE_READY){
+		asm("nop");
+	}
 	#ifdef USE_CS
 	Oled_Clear_CS();
 	#endif
 	Oled_Clear_DC();
 #ifdef OLED_SPI
-	if(HAL_SPI_Transmit(oled.device, &cmd, 1, 1000)!=HAL_OK){
+	HAL_StatusTypeDef err=HAL_OK;
+	if(err!=HAL_OK){
+		Error_Handler();
+	}
+	err=HAL_SPI_Transmit(oled.device, &cmd, 1, 10);
+	if(err!=HAL_OK){
 		Error_Handler();
 	}
 #elif defined OLED_SOFT_SPI
@@ -257,6 +267,7 @@ void write_cmd(uint8_t cmd) {
 
 void update_display( void ){
 		if(oled.status!=oled_idle) { return; }	// If OLED busy, skip update
+		if(oled.row!=0){ Error_Handler(); }
 
 		#if defined OLED_SOFT_SPI || defined OLED_SOFT_I2C
 		for(uint8_t row=0;row<8;row++){
@@ -285,7 +296,7 @@ void update_display( void ){
 		HAL_I2C_MemTxCpltCallback(oled.device);	// Call the DMA callback function to send the frame
 #endif
 }
-
+/*
 // Function for drawing a pixel in display buffer
 void pset(uint8_t x, uint8_t y, bool c){
    unsigned int p;
@@ -303,12 +314,14 @@ void pset(uint8_t x, uint8_t y, bool c){
       oled.buffer[p] &= ~(1<<(y%8));
    }
 }
-
+*/
+#if defined OLED_SOFT_SPI || defined OLED_SOFT_I2C
 void setOledRow(uint8_t row){
 	write_cmd(0xB0|row);									// Set the OLED Row address
 	write_cmd(systemSettings.settings.OledOffset);
 	write_cmd(0x10);
 }
+#endif
 
 void setContrast(uint8_t value) {
 	write_cmd(0x81);         // Set Contrast Control
@@ -455,84 +468,109 @@ void display_abort(void){
 // Screen update for hard error handlers (crashes) not using DMA
 void update_display_ErrorHandler(void){
 	for(uint8_t row=0;row<8;row++){
-		setOledRow(row);
 
-		#if defined OLED_SPI
+		uint8_t cmd[3]={
+			0xB0|row,
+			systemSettings.settings.OledOffset,
+			0x10
+		};
+
+		#ifdef OLED_SPI
+
 		#ifdef USE_CS
 		Oled_Clear_CS();
 		#endif
+
+		Oled_Clear_DC();								// Send row command
+		if(HAL_SPI_Transmit(oled.device, cmd, 3, 50)){
+			while(1){						// If error happens at this stage, just do nothing
+				HAL_IWDG_Refresh(&HIWDG);
+			}
+		}
 		Oled_Set_DC();
+
 		if(HAL_SPI_Transmit(oled.device, (uint8_t*)oled.ptr + (row * 128), 128, 1000)!=HAL_OK){
 			while(1){						// If error happens at this stage, just do nothing
 				HAL_IWDG_Refresh(&HIWDG);
 			}
 		}
-		#ifdef USE_CS
-		Oled_Set_CS();
-		#endif
 		#elif defined OLED_I2C
+		if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, cmd, 3, 50)){
+			while(1){						// If error happens at this stage, just do nothing
+				HAL_IWDG_Refresh(&HIWDG);
+			}
+		}
 		if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x40, 1, (uint8_t*)oled.ptr + (row * 128), 128, 1000)!=HAL_OK){
-			while(1);			// If error happens at this stage, just do nothing
-
+			while(1){						// If error happens at this stage, just do nothing
+				HAL_IWDG_Refresh(&HIWDG);
+			}
 		}
 		#endif
 	}
+	#ifdef USE_CS
+	Oled_Set_CS();
+	#endif
 }
 
 
 #ifdef OLED_SPI
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *device){
-
 #elif defined OLED_I2C
 void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 
 #endif
 
 	if(device == oled.device){
-		#ifdef USE_CS
-		Oled_Set_CS();
-		#endif
+		HAL_SPI_DMAStop(oled.device);
+
+		HAL_StatusTypeDef err=HAL_OK;
 
 		if(oled.row>7){
-			oled.row=0;												// We sent the last row of the OLED buffer data
+
+			#if defined OLED_SPI && defined USE_CS
+			Oled_Set_CS();											// Release CS
+			#endif
+
+			oled.row=0;												// Reset row position
 			oled.status=oled_idle;
 			return;													// Return without retriggering DMA.
 		}
-		oled.status=oled_sending_cmd;
-
-	#ifdef OLED_SPI
-
-		setOledRow(oled.row);
-
-		#ifdef USE_CS
-		Oled_Clear_CS();
-		#endif
-
-		Oled_Set_DC();
-		oled.status=oled_sending_data;								// Update status
-		// Send next OLED row
-		if(HAL_SPI_Transmit_DMA(oled.device,(uint8_t *) oled.ptr+(128*oled.row++), 128) != HAL_OK){
-			Error_Handler();
-		}
-	}
-	#elif defined OLED_I2C
 
 		uint8_t cmd[3]={
 			0xB0|oled.row,
 			systemSettings.settings.OledOffset,
 			0x10
 		};
+		oled.status=oled_busy;
 
-		if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, &cmd[0], 3, 50)){
+#ifdef OLED_SPI
+
+		#ifdef USE_CS
+		Oled_Clear_CS();
+		#endif
+		Oled_Clear_DC();
+		err=HAL_SPI_Transmit(oled.device, cmd, 3, 50);									// Send row command in blocking mode
+		if(err!=HAL_OK){
 			Error_Handler();
 		}
-		oled.status=oled_sending_data;								// Update status
-		if( HAL_I2C_Mem_Write_DMA(oled.device, OLED_ADDRESS, 0x40, 1, oled.ptr+(128*oled.row++), 128)){
+		Oled_Set_DC();
+		err=HAL_SPI_Transmit_DMA(oled.device,(uint8_t *) oled.ptr+((uint16_t)128*oled.row), 128);	// Send row data in DMA interrupt mode
+		if( err!= HAL_OK){
 			Error_Handler();
 		}
 
+#elif defined OLED_I2C
+		if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, cmd, 3, 50)){			// Send row command in blocking mode
+			Error_Handler();
+		}
+		oled.status=oled_sending_data;
+		if( HAL_I2C_Mem_Write_DMA(oled.device, OLED_ADDRESS, 0x40, 1, oled.ptr+(128*oled.row), 128)){	// Send row data in DMA interrupt mode
+			Error_Handler();
+		}
+#endif
+
+		oled.row++;
 	}
-	#endif
 }
 
 #endif
@@ -546,7 +584,7 @@ void FatalError(uint8_t type){
 	buzzer_fatal_beep();
 	Diag_init();
 	switch(type){
-		case error_NMI://TODO UPDATE
+		case error_NMI:
 			u8g2_DrawStr(&u8g2, 2, 15,"NMI HANDLER");
 			break;
 		case error_HARDFAULT:

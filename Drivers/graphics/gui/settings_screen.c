@@ -453,24 +453,6 @@ static void * getButtonWake() {
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
-// Settings screen functions
-//-------------------------------------------------------------------------------------------------------------------------------
-void SYSTEM_update(screen_t *scr) {
-	default_screenUpdate(scr);
-}
-
-int settings_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
-	if(input==LongClick){
-#ifdef ENABLE_DEBUG_SCREEN
-		return screen_debug;
-#else
-		return screen_main;
-#endif
-	}
-	return (default_screenProcessInput(scr, input, state));
-}
-
-//-------------------------------------------------------------------------------------------------------------------------------
 // Edit Tip screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 
@@ -627,25 +609,7 @@ void settings_screen_setup(void) {
 	screen_t* sc;
 	widget_t* w;
 	displayOnly_widget_t* dis;
-/*
-	screen_setDefaults(scr);
-	scr->processInput = &settings_screenProcessInput;
-	scr->init = &settings_screen_init;
-	scr->onEnter = &settings_screen_OnEnter;
 
-
-	//#################################### [ SETTINGS MAIN SCREEN ]#######################################
-	//
-	w = &comboWidget_MENU;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_combo);
-	comboAddScreen(&comboitem_MENU_PID, w, 			"PID", 			screen_pid);
-	comboAddScreen(&comboitem_MENU_IRON, w, 		"IRON", 		screen_iron);
-	comboAddScreen(&comboitem_MENU_SYSTEM, w, 		"SYSTEM", 		screen_system);
-	comboAddScreen(&comboitem_MENU_IRONTIPS, w, 	"EDIT TIPS",	screen_edit_iron_tips);
-	comboAddScreen(&comboitem_MENU_CALIBRATION, w, 	"CALIBRATION", 	screen_edit_calibration_wait);
-	comboAddScreen(&comboitem_MENU_EXIT, w, 		"EXIT",			screen_main);
-*/
 	//########################################## SYSTEM SCREEN ##########################################
 	//
 	sc=&Screen_system;
@@ -653,8 +617,6 @@ void settings_screen_setup(void) {
 	screen_setDefaults(sc);
 	sc->onEnter = &SYSTEM_onEnter;
 	sc->onExit = &SYSTEM_onExit;
-	sc->update = &SYSTEM_update;
-	sc->processInput=&settings_screenProcessInput;
 
 	//********[ Profile Widget ]***********************************************************
 	//
@@ -861,7 +823,6 @@ void settings_screen_setup(void) {
 	oled_addScreen(sc, screen_reset);
 	screen_setDefaults(sc);
 	sc->onEnter = &Reset_onEnter;
-	sc->processInput=&settings_screenProcessInput;
 
 	//========[ RESET OPTIONS COMBO ]===========================================================
 	//
@@ -914,7 +875,6 @@ void settings_screen_setup(void) {
 	oled_addScreen(sc,screen_pid);
 	screen_setDefaults(sc);
 	sc->onEnter = &PID_onEnter;
-	sc->processInput=&settings_screenProcessInput;
 
 	//********[ KP Widget]***********************************************************
 	//
@@ -993,7 +953,6 @@ void settings_screen_setup(void) {
 	oled_addScreen(sc,screen_iron);
 	screen_setDefaults(sc);
 	sc->onEnter = &IRON_onEnter;
-	sc->processInput=&settings_screenProcessInput;
 
 	//********[ Sleep Time Widget ]***********************************************************
 	//
@@ -1138,7 +1097,6 @@ void settings_screen_setup(void) {
 	oled_addScreen(sc, screen_edit_iron_tips);
 	screen_setDefaults(sc);
 	sc->init = &edit_iron_screen_init;
-	sc->processInput=&settings_screenProcessInput;
 
 	//========[ IRON TIPS COMBO ]===========================================================
 	//

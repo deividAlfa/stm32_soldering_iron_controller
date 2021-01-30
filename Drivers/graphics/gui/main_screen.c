@@ -112,13 +112,7 @@ static void * getTip() {
 
 static void * main_screen_getIronTemp() {
 	if(mainScr.update){
-		uint16_t t= readTipTemperatureCompensated(stored_reading,read_Avg);
-		if (mainScr.lastTip!=t){
-			mainScr.lastTip=t;
-			if(mainScr.currentMode==main_irontemp && mainScr.ironStatus==status_running){
-				Screen_main.refresh=screen_eraseAndRefresh;	// Redraw screen erasing using dma (faster than erasing each widget)
-			}
-		}
+		mainScr.lastTip=readTipTemperatureCompensated(stored_reading,read_Avg);
 	}
 	temp=mainScr.lastTip;
 	return &temp;
@@ -333,9 +327,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			break;
 
 		case main_menu:
-
+			if(HAL_GetTick()-mainScr.idleTick > 5000){
+				mainScr.currentMode=main_setMode;
+				mainScr.setMode=main_irontemp;
+			}
 			break;
-
 		case main_setpoint:
 		case main_tipselect:
 			switch((uint8_t)input){
@@ -343,7 +339,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 					break;
 
 				case Rotate_Nothing:
-					if( (mainScr.currentMode==main_setpoint && HAL_GetTick()-mainScr.idleTick > 500) || (mainScr.currentMode==main_tipselect && HAL_GetTick()-mainScr.idleTick > 5000)){
+					if( (mainScr.currentMode==main_setpoint && HAL_GetTick()-mainScr.idleTick > 500) || (mainScr.currentMode!=main_setpoint && HAL_GetTick()-mainScr.idleTick > 5000)){
 				case Click:
 						mainScr.currentMode=main_setMode;
 						mainScr.setMode=main_irontemp;
@@ -398,18 +394,59 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 
 
-uint8_t plotData[100];
-uint8_t plotX;
-uint32_t plotTime;
+
+
+static uint8_t plotData[100];
+static uint8_t plotX;
+static uint32_t plotTime;
+static uint8_t sleepWidth;
+static uint8_t sleepHeigh;
+static uint32_t sleepTim=0;
+static uint8_t xpos=30, ypos=10;
+static int8_t xadd=1, yadd=1;
+
 void main_screen_draw(screen_t *scr){
-	uint8_t scr_refresh=scr->refresh;
+	uint8_t scr_refresh;
+	if(Widget_SetPoint.refresh || Widget_IronTemp.refresh){
+		scr->refresh=screen_eraseAndRefresh;
+	}
+	if((HAL_GetTick()-plotTime)>99){
+		scr->refresh=screen_eraseAndRefresh;
+		plotTime=HAL_GetTick();
+		uint16_t t = readTipTemperatureCompensated(stored_reading,read_Avg)>>4;
+		if(t>31){ t=31; }
+		plotData[plotX] = t;
+		if(++plotX>99){
+			plotX=0;
+		}
+	}
+	if(mainScr.ironStatus==status_sleep && mainScr.currentMode==main_disabled){
+		if((HAL_GetTick()-sleepTim)>50){
+			sleepTim=HAL_GetTick();
+			scr->refresh=screen_eraseAndRefresh;
+			xpos+=xadd;
+			ypos+=yadd;
+			if((xpos+sleepWidth)>OledWidth){
+				xadd = -1;
+			}
+			else if(xpos==0){
+				xadd = 1;
+			}
+			if(ypos+sleepHeigh>OledHeight){
+				yadd = -1;
+			}
+			else if(ypos<14){
+				yadd = 1;
+			}
+		}
+	}
 
 	if(scr->refresh==screen_eraseAndRefresh){
 		FillBuffer(BLACK,fill_dma);
 		scr->refresh=screen_blankRefresh;
 		// Clean screen here, draw here before main screen draw
 	}
-
+	scr_refresh=scr->refresh;
 	default_screenDraw(scr);
 
 	if(scr_refresh>=screen_eraseAndRefresh){
@@ -428,11 +465,8 @@ void main_screen_draw(screen_t *scr){
 			u8g2_SetFont(&u8g2, u8g2_font_main_menu);
 			putStrAligned("NO IRON", 24, align_center);
 		}
-		if(mainScr.ironStatus==status_sleep && mainScr.currentMode==main_disabled){
-			u8g2_SetFont(&u8g2, u8g2_font_main_menu);
-			putStrAligned("SLEEP", 24, align_center);
-		}
 	}
+
 
 	if( (scr_refresh || updateIronPower()) && mainScr.ironStatus==status_running ){				// Value changed or screen redrawed?
 
@@ -444,16 +478,7 @@ void main_screen_draw(screen_t *scr){
 		u8g2_DrawBox(&u8g2, 13, OledHeight-5, mainScr.lastPwr, 3);
 		u8g2_DrawRFrame(&u8g2, 13, OledHeight-6, 100, 5, 2);
 	}
-	if((HAL_GetTick()-plotTime)>99){
-		scr->refresh=screen_eraseAndRefresh;
-		plotTime=HAL_GetTick();
-		uint16_t t = readTipTemperatureCompensated(stored_reading,read_Avg)>>4;
-		if(t>31){ t=31; }
-		plotData[plotX] = t;
-		if(++plotX>99){
-			plotX=0;
-		}
-	}
+
 	if(scr_refresh && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){
 		u8g2_DrawVLine(&u8g2, 10, 22, 31);
 		for(uint8_t x=22; x<=54; x+=6){
@@ -470,6 +495,13 @@ void main_screen_draw(screen_t *scr){
 		u8g2_DrawTriangle(&u8g2, 120, set-5, 120, set+5, 115, set);
 		u8g2_SetDrawColor(&u8g2, XOR);
 		u8g2_DrawHLine(&u8g2, 13, set, 100);
+	}
+	if(mainScr.ironStatus==status_sleep && mainScr.currentMode==main_disabled){
+		if(scr_refresh){
+			u8g2_SetDrawColor(&u8g2, WHITE);
+			u8g2_SetFont(&u8g2, u8g2_font_main_menu);
+			u8g2_DrawStr(&u8g2, xpos, ypos, "SLEEP");
+		}
 	}
 }
 
@@ -546,11 +578,11 @@ void main_screen_setup(screen_t *scr) {
 	//Ambient temperature display
 	w=&Widget_AmbTemp;
 	screen_addWidget(w,scr);
-	static char ntc[7];
+	static char ntc[8];
 	widgetDefaultsInit(w, widget_display);
 	dis=extractDisplayPartFromWidget(w);
 	w->displayString=ntc;
-	dis->reservedChars=6;
+	dis->reservedChars=7;
 	w->dispAlign=align_right;
 	w->textAlign=align_center;
 	w->posY= 2;
@@ -604,5 +636,8 @@ void main_screen_setup(screen_t *scr) {
 	w->multiOptionWidget.numberOfOptions = 7;
 
 	setMainWidget(&Widget_IronTemp);
+	u8g2_SetFont(&u8g2,u8g2_font_main_menu);
+	sleepWidth=u8g2_GetStrWidth(&u8g2, "SLEEP")+2;
+	sleepHeigh= u8g2_GetMaxCharHeight(&u8g2)+3;
 }
 
