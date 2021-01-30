@@ -129,7 +129,7 @@ void RE_Process(RE_State_t* data) {
 			was_pushed_time = HAL_GetTick();
 		}
 		else if(data->pv_click == RE_BT_PRESSED) {
-			if((now_button == 0)&&(pressed_time > 500)){
+			if((now_button == 0)&&(pressed_time > 300)){
 				data->pv_click = RE_BT_LONG_CLICK;
 			}
 			else if((now_button == 1)&&(pressed_time > 50)){
