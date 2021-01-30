@@ -425,11 +425,11 @@ void main_screen_draw(screen_t *scr){
 			u8g2_DrawXBMP(&u8g2, 0,OledHeight-pulseXBM[1], pulseXBM[0], pulseXBM[1], &pulseXBM[2]);
 		}
 		if(mainScr.ironStatus==status_noiron && mainScr.currentMode==main_disabled){
-			u8g2_SetFont(&u8g2, u8g2_font_main_msg);
+			u8g2_SetFont(&u8g2, u8g2_font_main_menu);
 			putStrAligned("NO IRON", 24, align_center);
 		}
 		if(mainScr.ironStatus==status_sleep && mainScr.currentMode==main_disabled){
-			u8g2_SetFont(&u8g2, u8g2_font_main_msg);
+			u8g2_SetFont(&u8g2, u8g2_font_main_menu);
 			putStrAligned("SLEEP", 24, align_center);
 		}
 	}
@@ -569,7 +569,7 @@ void main_screen_setup(screen_t *scr) {
 	w->posY = 22;
 	w->dispAlign=align_center;
 	w->textAlign=align_center;
-	w->font=u8g2_font_main_msg;
+	w->font=u8g2_font_main_menu;
 	w->multiOptionWidget.editable.inputData.getData = &getTip;
 	w->multiOptionWidget.editable.inputData.number_of_dec = 0;
 	w->multiOptionWidget.editable.big_step = 0;
@@ -592,7 +592,7 @@ void main_screen_setup(screen_t *scr) {
 	w->textAlign=align_center;
 	w->editableWidget.big_step = 1;
 	w->editableWidget.step = 1;
-	w->font=u8g2_font_main_msg;
+	w->font=u8g2_font_main_menu;
 	w->frameType=frame_disabled;
 	w->enabled=0;
 
