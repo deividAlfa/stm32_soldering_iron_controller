@@ -202,7 +202,8 @@ void resetCurrentProfile(void){
 		systemSettings.Profile.tip[4].calADC_At_200 = 1400;
 		systemSettings.Profile.tip[4].calADC_At_300 = 2300;
 		systemSettings.Profile.tip[4].calADC_At_400 = 3150;
-
+		systemSettings.Profile.impedance=80;
+		systemSettings.Profile.power=80;
 		systemSettings.Profile.noIronValue=4000;
 	}
 
@@ -222,6 +223,8 @@ void resetCurrentProfile(void){
 		systemSettings.Profile.currentNumberOfTips = 1;
 		systemSettings.Profile.currentTip = 0;
 		strcpy(systemSettings.Profile.tip[0].name, "C245");
+		systemSettings.Profile.impedance=26;
+		systemSettings.Profile.power=150;
 		systemSettings.Profile.noIronValue=4000;
 	}
 
@@ -242,6 +245,8 @@ void resetCurrentProfile(void){
 		systemSettings.Profile.currentTip = 0;
 		strcpy(systemSettings.Profile.tip[0].name, "C210");
 		systemSettings.Profile.noIronValue=1200;
+		systemSettings.Profile.power=80;
+		systemSettings.Profile.impedance=21;
 	}
 	else if(systemSettings.settings.currentProfile==profile_None){
 		asm("nop");																		// We shouldn't get here

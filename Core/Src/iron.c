@@ -10,6 +10,7 @@
 #include "settings.h"
 #include "main.h"
 #include "tempsensors.h"
+#include "voltagesensors.h"
 #include "ssd1306.h"
 
 volatile iron_t Iron;
@@ -161,8 +162,25 @@ void handleIron(void) {
 	if(set < 0){ set = 0; }
 	// If positive PID output, calculate PWM duty and power output.
 	if(set){
-	  Iron.CurrentIronPower = set*100;
-	  Iron.Pwm_Out = set*(float)Iron.Pwm_Max;	// Compute PWM Duty. The ADC will load it after sampling the tip.
+		volatile uint32_t volts = getSupplyVoltage_v_x10();						// Get last voltage reading x10
+		volts = (volts*volts)/10;											// (Vx10 * Vx10)/10 = (V*V)*10 (x10 for fixed point precision)
+		if(volts==0){
+			volts=10;														// minimum value to avoid division by 0
+		}
+		volatile uint32_t PwmPeriod=systemSettings.Profile.pwmPeriod;				// Max output
+		volatile uint32_t maxPower = volts/systemSettings.Profile.impedance;		// Max power with current voltage and impedance(Impedance stored in x10)
+		if(systemSettings.Profile.power >= maxPower){
+			Iron.Pwm_Max = Iron.Pwm_Limit;
+		}
+		else{
+			Iron.Pwm_Max = (PwmPeriod*systemSettings.Profile.power)/maxPower;	// Max PWM output for current power limit
+			if(Iron.Pwm_Max > Iron.Pwm_Limit){
+				Iron.Pwm_Max = Iron.Pwm_Limit;
+			}
+		}
+
+		Iron.CurrentIronPower = set*100;
+		Iron.Pwm_Out = set*(float)Iron.Pwm_Max;	// Compute PWM Duty. The ADC will load it after sampling the tip.
 	}
 	// Else, set both to 0
 	else{
@@ -171,7 +189,7 @@ void handleIron(void) {
 	  resetPID();
 	}
 	// If by any means the PWM output is higher than max calculated, generate error
-	if(Iron.Pwm_Out >Iron.Pwm_Max){
+	if(Iron.Pwm_Out > Iron.Pwm_Limit){
 		Error_Handler();
 	}
 	// For calibration process
@@ -312,7 +330,7 @@ void initTimers(void){
 		#error No PWM ouput set (See PWM_CHx / PWM_CHxN in board.h)
 	#endif
 
-		Iron.Pwm_Max = pwm - (delay + (uint16_t)ADC_MEASURE_TIME);
+		Iron.Pwm_Limit = pwm - (delay + (uint16_t)ADC_MEASURE_TIME);
 }
 
 // Loads the PWM delay

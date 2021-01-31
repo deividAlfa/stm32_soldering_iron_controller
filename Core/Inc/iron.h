@@ -20,8 +20,9 @@ typedef struct {
 
 	TIM_HandleTypeDef 		*Pwm_Timer;					// Pointer to the PWM timer
 	uint8_t 				Pwm_Channel;				// PWM channel
+	uint16_t				Pwm_Limit;					// Max PWM output value possible
+	uint16_t				Pwm_Max;					// Max PWM output based on power limit
 	uint16_t				Pwm_Out;					// Last PWM value calculated
-	uint16_t				Pwm_Max;					// Max PWM output value
 	TIM_HandleTypeDef 		*Delay_Timer;				// Pointer to the Delay timer
 	int8_t 					CurrentIronPower;			// Last output power
 	uint16_t 				CurrentSetTemperature;		// Actual set temperature (Setpoint)

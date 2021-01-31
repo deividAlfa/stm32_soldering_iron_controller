@@ -106,6 +106,8 @@ typedef struct tipData {
 __attribute__ ((aligned (4))) typedef struct{
 	tipData tip[TipSize];
 	bool initialized;
+	uint8_t impedance;
+	uint16_t power;
 	uint8_t tempUnit;
 	uint8_t currentNumberOfTips;
 	uint8_t currentTip;

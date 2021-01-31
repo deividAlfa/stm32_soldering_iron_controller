@@ -73,6 +73,7 @@ static widget_t Widget_PID_Time;
 static widget_t comboWidget_IRON;
 static comboBox_item_t comboitem_IRON_SleepTime;
 static comboBox_item_t comboitem_IRON_Power;
+static comboBox_item_t comboitem_IRON_Impedance;
 static comboBox_item_t comboitem_IRON_PWMPeriod;
 static comboBox_item_t comboitem_IRON_ADCDelay;
 static comboBox_item_t comboitem_IRON_FilterMode;
@@ -83,6 +84,7 @@ static comboBox_item_t comboitem_IRON_Back;
 
 static widget_t Widget_IRON_SleepTime;
 static widget_t Widget_IRON_Power;
+static widget_t Widget_IRON_Impedance;
 static widget_t Widget_IRON_ADCLimit;
 static widget_t Widget_IRON_PWMPeriod;
 static widget_t Widget_IRON_ADCDelay;
@@ -166,15 +168,20 @@ static int delTip(widget_t *w) {
 }
 
 static void * getMaxPower() {
-	temp = currentPID.max * 100;
+	temp = systemSettings.Profile.power;
 	return &temp;
 }
 static void setMaxPower(uint16_t *val) {
-	currentPID.max = (float)*val / 100.0;
-	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.max=currentPID.max;
-	setupPIDFromStruct();
+	systemSettings.Profile.power = *val;
 }
 
+static void * getTipImpedance() {
+	temp = systemSettings.Profile.impedance;
+	return &temp;
+}
+static void setTipImpedance(uint16_t *val) {
+	systemSettings.Profile.impedance = *val;
+}
 static void * getContrast_() {
 	temp = systemSettings.settings.contrast;
 	return &temp;
@@ -978,13 +985,30 @@ void settings_screen_setup(void) {
 	dis=extractDisplayPartFromWidget(w);
 	w->displayString=arr_Pwr;
 	dis->reservedChars=4;
-	w->endString="%";
+	w->endString="W";
 	dis->getData = &getMaxPower;
 	w->editableWidget.big_step = 20;
 	w->editableWidget.step = 5;
 	w->editableWidget.setData = (void (*)(void *))&setMaxPower;
-	w->editableWidget.max_value = 100;
+	w->editableWidget.max_value = 500;
 	w->editableWidget.min_value = 5;
+
+	//********[ Impedance Widget ]***********************************************************
+	//
+	w = &Widget_IRON_Impedance;
+	static char arr_Impedance[5];
+	widgetDefaultsInit(w, widget_editable);
+	dis=extractDisplayPartFromWidget(w);
+	w->displayString=arr_Impedance;
+	dis->reservedChars=4;
+	dis->number_of_dec=1;
+	//w->endString="";
+	dis->getData = &getTipImpedance;
+	w->editableWidget.big_step = 10;
+	w->editableWidget.step = 1;
+	w->editableWidget.setData = (void (*)(void *))&setTipImpedance;
+	w->editableWidget.max_value = 160;
+	w->editableWidget.min_value = 10;
 
 	//********[ ADC Limit Widget ]***********************************************************
 	//
@@ -1081,7 +1105,8 @@ void settings_screen_setup(void) {
 	screen_addWidget(w, sc);
 	widgetDefaultsInit(w, widget_combo);
 	comboAddOption(&comboitem_IRON_SleepTime, w,	"Sleep Time", 	&Widget_IRON_SleepTime);
-	comboAddOption(&comboitem_IRON_Power, w, 		"Max. Power",	&Widget_IRON_Power);
+	comboAddOption(&comboitem_IRON_Impedance, w, 	"Impedance",	&Widget_IRON_Impedance);
+	comboAddOption(&comboitem_IRON_Power, w, 		"Power",	&Widget_IRON_Power);
 	comboAddOption(&comboitem_IRON_ADCLimit, w, 	"Det. Limit",	&Widget_IRON_ADCLimit);
 	comboAddOption(&comboitem_IRON_PWMPeriod,w, 	"PWM Time", 	&Widget_IRON_PWMPeriod);
 	comboAddOption(&comboitem_IRON_ADCDelay, w, 	"ADC Delay", 	&Widget_IRON_ADCDelay);
