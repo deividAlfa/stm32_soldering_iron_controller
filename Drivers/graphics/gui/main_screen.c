@@ -138,23 +138,20 @@ static void * main_screen_getAmbTemp() {
 }
 #endif
 
-static bool updateIronPower() {
+static void updateIronPower() {
 	static uint32_t stored=0;
-
-	int32_t tmpPwr = getCurrentPower();
-	if(tmpPwr < 0){
-		tmpPwr = 0 ;
-	}
-
-	//tmpPwr = ((tmpPwr*323)>>8)<<12;
-	tmpPwr = tmpPwr<<12;
-	stored = ( ((stored<<9 )-stored)+tmpPwr+(1<<11))>>9 ;
-	tmpPwr = stored>>12;
-	if(tmpPwr!=mainScr.lastPwr){
+	static uint32_t updateTim;
+	if((HAL_GetTick()-updateTim)>10){
+		updateTim = HAL_GetTick();
+		int32_t tmpPwr = getCurrentPower();
+		if(tmpPwr < 0){
+			tmpPwr = 0 ;
+		}
+		tmpPwr = tmpPwr<<12;
+		stored = ( ((stored<<6 )-stored)+tmpPwr+(1<<11))>>6 ;
+		tmpPwr = stored>>12;
 		mainScr.lastPwr=tmpPwr;
-		return 1;
 	}
-	return 0;
 }
 
 static void setMainWidget(widget_t* w){
@@ -243,6 +240,8 @@ static void main_screen_init(screen_t *scr) {
 	mainScr.idleTick=HAL_GetTick();
 }
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
+	updateIronPower();
+
 	if(mainScr.update){
 		mainScr.update = 0;
 	}
@@ -399,6 +398,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 static uint8_t plotData[100];
 static uint8_t plotX;
 static uint32_t plotTime;
+static uint32_t barTime;
 static uint8_t sleepWidth;
 static uint8_t sleepHeigh;
 static uint32_t sleepTim=0;
@@ -468,7 +468,7 @@ void main_screen_draw(screen_t *scr){
 	}
 
 
-	if( (scr_refresh || updateIronPower()) && mainScr.ironStatus==status_running ){				// Value changed or screen redrawed?
+	if( (scr_refresh ||(HAL_GetTick()-barTime)>20) && mainScr.ironStatus==status_running ){				// Value changed or screen redrawed?
 
 		if(scr_refresh<screen_eraseAndRefresh){
 			u8g2_SetDrawColor(&u8g2,BLACK);
