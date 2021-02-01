@@ -141,14 +141,14 @@ static void * main_screen_getAmbTemp() {
 static void updateIronPower() {
 	static uint32_t stored=0;
 	static uint32_t updateTim;
-	if((HAL_GetTick()-updateTim)>10){
+	if((HAL_GetTick()-updateTim)>9){
 		updateTim = HAL_GetTick();
 		int32_t tmpPwr = getCurrentPower();
 		if(tmpPwr < 0){
 			tmpPwr = 0 ;
 		}
 		tmpPwr = tmpPwr<<12;
-		stored = ( ((stored<<6 )-stored)+tmpPwr+(1<<11))>>6 ;
+		stored = ( ((stored<<6)-stored)+tmpPwr+(1<<11))>>6 ;
 		tmpPwr = stored>>12;
 		mainScr.lastPwr=tmpPwr;
 	}
@@ -172,7 +172,7 @@ static int menuProcessInput(widget_t* w, RE_Rotation_t r, RE_State_t * s){
 	if(r==Click){
 		//mainScr.mode=main_resume;
      		switch(mainScr.menuPos){
-			case 0:
+			case 0:				//BACK
 				mainScr.setMode=main_irontemp;
 				mainScr.currentMode=main_setMode;
 				break;
@@ -188,7 +188,7 @@ static int menuProcessInput(widget_t* w, RE_Rotation_t r, RE_State_t * s){
 				return screen_system;
 			case 5:				// EDIT TIPS
 				return screen_edit_iron_tips;
-			case 6:				// CALIBRATIONS
+			case 6:				// CALIBRATION
 				return screen_edit_calibration_wait;
 			default:
 				break;
@@ -398,6 +398,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 static uint8_t plotData[100];
 static uint8_t plotX;
 static uint32_t plotTime;
+bool plotDraw;
 static uint32_t barTime;
 static uint8_t sleepWidth;
 static uint8_t sleepHeigh;
@@ -411,7 +412,8 @@ void main_screen_draw(screen_t *scr){
 		scr->refresh=screen_eraseAndRefresh;
 	}
 	if((HAL_GetTick()-plotTime)>99){
-		scr->refresh=screen_eraseAndRefresh;	// Force screen erase
+		plotDraw=1;
+		scr->refresh=screen_eraseAndRefresh;
 		plotTime=HAL_GetTick();
 		uint16_t t = readTipTemperatureCompensated(stored_reading,read_Avg);
 		if(t>500){
@@ -476,7 +478,7 @@ void main_screen_draw(screen_t *scr){
 	}
 
 
-	if( (scr_refresh || (HAL_GetTick()-barTime)>19) && mainScr.ironStatus==status_running ){	// Update every 10mS or if screen was erased
+	if( (scr_refresh || (HAL_GetTick()-barTime)>9) && mainScr.ironStatus==status_running ){	// Update every 10mS or if screen was erased
 
 		if(scr_refresh<screen_eraseAndRefresh){
 			u8g2_SetDrawColor(&u8g2,BLACK);
@@ -487,7 +489,8 @@ void main_screen_draw(screen_t *scr){
 		u8g2_DrawRFrame(&u8g2, 13, OledHeight-6, 100, 5, 2);
 	}
 
-	if(scr_refresh && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){	//Update every 100mS or if screen is erased
+	if((scr_refresh || plotDraw) && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){	//Update every 100mS or if screen is erased
+		plotDraw=0;
 		u8g2_DrawVLine(&u8g2, 11, 16, 40);
 		for(uint8_t y=	16; y<57; y+=13){
 			u8g2_DrawHLine(&u8g2, 7, y, 4);
