@@ -411,10 +411,18 @@ void main_screen_draw(screen_t *scr){
 		scr->refresh=screen_eraseAndRefresh;
 	}
 	if((HAL_GetTick()-plotTime)>99){
-		scr->refresh=screen_eraseAndRefresh;
+		scr->refresh=screen_eraseAndRefresh;	// Force screen erase
 		plotTime=HAL_GetTick();
-		uint16_t t = readTipTemperatureCompensated(stored_reading,read_Avg)>>4;
-		if(t>31){ t=31; }
+		uint16_t t = readTipTemperatureCompensated(stored_reading,read_Avg);
+		if(t>500){
+			t=40;
+		}
+		else if(t>188){
+			t = (t-180)>>3;
+		}
+		else{
+			t = 1;
+		}
 		plotData[plotX] = t;
 		if(++plotX>99){
 			plotX=0;
@@ -468,7 +476,7 @@ void main_screen_draw(screen_t *scr){
 	}
 
 
-	if( (scr_refresh ||(HAL_GetTick()-barTime)>20) && mainScr.ironStatus==status_running ){				// Value changed or screen redrawed?
+	if( (scr_refresh || (HAL_GetTick()-barTime)>19) && mainScr.ironStatus==status_running ){	// Update every 10mS or if screen was erased
 
 		if(scr_refresh<screen_eraseAndRefresh){
 			u8g2_SetDrawColor(&u8g2,BLACK);
@@ -479,22 +487,25 @@ void main_screen_draw(screen_t *scr){
 		u8g2_DrawRFrame(&u8g2, 13, OledHeight-6, 100, 5, 2);
 	}
 
-	if(scr_refresh && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){
-		u8g2_DrawVLine(&u8g2, 10, 22, 31);
-		for(uint8_t x=22; x<=54; x+=6){
-			u8g2_DrawHLine(&u8g2, 7, x, 3);
+	if(scr_refresh && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){	//Update every 100mS or if screen is erased
+		u8g2_DrawVLine(&u8g2, 11, 16, 40);
+		for(uint8_t y=	16; y<57; y+=13){
+			u8g2_DrawHLine(&u8g2, 7, y, 4);
 		}
 		for(uint8_t x=0; x<100; x++){
 			uint8_t pos=plotX+x;
 			if(pos>99){
 				pos -=100;
 			}
-			u8g2_DrawVLine(&u8g2, x+13, 53-plotData[pos], plotData[pos]);
+			u8g2_DrawVLine(&u8g2, x+13, 56-plotData[pos], plotData[pos]);
 		}
-		uint8_t set=53-(Iron.CurrentSetTemperature>>4);
-		u8g2_DrawTriangle(&u8g2, 120, set-5, 120, set+5, 115, set);
-		u8g2_SetDrawColor(&u8g2, XOR);
-		u8g2_DrawHLine(&u8g2, 13, set, 100);
+		uint8_t set;
+		if(Iron.CurrentSetTemperature<188){ set = 1; }
+		else {
+			set=(Iron.CurrentSetTemperature-180)>>3;
+		}
+		set= 56-set;
+		u8g2_DrawTriangle(&u8g2, 124, set-5, 124, set+5, 115, set);
 	}
 	if(mainScr.ironStatus==status_sleep && mainScr.currentMode==main_disabled){
 		if(scr_refresh){
