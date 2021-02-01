@@ -108,6 +108,8 @@ void handleIron(void) {
 		else{
 			Iron.CurrentIronPower = 0;
 		}
+		Iron.prevRunawayLevel=runaway_ok;				// Reset runaway status and timer
+		Iron.RunawayTimer = CurrentTime;
 		return;											// Do nothing else (PWM already disabled)
 	}
 
@@ -151,7 +153,7 @@ void handleIron(void) {
 	// Else use current setpoint value
 	else{
 	  // Disable output if requested temperature is below 100ºC or iron temp higher than setpoint
-	  if((Iron.CurrentSetTemperature>99)&&(tipTemp<Iron.CurrentSetTemperature)){
+	  if((Iron.CurrentSetTemperature>99)/*&&(tipTemp<Iron.CurrentSetTemperature)*/){
 		  uint16_t t=human2adc(Iron.CurrentSetTemperature);
 		  if(t){
 			  set = calculatePID(t, TIP.last_avg);
@@ -186,7 +188,7 @@ void handleIron(void) {
 	else{
 	  Iron.CurrentIronPower = 0;
 	  Iron.Pwm_Out = 0;
-	  resetPID();
+	  //resetPID();
 	}
 	// If by any means the PWM output is higher than max calculated, generate error
 	if(Iron.Pwm_Out > Iron.Pwm_Limit){
@@ -201,69 +203,70 @@ void handleIron(void) {
 
 
 	// Check for temperature runaway. Had to be moved at the end to prevent false triggering (Temperature higher, but new PID was not yet calculated to turn off pwm)
-	if((Iron.RunawayStatus==runaway_ok) && (Iron.presence==isPresent) && (Iron.DebugMode==debug_Off)){							// If overrun not triggered yet and iron detected
-		if(Iron.Pwm_Out!=0){												// If PWM is active
-
-			for(int8_t c=runaway_100; c>=runaway_ok; c--){					// Check for overrun
-				Iron.RunawayLevel=c;
-				if(tipTemp > (Iron.CurrentSetTemperature + (25*Iron.RunawayLevel)) ){					// 25ºC steps
-					break;															// Stop at the highest overrun condition
-				}
+	if((Iron.Pwm_Out) && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==debug_Off) &&(tipTemp > Iron.CurrentSetTemperature)){
+		for(int8_t c=runaway_100; c>=runaway_ok; c--){					// Check for overrun
+			Iron.RunawayLevel=c;
+			if(tipTemp > (Iron.CurrentSetTemperature + (25*Iron.RunawayLevel)) ){					// 25ºC steps
+				break;															// Stop at the highest overrun condition
 			}
+		}
 
-			if(tipTemp>500){ Iron.RunawayLevel=runaway_500; }						// In any case
+		if(tipTemp>500){ Iron.RunawayLevel=runaway_500; }						// In any case
 
-			if(Iron.RunawayLevel!=runaway_ok){										// Runaway detected?
-				if(Iron.prevRunawayLevel==runaway_ok){								// First overrun detection?
-					Iron.prevRunawayLevel=Iron.RunawayLevel;						// Yes, store in prev level
-					Iron.RunawayTimer=CurrentTime;									// Store time
-				}
-				else{																// Was already triggered
-					switch(Iron.RunawayLevel){
-						case runaway_ok:											// No problem (<25ºC difference)
-							break;													// (Never used here)
-						case runaway_25:											// Temp >25°C over setpoint
-							if((CurrentTime-Iron.RunawayTimer)>20000){			// 20 second limit
-								Iron.RunawayStatus=runaway_triggered;
-								FatalError(error_RUNAWAY25);
-							}
-							break;
-						case runaway_50:											// Temp >50°C over setpoint
-							if((CurrentTime+Iron.RunawayTimer)>10000){			// 10 second limit
-								Iron.RunawayStatus=runaway_triggered;
-								FatalError(error_RUNAWAY50);
-							}
-							break;
-						case runaway_75:											// Temp >75°C over setpoint
-							if((CurrentTime-Iron.RunawayTimer)>3000){				// 3 second limit
-								Iron.RunawayStatus=runaway_triggered;
-								FatalError(error_RUNAWAY75);
-							}
-							break;
-						case runaway_100:											// Temp >100°C over setpoint
-							if((CurrentTime-Iron.RunawayTimer)>1000){				// 1 second limit
-								Iron.RunawayStatus=runaway_triggered;
-								FatalError(error_RUNAWAY100);
-							}
-							break;
-						case runaway_500:											// Exceed 500ºC!
-							FatalError(error_RUNAWAY500);
-							break;
-						default:													// Unknown overrun state
+		if(Iron.RunawayLevel!=runaway_ok){										// Runaway detected?
+			if(Iron.prevRunawayLevel==runaway_ok){								// First overrun detection?
+				Iron.prevRunawayLevel=Iron.RunawayLevel;						// Yes, store in prev level
+				Iron.RunawayTimer=CurrentTime;									// Store time
+			}
+			else{																// Was already triggered
+				switch(Iron.RunawayLevel){
+					case runaway_ok:											// No problem (<25ºC difference)
+						break;													// (Never used here)
+					case runaway_25:											// Temp >25°C over setpoint
+						if((CurrentTime-Iron.RunawayTimer)>20000){			// 20 second limit
 							Iron.RunawayStatus=runaway_triggered;
-							FatalError(error_RUNAWAY_UNKNOWN);
-							break;
-					}
+							FatalError(error_RUNAWAY25);
+						}
+						break;
+					case runaway_50:											// Temp >50°C over setpoint
+						if((CurrentTime-Iron.RunawayTimer)>10000){				// 10 second limit
+							Iron.RunawayStatus=runaway_triggered;
+							FatalError(error_RUNAWAY50);
+						}
+						break;
+					case runaway_75:											// Temp >75°C over setpoint
+						if((CurrentTime-Iron.RunawayTimer)>3000){				// 3 second limit
+							Iron.RunawayStatus=runaway_triggered;
+							FatalError(error_RUNAWAY75);
+						}
+						break;
+					case runaway_100:											// Temp >100°C over setpoint
+						if((CurrentTime-Iron.RunawayTimer)>1000){				// 1 second limit
+							Iron.RunawayStatus=runaway_triggered;
+							FatalError(error_RUNAWAY100);
+						}
+						break;
+					case runaway_500:											// Exceed 500ºC!
+						if((CurrentTime-Iron.RunawayTimer)>1000){				// 1 second limit
+							Iron.RunawayStatus=runaway_triggered;
+							FatalError(error_RUNAWAY500);
+						}
+						break;
+					default:													// Unknown overrun state
+						Iron.RunawayStatus=runaway_triggered;
+						FatalError(error_RUNAWAY_UNKNOWN);
+						break;
 				}
-			}
-			else{
-				Iron.prevRunawayLevel=runaway_ok;							// No, clear prev level
 			}
 		}
 		else{
+			Iron.RunawayTimer = CurrentTime;							// RunAway OK, reset runaway status and timer
 			Iron.prevRunawayLevel=runaway_ok;
-			Iron.RunawayTimer = CurrentTime;								// PWM off, reset runaway status and timer
 		}
+	}
+	else{
+		Iron.RunawayTimer = CurrentTime;								// PWM off, reset runaway status and timer
+		Iron.prevRunawayLevel=runaway_ok;
 	}
 }
 
@@ -479,7 +482,7 @@ void setSetTemperature(uint16_t temperature) {
 		systemSettings.Profile.UserSetTemperature = temperature;
 		Iron.CurrentSetTemperature=temperature;
 		Iron.Cal_TemperatureReachedFlag = 0;
-		resetPID();
+		//resetPID();
 	}
 }
 
