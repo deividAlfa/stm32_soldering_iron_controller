@@ -218,7 +218,7 @@ static void setMainScrTempUnit(void) {
 		Widget_SetPoint.editableWidget.min_value=350;
 	}
 	else{
-		Widget_IronTemp.endString="\260C";
+		Widget_IronTemp.endString="\260C";		// \260 = ASCII dec. 176(°) in octal representation
 		#ifdef USE_NTC
 		Widget_AmbTemp.endString="\260C";
 		#endif
@@ -242,7 +242,7 @@ static void main_screen_init(screen_t *scr) {
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	updateIronPower();
 
-	if(mainScr.update){
+	if(mainScr.update){							// This was set on a previous pass. We reset the flag now.
 		mainScr.update = 0;
 	}
 	if((HAL_GetTick()-mainScr.updateTick)>systemSettings.settings.guiUpdateDelay){
@@ -461,8 +461,9 @@ void main_screen_draw(screen_t *scr){
 	scr_refresh=scr->refresh;
 	default_screenDraw(scr);
 
-	if(scr_refresh>=screen_eraseAndRefresh){
+	if(scr_refresh){
 		u8g2_SetDrawColor(&u8g2, WHITE);
+
 		#ifdef USE_NTC
 		u8g2_DrawXBMP(&u8g2, Widget_AmbTemp.posX-tempXBM[0]-2, Widget_AmbTemp.posY, tempXBM[0], tempXBM[1], &tempXBM[2]);
 		#endif
@@ -473,50 +474,48 @@ void main_screen_draw(screen_t *scr){
 		if(mainScr.ActivityOn){
 			u8g2_DrawXBMP(&u8g2, 0,OledHeight-pulseXBM[1], pulseXBM[0], pulseXBM[1], &pulseXBM[2]);
 		}
-		if(mainScr.ironStatus==status_noiron && mainScr.currentMode==main_disabled){
+		if(mainScr.currentMode==main_disabled){
 			u8g2_SetFont(&u8g2, u8g2_font_main_menu);
-			putStrAligned("NO IRON", 24, align_center);
-		}
-	}
-
-
-	if( (scr_refresh || (HAL_GetTick()-barTime)>9) && mainScr.ironStatus==status_running ){	// Update every 10mS or if screen was erased
-
-		if(scr_refresh<screen_eraseAndRefresh){
-			u8g2_SetDrawColor(&u8g2,BLACK);
-			u8g2_DrawBox(&u8g2, 13 , OledHeight-6, 100, 5);
-		}
-		u8g2_SetDrawColor(&u8g2,WHITE);
-		u8g2_DrawBox(&u8g2, 13, OledHeight-5, mainScr.lastPwr, 3);
-		u8g2_DrawRFrame(&u8g2, 13, OledHeight-6, 100, 5, 2);
-	}
-
-	if((scr_refresh || plotDraw) && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){	//Update every 100mS or if screen is erased
-		plotDraw=0;
-		u8g2_DrawVLine(&u8g2, 11, 16, 40);
-		for(uint8_t y=	16; y<57; y+=13){
-			u8g2_DrawHLine(&u8g2, 7, y, 4);
-		}
-		for(uint8_t x=0; x<100; x++){
-			uint8_t pos=plotX+x;
-			if(pos>99){
-				pos -=100;
+			if(mainScr.ironStatus==status_noiron){
+				putStrAligned("NO IRON", 24, align_center);
 			}
-			u8g2_DrawVLine(&u8g2, x+13, 56-plotData[pos], plotData[pos]);
+			else if(mainScr.ironStatus==status_sleep){
+				u8g2_DrawStr(&u8g2, xpos, ypos, "SLEEP");
+			}
 		}
-		uint8_t set;
-		if(Iron.CurrentSetTemperature<188){ set = 1; }
-		else {
-			set=(Iron.CurrentSetTemperature-180)>>3;
-		}
-		set= 56-set;
-		u8g2_DrawTriangle(&u8g2, 124, set-5, 124, set+5, 115, set);
 	}
-	if(mainScr.ironStatus==status_sleep && mainScr.currentMode==main_disabled){
-		if(scr_refresh){
-			u8g2_SetDrawColor(&u8g2, WHITE);
-			u8g2_SetFont(&u8g2, u8g2_font_main_menu);
-			u8g2_DrawStr(&u8g2, xpos, ypos, "SLEEP");
+
+	if(mainScr.ironStatus==status_running){
+		if( scr_refresh || (HAL_GetTick()-barTime)>9){	// Update every 10mS or if screen was erased
+			if(scr_refresh<screen_eraseAndRefresh){
+ 				u8g2_SetDrawColor(&u8g2,BLACK);
+				u8g2_DrawBox(&u8g2, 13 , OledHeight-6, 100, 5);
+			}
+			u8g2_SetDrawColor(&u8g2,WHITE);
+			u8g2_DrawBox(&u8g2, 13, OledHeight-5, mainScr.lastPwr, 3);
+			u8g2_DrawRFrame(&u8g2, 13, OledHeight-6, 100, 5, 2);
+		}
+
+		if((scr_refresh || plotDraw) && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){	//Update every 100mS or if screen is erased
+			plotDraw=0;
+			u8g2_DrawVLine(&u8g2, 11, 16, 40);
+			for(uint8_t y=	16; y<57; y+=13){
+				u8g2_DrawHLine(&u8g2, 7, y, 4);
+			}
+			for(uint8_t x=0; x<100; x++){
+				uint8_t pos=plotX+x;
+				if(pos>99){
+					pos -=100;
+				}
+				u8g2_DrawVLine(&u8g2, x+13, 56-plotData[pos], plotData[pos]);
+			}//
+			uint8_t set;
+			if(Iron.CurrentSetTemperature<188){ set = 1; }
+			else {
+				set=(Iron.CurrentSetTemperature-180)>>3;
+			}
+			set= 56-set;
+			u8g2_DrawTriangle(&u8g2, 124, set-5, 124, set+5, 115, set);
 		}
 	}
 }

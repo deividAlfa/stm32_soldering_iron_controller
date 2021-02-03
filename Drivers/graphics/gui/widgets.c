@@ -69,7 +69,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t){
 	w->update = &default_widgetUpdate;
 	w->enabled = 1;
 	w->frameType = frame_auto;
-	w->refresh = refresh_triggered;
+	w->refresh = refresh_idle;
 	w->radius=-1;
 	w->posX = 0;
 	w->posY = 0;
@@ -146,19 +146,23 @@ void widgetEnable(widget_t* w){
 	if(w && !w->enabled){
 		w->enabled = 1;
 		w->refresh = refresh_triggered;
+		//default_widgetUpdate(w);	// Update widget before drawing
 	}
 }
 
 void widgetDisable(widget_t* w){
 	if(w && w->enabled){
 		w->enabled = 0;
-		w->refresh = refresh_idle;
 		widgetClearField(w);
 	}
 }
 
 void default_widgetUpdate(widget_t *w) {
-	if(!w || !w->enabled){ return ; }
+	if(!w){ return ; }
+	if(!w->enabled){
+		w->refresh=refresh_idle;
+		return;
+	}
 	int32_t val_ui=0;
 	displayOnly_widget_t* dis = extractDisplayPartFromWidget(w);
 	switch(w->type){
