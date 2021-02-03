@@ -167,7 +167,7 @@ void handleIron(void) {
 		volatile uint32_t volts = getSupplyVoltage_v_x10();						// Get last voltage reading x10
 		volts = (volts*volts)/10;											// (Vx10 * Vx10)/10 = (V*V)*10 (x10 for fixed point precision)
 		if(volts==0){
-			volts=10;														// minimum value to avoid division by 0
+			volts=1;														// set minimum value to avoid division by 0
 		}
 		volatile uint32_t PwmPeriod=systemSettings.Profile.pwmPeriod;				// Max output
 		volatile uint32_t maxPower = volts/systemSettings.Profile.impedance;		// Max power with current voltage and impedance(Impedance stored in x10)
