@@ -338,7 +338,7 @@ void initTimers(void){
 
 // Loads the PWM delay
 bool setPwmDelay(uint16_t delay){
-	if(systemSettings.Profile.pwmPeriod>(delay+100)){
+	if(systemSettings.Profile.pwmPeriod>delay){
 		systemSettings.Profile.pwmDelay=delay;
 		Iron.updatePwm=needs_update;
 		return 0;
@@ -348,7 +348,7 @@ bool setPwmDelay(uint16_t delay){
 
 // Loads the PWM period
 bool setPwmPeriod(uint16_t period){
-	if(systemSettings.Profile.pwmDelay<(period-100)){
+	if(systemSettings.Profile.pwmDelay<period){
 		systemSettings.Profile.pwmPeriod=period;
 		Iron.updatePwm=needs_update;
 		return 0;
