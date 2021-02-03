@@ -310,7 +310,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 		case main_disabled:
 			if((HAL_GetTick()-mainScr.idleTick)>5000){
-				setContrast(0);
+				setContrast(5);
 			}
 			if(input!=Rotate_Nothing){
 				setContrast(systemSettings.settings.contrast);
