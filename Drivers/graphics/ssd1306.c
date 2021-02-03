@@ -227,36 +227,43 @@ void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
 
 // Send command in blocking mode
 void write_cmd(uint8_t cmd) {
+#if defined OLED_SPI || defined OLED_I2C
 	while(oled.status==oled_busy){
 		asm("nop");	//Wait for DMA to finish
 	}
 	// Now, else we are in idle (oled_idle) or DMA wants to send a cmd (oled_sending_cmd)
-#if defined OLED_SOFT_I2C
-	i2cSend(&cmd,1,i2cCmd);
-#elif defined OLED_SPI || defined OLED_SOFT_SPI
-	if(oled.device->State != HAL_SPI_STATE_READY){
-		asm("nop");
-	}
+#endif
+
+#if defined OLED_SPI || defined OLED_SOFT_SPI
 	#ifdef USE_CS
 	Oled_Clear_CS();
 	#endif
+
+	#ifdef USE_DC
 	Oled_Clear_DC();
-#ifdef OLED_SPI
-	HAL_StatusTypeDef err=HAL_OK;
+	#endif
+
+	#ifdef OLED_SPI
+	HAL_StatusTypeDef err=HAL_SPI_Transmit(oled.device, &cmd, 1, 10);
 	if(err!=HAL_OK){
 		Error_Handler();
 	}
-	err=HAL_SPI_Transmit(oled.device, &cmd, 1, 10);
-	if(err!=HAL_OK){
-		Error_Handler();
-	}
-#elif defined OLED_SOFT_SPI
+	#elif defined OLED_SOFT_SPI
 	spi_send(&cmd,1);
-#endif
+
+	#ifdef USE_DC
 	Oled_Set_DC();
+	#endif
+
 	#ifdef USE_CS
 	Oled_Set_CS();
 	#endif
+
+	#endif
+
+#elif defined OLED_SOFT_I2C
+	i2cSend(&cmd,1,i2cCmd);
+
 #elif defined OLED_I2C
 	if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, &cmd, 1, 100)){
 		 Error_Handler();
@@ -414,9 +421,13 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 	systemSettings.settings.OledOffset = 2;		// Set by default while system settings are not loaded
 	write_cmd(0xAF);   			// Set Display On
 	update_display();			// Update display CGRAM
+
+	#if defined OLED_SPI || defined OLED_I2C
 	while(oled.status!=oled_idle){
 		asm("nop");	// Wait for DMA completion
 	}
+	#endif
+
 	write_cmd(0xAF);   			// Set Display On
 }
 
@@ -430,9 +441,11 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 
 void FillBuffer(bool color, bool mode){
 	uint32_t fillVal;
+#if defined OLED_SPI || defined OLED_I2C
 	while(oled.status!=oled_idle){
 		asm("nop");				// Don't write to buffer while screen buffer is being transfered
 	}
+#endif
 
 	if(color==WHITE){ fillVal=0xffffffff; }	// Fill color = white
 	else{ fillVal=0; }						// Fill color = black
@@ -481,13 +494,18 @@ void update_display_ErrorHandler(void){
 		Oled_Clear_CS();
 		#endif
 
-		Oled_Clear_DC();								// Send row command
+		#ifdef USE_DC
+		Oled_Clear_DC();
+		#endif
+
 		if(HAL_SPI_Transmit(oled.device, cmd, 3, 50)){
 			while(1){						// If error happens at this stage, just do nothing
 				HAL_IWDG_Refresh(&HIWDG);
 			}
 		}
+		#ifdef USE_DC
 		Oled_Set_DC();
+		#endif
 
 		if(HAL_SPI_Transmit(oled.device, (uint8_t*)oled.ptr + (row * 128), 128, 1000)!=HAL_OK){
 			while(1){						// If error happens at this stage, just do nothing
@@ -507,7 +525,7 @@ void update_display_ErrorHandler(void){
 		}
 		#endif
 	}
-	#ifdef USE_CS
+	#if defined OLED_SPI && defined USE_CS
 	Oled_Set_CS();
 	#endif
 }
@@ -548,7 +566,11 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 		#ifdef USE_CS
 		Oled_Clear_CS();
 		#endif
+
+		#ifdef USE_DC
 		Oled_Clear_DC();
+		#endif
+
 		uint8_t try=3;
 		while(try){
 			err=HAL_SPI_Transmit(oled.device, cmd, 3, 50);									// Send row command in blocking mode
@@ -564,7 +586,10 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 		if(try==0){
 			Error_Handler();
 		}
+		#ifdef USE_DC
 		Oled_Set_DC();
+		#endif
+
 		err=HAL_SPI_Transmit_DMA(oled.device,(uint8_t *) oled.ptr+((uint16_t)128*oled.row), 128);	// Send row data in DMA interrupt mode
 		if( err!= HAL_OK){
 			Error_Handler();
