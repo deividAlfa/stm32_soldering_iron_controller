@@ -36,6 +36,7 @@ void RE_Init(RE_State_t* data, GPIO_TypeDef* GPIO_A_Port, uint16_t GPIO_A_Pin, G
 }
 
 RE_Rotation_t RE_Get(RE_State_t* data) {
+	static uint32_t last_push=0;
 	/* Calculate everything */
 	data->Diff = data->RE_Count - data->Absolute;
 	data->Absolute += data->Diff;
@@ -43,11 +44,17 @@ RE_Rotation_t RE_Get(RE_State_t* data) {
 	/* Check */
 	if(data->pv_click == RE_BT_CLICKED) {
 		data->pv_click = RE_BT_UNRELEASED;
-		RETURN_WITH_STATUS(data, Click);
+		if((HAL_GetTick()-last_push)>100){
+			last_push=HAL_GetTick();
+			RETURN_WITH_STATUS(data, Click);
+		}
 	}
 	else if(data->pv_click == RE_BT_LONG_CLICK) {
 		data->pv_click = RE_BT_UNRELEASED;
-		RETURN_WITH_STATUS(data, LongClick);
+		if((HAL_GetTick()-last_push)>100){
+			last_push=HAL_GetTick();
+			RETURN_WITH_STATUS(data, LongClick);
+		}
 	}
 	else if (data->Diff < 0) {
 		if(data->pv_click == RE_BT_DRAG) {

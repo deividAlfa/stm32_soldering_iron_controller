@@ -546,6 +546,8 @@ void Reset_onEnter(screen_t *scr){
 // Reset confirmation screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void Reset_confirmation_onEnter(screen_t *scr){
+	FillBuffer(BLACK, fill_dma);								// Manually clear the screen
+	Screen_reset_confirmation.refresh=screen_blankRefresh;		// Set to already cleared so it doesn't get erased automatically
 
 	u8g2_SetFont(&u8g2,default_font);
 	u8g2_SetDrawColor(&u8g2, WHITE);

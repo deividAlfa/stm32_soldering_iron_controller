@@ -719,7 +719,7 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
 	if (w->comboBoxWidget.currentItem->type==combo_Option){													// If combo option type
 		sel = extractSelectablePartFromWidget(w->comboBoxWidget.currentItem->widget);									// Get selectable data
 	}
-	if(input == Click){																								// If clicked
+	if((input == Click)||(input == LongClick)){																								// If clicked
 		if (w->comboBoxWidget.currentItem->type==combo_Option){												// If combo option type
 			if(sel->state==widget_idle){																					// If widget idle
 				sel->state=widget_edit;																				// Change to edit
@@ -797,11 +797,12 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 	if(!sel) {	return -2;	}
 
 	if(input == LongClick) {
-		if(sel->longPressAction)
+		if(sel->longPressAction){
 			return sel->longPressAction(w);
-		else
-			return -1;
-			//input = Click;
+		}
+		else{
+			input = Click;
+		}
 	}
 
 	if(input == Click) {
