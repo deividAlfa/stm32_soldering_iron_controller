@@ -295,6 +295,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 				mainScr.currentMode=main_setMode;
 			}
 			else if(input==Click){
+				mainScr.update=1;
 				scr->refresh=screen_eraseAndRefresh;
 				if(mainScr.displayMode==temp_numeric){
 					mainScr.displayMode=temp_graph;
@@ -360,6 +361,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 	}
 
 	if(mainScr.currentMode==main_setMode){
+		mainScr.update=1;
 		mainScr.idleTick=HAL_GetTick();
 		scr->refresh=screen_eraseAndRefresh;
 		mainScr.currentMode=mainScr.setMode;
