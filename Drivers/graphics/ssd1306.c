@@ -549,8 +549,19 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 		Oled_Clear_CS();
 		#endif
 		Oled_Clear_DC();
-		err=HAL_SPI_Transmit(oled.device, cmd, 3, 50);									// Send row command in blocking mode
-		if(err!=HAL_OK){
+		uint8_t try=3;
+		while(try){
+			err=HAL_SPI_Transmit(oled.device, cmd, 3, 50);									// Send row command in blocking mode
+			if(err==HAL_OK){
+				break;
+			}
+			else{
+				display_abort();
+				oled.status=oled_busy;
+				try--;
+			}
+		}
+		if(try==0){
 			Error_Handler();
 		}
 		Oled_Set_DC();
