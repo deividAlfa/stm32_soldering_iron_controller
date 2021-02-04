@@ -856,16 +856,16 @@ void settings_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(w, widget_combo);
 	comboAddOption(&comboitem_SYSTEM_Profile,w, 		"Profile", 		&Widget_SYSTEM_Profile);
 	comboAddOption(&comboitem_SYSTEM_Contrast,w, 		"Contrast", 	&Widget_SYSTEM_Contrast);
-	comboAddOption(&comboitem_SYSTEM_OledOffset, w, 	"OLED Offset", 	&Widget_SYSTEM_OledOffset);
+	comboAddOption(&comboitem_SYSTEM_OledOffset, w, 	"Offset", 	&Widget_SYSTEM_OledOffset);
 	comboAddOption(&comboitem_SYSTEM_EncoderMode, w, 	"Encoder",		&Widget_SYSTEM_EncoderMode);
-	comboAddOption(&comboitem_SYSTEM_InitMode, w, 		"Boot Mode", 	&Widget_SYSTEM_InitMode);
-	comboAddOption(&comboitem_SYSTEM_WakeMode, w, 		"Wake mode", 	&Widget_SYSTEM_WakeMode);
-	comboAddOption(&comboitem_SYSTEM_ButtonWake, w, 	"Button Wake", 	&Widget_SYSTEM_ButtonWake);
+	comboAddOption(&comboitem_SYSTEM_InitMode, w, 		"Boot", 	&Widget_SYSTEM_InitMode);
+	comboAddOption(&comboitem_SYSTEM_WakeMode, w, 		"Wake Mode", 	&Widget_SYSTEM_WakeMode);
+	comboAddOption(&comboitem_SYSTEM_ButtonWake, w, 	"Btn. wake", 	&Widget_SYSTEM_ButtonWake);
 	comboAddOption(&comboitem_SYSTEM_Buzzer, w, 		"Buzzer", 		&Widget_SYSTEM_Buzzer);
-	comboAddOption(&comboitem_SYSTEM_TempUnit, w, 		"Temp. Unit", 	&Widget_SYSTEM_TempUnit);
-	comboAddOption(&comboitem_SYSTEM_TempStep, w, 		"Temp. step",	&Widget_SYSTEM_TempStep);
-	comboAddOption(&comboitem_SYSTEM_GuiUpd, w, 		"GUI update", 	&Widget_SYSTEM_GuiUpd);
-	comboAddOption(&comboitem_SYSTEM_SaveInterval, w, 	"Save Delay",	&Widget_SYSTEM_SaveInterval);
+	comboAddOption(&comboitem_SYSTEM_TempUnit, w, 		"Unit", 	&Widget_SYSTEM_TempUnit);
+	comboAddOption(&comboitem_SYSTEM_TempStep, w, 		"Step",	&Widget_SYSTEM_TempStep);
+	comboAddOption(&comboitem_SYSTEM_GuiUpd, w, 		"Gui time", 	&Widget_SYSTEM_GuiUpd);
+	comboAddOption(&comboitem_SYSTEM_SaveInterval, w, 	"Save time",	&Widget_SYSTEM_SaveInterval);
 	comboAddScreen(&comboitem_SYSTEM_Reset, w, 			"RESET MENU",	screen_reset);
 	comboAddScreen(&comboitem_SYSTEM_Back, w, 			"RETURN", 		screen_settingsmenu);
 
@@ -1149,15 +1149,15 @@ void settings_screen_setup(screen_t *scr) {
 	w = &comboWidget_IRON;
 	screen_addWidget(w, sc);
 	widgetDefaultsInit(w, widget_combo);
-	comboAddOption(&comboitem_IRON_SleepTime, w,	"Sleep Time", 	&Widget_IRON_SleepTime);
-	comboAddOption(&comboitem_IRON_Impedance, w, 	"Impedance",	&Widget_IRON_Impedance);
-	comboAddOption(&comboitem_IRON_Power, w, 		"Power",	&Widget_IRON_Power);
-	comboAddOption(&comboitem_IRON_ADCLimit, w, 	"Det. Limit",	&Widget_IRON_ADCLimit);
+	comboAddOption(&comboitem_IRON_SleepTime, w,	"Sleep", 		&Widget_IRON_SleepTime);
+	comboAddOption(&comboitem_IRON_Impedance, w, 	"Heater R.",	&Widget_IRON_Impedance);
+	comboAddOption(&comboitem_IRON_Power, w, 		"Power",		&Widget_IRON_Power);
 	comboAddOption(&comboitem_IRON_PWMPeriod,w, 	"PWM Time", 	&Widget_IRON_PWMPeriod);
 	comboAddOption(&comboitem_IRON_ADCDelay, w, 	"ADC Delay", 	&Widget_IRON_ADCDelay);
-	comboAddOption(&comboitem_IRON_FilterMode, w, 	"Filter Mode", 	&Widget_IRON_FilterMode);
-	comboAddOption(&comboitem_IRON_filterCoef, w, 	"Filter Coef.",	&Widget_IRON_filterCoef);
-	comboAddOption(&comboitem_IRON_NoIronDelay, w, 	"Det. Time",	&Widget_IRON_NoIronDelay);
+	comboAddOption(&comboitem_IRON_FilterMode, w, 	"Filtering", 	&Widget_IRON_FilterMode);
+	comboAddOption(&comboitem_IRON_filterCoef, w, 	"Factor",		&Widget_IRON_filterCoef);
+	comboAddOption(&comboitem_IRON_ADCLimit, w, 	"No iron",		&Widget_IRON_ADCLimit);
+	comboAddOption(&comboitem_IRON_NoIronDelay, w, 	"Deboucing",	&Widget_IRON_NoIronDelay);
 	comboAddScreen(&comboitem_IRON_Back, w, 		"BACK", 		screen_settingsmenu);
 
 

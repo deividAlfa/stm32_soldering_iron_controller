@@ -267,15 +267,18 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 		case main_disabled:
 			if((HAL_GetTick()-mainScr.idleTick)>5000){
-				setContrast(5);
+				write_cmd(0x30);		// Set Boost voltage to lowest
+				setContrast(1);
 			}
 			if(input!=Rotate_Nothing){
+				write_cmd(0x33);// Set Boost voltage to max c
 				setContrast(systemSettings.settings.contrast);
 			}
 			if((input==LongClick)){
 				return screen_settingsmenu;
 			}
 			if(mainScr.ironStatus==status_running){
+				write_cmd(0x33);// Set Boost voltage to max
 				setContrast(systemSettings.settings.contrast);
 				mainScr.setMode=main_irontemp;
 				mainScr.currentMode=main_setMode;
