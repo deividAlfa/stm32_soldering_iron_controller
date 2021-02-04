@@ -395,7 +395,7 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 	HAL_Delay(100);				// 100mS wait for internal initialization
 	write_cmd(0xAE);  			// Display Off
 	write_cmd(0xD5);         	// Set Display Clock Divide Ratio / Oscillator Frequency
-	write_cmd(0b11110000);      // Set Clock as 100 Frames/Sec
+	write_cmd(0xF0);      		// Set max framerate
 	write_cmd(0xA8);         	// Set Multiplex Ratio
 	write_cmd(0x3F);         	// Default => 0x3F (1/64 Duty)
 	write_cmd(0xD3);         	// Set Display Offset
@@ -540,10 +540,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 #endif
 
 	if(device == oled.device){
-		HAL_SPI_DMAStop(oled.device);
-
-		HAL_StatusTypeDef err=HAL_OK;
-
+		HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 100);	//Wait for DMA to finish
 		if(oled.row>7){
 
 			#if defined OLED_SPI && defined USE_CS
@@ -570,8 +567,12 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 
 		#ifdef USE_DC
 		Oled_Clear_DC();
-		#endif
 
+		#endif
+		if(HAL_SPI_Transmit(oled.device, cmd, 3, 50)!=HAL_OK){									// Send row command in blocking mode
+			Error_Handler();
+		}
+/*
 		uint8_t try=3;
 		while(try){
 			err=HAL_SPI_Transmit(oled.device, cmd, 3, 50);									// Send row command in blocking mode
@@ -587,12 +588,12 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 		if(try==0){
 			Error_Handler();
 		}
+*/
 		#ifdef USE_DC
 		Oled_Set_DC();
 		#endif
 
-		err=HAL_SPI_Transmit_DMA(oled.device,(uint8_t *) oled.ptr+((uint16_t)128*oled.row), 128);	// Send row data in DMA interrupt mode
-		if( err!= HAL_OK){
+		if(HAL_SPI_Transmit_DMA(oled.device,(uint8_t *) oled.ptr+((uint16_t)128*oled.row), 128)!= HAL_OK){// Send row data in DMA interrupt mode
 			Error_Handler();
 		}
 
