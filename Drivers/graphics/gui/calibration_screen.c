@@ -81,8 +81,7 @@ static int okAction(widget_t *w) {
 	return screen_edit_calibration_wait;
 }
 
-static void waitCalibration_screen_init(screen_t *scr) {
-	default_init(scr);
+static void waitCalibration_screen_onEnter(screen_t *scr) {
 	if(scr != &Screen_edit_calibration_input) {
 		Iron.calibrating=1;
 		tempReady = 0;
@@ -166,9 +165,9 @@ void calibration_screen_setup(screen_t *scr) {
 	screen_t* sc;
 	screen_setDefaults(scr);
 	scr->processInput = &waitProcessInput;
-	scr->init = &waitCalibration_screen_init;
 	scr->draw = &waitCalibration_screen_draw;
 	scr->onExit = &waitOnExit;
+	scr->onEnter = &waitCalibration_screen_onEnter;
 
 	addSetTemperatureReachedCallback(tempReachedCallback);
 
