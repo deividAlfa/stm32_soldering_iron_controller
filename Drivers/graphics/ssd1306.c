@@ -393,6 +393,7 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 
 	HAL_IWDG_Refresh(&HIWDG);	// Clear watchdog
 	HAL_Delay(100);				// 100mS wait for internal initialization
+
 	write_cmd(0xAE);  			// Display Off
 	write_cmd(0xD5);         	// Set Display Clock Divide Ratio / Oscillator Frequency
 	write_cmd(0xF0);      		// Set max framerate
@@ -418,6 +419,36 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 
 	write_cmd(0xA4|0x00);   	// Set Entire Display On/Off
 	write_cmd(0xA6|0x00);   	// Set Inverse Display On/Off
+/*
+
+	// Commands extracted from KSGER firmware
+
+	write_cmd(0xAE);
+	write_cmd(0x81);
+	write_cmd(0xCF);
+	write_cmd(0xA1);
+	write_cmd(0xC8);
+	write_cmd(0xA6);
+	write_cmd(0xA8);
+	write_cmd(0x3F);
+	write_cmd(0xD3);
+	write_cmd(0x00);
+	write_cmd(0xD5);
+	write_cmd(0x80);
+	write_cmd(0xD9);
+	write_cmd(0xF1);
+	write_cmd(0xDA);
+	write_cmd(0x12);
+	write_cmd(0xDB);
+	write_cmd(0x40);
+	write_cmd(0x20);
+	write_cmd(0x02);
+	write_cmd(0x8D);
+	write_cmd(0x14);
+	write_cmd(0xA4);
+	write_cmd(0xA6);
+*/
+
 	FillBuffer(BLACK,fill_dma);	// Clear buffer
 	systemSettings.settings.OledOffset = 2;		// Set by default while system settings are not loaded
 	write_cmd(0xAF);   			// Set Display On
@@ -569,14 +600,9 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 		Oled_Clear_DC();
 
 		#endif
-		if(HAL_SPI_Transmit(oled.device, cmd, 3, 50)!=HAL_OK){									// Send row command in blocking mode
-			Error_Handler();
-		}
-/*
-		uint8_t try=3;
+		uint8_t try =3;
 		while(try){
-			err=HAL_SPI_Transmit(oled.device, cmd, 3, 50);									// Send row command in blocking mode
-			if(err==HAL_OK){
+			if(HAL_SPI_Transmit(oled.device, cmd, 3, 50)==HAL_OK){									// Send row command in blocking mode
 				break;
 			}
 			else{
@@ -588,7 +614,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 		if(try==0){
 			Error_Handler();
 		}
-*/
+
 		#ifdef USE_DC
 		Oled_Set_DC();
 		#endif
