@@ -22,6 +22,18 @@ char str[5];
 // Settings screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
 
+// SETTINGS SCREEM
+static widget_t comboWidget_Settings;
+static comboBox_item_t Settings_Combo_PID;
+static comboBox_item_t Settings_Combo_IRON;
+static comboBox_item_t Settings_Combo_SYSTEM;
+static comboBox_item_t Settings_Combo_TIPS;
+static comboBox_item_t Settings_Combo_CALIBRATION;
+#ifdef ENABLE_DEBUG_SCREEN
+static comboBox_item_t Settings_Combo_DEBUG;
+#endif
+static comboBox_item_t Settings_Combo_EXIT;
+
 // SYSTEM
 static widget_t comboWidget_SYSTEM;
 static comboBox_item_t comboitem_SYSTEM_Profile;
@@ -37,9 +49,6 @@ static comboBox_item_t comboitem_SYSTEM_Buzzer;
 static comboBox_item_t comboitem_SYSTEM_InitMode;
 static comboBox_item_t comboitem_SYSTEM_ButtonWake;
 static comboBox_item_t comboitem_SYSTEM_Reset;
-#ifdef ENABLE_DEBUG_SCREEN
-static comboBox_item_t comboitem_SYSTEM_Debug;
-#endif
 
 static comboBox_item_t comboitem_SYSTEM_Back;
 static widget_t Widget_SYSTEM_Profile;
@@ -458,6 +467,22 @@ static void * getButtonWake() {
 	temp = systemSettings.settings.wakeOnButton;
 	return &temp;
 }
+//-------------------------------------------------------------------------------------------------------------------------------
+// Settings screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+
+static void settings_screen_init(screen_t *scr) {
+	default_init(scr);
+	scr->current_widget = &comboWidget_Settings;
+	scr->current_widget->comboBoxWidget.selectable.state = widget_selected;
+}
+
+
+static void settings_screen_OnEnter(screen_t *scr) {
+	if(scr==&Screen_main){
+		comboResetIndex(&comboWidget_Settings);
+	}
+}
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Edit Tip screen functions
@@ -614,10 +639,31 @@ void SYSTEM_onExit(screen_t *scr){
 //-------------------------------------------------------------------------------------------------------------------------------
 // Settings screen setup
 //-------------------------------------------------------------------------------------------------------------------------------
-void settings_screen_setup(void) {
+void settings_screen_setup(screen_t *scr) {
 	screen_t* sc;
 	widget_t* w;
 	displayOnly_widget_t* dis;
+
+	screen_setDefaults(scr);
+	scr->init = &settings_screen_init;
+	scr->onEnter = &settings_screen_OnEnter;
+
+
+	//#################################### [ SETTINGS MAIN SCREEN ]#######################################
+	//
+	w = &comboWidget_Settings;
+	screen_addWidget(w, scr);
+	widgetDefaultsInit(w, widget_combo);
+	comboAddScreen(&Settings_Combo_PID, w, 			"PID", 			screen_pid);
+	comboAddScreen(&Settings_Combo_IRON, w, 		"IRON", 		screen_iron);
+	comboAddScreen(&Settings_Combo_SYSTEM, w, 		"SYSTEM", 		screen_system);
+	comboAddScreen(&Settings_Combo_TIPS, w, 		"EDIT TIPS", 	screen_edit_iron_tips);
+	comboAddScreen(&Settings_Combo_CALIBRATION, w, 	"CALIBRATION", 	screen_edit_calibration_wait);
+	#ifdef ENABLE_DEBUG_SCREEN
+	comboAddScreen(&Settings_Combo_DEBUG, w, 		"DEBUG", 		screen_debug);
+	#endif
+	comboAddScreen(&Settings_Combo_EXIT, w, 		"EXIT", 		screen_main);
+
 
 	//########################################## SYSTEM SCREEN ##########################################
 	//
@@ -821,10 +867,7 @@ void settings_screen_setup(void) {
 	comboAddOption(&comboitem_SYSTEM_GuiUpd, w, 		"GUI update", 	&Widget_SYSTEM_GuiUpd);
 	comboAddOption(&comboitem_SYSTEM_SaveInterval, w, 	"Save Delay",	&Widget_SYSTEM_SaveInterval);
 	comboAddScreen(&comboitem_SYSTEM_Reset, w, 			"RESET MENU",	screen_reset);
-#ifdef ENABLE_DEBUG_SCREEN
-	comboAddScreen(&comboitem_SYSTEM_Debug, w, 			"DEBUG MENU", 	screen_debug);
-#endif
-	comboAddScreen(&comboitem_SYSTEM_Back, w, 			"RETURN", 		screen_main);
+	comboAddScreen(&comboitem_SYSTEM_Back, w, 			"RETURN", 		screen_settingsmenu);
 
 	//########################################## RESET SCREEN ##########################################
 	//
@@ -954,7 +997,7 @@ void settings_screen_setup(void) {
 	comboAddOption(&comboitem_PID_KI, w, 	"Ki", 	&Widget_PID_Ki);
 	comboAddOption(&comboitem_PID_KD, w, 	"Kd", 	&Widget_PID_Kd);
 	comboAddOption(&comboitem_PID_Time, w, 	"Time",	&Widget_PID_Time);
-	comboAddScreen(&comboitem_PID_Back, w, 	"BACK", screen_main);
+	comboAddScreen(&comboitem_PID_Back, w, 	"BACK", screen_settingsmenu);
 
 	//########################################## IRON SCREEN ##########################################
 	//
@@ -1115,7 +1158,7 @@ void settings_screen_setup(void) {
 	comboAddOption(&comboitem_IRON_FilterMode, w, 	"Filter Mode", 	&Widget_IRON_FilterMode);
 	comboAddOption(&comboitem_IRON_filterCoef, w, 	"Filter Coef.",	&Widget_IRON_filterCoef);
 	comboAddOption(&comboitem_IRON_NoIronDelay, w, 	"Det. Time",	&Widget_IRON_NoIronDelay);
-	comboAddScreen(&comboitem_IRON_Back, w, 		"BACK", 		screen_main);
+	comboAddScreen(&comboitem_IRON_Back, w, 		"BACK", 		screen_settingsmenu);
 
 
 	//########################################## IRON TIPS SCREEN ##########################################
@@ -1135,7 +1178,7 @@ void settings_screen_setup(void) {
 		comboAddScreen(&comboitem_IRONTIPS[x],w, &t[x][0], screen_edit_tip_name);
 	}
 	comboAddScreen(&comboitem_IRONTIPS_addNewTip, w, "ADD NEW", screen_edit_tip_name);
-	comboAddScreen(&comboitem_IRONTIPS_Back, w, "BACK", screen_main);
+	comboAddScreen(&comboitem_IRONTIPS_Back, w, "BACK", screen_settingsmenu);
 
 
 

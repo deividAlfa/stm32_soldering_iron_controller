@@ -41,7 +41,7 @@ static widget_t Widget_Vsupply;
 static widget_t Widget_IronTemp;
 static widget_t Widget_TipSelect;
 static widget_t Widget_SetPoint;
-static widget_t Widget_Menu;
+
 
 static struct{
 	uint32_t updateTick;
@@ -75,17 +75,6 @@ static struct{
 // Main screen widgets functions
 //-------------------------------------------------------------------------------------------------------------------------------
 
-static void setMenu(uint16_t *val) {
-	if(mainScr.menuPos!=*val){
-		mainScr.menuPos=*val;
-		Screen_main.refresh=screen_eraseAndRefresh;	// Redraw screen erasing using dma (faster than erasing each widget)
-	}
-}
-
-static void * getMenu() {
-	temp = mainScr.menuPos;
-	return &temp;
-}
 
 static void setTemp(uint16_t *val) {
 	setSetTemperature(*val);
@@ -168,42 +157,6 @@ static void setMainWidget(widget_t* w){
 	}
 }
 
-static int menuProcessInput(widget_t* w, RE_Rotation_t r, RE_State_t * s){
-	if(r==Click){
-		//mainScr.mode=main_resume;
-     		switch(mainScr.menuPos){
-			case 0:				//BACK
-				mainScr.setMode=main_irontemp;
-				mainScr.currentMode=main_setMode;
-				break;
-			case 1:				// TIPS
-				mainScr.setMode=main_tipselect;
-				mainScr.currentMode=main_setMode;
-				return -1;
-			case 2:				// PID
-				return screen_pid;
-			case 3:				// IRON
-				return screen_iron;
-			case 4:				// SYSTEM
-				return screen_system;
-			case 5:				// EDIT TIPS
-				return screen_edit_iron_tips;
-			case 6:				// CALIBRATION
-				return screen_edit_calibration_wait;
-			default:
-				break;
-		}
-	}
-	else if(r==LongClick){
-		mainScr.setMode=main_irontemp;
-		mainScr.currentMode=main_setMode;
-	}
-	else{
-		default_widgetProcessInput(w, r, s);
-	}
-	return -1;
-}
-
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -211,7 +164,7 @@ static void setMainScrTempUnit(void) {
 	if(systemSettings.settings.tempUnit==mode_Farenheit){
 		Widget_IronTemp.endString="\260F";
 		#ifdef USE_NTC
-		Widget_AmbTemp.endString="\260F";
+		Widget_AmbTemp.endString="F";
 		#endif
 		Widget_SetPoint.endString="\260F";
 		Widget_SetPoint.editableWidget.max_value=900;
@@ -220,7 +173,7 @@ static void setMainScrTempUnit(void) {
 	else{
 		Widget_IronTemp.endString="\260C";		// \260 = ASCII dec. 176(°) in octal representation
 		#ifdef USE_NTC
-		Widget_AmbTemp.endString="\260C";
+		Widget_AmbTemp.endString="C";
 		#endif
 		Widget_SetPoint.endString="\260C";
 		Widget_SetPoint.editableWidget.max_value=480;
@@ -238,6 +191,7 @@ static void main_screen_init(screen_t *scr) {
 	Widget_SetPoint.editableWidget.big_step = systemSettings.settings.tempStep;
 	setMainScrTempUnit();
 	mainScr.idleTick=HAL_GetTick();
+
 }
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	updateIronPower();
@@ -287,8 +241,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 				break;
 			}
 			if((input==LongClick)){
+				return screen_settingsmenu;
+			}
+			else if((input==Rotate_Increment_while_click)||(input==Rotate_Decrement_while_click)){
+				mainScr.setMode=main_tipselect;
 				mainScr.currentMode=main_setMode;
-				mainScr.setMode=main_menu;
 			}
 			else if((input==Rotate_Increment)||(input==Rotate_Decrement)){
 				mainScr.setMode=main_setpoint;
@@ -316,8 +273,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 				setContrast(systemSettings.settings.contrast);
 			}
 			if((input==LongClick)){
-				mainScr.currentMode=main_setMode;
-				mainScr.setMode=main_menu;
+				return screen_settingsmenu;
 			}
 			if(mainScr.ironStatus==status_running){
 				setContrast(systemSettings.settings.contrast);
@@ -376,7 +332,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			}
 			break;
 		case main_menu:
-			setMainWidget(&Widget_Menu);
 			break;
 		case main_setpoint:
 			setMainWidget(&Widget_SetPoint);
@@ -483,6 +438,17 @@ void main_screen_draw(screen_t *scr){
 				u8g2_DrawStr(&u8g2, xpos, ypos, "SLEEP");
 			}
 		}
+		/*
+		else if((mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_numeric) || mainScr.currentMode==main_setpoint){
+			u8g2_SetFont(&u8g2, u8g2_font_maintempUnit);
+			if(systemSettings.settings.tempUnit==mode_Celsius){
+				u8g2_DrawStr(&u8g2, 95, 35, "C");
+			}
+			else{
+				u8g2_DrawStr(&u8g2, 97, 35, "F");
+			}
+		}
+		*/
 	}
 
 	if(mainScr.ironStatus==status_running){
@@ -626,29 +592,6 @@ void main_screen_setup(screen_t *scr) {
 	w->multiOptionWidget.options = tipName;
 	w->enabled=0;
 	w->frameType=frame_disabled;
-
-	//********[ Menu Widget ]***********************************************************
-	//
-	w = &Widget_Menu;
-	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_multi_option);
-	dis=extractDisplayPartFromWidget(w);
-	dis->getData = &getMenu;
-	w->posY = 22;
-	w->dispAlign=align_center;
-	w->textAlign=align_center;
-	w->editableWidget.big_step = 1;
-	w->editableWidget.step = 1;
-	w->font=u8g2_font_main_menu;
-	w->frameType=frame_disabled;
-	w->enabled=0;
-
-	w->editableWidget.setData = (void (*)(void *))&setMenu;
-	w->multiOptionWidget.editable.selectable.processInput=menuProcessInput;
-	w->editableWidget.max_value = 6;
-	w->editableWidget.min_value = 0;
-	w->multiOptionWidget.options =menuLabels;
-	w->multiOptionWidget.numberOfOptions = 7;
 
 	setMainWidget(&Widget_IronTemp);
 	u8g2_SetFont(&u8g2,u8g2_font_main_menu);

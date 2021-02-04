@@ -33,9 +33,9 @@ void guiInit(void) {
 	oled_addScreen(&Screen_main,screen_main);
 	main_screen_setup(&Screen_main);
 
-	//oled_addScreen(&Screen_settingsmenu,screen_settingsmenu);
-	//settings_screen_setup(&Screen_settingsmenu);
-	settings_screen_setup();
+	oled_addScreen(&Screen_settingsmenu,screen_settingsmenu);
+	settings_screen_setup(&Screen_settingsmenu);
+	//settings_screen_setup();
 #ifdef ENABLE_DEBUG_SCREEN
 
 	oled_addScreen(&Screen_debug,screen_debug);

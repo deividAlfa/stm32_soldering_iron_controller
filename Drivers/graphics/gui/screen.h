@@ -25,6 +25,7 @@
 
 enum {	screen_boot,
 		screen_main,
+		screen_settingsmenu,
 		screen_pid,
 		screen_iron,
 		screen_system,
@@ -60,6 +61,7 @@ struct screen_t
 
 screen_t Screen_boot;
 screen_t Screen_main;
+screen_t Screen_settingsmenu;
 screen_t Screen_pid;
 screen_t Screen_iron;
 screen_t Screen_system;
