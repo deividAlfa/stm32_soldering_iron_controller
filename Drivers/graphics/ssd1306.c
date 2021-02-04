@@ -393,7 +393,7 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 
 	HAL_IWDG_Refresh(&HIWDG);	// Clear watchdog
 	HAL_Delay(100);				// 100mS wait for internal initialization
-
+/*
 	write_cmd(0xAE);  			// Display Off
 	write_cmd(0xD5);         	// Set Display Clock Divide Ratio / Oscillator Frequency
 	write_cmd(0xF0);      		// Set max framerate
@@ -402,8 +402,6 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 	write_cmd(0xD3);         	// Set Display Offset
 	write_cmd(0x00);         	// Default => 0x00
 	write_cmd(0x40|0x00);   	// Set Display Start Line
-	write_cmd(0x8D);         	// Set Charge Pump
-	write_cmd(0x10|0x04);   	// Default => 0x10
 	write_cmd(0x20);         	// Set Memory Addressing Mode
 	write_cmd(0x02);         	// Default => 0x02
 	write_cmd(0xA0|0x01);   	// Set Segment Re-Map
@@ -419,40 +417,47 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 
 	write_cmd(0xA4|0x00);   	// Set Entire Display On/Off
 	write_cmd(0xA6|0x00);   	// Set Inverse Display On/Off
-/*
-
-	// Commands extracted from KSGER firmware
-
-	write_cmd(0xAE);
-	write_cmd(0x81);
-	write_cmd(0xCF);
-	write_cmd(0xA1);
-	write_cmd(0xC8);
-	write_cmd(0xA6);
-	write_cmd(0xA8);
-	write_cmd(0x3F);
-	write_cmd(0xD3);
-	write_cmd(0x00);
-	write_cmd(0xD5);
-	write_cmd(0x80);
-	write_cmd(0xD9);
-	write_cmd(0xF1);
-	write_cmd(0xDA);
-	write_cmd(0x12);
-	write_cmd(0xDB);
-	write_cmd(0x40);
-	write_cmd(0x20);
-	write_cmd(0x02);
-	write_cmd(0x8D);
-	write_cmd(0x14);
-	write_cmd(0xA4);
-	write_cmd(0xA6);
+	write_cmd(0x8D);         	// Set Charge Pump command
+	write_cmd(0x14);   			// Enable charge pump
+	write_cmd(0x33);         	// Charge pump to 9V
+  	FillBuffer(BLACK,fill_dma);	// Clear buffer
+    update_display();			// Update display CGRAM
+	write_cmd(0xAF);   			// Set Display On
 */
 
-	FillBuffer(BLACK,fill_dma);	// Clear buffer
+// Commands extracted from KSGER firmware
+  write_cmd(0xae);
+  write_cmd(0x00);
+  write_cmd(0x10);
+  write_cmd(0x40);
+  write_cmd(0xb0);
+  write_cmd(0x81);
+  write_cmd(0xff);
+  write_cmd(0xa1);
+  write_cmd(0xa6);
+  write_cmd(0xa8);
+  write_cmd(0x3f);
+  write_cmd(0xad);
+  write_cmd(0x8b);
+  write_cmd(0x33);
+  write_cmd(0xc8);
+  write_cmd(0xd3);
+  write_cmd(0x00);
+  write_cmd(0xd5);
+  write_cmd(0x80);
+  write_cmd(0xd9);
+  write_cmd(0x1f);
+  write_cmd(0xda);
+  write_cmd(0x12);
+  write_cmd(0xdb);
+  write_cmd(0x40);
+  FillBuffer(BLACK,fill_dma);	// Clear buffer
+  update_display();				// Update display CGRAM
+  write_cmd(0xaf);
+
+
 	systemSettings.settings.OledOffset = 2;		// Set by default while system settings are not loaded
-	write_cmd(0xAF);   			// Set Display On
-	update_display();			// Update display CGRAM
+
 
 	#if defined OLED_SPI || defined OLED_I2C
 	while(oled.status!=oled_idle){
