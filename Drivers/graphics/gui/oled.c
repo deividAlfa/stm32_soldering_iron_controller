@@ -77,7 +77,8 @@ void oled_processInput(void) {
 		screen_t *scr = screens;
 		while(scr) {
 			if(scr->index == ret) {
-				scr->refresh=screen_eraseAndRefresh;			// Changed screen, force full display erase using dma
+				FillBuffer(BLACK, fill_dma);
+				scr->refresh=screen_blankRefresh;			// Changed screen, force full display erase using dma
 				if(current_screen->onExit)
 					current_screen->onExit(scr);
 				if(scr->onEnter)
