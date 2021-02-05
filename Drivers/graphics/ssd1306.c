@@ -505,11 +505,11 @@ void FillBuffer(bool color, bool mode){
 void display_abort(void){
 #if defined OLED_SPI
 	HAL_SPI_Abort(oled.device);
-	__HAL_UNLOCK(oled.device);
 #elif defined OLED_I2C
 	HAL_I2C_Abort(oled.device);
 #endif
 
+	__HAL_UNLOCK(oled.device);
 	HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 3000);	//Wait for DMA to finish
 	oled.status=oled_idle;		// Force oled idle status
 }
