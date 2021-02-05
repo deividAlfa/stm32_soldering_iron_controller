@@ -231,7 +231,6 @@ void write_cmd(uint8_t cmd) {
 	while(oled.status==oled_busy){
 		asm("nop");	//Wait for DMA to finish
 	}
-	// Now, else we are in idle (oled_idle) or DMA wants to send a cmd (oled_sending_cmd)
 #endif
 
 #if defined OLED_SPI || defined OLED_SOFT_SPI
@@ -250,6 +249,7 @@ void write_cmd(uint8_t cmd) {
 	}
 	#elif defined OLED_SOFT_SPI
 	spi_send(&cmd,1);
+	#endif
 
 	#ifdef USE_DC
 	Oled_Set_DC();
@@ -257,8 +257,6 @@ void write_cmd(uint8_t cmd) {
 
 	#ifdef USE_CS
 	Oled_Set_CS();
-	#endif
-
 	#endif
 
 #elif defined OLED_SOFT_I2C
@@ -281,20 +279,26 @@ void update_display( void ){
 			HAL_IWDG_Refresh(&HIWDG);
 			setOledRow(row);
 
+			#if defined OLED_SOFT_SPI
+
 			#ifdef USE_CS
 			Oled_Clear_CS();
 			#endif
 
-			#if defined OLED_SOFT_SPI
+			#ifdef USE_DC
+			Oled_Set_DC();
+			#endif
+
 			spi_send((uint8_t *)&oled.buffer[128*row],128);
+
+			#ifdef USE_CS
+			Oled_Set_CS();
+			#endif
 
 			#elif defined OLED_SOFT_I2C
 			i2cSend((uint8_t *)&oled.buffer[128*row],128,i2cData);
 			#endif
 
-			#ifdef USE_CS
-			Oled_Set_CS();
-			#endif
 		}
 #elif defined OLED_SPI
 		HAL_SPI_TxCpltCallback(oled.device); 	// Call the DMA callback function to send the frame
@@ -453,10 +457,9 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
   write_cmd(0x40);
   FillBuffer(BLACK,fill_dma);	// Clear buffer
   update_display();				// Update display CGRAM
-  write_cmd(0xaf);
 
 
-	systemSettings.settings.OledOffset = 2;		// Set by default while system settings are not loaded
+  systemSettings.settings.OledOffset = 2;		// Set by default while system settings are not loaded
 
 
 	#if defined OLED_SPI || defined OLED_I2C
