@@ -7,7 +7,7 @@
 // This is left here just to have it handy for copying when debugging a specific function
 // Don't uncomment!!
 //               __attribute__((optimize("O0")))
-
+#define HWSTRING "HW:Quicko F103"
 /********************************
  * 			Display Settings    *
  ********************************/

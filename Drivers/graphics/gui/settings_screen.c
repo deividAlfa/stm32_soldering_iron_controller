@@ -8,7 +8,8 @@
 #include "settings_screen.h"
 #include "oled.h"
 #include "gui.h"
-
+#include "board.h"
+#include "settings.h"
 //-------------------------------------------------------------------------------------------------------------------------------
 // Settings screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -49,8 +50,10 @@ static comboBox_item_t comboitem_SYSTEM_Buzzer;
 static comboBox_item_t comboitem_SYSTEM_InitMode;
 static comboBox_item_t comboitem_SYSTEM_ButtonWake;
 static comboBox_item_t comboitem_SYSTEM_Reset;
-
+static comboBox_item_t comboitem_SYSTEM_SW;
+static comboBox_item_t comboitem_SYSTEM_HW;
 static comboBox_item_t comboitem_SYSTEM_Back;
+
 static widget_t Widget_SYSTEM_Profile;
 static widget_t Widget_SYSTEM_Contrast;
 static widget_t Widget_SYSTEM_OledOffset;
@@ -867,6 +870,8 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_SYSTEM_GuiUpd, w, 		"Gui time", 	&Widget_SYSTEM_GuiUpd);
 	comboAddOption(&comboitem_SYSTEM_SaveInterval, w, 	"Save time",	&Widget_SYSTEM_SaveInterval);
 	comboAddScreen(&comboitem_SYSTEM_Reset, w, 			"RESET MENU",	screen_reset);
+	comboAddScreen(&comboitem_SYSTEM_SW, w, 			SWSTRING,		-1);
+	comboAddScreen(&comboitem_SYSTEM_HW, w, 			HWSTRING,		-1);
 	comboAddScreen(&comboitem_SYSTEM_Back, w, 			"RETURN", 		screen_settingsmenu);
 
 	//########################################## RESET SCREEN ##########################################
