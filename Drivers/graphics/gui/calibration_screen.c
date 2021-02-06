@@ -14,6 +14,9 @@ static uint32_t lastUpdateTick;
 static int16_t lastTipTemp;
 static uint16_t backupTemp;
 static bool backupTempUnit;
+static uint16_t backupCal200;
+static uint16_t backupCal300;
+static uint16_t backupCal400;
 const static uint16_t state_temps[3] = {200, 300, 400};
 const static char* state_tempstr[3] = {"200C", "300C", "400C"};
 static uint16_t measured_temps[3];
@@ -52,10 +55,10 @@ static void setCalState(state_t s) {
 		measuredTemp = state_temps[(int)s];
 	}
 	else {
+		tipData * Currtip = getCurrentTip();
 		uint8_t result = processCalibration();
 		if(result) {
 			current_state = cal_suceed;
-			tipData * Currtip = getCurrentTip();
 			Currtip->calADC_At_200 = adcCal[cal_200];
 			Currtip->calADC_At_300 = adcCal[cal_300];
 			Currtip->calADC_At_400 = adcCal[cal_400];
@@ -68,16 +71,17 @@ static void setCalState(state_t s) {
 
 static int cancelAction(widget_t* w) {
 	setSystemTempUnit(backupTempUnit);
+	tipData * Currtip = getCurrentTip();
+	if(current_state != cal_suceed){
+		Currtip->calADC_At_200 = backupCal200;
+		Currtip->calADC_At_300 = backupCal300;
+		Currtip->calADC_At_400 = backupCal400;
+	}
 	return screen_settingsmenu;
 }
 
 static int okAction(widget_t *w) {
 	tempReady = 0;
-	if(current_state > cal_400) {
-		current_state = cal_200;
-		setSystemTempUnit(backupTempUnit);
-		return screen_main;
-	}
 	measured_temps[(int)current_state] = measuredTemp - (readColdJunctionSensorTemp_x10(mode_Celsius) / 10);
 	adcAtTemp[(int)current_state] = TIP.last_avg;
 	setCalState(++current_state);
@@ -86,11 +90,34 @@ static int okAction(widget_t *w) {
 
 static void waitCalibration_screen_onEnter(screen_t *scr) {
 	if(scr != &Screen_edit_calibration_input) {
+		tipData * Currtip = getCurrentTip();
 		Iron.calibrating=1;
 		tempReady = 0;
 		setCurrentMode(mode_run,forceMode);
 		backupTemp = getSetTemperature();
 		backupTempUnit=systemSettings.settings.tempUnit;
+
+		backupCal200 = Currtip->calADC_At_200;
+		backupCal300 = Currtip->calADC_At_300;
+		backupCal400 = Currtip->calADC_At_400;
+
+		switch(systemSettings.settings.currentProfile){
+			case profile_T12:
+				Currtip->calADC_At_200=T12_Cal200;
+				Currtip->calADC_At_300=T12_Cal300;
+				Currtip->calADC_At_400=T12_Cal400;
+				break;
+			case profile_C210:
+				Currtip->calADC_At_200=C210_Cal200;
+				Currtip->calADC_At_300=C210_Cal300;
+				Currtip->calADC_At_400=C210_Cal400;
+				break;
+			case profile_C245:
+				Currtip->calADC_At_200=C245_Cal200;
+				Currtip->calADC_At_300=C245_Cal300;
+				Currtip->calADC_At_400=C245_Cal400;
+				break;
+		}
 		setSystemTempUnit(mode_Celsius);
 		setCalState(cal_200);
 	}
@@ -241,7 +268,7 @@ static uint8_t processCalibration() {
 	  }
 
 	  //  Ensure adc values are valid (200<300<400)
-	  if (	(adcAtTemp[cal_300] <=adcAtTemp[cal_200]) ||	(adcAtTemp[cal_400] <= adcAtTemp[cal_300]) ){
+	  if (	(adcAtTemp[cal_300] <=adcAtTemp[cal_200]) ||(adcAtTemp[cal_400] <= adcAtTemp[cal_300]) ){
 		  return 0;
 	  }
 

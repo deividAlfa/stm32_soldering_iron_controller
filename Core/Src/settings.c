@@ -181,9 +181,9 @@ void resetCurrentProfile(void){
 #endif
 	if(systemSettings.settings.currentProfile==profile_T12){
 		for(uint8_t x = 0; x < TipSize; x++) {
-			systemSettings.Profile.tip[x].calADC_At_200 = 900;
-			systemSettings.Profile.tip[x].calADC_At_300 = 1500;			// These values are way lower, but better to be safe than sorry
-			systemSettings.Profile.tip[x].calADC_At_400 = 2000;			// User needs to calibrate its station
+			systemSettings.Profile.tip[x].calADC_At_200 = T12_Cal200;
+			systemSettings.Profile.tip[x].calADC_At_300 = T12_Cal300;			// These values are way lower, but better to be safe than sorry
+			systemSettings.Profile.tip[x].calADC_At_400 = T12_Cal400;			// User needs to calibrate its station
 			systemSettings.Profile.tip[x].PID.Kp = 0.0045;
 			systemSettings.Profile.tip[x].PID.Ki = 0.0030;
 			systemSettings.Profile.tip[x].PID.Kd = 0.0015;
@@ -192,16 +192,9 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].PID.maxI = 200;
 			systemSettings.Profile.tip[x].PID.minI = -50;
 		}
-		systemSettings.Profile.currentNumberOfTips= 5;
+		systemSettings.Profile.currentNumberOfTips= 1;
 		systemSettings.Profile.currentTip = 0;
-		strcpy(systemSettings.Profile.tip[0].name, "DFLT");
-		strcpy(systemSettings.Profile.tip[1].name, "B   ");
-		strcpy(systemSettings.Profile.tip[2].name, "BC2 ");
-		strcpy(systemSettings.Profile.tip[3].name, "D24 ");
-		strcpy(systemSettings.Profile.tip[4].name, "C245");				// Fake JBC tip with similar T12 sensor but gives little higher output
-		systemSettings.Profile.tip[4].calADC_At_200 = 1400;
-		systemSettings.Profile.tip[4].calADC_At_300 = 2300;
-		systemSettings.Profile.tip[4].calADC_At_400 = 3150;
+		strcpy(systemSettings.Profile.tip[0].name, "T12");
 		systemSettings.Profile.impedance=80;
 		systemSettings.Profile.power=80;
 		systemSettings.Profile.noIronValue=4000;
@@ -209,9 +202,9 @@ void resetCurrentProfile(void){
 
 	else if(systemSettings.settings.currentProfile==profile_C245){
 		for(uint8_t x = 0; x < TipSize; x++) {
-			systemSettings.Profile.tip[x].calADC_At_200 = 390;
-			systemSettings.Profile.tip[x].calADC_At_300 = 625;
-			systemSettings.Profile.tip[x].calADC_At_400 = 883;
+			systemSettings.Profile.tip[x].calADC_At_200 = C245_Cal200;
+			systemSettings.Profile.tip[x].calADC_At_300 = C245_Cal300;
+			systemSettings.Profile.tip[x].calADC_At_400 = C245_Cal400;
 			systemSettings.Profile.tip[x].PID.Kp = 0.0028;
 			systemSettings.Profile.tip[x].PID.Ki = 0.0018;
 			systemSettings.Profile.tip[x].PID.Kd = 0.00007;
@@ -230,9 +223,9 @@ void resetCurrentProfile(void){
 
 	else if(systemSettings.settings.currentProfile==profile_C210){
 		for(uint8_t x = 0; x < TipSize; x++) {
-			systemSettings.Profile.tip[x].calADC_At_200 = 390;
-			systemSettings.Profile.tip[x].calADC_At_300 = 625;
-			systemSettings.Profile.tip[x].calADC_At_400 = 883;
+			systemSettings.Profile.tip[x].calADC_At_200 = C210_Cal200;
+			systemSettings.Profile.tip[x].calADC_At_300 = C210_Cal300;
+			systemSettings.Profile.tip[x].calADC_At_400 = C210_Cal400;
 			systemSettings.Profile.tip[x].PID.Kp = 0.0028;
 			systemSettings.Profile.tip[x].PID.Ki = 0.0018;
 			systemSettings.Profile.tip[x].PID.Kd = 0.00007;

@@ -16,6 +16,18 @@
 #define TipSize			10		// Number of tips for each profile
 #define TipCharSize		5		// String size for each tip name
 
+#define T12_Cal200		1000
+#define T12_Cal300		1500
+#define T12_Cal400		2000
+
+#define C210_Cal200		400
+#define C210_Cal300		600
+#define C210_Cal400		900
+
+#define C245_Cal200		1000
+#define C245_Cal300		1500
+#define C245_Cal400		2000
+
 #define SWSTRING		"SW: r52bc1a1"
 #define SETTINGS_VERSION 1											// Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize 		2 											// In KB
