@@ -16,7 +16,7 @@
 #define TipSize			10		// Number of tips for each profile
 #define TipCharSize		5		// String size for each tip name
 
-#define SWSTRING		"SW: r0bb6aa7"
+#define SWSTRING		"SW: r52bc1a1"
 #define SETTINGS_VERSION 1											// Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize 		2 											// In KB
 #define FLASH_ADDR 		(0x8000000 + ((FLASH_SZ-StoreSize)*1024))	// Last 2KB flash (Minimum erase size, page size=2KB)
