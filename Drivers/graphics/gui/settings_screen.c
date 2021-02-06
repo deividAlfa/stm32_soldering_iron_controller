@@ -148,8 +148,15 @@ static void setTipStr(char *s) {
 }
 static int saveTip(widget_t *w) {
 	if(strcmp(comboWidget_IRONTIPS.comboBoxWidget.currentItem->text, "ADD NEW") == 0) {
-		strcpy(systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips].name, str);
+		for(uint8_t x=0;x<TipSize;x++){
+			if(strcmp(systemSettings.Profile.tip[x].name, "    ")!=0){														// Find first tip
+				systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips] = systemSettings.Profile.tip[x];	// Copy TIP data to new tip
+				break;
+			}
+		}
+		strcpy(systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips].name, str);						// Copy new string
 		++systemSettings.Profile.currentNumberOfTips;
+
 	}
 	else {
 		for(int x = 0; x < TipSize;x++) {

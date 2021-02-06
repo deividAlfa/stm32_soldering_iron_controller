@@ -13,8 +13,9 @@ typedef enum {cal_200, cal_300, cal_400, cal_suceed, cal_failed}state_t;
 static uint32_t lastUpdateTick;
 static int16_t lastTipTemp;
 static uint16_t backupTemp;
+static bool backupTempUnit;
 const static uint16_t state_temps[3] = {200, 300, 400};
-const static char* state_tempstr[3] = {"200\260C", "300\260C", "400\260C"};
+const static char* state_tempstr[3] = {"200C", "300C", "400C"};
 static uint16_t measured_temps[3];
 static uint16_t adcAtTemp[3];
 static state_t current_state = cal_200;
@@ -66,6 +67,7 @@ static void setCalState(state_t s) {
 }
 
 static int cancelAction(widget_t* w) {
+	setSystemTempUnit(backupTempUnit);
 	return screen_settingsmenu;
 }
 
@@ -73,6 +75,7 @@ static int okAction(widget_t *w) {
 	tempReady = 0;
 	if(current_state > cal_400) {
 		current_state = cal_200;
+		setSystemTempUnit(backupTempUnit);
 		return screen_main;
 	}
 	measured_temps[(int)current_state] = measuredTemp - (readColdJunctionSensorTemp_x10(mode_Celsius) / 10);
@@ -87,6 +90,8 @@ static void waitCalibration_screen_onEnter(screen_t *scr) {
 		tempReady = 0;
 		setCurrentMode(mode_run,forceMode);
 		backupTemp = getSetTemperature();
+		backupTempUnit=systemSettings.settings.tempUnit;
+		setSystemTempUnit(mode_Celsius);
 		setCalState(cal_200);
 	}
 }
@@ -129,16 +134,13 @@ static void waitOnExit(screen_t *scr) {
 // Calibration screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void waitCalibration_screen_draw(screen_t *scr){
-	default_screenDraw(scr);
 	if((HAL_GetTick()-lastUpdateTick)>200){										// Refresh every 200mS
-		char waitstr[6];
 		lastUpdateTick=HAL_GetTick();
-		lastTipTemp = readTipTemperatureCompensated(stored_reading,read_Avg);
-		u8g2_SetFont(&u8g2,default_font);
-		u8g2_SetDrawColor(&u8g2, BLACK);		// Erase previous temps
-		u8g2_DrawBox(&u8g2, 90, 15, OledWidth-90, 30);
+		scr->refresh=screen_eraseAndRefresh;
+		default_screenDraw(scr);
 		u8g2_SetDrawColor(&u8g2, WHITE);
-
+		char waitstr[6];
+		lastTipTemp = readTipTemperatureCompensated(stored_reading,read_Avg);
 		switch((int)current_state){
 			case cal_200:
 			case cal_300:
@@ -150,8 +152,15 @@ void waitCalibration_screen_draw(screen_t *scr){
 				u8g2_DrawStr(&u8g2, 90, 30, waitstr);
 				break;
 			case cal_suceed:
-				putStrAligned("SUCCEED!", 15, align_center);
+			{
+				char str[20];
+				for(uint8_t x=0;x<3;x++){
+					sprintf(str, "ADC %s: %u", state_tempstr[x], adcCal[x]);
+					u8g2_DrawStr(&u8g2, 6, (x*14), str);
+				}
+				u8g2_DrawStr(&u8g2, 0, 50, "SUCCEED!");
 				break;
+			}
 			case cal_failed:
 				putStrAligned("FAILED!", 15, align_center);
 				break;
