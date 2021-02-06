@@ -140,10 +140,10 @@ __attribute__ ((aligned (4))) typedef struct{
 }settings_t;
 
 typedef struct{
-	settings_t settings;
-	uint32_t settingsChecksum;
 	profile_t Profile[ProfileSize];
 	uint32_t ProfileChecksum[ProfileSize];
+	settings_t settings;
+	uint32_t settingsChecksum;
 }flashSettings_t;
 
 

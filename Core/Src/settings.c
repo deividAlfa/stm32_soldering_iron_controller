@@ -133,13 +133,13 @@ void restoreSettings() {
 
 	systemSettings.settings=flashSettings->settings;									// Load system settings from flash
 	systemSettings.settingsChecksum=flashSettings->settingsChecksum;					// Load stored checksum
+	loadProfile(systemSettings.settings.currentProfile);								// Load current tip data into system memory
 
 	// Compare loaded checksum with calculated checksum
 	if( (systemSettings.settings.version != SETTINGS_VERSION) || (ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum) ){
 		settingsChkErr();
 	}
 
-	loadProfile(systemSettings.settings.currentProfile);								// Load current tip data into system memory
 
 	setContrast(systemSettings.settings.contrast);
 }
@@ -294,7 +294,7 @@ void loadProfile(uint8_t profile){
 		Error_Handler();
 	}
 	if(systemSettings.settings.tempUnit != systemSettings.Profile.tempUnit){			// If stored temps are in different units
-		setSystemTempUnit(systemSettings.settings.tempUnit);								// Convert temperatures
+		setSystemTempUnit(systemSettings.settings.tempUnit);							// Convert temperatures
 		systemSettings.Profile.tempUnit = systemSettings.settings.tempUnit;				// Store unit in profile
 	}
 }
@@ -329,10 +329,18 @@ void settingsChkErr(void){
 		(systemSettings.settings.currentProfile==profile_C210)	||
 		(systemSettings.settings.currentProfile==profile_C245)	){
 
-		uint8_t tip = systemSettings.settings.currentProfile;		// save current tip
-		resetSystemSettings();									// reset settings
-		systemSettings.settings.currentProfile=tip;				// Restore tip type
-		saveSettings(saveKeepingProfiles);									// Save settings preserving tip data
+		if(systemSettings.ProfileChecksum==ChecksumProfile(&systemSettings.Profile)){	// If current profile checksum is correct
+			uint8_t tip = systemSettings.settings.currentProfile;				// save current tip
+			resetSystemSettings();												// reset settings
+			systemSettings.settings.currentProfile=tip;							// Restore tip type
+			saveSettings(saveKeepingProfiles);									// Save settings preserving tip data
+		}
+		else{
+			resetSystemSettings();									// reset settings
+			saveSettings(saveWipingProfiles);						// Save settings erasing tip data
+		}
+
+
 	}
 	else{
 		resetSystemSettings();									// Reset settings
