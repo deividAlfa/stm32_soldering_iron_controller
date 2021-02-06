@@ -135,7 +135,7 @@ void restoreSettings() {
 	systemSettings.settingsChecksum=flashSettings->settingsChecksum;					// Load stored checksum
 
 	// Compare loaded checksum with calculated checksum
-	if( (systemSettings.settings.version != FW_Version) || (ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum) ){
+	if( (systemSettings.settings.version != SETTINGS_VERSION) || (ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum) ){
 		settingsChkErr();
 	}
 
@@ -157,7 +157,7 @@ uint32_t ChecksumProfile(profile_t* profile){
 }
 
 void resetSystemSettings(void) {
-	systemSettings.settings.version 			= FW_Version;
+	systemSettings.settings.version 			= SETTINGS_VERSION;
 	systemSettings.settings.contrast 			= 255;
 	systemSettings.settings.OledOffset 			= 2;
 	systemSettings.settings.noIronDelay			= 500;

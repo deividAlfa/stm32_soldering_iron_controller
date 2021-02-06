@@ -394,10 +394,10 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 	#endif
 
 #endif
-
+	systemSettings.settings.OledOffset = 2;		// Set by default while system settings are not loaded
 	HAL_IWDG_Refresh(&HIWDG);	// Clear watchdog
 	HAL_Delay(100);				// 100mS wait for internal initialization
-/*
+
 	write_cmd(0xAE);  			// Display Off
 	write_cmd(0xD5);         	// Set Display Clock Divide Ratio / Oscillator Frequency
 	write_cmd(0xF0);      		// Set max framerate
@@ -424,50 +424,14 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 	write_cmd(0x8D);         	// Set Charge Pump command
 	write_cmd(0x14);   			// Enable charge pump
 	write_cmd(0x33);         	// Charge pump to 9V
-  	FillBuffer(BLACK,fill_dma);	// Clear buffer
+    FillBuffer(BLACK,fill_dma);	// Clear buffer
     update_display();			// Update display CGRAM
-	write_cmd(0xAF);   			// Set Display On
-*/
-
-// Commands extracted from KSGER firmware
-  write_cmd(0xae);
-  write_cmd(0x00);
-  write_cmd(0x10);
-  write_cmd(0x40);
-  write_cmd(0xb0);
-  write_cmd(0x81);
-  write_cmd(0xff);
-  write_cmd(0xa1);
-  write_cmd(0xa6);
-  write_cmd(0xa8);
-  write_cmd(0x3f);
-  write_cmd(0xad);
-  write_cmd(0x8b);
-  write_cmd(0x33);
-  write_cmd(0xc8);
-  write_cmd(0xd3);
-  write_cmd(0x00);
-  write_cmd(0xd5);
-  write_cmd(0x80);
-  write_cmd(0xd9);
-  write_cmd(0x1f);
-  write_cmd(0xda);
-  write_cmd(0x12);
-  write_cmd(0xdb);
-  write_cmd(0x40);
-  FillBuffer(BLACK,fill_dma);	// Clear buffer
-  update_display();				// Update display CGRAM
-
-
-  systemSettings.settings.OledOffset = 2;		// Set by default while system settings are not loaded
-
 
 	#if defined OLED_SPI || defined OLED_I2C
 	while(oled.status!=oled_idle){
 		asm("nop");	// Wait for DMA completion
 	}
 	#endif
-
 	write_cmd(0xAF);   			// Set Display On
 }
 
