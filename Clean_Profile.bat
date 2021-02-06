@@ -12,5 +12,4 @@ rmdir .\Drivers\STM32F1xx_HAL_Driver /S /Q >nul
 rmdir .\Debug /S /Q >nul
 rmdir .\Release /S /Q >nul
 echo Done cleaning profile files!
-echo Press any key to close the window...
-pause >nul
+ping localhost -n 2 >nul
