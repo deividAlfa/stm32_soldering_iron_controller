@@ -390,9 +390,11 @@ void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
 	HAL_Delay(20);				// Dirty fix to ensure Oled DMA transfer has ended before writing to the buffer
 	while(Start){
 		timErr=HAL_GetTick();
-		u8g2_DrawStr(&u8g2,xpos,ypos,"    ");
+		u8g2_SetDrawColor(&u8g2, BLACK);
+		u8g2_DrawBox(&u8g2,xpos,ypos,u8g2_GetStrWidth(&u8g2,str),u8g2_GetMaxCharHeight(&u8g2));
+		u8g2_SetDrawColor(&u8g2, WHITE);
 		sprintf(&str[0],"%*u",length-1,Start--);
-		u8g2_DrawStr(&u8g2,xpos,ypos,&str[0]);
+		u8g2_DrawStr(&u8g2,xpos,ypos,str);
 		update_display();
 		while( (HAL_GetTick()-timErr)<999 ){
 			HAL_IWDG_Refresh(&HIWDG);			// Clear watchdog
