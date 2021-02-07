@@ -203,15 +203,24 @@ void handleIron(void) {
 
 
 	// Check for temperature runaway. Had to be moved at the end to prevent false triggering (Temperature higher, but new PID was not yet calculated to turn off pwm)
+	uint8_t TempStep=25;
+	uint16_t TempLimit=500;
+	if(systemSettings.settings.tempUnit==mode_Farenheit){
+		TempStep=45;
+		TempLimit=950;
+	}
+	else{
+		if(tipTemp>950){ Iron.RunawayLevel=runaway_500; }					// In any case
+	}
 	if((Iron.Pwm_Out) && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==debug_Off) &&(tipTemp > Iron.CurrentSetTemperature)){
 		for(int8_t c=runaway_100; c>=runaway_ok; c--){					// Check for overrun
 			Iron.RunawayLevel=c;
-			if(tipTemp > (Iron.CurrentSetTemperature + (25*Iron.RunawayLevel)) ){					// 25ºC steps
+
+			if(tipTemp > (Iron.CurrentSetTemperature + (TempStep*Iron.RunawayLevel)) ){					// 25ºC steps
 				break;															// Stop at the highest overrun condition
 			}
 		}
-
-		if(tipTemp>500){ Iron.RunawayLevel=runaway_500; }						// In any case
+		if(tipTemp>TempLimit){ Iron.RunawayLevel=runaway_500; }					// In any case
 
 		if(Iron.RunawayLevel!=runaway_ok){										// Runaway detected?
 			if(Iron.prevRunawayLevel==runaway_ok){								// First overrun detection?
