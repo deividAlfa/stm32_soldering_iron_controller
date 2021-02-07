@@ -194,7 +194,7 @@ void resetCurrentProfile(void){
 		}
 		systemSettings.Profile.currentNumberOfTips= 1;
 		systemSettings.Profile.currentTip = 0;
-		strcpy(systemSettings.Profile.tip[0].name, "T12");
+		strcpy(systemSettings.Profile.tip[0].name, "T12 ");
 		systemSettings.Profile.impedance=80;
 		systemSettings.Profile.power=80;
 		systemSettings.Profile.noIronValue=4000;

@@ -294,6 +294,9 @@ static uint8_t processCalibration() {
 	    adcCal[1] = map(state_temps[1], measured_temps[0], measured_temps[2], adcAtTemp[0], adcAtTemp[2]);
 	    adcCal[2] = map(state_temps[2], measured_temps[0], measured_temps[2], adcAtTemp[0], adcAtTemp[2]);
 	  }
+	if(adcCal[0]>4090 || adcCal[1]>4090 || adcCal[2]>4090){		// Check that values don't exceed ADC range
+		return 0;
+	}
 	return 1;
 
 }
