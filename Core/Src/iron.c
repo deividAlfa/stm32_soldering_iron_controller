@@ -203,7 +203,7 @@ void handleIron(void) {
 
 
 	// Check for temperature runaway. Had to be moved at the end to prevent false triggering (Temperature higher, but new PID was not yet calculated to turn off pwm)
-	uint8_t TempStep=25;
+	uint16_t TempStep=25;
 	uint16_t TempLimit=500;
 	if(systemSettings.settings.tempUnit==mode_Farenheit){
 		TempStep=45;
