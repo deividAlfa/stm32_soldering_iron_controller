@@ -28,7 +28,7 @@
 #define C245_Cal300		1500
 #define C245_Cal400		2000
 
-#define SWSTRING		"SW: r52bc1a1"
+#define SWSTRING		"SW: r61b02cd"
 #define SETTINGS_VERSION 1											// Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize 		2 											// In KB
 #define FLASH_ADDR 		(0x8000000 + ((FLASH_SZ-StoreSize)*1024))	// Last 2KB flash (Minimum erase size, page size=2KB)
