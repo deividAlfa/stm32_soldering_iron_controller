@@ -17,7 +17,7 @@ static char t[TipSize][TipCharSize];
 static int32_t temp;
 static uint8_t resStatus, profile;
 char str[5];
-
+uint32_t settingsTimer;
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Settings screen widgets
@@ -485,6 +485,7 @@ static void settings_screen_init(screen_t *scr) {
 	default_init(scr);
 	scr->current_widget = &comboWidget_Settings;
 	scr->current_widget->comboBoxWidget.selectable.state = widget_selected;
+	settingsTimer=HAL_GetTick();
 }
 
 
@@ -494,6 +495,15 @@ static void settings_screen_OnEnter(screen_t *scr) {
 	}
 }
 
+int settings_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
+	if(input!=Rotate_Nothing){
+		settingsTimer=HAL_GetTick();
+	}
+	if(input==LongClick || (HAL_GetTick()-settingsTimer)>15000){
+		return screen_main;
+	}
+	return default_screenProcessInput(scr, input, state);
+}
 //-------------------------------------------------------------------------------------------------------------------------------
 // Edit Tip screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -657,6 +667,7 @@ void settings_screen_setup(screen_t *scr) {
 	screen_setDefaults(scr);
 	scr->init = &settings_screen_init;
 	scr->onEnter = &settings_screen_OnEnter;
+	scr->processInput=&settings_screenProcessInput;
 
 
 	//#################################### [ SETTINGS MAIN SCREEN ]#######################################
@@ -682,6 +693,7 @@ void settings_screen_setup(screen_t *scr) {
 	screen_setDefaults(sc);
 	sc->onEnter = &SYSTEM_onEnter;
 	sc->onExit = &SYSTEM_onExit;
+	sc->processInput=&settings_screenProcessInput;
 
 	//********[ Profile Widget ]***********************************************************
 	//
@@ -887,6 +899,7 @@ void settings_screen_setup(screen_t *scr) {
 	oled_addScreen(sc, screen_reset);
 	screen_setDefaults(sc);
 	sc->onEnter = &Reset_onEnter;
+	sc->processInput=&settings_screenProcessInput;
 
 	//========[ RESET OPTIONS COMBO ]===========================================================
 	//
@@ -908,6 +921,7 @@ void settings_screen_setup(screen_t *scr) {
 	oled_addScreen(sc, screen_reset_confirmation);
 	screen_setDefaults(sc);
 	sc->onEnter = &Reset_confirmation_onEnter;
+	sc->processInput=&settings_screenProcessInput;
 
 
 	// ********[ Name Save Button Widget ]***********************************************************
@@ -939,6 +953,7 @@ void settings_screen_setup(screen_t *scr) {
 	oled_addScreen(sc,screen_pid);
 	screen_setDefaults(sc);
 	sc->onEnter = &PID_onEnter;
+	sc->processInput=&settings_screenProcessInput;
 
 	//********[ KP Widget]***********************************************************
 	//
@@ -1017,6 +1032,7 @@ void settings_screen_setup(screen_t *scr) {
 	oled_addScreen(sc,screen_iron);
 	screen_setDefaults(sc);
 	sc->onEnter = &IRON_onEnter;
+	sc->processInput=&settings_screenProcessInput;
 
 	//********[ Sleep Time Widget ]***********************************************************
 	//
@@ -1179,6 +1195,7 @@ void settings_screen_setup(screen_t *scr) {
 	oled_addScreen(sc, screen_edit_iron_tips);
 	screen_setDefaults(sc);
 	sc->init = &edit_iron_screen_init;
+	sc->processInput=&settings_screenProcessInput;
 
 	//========[ IRON TIPS COMBO ]===========================================================
 	//
