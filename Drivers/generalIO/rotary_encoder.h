@@ -46,8 +46,8 @@ volatile typedef struct {
 	int32_t Absolute;        /*!< Absolute rotation from beginning, for public use */
 	int32_t Diff;            /*!< Rotary difference from last check, for public use */
 	RE_Rotation_t Rotation; /*!< Increment, Decrement or nothing, for public use */
-	RE_Mode_t Mode;       /*!< Rotary encoder mode selected */
-	uint8_t LastA;           /*!< Last status of A pin when checking. Meant for private use */
+	RE_Mode_t Mode;       	/*!< Rotary encoder mode selected */
+	bool LastA;           /*!< Last status of A pin when checking. Meant for private use */
 	int32_t RE_Count;        /*!< Temporary variable to store data between rotation and user check */
 	GPIO_TypeDef* GPIO_A;    /*!< Pointer to GPIOx for Rotary encode A pin. Meant for private use */
 	GPIO_TypeDef* GPIO_B;    /*!< Pointer to GPIOx for Rotary encode B pin. Meant for private use */
@@ -56,8 +56,8 @@ volatile typedef struct {
 	uint16_t GPIO_PIN_B;     /*!< GPIO pin for rotary encoder B pin. */
 	uint16_t GPIO_PIN_BUTTON;     /*!< GPIO pin for rotary encoder B pin. */
 	RE_Click_t pv_click;
-	uint8_t halfPointReached;
-	uint8_t direction;
+	bool direction;
+	bool halfPointReached;
 } RE_State_t;
 
 void RE_Init(RE_State_t* data, GPIO_TypeDef* GPIO_A_Port, uint16_t GPIO_A_Pin, GPIO_TypeDef* GPIO_B_Port, uint16_t GPIO_B_Pin, GPIO_TypeDef* GPIO_BUTTON_Port, uint16_t GPIO_BUTTON_Pin);

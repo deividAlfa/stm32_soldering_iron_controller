@@ -321,11 +321,12 @@ static void setWakeMode(uint16_t *val) {
 
 static void * getEncoderMode() {
 
-	temp = systemSettings.settings.EncoderInvert;
+	temp = systemSettings.settings.EncoderMode;
 	return &temp;
 }
 static void setEncoderMode(uint16_t *val) {
-	systemSettings.settings.EncoderInvert = * val;
+	systemSettings.settings.EncoderMode = * val;
+	RE_SetMode(&RE1_Data, systemSettings.settings.EncoderMode);
 }
 
 static void * getGuiUpd_ms() {

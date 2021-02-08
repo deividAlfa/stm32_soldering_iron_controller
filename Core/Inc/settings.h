@@ -147,7 +147,7 @@ __attribute__ ((aligned (4))) typedef struct{
 	bool buzzerMode;
 	bool wakeOnButton;
 	bool WakeInputMode;
-	bool EncoderInvert;
+	bool EncoderMode;
 	bool initialized;			// Always 1 if flash is erased
 }settings_t;
 

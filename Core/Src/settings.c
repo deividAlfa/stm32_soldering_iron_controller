@@ -142,6 +142,7 @@ void restoreSettings() {
 
 
 	setContrast(systemSettings.settings.contrast);
+	RE_SetMode(&RE1_Data, systemSettings.settings.EncoderMode);
 }
 
 uint32_t ChecksumSettings(settings_t* settings){
@@ -170,7 +171,7 @@ void resetSystemSettings(void) {
 	systemSettings.settings.buzzerMode			= buzzer_Off;
 	systemSettings.settings.wakeOnButton		= wakeButton_On;
 	systemSettings.settings.WakeInputMode		= wakeInputmode_shake;
-	systemSettings.settings.EncoderInvert		= encoder_normal;
+	systemSettings.settings.EncoderMode			= RE_Mode_One;
 }
 
 

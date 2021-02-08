@@ -76,9 +76,9 @@ void RE_SetMode(RE_State_t* data, RE_Mode_t mode) {
 }
 
 void RE_Process(RE_State_t* data) {
-	uint8_t now_a;
-	uint8_t now_b;
-	uint8_t now_button;
+	bool now_a;
+	bool now_b;
+	bool now_button;
 	uint32_t pressed_time;
 	/* Read inputs */
 	now_a = HAL_GPIO_ReadPin(data->GPIO_A, data->GPIO_PIN_A);
@@ -95,7 +95,8 @@ void RE_Process(RE_State_t* data) {
 				} else {
 					data->RE_Count++;
 				}
-			} else {
+			}
+			else {
 				if (data->direction) {
 					data->RE_Count++;
 				} else {
@@ -119,23 +120,12 @@ void RE_Process(RE_State_t* data) {
 		}
 	}
 	else if(!data->halfPointReached) {
-		if(now_a){
-			if(systemSettings.settings.EncoderInvert==encoder_normal){
-				data->direction = 1;
-			}
-			else{
-				data->direction = 0;
-			}
-		}
-		else if(now_b){
-			if(systemSettings.settings.EncoderInvert==encoder_normal){
-				data->direction = 0;
-			}
-			else{
-				data->direction = 1;
-			}
-		}
+		if(now_a)
+			data->direction = 1;
+		else if (now_b)
+			data->direction = 0;
 	}
+
 	if((data->pv_click == RE_BT_DRAG) && (now_button == 1))
 		data->pv_click = RE_BT_HIDLE;
 	else if(data->pv_click != RE_BT_DRAG) {
