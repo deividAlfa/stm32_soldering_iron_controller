@@ -112,7 +112,7 @@ void RE_Process(RE_State_t* data) {
 				data->pv_click = RE_BT_DRAG;
 			}
 		}
-		else if((HAL_GetTick()-halfPointReachedTime)>50){
+		else if((HAL_GetTick()-halfPointReachedTime)>500){
 			if(now_button == 0 && data->pv_click == RE_BT_DRAG) {//button pressed
 				data->pv_click = RE_BT_PRESSED;
 			}
