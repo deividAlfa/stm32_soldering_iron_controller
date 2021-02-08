@@ -1058,6 +1058,13 @@ void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, int (*a
 }
 
 void comboResetIndex(widget_t *combo){
+	if(combo->comboBoxWidget.currentItem->type==combo_Option){
+		selectable_widget_t* sel = extractSelectablePartFromWidget(combo->comboBoxWidget.currentItem->widget);
+		if(sel){
+			sel->state = widget_idle;
+			sel->previous_state = widget_idle;
+		}
+	}
 	combo->comboBoxWidget.currentItem = combo->comboBoxWidget.first;
 	combo->comboBoxWidget.currentScroll=0;
 }
