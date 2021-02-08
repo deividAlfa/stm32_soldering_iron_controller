@@ -9,7 +9,7 @@
 #include "rotary_encoder.h"
 #include "settings.h"
 volatile RE_State_t RE1_Data;
-static uint32_t push_time = 0, release_time=0;
+static uint32_t push_time = 0, release_time=0, halfPointReachedTime=0;
 
 /* Return with status macro */
 #define RETURN_WITH_STATUS(p, s) (p)->Rotation = s; return s
@@ -105,9 +105,17 @@ void RE_Process(RE_State_t* data) {
 		}
 	}
 	else if(now_a == 0 && now_b == 0) {
-		data->halfPointReached = 1;
-		if(now_button == 0) {//button pressed
-			data->pv_click = RE_BT_DRAG;
+		if(!data->halfPointReached){
+			halfPointReachedTime = HAL_GetTick();
+			data->halfPointReached = 1;
+			if(now_button == 0) {//button pressed
+				data->pv_click = RE_BT_DRAG;
+			}
+		}
+		else if((HAL_GetTick()-halfPointReachedTime)>50){
+			if(now_button == 0 && data->pv_click == RE_BT_DRAG) {//button pressed
+				data->pv_click = RE_BT_PRESSED;
+			}
 		}
 	}
 	else if(!data->halfPointReached) {
