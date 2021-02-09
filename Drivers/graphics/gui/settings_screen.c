@@ -713,10 +713,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Contrast Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_Contrast;
-	static char arr_contrast[4];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_contrast;
 	dis->reservedChars=3;
 	dis->getData = &getContrast_;
 	w->editableWidget.big_step = 25;
@@ -728,10 +726,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Oled Offset Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_OledOffset;
-	static char oledoffset[3];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=oledoffset;
 	dis->reservedChars=2;
 	dis->getData = &getOledOffset;
 	w->editableWidget.big_step = 10;
@@ -771,10 +767,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Save Delay Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_SaveInterval;
-	static char arr_savDelay[4];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_savDelay;
 	dis->reservedChars=3;
 	w->endString="s";
 	dis->getData = &getSavDelay;
@@ -787,10 +781,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Gui refresh rate Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_GuiUpd;
-	static char arr_guiUpd[6];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_guiUpd;
 	w->endString="mS";
 	dis->reservedChars=5;
 	dis->getData = &getGuiUpd_ms;
@@ -818,10 +810,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Temp step Widget ]***********************************************************
 	//
 	w = &Widget_SYSTEM_TempStep;
-	static char arr_TmpStepP[5];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_TmpStepP;
 	dis->reservedChars=4;
 	dis->getData = &getTmpStep;
 	w->editableWidget.big_step = 5;
@@ -959,10 +949,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ KP Widget]***********************************************************
 	//
 	w = &Widget_PID_Kp;
-	static char arr_P[7];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_P;
 	dis->reservedChars=6;
 	dis->getData = &getKp;
 	dis->number_of_dec = 2;
@@ -974,10 +962,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ KI Widget ]***********************************************************
 	//
 	w = &Widget_PID_Ki;
-	static char arr_I[7];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_I;
 	dis->reservedChars=6;
 	dis->getData = &getKi;
 	dis->number_of_dec = 2;
@@ -989,10 +975,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ KD Widget ]***********************************************************
 	//
 	w = &Widget_PID_Kd;
-	static char arr_D[7];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_D;
 	dis->reservedChars=6;
 	dis->getData = &getKd;
 	dis->number_of_dec = 2;
@@ -1003,10 +987,8 @@ void settings_screen_setup(screen_t *scr) {
 
 	//********[ PID Time Widget ]***********************************************************
 	w = &Widget_PID_Time;
-	static char arr_PIDTim[6];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_PIDTim;
 	w->endString="mS";
 	dis->reservedChars=5;
 	dis->getData = &getPIDTime;
@@ -1038,10 +1020,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Sleep Time Widget ]***********************************************************
 	//
 	w = &Widget_IRON_SleepTime;
-	static char arr_SleepTime[7];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_SleepTime;
 	w->endString="min";
 	dis->reservedChars=5;
 	dis->getData = &getSleepTime;
@@ -1054,10 +1034,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Power Widget ]***********************************************************
 	//
 	w = &Widget_IRON_Power;
-	static char arr_Pwr[5];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_Pwr;
 	dis->reservedChars=4;
 	w->endString="W";
 	dis->getData = &getMaxPower;
@@ -1070,10 +1048,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ Impedance Widget ]***********************************************************
 	//
 	w = &Widget_IRON_Impedance;
-	static char arr_Impedance[5];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_Impedance;
 	dis->reservedChars=4;
 	dis->number_of_dec=1;
 	//w->endString="";
@@ -1087,10 +1063,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ ADC Limit Widget ]***********************************************************
 	//
 	w = &Widget_IRON_ADCLimit;
-	static char arr_adcL[5];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_adcL;
 	dis->reservedChars=4;
 	dis->getData = &getNoIronADC;
 	w->editableWidget.big_step = 200;
@@ -1101,10 +1075,8 @@ void settings_screen_setup(screen_t *scr) {
 
 	//********[ PWM Period Widget ]***********************************************************
 	w = &Widget_IRON_PWMPeriod;
-	static char arr_pwmP[6];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_pwmP;
 	w->endString="mS";
 	dis->reservedChars=5;
 	dis->getData = &getPWMPeriod;
@@ -1116,10 +1088,8 @@ void settings_screen_setup(screen_t *scr) {
 
 	//********[ ADC Delay Widget ]***********************************************************
 	w = &Widget_IRON_ADCDelay;
-	static char arr_adcD[6];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_adcD;
 	w->endString="mS";
 	dis->reservedChars=5;
 	dis->getData = &getPWMDelay;
@@ -1145,10 +1115,8 @@ void settings_screen_setup(screen_t *scr) {
 
 	//********[ Filter Coefficient Widget ]***********************************************************
 	w = &Widget_IRON_filterCoef;
-	static char arr_filterCoef[2];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_filterCoef;
 	dis->reservedChars=1;
 	dis->getData = &getFilterCoef;
 	w->editableWidget.big_step = 1;
@@ -1160,10 +1128,8 @@ void settings_screen_setup(screen_t *scr) {
 	//********[ No Iron Delay Widget ]***********************************************************
 	//
 	w = &Widget_IRON_NoIronDelay;
-	static char arr_noIron[6];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_noIron;
 	w->endString="mS";
 	dis->reservedChars=5;
 	dis->getData = &getNoIronDelay;
@@ -1224,10 +1190,8 @@ void settings_screen_setup(screen_t *scr) {
 	//
 	w = &Widget_IRONTIPS_Edit;
 	screen_addWidget(w,sc);
-	static char arr_tipName[TipCharSize];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=arr_tipName;
 	dis->reservedChars=TipCharSize-1;
 	w->posX = 75;
 	w->posY = 17;

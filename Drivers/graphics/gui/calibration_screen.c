@@ -226,8 +226,6 @@ void calibration_screen_setup(screen_t *scr) {
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	static char measuredTemp[6];
-	w->displayString = measuredTemp;
 	dis->reservedChars = 5;
 	w->endString = "\260C";
 	w->posX = 84;
