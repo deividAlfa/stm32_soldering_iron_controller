@@ -64,11 +64,11 @@ Near the end of each PWM period, the temperature is measured by the ADC. _ADC De
 </pre>
   * #### _Filtering_
 Used to filter the temperature measurements before they are passed to the PID. This helps remove noise and provides more stability.
-    * ##### _Avg_
+   * * ##### _Avg_
 This uses a simple moving average, and is the default filter.
-    * ##### _EMA_
+   * * ##### _EMA_
 Exponential Moving Average. A more sophisticated filter, adds a delay, but tracks changes more closely.
-    * ##### _DEMA_
+   * * ##### _DEMA_
 Double Exponential Moving Average. A more sophisticated filter, double _EMA_.
   * #### _Factor_
 Only for EMA/DEMA. 
@@ -108,13 +108,13 @@ How often the main screen readings are updated (voltage, temperatures). Should b
 How long before storing changed settings in flash memory. Flash has a limited number of write cycles (~100,000). Higher values reduce writes, but settings changes could be forgotten when the controller is powered off or reset. Default: 5 seconds.
   * #### _RESET MENU_
 Reset various configuration sections:
-    * ##### _Settings_
+  * * ##### _Settings_
 Reset Settings menu items to default.
-    * ##### _Profile_
+  * * ##### _Profile_
 Reset the current profile (iron/tips) to default.
-    * ##### _Profiles_
+  * * ##### _Profiles_
 Reset all profiles to default.
-    * ##### _All_
+  * * ##### _All_
 Reset everything.
 
   * #### _SW:_
