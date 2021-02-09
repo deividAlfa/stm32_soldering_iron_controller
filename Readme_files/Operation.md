@@ -95,9 +95,9 @@ How to detect activity. SHAKE or STAND. SHAKE uses a motion sensor present in T1
 Allow waking the controller by moving or pressing the encoder.
   * #### _Buzzer_
 Buzz/beep when notable conditions occur.
-    * Changing operating mode (sleep, run)
-    * Temperature reached after the setpoint was changes
-    * Alarm when no iron is detected or system error happens
+  * * Changing operating mode (sleep, run)
+  * * Temperature reached after the setpoint was changes
+  * * Alarm when no iron is detected or system error happens
   * #### _Unit_
 Temperature scale, Celsius or Fahrenheit
   * #### _Step_
