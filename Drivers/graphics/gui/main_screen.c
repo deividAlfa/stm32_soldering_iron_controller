@@ -508,10 +508,8 @@ void main_screen_setup(screen_t *scr) {
 	//iron tip temperature display
 	w=&Widget_IronTemp;
 	screen_addWidget(w,scr);
-	static char irontmp[6];
 	widgetDefaultsInit(w, widget_display);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=irontmp;
 	dis->reservedChars=5;
 	w->textAlign=align_center;
 	w->dispAlign=align_center;
@@ -522,10 +520,8 @@ void main_screen_setup(screen_t *scr) {
 	// Tip temperature setpoint
 	w=&Widget_SetPoint;
 	screen_addWidget(w,scr);
-	static char SetP[6];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=SetP;
 	dis->reservedChars=5;
 	w->posY = Widget_IronTemp.posY-2;
 	dis->getData = &getTemp;
@@ -541,10 +537,8 @@ void main_screen_setup(screen_t *scr) {
 	//V input display
 	w = &Widget_Vsupply;
 	screen_addWidget(w, scr);
-	static char vin[6];
 	widgetDefaultsInit(w, widget_display);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=vin;
 	w->endString="V";
 	dis->reservedChars=5;
 	w->textAlign=align_center;
@@ -561,10 +555,8 @@ void main_screen_setup(screen_t *scr) {
 	//Ambient temperature display
 	w=&Widget_AmbTemp;
 	screen_addWidget(w,scr);
-	static char ntc[8];
 	widgetDefaultsInit(w, widget_display);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=ntc;
 	dis->reservedChars=7;
 	w->dispAlign=align_right;
 	w->textAlign=align_center;
