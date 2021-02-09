@@ -1186,7 +1186,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_IRON_FilterMode, w, 	"Filtering", 	&Widget_IRON_FilterMode);
 	comboAddOption(&comboitem_IRON_filterCoef, w, 	"Factor",		&Widget_IRON_filterCoef);
 	comboAddOption(&comboitem_IRON_ADCLimit, w, 	"No iron",		&Widget_IRON_ADCLimit);
-	comboAddOption(&comboitem_IRON_NoIronDelay, w, 	"Debounce",		&Widget_IRON_NoIronDelay);
+	comboAddOption(&comboitem_IRON_NoIronDelay, w, 	"Detection",	&Widget_IRON_NoIronDelay);
 	comboAddScreen(&comboitem_IRON_Back, w, 		"BACK", 		screen_settingsmenu);
 
 
