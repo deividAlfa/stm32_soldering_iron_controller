@@ -23,7 +23,12 @@ Before covering the settings, it is useful to understand how it works.
 
 Tip temperature is measured by using an ADC (Analog-Digital Converter) to measure the voltage output by a thermocouple in the tip. The voltage is basically proportional to the difference between tip temperature and room temperature.
 
-The controller uses PWM (Pulse Width Modulation) to control the tip temperature. PWM basically varies the amount of time that the tip is powered. By default, PWM uses a 200 ms (5 times per second) period. If the tip is too hot, the controller will turn on power to the tip little or not at all during each cycle. If the tip is too cold, it will turn the power on for more of the period. The time the tip is powered during each period is called the duty cycle. The PID (Proportional, Integral, Derivitive) algorithm determines the PWM duty cycle based on the difference between desired and measured tip temperatures.
+The controller uses PWM (Pulse Width Modulation) to control the tip temperature. PWM basically varies the amount of time that the tip is powered. By default, PWM uses a 200 ms (5 times per second) period. If the tip is too hot, the controller will turn on power to the tip little or not at all during each cycle. If the tip is too cold, it will turn the power on for more of the period. The time the tip is powered on during each period is called the duty cycle. 
+<pre>
+|<------ PWM PERIOD ------>|
+| POWER |____ no power ____|
+</pre>
+The PID (Proportional, Integral, Derivitive) algorithm determines the PWM duty cycle based on the difference between desired and measured tip temperatures.
 
 ## Menus
 
@@ -37,7 +42,8 @@ The integral term, changes the duty cycle based on how long the temperatures hav
   * #### _Kd_ 
 The differential term, changes the duty cycle based on how fast the measured temperature has changed.
   * #### _Time_
- ???
+PID is called at the end of every PWM period. The _time_ preset will delay the PID calculation. 
+Settings this value lower than the PWM period will cause the PID to be done every time. Setting it higher will delay the PID update to a later PWM period. Default is 0 (no delay, update every PWM period)
 
 ### IRON
 Iron settings control the operation of the handle/tips. 
@@ -50,15 +56,20 @@ The maximum power which will be delivered to the tip. This sets a maximum for th
   * #### _PWM Time_
 Sets the PWM period. The controller will check and adjust the tip temperature once each period. Default 200 ms.
   * #### _ADC Delay_
-At the start of each PWM period, power is removed from the tip, so the temperature can be measured. This setting controls how long after power is removed until the temperature is measured. This is necessary because the measurement is unstable for a short time after power is removed. Default 20 ms.
+Near the end of each PWM period, the temperature is measured by the ADC. _ADC Delay_ controls how soon before the end of the a period the temperature is measured. The measurement can only be taken when the power to the tip is off, so the effective PWM duty cycle is limited to (_PWM Time_ - _ADC Delay_). Default 20 ms.
+<pre>
+|<----------------- PWM TIME -------------------->|
+|_____________________________[ADC READ]|<-DELAY->| NEXT CYCLE
+|<- POWER ->|_____________________________________|
+</pre>
   * #### _Filtering_
 Used to filter the temperature measurements before they are passed to the PID. This helps remove noise and provides more stability.
     * ##### _Avg_
 This uses a simple moving average, and is the default filter.
     * ##### _EMA_
-Exponential Moving Average. A more sophisticated filter, which reacts faster to changes.
+Exponential Moving Average. A more sophisticated filter, adds a delay, but tracks changes more closely.
     * ##### _DEMA_
-Double Exponential Moving Average. A more sophisticated filter, which reacts even faster to changes.
+Double Exponential Moving Average. A more sophisticated filter, double _EMA_.
   * #### _Factor_
 Only for EMA/DEMA. 
   * #### _No iron_
@@ -79,19 +90,22 @@ If rotating the encoder moves in the wrong direction, change this.
   * #### _Boot_
 Operation mode when powered on. __RUN__ or __SLEEP__.
   * #### _Wake mode_
-How to detect activity. SHAKE or STAND. SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip up to wake. STAND uses a separate wire to detect when the iron is in or out of the stand.
+How to detect activity. SHAKE or STAND. SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip up to wake. STAND can use the same handle shake wire, but must be disconnected from the handle and connected so when the tip is in the stand, this wire is shorted to GND. Shorted = sleep, open = wake.
   * #### _Btn. Wake_
 Whether the moving the encoder or pressing the button wakes the controller.
   * #### _Buzzer_
-Buzz/beep when set temperature is reached or mode (sleep/wake) changes (?)
+Buzz/beep when notable conditions occur.
+    * Changing operating mode (sleep, run)
+    * Temperature reached after the setpoint was changes
+    * Alarm when no iron is detected or system error happens
   * #### _Unit_
-Temperature scale, Celcius or Fahrenheit
+Temperature scale, Celsius or Fahrenheit
   * #### _Step_
 Temperature step when adjusting tip temperature.
   * #### _GUI Time_
-How often the display is updated (?)
+How often the main screen readings are updated (voltage, temperatures). Should be greater than _PWM Time_. Low settings may cause objectionable "flicker."
   * #### _Save time_
-How long before storing changed settings in memory. (?)
+How long before storing changed settings in flash memory. Flash has a limited number of write cycles (~100,000). Higher values reduce writes, but settings changes could be forgotten when the controller is powered off or reset. Default: 5 seconds.
   * #### _RESET MENU_
 Reset various configuration sections:
     * ##### _Settings_
