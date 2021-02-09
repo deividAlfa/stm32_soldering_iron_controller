@@ -892,7 +892,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddScreen(&comboitem_SYSTEM_Reset, w, 			"RESET MENU",	screen_reset);
 	comboAddScreen(&comboitem_SYSTEM_SW, w, 			SWSTRING,		-1);
 	comboAddScreen(&comboitem_SYSTEM_HW, w, 			HWSTRING,		-1);
-	comboAddScreen(&comboitem_SYSTEM_Back, w, 			"RETURN", 		screen_settingsmenu);
+	comboAddScreen(&comboitem_SYSTEM_Back, w, 			"BACK", 		screen_settingsmenu);
 
 	//########################################## RESET SCREEN ##########################################
 	//
@@ -911,7 +911,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddAction(&comboitem_RESET_TIP,w, 			"Reset Profile", 	&goProfileReset );
 	comboAddAction(&comboitem_RESET_ALLTIP,w, 		"Reset Profiles", 	&goAllProfileReset );
 	comboAddAction(&comboitem_RESET_EVERYTHING,w, 	"Reset All", 		&goFactoryReset);
-	comboAddScreen(&comboitem_RESET_Back,w, 		"RETURN", 			screen_system);
+	comboAddScreen(&comboitem_RESET_Back,w, 		"BACK", 			screen_system);
 	comboitem_RESET_SETTINGS.dispAlign=align_left;
 	comboitem_RESET_TIP.dispAlign=align_left;
 	comboitem_RESET_ALLTIP.dispAlign=align_left;
