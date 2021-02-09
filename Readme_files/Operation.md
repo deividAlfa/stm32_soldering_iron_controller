@@ -56,7 +56,7 @@ The maximum power which will be delivered to the tip. This sets a maximum for th
   * #### _PWM Time_
 Sets the PWM period. The controller will check and adjust the tip temperature once each period. Default 200 ms.
   * #### _ADC Delay_
-Near the end of each PWM period, the temperature is measured by the ADC. _ADC Delay_ controls how soon before the end of the a period the temperature is measured. The measurement can only be taken when the power to the tip is off, so the effective PWM duty cycle is limited to (_PWM Time_ - _ADC Delay_). Default 20 ms.
+Near the end of each PWM period, the temperature is measured by the ADC. _ADC Delay_ controls how soon before the end of a period the temperature is measured. The measurement can only be taken when the power to the tip is off, so the effective PWM duty cycle is limited to (_PWM Time_ - _ADC Delay_). Default 20 ms.
 <pre>
 |<----------------- PWM TIME -------------------->|
 |_____________________________[ADC READ]|<-DELAY->| NEXT CYCLE
@@ -92,7 +92,7 @@ Operation mode when powered on. __RUN__ or __SLEEP__.
   * #### _Wake mode_
 How to detect activity. SHAKE or STAND. SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip up to wake. STAND can use the same handle shake wire, but must be disconnected from the handle and connected so when the tip is in the stand, this wire is shorted to GND. Shorted = sleep, open = wake.
   * #### _Btn. Wake_
-Whether the moving the encoder or pressing the button wakes the controller.
+Allow waking the controller by moving or pressing the encoder.
   * #### _Buzzer_
 Buzz/beep when notable conditions occur.
     * Changing operating mode (sleep, run)
@@ -103,7 +103,7 @@ Temperature scale, Celsius or Fahrenheit
   * #### _Step_
 Temperature step when adjusting tip temperature.
   * #### _GUI Time_
-How often the main screen readings are updated (voltage, temperatures). Should be greater than _PWM Time_. Low settings may cause objectionable "flicker."
+How often the main screen readings are updated (voltage, temperatures). Should be greater than _PWM Time_. Use a higher setting for less "flicker" in the display.
   * #### _Save time_
 How long before storing changed settings in flash memory. Flash has a limited number of write cycles (~100,000). Higher values reduce writes, but settings changes could be forgotten when the controller is powered off or reset. Default: 5 seconds.
   * #### _RESET MENU_
