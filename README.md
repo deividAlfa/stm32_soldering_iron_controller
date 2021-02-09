@@ -10,6 +10,7 @@
 * [Working with board profiles](#boards)
 * [Building](#build)
 * [Creating a .ioc file from scratch](#Creating_ioc)
+* [Operations guide](Readme_files/Operation.md)
 * [Additional Documentation](#docs)
 * [Pending or non working features](#pending)
 
