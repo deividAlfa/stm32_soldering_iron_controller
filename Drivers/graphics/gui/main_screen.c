@@ -374,7 +374,10 @@ void main_screen_draw(screen_t *scr){
 		plotDraw=1;
 		scr->refresh=screen_eraseAndRefresh;
 		plotTime=HAL_GetTick();
-		uint16_t t = readTipTemperatureCompensated(stored_reading,read_Avg);
+		int16_t t = readTipTemperatureCompensated(stored_reading,read_Avg);
+		if(systemSettings.settings.tempUnit==mode_Farenheit){
+			t = TempConversion(t, mode_Celsius, 0);
+		}
 		if(t>500){
 			t=40;
 		}
@@ -478,9 +481,13 @@ void main_screen_draw(screen_t *scr){
 				u8g2_DrawVLine(&u8g2, x+13, 56-plotData[pos], plotData[pos]);
 			}//
 			uint8_t set;
-			if(Iron.CurrentSetTemperature<188){ set = 1; }
+			int16_t t = Iron.CurrentSetTemperature;
+			if(systemSettings.settings.tempUnit==mode_Farenheit){
+				t = TempConversion(t, mode_Celsius, 0);
+			}
+			if(t<188){ set = 1; }
 			else {
-				set=(Iron.CurrentSetTemperature-180)>>3;
+				set=(t-180)>>3;
 			}
 			set= 56-set;
 			u8g2_DrawTriangle(&u8g2, 124, set-5, 124, set+5, 115, set);
