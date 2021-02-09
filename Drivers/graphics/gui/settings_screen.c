@@ -882,7 +882,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddScreen(&comboitem_SYSTEM_Reset, w, 			"RESET MENU",	screen_reset);
 	comboAddScreen(&comboitem_SYSTEM_SW, w, 			SWSTRING,		-1);
 	comboAddScreen(&comboitem_SYSTEM_HW, w, 			HWSTRING,		-1);
-	comboAddScreen(&comboitem_SYSTEM_Back, w, 			"RETURN", 		screen_settingsmenu);
+	comboAddScreen(&comboitem_SYSTEM_Back, w, 			"BACK", 		screen_settingsmenu);
 
 	//########################################## RESET SCREEN ##########################################
 	//
@@ -901,7 +901,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddAction(&comboitem_RESET_TIP,w, 			"Reset Profile", 	&goProfileReset );
 	comboAddAction(&comboitem_RESET_ALLTIP,w, 		"Reset Profiles", 	&goAllProfileReset );
 	comboAddAction(&comboitem_RESET_EVERYTHING,w, 	"Reset All", 		&goFactoryReset);
-	comboAddScreen(&comboitem_RESET_Back,w, 		"RETURN", 			screen_system);
+	comboAddScreen(&comboitem_RESET_Back,w, 		"BACK", 			screen_system);
 	comboitem_RESET_SETTINGS.dispAlign=align_left;
 	comboitem_RESET_TIP.dispAlign=align_left;
 	comboitem_RESET_ALLTIP.dispAlign=align_left;
@@ -1152,7 +1152,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_IRON_FilterMode, w, 	"Filtering", 	&Widget_IRON_FilterMode);
 	comboAddOption(&comboitem_IRON_filterCoef, w, 	"Factor",		&Widget_IRON_filterCoef);
 	comboAddOption(&comboitem_IRON_ADCLimit, w, 	"No iron",		&Widget_IRON_ADCLimit);
-	comboAddOption(&comboitem_IRON_NoIronDelay, w, 	"Deboucing",	&Widget_IRON_NoIronDelay);
+	comboAddOption(&comboitem_IRON_NoIronDelay, w, 	"Detection",	&Widget_IRON_NoIronDelay);
 	comboAddScreen(&comboitem_IRON_Back, w, 		"BACK", 		screen_settingsmenu);
 
 
