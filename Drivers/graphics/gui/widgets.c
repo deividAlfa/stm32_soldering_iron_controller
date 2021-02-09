@@ -9,7 +9,7 @@
 #include "screen.h"
 #include "oled.h"
 #include "gui.h"
-
+char displayString[32];
 displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *w) {
 	if(!w)
 		return NULL;
@@ -99,6 +99,7 @@ void widgetDefaultsInit(widget_t *w, widgetType t){
 		dis->reservedChars = 0;
 		dis->number_of_dec = 0;
 		dis->type = field_int32;
+		w->displayString=displayString;
 	}
 	if(edit){
 		edit->step=1;
@@ -202,14 +203,10 @@ void default_widgetUpdate(widget_t *w) {
 				break;
 			}
 			else{
-				if(!w->displayString){	// If empty
-					widgetDisable(w);
-					return;
-				}
 				val_ui = *(int32_t*)dis->getData();
 				uint8_t sum = strsum(w->endString);
 				widgetDetectChange(w,(val_ui + sum));						// Check for changes in value and endString
-
+/*
 				if((w->refresh) || (!*w->displayString)){										// Ensure displaystring is initialized
 					snprintf(w->displayString, dis->reservedChars+1, "%0*ld", dis->number_of_dec+1, (int32_t)val_ui);	// Convert value into string
 					uint8_t dispLen=strlen(w->displayString);
@@ -225,6 +222,7 @@ void default_widgetUpdate(widget_t *w) {
 					}
 					w->displayString[dis->reservedChars]=0;											// Ensure last string char is 0
 				}
+				*/
 				return;
 			}
 			break;
@@ -347,7 +345,7 @@ void widgetAlign(widget_t* w){
 				strWidth=u8g2_GetStrWidth(&u8g2, (char *)dis->getData());
 			}
 			else{
-				strWidth=u8g2_GetStrWidth(&u8g2, w->displayString);
+				strWidth=u8g2_GetStrWidth(&u8g2, displayString);
 			}
 			break;
 
@@ -480,10 +478,24 @@ void default_widgetDraw(widget_t *w) {
 	}
 
 	if(refresh){
+		if(dis && dis->type==field_int32){
+			int32_t val_ui = *(int32_t*)dis->getData();
+			snprintf(w->displayString, dis->reservedChars+1, "%0*ld", dis->number_of_dec+1, (int32_t)val_ui);		// Convert value into string
+			uint8_t dispLen=strlen(w->displayString);
+			uint8_t endLen=strlen(w->endString);
+			if(dis->number_of_dec){																				// If there're decimals
+				if(dis->reservedChars >= (dispLen+1)){															// Ensure there's enough space in the string for adding the decimal point
+					insertDot(w->displayString,  dis->number_of_dec);												// Insert decimal dot
+				}
+			}
+			if(dis->reservedChars >= (dispLen+endLen)){															// Ensure there's enough space in the string for adding the end String
+				strcat(w->displayString, w->endString);															// Append endString
+			}
+			w->displayString[dis->reservedChars]=0;																// Ensure last string char is 0
+		}
+
 		widgetAlign(w);				// Align
 		widgetClearField(w);				// Clear old field
-
-
 		if(w->refresh==refresh_triggered){
 			w->refresh=refresh_idle;
 		}
@@ -650,18 +662,9 @@ void comboBoxDraw(widget_t *w) {
 		}
 		else if (item->type==combo_Option){
 			selectable_widget_t *sel = extractSelectablePartFromWidget(item->widget);
+			displayOnly_widget_t* dis = extractDisplayPartFromWidget(item->widget);
 			default_widgetUpdate(item->widget);
 			uint8_t len=0;
-			if(item->widget->type==widget_multi_option){
-				displayOnly_widget_t* dis = extractDisplayPartFromWidget(item->widget);
-				len = u8g2_GetStrWidth(&u8g2,item->widget->multiOptionWidget.options[*(uint8_t*)dis->getData()]);
-			}
-			else if(item->widget->type==widget_editable){
-				len=u8g2_GetStrWidth(&u8g2,item->widget->displayString);
-			}
-			item->widget->posY = y * height + w->posY;																						// Set widget Ypos same as the current combo option
-			item->widget->stringPos = OledWidth-len-5;																							// Align to the left measuring actual string width
-
 			if(sel->state==widget_edit){																									// If edit mode
 				drawFrame=0;
 				u8g2_SetDrawColor(&u8g2, WHITE);
@@ -671,8 +674,36 @@ void comboBoxDraw(widget_t *w) {
 			else{
 				u8g2_SetDrawColor(&u8g2, WHITE);
 			}
+
+			if(item->widget->type==widget_multi_option){
+				len = u8g2_GetStrWidth(&u8g2,item->widget->multiOptionWidget.options[*(uint8_t*)dis->getData()]);
+			}
+			else if(item->widget->type==widget_editable){
+				int32_t val_ui = *(int32_t*)dis->getData();
+				snprintf(item->widget->displayString, dis->reservedChars+1, "%0*ld", dis->number_of_dec+1, (int32_t)val_ui);		// Convert value into string
+				uint8_t dispLen=strlen(item->widget->displayString);
+				uint8_t endLen=strlen(item->widget->endString);
+				if(dis->number_of_dec){																				// If there're decimals
+					if(dis->reservedChars >= (dispLen+1)){															// Ensure there's enough space in the string for adding the decimal point
+						insertDot(item->widget->displayString,  dis->number_of_dec);												// Insert decimal dot
+					}
+				}
+				if(dis->reservedChars >= (dispLen+endLen)){															// Ensure there's enough space in the string for adding the end String
+					strcat(item->widget->displayString, item->widget->endString);															// Append endString
+				}
+				item->widget->displayString[dis->reservedChars]=0;																// Ensure last string char is 0
+				len=u8g2_GetStrWidth(&u8g2,item->widget->displayString);
+			}
+			item->widget->posY = y * height + w->posY;																						// Set widget Ypos same as the current combo option
+			item->widget->stringPos = OledWidth-len-5;																							// Align to the left measuring actual string width
+			if(item->widget->type==widget_editable){
+				u8g2_DrawStr(&u8g2,item->widget->stringPos, item->widget->posY+2,  item->widget->displayString);
+			}
+			else{
+				u8g2_DrawStr(&u8g2,item->widget->stringPos, item->widget->posY+2,  item->widget->multiOptionWidget.options[*(uint8_t*)dis->getData()]);
+			}
 			u8g2_DrawStr(&u8g2, 4, y * height + w->posY +2, item->text);																// Draw the label
-			default_widgetDraw(item->widget);																								// Draw widget
+			//default_widgetDraw(item->widget);																								// Draw widget
 		}
 		do {
 			item = item->next_item;

@@ -374,7 +374,10 @@ void main_screen_draw(screen_t *scr){
 		plotDraw=1;
 		scr->refresh=screen_eraseAndRefresh;
 		plotTime=HAL_GetTick();
-		uint16_t t = readTipTemperatureCompensated(stored_reading,read_Avg);
+		int16_t t = readTipTemperatureCompensated(stored_reading,read_Avg);
+		if(systemSettings.settings.tempUnit==mode_Farenheit){
+			t = TempConversion(t, mode_Celsius, 0);
+		}
 		if(t>500){
 			t=40;
 		}
@@ -478,9 +481,13 @@ void main_screen_draw(screen_t *scr){
 				u8g2_DrawVLine(&u8g2, x+13, 56-plotData[pos], plotData[pos]);
 			}//
 			uint8_t set;
-			if(Iron.CurrentSetTemperature<188){ set = 1; }
+			int16_t t = Iron.CurrentSetTemperature;
+			if(systemSettings.settings.tempUnit==mode_Farenheit){
+				t = TempConversion(t, mode_Celsius, 0);
+			}
+			if(t<188){ set = 1; }
 			else {
-				set=(Iron.CurrentSetTemperature-180)>>3;
+				set=(t-180)>>3;
 			}
 			set= 56-set;
 			u8g2_DrawTriangle(&u8g2, 124, set-5, 124, set+5, 115, set);
@@ -508,10 +515,8 @@ void main_screen_setup(screen_t *scr) {
 	//iron tip temperature display
 	w=&Widget_IronTemp;
 	screen_addWidget(w,scr);
-	static char irontmp[6];
 	widgetDefaultsInit(w, widget_display);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=irontmp;
 	dis->reservedChars=5;
 	w->textAlign=align_center;
 	w->dispAlign=align_center;
@@ -522,10 +527,8 @@ void main_screen_setup(screen_t *scr) {
 	// Tip temperature setpoint
 	w=&Widget_SetPoint;
 	screen_addWidget(w,scr);
-	static char SetP[6];
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=SetP;
 	dis->reservedChars=5;
 	w->posY = Widget_IronTemp.posY-2;
 	dis->getData = &getTemp;
@@ -541,10 +544,8 @@ void main_screen_setup(screen_t *scr) {
 	//V input display
 	w = &Widget_Vsupply;
 	screen_addWidget(w, scr);
-	static char vin[6];
 	widgetDefaultsInit(w, widget_display);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=vin;
 	w->endString="V";
 	dis->reservedChars=5;
 	w->textAlign=align_center;
@@ -561,10 +562,8 @@ void main_screen_setup(screen_t *scr) {
 	//Ambient temperature display
 	w=&Widget_AmbTemp;
 	screen_addWidget(w,scr);
-	static char ntc[8];
 	widgetDefaultsInit(w, widget_display);
 	dis=extractDisplayPartFromWidget(w);
-	w->displayString=ntc;
 	dis->reservedChars=7;
 	w->dispAlign=align_right;
 	w->textAlign=align_center;
