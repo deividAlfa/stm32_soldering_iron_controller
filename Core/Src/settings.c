@@ -140,9 +140,7 @@ void restoreSettings() {
 		settingsChkErr();
 	}
 
-
 	setContrast(systemSettings.settings.contrast);
-	RE_SetMode(&RE1_Data, systemSettings.settings.EncoderMode);
 }
 
 uint32_t ChecksumSettings(settings_t* settings){
