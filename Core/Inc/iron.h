@@ -38,7 +38,6 @@ typedef struct {
 	bool 					DebugMode ;				// Flag to indicate Debug is enabled
 	bool 					presence;					// Flag to indicate the presence of the iron
 	bool 					calibrating;				// Flag to indicate calibration state (don't save temperature settings)
-	bool 					PIDUpdate;					// Flag to indicate PID calculation must be updated
 	bool 					updateMode;					// Flag to indicate the mode must be changed
 	bool 					newActivity;				// Flag to indicate handle movement
 	bool 					FailState;					// Flag to indicate a serious failure, totally disables the PWM until the flag is manually cleared

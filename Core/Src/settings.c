@@ -253,7 +253,7 @@ void resetCurrentProfile(void){
 	systemSettings.Profile.pwmDelay=1999;
 	systemSettings.Profile.filterCoef=1;
 	systemSettings.Profile.filterMode=filter_avg;
-	systemSettings.Profile.PIDTime=0;
+	systemSettings.Profile.PIDTime= (systemSettings.Profile.pwmPeriod+1)/100;
 	systemSettings.Profile.tempUnit=mode_Celsius;
 }
 

@@ -128,15 +128,12 @@ void handleIron(void) {
 			buzzer_long_beep();
 		}
 	}
-	if((CurrentTime-PID_time)>systemSettings.Profile.PIDTime){		//Timer for updating PID calculation
-			PID_time=CurrentTime;
-			Iron.PIDUpdate=1;
-	}
-	// Only continue if PID update flag is set
+	//Timer for updating PID calculation
 	// Don't calculate PID for the first second after boot, as the filters might not have enough data yet (Only causes problem with high EMA/DEMA coefficients)
-	if((Iron.PIDUpdate==0) || (CurrentTime<1000)){
+	if((CurrentTime-PID_time)<systemSettings.Profile.PIDTime || (CurrentTime<1000)){
 		return;
 	}
+	PID_time=CurrentTime;
 
 	// If there are pending PWM settings to be applied, apply them before new calculation
 	if(Iron.updatePwm==needs_update){
@@ -158,6 +155,9 @@ void handleIron(void) {
 		  if(t){
 			  set = calculatePID(t, TIP.last_avg);
 		  }
+	  }
+	  else{
+		  //resetPID();
 	  }
 	}
 	// If PID output negative, set to 0
@@ -188,7 +188,6 @@ void handleIron(void) {
 	else{
 	  Iron.CurrentIronPower = 0;
 	  Iron.Pwm_Out = 0;
-	  //resetPID();
 	}
 	// If by any means the PWM output is higher than max calculated, generate error
 	if(Iron.Pwm_Out > Iron.Pwm_Limit){
@@ -208,9 +207,6 @@ void handleIron(void) {
 	if(systemSettings.settings.tempUnit==mode_Farenheit){
 		TempStep=45;
 		TempLimit=950;
-	}
-	else{
-		if(tipTemp>950){ Iron.RunawayLevel=runaway_500; }					// In any case
 	}
 	if((Iron.Pwm_Out) && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==debug_Off) &&(tipTemp > Iron.CurrentSetTemperature)){
 		for(int8_t c=runaway_100; c>=runaway_ok; c--){					// Check for overrun

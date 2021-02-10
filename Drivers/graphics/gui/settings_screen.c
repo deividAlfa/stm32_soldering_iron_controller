@@ -623,6 +623,11 @@ void Reset_confirmation_onEnter(screen_t *scr){
 //-------------------------------------------------------------------------------------------------------------------------------
 void PID_onEnter(screen_t *scr){
 	comboResetIndex(&comboWidget_PID);
+	Widget_PID_Time.editableWidget.min_value=(systemSettings.Profile.pwmPeriod+1)/100;
+	Widget_PID_Time.editableWidget.step=Widget_PID_Time.editableWidget.min_value;
+	if(systemSettings.Profile.PIDTime <	Widget_PID_Time.editableWidget.min_value){
+		systemSettings.Profile.PIDTime = Widget_PID_Time.editableWidget.min_value;
+	}
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -995,7 +1000,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->editableWidget.big_step = 100;
 	w->editableWidget.step = 10;
 	w->editableWidget.setData = (void (*)(void *))&setPIDTime;
-	w->editableWidget.max_value = 500;
+	w->editableWidget.max_value = 1000;
 	w->editableWidget.min_value = 0;
 
 	//========[ PID COMBO ]===========================================================
