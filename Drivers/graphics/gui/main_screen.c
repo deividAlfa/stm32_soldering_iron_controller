@@ -354,7 +354,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 
 
-static uint8_t plotData[100];
+static uint16_t plotData[100];
 static uint8_t plotX;
 static uint32_t plotTime;
 bool plotDraw;
@@ -378,15 +378,22 @@ void main_screen_draw(screen_t *scr){
 		if(systemSettings.settings.tempUnit==mode_Farenheit){
 			t = TempConversion(t, mode_Celsius, 0);
 		}
-		if(t>500){
+		/*
+		if(t>500){          // invalid temp, valid is 180-480
 			t=40;
 		}
 		else if(t>188){
-			t = (t-180)>>3;
+			t = (t-180)>>3;  // 188-500 -> 1-40
 		}
 		else{
 			t = 1;
 		}
+		*/
+
+		// save temps
+		if(t>500) t=500;  				// over range
+		else if(t<1) t = 1;				// under range
+
 		plotData[plotX] = t;
 		if(++plotX>99){
 			plotX=0;
@@ -469,28 +476,59 @@ void main_screen_draw(screen_t *scr){
 
 		if((scr_refresh || plotDraw) && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){	//Update every 100mS or if screen is erased
 			plotDraw=0;
-			u8g2_DrawVLine(&u8g2, 11, 16, 40);
-			for(uint8_t y=	16; y<57; y+=13){
-				u8g2_DrawHLine(&u8g2, 7, y, 4);
-			}
-			for(uint8_t x=0; x<100; x++){
-				uint8_t pos=plotX+x;
-				if(pos>99){
-					pos -=100;
-				}
-				u8g2_DrawVLine(&u8g2, x+13, 56-plotData[pos], plotData[pos]);
-			}//
-			uint8_t set;
 			int16_t t = Iron.CurrentSetTemperature;
+
+			bool magnify = true;		// for future, to support both graph types
+
 			if(systemSettings.settings.tempUnit==mode_Farenheit){
 				t = TempConversion(t, mode_Celsius, 0);
 			}
-			if(t<188){ set = 1; }
-			else {
-				set=(t-180)>>3;
+
+			// plot is 16-56 V, 14-113 H ?
+			u8g2_DrawVLine(&u8g2, 11, 16, 40);						// left scale
+
+			if (magnify) {											// graphing magnified
+				for(uint8_t y=16; y<57; y+=10){
+					u8g2_DrawHLine(&u8g2, 7, y, 4); 				// left ticks
+				}
+
+				for(uint8_t x=0; x<100; x++){
+					uint8_t pos=plotX+x;
+					if(pos>99) pos-=100;
+
+					uint16_t plotV = plotData[pos];
+					if (plotV < t-20) plotV = 0;
+					else if (plotV >= t+20) plotV = 40;
+					else plotV = (plotV-t+20) ; 					// relative to t, +-20C
+					u8g2_DrawVLine(&u8g2, x+13, 56-plotV, plotV);	// data points
+				}
+
+				uint8_t set= 36;
+				u8g2_DrawTriangle(&u8g2, 124, set-5, 124, set+5, 115, set);		// set temp marker
+
+			} else {												// graphing full range
+				for(uint8_t y=16; y<57; y+=13){
+					u8g2_DrawHLine(&u8g2, 7, y, 4); 				// left ticks
+				}
+
+				for(uint8_t x=0; x<100; x++){
+					uint8_t pos=plotX+x;
+					if(pos>99) pos-=100;
+
+					uint16_t plotV = plotData[pos];					// 180-500 -> 0-40
+					if (plotV<180) plotV = 0;
+					else plotV = (plotV-180) >> 3; 					// divide by 8, (500-180)/8=40
+					u8g2_DrawVLine(&u8g2, x+13, 56-plotV, plotV);	// data points
+				}
+
+				uint8_t set;
+				if(t<188){ set = 1; }
+				else {
+					set=(t-180)>>3;
+				}
+				set= 56-set;
+				u8g2_DrawTriangle(&u8g2, 124, set-5, 124, set+5, 115, set);		// set temp marker
 			}
-			set= 56-set;
-			u8g2_DrawTriangle(&u8g2, 124, set-5, 124, set+5, 115, set);
 		}
 	}
 }
