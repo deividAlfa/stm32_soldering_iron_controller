@@ -16,9 +16,9 @@
 #define TipSize			10		// Number of tips for each profile
 #define TipCharSize		5		// String size for each tip name
 
-#define T12_Cal200		1000
-#define T12_Cal300		1500
-#define T12_Cal400		2000
+#define T12_Cal200		1300
+#define T12_Cal300		1900
+#define T12_Cal400		2500
 
 #define C210_Cal200		400
 #define C210_Cal300		600
