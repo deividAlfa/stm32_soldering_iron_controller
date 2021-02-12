@@ -354,7 +354,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 
 
-static uint16_t plotData[100];
+static uint8_t plotData[100];
 static uint8_t plotX;
 static uint32_t plotTime;
 bool plotDraw;
@@ -378,21 +378,20 @@ void main_screen_draw(screen_t *scr){
 		if(systemSettings.settings.tempUnit==mode_Farenheit){
 			t = TempConversion(t, mode_Celsius, 0);
 		}
-		/*
-		if(t>500){          // invalid temp, valid is 180-480
-			t=40;
-		}
-		else if(t>188){
-			t = (t-180)>>3;  // 188-500 -> 1-40
-		}
-		else{
-			t = 1;
-		}
-		*/
 
-		// save temps
-		if(t>500) t=500;  				// over range
-		else if(t<1) t = 1;				// under range
+		// here we encode tip temperatures from 180-500C
+		// to save RAM, the extreme highs and lows overlap
+		// in their encoding. We'll later interpret the values
+		// based on the set temperature.
+		//				set <330			set >=330
+		//            	range 160-415		range 245-500
+		// temperature	160-201 202-329		330-457 458-500
+		// as encoded	214-255 000-127 	128-255 000-042
+		if (t < 160) 		t=214; // under range
+		else if (t < 202) 	t+=54;
+		else if (t < 458)	t-=202;
+		else if (t <= 500)	t-=458;
+		else				t=42;  // over range
 
 		plotData[plotX] = t;
 		if(++plotX>99){
@@ -496,7 +495,18 @@ void main_screen_draw(screen_t *scr){
 					uint8_t pos=plotX+x;
 					if(pos>99) pos-=100;
 
+					// here we unscramble the temperatures, which
+					// were encoded with overlapping values
+					// we base it on the current set temperature
 					uint16_t plotV = plotData[pos];
+					if (t < 330) {
+					  if (plotV >= 214) plotV-=54;
+					  else				plotV+=202;
+					} else {
+					  if (plotV <= 42) 	plotV+=458;
+					  else				plotV+=202;
+					}
+
 					if (plotV < t-20) plotV = 0;
 					else if (plotV >= t+20) plotV = 40;
 					else plotV = (plotV-t+20) ; 					// relative to t, +-20C
@@ -515,7 +525,17 @@ void main_screen_draw(screen_t *scr){
 					uint8_t pos=plotX+x;
 					if(pos>99) pos-=100;
 
-					uint16_t plotV = plotData[pos];					// 180-500 -> 0-40
+					// here we unscramble the temperatures, which
+					// were encoded with overlapping values
+					// we base it on the current set temperature
+					uint16_t plotV = plotData[pos];
+					if (t < 330) {
+					  if (plotV >= 214) plotV-=54;
+					  else				plotV+=202;
+					} else {
+					  if (plotV <= 42) 	plotV+=458;
+					  else				plotV+=202;
+					}
 					if (plotV<180) plotV = 0;
 					else plotV = (plotV-180) >> 3; 					// divide by 8, (500-180)/8=40
 					u8g2_DrawVLine(&u8g2, x+13, 56-plotV, plotV);	// data points
