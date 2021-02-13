@@ -187,8 +187,6 @@ static void main_screen_init(screen_t *scr) {
 	Widget_TipSelect.multiOptionWidget.numberOfOptions = systemSettings.Profile.currentNumberOfTips;
 	Widget_SetPoint.editableWidget.step = systemSettings.settings.tempStep;
 	Widget_SetPoint.editableWidget.big_step = systemSettings.settings.tempStep;
-	Widget_SetPoint.editableWidget.step = systemSettings.settings.tempStep;
-	Widget_SetPoint.editableWidget.big_step = systemSettings.settings.tempStep;
 	setMainScrTempUnit();
 	mainScr.idleTick=HAL_GetTick();
 
