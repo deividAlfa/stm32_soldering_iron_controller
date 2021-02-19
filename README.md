@@ -50,9 +50,9 @@ The actual requirements are 16KB RAM and 64KB flash. Don't even try if your MCU 
 The BOARDS folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.  
 
 These board profiles are being tested:
-* Quicko T12[STABLE]: Profiles for STN32F072C8/CB and STN32F103C8/CB versions. 
-* KSGER v2.1s[WIP](64pin "blue" board): Profiles for STN32F101RB and STN32F103RB versions. 
-* KSGER v3.1 [WIP](64pin "black" board): Profiles for STN32F101RB and STN32F103RB versions.
+* Quicko T12 [STABLE]: Profiles for STM32F072C8/CB and STM32F103C8/CB versions. 
+* KSGER v2.1 [STABLE]: Profile for STM32F101RB, it will work fine with 102/103, also with 48 and 64-pin versions.
+* KSGER v3.0 [STABLE]: Profile for STM32F101RB, it will work fine with 102/103 versions.
 
 
 
