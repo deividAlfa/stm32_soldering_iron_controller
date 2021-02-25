@@ -9,19 +9,19 @@
 #include "oled.h"
 #include "gui.h"
 
-typedef enum {cal_200, cal_300, cal_400, cal_suceed, cal_failed}state_t;
+typedef enum {cal_250, cal_350, cal_450, cal_suceed, cal_failed}state_t;
 static uint32_t lastUpdateTick;
 static int16_t lastTipTemp;
 static uint16_t backupTemp;
 static bool backupTempUnit;
-static uint16_t backupCal200;
-static uint16_t backupCal300;
-static uint16_t backupCal400;
-const static uint16_t state_temps[3] = {200, 300, 400};
-const static char* state_tempstr[3] = {"200C", "300C", "400C"};
+static uint16_t backupCal250;
+static uint16_t backupCal350;
+static uint16_t backupCal450;
+const static uint16_t state_temps[3] = {250, 350, 450};
+const static char* state_tempstr[3] = {"250C", "350C", "450C"};
 static uint16_t measured_temps[3];
 static uint16_t adcAtTemp[3];
-static state_t current_state = cal_200;
+static state_t current_state = cal_250;
 static uint8_t tempReady;
 static int32_t measuredTemp;
 static uint16_t adcCal[3];
@@ -59,9 +59,9 @@ static void setCalState(state_t s) {
 		uint8_t result = processCalibration();
 		if(result) {
 			current_state = cal_suceed;
-			Currtip->calADC_At_200 = adcCal[cal_200];
-			Currtip->calADC_At_300 = adcCal[cal_300];
-			Currtip->calADC_At_400 = adcCal[cal_400];
+			Currtip->calADC_At_250 = adcCal[cal_250];
+			Currtip->calADC_At_350 = adcCal[cal_350];
+			Currtip->calADC_At_450 = adcCal[cal_450];
 		}
 		else {
 			current_state = cal_failed;
@@ -73,9 +73,9 @@ static int cancelAction(widget_t* w) {
 	setSystemTempUnit(backupTempUnit);
 	tipData * Currtip = getCurrentTip();
 	if(current_state != cal_suceed){
-		Currtip->calADC_At_200 = backupCal200;
-		Currtip->calADC_At_300 = backupCal300;
-		Currtip->calADC_At_400 = backupCal400;
+		Currtip->calADC_At_250 = backupCal250;
+		Currtip->calADC_At_350 = backupCal350;
+		Currtip->calADC_At_450 = backupCal450;
 	}
 	return screen_settingsmenu;
 }
@@ -97,29 +97,29 @@ static void waitCalibration_screen_onEnter(screen_t *scr) {
 		backupTemp = getSetTemperature();
 		backupTempUnit=systemSettings.settings.tempUnit;
 
-		backupCal200 = Currtip->calADC_At_200;
-		backupCal300 = Currtip->calADC_At_300;
-		backupCal400 = Currtip->calADC_At_400;
+		backupCal250 = Currtip->calADC_At_250;
+		backupCal350 = Currtip->calADC_At_350;
+		backupCal450 = Currtip->calADC_At_450;
 
 		switch(systemSettings.settings.currentProfile){
 			case profile_T12:
-				Currtip->calADC_At_200=T12_Cal200;
-				Currtip->calADC_At_300=T12_Cal300;
-				Currtip->calADC_At_400=T12_Cal400;
+				Currtip->calADC_At_250=T12_Cal250;
+				Currtip->calADC_At_350=T12_Cal350;
+				Currtip->calADC_At_450=T12_Cal450;
 				break;
 			case profile_C210:
-				Currtip->calADC_At_200=C210_Cal200;
-				Currtip->calADC_At_300=C210_Cal300;
-				Currtip->calADC_At_400=C210_Cal400;
+				Currtip->calADC_At_250=C210_Cal250;
+				Currtip->calADC_At_350=C210_Cal350;
+				Currtip->calADC_At_450=C210_Cal450;
 				break;
 			case profile_C245:
-				Currtip->calADC_At_200=C245_Cal200;
-				Currtip->calADC_At_300=C245_Cal300;
-				Currtip->calADC_At_400=C245_Cal400;
+				Currtip->calADC_At_250=C245_Cal250;
+				Currtip->calADC_At_350=C245_Cal350;
+				Currtip->calADC_At_450=C245_Cal450;
 				break;
 		}
 		setSystemTempUnit(mode_Celsius);
-		setCalState(cal_200);
+		setCalState(cal_250);
 	}
 }
 
@@ -139,7 +139,7 @@ int waitProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
 static void waitOnExit(screen_t *scr) {
 	if(scr != &Screen_edit_calibration_wait && scr != &Screen_edit_calibration_input) {
 		tempReady = 0;
-		current_state = cal_200;
+		current_state = cal_250;
 		setSetTemperature(backupTemp);
 		setCurrentMode(mode_run,forceMode);
 		Iron.calibrating=0;
@@ -169,9 +169,9 @@ void waitCalibration_screen_draw(screen_t *scr){
 		char waitstr[6];
 		lastTipTemp = readTipTemperatureCompensated(stored_reading,read_Avg);
 		switch((int)current_state){
-			case cal_200:
-			case cal_300:
-			case cal_400:
+			case cal_250:
+			case cal_350:
+			case cal_450:
 				u8g2_DrawStr(&u8g2, 10, 15, "CAL STEP:");						// Draw current cal state
 				u8g2_DrawStr(&u8g2, 90, 15, state_tempstr[(int)current_state]);
 				u8g2_DrawStr(&u8g2, 10, 30, "WAIT...");							 // Draw current temp
@@ -261,20 +261,20 @@ static uint8_t processCalibration() {
 	  uint16_t ambient = readColdJunctionSensorTemp_x10(mode_Celsius) / 10;
 	  
 	  //  Ensure measured temps are valid (200<300<400)
-	  if (	(measured_temps[cal_300] <= measured_temps[cal_200]) ||	(measured_temps[cal_400] <= measured_temps[cal_300]) ){
+	  if (	(measured_temps[cal_350] <= measured_temps[cal_250]) ||	(measured_temps[cal_450] <= measured_temps[cal_350]) ){
 		  return 0;
 	  }
 
 	  //  Ensure adc values are valid (200<300<400)
-	  if (	(adcAtTemp[cal_300] <=adcAtTemp[cal_200]) ||(adcAtTemp[cal_400] <= adcAtTemp[cal_300]) ){
+	  if (	(adcAtTemp[cal_350] <=adcAtTemp[cal_250]) ||(adcAtTemp[cal_450] <= adcAtTemp[cal_350]) ){
 		  return 0;
 	  }
 
-	  if ((measured_temps[cal_300] > measured_temps[cal_200]) && ((measured_temps[cal_200] + delta) < measured_temps[cal_300]))
-	    adcCal[cal_300] = map(state_temps[cal_300], measured_temps[cal_200], measured_temps[cal_300], adcAtTemp[cal_200], adcAtTemp[cal_300]);
+	  if ((measured_temps[cal_350] > measured_temps[cal_250]) && ((measured_temps[cal_250] + delta) < measured_temps[cal_350]))
+	    adcCal[cal_350] = map(state_temps[cal_350], measured_temps[cal_250], measured_temps[cal_350], adcAtTemp[cal_250], adcAtTemp[cal_350]);
 	  else
 	    adcCal[1] = map(state_temps[1], ambient, measured_temps[1], 0, adcAtTemp[1]);
-	  adcCal[cal_300] += map(state_temps[cal_300], measured_temps[cal_200], measured_temps[cal_400], adcAtTemp[cal_200], adcAtTemp[cal_400]) + 1;
+	  adcCal[cal_350] += map(state_temps[cal_350], measured_temps[cal_250], measured_temps[cal_450], adcAtTemp[cal_250], adcAtTemp[cal_450]) + 1;
 	  adcCal[1] >>= 1;
 
 	  if ((measured_temps[1] > measured_temps[0]) && ((measured_temps[0] + delta) < measured_temps[1]))

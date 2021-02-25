@@ -180,9 +180,9 @@ void resetCurrentProfile(void){
 #endif
 	if(systemSettings.settings.currentProfile==profile_T12){
 		for(uint8_t x = 0; x < TipSize; x++) {
-			systemSettings.Profile.tip[x].calADC_At_200 = T12_Cal200;
-			systemSettings.Profile.tip[x].calADC_At_300 = T12_Cal300;			// These values are way lower, but better to be safe than sorry
-			systemSettings.Profile.tip[x].calADC_At_400 = T12_Cal400;			// User needs to calibrate its station
+			systemSettings.Profile.tip[x].calADC_At_250 = T12_Cal250;
+			systemSettings.Profile.tip[x].calADC_At_350 = T12_Cal350;			// These values are way lower, but better to be safe than sorry
+			systemSettings.Profile.tip[x].calADC_At_450 = T12_Cal450;			// User needs to calibrate its station
 			systemSettings.Profile.tip[x].PID.Kp = 0.0045;
 			systemSettings.Profile.tip[x].PID.Ki = 0.0030;
 			systemSettings.Profile.tip[x].PID.Kd = 0.0015;
@@ -201,9 +201,9 @@ void resetCurrentProfile(void){
 
 	else if(systemSettings.settings.currentProfile==profile_C245){
 		for(uint8_t x = 0; x < TipSize; x++) {
-			systemSettings.Profile.tip[x].calADC_At_200 = C245_Cal200;
-			systemSettings.Profile.tip[x].calADC_At_300 = C245_Cal300;
-			systemSettings.Profile.tip[x].calADC_At_400 = C245_Cal400;
+			systemSettings.Profile.tip[x].calADC_At_250 = C245_Cal250;
+			systemSettings.Profile.tip[x].calADC_At_350 = C245_Cal350;
+			systemSettings.Profile.tip[x].calADC_At_450 = C245_Cal450;
 			systemSettings.Profile.tip[x].PID.Kp = 0.0028;
 			systemSettings.Profile.tip[x].PID.Ki = 0.0018;
 			systemSettings.Profile.tip[x].PID.Kd = 0.00007;
@@ -222,9 +222,9 @@ void resetCurrentProfile(void){
 
 	else if(systemSettings.settings.currentProfile==profile_C210){
 		for(uint8_t x = 0; x < TipSize; x++) {
-			systemSettings.Profile.tip[x].calADC_At_200 = C210_Cal200;
-			systemSettings.Profile.tip[x].calADC_At_300 = C210_Cal300;
-			systemSettings.Profile.tip[x].calADC_At_400 = C210_Cal400;
+			systemSettings.Profile.tip[x].calADC_At_250 = C210_Cal250;
+			systemSettings.Profile.tip[x].calADC_At_350 = C210_Cal350;
+			systemSettings.Profile.tip[x].calADC_At_450 = C210_Cal450;
 			systemSettings.Profile.tip[x].PID.Kp = 0.0028;
 			systemSettings.Profile.tip[x].PID.Ki = 0.0018;
 			systemSettings.Profile.tip[x].PID.Kd = 0.00007;

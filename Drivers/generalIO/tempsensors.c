@@ -84,17 +84,17 @@ uint16_t human2adc(int16_t t) {
 	if (t < temp_minC){ return 0; } // If requested temp below min, return 0
 	else if (t > temp_maxC){ t = temp_maxC; } // If requested over max, apply limit
 
-	// If t>300, map between ADC values Cal_300 - Cal_400
-	if (t >= 300){
-		temp = map(t, 300, 400, currentTipData->calADC_At_300, currentTipData->calADC_At_400);
+	// If t>350, map between ADC values Cal_300 - Cal_400
+	if (t >= 350){
+		temp = map(t, 350, 450, currentTipData->calADC_At_350, currentTipData->calADC_At_450);
 	}
 	// If t>200, map between ADC values Cal_200 - Cal_300
-	else if(t >= 200){
-		temp = map(t, 200, 300, currentTipData->calADC_At_200, currentTipData->calADC_At_300);
+	else if(t >= 250){
+		temp = map(t, 250, 350, currentTipData->calADC_At_250, currentTipData->calADC_At_350);
 	}
 	// If t<200, map between ADC values ambTemp - Cal_200
 	else{
-		temp = map(t, ambTemp, 200, 0, currentTipData->calADC_At_200);
+		temp = map(t, ambTemp, 250, 0, currentTipData->calADC_At_250);
 	}
 
 	tH = adc2Human(temp,0,mode_Celsius);
@@ -116,14 +116,14 @@ int16_t adc2Human(uint16_t adc_value,bool correction, bool tempUnit) {
 	int16_t tempH = 0;
 	int16_t ambTemp;
 	ambTemp = readColdJunctionSensorTemp_x10(mode_Celsius) / 10;
-	if (adc_value >= currentTipData->calADC_At_300) {
-		tempH = map(adc_value, currentTipData->calADC_At_300, currentTipData->calADC_At_400, 300, 400);
+	if (adc_value >= currentTipData->calADC_At_350) {
+		tempH = map(adc_value, currentTipData->calADC_At_350, currentTipData->calADC_At_450, 350, 450);
 	}
-	else if(adc_value >= currentTipData->calADC_At_200){
-		tempH = map(adc_value, currentTipData->calADC_At_200, currentTipData->calADC_At_300, 200, 300);
+	else if(adc_value >= currentTipData->calADC_At_250){
+		tempH = map(adc_value, currentTipData->calADC_At_250, currentTipData->calADC_At_350, 250, 350);
 	}
 	else{
-		tempH = map(adc_value, 0, currentTipData->calADC_At_200, ambTemp, 200);
+		tempH = map(adc_value, 0, currentTipData->calADC_At_250, ambTemp, 250);
 	}
 	if(correction){ tempH+= ambTemp; }
 	if(tempUnit==mode_Farenheit){

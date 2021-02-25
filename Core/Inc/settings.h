@@ -16,17 +16,17 @@
 #define TipSize			10		// Number of tips for each profile
 #define TipCharSize		5		// String size for each tip name
 
-#define T12_Cal200		1300
-#define T12_Cal300		1900
-#define T12_Cal400		2500
+#define T12_Cal250		1400
+#define T12_Cal350		2050
+#define T12_Cal450		2700
 
-#define C210_Cal200		400
-#define C210_Cal300		600
-#define C210_Cal400		900
+#define C210_Cal250		400
+#define C210_Cal350		600
+#define C210_Cal450		900
 
-#define C245_Cal200		1000
-#define C245_Cal300		1500
-#define C245_Cal400		2000
+#define C245_Cal250		1000
+#define C245_Cal350		1500
+#define C245_Cal450		2000
 
 #define SWSTRING		"SW: r.aadaaa6"
 #define SETTINGS_VERSION 1											// Change this if you change the struct below to prevent people getting out of sync
@@ -108,9 +108,9 @@ typedef struct ironSettings_t{
 } ironSettings_t;
 
 typedef struct tipData {
-	uint16_t calADC_At_200;
-	uint16_t calADC_At_300;
-	uint16_t calADC_At_400;
+	uint16_t calADC_At_250;
+	uint16_t calADC_At_350;
+	uint16_t calADC_At_450;
 	char name[TipCharSize];
 	pid_values_t PID;
 }tipData;
