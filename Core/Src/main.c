@@ -130,7 +130,65 @@ int main(void)
 }
 
 
+/* USER CODE BEGIN 4 */
 
+// Called from SysTick IRQ every 1mS
+void Program_Handler(void) {
+	handle_buzzer();
+	RE_Process(&RE1_Data);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	/*
+
+	// This is no longer used, as checking the inputs in interrupt mode can't properly time button time until the key is released
+	// Now it's handled in ProgramTimer
+	// Code is left just in case
+
+		if((GPIO_Pin == ROT_ENC_BUTTON_Pin) || (GPIO_Pin == ROT_ENC_R_Pin) || (GPIO_Pin == ROT_ENC_L_Pin)) {
+		RE_Process(&RE1_Data);
+		if(systemSettings.settings.wakeOnButton){					// If system setting set  to wake on encoder activity
+			IronWake();
+		}
+	}*/
+	if(GPIO_Pin==WAKE_Pin){								// If handle moves
+		if(systemSettings.settings.WakeInputMode==wakeInputmode_stand){
+			if(WAKE_input()){
+				setModefromStand(mode_run);
+			}
+			else{
+				setModefromStand(mode_sleep);
+			}
+		}
+		else{
+			IronWake(source_wakeInput);
+		}
+	}
+}
+
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim){
+	if(_htim == Iron.Pwm_Timer){									// PWM output low
+		if(ADC_Status==ADC_InitTip){								// ADC ready?
+			ADC_Status = ADC_SamplingTip;							// Update status
+			__HAL_TIM_ENABLE(Iron.Delay_Timer);						// Enable Delay Timer and start counting
+																	// It will trigger the ADC when it overflows and disable by itself (One-pulse mode).
+		}
+	}
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
+	if(_htim == Iron.Delay_Timer){									// Delay Timer?
+		if(ADC_Status==ADC_SamplingTip){							// ADC ready?
+			__HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);	// Clear Delay Timer flag
+			if(HAL_ADC_Start_DMA(&ADC_DEVICE, (uint32_t*)Tip_measures, sizeof(Tip_measures)/ sizeof(uint16_t) )!=HAL_OK){	// Start ADC conversion
+				Error_Handler();
+			}
+		}
+		else{
+			Error_Handler();										// If ADC_Status!=ADC_SamplingTip, lose of ADC_Status control happened somewhere
+		}
+	}
+}
 /* USER CODE END 4 */
 
 /**
