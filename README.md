@@ -45,7 +45,7 @@ Video can be seen there: (Project in active development, the features will chang
 <a id="compatibility"></a>
 ## Compatibility
 
-The actual requirements are 16KB RAM and 64KB flash. Don't even try if your MCU has less than that.
+The actual requirements are 10KB RAM and 64KB flash. Don't even try if your MCU has less than that.
 
 The BOARDS folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.  
 
