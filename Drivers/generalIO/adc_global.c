@@ -194,10 +194,10 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 	// Global filter flag (setup.h)
 	if((systemSettings.Profile.filterMode ==filter_ema) || (systemSettings.Profile.filterMode ==filter_dema)){					// Advanced filtering enabled?
 
-		if(systemSettings.Profile.filterCoef>4){						// Limit coefficient
-			systemSettings.Profile.filterCoef=4;
+		if(systemSettings.Profile.filterFactor>4){						// Limit coefficient
+			systemSettings.Profile.filterFactor=4;
 		}
-		uint8_t shift = systemSettings.Profile.filterCoef;
+		uint8_t shift = systemSettings.Profile.filterFactor;
 		//factor=0.6
 		//EMA = factor* data + (1-factor) * EMA;
 

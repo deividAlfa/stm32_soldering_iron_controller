@@ -183,8 +183,8 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].calADC_At_250 = T12_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = T12_Cal350;			// These values are way lower, but better to be safe than sorry
 			systemSettings.Profile.tip[x].calADC_At_450 = T12_Cal450;			// User needs to calibrate its station
-			systemSettings.Profile.tip[x].PID.Kp = 0.0045;
-			systemSettings.Profile.tip[x].PID.Ki = 0.0030;
+			systemSettings.Profile.tip[x].PID.Kp = 0.0025;
+			systemSettings.Profile.tip[x].PID.Ki = 0.0042;
 			systemSettings.Profile.tip[x].PID.Kd = 0.0015;
 			systemSettings.Profile.tip[x].PID.min = 0;
 			systemSettings.Profile.tip[x].PID.max = 1;
@@ -251,8 +251,8 @@ void resetCurrentProfile(void){
 	systemSettings.Profile.UserSetTemperature = 320;
 	systemSettings.Profile.pwmPeriod=19999;
 	systemSettings.Profile.pwmDelay=1999;
-	systemSettings.Profile.filterCoef=1;
-	systemSettings.Profile.filterMode=filter_avg;
+	systemSettings.Profile.filterFactor=2;
+	systemSettings.Profile.filterMode=filter_ema;
 	systemSettings.Profile.PIDTime= (systemSettings.Profile.pwmPeriod+1)/100;
 	systemSettings.Profile.tempUnit=mode_Celsius;
 }

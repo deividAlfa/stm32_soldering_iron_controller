@@ -89,7 +89,7 @@ static comboBox_item_t comboitem_IRON_Impedance;
 static comboBox_item_t comboitem_IRON_PWMPeriod;
 static comboBox_item_t comboitem_IRON_ADCDelay;
 static comboBox_item_t comboitem_IRON_FilterMode;
-static comboBox_item_t comboitem_IRON_filterCoef;
+static comboBox_item_t comboitem_IRON_filterFactor;
 static comboBox_item_t comboitem_IRON_NoIronDelay;
 static comboBox_item_t comboitem_IRON_ADCLimit;
 static comboBox_item_t comboitem_IRON_Back;
@@ -101,7 +101,7 @@ static widget_t Widget_IRON_ADCLimit;
 static widget_t Widget_IRON_PWMPeriod;
 static widget_t Widget_IRON_ADCDelay;
 static widget_t Widget_IRON_FilterMode;
-static widget_t Widget_IRON_filterCoef;
+static widget_t Widget_IRON_filterFactor;
 static widget_t Widget_IRON_NoIronDelay;
 
 // EDIT TIPS SCREEN
@@ -383,19 +383,19 @@ static void * getFilterMode() {
 static void setFilterMode(uint16_t *val) {
 	systemSettings.Profile.filterMode = *val;
 	if(*val==filter_avg){
-		comboitem_IRON_filterCoef.enabled=0;
+		comboitem_IRON_filterFactor.enabled=0;
 	}
 	else{
-		comboitem_IRON_filterCoef.enabled=1;
+		comboitem_IRON_filterFactor.enabled=1;
 	}
 }
 
-static void * getFilterCoef() {
-	temp = systemSettings.Profile.filterCoef;
+static void * getfilterFactor() {
+	temp = systemSettings.Profile.filterFactor;
 	return &temp;
 }
-static void setFilterCoef(uint16_t *val) {
-	systemSettings.Profile.filterCoef = *val;
+static void setfilterFactor(uint16_t *val) {
+	systemSettings.Profile.filterFactor = *val;
 }
 
 
@@ -636,10 +636,10 @@ void PID_onEnter(screen_t *scr){
 void IRON_onEnter(screen_t *scr){
 	comboResetIndex(&comboWidget_IRON);
 	if(systemSettings.Profile.filterMode == filter_avg){
-		comboitem_IRON_filterCoef.enabled=0;
+		comboitem_IRON_filterFactor.enabled=0;
 	}
 	else{
-		comboitem_IRON_filterCoef.enabled=1;
+		comboitem_IRON_filterFactor.enabled=1;
 	}
 }
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -1119,14 +1119,14 @@ void settings_screen_setup(screen_t *scr) {
 	w->multiOptionWidget.numberOfOptions = 3;
 
 	//********[ Filter Coefficient Widget ]***********************************************************
-	w = &Widget_IRON_filterCoef;
+	w = &Widget_IRON_filterFactor;
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
 	dis->reservedChars=1;
-	dis->getData = &getFilterCoef;
+	dis->getData = &getfilterFactor;
 	w->editableWidget.big_step = 1;
 	w->editableWidget.step = 1;
-	w->editableWidget.setData = (void (*)(void *))&setFilterCoef;
+	w->editableWidget.setData = (void (*)(void *))&setfilterFactor;
 	w->editableWidget.max_value = 4;
 	w->editableWidget.min_value = 1;
 
@@ -1155,7 +1155,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_IRON_PWMPeriod,w, 	"PWM Time", 	&Widget_IRON_PWMPeriod);
 	comboAddOption(&comboitem_IRON_ADCDelay, w, 	"ADC Delay", 	&Widget_IRON_ADCDelay);
 	comboAddOption(&comboitem_IRON_FilterMode, w, 	"Filtering", 	&Widget_IRON_FilterMode);
-	comboAddOption(&comboitem_IRON_filterCoef, w, 	"Factor",		&Widget_IRON_filterCoef);
+	comboAddOption(&comboitem_IRON_filterFactor, w, 	"Factor",		&Widget_IRON_filterFactor);
 	comboAddOption(&comboitem_IRON_ADCLimit, w, 	"No iron",		&Widget_IRON_ADCLimit);
 	comboAddOption(&comboitem_IRON_NoIronDelay, w, 	"Detection",	&Widget_IRON_NoIronDelay);
 	comboAddScreen(&comboitem_IRON_Back, w, 		"BACK", 		screen_settingsmenu);

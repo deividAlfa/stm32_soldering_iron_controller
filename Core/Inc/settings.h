@@ -129,7 +129,7 @@ __attribute__ ((aligned (4))) typedef struct{
 	uint16_t pwmDelay;
 	uint16_t noIronValue;
 	uint8_t filterMode;
-	uint8_t filterCoef;
+	uint8_t filterFactor;
 	uint16_t PIDTime;
 }profile_t;
 
