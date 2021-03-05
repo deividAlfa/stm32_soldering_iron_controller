@@ -1,4 +1,4 @@
-# stm32_soldering_iron_controller
+# STM32 Soldering Iron Controller
 
 <!-- MarkdownTOC -->
 
