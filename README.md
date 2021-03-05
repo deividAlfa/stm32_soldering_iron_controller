@@ -185,6 +185,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
                 User Label: OLED_SCL<br>
                 No pull<br>
                 Speed: High<br>
+                
              * Oled DATA signal<br>
                 User Label: OLED_SDA<br>
                 No pull<br>
@@ -200,6 +201,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
                 User Label: OLED_SDA (Don't care actually)<br>
                 No pull<br>
                 Speed: High<br>
+                
         -  Parameter settings:
              * Mode: Half-Duplex master or master transmit only
              * NSS: Disabled
@@ -211,12 +213,14 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
              * CRC Calculation: Disabled
              * NSSP Mode: Disabled
              * NSSP SIgnal Type: Software
+             
         - DMA Settings:
             * SPIx_Tx
             * Direction: Memory to pheripheral
             * Piority: Low
             * DMA request mode: Normal
             * Data width: Byte in both
+            
         - NVIC Settings:
             * DMAx channel interrupt enabled.
             * SPIx global interrupt disabled
@@ -231,17 +235,20 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
                 User Label: OLED_SDA (Don't care actually)<br>
                 No pull<br>
                 Speed: High<br>
+                
         -  Parameter settings:
              * I2C Speed Mode: Fast mode or Fast-mode Plus (The fastest the better).<br>
                (Try lower speeds if it doen't work)<br>
              * I2C Clock Speed: 100KHz...1MHz
              * Slave features: Don't care.
+             
         - DMA Settings:
             * I2Cx_Tx
             * Direction: Memory to pheripheral
             * Piority: Low
             * DMA request mode: Normal
             * Data width: Byte in both
+            
         - NVIC Settings:
             * DMAx channel interrupt enabled.
             * I2Cx global interrupt disabled
@@ -252,6 +259,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * V Supply pin label: VINPUT
             * VRef pin label: VREF
             * Iron Temp pin label: IRON
+            
         - Parameter settings:
             * Select channels assigned to the used inputs
             * Clock prescaler: Asynchronous clock mode
@@ -290,6 +298,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * Pheripheral to memory
             * Mode: Circular
             * Data width: Half word on both.
+            
         - NVIC Settings:
             * DMAx channel interrupt enabled.
             * ADC and COMP*** interrupts disabled
