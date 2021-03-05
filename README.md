@@ -2,17 +2,17 @@
 
 <!-- MarkdownTOC -->
 
-* [Status](#status)
-* [Compatibility](#Compatibility)
-* [Warning](#warning)
-* [Backup First!](#backup-first)
-* [Setup instructions](#Setup_instructions)
-* [Working with board profiles](#boards)
-* [Building](#build)
-* [Creating a .ioc file from scratch](#Creating_ioc)
-* [Operations guide](Readme_files/Operation.md)
-* [Additional Documentation](#docs)
-* [Pending or non working features](#pending)
+* [Status](#status)<br>
+* [Compatibility](#Compatibility)<br>
+* [Warning](#warning)<br>
+* [Backup First!](#backup-first)<br>
+* [Setup instructions](#Setup_instructions)<br>
+* [Working with board profiles](#boards)<br>
+* [Building](#build)<br>
+* [Creating a .ioc file from scratch](#Creating_ioc)<br>
+* [Operations guide](Readme_files/Operation.md)<br>
+* [Additional Documentation](#docs)<br>
+* [Pending or non working features](#pending)<br>
 
 <!-- /MarkdownTOC -->
 
