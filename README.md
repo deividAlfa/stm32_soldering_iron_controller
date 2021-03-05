@@ -6,8 +6,7 @@
 * [Compatibility](#Compatibility)<br>
 * [Warning](#warning)<br>
 * [Backup First!](#backup-first)<br>
-* [Setup instructions](#Setup_instructions)<br>
-* [Working with board profiles](#boards)<br>
+* [Flashing the firmware](#flashing)<br>
 * [Building](#build)<br>
 * [Creating a .ioc file from scratch](#Creating_ioc)<br>
 * [Operations guide](Readme_files/Operation.md)<br>
@@ -76,22 +75,22 @@ There are some hacks / vulnerabilities that can be used to backup protected firm
 
 
 <a id="Setup_instructions"></a>
-## Setup instructions<br>
+## Flashing th firmware<br>
 Download the binary already compiled from the /BOARDS folder, flash it using stlink, and it would be done.<br>
 There's no support for custom bootloaders, and there won't be, as flash is almost full in 64KB devices.<br>
 Use one of these ST-LINK clones ($3 or less)<br>
-
-<a id="boards"></a>
-## Working with board profiles<br>
-If you use an existing project template and modify it, the changes must be reflected in /Core/Inc/board.h.<br>
-All the project code takes the data from there. The file it's pretty much self-explaining.<br>
-So, any changes you make in CubeMX, ex. use PWM timer6 intead timer2, or SPI1 instead SPI2...all that should be configured in their respective define.<br>
-As long as the GPIO names are called the same way, no further changes are needed.<br>
 
 
 <a id="build"></a>     
 ## Building
 
+#### Board profiles<br>
+If you use an existing project template and modify it, the changes must be reflected in /Core/Inc/board.h.<br>
+All the project code takes the data from there. The file it's pretty much self-explaining.<br>
+So, any changes you make in CubeMX, ex. use PWM timer6 intead timer2, or SPI1 instead SPI2...all that should be configured in their respective define.<br>
+As long as the GPIO names are called the same way, no further changes are needed.<br>
+
+#### Building the code<br>
 If you want to build your own, clone or download the source.<br>
 The source is stripped from ST own libraries and unnecesary stuff, only includes the very basic code owning to the project.<br>
 CubeMX will add the STM32 and CMSIS libraries automatically after a code generation.<br>
