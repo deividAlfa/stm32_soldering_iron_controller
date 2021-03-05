@@ -66,9 +66,9 @@ Buying a cheap high temperature meter is highly recommended!
 
 These boards can have pretty different readings and tolerances. It can even change a lot between T12 tips.
 
-So the factory calibration is set lower than real intentionally to avoid possible overheating problems.
+So the factory calibration is intentionally set lower than real, to avoid possible overheating problems.
 
-Once you set the firmware, go to calibration and set there the real temp meassured with the external probe.
+Once you set the firmware, go to calibration and set there the real temperature measured with the external probe.
 
 
 #### Hardware issues
