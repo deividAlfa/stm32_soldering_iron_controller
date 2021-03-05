@@ -134,9 +134,11 @@ Video of building steps:
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/8oeGVSSxudk/0.jpg)](https://www.youtube.com/watch?v=8oeGVSSxudk "Firmware build")<br>
 Keep in mind that in 64KB devices the flash is almost full and will not fit unless optimization is set to "Optimize for size".<br>
 To debug MCUs where the flash space is unsufficient to store a unoptimized build, you can selectively disable build optimizations.<br>
-A line of code can be found at the start of board.h: "__attribute__((optimize("O0")))"<br>
+A line of code can be found at the start of board.h:
 
-Copy that line before the function like this:<br>
+	__attribute__((optimize("O0")))
+
+Copy that line before the function like this:
 
 	 __attribute__((optimize("O0"))) void ThisFunctionWillNotBeOptimized(...)
 	 
