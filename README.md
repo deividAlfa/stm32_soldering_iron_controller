@@ -61,6 +61,7 @@ Once you set the firmware, go to calibration and set there the real temperature 
 Newer hardware is often inferior and can lead to bad temperature regulation issues, with low quality components such as:<br>
 * Bad Op-Amp<br>
 * Bad 3v3 Regulator<br>
+
 It is recommended to check and replace the problematic parts with better alternatives before proceeding.<br>
 This is especially true for many of the newer v2.1 boards and v3.x boards by KSGER.<br>
 
