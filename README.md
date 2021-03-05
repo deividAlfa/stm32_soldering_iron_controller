@@ -24,7 +24,7 @@ Video can be seen there: (Project in active development, the features will chang
 
 <a id="status"></a>
 ## Status<br>
-* Developed on STM32Cube IDE - download and use that for compiling.
+* Developed on STM32Cube IDE - download and use that for compiling.<br>
 * Basic configuration is easily done in CubeMx (Included in STM32Cube IDE).<br>
 * Already compiled bins in each board folder (Test at your own risk).<br>
 * Intended to serve as an unified codebase that's easier to share across different boards / hardware.<br>
@@ -37,7 +37,6 @@ Video can be seen there: (Project in active development, the features will chang
   	Boards where the display is not connected to dedicated hardware:<br>
   	- Software SPI<br>
   	- Software I2C<br>
-
 
 <a id="compatibility"></a>
 ## Compatibility
