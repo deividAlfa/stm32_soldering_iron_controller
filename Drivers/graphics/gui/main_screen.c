@@ -228,9 +228,12 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 		}
 	}
 
+	if(input!=Rotate_Nothing){
+		mainScr.idleTick=HAL_GetTick();
+	}
+
 	if(input==Click && (HAL_GetTick() - mainScr.enteredSleep) >500 ){		// Disable button wake for 500mS after manually entering sleep mode
 		IronWake(source_wakeButton);
-		mainScr.idleTick=HAL_GetTick();
 	}
 
 
@@ -366,7 +369,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 
 
-static uint8_t plotData[100];
+static uint16_t plotData[100];
 static uint8_t plotX;
 static uint32_t plotTime;
 bool plotDraw;
@@ -393,9 +396,9 @@ void main_screen_draw(screen_t *scr){
 
 		// scale 160-500C to 0-255
 		if (t<160) t = 160;
-		if (t>500) t = 499;
-		float tf = ((float)t-159.5)*(255.0/340.0); // round and scale
-		t = tf;
+		if (t>500) t = 500;		//499?
+		//float tf = ((float)t-159.5)*(255.0/340.0); // round and scale
+		//t = tf;
 
 		plotData[plotX] = t;
 		if(++plotX>99){
@@ -453,17 +456,6 @@ void main_screen_draw(screen_t *scr){
 				u8g2_DrawStr(&u8g2, xpos, ypos, "SLEEP");
 			}
 		}
-		/*
-		else if((mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_numeric) || mainScr.currentMode==main_setpoint){
-			u8g2_SetFont(&u8g2, u8g2_font_maintempUnit);
-			if(systemSettings.settings.tempUnit==mode_Celsius){
-				u8g2_DrawStr(&u8g2, 95, 35, "C");
-			}
-			else{
-				u8g2_DrawStr(&u8g2, 97, 35, "F");
-			}
-		}
-		*/
 	}
 
 	if(mainScr.ironStatus==status_running){
@@ -488,7 +480,7 @@ void main_screen_draw(screen_t *scr){
 			}
 
 			// plot is 16-56 V, 14-113 H ?
-			u8g2_DrawVLine(&u8g2, 11, 16, 40);						// left scale
+			u8g2_DrawVLine(&u8g2, 11, 16, 41);						// left scale
 
 			if (magnify) {											// graphing magnified
 				for(uint8_t y=16; y<57; y+=10){
@@ -501,8 +493,8 @@ void main_screen_draw(screen_t *scr){
 
 					// scale 0-255 to 160-500C
 					uint16_t plotV = plotData[pos];
-					float plotVf = ( (float)plotV * (340.0/255.0)) + 160;
-					plotV = plotVf;
+					//float plotVf = ( (float)plotV * (340.0/255.0)) + 160;		// This is a total waste of power, STM32F1 doesn't have FPU
+					//plotV = plotVf;
 
 					if (plotV < t-20) plotV = 0;
 					else if (plotV >= t+20) plotV = 40;
@@ -524,8 +516,8 @@ void main_screen_draw(screen_t *scr){
 
 					// scale 0-255 to 160-500C
 					uint16_t plotV = plotData[pos];
-					float plotVf = ( (float)plotV * (340.0/255.0)) + 160;
-					plotV = plotVf;
+					//float plotVf = ( (float)plotV * (340.0/255.0)) + 160;		// This is a total waste of power, STM32F1 doesn't have FPU
+					//plotV = plotVf;
 
 					if (plotV<180) plotV = 0;
 					else plotV = (plotV-180) >> 3; 					// divide by 8, (500-180)/8=40
