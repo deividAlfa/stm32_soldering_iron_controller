@@ -78,8 +78,7 @@ There are some hacks / vulnerabilities that can be used to backup protected firm
 ## Flashing the firmware<br>
 Download the binary already compiled from the /BOARDS folder, flash it using stlink, and it would be done.<br>
 There's no support for custom bootloaders, and there won't be, as flash is almost full in 64KB devices.<br>
-Use one of these ST-LINK clones ($3 or less).<br>
-Refer to the schematics for the SWD pinout<br>
+Use one of these ST-LINK clones ($3 or less), refer to the schematics for the SWD pinout.<br>
 
 
 <a id="build"></a>     
