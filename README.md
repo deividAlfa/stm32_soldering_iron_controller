@@ -58,13 +58,11 @@ These boards can have pretty different readings and tolerances. It can even chan
 So the factory calibration is intentionally set lower than real, to avoid possible overheating problems.<br>
 Once you set the firmware, go to calibration and set there the real temperature measured with the external probe.<br>
 #### Hardware issues<br>
-Newer hardware is often inferior! With bad low quality component(s) such as:<br>
-* Bad Op-Amp
-* Bad 3v3 Regulator
-Which can then result in bad performance / bad temperature regulation.<br>
-
-* It is recommended to check these above suspect components. And if necessary order better alternatives parts and replace them (before proceeding further).<br>
-* This is especially true for many of the newer v2.1 boards and v3.x boards by KSGER.<br>
+Newer hardware is often inferior and can lead to bad temperature regulation issues, with low quality components such as:<br>
+* Bad Op-Amp<br>
+* Bad 3v3 Regulator<br>
+It is recommended to check and replace the problematic parts with better alternatives before proceeding.<br>
+This is especially true for many of the newer v2.1 boards and v3.x boards by KSGER.<br>
 
 <a id="backup-first"></a>
 ## Backup First!<br>
