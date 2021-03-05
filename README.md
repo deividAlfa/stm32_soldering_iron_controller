@@ -50,8 +50,6 @@ These board profiles are being tested:<br>
 * KSGER v3.0 [STABLE]: Profile compatible with STM32F101/102/103 R8/RB. Use 101R8 profile.<br>
 
 
-
-
 <a id="warning"></a>
 ## Warning<br>
 #### Temperature accuracy
@@ -157,6 +155,8 @@ And then copy the board profile files overwriting any existing files.<br>
 ## Creating a .ioc file from scratch
 
 If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
+
+
     * MISC
         -  Wake signal from handle: GPIO EXTI*, User label: WAKE, No pull<br>
            GPIO config: Rising/falling edge interrupt mode. <br>
@@ -274,17 +274,17 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
               You must define the ADC channels in these lines:<br>
               
               
-                	#define ADC_VREF            ADC_CHANNEL_1                       //  CH1 = VREF
-                	#define ADC_NTC             ADC_CHANNEL_2                       //  CH2 = NTC
-                	#define ADC_VIN             ADC_CHANNEL_3                       //  CH3 = VIN
-                	#define ADC_TIP             ADC_CHANNEL_5                       //  CH5 = IRON TIP (Sampled independently)
+                #define ADC_VREF            ADC_CHANNEL_1                       //  CH1 = VREF
+                #define ADC_NTC             ADC_CHANNEL_2                       //  CH2 = NTC
+                #define ADC_VIN             ADC_CHANNEL_3                       //  CH3 = VIN
+                #define ADC_TIP             ADC_CHANNEL_5                       //  CH5 = IRON TIP (Sampled independently)
 				
               Also, as the secondary channels are samples together in sequence, they must be correctly ordered as follows:<br>
 			
-                	#define ADC_1st             VREF                                // ADC 1st used channel (CH1)
-                	#define ADC_2nd             NTC                                 // ADC 2nd used channel (CH2)
-                	#define ADC_3rd             VIN                                 // ADC 3rd used channel (CH3)
-                	#define ADC_AuxNum          3                                   // Number of secondary elements
+                #define ADC_1st             VREF                                // ADC 1st used channel (CH1)
+                #define ADC_2nd             NTC                                 // ADC 2nd used channel (CH2)
+                #define ADC_3rd             VIN                                 // ADC 3rd used channel (CH3)
+                #define ADC_AuxNum          3                                   // Number of secondary elements
 				
         - DMA settings:
             * Pheripheral to memory
