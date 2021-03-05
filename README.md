@@ -158,54 +158,54 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 
 * MISC
 
-        -  Wake signal from handle: GPIO EXTI*, User label: WAKE, No pull<br>
-           GPIO config: Rising/falling edge interrupt mode. <br>
-           Ensure that NVIC interrupt is enabled for it!<br>
+        -  Wake signal from handle: GPIO EXTI*, User label: WAKE, No pull
+           GPIO config: Rising/falling edge interrupt mode. 
+           Ensure that NVIC interrupt is enabled for it!
           
-        -  Buzzer signal: GPIO Output, User label: BUZZER,  No pull<br>
-        -  DMA stream mem2mem, Mode: Normal, Size: Word, increase only dest address.<br>
+        -  Buzzer signal: GPIO Output, User label: BUZZER,  No pull
+        -  DMA stream mem2mem, Mode: Normal, Size: Word, increase only dest address.
          
 * CRC
 
-        -  Enabled, default settings<br>
+        -  Enabled, default settings
         
 * ENCODER
 
-        -  Rotatory encoder right signal: GPIO INPUT, name: ROT_ENC_R<br>
-        -  Rotatory encoder left signal: GPIO INPUT, name: ROT_ENC_L<br>
-        -  Rotatory encoder button signal: GPIO INPUT,name: ROT_ENC_BUTTON<br>
-        -  GPIO config: All inputs no pull<br>
+        -  Rotatory encoder right signal: GPIO INPUT, name: ROT_ENC_R
+        -  Rotatory encoder left signal: GPIO INPUT, name: ROT_ENC_L
+        -  Rotatory encoder button signal: GPIO INPUT,name: ROT_ENC_BUTTON
+        -  GPIO config: All inputs no pull
         
 * OLED 
 
-        -  Oled CS signal: GPIO Output, name: OLED_CS<br>
-        -  Oled DC signal: GPIO Output, name: OLED_DC<br>
-        -  Oled RESET signal: GPIO Output, name: OLED_RST<br>
+        -  Oled CS signal: GPIO Output, name: OLED_CS
+        -  Oled DC signal: GPIO Output, name: OLED_DC
+        -  Oled RESET signal: GPIO Output, name: OLED_RST
     
-* Software SPI/I2C (If used)<br>
+* Software SPI/I2C (If used)
 
-        -  GPIO Settings:<br>
-             * Oled CLOCK signal<br>
-                User Label: OLED_SCL<br>
-                No pull<br>
-                Speed: High<br>
+        -  GPIO Settings:
+             * Oled CLOCK signal
+                User Label: OLED_SCL
+                No pull
+                Speed: High
                 
-             * Oled DATA signal<br>
-                User Label: OLED_SDA<br>
-                No pull<br>
-                Speed: High<br>
+             * Oled DATA signal
+                User Label: OLED_SDA
+                No pull
+                Speed: High
 
-* Hardware SPI (If used)<br>
+* Hardware SPI (If used)
 
-        -  GPIO Settings:<br>
-             * Oled SPI CLOCK signal<br>
-                User Label: OLED_SCL (Don't care actually)<br>
-                No pull<br>
-                Speed: High<br>
-             * Oled SPI MOSI signal<br>
-                User Label: OLED_SDA (Don't care actually)<br>
-                No pull<br>
-                Speed: High<br>
+        -  GPIO Settings:
+             * Oled SPI CLOCK signal
+                User Label: OLED_SCL (Don't care actually)
+                No pull
+                Speed: High
+             * Oled SPI MOSI signal
+                User Label: OLED_SDA (Don't care actually)
+                No pull
+                Speed: High
                 
         -  Parameter settings:
              * Mode: Half-Duplex master or master transmit only
@@ -234,17 +234,17 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 
          -  GPIO Settings:
              * Oled I2C CLOCK signal
-                User Label: OLED_SCL (Don't care actually)<br>
-                No pull<br>
-                Speed: High<br>
+                User Label: OLED_SCL (Don't care actually)
+                No pull
+                Speed: High
              * Oled I2C DATA signal
-                User Label: OLED_SDA (Don't care actually)<br>
-                No pull<br>
-                Speed: High<br>
+                User Label: OLED_SDA (Don't care actually)
+                No pull
+                Speed: High
                 
         -  Parameter settings:
-             * I2C Speed Mode: Fast mode or Fast-mode Plus (The fastest the better).<br>
-               (Try lower speeds if it doen't work)<br>
+             * I2C Speed Mode: Fast mode or Fast-mode Plus (The fastest the better).
+               (Try lower speeds if it doen't work)
              * I2C Clock Speed: 100KHz...1MHz
              * Slave features: Don't care.
              
@@ -284,9 +284,9 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * External trigger Conversion Edge: None
             * Watchdog disabled.
             
-            * IMPORTANT: Configure in board.h the order of the channels and set their labels accordingly!<br>
-              The ADC channel order goes from 0 to 15 (unless otherwise set in regular config), skipping the disabled channels.<br>
-              You must define the ADC channels in these lines:<br>
+            * IMPORTANT: Configure in board.h the order of the channels and set their labels accordingly!
+              The ADC channel order goes from 0 to 15 (unless otherwise set in regular config), skipping the disabled channels.
+              You must define the ADC channels in these lines:
               
               
                 #define ADC_VREF            ADC_CHANNEL_1                       //  CH1 = VREF
@@ -294,7 +294,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
                 #define ADC_VIN             ADC_CHANNEL_3                       //  CH3 = VIN
                 #define ADC_TIP             ADC_CHANNEL_5                       //  CH5 = IRON TIP (Sampled independently)
 				
-              Also, as the secondary channels are samples together in sequence, they must be correctly ordered as follows:<br>
+              Also, as the secondary channels are samples together in sequence, they must be correctly ordered as follows:
 			
                 #define ADC_1st             VREF                                // ADC 1st used channel (CH1)
                 #define ADC_2nd             NTC                                 // ADC 2nd used channel (CH2)
@@ -318,10 +318,10 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * Auto-reload preload: Enable
             * Master/Slave mode: Disable
             * Trigger event selection: Reset
-            * Prescaler: Don't care, adjusted within the program.<br>
-                         Consider that the routine is designed for the timer running at CPU speed. Some timers may take haf the clock speed, depending on the bus!<br>
-                         If the timer uses FCY/2, use #define DELAY_TIMER_HALFCLOCK in board.h!<br>
-                         Check the Clock config in CUBEMX!<br>
+            * Prescaler: Don't care, adjusted within the program.
+                         Consider that the routine is designed for the timer running at CPU speed. Some timers may take haf the clock speed, depending on the bus!
+                         If the timer uses FCY/2, use #define DELAY_TIMER_HALFCLOCK in board.h!
+                         Check the Clock config in CUBEMX!
             * Period: Don't care, it's adjusted within the program.
             * NVIC settings: General enabled.
               
@@ -337,14 +337,14 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             - Select channel assigned to the pin
             - Mode: PWM Generation. Select CHx(N), as assigned to PIN. Ensure to select "N" if the pin has it!
             - Prescaler: Don't care, it's adjusted within the program.
-                         Consider that the routine is designed for the timer running at CPU speed. Some timers may take haf the clock speed, depending on the bus!<br>
-                         If the timer uses FCY/2, use #define PWM_TIMER_HALFCLOCK in board.h!<br>
-                         Check the Clock config in CUBEMX!<br>
+                         Consider that the routine is designed for the timer running at CPU speed. Some timers may take haf the clock speed, depending on the bus!
+                         If the timer uses FCY/2, use #define PWM_TIMER_HALFCLOCK in board.h!
+                         Check the Clock config in CUBEMX!
             - Period: Don't care, it's adjusted within the program.
             - Pulse: Don't care, it's adjusted within the program.
-            - NVIC settings: Depending on the timer type, enable TIMx "Capture compare" if available, else use "Global interrupt".<br>
-              Consider that some timers will run at CPU speed while other may take a slower clock.<br>
-              Check the Clock config in CUBEMX!<br>       
+            - NVIC settings: Depending on the timer type, enable TIMx "Capture compare" if available, else use "Global interrupt".
+              Consider that some timers will run at CPU speed while other may take a slower clock.
+              Check the Clock config in CUBEMX!       
        
        
             
