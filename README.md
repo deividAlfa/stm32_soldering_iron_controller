@@ -157,6 +157,7 @@ And then copy the board profile files overwriting any existing files.<br>
 If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 
 * MISC
+
         -  Wake signal from handle: GPIO EXTI*, User label: WAKE, No pull<br>
            GPIO config: Rising/falling edge interrupt mode. <br>
            Ensure that NVIC interrupt is enabled for it!<br>
@@ -165,20 +166,24 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
         -  DMA stream mem2mem, Mode: Normal, Size: Word, increase only dest address.<br>
          
 * CRC
+
         -  Enabled, default settings<br>
         
 * ENCODER
+
         -  Rotatory encoder right signal: GPIO INPUT, name: ROT_ENC_R<br>
         -  Rotatory encoder left signal: GPIO INPUT, name: ROT_ENC_L<br>
         -  Rotatory encoder button signal: GPIO INPUT,name: ROT_ENC_BUTTON<br>
         -  GPIO config: All inputs no pull<br>
         
 * OLED 
+
         -  Oled CS signal: GPIO Output, name: OLED_CS<br>
         -  Oled DC signal: GPIO Output, name: OLED_DC<br>
         -  Oled RESET signal: GPIO Output, name: OLED_RST<br>
     
 * Software SPI/I2C (If used)<br>
+
         -  GPIO Settings:<br>
              * Oled CLOCK signal<br>
                 User Label: OLED_SCL<br>
@@ -191,6 +196,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
                 Speed: High<br>
 
 * Hardware SPI (If used)<br>
+
         -  GPIO Settings:<br>
              * Oled SPI CLOCK signal<br>
                 User Label: OLED_SCL (Don't care actually)<br>
@@ -225,6 +231,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * SPIx global interrupt disabled
             
 * Hardware I2C (If used)
+
          -  GPIO Settings:
              * Oled I2C CLOCK signal
                 User Label: OLED_SCL (Don't care actually)<br>
@@ -253,6 +260,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * I2Cx global interrupt disabled
             
 * ADC
+
        -   GPIO config:
             * NTC pin label: NTC
             * V Supply pin label: VINPUT
@@ -303,6 +311,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * ADC and COMP*** interrupts disabled
             
 * DELAY TIMER
+
         - Base timer: Take any.
             * Internal clock
             * Internal clock division: No division
@@ -318,6 +327,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
               
             
 * PWM
+
         - GPIO:
            * User label: PWM_OUTPUT (Don't care actually)
            * Mode: TIMxCHx(N) ("x" and "N" depends on the selected pin)
