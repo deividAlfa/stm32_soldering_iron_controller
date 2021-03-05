@@ -14,7 +14,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 static int32_t temp;
 static char *tipName[TipSize];
-enum mode{  main_irontemp=0, main_disabled, main_ironstatus,main_setpoint, main_tipselect, main_sleepwake, main_menu,  main_setMode};
+enum mode{  main_irontemp=0, main_disabled, main_ironstatus,main_setpoint, main_tipselect, /*main_sleepwake,*/ main_menu,  main_setMode};
 enum{ status_running, status_sleep, status_noiron };
 enum { temp_numeric, temp_graph };
 const uint8_t pulseXBM[] ={
@@ -40,7 +40,7 @@ static widget_t Widget_Vsupply;
 #endif
 static widget_t Widget_IronTemp;
 static widget_t Widget_TipSelect;
-static widget_t Widget_SleepWake;
+//static widget_t Widget_SleepWake;
 static widget_t Widget_SetPoint;
 
 
@@ -60,6 +60,7 @@ static struct{
 	#endif
 	uint32_t drawTick;
 	uint32_t idleTick;
+	uint32_t enteredSleep;
 	bool idle;
 	bool ActivityOn;
 
@@ -186,7 +187,7 @@ static void setMainScrTempUnit(void) {
 static void main_screen_init(screen_t *scr) {
 	default_init(scr);
 	Widget_TipSelect.multiOptionWidget.numberOfOptions = systemSettings.Profile.currentNumberOfTips;
-	Widget_SleepWake.multiOptionWidget.numberOfOptions = systemSettings.Profile.currentNumberOfTips; // still tips for now
+	//Widget_SleepWake.multiOptionWidget.numberOfOptions = systemSettings.Profile.currentNumberOfTips; // still tips for now
 	Widget_SetPoint.editableWidget.step = systemSettings.settings.tempStep;
 	Widget_SetPoint.editableWidget.big_step = systemSettings.settings.tempStep;
 	setMainScrTempUnit();
@@ -227,7 +228,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 		}
 	}
 
-	if(input!=Rotate_Nothing){
+	if(input==Click && (HAL_GetTick() - mainScr.enteredSleep) >500 ){		// Disable button wake for 500mS after manually entering sleep mode
 		IronWake(source_wakeButton);
 		mainScr.idleTick=HAL_GetTick();
 	}
@@ -248,8 +249,10 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 				mainScr.currentMode=main_setMode;
 			}
 			else if((input==Rotate_Decrement_while_click)){
-				mainScr.setMode=main_sleepwake;
-				mainScr.currentMode=main_setMode;
+				//mainScr.setMode=main_sleepwake;
+				//mainScr.currentMode=main_setMode;
+				mainScr.enteredSleep = HAL_GetTick();
+				setCurrentMode(mode_sleep,forceMode);
 			}
 			else if((input==Rotate_Increment)||(input==Rotate_Decrement)){
 				mainScr.setMode=main_setpoint;
@@ -275,7 +278,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 				setContrast(1);
 			}
 			if(input!=Rotate_Nothing){
-				//write_cmd(0x33);// Set Boost voltage to max c
+				//write_cmd(0x33);// Set Boost voltage to max
 				setContrast(systemSettings.settings.contrast);
 			}
 			if((input==LongClick)){
@@ -297,7 +300,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			break;
 		case main_setpoint:
 		case main_tipselect:
-		case main_sleepwake:
+		//case main_sleepwake:
+
 			switch((uint8_t)input){
 				case LongClick:
 					return -1;
@@ -346,9 +350,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 		case main_tipselect:
 			setMainWidget(&Widget_TipSelect);
 			break;
-		case main_sleepwake:
-			setMainWidget(&Widget_SleepWake);
-			break;
+		//case main_sleepwake:
+		//	setMainWidget(&Widget_SleepWake);
+		//	break;
 		default:
 			break;
 		}
@@ -638,7 +642,7 @@ void main_screen_setup(screen_t *scr) {
 	w->multiOptionWidget.options = tipName;
 	w->enabled=0;
 	w->frameType=frame_disabled;
-
+/*
 	// Sleep/wake
 	w=&Widget_SleepWake;							// still tips for now
 	screen_addWidget(w,scr);
@@ -658,7 +662,7 @@ void main_screen_setup(screen_t *scr) {
 	w->multiOptionWidget.options = tipName;
 	w->enabled=0;
 	w->frameType=frame_disabled;
-
+*/
 
 	setMainWidget(&Widget_IronTemp);
 	u8g2_SetFont(&u8g2,u8g2_font_main_menu);

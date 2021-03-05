@@ -123,7 +123,7 @@ void handleIron(void) {
 
 	// Controls inactivity timer and enters low power modes
 	if(Iron.CurrentMode==mode_run) {
-		if((Iron.calibrating==calibration_Off )&& (systemSettings.Profile.sleepTimeout>0) && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.Profile.sleepTimeout*60000) ) {
+		if((Iron.calibrating==calibration_Off ) && (systemSettings.Profile.sleepTimeout>0) && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.Profile.sleepTimeout*60000) ) {
 			setCurrentMode(mode_sleep,forceMode);
 			buzzer_long_beep();
 		}
