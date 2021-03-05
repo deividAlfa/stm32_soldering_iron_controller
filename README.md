@@ -57,7 +57,7 @@ These boards can have pretty different readings and tolerances. It can even chan
 So the factory calibration is intentionally set lower than real, to avoid possible overheating problems.<br>
 Once you set the firmware, go to calibration and set there the real temperature measured with the external probe.<br>
 #### Hardware issues<br>
-Newer hardware is often inferior and can lead to bad temperature regulation issues, with low quality components such as:<br>
+Newer hardware is often inferior, causing temperature regulation issues, with low quality components such as:<br>
 * Bad Op-Amp<br>
 * Bad 3v3 Regulator<br>
 
