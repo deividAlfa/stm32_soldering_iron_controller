@@ -387,19 +387,11 @@ void main_screen_draw(screen_t *scr){
 			t = TempConversion(t, mode_Celsius, 0);
 		}
 
-		// here we encode tip temperatures from 180-500C
-		// to save RAM, the extreme highs and lows overlap
-		// in their encoding. We'll later interpret the values
-		// based on the set temperature.
-		//				set <330			set >=330
-		//            	range 160-415		range 245-500
-		// temperature	160-201 202-329		330-457 458-500
-		// as encoded	214-255 000-127 	128-255 000-042
-		if (t < 160) 		t=214; // under range
-		else if (t < 202) 	t+=54;
-		else if (t < 458)	t-=202;
-		else if (t <= 500)	t-=458;
-		else				t=42;  // over range
+		// scale 160-500C to 0-255
+		if (t<160) t = 160;
+		if (t>500) t = 499;
+		float tf = ((float)t-159.5)*(255.0/340.0); // round and scale
+		t = tf;
 
 		plotData[plotX] = t;
 		if(++plotX>99){
@@ -503,17 +495,10 @@ void main_screen_draw(screen_t *scr){
 					uint8_t pos=plotX+x;
 					if(pos>99) pos-=100;
 
-					// here we unscramble the temperatures, which
-					// were encoded with overlapping values
-					// we base it on the current set temperature
+					// scale 0-255 to 160-500C
 					uint16_t plotV = plotData[pos];
-					if (t < 330) {
-					  if (plotV >= 214) plotV-=54;
-					  else				plotV+=202;
-					} else {
-					  if (plotV <= 42) 	plotV+=458;
-					  else				plotV+=202;
-					}
+					float plotVf = ( (float)plotV * (340.0/255.0)) + 160;
+					plotV = plotVf;
 
 					if (plotV < t-20) plotV = 0;
 					else if (plotV >= t+20) plotV = 40;
@@ -533,17 +518,11 @@ void main_screen_draw(screen_t *scr){
 					uint8_t pos=plotX+x;
 					if(pos>99) pos-=100;
 
-					// here we unscramble the temperatures, which
-					// were encoded with overlapping values
-					// we base it on the current set temperature
+					// scale 0-255 to 160-500C
 					uint16_t plotV = plotData[pos];
-					if (t < 330) {
-					  if (plotV >= 214) plotV-=54;
-					  else				plotV+=202;
-					} else {
-					  if (plotV <= 42) 	plotV+=458;
-					  else				plotV+=202;
-					}
+					float plotVf = ( (float)plotV * (340.0/255.0)) + 160;
+					plotV = plotVf;
+
 					if (plotV<180) plotV = 0;
 					else plotV = (plotV-180) >> 3; 					// divide by 8, (500-180)/8=40
 					u8g2_DrawVLine(&u8g2, x+13, 56-plotV, plotV);	// data points
