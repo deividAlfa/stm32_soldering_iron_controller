@@ -81,6 +81,17 @@ Download the binary already compiled from the /BOARDS folder, flash it using stl
 There's no support for custom bootloaders, and there won't be, as flash is almost full in 64KB devices.<br>
 Use one of these ST-LINK clones ($3 or less)<br>
 
+<a id="boards"></a>
+## Working with board profiles<br>
+If you use an existing project template and modify it, the changes must be reflected in /Core/Inc/board.h.<br>
+All the project code takes the data from there. The file it's pretty much self-explaining.<br>
+So, any changes you make in CubeMX, ex. use PWM timer6 intead timer2, or SPI1 instead SPI2...all that should be configured in their respective define.<br>
+As long as the GPIO names are called the same way, no further changes are needed.<br>
+
+
+<a id="build"></a>     
+## Building
+
 If you want to build your own, clone or download the source.<br>
 The source is stripped from ST own libraries and unnecesary stuff, only includes the very basic code owning to the project.<br>
 CubeMX will add the STM32 and CMSIS libraries automatically after a code generation.<br>
@@ -106,22 +117,8 @@ Ensure these are present:<br>
     	/Drivers/CMSIS/Include
     	
 (STM32Fxxx matches your current mcu family, ex. STM32F0xx, STM32F1xx)
-    	
 ![Alt text](/Readme_files/Includes.jpg?raw=true "Title")
 
-
-
-
-<a id="boards"></a>
-## Working with board profiles<br>
-If you use an existing project template and modify it, the changes must be reflected in /Core/Inc/board.h.<br>
-All the project code takes the data from there. The file it's pretty much self-explaining.<br>
-So, any changes you make in CubeMX, ex. use PWM timer6 intead timer2, or SPI1 instead SPI2...all that should be configured in their respective define.<br>
-As long as the GPIO names are called the same way, no further changes are needed.<br>
-
-
-<a id="build"></a>     
-## Building
 
 Click in the right arrow of the build button (Hammer icon), select Release, then click on the build button and should build right away.<br>
 ![Alt text](/Readme_files/release.jpg?raw=true "Title")
