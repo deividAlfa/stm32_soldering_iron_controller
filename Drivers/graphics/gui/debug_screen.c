@@ -31,9 +31,9 @@ static widget_t Debug_PID_D;
 static widget_t Debug_PID_Err;
 static widget_t Debug_PID_Out;
 static widget_t Debug_SetPoint_edit;
-static widget_t Debug_Cal200_edit;
-static widget_t Debug_Cal300_edit;
-static widget_t Debug_Cal400_edit;
+static widget_t Debug_Cal250_edit;
+static widget_t Debug_Cal350_edit;
+static widget_t Debug_Cal450_edit;
 static widget_t Widget_Power;
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug screen widgets functions
@@ -61,26 +61,26 @@ static void setDebugTemperature(uint16_t *val) {
 	resetPID();
 	setDebugTemp(debugTemperature);
 }
-static void * getCalcAt200() {
-	temp = getCurrentTip()->calADC_At_200;
+static void * getCalcAt250() {
+	temp = getCurrentTip()->calADC_At_250;
 	return &temp;
 }
-static void setCalcAt200(uint16_t *val) {
-	getCurrentTip()->calADC_At_200 = *val;
+static void setCalcAt250(uint16_t *val) {
+	getCurrentTip()->calADC_At_250 = *val;
 }
-static void * getCalcAt300() {
-	temp = getCurrentTip()->calADC_At_300;
+static void * getCalcAt350() {
+	temp = getCurrentTip()->calADC_At_350;
 	return &temp;
 }
-static void setCalcAt300(uint16_t *val) {
-	getCurrentTip()->calADC_At_300 = *val;
+static void setCalcAt350(uint16_t *val) {
+	getCurrentTip()->calADC_At_350 = *val;
 }
-static void * getCalcAt400() {
-	temp = getCurrentTip()->calADC_At_400;
+static void * getCalcAt450() {
+	temp = getCurrentTip()->calADC_At_450;
 	return &temp;
 }
-static void setCalcAt400(uint16_t *val) {
-	getCurrentTip()->calADC_At_400 = *val;
+static void setCalcAt450(uint16_t *val) {
+	getCurrentTip()->calADC_At_450 = *val;
 }
 
 static void * debug_screen_getP() {
@@ -144,8 +144,7 @@ static void debug2_onEnter(screen_t *scr) {
 	u8g2_SetFont(&u8g2,default_font );
 	u8g2_SetDrawColor(&u8g2, WHITE);
 	u8g2_DrawStr(&u8g2,0,0,"ADC:       Raw:");//12
-	u8g2_DrawStr(&u8g2,4,20,"SetP C200 C300 C400");//12
-	u8g2_DrawStr(&u8g2,0,55,SYSTEM_VERSION);//12
+	u8g2_DrawStr(&u8g2,4,20,"SetP C250 C350 C450");//12
 }
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug screen setup
@@ -311,7 +310,7 @@ void debug2_screen_setup(screen_t *scr) {
 	
 
 	// Cal at 200
-	w = &Debug_Cal200_edit;
+	w = &Debug_Cal250_edit;
 	screen_addWidget(w, scr);
 	static char c200[5];
 	widgetDefaultsInit(w, widget_editable);
@@ -320,16 +319,16 @@ void debug2_screen_setup(screen_t *scr) {
 	dis->reservedChars=4;
 	w->posX = 34;
 	w->posY = 33;
-	dis->getData = &getCalcAt200;
+	dis->getData = &getCalcAt250;
 	w->editableWidget.big_step = 100;
 	w->editableWidget.step = 20;
 	w->editableWidget.max_value = 4095;
 	w->editableWidget.selectable.tab = 1;
-	w->editableWidget.setData = (void (*)(void *))&setCalcAt200;
+	w->editableWidget.setData = (void (*)(void *))&setCalcAt250;
 	
 
 	// Cal at 300
-	w = &Debug_Cal300_edit;
+	w = &Debug_Cal350_edit;
 	screen_addWidget(w, scr);
 	static char c300[5];
 	widgetDefaultsInit(w, widget_editable);
@@ -338,16 +337,16 @@ void debug2_screen_setup(screen_t *scr) {
 	dis->reservedChars=4;
 	w->posX = 64;
 	w->posY = 33;
-	dis->getData = &getCalcAt300;
+	dis->getData = &getCalcAt350;
 	w->editableWidget.big_step = 100;
 	w->editableWidget.step = 20;
 	w->editableWidget.max_value = 4095;
 	w->editableWidget.selectable.tab = 2;
-	w->editableWidget.setData = (void (*)(void *))&setCalcAt300;
+	w->editableWidget.setData = (void (*)(void *))&setCalcAt350;
 	
 
 	// Cal at 400
-	w = &Debug_Cal400_edit;
+	w = &Debug_Cal450_edit;
 	screen_addWidget(w, scr);
 	static char c400[5];
 	widgetDefaultsInit(w, widget_editable);
@@ -356,12 +355,12 @@ void debug2_screen_setup(screen_t *scr) {
 	dis->reservedChars=4;
 	w->posX = 94;
 	w->posY = 33;
-	dis->getData = &getCalcAt400;
+	dis->getData = &getCalcAt450;
 	w->editableWidget.big_step = 100;
 	w->editableWidget.step = 20;
 	w->editableWidget.max_value = 4095;
 	w->editableWidget.selectable.tab = 3;
-	w->editableWidget.setData = (void (*)(void *))&setCalcAt400;
+	w->editableWidget.setData = (void (*)(void *))&setCalcAt450;
 	
 }
 
