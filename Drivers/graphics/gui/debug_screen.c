@@ -251,7 +251,7 @@ void debug_screen_setup(screen_t *scr) {
 	dis->reservedChars=6;
 	w->posX = 87;
 	w->posY = 50;
-	w->width = 40;
+	w->width = 32;
 	w->displayWidget.getData = &debug_screen_getOutput;
 	w->textAlign = align_right;
 
@@ -264,6 +264,7 @@ void debug_screen_setup(screen_t *scr) {
 	dis->reservedChars=4;
 	w->posX = 12;
 	w->posY = 50;
+	w->width = 40;
 	w->displayWidget.getData = &debug_screen_getIronPower;
 	w->textAlign = align_right;
 }
@@ -288,6 +289,7 @@ void debug2_screen_setup(screen_t *scr) {
 	dis->reservedChars=4;
 	w->posX = 92;
 	w->posY = 50;
+	w->width = 32;
 	w->displayWidget.getData = &debug_screen_getIronPower;
 	w->textAlign = align_right;
 
@@ -326,7 +328,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->width = 40;
 	dis->getData = &getDebugTemperature;
 	w->editableWidget.big_step = 200;
-	w->editableWidget.step = 50;
+	w->editableWidget.step = 20;
 	w->editableWidget.max_value = 4095;
 	w->editableWidget.selectable.tab = 0;
 	w->editableWidget.setData = (void (*)(void *))&setDebugTemperature;
@@ -342,7 +344,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->posY = 16;
 	w->width = 40;
 	dis->getData = &getCalcAt250;
-	w->editableWidget.big_step = 100;
+	w->editableWidget.big_step = 200;
 	w->editableWidget.step = 20;
 	w->editableWidget.max_value = 4095;
 	w->editableWidget.selectable.tab = 1;
@@ -359,7 +361,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->posY = 32;
 	w->width = 40;
 	dis->getData = &getCalcAt350;
-	w->editableWidget.big_step = 100;
+	w->editableWidget.big_step = 200;
 	w->editableWidget.step = 20;
 	w->editableWidget.max_value = 4095;
 	w->editableWidget.selectable.tab = 2;
@@ -376,7 +378,7 @@ void debug2_screen_setup(screen_t *scr) {
 	w->posY = 48;
 	w->width=40;
 	dis->getData = &getCalcAt450;
-	w->editableWidget.big_step = 100;
+	w->editableWidget.big_step = 200;
 	w->editableWidget.step = 20;
 	w->editableWidget.max_value = 4095;
 	w->editableWidget.selectable.tab = 3;
