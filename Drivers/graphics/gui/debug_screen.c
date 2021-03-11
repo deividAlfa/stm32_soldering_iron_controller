@@ -131,7 +131,7 @@ void debug_onEnter(screen_t *scr){
 	u8g2_DrawStr(&u8g2,65,0,"ADC");
 	u8g2_DrawStr(&u8g2,65,16,"RAW");
 	u8g2_DrawStr(&u8g2,65,33,"ERR");
-	u8g2_DrawStr(&u8g2,60,50,"OUT");
+	u8g2_DrawStr(&u8g2,60,50,"PWM");
 
 	u8g2_DrawStr(&u8g2,0,0,"P");
 	u8g2_DrawStr(&u8g2,0,16,"I");
