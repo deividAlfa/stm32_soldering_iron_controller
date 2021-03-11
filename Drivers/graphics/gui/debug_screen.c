@@ -14,8 +14,8 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
-int16_t temp;
-uint16_t debugTemperature = 0;
+int32_t temp;
+int32_t debugTemperature = 0;
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ static void * debug_screen_getOutput() {
 //-------------------------------------------------------------------------------------------------------------------------------
 int debug_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	if(input==LongClick){
-		return screen_debug2;
+                                              		return screen_debug2;
 	}
 	return (default_screenProcessInput(scr, input, state));
 }
@@ -197,7 +197,7 @@ void debug_screen_setup(screen_t *scr) {
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_display);
 	dis=extractDisplayPartFromWidget(w);
-	dis->reservedChars=8;
+	dis->reservedChars=6;
 	w->posX = 12;
 	w->posY = 0;
 	w->displayWidget.getData = &debug_screen_getP;
@@ -210,7 +210,7 @@ void debug_screen_setup(screen_t *scr) {
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_display);
 	dis=extractDisplayPartFromWidget(w);
-	dis->reservedChars=8;
+	dis->reservedChars=6;
 	w->posX = 12;
 	w->posY = 16;
 	w->displayWidget.getData = &debug_screen_getI;
@@ -222,7 +222,7 @@ void debug_screen_setup(screen_t *scr) {
 	screen_addWidget(w, scr);
 	widgetDefaultsInit(w, widget_display);
 	dis=extractDisplayPartFromWidget(w);
-	dis->reservedChars=8;
+	dis->reservedChars=6;
 	w->posX = 12;
 	w->posY = 33;
 	w->displayWidget.getData = &debug_screen_getD;
