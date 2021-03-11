@@ -189,7 +189,7 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].PID.min = 0;
 			systemSettings.Profile.tip[x].PID.max = 1;
 			systemSettings.Profile.tip[x].PID.maxI = 200;
-			systemSettings.Profile.tip[x].PID.minI = -50;
+			systemSettings.Profile.tip[x].PID.minI = 0;
 		}
 		systemSettings.Profile.currentNumberOfTips= 1;
 		systemSettings.Profile.currentTip = 0;
@@ -210,7 +210,7 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].PID.min = 0;
 			systemSettings.Profile.tip[x].PID.max = 1;
 			systemSettings.Profile.tip[x].PID.maxI = 200;
-			systemSettings.Profile.tip[x].PID.minI = -50;
+			systemSettings.Profile.tip[x].PID.minI = 0;
 		}
 		systemSettings.Profile.currentNumberOfTips = 1;
 		systemSettings.Profile.currentTip = 0;
@@ -231,7 +231,7 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].PID.min = 0;
 			systemSettings.Profile.tip[x].PID.max = 1;
 			systemSettings.Profile.tip[x].PID.maxI = 200;
-			systemSettings.Profile.tip[x].PID.minI = -50;
+			systemSettings.Profile.tip[x].PID.minI = 0;
 		}
 		systemSettings.Profile.currentNumberOfTips = 1;
 		systemSettings.Profile.currentTip = 0;
