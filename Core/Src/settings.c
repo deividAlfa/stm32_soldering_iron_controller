@@ -37,9 +37,10 @@ void saveSettings(bool wipeAllProfileData) {
 
 	if(!wipeAllProfileData){																				// If wipe all tips is not set
 		if(systemSettings.settings.currentProfile!=profile_None){											// If current tip is initialized
-			if( 	(systemSettings.settings.currentProfile==profile_T12)	||								// Check valid Profile
+			if( 	((systemSettings.settings.currentProfile==profile_T12)	||								// Check valid Profile
 					(systemSettings.settings.currentProfile==profile_C210)	||
-					(systemSettings.settings.currentProfile==profile_C245)	){
+					(systemSettings.settings.currentProfile==profile_C245))
+					&& (systemSettings.Profile.ID = systemSettings.settings.currentProfile ) 		){		// Ensure profile ID is correct
 
 				systemSettings.Profile.initialized=initialized;																		// Reset flag
 				systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);										// Compute checksum
@@ -179,6 +180,7 @@ void resetCurrentProfile(void){
 																							// TODO this is not tested with the profiles update!
 #endif
 	if(systemSettings.settings.currentProfile==profile_T12){
+		systemSettings.Profile.ID = profile_T12;
 		for(uint8_t x = 0; x < TipSize; x++) {
 			systemSettings.Profile.tip[x].calADC_At_250 = T12_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = T12_Cal350;			// These values are way lower, but better to be safe than sorry
@@ -200,6 +202,7 @@ void resetCurrentProfile(void){
 	}
 
 	else if(systemSettings.settings.currentProfile==profile_C245){
+		systemSettings.Profile.ID = profile_C245;
 		for(uint8_t x = 0; x < TipSize; x++) {
 			systemSettings.Profile.tip[x].calADC_At_250 = C245_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = C245_Cal350;
@@ -221,6 +224,7 @@ void resetCurrentProfile(void){
 	}
 
 	else if(systemSettings.settings.currentProfile==profile_C210){
+		systemSettings.Profile.ID = profile_C210;
 		for(uint8_t x = 0; x < TipSize; x++) {
 			systemSettings.Profile.tip[x].calADC_At_250 = C210_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = C210_Cal350;
@@ -271,8 +275,8 @@ void loadProfile(uint8_t profile){
 			resetCurrentProfile();														// Load defaults if not
 			systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);	// Compute checksum
 		}
-
-		if(systemSettings.ProfileChecksum != ChecksumProfile(&systemSettings.Profile)){	// Calculate data checksum and compare with stored checksum
+		// Calculate data checksum and compare with stored checksum, also ensure the stored ID is the same as the requested profile
+		if( (profile!=systemSettings.Profile.ID) || (systemSettings.ProfileChecksum != ChecksumProfile(&systemSettings.Profile)) ){
 			ProfileChkErr();															// Checksum mismatch, reset current tip data
 		}
 		setSetTemperature(systemSettings.Profile.UserSetTemperature);					// Load user set temperature

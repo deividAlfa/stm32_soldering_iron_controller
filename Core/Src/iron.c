@@ -74,7 +74,11 @@ void handleIron(void) {
 
 	// Enter failure state if profile is not defined
 	if(!Iron.Error.failState){
-		if((systemSettings.settings.currentProfile!=profile_T12)&&(systemSettings.settings.currentProfile!=profile_C245)&&(systemSettings.settings.currentProfile!=profile_C210)){
+		// Ensure profile ID is the same as the system profile, and it's a known value
+		if( (systemSettings.Profile.ID != systemSettings.settings.currentProfile) ||	\
+					(		(systemSettings.settings.currentProfile!=profile_T12) &&	\
+							(systemSettings.settings.currentProfile!=profile_C245) &&	\
+							(systemSettings.settings.currentProfile!=profile_C210))){
 			SetFailState(setError);
 		}
 	}
