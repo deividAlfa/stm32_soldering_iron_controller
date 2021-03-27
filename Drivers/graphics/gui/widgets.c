@@ -480,6 +480,7 @@ void default_widgetDraw(widget_t *w) {
 	if(refresh){
 		if(dis && dis->type==field_int32){
 			int32_t val_ui = *(int32_t*)dis->getData();
+			if(dis->number_of_dec>10){ dis->number_of_dec = 10; }	// Put some limits, otherwise the compiler will get anxiety
 			if(val_ui<0){
 				snprintf(w->displayString, dis->reservedChars+1, "%0*ld", dis->number_of_dec+2, (int32_t)val_ui);		// Convert value into string
 			}
