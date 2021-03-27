@@ -40,7 +40,7 @@ void saveSettings(bool wipeAllProfileData) {
 			if( 	((systemSettings.settings.currentProfile==profile_T12)	||								// Check valid Profile
 					(systemSettings.settings.currentProfile==profile_C210)	||
 					(systemSettings.settings.currentProfile==profile_C245))
-					&& (systemSettings.Profile.ID = systemSettings.settings.currentProfile ) 		){		// Ensure profile ID is correct
+					&& (systemSettings.Profile.ID == systemSettings.settings.currentProfile ) 		){		// Ensure profile ID is correct
 
 				systemSettings.Profile.initialized=initialized;																		// Reset flag
 				systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);										// Compute checksum
