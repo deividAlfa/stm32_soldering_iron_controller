@@ -90,7 +90,7 @@ static comboBox_item_t comboitem_IRON_PWMPeriod;
 static comboBox_item_t comboitem_IRON_ADCDelay;
 static comboBox_item_t comboitem_IRON_FilterMode;
 static comboBox_item_t comboitem_IRON_filterFactor;
-static comboBox_item_t comboitem_IRON_NoIronDelay;
+static comboBox_item_t comboitem_IRON_errorDelay;
 static comboBox_item_t comboitem_IRON_ADCLimit;
 static comboBox_item_t comboitem_IRON_Back;
 
@@ -102,7 +102,7 @@ static widget_t Widget_IRON_PWMPeriod;
 static widget_t Widget_IRON_ADCDelay;
 static widget_t Widget_IRON_FilterMode;
 static widget_t Widget_IRON_filterFactor;
-static widget_t Widget_IRON_NoIronDelay;
+static widget_t Widget_IRON_errorDelay;
 
 // EDIT TIPS SCREEN
 static widget_t comboWidget_IRONTIPS;
@@ -346,12 +346,12 @@ static void setSavDelay(uint16_t *val) {
 	systemSettings.settings.saveSettingsDelay = *val;
 }
 
-static void * getNoIronDelay() {
-	temp = systemSettings.settings.noIronDelay;
+static void * geterrorDelay() {
+	temp = systemSettings.settings.errorDelay;
 	return &temp;
 }
-static void setNoIronDelay(uint16_t *val) {
-	systemSettings.settings.noIronDelay = *val;
+static void seterrorDelay(uint16_t *val) {
+	systemSettings.settings.errorDelay = *val;
 }
 
 static void * getNoIronADC() {
@@ -1132,15 +1132,15 @@ void settings_screen_setup(screen_t *scr) {
 
 	//********[ No Iron Delay Widget ]***********************************************************
 	//
-	w = &Widget_IRON_NoIronDelay;
+	w = &Widget_IRON_errorDelay;
 	widgetDefaultsInit(w, widget_editable);
 	dis=extractDisplayPartFromWidget(w);
 	w->endString="mS";
 	dis->reservedChars=5;
-	dis->getData = &getNoIronDelay;
+	dis->getData = &geterrorDelay;
 	w->editableWidget.big_step = 100;
 	w->editableWidget.step = 50;
-	w->editableWidget.setData = (void (*)(void *))&setNoIronDelay;
+	w->editableWidget.setData = (void (*)(void *))&seterrorDelay;
 	w->editableWidget.max_value = 950;
 	w->editableWidget.min_value = 100;
 
@@ -1157,7 +1157,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_IRON_FilterMode, w, 	"Filtering", 	&Widget_IRON_FilterMode);
 	comboAddOption(&comboitem_IRON_filterFactor, w, 	"Factor",		&Widget_IRON_filterFactor);
 	comboAddOption(&comboitem_IRON_ADCLimit, w, 	"No iron",		&Widget_IRON_ADCLimit);
-	comboAddOption(&comboitem_IRON_NoIronDelay, w, 	"Detection",	&Widget_IRON_NoIronDelay);
+	comboAddOption(&comboitem_IRON_errorDelay, w, 	"Detection",	&Widget_IRON_errorDelay);
 	comboAddScreen(&comboitem_IRON_Back, w, 		"BACK", 		screen_settingsmenu);
 
 

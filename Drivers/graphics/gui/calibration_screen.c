@@ -50,7 +50,7 @@ static void setCalState(state_t s) {
 	current_state = s;
 	if(current_state < cal_suceed) {
 		Widget_CAL_WaitTemp.posX = 2;
-		setCurrentMode(mode_run,forceMode);
+		setCurrentMode(mode_run);
 		setSetTemperature(state_temps[(int)s]);
 		measuredTemp = state_temps[(int)s];
 	}
@@ -93,7 +93,7 @@ static void waitCalibration_screen_onEnter(screen_t *scr) {
 		tipData * Currtip = getCurrentTip();
 		Iron.calibrating=1;
 		tempReady = 0;
-		setCurrentMode(mode_run,forceMode);
+		setCurrentMode(mode_run);
 		backupTemp = getSetTemperature();
 		backupTempUnit=systemSettings.settings.tempUnit;
 
@@ -141,7 +141,7 @@ static void waitOnExit(screen_t *scr) {
 		tempReady = 0;
 		current_state = cal_250;
 		setSetTemperature(backupTemp);
-		setCurrentMode(mode_run,forceMode);
+		setCurrentMode(mode_run);
 		Iron.calibrating=0;
 	}
 	Widget_CAL_Input_OK.buttonWidget.selectable.previous_state=widget_idle;

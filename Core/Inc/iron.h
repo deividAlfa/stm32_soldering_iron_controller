@@ -14,7 +14,20 @@ typedef void (*setTemperatureReachedCallback)(uint16_t);
 
 
 typedef void (*currentModeChanged)(uint8_t);
-
+typedef union{
+	uint8_t Flags;									// Flag for errors (wrong iron connection, NTC, internal failure...)
+	struct{
+		unsigned noIron:1;							// No iron detected
+		unsigned NTC_high:1;						// NTC too high
+		unsigned NTC_low:1;							// NTC too low
+		unsigned V_low:1;							// Voltage too low
+		unsigned failState:1;						// Internal fail-safe state (some undefined variable or data detected)
+		unsigned unused_b5:1;
+		unsigned unused_b6:1;
+		unsigned globalFlag:1;						// Global error flag
+	};
+}IronError_t;
+# define ErrorMask		(uint8_t)0b11111					// mask for used error bit fields (skipping global flag)
 
 typedef struct {
 
@@ -29,33 +42,32 @@ typedef struct {
 	uint16_t 				Debug_SetTemperature;		// Debug mode temperature
 	uint32_t 				LastSysChangeTime;			// Last time a system setting was changed
 	uint32_t 				LastModeChangeTime;			// Last time the mode was changed (To provide debouncing)
-	uint32_t				LastNoPresentTime;			// last time iron absence was detected
+	uint32_t				LastErrorTime;			// last time iron absence was detected
 	uint32_t				lastActivityTime;			// last time iron was moved
 	uint8_t					CurrentMode;				// Actual working mode (Standby, Sleep, Normal, Boost)
 	uint8_t					changeMode;					// change working mode to (Standby, Sleep, Normal, Boost)
 	uint32_t 				CurrentModeTimer;			// Time since actual mode was set
 	bool 					Cal_TemperatureReachedFlag;	// Flag for temperature calibration
-	bool 					DebugMode ;				// Flag to indicate Debug is enabled
-	bool 					presence;					// Flag to indicate the presence of the iron
+	bool 					DebugMode ;					// Flag to indicate Debug is enabled
+	IronError_t 			Error;						// Error flags
 	bool 					calibrating;				// Flag to indicate calibration state (don't save temperature settings)
 	bool 					updateMode;					// Flag to indicate the mode must be changed
 	bool 					newActivity;				// Flag to indicate handle movement
-	bool 					FailState;					// Flag to indicate a serious failure, totally disables the PWM until the flag is manually cleared
 	uint32_t 				RunawayTimer;				// Runaway timer
 	uint8_t 				RunawayLevel;				// Runaway actual level
 	uint8_t 				prevRunawayLevel;			// Runaway previous level
-	bool 					RunawayStatus;			// Runaway triggered flag
+	bool 					RunawayStatus;				// Runaway triggered flag
 	bool					updatePwm;					// Set when timer values need to be updated
 }iron_t;
 
-#define IRON_MIN			2048						// OUT= PWM_MAX/IRON_MIN
+
 extern volatile iron_t Iron;
 void IronWake(bool source);
-void checkIronPresence(void);
-bool GetIronPresence(void);
+void checkIronError(void);
+bool GetIronError(void);
 void SetFailState(bool FailState);
 bool GetFailState(void);
-void setCurrentMode(uint8_t mode, bool forceMode);
+void setCurrentMode(uint8_t mode);
 void setModefromStand(uint8_t mode);
 void setSetTemperature(uint16_t temperature);
 void setCurrentTemperature(uint16_t temperature);

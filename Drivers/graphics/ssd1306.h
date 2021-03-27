@@ -117,5 +117,5 @@ void setOledRow(uint8_t row);
 uint8_t getContrast();
 void FillBuffer(bool color, bool mode);
 void putStrAligned(char* str, uint8_t y, AlignType align);
-
+void Reset_onError(void);
 #endif /* GRAPHICS_SSD1306_H_ */

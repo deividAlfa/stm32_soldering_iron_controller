@@ -36,7 +36,7 @@ static void setProfile(int32_t *val) {
 static int profile_OK(widget_t *w) {
 	loadProfile((uint8_t)profile);											// Load profile
 	saveSettings(saveKeepingProfiles);								// Save
-	SetFailState(failureState_Off);									// Enable normal operation
+	SetFailState(noError);									// Enable normal operation
 	systemSettings.setupMode=setup_Off;								// Reset setup mode
 	return screen_main;
 }

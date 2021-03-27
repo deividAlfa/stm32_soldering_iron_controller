@@ -43,9 +43,6 @@ enum{
 	source_wakeInput	= 0,
 	source_wakeButton	= 1,
 
-	failureState_Off	= 0,
-	failureState_On		= 1,
-
 	no_update	= 0,
 	needs_update		= 1,
 
@@ -58,8 +55,8 @@ enum{
 
 	runaway_triggered 	= 1,
 
-	notPresent		= 0,
-	isPresent		= 1,
+	noError				= 0,
+	setError			= 1,
 
 	debug_Off		= 0,
 	debug_On		= 1,
@@ -137,7 +134,7 @@ __attribute__ ((aligned (4))) typedef struct{
 	uint32_t version;				// Used to track if a reset is needed on firmware upgrade
 	uint8_t contrast;
 	uint8_t OledOffset;
-	uint16_t noIronDelay;
+	uint16_t errorDelay;
 	uint16_t guiUpdateDelay;
 	uint8_t currentProfile;
 	uint8_t saveSettingsDelay;

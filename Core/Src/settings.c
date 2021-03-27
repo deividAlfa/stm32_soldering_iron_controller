@@ -159,7 +159,7 @@ void resetSystemSettings(void) {
 	systemSettings.settings.version 			= SETTINGS_VERSION;
 	systemSettings.settings.contrast 			= 255;
 	systemSettings.settings.OledOffset 			= 2;
-	systemSettings.settings.noIronDelay			= 500;
+	systemSettings.settings.errorDelay			= 500;
 	systemSettings.settings.guiUpdateDelay		= 200;
 	systemSettings.settings.tempUnit			= mode_Celsius;
 	systemSettings.settings.tempStep			= 5;
@@ -183,11 +183,11 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].calADC_At_250 = T12_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = T12_Cal350;			// These values are way lower, but better to be safe than sorry
 			systemSettings.Profile.tip[x].calADC_At_450 = T12_Cal450;			// User needs to calibrate its station
-			systemSettings.Profile.tip[x].PID.Kp = 0.0052;
-			systemSettings.Profile.tip[x].PID.Ki = 0.0025;
-			systemSettings.Profile.tip[x].PID.Kd = 0.0014;
-			systemSettings.Profile.tip[x].PID.min = 0;
-			systemSettings.Profile.tip[x].PID.max = 1;
+			systemSettings.Profile.tip[x].PID.Kp = (float)0.0052;
+			systemSettings.Profile.tip[x].PID.Ki = (float)0.0025;
+			systemSettings.Profile.tip[x].PID.Kd = (float)0.0014;
+			systemSettings.Profile.tip[x].PID.min = (float)0;
+			systemSettings.Profile.tip[x].PID.max = (float)1;
 			systemSettings.Profile.tip[x].PID.maxI = 200;
 			systemSettings.Profile.tip[x].PID.minI = 0;
 		}
@@ -204,11 +204,11 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].calADC_At_250 = C245_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = C245_Cal350;
 			systemSettings.Profile.tip[x].calADC_At_450 = C245_Cal450;
-			systemSettings.Profile.tip[x].PID.Kp = 0.0028;
-			systemSettings.Profile.tip[x].PID.Ki = 0.0018;
-			systemSettings.Profile.tip[x].PID.Kd = 0.00007;
-			systemSettings.Profile.tip[x].PID.min = 0;
-			systemSettings.Profile.tip[x].PID.max = 1;
+			systemSettings.Profile.tip[x].PID.Kp = (float)0.0028;
+			systemSettings.Profile.tip[x].PID.Ki = (float)0.0018;
+			systemSettings.Profile.tip[x].PID.Kd = (float)0.00007;
+			systemSettings.Profile.tip[x].PID.min = (float)0;
+			systemSettings.Profile.tip[x].PID.max = (float)1;
 			systemSettings.Profile.tip[x].PID.maxI = 200;
 			systemSettings.Profile.tip[x].PID.minI = 0;
 		}
@@ -225,11 +225,11 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].calADC_At_250 = C210_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = C210_Cal350;
 			systemSettings.Profile.tip[x].calADC_At_450 = C210_Cal450;
-			systemSettings.Profile.tip[x].PID.Kp = 0.0028;
-			systemSettings.Profile.tip[x].PID.Ki = 0.0018;
-			systemSettings.Profile.tip[x].PID.Kd = 0.00007;
-			systemSettings.Profile.tip[x].PID.min = 0;
-			systemSettings.Profile.tip[x].PID.max = 1;
+			systemSettings.Profile.tip[x].PID.Kp = (float)0.0028;
+			systemSettings.Profile.tip[x].PID.Ki = (float)0.0018;
+			systemSettings.Profile.tip[x].PID.Kd = (float)0.00007;
+			systemSettings.Profile.tip[x].PID.min = (float)0;
+			systemSettings.Profile.tip[x].PID.max = (float)1;
 			systemSettings.Profile.tip[x].PID.maxI = 200;
 			systemSettings.Profile.tip[x].PID.minI = 0;
 		}

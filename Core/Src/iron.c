@@ -54,8 +54,8 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 	Iron.Pwm_Timer			= pwmtimer;
 	Iron.Delay_Timer		= delaytimer;
 	Iron.Pwm_Channel 		= pwmchannel;
-	Iron.presence			= isPresent;								// Set detected by default (to not show ERROR screen at boot)
-	setCurrentMode(systemSettings.settings.initMode,forceMode);			// Set mode
+	Iron.Error.Flags		= noError;									// Clear all errors
+	setCurrentMode(systemSettings.settings.initMode);			// Set mode
 	initTimers();														// Initialize timers
 
 	// Now the PWM and ADC are working in the background.
@@ -73,14 +73,16 @@ void handleIron(void) {
 	uint16_t tipTemp = readTipTemperatureCompensated(update_reading,read_Avg);
 
 	// Enter failure state if profile is not defined
-	if(!GetFailState()){
+	if(!Iron.Error.failState){
 		if((systemSettings.settings.currentProfile!=profile_T12)&&(systemSettings.settings.currentProfile!=profile_C245)&&(systemSettings.settings.currentProfile!=profile_C210)){
-			SetFailState(failureState_On);
+			SetFailState(setError);
 		}
 	}
 
-	// Check changes in system settings. Don't check if in: Calibration mode, setup mode, save delay==0 or in PWM failure state
-	if( (systemSettings.setupMode==setup_Off) && (Iron.calibrating==calibration_Off) && (systemSettings.settings.saveSettingsDelay>0) && (Iron.FailState==failureState_Off) && (CurrentTime-checksumtime>999)){
+
+	// Check for changes in system settings.
+	// Don't check if in: Calibration mode, Setup mode, Save delay==0 or in internal failure state
+	if( (systemSettings.setupMode==setup_Off) && (Iron.calibrating==calibration_Off) && (systemSettings.settings.saveSettingsDelay>0) && (Iron.Error.failState==noError) && (CurrentTime-checksumtime>999)){
 		checksumtime=CurrentTime;														// Store current time
 		newSysChecksum=ChecksumSettings(&systemSettings.settings);						// Calculate system checksum
 		newTipChecksum=ChecksumProfile(&systemSettings.Profile);						// Calculate tip profile checksum
@@ -97,34 +99,26 @@ void handleIron(void) {
 		}
 	}
 
-	// No iron detection.
-	checkIronPresence();
+	// Error detection.
+	checkIronError();
 
 	// Any flag active?
-	if( (Iron.FailState==failureState_On) || (Iron.presence==notPresent)){
-		if(Iron.FailState){
-			Iron.CurrentIronPower = -99;				//Show -99 if the PWM is in failure state
-		}
-		else{
-			Iron.CurrentIronPower = 0;
-		}
-		Iron.prevRunawayLevel=runaway_ok;				// Reset runaway status and timer
-		Iron.RunawayTimer = CurrentTime;
-		return;											// Do nothing else (PWM already disabled)
+	if( Iron.Error.globalFlag ){
+		return;														// Do nothing else (PWM already disabled)
 	}
 
-	// Controls external mode changes from stand changes
-	if(Iron.updateMode==needs_update){						// If pending mode change
-		if((CurrentTime-Iron.LastModeChangeTime)>500){	// Wait 500mS with steady mode (de-bouncing)
-			Iron.updateMode=no_update;						// reset flag
-			setCurrentMode(Iron.changeMode,noForceMode);				// Apply mode
+	// Controls external mode changes (from stand mode changes), this acts as a debouncing timer
+	if(Iron.updateMode==needs_update){								// If pending mode change
+		if((CurrentTime-Iron.LastModeChangeTime)>500){				// Wait 500mS with steady mode (de-bouncing)
+			Iron.updateMode=no_update;								// reset flag
+			setCurrentMode(Iron.changeMode);			// Apply mode
 		}
 	}
 
 	// Controls inactivity timer and enters low power modes
 	if(Iron.CurrentMode==mode_run) {
 		if((Iron.calibrating==calibration_Off ) && (systemSettings.Profile.sleepTimeout>0) && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.Profile.sleepTimeout*60000) ) {
-			setCurrentMode(mode_sleep,forceMode);
+			setCurrentMode(mode_sleep);
 			buzzer_long_beep();
 		}
 	}
@@ -294,7 +288,7 @@ void setSystemTempUnit(bool unit){
 		systemSettings.Profile.tempUnit = unit;
 		systemSettings.Profile.UserSetTemperature = round_10(TempConversion(systemSettings.Profile.UserSetTemperature,unit,0));
 	}
-	setCurrentMode(Iron.CurrentMode, forceMode);										// Reload temps
+	setCurrentMode(Iron.CurrentMode);													// Reload temps
 }
 
 // This function sets the prescaler settings depending on the system, core clock
@@ -311,7 +305,7 @@ void initTimers(void){
 	}
 	// Delay timer config
 	//
-	Iron.Delay_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;				//10uS input clock
+	Iron.Delay_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;				// 10uS input clock
 	Iron.Delay_Timer->Init.Period = delay;
 	if (HAL_TIM_Base_Init(Iron.Delay_Timer) != HAL_OK){
 		Error_Handler();
@@ -337,7 +331,7 @@ void initTimers(void){
 	#else
 		#error No PWM ouput set (See PWM_CHx / PWM_CHxN in board.h)
 	#endif
-
+		__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, 1);					// Set min value into PWM (To enable detection)
 		Iron.Pwm_Limit = pwm - (delay + (uint16_t)ADC_MEASURE_TIME);
 }
 
@@ -373,31 +367,12 @@ void setModefromStand(uint8_t mode){
 
 
 // Change the iron operating mode
-void setCurrentMode(uint8_t mode, bool forceMode){
+void setCurrentMode(uint8_t mode){
 	Iron.CurrentModeTimer = HAL_GetTick();					// refresh current mode timer
-
-	if((Iron.CurrentMode!=mode) || forceMode){
-		Iron.CurrentMode = mode;
-		Iron.Cal_TemperatureReachedFlag = 0;
-		buzzer_short_beep();
-		switch (mode) {
-		/*
-			case mode_boost:
-				Iron.CurrentSetTemperature = systemSettings.Profile.boost.Temperature;
-				break;
-			case mode_normal:
-				Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature;
-				break;
-			case mode_sleep:
-				Iron.CurrentSetTemperature = systemSettings.Profile.sleep.Temperature;
-				break;
-			case mode_standby:
-			default:
-				mode=mode_standby;
-				Iron.CurrentSetTemperature = 0;
-				break;
-		}
-		*/
+	Iron.CurrentMode = mode;
+	Iron.Cal_TemperatureReachedFlag = 0;
+	buzzer_short_beep();
+	switch (mode) {
 		case mode_run:
 			Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature;
 			break;
@@ -407,8 +382,7 @@ void setCurrentMode(uint8_t mode, bool forceMode){
 			Iron.CurrentSetTemperature = 0;
 			break;
 	}
-		modeChanged(mode);
-	}
+	modeChanged(mode);
 }
 
 // Called from program timer if WAKE change is detected
@@ -422,51 +396,61 @@ void IronWake(bool source){											// source: 0 = handle, 1=encoder
 		Iron.newActivity=1;											// Enable flag for oled pulse icon
 		Iron.lastActivityTime = HAL_GetTick();						// Store time for keeping the image on
 	}
-	setCurrentMode(mode_run,noForceMode);						// Back to normal mode
+	setCurrentMode(mode_run);						// Back to normal mode
 }
 // Sets the presence of the iron. Handles alarm output
-void checkIronPresence(void){
-	uint32_t CurrentTime = HAL_GetTick();
-	int16_t ambTemp = readColdJunctionSensorTemp_x10(mode_Celsius);
+void checkIronError(void){
+	uint32_t CurrentTime = HAL_GetTick();												// Get current time
+	if(CurrentTime<1000){																// Don't check for errors for the first second, readings need to get stable
+		return;																			// (In boot screen, PWM disabled, no danger)
+	}
+	int16_t ambTemp = readColdJunctionSensorTemp_x10(mode_Celsius);						// Read NTC in Celsius
+	IronError_t Err={0};
+	Err.failState = Iron.Error.failState;												// Get failState flag
+	Err.NTC_high = ambTemp > 700 ? 1 : 0;												// Check NTC too high (Wrong NTC wiring or overheating, >70ºC)
+	Err.NTC_low = ambTemp < -600 ? 1 : 0;												// Check NTC too low (If NTC is mounted in the handle, open circuit reports -70ºC or so)
+	Err.V_low = getSupplyVoltage_v_x10() < 120 ? 1 : 0;									// Check supply voltage (Mosfet will not work ok <12V, it will heat up)
+	Err.noIron = TIP.last_RawAvg>systemSettings.Profile.noIronValue ? 1 : 0;			// Check tip temperature too high (Wrong connection or not connected)
 
-	// If tip temperature reading too high or NTC too low (If NTC is mounted in the handle, open circuit reports -70ºC or so)
-	if((TIP.last_RawAvg>systemSettings.Profile.noIronValue) || (ambTemp < -600)) {
-		if(Iron.presence==isPresent){
-			Iron.LastNoPresentTime = CurrentTime;	// Start alarm and save last detected time
-			Iron.presence = notPresent;
-			setCurrentMode(mode_sleep,forceMode);
-			Iron.Pwm_Out = 0;
-			buzzer_alarm_start();
+	if(Err.Flags & ErrorMask){															// If there are errors
+		Iron.Error.Flags |= Err.Flags;													// Update flags
+		Iron.LastErrorTime = CurrentTime;												// Save time
+		if(!Iron.Error.globalFlag){														// If first detection
+			Iron.Error.globalFlag = 1;													// Set global flag
+			setCurrentMode(mode_sleep);													// Force sleep mode
+			if(Iron.Error.failState){
+				Iron.Pwm_Out = 0;														// Totally disable PWM
+			}
+			else{
+				Iron.Pwm_Out = 1;														// Set PWM output value to min, but not 0,to keep iron detection working (1=10uS)
+			}
+			__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);		// Load now the value into the PWM hardware
+			buzzer_alarm_start();														// Start alarm
 		}
 	}
-	else{																						// If now present
-		if(Iron.presence==notPresent){															// But wasn't before
-			if((CurrentTime-Iron.LastNoPresentTime)>systemSettings.settings.noIronDelay){		// Check enough time passed
-				buzzer_alarm_stop();
-				Iron.presence = isPresent;
-				setCurrentMode(mode_run,forceMode);
-			}
+	else if (Iron.Error.globalFlag && Err.Flags==noError){								// If global flag set, but there are no errors anymore
+		if((CurrentTime-Iron.LastErrorTime)>systemSettings.settings.errorDelay){		// Check enough time passed
+			Iron.Error.Flags = noError;													// Reset errors
+			buzzer_alarm_stop();														// Stop alarm
+			setCurrentMode(mode_run);													// Restore run mode
 		}
 	}
 }
 
-// Returns the actual status of the iron presence.
-bool GetIronPresence(void){
-	return Iron.presence;
+// Returns the actual status of the iron error.
+bool GetIronError(void){
+	return Iron.Error.globalFlag;
 }
 
 // Sets Failure state
 void SetFailState(bool FailState) {
-	Iron.FailState = FailState;
-	if(FailState==failureState_On){	// Force PWM Output low state
-		Iron.Pwm_Out = 0;
-		__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);
-	}
+	Iron.Error.failState = FailState;
+	checkIronError();					// Update Error
 }
 
 // Gets Failure state
 bool GetFailState() {
-	return Iron.FailState;
+	return Iron.Error.failState;
 }
 
 

@@ -166,13 +166,15 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 	uint32_t adc_sum,avg_data;
 	uint16_t max=0, min=0xffff;
 	uint8_t step;
-
+	uint8_t shift;
 
 	if(InputData==&TIP){
-		step=1;					// Tip uses its own buffer
+		step=1;																	// Tip uses its own buffer
+		shift = systemSettings.Profile.filterFactor;							// Set EMA / DEMA factor setting from system settings
 	}
 	else{
-		step=ADC_AuxNum;		// Number of elements in secondary buffer
+		shift = 1;																// As these are pretty stable values, force factor 1 for faster response.
+		step=ADC_AuxNum;														// Number of elements in secondary buffer
 	}
 	// Make the average of the ADC buffer
 	adc_sum = 0;
@@ -191,18 +193,22 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 
 	// Calculate average
 	avg_data = adc_sum / (ADC_BFSIZ -2) ;
-	// Global filter flag (setup.h)
+	
 	if((systemSettings.Profile.filterMode ==filter_ema) || (systemSettings.Profile.filterMode ==filter_dema)){					// Advanced filtering enabled?
 
 		if(systemSettings.Profile.filterFactor>4){						// Limit coefficient
 			systemSettings.Profile.filterFactor=4;
 		}
-		uint8_t shift = systemSettings.Profile.filterFactor;
-		//factor=0.6
-		//EMA = factor* data + (1-factor) * EMA;
 
 		// Fixed point shift
-		uint32_t RawData = avg_data<<12;
+		uint32_t RawData;
+
+		if(Iron.Error.noIron && InputData==&TIP){						// If no iron detected and this is the TIP data
+			RawData = 100<<12;											// Don't use the readings for the average, use a low value instead
+		}																// (But leave avg_data untouched, it's copied to rawAVG, used for detection)
+		else{
+			RawData = avg_data<<12;
+		}
 
 		// Compute EMA of input
 		InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) +RawData +(1<<(shift-1)))>>shift;

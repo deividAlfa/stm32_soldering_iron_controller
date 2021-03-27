@@ -15,7 +15,7 @@
 static int32_t temp;
 static char *tipName[TipSize];
 enum mode{  main_irontemp=0, main_disabled, main_ironstatus,main_setpoint, main_tipselect, /*main_sleepwake,*/ main_menu,  main_setMode};
-enum{ status_running, status_sleep, status_noiron };
+enum{ status_running, status_sleep, status_error };
 enum { temp_numeric, temp_graph };
 const uint8_t pulseXBM[] ={
 	8,9,
@@ -40,7 +40,6 @@ static widget_t Widget_Vsupply;
 #endif
 static widget_t Widget_IronTemp;
 static widget_t Widget_TipSelect;
-//static widget_t Widget_SleepWake;
 static widget_t Widget_SetPoint;
 
 
@@ -187,13 +186,13 @@ static void setMainScrTempUnit(void) {
 static void main_screen_init(screen_t *scr) {
 	default_init(scr);
 	Widget_TipSelect.multiOptionWidget.numberOfOptions = systemSettings.Profile.currentNumberOfTips;
-	//Widget_SleepWake.multiOptionWidget.numberOfOptions = systemSettings.Profile.currentNumberOfTips; // still tips for now
 	Widget_SetPoint.editableWidget.step = systemSettings.settings.tempStep;
 	Widget_SetPoint.editableWidget.big_step = systemSettings.settings.tempStep;
 	setMainScrTempUnit();
 	mainScr.idleTick=HAL_GetTick();
 
 }
+
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	updateIronPower();
 
@@ -201,12 +200,12 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 		mainScr.update = 0;
 	}
 	if((HAL_GetTick()-mainScr.updateTick)>systemSettings.settings.guiUpdateDelay){
-		mainScr.update=1;						//Update realtime readings slower than the rest of the GUI
+		mainScr.update=1;						// Update realtime readings slower than the rest of the GUI
 		mainScr.updateTick=HAL_GetTick();
 	}
 
-	if(!GetIronPresence()){
-		mainScr.ironStatus = status_noiron;
+	if(GetIronError()){
+		mainScr.ironStatus = status_error;
 	}
 	else if(getCurrentMode()==mode_sleep){
 		mainScr.ironStatus = status_sleep;
@@ -252,10 +251,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 				mainScr.currentMode=main_setMode;
 			}
 			else if((input==Rotate_Decrement_while_click)){
-				//mainScr.setMode=main_sleepwake;
-				//mainScr.currentMode=main_setMode;
 				mainScr.enteredSleep = HAL_GetTick();
-				setCurrentMode(mode_sleep,forceMode);
+				setCurrentMode(mode_sleep);
 			}
 			else if((input==Rotate_Increment)||(input==Rotate_Decrement)){
 				mainScr.setMode=main_setpoint;
@@ -277,18 +274,15 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 		case main_disabled:
 			if((HAL_GetTick()-mainScr.idleTick)>5000){
-				//write_cmd(0x30);		// Set Boost voltage to lowest
 				setContrast(1);
 			}
 			if(input!=Rotate_Nothing){
-				//write_cmd(0x33);// Set Boost voltage to max
 				setContrast(systemSettings.settings.contrast);
 			}
 			if((input==LongClick)){
 				return screen_settingsmenu;
 			}
 			if(mainScr.ironStatus==status_running){
-				//write_cmd(0x33);// Set Boost voltage to max
 				setContrast(systemSettings.settings.contrast);
 				mainScr.setMode=main_irontemp;
 				mainScr.currentMode=main_setMode;
@@ -303,7 +297,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			break;
 		case main_setpoint:
 		case main_tipselect:
-		//case main_sleepwake:
 
 			switch((uint8_t)input){
 				case LongClick:
@@ -353,16 +346,12 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 		case main_tipselect:
 			setMainWidget(&Widget_TipSelect);
 			break;
-		//case main_sleepwake:
-		//	setMainWidget(&Widget_SleepWake);
-		//	break;
 		default:
 			break;
 		}
 		return -1;
 	}
 	return default_screenProcessInput(scr, input, state);
-	//return -1;
 }
 
 
@@ -377,8 +366,8 @@ static uint32_t barTime;
 static uint8_t sleepWidth;
 static uint8_t sleepHeigh;
 static uint32_t sleepTim=0;
-static uint8_t xpos=30, ypos=10;
-static int8_t xadd=1, yadd=1;
+static uint8_t Slp_xpos=30, Slp_ypos=14;
+static int8_t Slp_xadd=1, Slp_yadd=1;
 
 void main_screen_draw(screen_t *scr){
 	uint8_t scr_refresh;
@@ -394,11 +383,8 @@ void main_screen_draw(screen_t *scr){
 			t = TempConversion(t, mode_Celsius, 0);
 		}
 
-		// scale 160-500C to 0-255
 		if (t<160) t = 160;
-		if (t>500) t = 500;		//499?
-		//float tf = ((float)t-159.5)*(255.0/340.0); // round and scale
-		//t = tf;
+		if (t>500) t = 500;
 
 		plotData[plotX] = t;
 		if(++plotX>99){
@@ -409,19 +395,19 @@ void main_screen_draw(screen_t *scr){
 		if((HAL_GetTick()-sleepTim)>50){
 			sleepTim=HAL_GetTick();
 			scr->refresh=screen_eraseAndRefresh;
-			xpos+=xadd;
-			ypos+=yadd;
-			if((xpos+sleepWidth)>OledWidth){
-				xadd = -1;
+			Slp_xpos += Slp_xadd;
+			Slp_ypos += Slp_yadd;
+			if((Slp_xpos+sleepWidth)>OledWidth){
+				Slp_xadd = -1;
 			}
-			else if(xpos==0){
-				xadd = 1;
+			else if(Slp_xpos==0){
+				Slp_xadd = 1;
 			}
-			if(ypos+sleepHeigh>OledHeight){
-				yadd = -1;
+			if(Slp_ypos+sleepHeigh>OledHeight){
+				Slp_yadd = -1;
 			}
-			else if(ypos<14){
-				yadd = 1;
+			else if(Slp_ypos<14){
+				Slp_yadd = 1;
 			}
 		}
 	}
@@ -429,7 +415,7 @@ void main_screen_draw(screen_t *scr){
 	if(scr->refresh==screen_eraseAndRefresh){
 		FillBuffer(BLACK,fill_dma);
 		scr->refresh=screen_blankRefresh;
-		// Clean screen here, draw here before main screen draw
+		// Screen is erased now, draw anything here before main screen draws
 	}
 	scr_refresh=scr->refresh;
 	default_screenDraw(scr);
@@ -448,13 +434,43 @@ void main_screen_draw(screen_t *scr){
 			u8g2_DrawXBMP(&u8g2, 0,OledHeight-pulseXBM[1], pulseXBM[0], pulseXBM[1], &pulseXBM[2]);
 		}
 		if(mainScr.currentMode==main_disabled){
-			u8g2_SetFont(&u8g2, u8g2_font_main_menu);
-			if(mainScr.ironStatus==status_noiron){
-				putStrAligned("NO IRON", 24, align_center);
+			u8g2_SetFont(&u8g2, u8g2_font_mainBig);
+			if(mainScr.ironStatus==status_error){
+				uint8_t Err_ypos = 14;
+				//PutStrAligned("ERROR", 12, align_center);
+				u8g2_SetFont(&u8g2, u8g2_font_t0_16_tr);
+				char errStr[16];
+				sprintf(errStr, "ERROR %X",Iron.Error.Flags);
+				putStrAligned(errStr, Err_ypos, align_center);
+				Err_ypos+=13;
+				if(Iron.Error.failState){
+					putStrAligned("Internal failure", Err_ypos, align_center);
+					Err_ypos+=13;
+				}
+				if(Iron.Error.V_low){
+					putStrAligned("Voltage low!", Err_ypos, align_center);
+					Err_ypos+=13;
+				}
+				if(Iron.Error.noIron){
+					putStrAligned("No iron detected", Err_ypos, align_center);
+					Err_ypos+=13;
+				}
+				if(Iron.Error.NTC_high){
+					putStrAligned("NTC read high!", Err_ypos, align_center);
+					Err_ypos+=13;
+				}
+				else if(Iron.Error.NTC_low){
+					putStrAligned("NTC read low!", Err_ypos, align_center);
+					Err_ypos+=13;
+				}
 			}
 			else if(mainScr.ironStatus==status_sleep){
-				u8g2_DrawStr(&u8g2, xpos, ypos, "SLEEP");
+				u8g2_DrawStr(&u8g2, Slp_xpos, Slp_ypos, "SLEEP");
 			}
+		}
+		else if(mainScr.currentMode==main_tipselect){
+			u8g2_SetFont(&u8g2, u8g2_font_t0_16_tr);
+			putStrAligned("TIP SELECTION", 16, align_center);
 		}
 	}
 
@@ -489,12 +505,9 @@ void main_screen_draw(screen_t *scr){
 
 				for(uint8_t x=0; x<100; x++){
 					uint8_t pos=plotX+x;
-					if(pos>99) pos-=100;
+					if(pos>99){ pos-=100; }							// Reset index if > 99
 
-					// scale 0-255 to 160-500C
 					uint16_t plotV = plotData[pos];
-					//float plotVf = ( (float)plotV * (340.0/255.0)) + 160;		// This is a total waste of power, STM32F1 doesn't have FPU
-					//plotV = plotVf;
 
 					if (plotV < t-20) plotV = 0;
 					else if (plotV >= t+20) plotV = 40;
@@ -514,10 +527,7 @@ void main_screen_draw(screen_t *scr){
 					uint8_t pos=plotX+x;
 					if(pos>99) pos-=100;
 
-					// scale 0-255 to 160-500C
 					uint16_t plotV = plotData[pos];
-					//float plotVf = ( (float)plotV * (340.0/255.0)) + 160;		// This is a total waste of power, STM32F1 doesn't have FPU
-					//plotV = plotVf;
 
 					if (plotV<180) plotV = 0;
 					else plotV = (plotV-180) >> 3; 					// divide by 8, (500-180)/8=40
@@ -612,7 +622,6 @@ void main_screen_setup(screen_t *scr) {
 	dis->number_of_dec=1;
 	w->font=u8g2_font_labels;
 	dis->getData = &main_screen_getAmbTemp;
-	//w->width = 24;
 	#endif
 
 	// Tips
@@ -621,10 +630,10 @@ void main_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(w, widget_multi_option);
 	dis=extractDisplayPartFromWidget(w);
 	dis->reservedChars=TipCharSize-1;
-	w->posY = 22;
+	w->posY = 32;
 	w->dispAlign=align_center;
 	w->textAlign=align_center;
-	w->font=u8g2_font_main_menu;
+	//w->font=u8g2_font_main_menu;
 	w->multiOptionWidget.editable.inputData.getData = &getTip;
 	w->multiOptionWidget.editable.inputData.number_of_dec = 0;
 	w->multiOptionWidget.editable.big_step = 0;
@@ -634,30 +643,9 @@ void main_screen_setup(screen_t *scr) {
 	w->multiOptionWidget.options = tipName;
 	w->enabled=0;
 	w->frameType=frame_disabled;
-/*
-	// Sleep/wake
-	w=&Widget_SleepWake;							// still tips for now
-	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_multi_option);
-	dis=extractDisplayPartFromWidget(w);
-	dis->reservedChars=TipCharSize-1;
-	w->posY = 22;
-	w->dispAlign=align_center;
-	w->textAlign=align_center;
-	w->font=u8g2_font_main_menu;
-	w->multiOptionWidget.editable.inputData.getData = &getTip;
-	w->multiOptionWidget.editable.inputData.number_of_dec = 0;
-	w->multiOptionWidget.editable.big_step = 0;
-	w->multiOptionWidget.editable.step = 0;
-	w->multiOptionWidget.editable.selectable.tab = 2;
-	w->multiOptionWidget.editable.setData = (void (*)(void *))&setTip;
-	w->multiOptionWidget.options = tipName;
-	w->enabled=0;
-	w->frameType=frame_disabled;
-*/
 
 	setMainWidget(&Widget_IronTemp);
-	u8g2_SetFont(&u8g2,u8g2_font_main_menu);
+	u8g2_SetFont(&u8g2,u8g2_font_mainBig);
 	sleepWidth=u8g2_GetStrWidth(&u8g2, "SLEEP")+2;
 	sleepHeigh= u8g2_GetMaxCharHeight(&u8g2)+3;
 }

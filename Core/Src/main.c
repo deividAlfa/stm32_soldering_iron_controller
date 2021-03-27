@@ -34,8 +34,7 @@
 #include "ssd1306.h"
 #include "gui.h"
 #include "screen.h"
-#include <stdint.h>
-#include <stdio.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,19 +53,18 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-
 /* USER CODE BEGIN PV */
-RE_Rotation_t RotationData;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-
 
 /* USER CODE BEGIN PFP */
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 void Init(void){
 	  guiInit();
 #if defined OLED_SOFT_SPI || defined OLED_SOFT_I2C
@@ -97,14 +95,12 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
 
   /* Configure the system clock */
-
 
   /* USER CODE BEGIN SysInit */
 
@@ -118,7 +114,6 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   Init();
-
   while (1){
     /* USER CODE END WHILE */
 
@@ -139,20 +134,9 @@ void Program_Handler(void) {
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-	/*
 
-	// This is no longer used, as checking the inputs in interrupt mode can't properly time button time until the key is released
-	// Now it's handled in ProgramTimer
-	// Code is left just in case
-
-		if((GPIO_Pin == ROT_ENC_BUTTON_Pin) || (GPIO_Pin == ROT_ENC_R_Pin) || (GPIO_Pin == ROT_ENC_L_Pin)) {
-		RE_Process(&RE1_Data);
-		if(systemSettings.settings.wakeOnButton){					// If system setting set  to wake on encoder activity
-			IronWake();
-		}
-	}*/
-	if(GPIO_Pin==WAKE_Pin){								// If handle moves
-		if(systemSettings.settings.WakeInputMode==wakeInputmode_stand){
+	if(GPIO_Pin==WAKE_Pin){													// If wake sensor input changed
+		if(systemSettings.settings.WakeInputMode==wakeInputmode_stand){		// In stand mode
 			if(WAKE_input()){
 				setModefromStand(mode_run);
 			}
@@ -160,7 +144,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 				setModefromStand(mode_sleep);
 			}
 		}
-		else{
+		else{																// In shake mode
 			IronWake(source_wakeInput);
 		}
 	}
@@ -189,6 +173,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
 		}
 	}
 }
+
 /* USER CODE END 4 */
 
 /**
@@ -199,12 +184,13 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+
 #ifdef DEBUG_ERROR
 	char chars[6];
 	#if defined OLED_I2C || defined OLED_SPI
 	display_abort();
 	#endif
-	SetFailState(failureState_On);
+	SetFailState(setError);
 	buzzer_fatal_beep();
 	Diag_init();
 	u8g2_DrawStr(&u8g2, 0, 0, "ERROR IN:");
@@ -219,20 +205,11 @@ void Error_Handler(void)
 	#elif defined OLED_SOFT_I2C || defined OLED_SOFT_SPI
 	update_display();
 	#endif
-
+	Reset_onError();
 #endif
 	while(1){
-		if(!BUTTON_input()){
-			for(uint16_t i=0;i<50000;i++);
-			while(!BUTTON_input()){
-				HAL_IWDG_Refresh(&HIWDG);					// Clear watchdog
-			}
-			if(BUTTON_input()){
-				NVIC_SystemReset();
-			}
-		}
-		HAL_IWDG_Refresh(&HIWDG);							// Clear watchdog
 	}
+
   /* USER CODE END Error_Handler_Debug */
 }
 

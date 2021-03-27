@@ -616,7 +616,7 @@ void FatalError(uint8_t type){
 	display_abort();
 	#endif
 
-	SetFailState(failureState_On);
+	SetFailState(setError);
 	buzzer_fatal_beep();
 	Diag_init();
 	switch(type){
@@ -672,19 +672,7 @@ void FatalError(uint8_t type){
 	update_display();
 	#endif
 
-	while(1){
-		if(!BUTTON_input()){
-			for(uint16_t i=0;i<50000;i++);
-			while(!BUTTON_input()){
-				HAL_IWDG_Refresh(&HIWDG);					// Clear watchdog
-			}
-			if(BUTTON_input()){
-				NVIC_SystemReset();
-			}
-		}
-		HAL_IWDG_Refresh(&HIWDG);
-	}
-
+	Reset_onError();
 }
 
 void putStrAligned(char* str, uint8_t y, AlignType align){
@@ -701,4 +689,15 @@ void putStrAligned(char* str, uint8_t y, AlignType align){
 			u8g2_DrawStr(&u8g2, (OledWidth-1)-len, y, str);
 		}
 	}
+}
+void Reset_onError(void){
+	while(BUTTON_input()){							// Wait until the button is pressed
+		for(uint16_t i=0;i<50000;i++);				// Small delay
+		HAL_IWDG_Refresh(&HIWDG);					// Clear watchdog
+	}
+	while(!BUTTON_input()){							// Wait until the button is released
+		for(uint16_t i=0;i<50000;i++);				// Small delay
+		HAL_IWDG_Refresh(&HIWDG);					// Clear watchdog
+	}
+	NVIC_SystemReset();							// Reset system
 }
