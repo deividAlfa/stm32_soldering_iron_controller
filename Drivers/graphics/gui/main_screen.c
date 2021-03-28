@@ -378,6 +378,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 void main_screen_draw(screen_t *scr){
 	uint8_t scr_refresh;
+	static uint8_t lastError = 0;
+	if(lastError!=Iron.Error.Flags){
+		lastError=Iron.Error.Flags;
+		scr->refresh=screen_eraseAndRefresh;
+	}
 	if(Widget_SetPoint.refresh || Widget_IronTemp.refresh){
 		scr->refresh=screen_eraseAndRefresh;
 	}
@@ -444,31 +449,38 @@ void main_screen_draw(screen_t *scr){
 			u8g2_SetFont(&u8g2, u8g2_font_mainBig);
 			if(mainScr.ironStatus==status_error){
 				uint8_t Err_ypos = 14;
-				//PutStrAligned("ERROR", 12, align_center);
-				u8g2_SetFont(&u8g2, u8g2_font_t0_16_tr);
-				char errStr[16];
-				sprintf(errStr, "ERROR %X",Iron.Error.Flags);
-				putStrAligned(errStr, Err_ypos, align_center);
-				Err_ypos+=13;
-				if(Iron.Error.failState){
-					putStrAligned("Internal failure", Err_ypos, align_center);
-					Err_ypos+=13;
+
+
+				if(Iron.Error.Flags==0x81){						// 0x81 = Only "No iron detected". Don't show error just for it
+					u8g2_SetFont(&u8g2, u8g2_font_mainBig);
+					putStrAligned("NO IRON", 26, align_center);
 				}
-				if(Iron.Error.V_low){
-					putStrAligned("Voltage low!", Err_ypos, align_center);
+				else{
+					char errStr[16];
+					sprintf(errStr, "ERROR %X",Iron.Error.Flags);
+					u8g2_SetFont(&u8g2, u8g2_font_t0_16_tr);
+					putStrAligned(errStr, Err_ypos, align_center);
 					Err_ypos+=13;
-				}
-				if(Iron.Error.noIron){
-					putStrAligned("No iron detected", Err_ypos, align_center);
-					Err_ypos+=13;
-				}
-				if(Iron.Error.NTC_high){
-					putStrAligned("NTC read high!", Err_ypos, align_center);
-					Err_ypos+=13;
-				}
-				else if(Iron.Error.NTC_low){
-					putStrAligned("NTC read low!", Err_ypos, align_center);
-					Err_ypos+=13;
+					if(Iron.Error.failState){
+						putStrAligned("Internal failure", Err_ypos, align_center);
+						Err_ypos+=13;
+					}
+					if(Iron.Error.V_low){
+						putStrAligned("Voltage low!", Err_ypos, align_center);
+						Err_ypos+=13;
+					}
+					if(Iron.Error.noIron){
+						putStrAligned("No iron detected", Err_ypos, align_center);
+						Err_ypos+=13;
+					}
+					if(Iron.Error.NTC_high){
+						putStrAligned("NTC read high!", Err_ypos, align_center);
+						Err_ypos+=13;
+					}
+					else if(Iron.Error.NTC_low){
+						putStrAligned("NTC read low!", Err_ypos, align_center);
+						Err_ypos+=13;
+					}
 				}
 			}
 			else if(mainScr.ironStatus==status_sleep){
