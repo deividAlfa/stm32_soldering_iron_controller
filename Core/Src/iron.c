@@ -138,7 +138,7 @@ void handleIron(void) {
 		Iron.updatePwm=no_update;
 		__HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.Profile.pwmPeriod);
 		__HAL_TIM_SET_AUTORELOAD(Iron.Delay_Timer,systemSettings.Profile.pwmDelay);
-		Iron.Pwm_Limit = systemSettings.Profile.pwmPeriod - (systemSettings.Profile.pwmDelay + (uint16_t)ADC_MEASURE_TIME);
+		Iron.Pwm_Limit = systemSettings.Profile.pwmPeriod - (systemSettings.Profile.pwmDelay + (uint16_t)ADC_MEASURE_TIME/10);
 	}
 
 	// If in debug mode, use debug setpoint value
@@ -336,7 +336,7 @@ void initTimers(void){
 		#error No PWM ouput set (See PWM_CHx / PWM_CHxN in board.h)
 	#endif
 		__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, 1);					// Set min value into PWM (To enable detection)
-		Iron.Pwm_Limit = pwm - (delay + (uint16_t)ADC_MEASURE_TIME);
+		Iron.Pwm_Limit = pwm - (delay + (uint16_t)ADC_MEASURE_TIME/10);
 }
 
 // Loads the PWM delay
