@@ -13,5 +13,4 @@ char *tempUnit[] = 		{ "\260C", "\260F" };
 char *wakeMode[] = 		{ "SHAKE", "STAND" };
 char *encMode[] = 		{ "REVERSE", "NORMAL" };
 char *InitMode[] = 		{ "SLEEP","RUN"};
-char *filterMode[] = 	{ "AVG", "EMA", "DEMA"};
-char *menuLabels[] = 	{ "BACK", "TIPS", "PID", "IRON", "SYSTEM", "EDIT", "CAL."};
+char *filterMode[] = 	{ "AVG", "EMA"};

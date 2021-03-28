@@ -1113,10 +1113,10 @@ void settings_screen_setup(screen_t *scr) {
 	w->editableWidget.big_step = 1;
 	w->editableWidget.step = 1;
 	w->editableWidget.setData = (void (*)(void *))&setFilterMode;
-	w->editableWidget.max_value = filter_dema;
+	w->editableWidget.max_value = filter_ema;
 	w->editableWidget.min_value = filter_avg;
 	w->multiOptionWidget.options = filterMode;
-	w->multiOptionWidget.numberOfOptions = 3;
+	w->multiOptionWidget.numberOfOptions = 2;
 
 	//********[ Filter Coefficient Widget ]***********************************************************
 	w = &Widget_IRON_filterFactor;

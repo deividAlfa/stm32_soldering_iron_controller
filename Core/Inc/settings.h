@@ -84,7 +84,6 @@ enum{
 
 	filter_avg		= 0,
 	filter_ema		= 1,
-	filter_dema		= 2,
 
 	noForceMode		= 0,
 	forceMode		= 1,

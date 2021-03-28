@@ -21,40 +21,24 @@ ADC_Status_t ADC_Status = ADC_Idle;
 
 
 ADCDataTypeDef_t TIP = {
-		adc_buffer: &Tip_measures[0],
-		last_avg: 1,
-		last_RawAvg: 0,
-		EMA_of_EMA:1<<12,
-		EMA_of_Input:1<<12,
+		adc_buffer: &Tip_measures[0]
 };
 
 #ifdef USE_VIN
 ADCDataTypeDef_t VIN = {
-		adc_buffer: &ADC_measures[0].VIN,
-		last_avg: 1,
-		last_RawAvg: 0,
-		EMA_of_EMA:1<<12,
-		EMA_of_Input:1<<12,
+		adc_buffer: &ADC_measures[0].VIN
 };
 #endif
 
 #ifdef USE_NTC
 ADCDataTypeDef_t NTC = {
-		adc_buffer: &ADC_measures[0].NTC,
-		last_avg: 1,
-		last_RawAvg: 0,
-		EMA_of_EMA:1<<12,
-		EMA_of_Input:1<<12,
+		adc_buffer: &ADC_measures[0].NTC
 };
 #endif
 
 #ifdef USE_VREF
 ADCDataTypeDef_t VREF = {
-		adc_buffer: &ADC_measures[0].VREF,
-		last_avg: 1,
-		last_RawAvg: 0,
-		EMA_of_EMA:1<<12,
-		EMA_of_Input:1<<12,
+		adc_buffer: &ADC_measures[0].VREF
 };
 #endif
 
@@ -166,14 +150,12 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 	uint32_t adc_sum,avg_data;
 	uint16_t max=0, min=0xffff;
 	uint8_t step;
-	uint8_t shift;
+	uint8_t shift = systemSettings.Profile.filterFactor;						// Set EMA / DEMA factor setting from system settings
 
 	if(InputData==&TIP){
 		step=1;																	// Tip uses its own buffer
-		shift = systemSettings.Profile.filterFactor;							// Set EMA / DEMA factor setting from system settings
 	}
 	else{
-		shift = 1;																// As these are pretty stable values, force factor 1 for faster response.
 		step=ADC_AuxNum;														// Number of elements in secondary buffer
 	}
 	// Make the average of the ADC buffer
@@ -193,39 +175,39 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 
 	// Calculate average
 	avg_data = adc_sum / (ADC_BFSIZ -2) ;
+	InputData->last_RawAvg = avg_data;
 	
-	if((systemSettings.Profile.filterMode ==filter_ema) || (systemSettings.Profile.filterMode ==filter_dema)){					// Advanced filtering enabled?
+	if(systemSettings.Profile.filterMode == filter_ema) {					// Advanced filtering enabled?
 
 		if(systemSettings.Profile.filterFactor>4){						// Limit coefficient
 			systemSettings.Profile.filterFactor=4;
 		}
 
 		// Fixed point shift
-		uint32_t RawData;
-
-		if(Iron.Error.noIron && InputData==&TIP){						// If no iron detected and this is the TIP data
-			RawData = 100<<12;											// Don't use the readings for the average, use a low value instead
-		}																// (But leave avg_data untouched, it's copied to rawAVG, used for detection)
-		else{
-			RawData = avg_data<<12;
-		}
+		uint32_t RawData = avg_data << 12;
 
 		// Compute EMA of input
-		InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) +RawData +(1<<(shift-1)))>>shift;
-
-		if(systemSettings.Profile.filterMode == filter_ema){							// EMA Filter
-			InputData->last_avg = InputData->EMA_of_Input>>12;
+		int16_t EMA = InputData->EMA_of_Input>>12;
+		int16_t diff = (int16_t)avg_data - EMA;										// Check difference between stored EMA and last average
+		if(abs(diff)>200){															// If huge (Filtering will delay too much the response)
+			InputData->EMA_of_Input = (uint32_t)avg_data<<12;						// Reset stored to last average
 		}
-		else{																			// DEMA filter
-			// Compute EMA of EMA
-			InputData->EMA_of_EMA = ( ((InputData->EMA_of_EMA << shift) - InputData->EMA_of_EMA) + InputData->EMA_of_Input  ) >> shift;
-			InputData->last_avg = ((2*InputData->EMA_of_Input)-InputData->EMA_of_EMA)>>12;
+		/*
+		else if(abs(diff)>100){														// If medium
+			InputData->EMA_of_Input = (uint32_t)(EMA + diff/2)<<12;					// Add half difference
 		}
+		*/
+		else if(abs(diff)>100){														// If medium
+			InputData->EMA_of_Input = (uint32_t)(EMA + diff/2)<<12;					// Add half difference
+		}
+		else{
+			InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
+		}
+		InputData->last_avg = InputData->EMA_of_Input>>12;
 	}
 	else {
 		InputData->last_avg=avg_data;
 	}
-	InputData->last_RawAvg = avg_data;
 }
 
 uint16_t ADC_to_mV (uint16_t adc){
