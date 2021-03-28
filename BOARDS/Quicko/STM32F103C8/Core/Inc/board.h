@@ -35,7 +35,7 @@
  * 			ADC Settings        *
  ********************************/
 #define ADC_DEVICE 			hadc1			                    // ADC device
-#define ADC_MEASURE_TIME	60 				                    // in uS
+#define ADC_MEASURE_TIME	100				                    // in uS
 #define ADC_BFSIZ 	        16	+2		                        // ADC DMA buffer size Buffer[ADC_BFSIZ][Adc_Buffer_Elements](+2 to compensate min/max value discard in filtering)
 
 // Order for secondary measurements, ADC channels not requiring sampling in the PWM low period. Order as ADC rank order (usually ch0-ch18)
