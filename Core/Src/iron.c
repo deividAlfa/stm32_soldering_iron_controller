@@ -185,7 +185,7 @@ void handleIron(void) {
 	// Else, set both to 0
 	else{
 	  Iron.CurrentIronPower = 0;
-	  Iron.Pwm_Out = 0;
+	  Iron.Pwm_Out = 1;				// Maintain iron detection
 	}
 	// If by any means the PWM output is higher than max calculated, generate error
 	if(Iron.Pwm_Out > Iron.Pwm_Limit){
@@ -206,7 +206,7 @@ void handleIron(void) {
 		TempStep=45;
 		TempLimit=950;
 	}
-	if((Iron.Pwm_Out) && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==debug_Off) &&(tipTemp > Iron.CurrentSetTemperature)){
+	if((Iron.Pwm_Out>1) && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==debug_Off) &&(tipTemp > Iron.CurrentSetTemperature)){
 		for(int8_t c=runaway_100; c>=runaway_ok; c--){					// Check for overrun
 			Iron.RunawayLevel=c;
 
