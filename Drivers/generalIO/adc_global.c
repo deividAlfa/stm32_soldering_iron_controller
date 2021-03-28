@@ -192,11 +192,6 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 		if(abs(diff)>200){															// If huge (Filtering will delay too much the response)
 			InputData->EMA_of_Input = (uint32_t)avg_data<<12;						// Reset stored to last average
 		}
-		/*
-		else if(abs(diff)>100){														// If medium
-			InputData->EMA_of_Input = (uint32_t)(EMA + diff/2)<<12;					// Add half difference
-		}
-		*/
 		else if(abs(diff)>100){														// If medium
 			InputData->EMA_of_Input = (uint32_t)(EMA + diff/2)<<12;					// Add half difference
 		}
