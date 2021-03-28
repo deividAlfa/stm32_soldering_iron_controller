@@ -12,6 +12,21 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
+
+static uint16_t plotData[100];
+static uint8_t plot_Index;
+static uint32_t plotTime;
+static bool plotUpdate;
+
+static uint32_t barTime;
+
+static uint8_t sleepWidth;
+static uint8_t sleepHeigh;
+static uint32_t sleepTim=0;
+static uint8_t Slp_xpos=30, Slp_ypos=14;
+static int8_t Slp_xadd=1, Slp_yadd=1;
+
+
 static int32_t temp;
 static char *tipName[TipSize];
 enum mode{  main_irontemp=0, main_disabled, main_ironstatus,main_setpoint, main_tipselect, /*main_sleepwake,*/ main_menu,  main_setMode};
@@ -238,7 +253,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 	switch(mainScr.currentMode){
 		case main_irontemp:
-			if(mainScr.ironStatus!=status_running){
+			if(mainScr.ironStatus!=status_running){							// When the screen goes to disable state
+				memset(plotData,0,sizeof(plotData));						// Clear plotdata
+				plot_Index=0;													// Reset X
 				mainScr.setMode=main_disabled;
 				mainScr.currentMode=main_setMode;
 				break;
@@ -306,7 +323,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 				case LongClick:
 					return -1;
 				case Rotate_Nothing:
-					if( (mainScr.currentMode==main_setpoint && HAL_GetTick()-mainScr.idleTick > 500) || (mainScr.currentMode!=main_setpoint && HAL_GetTick()-mainScr.idleTick > 5000)){
+					if( (mainScr.currentMode==main_setpoint && HAL_GetTick()-mainScr.idleTick > 1000) || (mainScr.currentMode!=main_setpoint && HAL_GetTick()-mainScr.idleTick > 5000)){
 				case Click:
 						mainScr.currentMode=main_setMode;
 						mainScr.setMode=main_irontemp;
@@ -359,27 +376,13 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 }
 
 
-
-
-
-static uint16_t plotData[100];
-static uint8_t plotX;
-static uint32_t plotTime;
-bool plotDraw;
-static uint32_t barTime;
-static uint8_t sleepWidth;
-static uint8_t sleepHeigh;
-static uint32_t sleepTim=0;
-static uint8_t Slp_xpos=30, Slp_ypos=14;
-static int8_t Slp_xadd=1, Slp_yadd=1;
-
 void main_screen_draw(screen_t *scr){
 	uint8_t scr_refresh;
 	if(Widget_SetPoint.refresh || Widget_IronTemp.refresh){
 		scr->refresh=screen_eraseAndRefresh;
 	}
-	if((HAL_GetTick()-plotTime)>99){
-		plotDraw=1;
+	if(mainScr.currentMode!=main_disabled && (HAL_GetTick()-plotTime)>99){			// Only store values if running
+		plotUpdate=1;
 		scr->refresh=screen_eraseAndRefresh;
 		plotTime=HAL_GetTick();
 		int16_t t = readTipTemperatureCompensated(stored_reading,read_Avg);
@@ -390,9 +393,9 @@ void main_screen_draw(screen_t *scr){
 		if (t<160) t = 160;
 		if (t>500) t = 500;
 
-		plotData[plotX] = t;
-		if(++plotX>99){
-			plotX=0;
+		plotData[plot_Index] = t;
+		if(++plot_Index>99){
+			plot_Index=0;
 		}
 	}
 	if(mainScr.ironStatus==status_sleep && mainScr.currentMode==main_disabled){
@@ -489,8 +492,8 @@ void main_screen_draw(screen_t *scr){
 			u8g2_DrawRFrame(&u8g2, 13, OledHeight-6, 100, 5, 2);
 		}
 
-		if((scr_refresh || plotDraw) && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){	//Update every 100mS or if screen is erased
-			plotDraw=0;
+		if((scr_refresh || plotUpdate) && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){	//Update every 100mS or if screen is erased
+			plotUpdate=0;
 			int16_t t = Iron.CurrentSetTemperature;
 
 			bool magnify = true;		// for future, to support both graph types
@@ -508,7 +511,7 @@ void main_screen_draw(screen_t *scr){
 				}
 
 				for(uint8_t x=0; x<100; x++){
-					uint8_t pos=plotX+x;
+					uint8_t pos=plot_Index+x;
 					if(pos>99){ pos-=100; }							// Reset index if > 99
 
 					uint16_t plotV = plotData[pos];
@@ -528,7 +531,7 @@ void main_screen_draw(screen_t *scr){
 				}
 
 				for(uint8_t x=0; x<100; x++){
-					uint8_t pos=plotX+x;
+					uint8_t pos=plot_Index+x;
 					if(pos>99) pos-=100;
 
 					uint16_t plotV = plotData[pos];
@@ -592,7 +595,8 @@ void main_screen_setup(screen_t *scr) {
 	w->font=Widget_IronTemp.font;
 	w->editableWidget.selectable.tab = 1;
 	w->editableWidget.setData = (void (*)(void *))&setTemp;
-	w->frameType=frame_disabled;
+	w->frameType=frame_solid;
+	w->radius=0;
 	w->enabled=0;
 
 	#ifdef USE_VIN
