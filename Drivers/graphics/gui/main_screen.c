@@ -282,6 +282,10 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			if((input==LongClick)){
 				return screen_settingsmenu;
 			}
+			else if((input==Rotate_Increment_while_click)){
+				mainScr.setMode=main_tipselect;
+				mainScr.currentMode=main_setMode;
+			}
 			if(mainScr.ironStatus==status_running){
 				setContrast(systemSettings.settings.contrast);
 				mainScr.setMode=main_irontemp;
