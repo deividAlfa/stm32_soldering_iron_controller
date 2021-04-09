@@ -148,7 +148,7 @@ void handleIron(void) {
 	// Else use current setpoint value
 	else{
 	  // Disable output if requested temperature is below 100ºC or iron temp higher than setpoint
-	  if((Iron.CurrentSetTemperature>99)/*&&(tipTemp<Iron.CurrentSetTemperature)*/){
+	  if((Iron.CurrentSetTemperature>100)/*&&(tipTemp<Iron.CurrentSetTemperature)*/){
 		  uint16_t t=human2adc(Iron.CurrentSetTemperature);
 		  if(t){
 			  set = calculatePID(t, TIP.last_avg);
@@ -373,9 +373,11 @@ void setModefromStand(uint8_t mode){
 // Change the iron operating mode
 void setCurrentMode(uint8_t mode){
 	Iron.CurrentModeTimer = HAL_GetTick();					// refresh current mode timer
-	Iron.CurrentMode = mode;
 	Iron.Cal_TemperatureReachedFlag = 0;
-	buzzer_short_beep();
+	if(Iron.CurrentMode != mode){
+		buzzer_short_beep();
+	}
+	Iron.CurrentMode = mode;
 	switch (mode) {
 		case mode_run:
 			Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature;
