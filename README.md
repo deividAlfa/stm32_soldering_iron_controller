@@ -23,7 +23,7 @@ Video can be seen there: (Project in active development, the features will chang
 
 <a id="status"></a>
 ## Status<br>
-* This project started as a fork of [PTDreamer's firmware](https://github.com/PTDreamer/stm32_soldering_iron_controller). There was a lot of development since then.
+* This project started by forking [PTDreamer's firmware](https://github.com/PTDreamer/stm32_soldering_iron_controller). There was a lot of development since then.
 * Developed on STM32Cube IDE - download and use that for compiling.<br>
 * Basic configuration is easily done in CubeMx (Included in STM32Cube IDE).<br>
 * Already compiled bins in each board folder (Test at your own risk).<br>
