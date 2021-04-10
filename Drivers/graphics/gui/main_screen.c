@@ -234,7 +234,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 	}
 
 	else if(Iron.newActivity && mainScr.ActivityOn){
-		if((HAL_GetTick()-Iron.lastActivityTime)>50){
+		if((HAL_GetTick()-Iron.lastActivityTime)>200){
 			u8g2_SetDrawColor(&u8g2, BLACK);
 			u8g2_DrawBox(&u8g2, 0,OledHeight-pulseXBM[1], pulseXBM[0], pulseXBM[1]);
 			mainScr.ActivityOn=0;

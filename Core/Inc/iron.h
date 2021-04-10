@@ -42,8 +42,8 @@ typedef struct {
 	uint16_t 				Debug_SetTemperature;		// Debug mode temperature
 	uint32_t 				LastSysChangeTime;			// Last time a system setting was changed
 	uint32_t 				LastModeChangeTime;			// Last time the mode was changed (To provide debouncing)
-	uint32_t				LastErrorTime;			// last time iron absence was detected
-	uint32_t				lastActivityTime;			// last time iron was moved
+	uint32_t				LastErrorTime;				// last time iron error was detected
+	uint32_t				lastActivityTime;			// last time iron handle was moved (In shake mode)
 	uint8_t					CurrentMode;				// Actual working mode (Standby, Sleep, Normal, Boost)
 	uint8_t					changeMode;					// change working mode to (Standby, Sleep, Normal, Boost)
 	uint32_t 				CurrentModeTimer;			// Time since actual mode was set

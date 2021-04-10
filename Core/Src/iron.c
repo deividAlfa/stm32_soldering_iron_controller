@@ -291,8 +291,9 @@ void setSystemTempUnit(bool unit){
 	if(systemSettings.Profile.tempUnit != unit){										// If profile unit is different
 		systemSettings.Profile.tempUnit = unit;
 		systemSettings.Profile.UserSetTemperature = round_10(TempConversion(systemSettings.Profile.UserSetTemperature,unit,0));
+		Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature;
 	}
-	setCurrentMode(Iron.CurrentMode);													// Reload temps
+	//setCurrentMode(Iron.CurrentMode);													// Reload temps
 }
 
 // This function sets the prescaler settings depending on the system, core clock
@@ -373,11 +374,11 @@ void setModefromStand(uint8_t mode){
 // Change the iron operating mode
 void setCurrentMode(uint8_t mode){
 	Iron.CurrentModeTimer = HAL_GetTick();					// refresh current mode timer
-	Iron.Cal_TemperatureReachedFlag = 0;
 	if(Iron.CurrentMode != mode){
 		buzzer_short_beep();
+		Iron.CurrentMode = mode;
+		Iron.Cal_TemperatureReachedFlag = 0;
 	}
-	Iron.CurrentMode = mode;
 	switch (mode) {
 		case mode_run:
 			Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature;
@@ -415,7 +416,7 @@ void checkIronError(void){
 	Err.failState = Iron.Error.failState;												// Get failState flag
 	Err.NTC_high = ambTemp > 700 ? 1 : 0;												// Check NTC too high (Wrong NTC wiring or overheating, >70ºC)
 	Err.NTC_low = ambTemp < -600 ? 1 : 0;												// Check NTC too low (If NTC is mounted in the handle, open circuit reports -70ºC or so)
-	Err.V_low = getSupplyVoltage_v_x10() < 120 ? 1 : 0;									// Check supply voltage (Mosfet will not work ok <12V, it will heat up)
+	Err.V_low = getSupplyVoltage_v_x10() < 110 ? 1 : 0;									// Check supply voltage (Mosfet will not work ok <12V, it will heat up)
 	Err.noIron = TIP.last_RawAvg>systemSettings.Profile.noIronValue ? 1 : 0;			// Check tip temperature too high (Wrong connection or not connected)
 
 	if(Err.Flags & ErrorMask){															// If there are errors
