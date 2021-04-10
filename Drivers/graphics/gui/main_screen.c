@@ -29,8 +29,8 @@ static int8_t Slp_xadd=1, Slp_yadd=1;
 
 static int32_t temp;
 static char *tipName[TipSize];
-enum mode{  main_irontemp=0, main_disabled, main_ironstatus,main_setpoint, main_tipselect, /*main_sleepwake,*/ main_menu,  main_setMode};
-enum{ status_running, status_sleep, status_error };
+enum mode{  main_irontemp=0, main_disabled, main_ironstatus, main_setpoint, main_tipselect, main_menu,  main_setMode};
+enum{ status_running=0x20, status_sleep, status_error };
 enum { temp_numeric, temp_graph };
 const uint8_t pulseXBM[] ={
 	8,9,
@@ -250,7 +250,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 		IronWake(source_wakeButton);
 	}
 
-
 	switch(mainScr.currentMode){
 		case main_irontemp:
 			if(mainScr.ironStatus!=status_running){							// When the screen goes to disable state
@@ -378,9 +377,10 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 void main_screen_draw(screen_t *scr){
 	uint8_t scr_refresh;
-	static uint8_t lastError = 0;
-	if(lastError!=Iron.Error.Flags){
-		lastError=Iron.Error.Flags;
+	static uint16_t lastState = 0;
+	uint16_t currentState = Iron.Error.Flags + mainScr.ironStatus + mainScr.currentMode;		// Simple checksum to detect changes
+	if(currentState!=lastState){
+		currentState=lastState;
 		scr->refresh=screen_eraseAndRefresh;
 	}
 	if(Widget_SetPoint.refresh || Widget_IronTemp.refresh){
