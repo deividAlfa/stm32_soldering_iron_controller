@@ -365,6 +365,7 @@ void setNoIronValue(uint16_t noiron){
 }
 // Change the iron operating mode
 void setModefromStand(uint8_t mode){
+	if(GetIronError()){ return; }									// Ignore if error present
 	Iron.changeMode = mode;
 	Iron.LastModeChangeTime = HAL_GetTick();
 	Iron.updateMode = needs_update;
@@ -373,7 +374,7 @@ void setModefromStand(uint8_t mode){
 
 // Change the iron operating mode
 void setCurrentMode(uint8_t mode){
-	Iron.CurrentModeTimer = HAL_GetTick();					// refresh current mode timer
+	Iron.CurrentModeTimer = HAL_GetTick();						// refresh current mode timer
 	if(Iron.CurrentMode != mode){
 		buzzer_short_beep();
 		Iron.CurrentMode = mode;
@@ -394,8 +395,9 @@ void setCurrentMode(uint8_t mode){
 
 // Called from program timer if WAKE change is detected
 void IronWake(bool source){											// source: 0 = handle, 1=encoder
+	if(GetIronError()){ return; }									// Ignore if error present
 	if(source==source_wakeButton){									// Wake from handle
-		if(!systemSettings.settings.wakeOnButton){
+		if(!systemSettings.settings.wakeOnButton){ // If button
 			return;
 		}
 	}
@@ -403,7 +405,7 @@ void IronWake(bool source){											// source: 0 = handle, 1=encoder
 		Iron.newActivity=1;											// Enable flag for oled pulse icon
 		Iron.lastActivityTime = HAL_GetTick();						// Store time for keeping the image on
 	}
-	setCurrentMode(mode_run);						// Back to normal mode
+	setCurrentMode(mode_run);						// Back to normal mode only if not in error state
 }
 // Sets the presence of the iron. Handles alarm output
 void checkIronError(void){
