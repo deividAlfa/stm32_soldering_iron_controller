@@ -71,7 +71,6 @@ static widget_t Widget_SYSTEM_ButtonWake;
 
 // PID
 static widget_t comboWidget_PID;
-static comboBox_item_t comboitem_PID_Time;
 static comboBox_item_t comboitem_PID_KP;
 static comboBox_item_t comboitem_PID_KI;
 static comboBox_item_t comboitem_PID_KD;
@@ -79,7 +78,6 @@ static comboBox_item_t comboitem_PID_Back;
 static widget_t Widget_PID_Kd;
 static widget_t Widget_PID_Ki;
 static widget_t Widget_PID_Kp;
-static widget_t Widget_PID_Time;
 
 // IRON SETTINGS
 static widget_t comboWidget_IRON;
@@ -220,29 +218,29 @@ static void * getSleepTime() {
 }
 
 static void * getKp() {
-	temp = currentPID.Kp * 1000000;
+	temp = currentPID.Kp;
 	return &temp;
 }
 static void setKp(int32_t *val) {
-	currentPID.Kp = (float)*val / 1000000;
+	currentPID.Kp = *val;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kp=currentPID.Kp ;
 	setupPIDFromStruct();
 }
 static void * getKi() {
-	temp = currentPID.Ki * 1000000;
+	temp = currentPID.Ki;
 	return &temp;
 }
 static void setKi(int32_t *val) {
-	currentPID.Ki = (float)*val / 1000000;
+	currentPID.Ki = *val;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Ki=currentPID.Ki;
 	setupPIDFromStruct();
 }
 static void * getKd() {
-	temp = currentPID.Kd * 1000000;
+	temp = currentPID.Kd;
 	return &temp;
 }
 static void setKd(int32_t *val) {
-	currentPID.Kd = (float)*val / 1000000;
+	currentPID.Kd = *val;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kd=currentPID.Kd;
 	setupPIDFromStruct();
 }
@@ -397,16 +395,6 @@ static void * getfilterFactor() {
 static void setfilterFactor(uint16_t *val) {
 	systemSettings.Profile.filterFactor = *val;
 }
-
-
-static void * getPIDTime() {
-	temp = systemSettings.Profile.PIDTime;
-	return &temp;
-}
-static void setPIDTime(uint16_t *val) {
-	systemSettings.Profile.PIDTime = *val;
-}
-
 
 static void * getProfile() {
 	temp = profile;
@@ -623,11 +611,6 @@ void Reset_confirmation_onEnter(screen_t *scr){
 //-------------------------------------------------------------------------------------------------------------------------------
 void PID_onEnter(screen_t *scr){
 	comboResetIndex(&comboWidget_PID);
-	Widget_PID_Time.editableWidget.min_value=(systemSettings.Profile.pwmPeriod+1)/100;
-	Widget_PID_Time.editableWidget.step=Widget_PID_Time.editableWidget.min_value;
-	if(systemSettings.Profile.PIDTime <	Widget_PID_Time.editableWidget.min_value){
-		systemSettings.Profile.PIDTime = Widget_PID_Time.editableWidget.min_value;
-	}
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -685,7 +668,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddScreen(&Settings_Combo_IRON, w, 		"IRON", 		screen_iron);
 	comboAddScreen(&Settings_Combo_SYSTEM, w, 		"SYSTEM", 		screen_system);
 	comboAddScreen(&Settings_Combo_TIPS, w, 		"EDIT TIPS", 	screen_edit_iron_tips);
-	comboAddScreen(&Settings_Combo_CALIBRATION, w, 	"CALIBRATION", 	screen_edit_calibration_wait);
+	comboAddScreen(&Settings_Combo_CALIBRATION, w, 	"CALIBRATION", 	screen_edit_calibration);
 	#ifdef ENABLE_DEBUG_SCREEN
 	comboAddScreen(&Settings_Combo_DEBUG, w, 		"DEBUG", 		screen_debug);
 	#endif
@@ -959,7 +942,7 @@ void settings_screen_setup(screen_t *scr) {
 	dis->reservedChars=6;
 	dis->getData = &getKp;
 	dis->number_of_dec = 2;
-	w->editableWidget.max_value=99999;
+	w->editableWidget.max_value=65000;
 	w->editableWidget.big_step = 1000;
 	w->editableWidget.step = 50;
 	w->editableWidget.setData =  (void (*)(void *))&setKp;
@@ -972,7 +955,7 @@ void settings_screen_setup(screen_t *scr) {
 	dis->reservedChars=6;
 	dis->getData = &getKi;
 	dis->number_of_dec = 2;
-	w->editableWidget.max_value=99999;
+	w->editableWidget.max_value=65000;
 	w->editableWidget.big_step = 1000;
 	w->editableWidget.step = 50;
 	w->editableWidget.setData = (void (*)(void *))&setKi;
@@ -985,23 +968,10 @@ void settings_screen_setup(screen_t *scr) {
 	dis->reservedChars=6;
 	dis->getData = &getKd;
 	dis->number_of_dec = 2;
-	w->editableWidget.max_value=99999;
+	w->editableWidget.max_value=65000;
 	w->editableWidget.big_step = 1000;
 	w->editableWidget.step = 50;
 	w->editableWidget.setData = (void (*)(void *))&setKd;
-
-	//********[ PID Time Widget ]***********************************************************
-	w = &Widget_PID_Time;
-	widgetDefaultsInit(w, widget_editable);
-	dis=extractDisplayPartFromWidget(w);
-	w->endString="mS";
-	dis->reservedChars=5;
-	dis->getData = &getPIDTime;
-	w->editableWidget.big_step = 100;
-	w->editableWidget.step = 10;
-	w->editableWidget.setData = (void (*)(void *))&setPIDTime;
-	w->editableWidget.max_value = 1000;
-	w->editableWidget.min_value = 0;
 
 	//========[ PID COMBO ]===========================================================
 	//
@@ -1011,7 +981,6 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddOption(&comboitem_PID_KP, w, 	"Kp", 	&Widget_PID_Kp);
 	comboAddOption(&comboitem_PID_KI, w, 	"Ki", 	&Widget_PID_Ki);
 	comboAddOption(&comboitem_PID_KD, w, 	"Kd", 	&Widget_PID_Kd);
-	comboAddOption(&comboitem_PID_Time, w, 	"Time",	&Widget_PID_Time);
 	comboAddScreen(&comboitem_PID_Back, w, 	"BACK", screen_settingsmenu);
 
 	//########################################## IRON SCREEN ##########################################
