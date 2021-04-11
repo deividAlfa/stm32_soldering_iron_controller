@@ -210,13 +210,14 @@ static void main_screen_init(screen_t *scr) {
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	updateIronPower();
+	uint32_t currentTime = HAL_GetTick();
 
 	if(mainScr.update){							// This was set on a previous pass. We reset the flag now.
 		mainScr.update = 0;
 	}
 	if((HAL_GetTick()-mainScr.updateTick)>systemSettings.settings.guiUpdateDelay){
 		mainScr.update=1;						// Update realtime readings slower than the rest of the GUI
-		mainScr.updateTick=HAL_GetTick();
+		mainScr.updateTick=currentTime;
 	}
 
 	if(GetIronError()){
@@ -234,7 +235,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 	}
 
 	else if(Iron.newActivity && mainScr.ActivityOn){
-		if((HAL_GetTick()-Iron.lastActivityTime)>200){
+		if((currentTime-Iron.lastActivityTime)>200){
 			u8g2_SetDrawColor(&u8g2, BLACK);
 			u8g2_DrawBox(&u8g2, 0,OledHeight-pulseXBM[1], pulseXBM[0], pulseXBM[1]);
 			mainScr.ActivityOn=0;
@@ -243,10 +244,10 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 	}
 
 	if(input!=Rotate_Nothing){
-		mainScr.idleTick=HAL_GetTick();
+		mainScr.idleTick=currentTime;
 	}
 
-	if(input==Click && (HAL_GetTick() - mainScr.enteredSleep) >500 ){		// Disable button wake for 500mS after manually entering sleep mode
+	if(input==Click && (currentTime - mainScr.enteredSleep) >500 ){		// Disable button wake for 500mS after manually entering sleep mode
 		IronWake(source_wakeButton);
 	}
 
@@ -267,7 +268,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 				mainScr.currentMode=main_setMode;
 			}
 			else if((input==Rotate_Decrement_while_click)){
-				mainScr.enteredSleep = HAL_GetTick();
+				mainScr.enteredSleep = currentTime;
 				setCurrentMode(mode_sleep);
 			}
 			else if((input==Rotate_Increment)||(input==Rotate_Decrement)){
@@ -289,12 +290,47 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			break;
 
 		case main_disabled:
-			if((HAL_GetTick()-mainScr.idleTick)>5000){
-				setContrast(1);
+		{
+			enum{ dim_idle, dim_down, dim_up };
+			static uint8_t dimDisplay=dim_idle;
+			static uint32_t dimTimer=0;
+			if(((currentTime-mainScr.idleTick)>5000) && (getContrast()>5)){
+				dimDisplay=dim_down;
 			}
-			if(input!=Rotate_Nothing){
+			if((input==Rotate_Decrement) || (input==Rotate_Increment)){
+				dimDisplay=dim_up;
+			}
+			else if(input!=Rotate_Nothing){
+				dimDisplay = dim_idle;
 				setContrast(systemSettings.settings.contrast);
 			}
+
+			if(dimDisplay!=dim_idle){
+				if(currentTime-dimTimer>9){
+					uint8_t contrast = getContrast();
+					dimTimer = currentTime;
+					mainScr.idleTick = currentTime;
+					if(dimDisplay==dim_down){
+						if(contrast>5){
+							dimTimer=currentTime;
+							setContrast(contrast-5);
+						}
+						else{
+							dimDisplay=dim_idle;
+						}
+					}
+					else{
+						if(systemSettings.settings.contrast>(contrast+5)){
+							setContrast(contrast+5);
+						}
+						else{
+							setContrast(systemSettings.settings.contrast);
+							dimDisplay=dim_idle;
+						}
+					}
+				}
+			}
+
 			if((input==LongClick)){
 				return screen_settingsmenu;
 			}
@@ -308,9 +344,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 				mainScr.currentMode=main_setMode;
 			}
 			break;
-
+		}
 		case main_menu:
-			if(HAL_GetTick()-mainScr.idleTick > 5000){
+			if(currentTime-mainScr.idleTick > 5000){
 				mainScr.currentMode=main_setMode;
 				mainScr.setMode=main_irontemp;
 			}
@@ -322,7 +358,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 				case LongClick:
 					return -1;
 				case Rotate_Nothing:
-					if( (mainScr.currentMode==main_setpoint && HAL_GetTick()-mainScr.idleTick > 1000) || (mainScr.currentMode!=main_setpoint && HAL_GetTick()-mainScr.idleTick > 5000)){
+					if( (mainScr.currentMode==main_setpoint && currentTime-mainScr.idleTick > 1000) || (mainScr.currentMode!=main_setpoint && currentTime-mainScr.idleTick > 5000)){
 				case Click:
 						mainScr.currentMode=main_setMode;
 						mainScr.setMode=main_irontemp;
@@ -345,7 +381,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 	if(mainScr.currentMode==main_setMode){
 		mainScr.update=1;
-		mainScr.idleTick=HAL_GetTick();
+		mainScr.idleTick=currentTime;
 		scr->refresh=screen_eraseAndRefresh;
 		mainScr.currentMode=mainScr.setMode;
 		switch(mainScr.currentMode){
@@ -653,7 +689,6 @@ void main_screen_setup(screen_t *scr) {
 	w->posY = 32;
 	w->dispAlign=align_center;
 	w->textAlign=align_center;
-	//w->font=u8g2_font_main_menu;
 	w->multiOptionWidget.editable.inputData.getData = &getTip;
 	w->multiOptionWidget.editable.inputData.number_of_dec = 0;
 	w->multiOptionWidget.editable.big_step = 0;
