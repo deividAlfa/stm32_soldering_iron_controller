@@ -9,7 +9,9 @@
 #include "oled.h"
 #include "gui.h"
 
-typedef enum {cal_250, cal_350, cal_450, cal_suceed, cal_failed}state_t;
+typedef enum {cal_250, cal_350, cal_450, cal_suceed, cal_failed, cal_needsAdjust}state_t;
+static uint32_t temp;
+static uint16_t adjustSetPoint;
 static uint32_t lastUpdateTick;
 static int16_t lastTipTemp;
 static uint16_t backupTemp;
@@ -18,7 +20,7 @@ static uint16_t backupCal250;
 static uint16_t backupCal350;
 static uint16_t backupCal450;
 const static uint16_t state_temps[3] = {250, 350, 450};
-const static char* state_tempstr[3] = {"250C", "350C", "450C"};
+static char* state_tempstr[3] = {"250C", "350C", "450C"};
 static uint16_t measured_temps[3];
 static uint16_t adcAtTemp[3];
 static state_t current_state = cal_250;
@@ -27,11 +29,25 @@ static int32_t measuredTemp;
 static uint16_t adcCal[3];
 static uint8_t processCalibration();
 
-static widget_t Widget_CAL_WaitTemp;
-static widget_t Widget_CAL_Cancel;
-static widget_t Widget_CAL_Input_MeasuredTemp_edit;
-static widget_t Widget_CAL_Input_Cancel;
-static widget_t Widget_CAL_Input_OK;
+static widget_t comboWidget_Cal;
+static comboBox_item_t Cal_Combo_Start;
+static comboBox_item_t Cal_Combo_Adjust;
+static comboBox_item_t Cal_Combo_Exit;
+
+static widget_t Widget_Cal_Start_Cancel;
+
+static widget_t comboWidget_Cal_Adjust;
+static comboBox_item_t Cal_Combo_Adjust_Target;
+static comboBox_item_t Cal_Combo_Adjust_Setpoint;
+static comboBox_item_t Cal_Combo_Adjust_Save;
+static comboBox_item_t Cal_Combo_Adjust_Cancel;
+
+static widget_t Widget_Cal_Adjust_Select;
+static widget_t Widget_Cal_Adjust_Setpoint;
+
+static widget_t Widget_Cal_Input_MeasuredTemp_edit;
+static widget_t Widget_Cal_Input_Cancel;
+static widget_t Widget_Cal_Input_OK;
 
 static void tempReached(uint16_t temp) {
 	if(temp == state_temps[(int)current_state])
@@ -45,25 +61,50 @@ static void *getMeasuredTemp() {
 static void setMeasuredTemp(int32_t *val) {
 	measuredTemp = *val;
 }
-
+//******************************************************
+static void *getCalStep() {
+	temp = current_state;
+	return &temp;
+}
+static void setCalStep(int32_t *val) {
+	current_state = *val;
+	adjustSetPoint = adcAtTemp[current_state];
+	setDebugTemp(adjustSetPoint);
+}
+static void *getAdjustSetpoint() {
+	temp = adjustSetPoint;
+	return &temp;
+}
+static void setAdjustSetpoint(int32_t *val) {
+	adjustSetPoint = *val;
+	adcAtTemp[current_state] = *val;
+	setDebugTemp(*val);
+}
+static int cal_adjust_SaveAction(widget_t* w) {
+	systemSettings.Profile.Cal250_default = adcAtTemp[cal_250];
+	systemSettings.Profile.Cal350_default = adcAtTemp[cal_350];
+	systemSettings.Profile.Cal450_default = adcAtTemp[cal_450];
+	return screen_edit_calibration;
+}
+static int cal_adjust_CancelAction(widget_t* w) {
+	return screen_edit_calibration;
+}
+//***************************************************
 static void setCalState(state_t s) {
 	current_state = s;
 	if(current_state < cal_suceed) {
-		Widget_CAL_WaitTemp.posX = 2;
 		setCurrentMode(mode_run);
 		setSetTemperature(state_temps[(int)s]);
 		measuredTemp = state_temps[(int)s];
 	}
-	else {
-		tipData * Currtip = getCurrentTip();
-		uint8_t result = processCalibration();
-		if(result) {
-			current_state = cal_suceed;
+	else if(current_state == cal_suceed) {
+		if(processCalibration()){
+			tipData * Currtip = getCurrentTip();
 			Currtip->calADC_At_250 = adcCal[cal_250];
 			Currtip->calADC_At_350 = adcCal[cal_350];
 			Currtip->calADC_At_450 = adcCal[cal_450];
 		}
-		else {
+		else{
 			current_state = cal_failed;
 		}
 	}
@@ -77,18 +118,39 @@ static int cancelAction(widget_t* w) {
 		Currtip->calADC_At_350 = backupCal350;
 		Currtip->calADC_At_450 = backupCal450;
 	}
-	return screen_settingsmenu;
+	return screen_edit_calibration;
 }
 
 static int okAction(widget_t *w) {
 	tempReady = 0;
-	measured_temps[(int)current_state] = measuredTemp - (readColdJunctionSensorTemp_x10(mode_Celsius) / 10);
-	adcAtTemp[(int)current_state] = TIP.last_avg;
-	setCalState(++current_state);
-	return screen_edit_calibration_wait;
+
+	// Abort if the measured temp is >50ºC than requested
+	if( measuredTemp > (state_temps[current_state]+50)){
+		setCalState(cal_needsAdjust);
+	}
+	else{
+		measured_temps[current_state] = measuredTemp - (readColdJunctionSensorTemp_x10(mode_Celsius) / 10);
+		adcAtTemp[(int)current_state] = TIP.last_avg;
+		setCalState(++current_state);
+	}
+	return screen_edit_calibration_start;
 }
 
-static void waitCalibration_screen_onEnter(screen_t *scr) {
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Calibration screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+static void Cal_onEnter(screen_t *scr) {
+	if(scr == &Screen_settingsmenu) {
+		comboResetIndex(&comboWidget_Cal);
+	}
+}
+
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Calibration start screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+static void Cal_Start_onEnter(screen_t *scr) {
 	if(scr != &Screen_edit_calibration_input) {
 		tipData * Currtip = getCurrentTip();
 		Iron.calibrating=1;
@@ -101,66 +163,32 @@ static void waitCalibration_screen_onEnter(screen_t *scr) {
 		backupCal350 = Currtip->calADC_At_350;
 		backupCal450 = Currtip->calADC_At_450;
 
-		switch(systemSettings.settings.currentProfile){
-			case profile_T12:
-				Currtip->calADC_At_250=T12_Cal250;
-				Currtip->calADC_At_350=T12_Cal350;
-				Currtip->calADC_At_450=T12_Cal450;
-				break;
-			case profile_C210:
-				Currtip->calADC_At_250=C210_Cal250;
-				Currtip->calADC_At_350=C210_Cal350;
-				Currtip->calADC_At_450=C210_Cal450;
-				break;
-			case profile_C245:
-				Currtip->calADC_At_250=C245_Cal250;
-				Currtip->calADC_At_350=C245_Cal350;
-				Currtip->calADC_At_450=C245_Cal450;
-				break;
-		}
+		Currtip->calADC_At_250=systemSettings.Profile.Cal250_default;
+		Currtip->calADC_At_350=systemSettings.Profile.Cal350_default;
+		Currtip->calADC_At_450=systemSettings.Profile.Cal450_default;
+
 		setSystemTempUnit(mode_Celsius);
 		setCalState(cal_250);
 	}
 }
 
-static void inputCalibration_screen_init(screen_t *scr) {
-	default_init(scr);
-	u8g2_SetFont(&u8g2,default_font );
-	u8g2_SetDrawColor(&u8g2, WHITE);
-	u8g2_DrawStr(&u8g2,0,19,"MEASURED:");//12
-}
-
-int waitProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
+static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
 	if(tempReady)
 		return screen_edit_calibration_input;
 	return default_screenProcessInput(scr, input, s);
 }
 
-static void waitOnExit(screen_t *scr) {
-	if(scr != &Screen_edit_calibration_wait && scr != &Screen_edit_calibration_input) {
+static void Cal_Start_OnExit(screen_t *scr) {
+	if((scr != &Screen_edit_calibration_start) && (scr != &Screen_edit_calibration_input)) {
 		tempReady = 0;
 		current_state = cal_250;
 		setSetTemperature(backupTemp);
 		setCurrentMode(mode_run);
 		Iron.calibrating=0;
 	}
-	Widget_CAL_Input_OK.buttonWidget.selectable.previous_state=widget_idle;
-	Widget_CAL_Input_OK.buttonWidget.selectable.state=widget_idle;
-
-	Widget_CAL_Input_Cancel.buttonWidget.selectable.previous_state=widget_idle;
-	Widget_CAL_Input_Cancel.buttonWidget.selectable.state=widget_idle;
-
-	Widget_CAL_Input_MeasuredTemp_edit.editableWidget.selectable.previous_state=widget_selected;
-	Widget_CAL_Input_MeasuredTemp_edit.editableWidget.selectable.state=widget_edit;
-
-	Screen_edit_calibration_input.current_widget=&Widget_CAL_Input_MeasuredTemp_edit;
 
 }
-
-//-------------------------------------------------------------------------------------------------------------------------------
-// Calibration screen functions
-//-------------------------------------------------------------------------------------------------------------------------------
-void waitCalibration_screen_draw(screen_t *scr){
+static void Cal_Start_draw(screen_t *scr){
 	if((HAL_GetTick()-lastUpdateTick)>200){										// Refresh every 200mS
 		lastUpdateTick=HAL_GetTick();
 		scr->refresh=screen_eraseAndRefresh;
@@ -191,24 +219,114 @@ void waitCalibration_screen_draw(screen_t *scr){
 			case cal_failed:
 				putStrAligned("FAILED!", 15, align_center);
 				break;
+			case cal_needsAdjust:
+				putStrAligned("DELTA TOO HIGH!", 0, align_center);
+				putStrAligned("Adjust manually", 15, align_center);
+				putStrAligned("and try again", 30, align_center);
+				break;
 		}
 	}
 }
+
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Calibration input screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+static void Cal_Input_init(screen_t *scr) {
+	default_init(scr);
+	u8g2_SetFont(&u8g2,default_font );
+	u8g2_SetDrawColor(&u8g2, WHITE);
+	u8g2_DrawStr(&u8g2,0,19,"MEASURED:");//12
+}
+
+static void Cal_Input_OnExit(screen_t *scr) {
+
+	Widget_Cal_Input_OK.buttonWidget.selectable.previous_state=widget_idle;
+	Widget_Cal_Input_OK.buttonWidget.selectable.state=widget_idle;
+
+	Widget_Cal_Input_Cancel.buttonWidget.selectable.previous_state=widget_idle;
+	Widget_Cal_Input_Cancel.buttonWidget.selectable.state=widget_idle;
+
+	Widget_Cal_Input_MeasuredTemp_edit.editableWidget.selectable.previous_state=widget_selected;
+	Widget_Cal_Input_MeasuredTemp_edit.editableWidget.selectable.state=widget_edit;
+
+	Screen_edit_calibration_input.current_widget=&Widget_Cal_Input_MeasuredTemp_edit;
+}
+
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Calibration adjust screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+static void Cal_Adjust_init(screen_t *scr) {
+	comboResetIndex(&comboWidget_Cal_Adjust);
+	adcAtTemp[cal_250] = systemSettings.Profile.Cal250_default;
+	adcAtTemp[cal_350] = systemSettings.Profile.Cal350_default;
+	adcAtTemp[cal_450] = systemSettings.Profile.Cal450_default;
+	Cal_Combo_Adjust_Save.enabled=0;
+
+	current_state = cal_250;
+	adjustSetPoint = adcAtTemp[cal_250];
+	setDebugTemp(adjustSetPoint);
+
+	setDebugMode(debug_On);
+	setCurrentMode(mode_run);
+}
+
+static void Cal_Adjust_OnExit(screen_t *scr) {
+	setDebugMode(debug_Off);
+	setCurrentMode(mode_run);
+}
+
+static int Cal_Adjust_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
+	if(input!=Rotate_Nothing){
+		asm("nop");
+	}
+	// Only enable save option is valid and different data is entered
+	if( (adcAtTemp[cal_250] && adcAtTemp[cal_350] && adcAtTemp[cal_450]) &&
+
+		((adcAtTemp[cal_250] != systemSettings.Profile.Cal250_default)||
+		 (adcAtTemp[cal_350] != systemSettings.Profile.Cal350_default)||
+		 (adcAtTemp[cal_450] != systemSettings.Profile.Cal450_default)) &&
+
+		((adcAtTemp[cal_250] < adcAtTemp[cal_350]) && (adcAtTemp[cal_350] < adcAtTemp[cal_450]))){
+		Cal_Combo_Adjust_Save.enabled=1;
+	}
+	else{
+		Cal_Combo_Adjust_Save.enabled=0;
+	}
+	return default_screenProcessInput(scr, input, s);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Calibration screens setup
+//-------------------------------------------------------------------------------------------------------------------------------
 void calibration_screen_setup(screen_t *scr) {
 
 	widget_t* w;
 	displayOnly_widget_t *dis;
 	screen_t* sc;
 	screen_setDefaults(scr);
-	scr->processInput = &waitProcessInput;
-	scr->draw = &waitCalibration_screen_draw;
-	scr->onExit = &waitOnExit;
-	scr->onEnter = &waitCalibration_screen_onEnter;
-
+	scr->onEnter = &Cal_onEnter;
 	addSetTemperatureReachedCallback(tempReachedCallback);
 
-	w = &Widget_CAL_Cancel;
-	screen_addWidget(w,scr);
+	w = &comboWidget_Cal;
+	screen_addWidget(w, scr);
+	widgetDefaultsInit(w, widget_combo);
+	comboAddScreen(&Cal_Combo_Start, w, 			"START", 			screen_edit_calibration_start);
+	comboAddScreen(&Cal_Combo_Adjust, w, 		"ADJUST", 		screen_edit_calibration_adjust);
+	comboAddScreen(&Cal_Combo_Exit, w, 		"BACK", 		screen_settingsmenu);
+	w->posY=10;
+
+	sc = &Screen_edit_calibration_start;
+	oled_addScreen(sc, screen_edit_calibration_start);
+	screen_setDefaults(sc);
+	sc->processInput = &Cal_Start_ProcessInput;
+	sc->draw = &Cal_Start_draw;
+	sc->onExit = &Cal_Start_OnExit;
+	sc->onEnter = &Cal_Start_onEnter;
+
+	w = &Widget_Cal_Start_Cancel;
+	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
 	w->displayString="BACK";
 	w->posX = 90;
@@ -216,15 +334,72 @@ void calibration_screen_setup(screen_t *scr) {
 	w->buttonWidget.selectable.tab = 0;
 	w->buttonWidget.action = &cancelAction;
 
-	sc = &Screen_edit_calibration_input;
-	oled_addScreen(&Screen_edit_calibration_input, screen_edit_calibration_input);
-	screen_setDefaults(sc);
-	sc->init = &inputCalibration_screen_init;
-	sc->onExit = &waitOnExit;
 
-	w=&Widget_CAL_Input_MeasuredTemp_edit;
-	screen_addWidget(w,sc);
+
+	sc = &Screen_edit_calibration_adjust;
+	oled_addScreen(sc, screen_edit_calibration_adjust);
+	screen_setDefaults(sc);
+	sc->init = &Cal_Adjust_init;
+	sc->processInput = &Cal_Adjust_ProcessInput;
+	//sc->draw = &waitCalibration_screen_draw;
+	sc->onExit = &Cal_Adjust_OnExit;
+	//sc->onEnter = &waitCalibration_screen_onEnter;
+
+
+	//********[ Cal Step Widget ]***********************************************************
+	//
+	w = &Widget_Cal_Adjust_Select;
+	widgetDefaultsInit(w, widget_multi_option);
+	//screen_addWidget(w,sc);
+	dis=extractDisplayPartFromWidget(w);
+	dis->getData = &getCalStep;
+	w->editableWidget.big_step = 1;
+	w->editableWidget.step = 1;
+	w->editableWidget.setData = (void (*)(void *))&setCalStep;
+	w->editableWidget.max_value = cal_450;
+	w->editableWidget.min_value = cal_250 ;
+	w->multiOptionWidget.options = state_tempstr;
+	w->multiOptionWidget.numberOfOptions = 3;
+	w->posX = 20;
+	w->posY = 20;
+	w->width = 40;
+
+	//********[ Setpoint Widget ]***********************************************************
+	//
+	w = &Widget_Cal_Adjust_Setpoint;
 	widgetDefaultsInit(w, widget_editable);
+	//screen_addWidget(w,sc);
+	dis=extractDisplayPartFromWidget(w);
+	dis->reservedChars=4;
+	dis->getData = &getAdjustSetpoint;
+	w->editableWidget.big_step = 100;
+	w->editableWidget.step = 50;
+	w->editableWidget.setData = (void (*)(void *))&setAdjustSetpoint;
+	w->editableWidget.max_value = 4000;
+	w->editableWidget.min_value = 0;
+	w->posX = 80;
+	w->posY = 20;
+	w->width = 40;
+
+	w = &comboWidget_Cal_Adjust;
+	screen_addWidget(w, sc);
+	widgetDefaultsInit(w, widget_combo);
+	comboAddOption(&Cal_Combo_Adjust_Target, w, 	"Target:", 			&Widget_Cal_Adjust_Select);
+	comboAddOption(&Cal_Combo_Adjust_Setpoint, w, 	"Value", 		&Widget_Cal_Adjust_Setpoint);
+	comboAddAction(&Cal_Combo_Adjust_Save, w, 		"SAVE", 			&cal_adjust_SaveAction);
+	comboAddAction(&Cal_Combo_Adjust_Cancel, w, 	"CANCEL", 			&cal_adjust_CancelAction);
+
+
+
+	sc = &Screen_edit_calibration_input;
+	oled_addScreen(sc, screen_edit_calibration_input);
+	screen_setDefaults(sc);
+	sc->init = &Cal_Input_init;
+	sc->onExit = &Cal_Input_OnExit;
+
+	w=&Widget_Cal_Input_MeasuredTemp_edit;
+	widgetDefaultsInit(w, widget_editable);
+	screen_addWidget(w,sc);
 	dis=extractDisplayPartFromWidget(w);
 	dis->reservedChars = 5;
 	w->endString = "\260C";
@@ -234,9 +409,9 @@ void calibration_screen_setup(screen_t *scr) {
 	w->editableWidget.setData =  (void (*)(void *)) &setMeasuredTemp;
 	w->editableWidget.selectable.tab = 0;
 
-	w=&Widget_CAL_Input_OK;
-	screen_addWidget(w,sc);
+	w=&Widget_Cal_Input_OK;
 	widgetDefaultsInit(w, widget_button);
+	screen_addWidget(w,sc);
 	w->displayString="SAVE";
 	w->buttonWidget.selectable.tab = 1;
 	w->buttonWidget.action = &okAction;
@@ -244,7 +419,7 @@ void calibration_screen_setup(screen_t *scr) {
 	w->posY = 48;
 
 
-	w=&Widget_CAL_Input_Cancel;
+	w=&Widget_Cal_Input_Cancel;
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
 	w->displayString="CANCEL";
