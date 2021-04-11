@@ -27,9 +27,9 @@ void setupPIDFromStruct() {
 void setupPID(float _max, float _min, float _Kp, float _Kd, float _Ki, int16_t _minI, int16_t _maxI ) {
 	max = _max;
 	min = _min;
-	Kp = _Kp;
-	Kd = _Kd;
-	Ki = _Ki;
+	Kp = (float)_Kp/1000000;
+	Kd = (float)_Kd/1000000;
+	Ki = (float)_Ki/1000000;
 	minI = _minI;
 	maxI = _maxI;
 	pre_error = 0;

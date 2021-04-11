@@ -11,11 +11,11 @@
 #include "main.h"
 
 typedef struct pid_values {
-	float max;
-	float min;
-	float Kp;
-	float Ki;
-	float Kd;
+	uint16_t max;
+	uint16_t min;
+	uint16_t Kp;
+	uint16_t Ki;
+	uint16_t Kd;
 	int16_t maxI;
 	int16_t minI;
 } pid_values_t;
