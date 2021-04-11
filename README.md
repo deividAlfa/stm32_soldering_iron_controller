@@ -2,6 +2,7 @@
 
 <!-- MarkdownTOC -->
 
+* [Operations guide](Readme_files/Operation.md)<br>
 * [Status](#status)<br>
 * [Compatibility](#Compatibility)<br>
 * [Warning](#warning)<br>
@@ -9,7 +10,6 @@
 * [Flashing the firmware](#flashing)<br>
 * [Building](#build)<br>
 * [Creating a .ioc file from scratch](#Creating_ioc)<br>
-* [Operations guide](Readme_files/Operation.md)<br>
 * [Additional Documentation](#docs)<br>
 * [Pending or non working features](#pending)<br>
 
@@ -348,9 +348,9 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
        
             
 <a id="pending"></a>
-### Pending or non working features
-* I2C eeprom not implemented yet. Internal flash storage is used. (1KB free needed)
-* RTC clock is not implemented and probably never will.
+### Non working features
+* I2C eeprom. Some boards have it, some doesn't. So internal flash storage is used for all.
+* RTC clock. And probably never will.
 
 
 
