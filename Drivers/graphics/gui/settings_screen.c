@@ -17,7 +17,7 @@ static char t[TipSize][TipCharSize];
 static int32_t temp;
 static uint8_t resStatus, profile;
 char str[5];
-uint32_t settingsTimer;
+static uint32_t settingsTimer;
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Settings screen widgets
@@ -1187,6 +1187,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->displayString="SAVE";
 	w->posX = 0;
 	w->posY = 48;
+	w->width = 42;
 	w->buttonWidget.selectable.tab = 3;
 	w->buttonWidget.action = &saveTip;
 
@@ -1196,8 +1197,9 @@ void settings_screen_setup(screen_t *scr) {
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
 	w->displayString="BACK";
-	w->posX = 90;
+	w->posX = 86;
 	w->posY = 48;
+	w->width = 42;
 	w->buttonWidget.selectable.tab = 1;
 	w->buttonWidget.action = &cancelTip;
 
@@ -1207,8 +1209,9 @@ void settings_screen_setup(screen_t *scr) {
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
 	w->displayString="DEL.";
-	w->posX = 46 ;
+	w->posX = 43 ;
 	w->posY = 48;
+	w->width = 42;
 	w->buttonWidget.selectable.tab = 2;
 	w->buttonWidget.action = &delTip;
 }
