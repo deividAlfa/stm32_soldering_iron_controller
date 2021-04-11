@@ -33,7 +33,9 @@ enum {	screen_boot,
 				screen_reset_confirmation,
 		screen_edit_iron_tips,
 			screen_edit_tip_name,
-		screen_edit_calibration_wait,
+		screen_edit_calibration,
+			screen_edit_calibration_start,
+			screen_edit_calibration_adjust,
 			screen_edit_calibration_input,
 #ifdef ENABLE_DEBUG_SCREEN
 		screen_debug,
@@ -69,7 +71,9 @@ screen_t Screen_system;
 		screen_t Screen_reset_confirmation;
 screen_t Screen_edit_iron_tips;
 	screen_t Screen_edit_tip_name;
-screen_t Screen_edit_calibration_wait;
+	screen_t Screen_edit_calibration;
+	screen_t Screen_edit_calibration_start;
+	screen_t Screen_edit_calibration_adjust;
 	screen_t Screen_edit_calibration_input;
 #ifdef ENABLE_DEBUG_SCREEN
 screen_t Screen_debug;
