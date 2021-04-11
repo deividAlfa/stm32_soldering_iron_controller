@@ -185,11 +185,11 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].calADC_At_250 = T12_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = T12_Cal350;			// These values are way lower, but better to be safe than sorry
 			systemSettings.Profile.tip[x].calADC_At_450 = T12_Cal450;			// User needs to calibrate its station
-			systemSettings.Profile.tip[x].PID.Kp = (float)0.0052;
-			systemSettings.Profile.tip[x].PID.Ki = (float)0.0025;
-			systemSettings.Profile.tip[x].PID.Kd = (float)0.0014;
-			systemSettings.Profile.tip[x].PID.min = (float)0;
-			systemSettings.Profile.tip[x].PID.max = (float)1;
+			systemSettings.Profile.tip[x].PID.Kp = 5200;
+			systemSettings.Profile.tip[x].PID.Ki = 2500;
+			systemSettings.Profile.tip[x].PID.Kd = 1400;
+			systemSettings.Profile.tip[x].PID.min = 0;
+			systemSettings.Profile.tip[x].PID.max = 1;
 			systemSettings.Profile.tip[x].PID.maxI = 200;
 			systemSettings.Profile.tip[x].PID.minI = 0;
 		}
@@ -199,6 +199,10 @@ void resetCurrentProfile(void){
 		systemSettings.Profile.impedance=80;
 		systemSettings.Profile.power=80;
 		systemSettings.Profile.noIronValue=4000;
+		systemSettings.Profile.Cal250_default=T12_Cal250;
+		systemSettings.Profile.Cal350_default=T12_Cal350;
+		systemSettings.Profile.Cal450_default=T12_Cal450;
+
 	}
 
 	else if(systemSettings.settings.currentProfile==profile_C245){
@@ -207,11 +211,11 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].calADC_At_250 = C245_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = C245_Cal350;
 			systemSettings.Profile.tip[x].calADC_At_450 = C245_Cal450;
-			systemSettings.Profile.tip[x].PID.Kp = (float)0.0028;
-			systemSettings.Profile.tip[x].PID.Ki = (float)0.0018;
-			systemSettings.Profile.tip[x].PID.Kd = (float)0.00007;
-			systemSettings.Profile.tip[x].PID.min = (float)0;
-			systemSettings.Profile.tip[x].PID.max = (float)1;
+			systemSettings.Profile.tip[x].PID.Kp = 2800;
+			systemSettings.Profile.tip[x].PID.Ki = 1800;
+			systemSettings.Profile.tip[x].PID.Kd = 700;
+			systemSettings.Profile.tip[x].PID.min = 0;
+			systemSettings.Profile.tip[x].PID.max = 1;
 			systemSettings.Profile.tip[x].PID.maxI = 200;
 			systemSettings.Profile.tip[x].PID.minI = 0;
 		}
@@ -221,6 +225,9 @@ void resetCurrentProfile(void){
 		systemSettings.Profile.impedance=26;
 		systemSettings.Profile.power=150;
 		systemSettings.Profile.noIronValue=4000;
+		systemSettings.Profile.Cal250_default=C245_Cal250;
+		systemSettings.Profile.Cal350_default=C245_Cal350;
+		systemSettings.Profile.Cal450_default=C245_Cal450;
 	}
 
 	else if(systemSettings.settings.currentProfile==profile_C210){
@@ -229,20 +236,23 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].calADC_At_250 = C210_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = C210_Cal350;
 			systemSettings.Profile.tip[x].calADC_At_450 = C210_Cal450;
-			systemSettings.Profile.tip[x].PID.Kp = (float)0.0028;
-			systemSettings.Profile.tip[x].PID.Ki = (float)0.0018;
-			systemSettings.Profile.tip[x].PID.Kd = (float)0.00007;
-			systemSettings.Profile.tip[x].PID.min = (float)0;
-			systemSettings.Profile.tip[x].PID.max = (float)1;
+			systemSettings.Profile.tip[x].PID.Kp = 2800;
+			systemSettings.Profile.tip[x].PID.Ki = 1800;
+			systemSettings.Profile.tip[x].PID.Kd = 700;
+			systemSettings.Profile.tip[x].PID.min = 0;
+			systemSettings.Profile.tip[x].PID.max = 1;
 			systemSettings.Profile.tip[x].PID.maxI = 200;
 			systemSettings.Profile.tip[x].PID.minI = 0;
 		}
 		systemSettings.Profile.currentNumberOfTips = 1;
 		systemSettings.Profile.currentTip = 0;
 		strcpy(systemSettings.Profile.tip[0].name, "C210");
-		systemSettings.Profile.noIronValue=1200;
 		systemSettings.Profile.power=80;
 		systemSettings.Profile.impedance=21;
+		systemSettings.Profile.noIronValue=1200;
+		systemSettings.Profile.Cal250_default=C210_Cal250;
+		systemSettings.Profile.Cal350_default=C210_Cal350;
+		systemSettings.Profile.Cal450_default=C210_Cal450;
 	}
 	else if(systemSettings.settings.currentProfile==profile_None){
 		asm("nop");																		// We shouldn't get here
@@ -257,7 +267,6 @@ void resetCurrentProfile(void){
 	systemSettings.Profile.pwmDelay=1999;
 	systemSettings.Profile.filterFactor=2;
 	systemSettings.Profile.filterMode=filter_ema;
-	systemSettings.Profile.PIDTime= (systemSettings.Profile.pwmPeriod+1)/100;
 	systemSettings.Profile.tempUnit=mode_Celsius;
 }
 
