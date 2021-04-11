@@ -85,9 +85,6 @@ enum{
 	filter_avg		= 0,
 	filter_ema		= 1,
 
-	noForceMode		= 0,
-	forceMode		= 1,
-
 	buzzer_Off		= 0,
 	buzzer_On		= 1,
 
@@ -127,7 +124,9 @@ __attribute__ ((aligned (4))) typedef struct{
 	uint16_t noIronValue;
 	uint8_t filterMode;
 	uint8_t filterFactor;
-	uint16_t PIDTime;
+	uint16_t Cal250_default;
+	uint16_t Cal350_default;
+	uint16_t Cal450_default;
 }profile_t;
 
 __attribute__ ((aligned (4))) typedef struct{
