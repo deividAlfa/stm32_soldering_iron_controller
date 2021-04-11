@@ -65,7 +65,6 @@ void handleIron(void) {
 	static uint32_t prevSysChecksum=0, newSysChecksum=0;
 	static uint32_t prevTipChecksum=0, newTipChecksum=0;
 	static uint32_t checksumtime=0;
-	static uint32_t PID_time=0;
 	uint32_t CurrentTime = HAL_GetTick();
 	float set=0;
 	
