@@ -44,6 +44,6 @@ void guiInit(void) {
 	oled_addScreen(&Screen_debug2,screen_debug2);
 	debug2_screen_setup(&Screen_debug2);
 #endif
-	oled_addScreen(&Screen_edit_calibration_wait,screen_edit_calibration_wait);
-	calibration_screen_setup(&Screen_edit_calibration_wait);
+	oled_addScreen(&Screen_edit_calibration,screen_edit_calibration);
+	calibration_screen_setup(&Screen_edit_calibration);
 }
