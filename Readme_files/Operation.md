@@ -19,12 +19,14 @@ Press and turn anticlockwise (while pressed) to force entering sleep mode.<br>
 A long press will enter the system menu. The controller will return to the main screen with another long press, scrolling and selecting "BACK" from each menu, or 15 seconds of inactivity.<br>
 To operate the menus, rotate to scroll to the desired selection, quick press to select it, rotate to change. Quick press again to exit the setting.<br>
 
+
 ## Theory of Operation<br>
 Before covering the settings, it is useful to understand how it works.<br>
 Tip temperature is measured by using an ADC (Analog-Digital Converter) to measure the voltage output by a thermocouple in the tip.<br>
 The voltage is basically proportional to the difference between tip temperature and room temperature.
 The controller uses PWM (Pulse Width Modulation) to control the tip temperature.<br>
-PWM basically varies the amount of time that the tip is powered. By default, PWM uses a 200 ms (5 times per second) period.<br>
+PWM basically varies the amount of time that the tip is powered.<br>
+By default, PWM uses a 200 ms (5 times per second) period.<br>
 If the tip is too hot, the controller will turn on power to the tip little or not at all during each cycle.<br>
 If the tip is too cold, it will turn the power on for more of the period.<br>
 The time the tip is powered on during each period is called the duty cycle.<br> 
@@ -34,14 +36,14 @@ The time the tip is powered on during each period is called the duty cycle.<br>
 </pre>
 The PID (Proportional, Integral, Derivitive) algorithm determines the PWM duty cycle based on the difference between desired and measured tip temperatures.<br>
 
-## Menus<br>
+## System menu<br>
 
 ### PID
-
 The PID menu allows fine tuning of the algorithm.<br>
 PID tuning is an advanced topic, _**incorrect settings here can result in instability and damage to tips and possibly the controller**_.<br>
-Most users should not change these settings, but here are the basics. Kp, Ki, and Kd are the coefficients which control the PID's behavior. In simple terms:
-  * #### _Kp_ 
+Most users should not change these settings, but here are the basics. Kp, Ki, and Kd are the coefficients which control the PID's behavior.<br>
+In simple terms:
+  * ##### _Kp_ 
 The proportional term, changes the PWM duty cycle based on how far the measured temperature is from the desired temperature.<br>
   * #### _Ki_ 
 The integral term, changes the duty cycle based on how long the temperatures have been different.<br>
@@ -61,7 +63,10 @@ Sets the PWM period. The controller will check and adjust the tip temperature on
   * #### _ADC Delay_
 Near the end of each PWM period, the temperature is measured by the ADC.<br>
 _ADC Delay_ controls how soon before the end of a period the temperature is measured.<br> 
+This delay is needed to have a clean reading of the thermocouple. If the delay is too low, it will read switching noise and be very unstable.<br>
 The measurement can only be taken when the power to the tip is off, so the effective PWM duty cycle is limited to (_PWM Time_ - _ADC Delay_).<br>
+If you getrandom spikes in the temperature reading, try increasing the value. 20mS is usually more than enough.<br>
+There are other factors that could cause unstability, like poor circuit design, power supply noise or bad quality parts.<br>
 Default 20 ms.<br>
 <pre>
 |<----------------- PWM TIME -------------------->|
@@ -103,7 +108,7 @@ Allow waking the controller by pressing the encoder button.<br>
   * #### _Buzzer_
 Buzz/beep when notable conditions occur.<br>
   * * Changing operating mode (sleep, run)<br>
-  * * Temperature reached after the setpoint was changes<br>
+  * * Temperature reached after the setpoint was changed<br>
   * * Alarm when no iron is detected or system error happens<br>
   * #### _Unit_
 Temperature scale, Celsius or Fahrenheit<br>
@@ -149,7 +154,7 @@ Requires a tip thermometer (e.g. Hakko FG-100 or similar). Calibrates the curren
 Wait for tip temperature to settle, then enter temperature as measured by the thermometer for each step.<br>
 If the entered temperature is more than 50ºC higher than the target calibration value, the process will be aborted and you will have to adjust it manually<br>
 * #### _Adjust_
-Here you can adjust the default calibration values. For every step (250,350,450ºC) adjust the value until it's close to the target temperature.
+Here you can adjust the default calibration values. For every step (250,350,450ºC) adjust the value until it's close to the target temperature.<br> 
 Click on save to apply and store the changes, or cancel to discard.<br>
 The Save button will be hidden if no changes were made, or the entered data is invalid.<br>
 
@@ -157,28 +162,29 @@ The Save button will be hidden if no changes were made, or the entered data is i
 ### ERROR REPORTING
 A lot of effort was done to protect the tips from overheating.<br>
 Any detected error will disable PWM and show a message on the display.<br>
+To recover from an error, simply press the button and it will reboot.<br>
 There are multiple error types:<br>
 * #### _Iron warning_
-Non critical errors, a warning will be shown about iron not connected, supply voltyage too low, ambient temperature too high or too low.<br>
+Non critical errors, a warning will be shown: iron not detected, supply voltage too low, ambient temperature too high or too low.<br>
 * #### _Iron runaway_
 If by any means the iron temperature is higher than requested and the PWM is still active, it will trigger a timer depending on the temperature diference.<br>
-The condition must dissapear in the specified time, otherwise it will trigger a critical runaway error a lock the station, shutting down the power stage<br>
+The condition must dissapear within the specified time, otherwise it will trigger a critical runaway error, shutting down the power stage<br>
 * #### _Internal function errors_
-If any internal function detects undefined or not expected state, it will also lock the station and show a message trying to show where the error happened (File, line).<br>
+If any internal function detects undefined or not expected state, it will lock the station and show a message trying to show where the error happened (File, line).<br>
 * #### _Hardware exceptions_
-If a hardware exception happens, it will also lock the station and try to show an error message.<br>
+If a hardware exception happens, the station will lock up and display an error message about the exception.<br>
  * #### _Data error detection_
 The data is stored as separate blocks: System settings, profile 1, profile 2 and profile 3.<br>
-Each one has it's own CRC checksum. Everytime the data is read, the checksum are computed and compared.<br>
-If a mismatch happens, it will erase that block, trying to preserve the rest.<br>
-An error will be shown, detailing if the error detected belongs to the system settings data, or any of the profiles.<br>
+Each one has it's own CRC checksum. When a block is read, the checksum is computed and compared.<br>
+If a mismatch occurs, the block will be erased and resetted to defaults, trying to preserve the rest of the data.<br>
+An error will be shown, detailing if the error detected was on the system settings data, or in any of the profiles.<br>
 Also, the flash storage is checked carefully before and after writes, any issue will trigger a flash error message.<br>
- 
+  
  ### HARD RESET
 If for any reason the station is unable to boot, you can't access the reset menu or you want to reset everything up quickly, there's a hard reset method.<br>
 Power the station off, push and hold the button, then power the station on.<br>
 A message will appear in the screen. "Hold button to restore defaults".<br>
 Keep pressing the button for another 5 seconds, until the next message appears, "Release button now".
-Release the button, the station will reset and wipe everything.<br>
+Release the button, the station will wipe everything and reboot.<br>
 
 If you accidentally pushed the button, just release it before the 5 second timeout to resume the boot process. 
