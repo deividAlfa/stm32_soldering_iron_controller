@@ -126,12 +126,6 @@ void handleIron(void) {
 			buzzer_long_beep();
 		}
 	}
-	//Timer for updating PID calculation
-	// Don't calculate PID for the first second after boot, as the filters might not have enough data yet (Only causes problem with high EMA/DEMA coefficients)
-	if((CurrentTime-PID_time)<systemSettings.Profile.PIDTime || (CurrentTime<1000)){
-		return;
-	}
-	PID_time=CurrentTime;
 
 	// If there are pending PWM settings to be applied, apply them before new calculation
 	if(Iron.updatePwm==needs_update){
@@ -475,11 +469,11 @@ void setDebugMode(uint8_t value) {
 // Sets the user temperature
 void setSetTemperature(uint16_t temperature) {
 	static uint8_t prevProfile=profile_None;
+	Iron.Cal_TemperatureReachedFlag = 0;
 	if((systemSettings.Profile.UserSetTemperature != temperature)||(prevProfile!=systemSettings.settings.currentProfile)){
 		prevProfile=systemSettings.settings.currentProfile;
 		systemSettings.Profile.UserSetTemperature = temperature;
 		Iron.CurrentSetTemperature=temperature;
-		Iron.Cal_TemperatureReachedFlag = 0;
 		//resetPID();
 	}
 }
