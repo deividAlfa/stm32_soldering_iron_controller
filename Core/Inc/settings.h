@@ -80,7 +80,6 @@ enum{
 	mode_run		= 1,
 
 	initialized		= 0,
-	notInitialized	= 1,
 
 	filter_avg		= 0,
 	filter_ema		= 1,
@@ -111,7 +110,7 @@ typedef struct tipData {
 __attribute__ ((aligned (4))) typedef struct{
 	uint8_t ID;
 	tipData tip[TipSize];
-	bool initialized;
+	uint8_t initialized;
 	uint8_t impedance;
 	uint16_t power;
 	uint8_t tempUnit;
@@ -127,6 +126,7 @@ __attribute__ ((aligned (4))) typedef struct{
 	uint16_t Cal250_default;
 	uint16_t Cal350_default;
 	uint16_t Cal450_default;
+	int8_t CalNTC;
 }profile_t;
 
 __attribute__ ((aligned (4))) typedef struct{

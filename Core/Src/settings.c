@@ -54,7 +54,7 @@ void saveSettings(bool wipeAllProfileData) {
 	}
 	else{																								// Wipe all tip data
 		for(uint8_t x=0;x<ProfileSize;x++){
-			flashBuffer.Profile[x].initialized=notInitialized;													// Set all profile data to "1"
+			flashBuffer.Profile[x].initialized=0xFF;													// Set all profile data to "1"
 			flashBuffer.ProfileChecksum[x]=0xFF;
 			memset(&flashBuffer.Profile[x],0xFF,sizeof(profile_t));
 		}
@@ -124,7 +124,7 @@ void restoreSettings() {
 	return;
 #endif
 
-	if(flashSettings->settings.initialized==notInitialized){											// If flash not initialized (Erased flash is always read "1")
+	if(flashSettings->settings.initialized!=initialized){											// If flash not initialized (Erased flash is always read "1")
 		resetSystemSettings();
 		saveSettings(saveWipingProfiles);
 	}
@@ -261,6 +261,7 @@ void resetCurrentProfile(void){
 	else{
 		Error_Handler();
 	}
+	systemSettings.Profile.CalNTC=25;
 	systemSettings.Profile.sleepTimeout = 10;
 	systemSettings.Profile.UserSetTemperature = 320;
 	systemSettings.Profile.pwmPeriod=19999;
@@ -280,7 +281,7 @@ void loadProfile(uint8_t profile){
 		systemSettings.Profile = flashSettings->Profile[profile];						// Load stored tip data
 		systemSettings.ProfileChecksum = flashSettings->ProfileChecksum[profile];		// Load stored checksum
 
-		if(systemSettings.Profile.initialized==notInitialized){							// Check if initialized
+		if(systemSettings.Profile.initialized!=initialized){							// Check if initialized
 			resetCurrentProfile();														// Load defaults if not
 			systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);	// Compute checksum
 		}
