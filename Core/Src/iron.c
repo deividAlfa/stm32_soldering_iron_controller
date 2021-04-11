@@ -141,7 +141,7 @@ void handleIron(void) {
 	// Else use current setpoint value
 	else{
 	  // Disable output if requested temperature is below 100ºC or iron temp higher than setpoint
-	  if((Iron.CurrentSetTemperature>100)/*&&(tipTemp<Iron.CurrentSetTemperature)*/){
+	  if(Iron.CurrentSetTemperature>100){
 		  uint16_t t=human2adc(Iron.CurrentSetTemperature);
 		  if(t){
 			  set = calculatePID(t, TIP.last_avg);
