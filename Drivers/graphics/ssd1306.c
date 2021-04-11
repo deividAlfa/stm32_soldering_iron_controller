@@ -15,7 +15,7 @@ oled_t oled = {
 #endif
 	fillDMA:	NULL,
 };
-
+static uint8_t lastContrast;
 
 
 
@@ -337,8 +337,12 @@ void setOledRow(uint8_t row){
 void setContrast(uint8_t value) {
 	write_cmd(0x81);         // Set Contrast Control
 	write_cmd(value);         //   Default => 0xFF
+	lastContrast = value;
 }
 
+uint8_t getContrast(void) {
+	return lastContrast;
+}
 
 #if defined OLED_SOFT_SPI
 void ssd1306_init(DMA_HandleTypeDef *dma){
