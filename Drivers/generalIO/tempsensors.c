@@ -84,19 +84,14 @@ uint16_t human2adc(int16_t t) {
 	if (t < temp_minC){ return 0; } // If requested temp below min, return 0
 	else if (t > temp_maxC){ t = temp_maxC; } // If requested over max, apply limit
 
-	// If t>350, map between ADC values Cal_300 - Cal_400
+	// If t>350, map between ADC values Cal_350 - Cal_450
 	if (t >= 350){
 		temp = map(t, 350, 450, currentTipData->calADC_At_350, currentTipData->calADC_At_450);
 	}
-	// If t>200, map between ADC values Cal_200 - Cal_300
-	else if(t >= 250){
-		temp = map(t, 250, 350, currentTipData->calADC_At_250, currentTipData->calADC_At_350);
-	}
-	// If t<200, map between ADC values ambTemp - Cal_200
+	// Else, map between ADC values Cal_250 - Cal_350
 	else{
-		temp = map(t, ambTemp, 250, 0, currentTipData->calADC_At_250);
+ 		temp = map(t, 250, 350, currentTipData->calADC_At_250, currentTipData->calADC_At_350);
 	}
-
 	tH = adc2Human(temp,0,mode_Celsius);
 	if (tH < t) {
 		while(tH < t){
@@ -119,11 +114,8 @@ int16_t adc2Human(uint16_t adc_value,bool correction, bool tempUnit) {
 	if (adc_value >= currentTipData->calADC_At_350) {
 		tempH = map(adc_value, currentTipData->calADC_At_350, currentTipData->calADC_At_450, 350, 450);
 	}
-	else if(adc_value >= currentTipData->calADC_At_250){
-		tempH = map(adc_value, currentTipData->calADC_At_250, currentTipData->calADC_At_350, 250, 350);
-	}
 	else{
-		tempH = map(adc_value, 0, currentTipData->calADC_At_250, ambTemp, 250);
+		tempH = map(adc_value, currentTipData->calADC_At_250, currentTipData->calADC_At_350, 250, 350);
 	}
 	if(correction){ tempH+= ambTemp; }
 	if(tempUnit==mode_Farenheit){
