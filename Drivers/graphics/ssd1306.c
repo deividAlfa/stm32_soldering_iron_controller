@@ -475,9 +475,13 @@ void FillBuffer(bool color, bool mode){
 // Abort DMA transfers and reset status
 void display_abort(void){
 #if defined OLED_SPI
-	HAL_SPI_Abort(oled.device);
+	if(oled.device!=NULL){
+		HAL_SPI_Abort(oled.device);
+	}
 #elif defined OLED_I2C
-	HAL_I2C_Abort(oled.device);
+	if(oled.device!=NULL){
+		HAL_I2C_Abort(oled.device);
+	}
 #endif
 
 	__HAL_UNLOCK(oled.device);
@@ -625,49 +629,46 @@ void FatalError(uint8_t type){
 	Diag_init();
 	switch(type){
 		case error_NMI:
-			u8g2_DrawStr(&u8g2, 2, 15,"NMI HANDLER");
+			putStrAligned("NMI HANDLER", 0, align_center);
 			break;
 		case error_HARDFAULT:
-			u8g2_DrawStr(&u8g2, 8, 15, "HARD FAULT");
+			putStrAligned("HARD FAULT", 0, align_center);
 			break;
 		case error_MEMMANAGE:
-			u8g2_DrawStr(&u8g2, 8, 15, "MEM MANAGE");
+			putStrAligned("MEM MANAGE", 0, align_center);
 			break;
 		case error_BUSFAULT:
-			u8g2_DrawStr(&u8g2, 11, 15, "BUS FAULT");
+			putStrAligned("BUS FAULT", 0, align_center);
 			break;
 		case error_USAGEFAULT:
-			u8g2_DrawStr(&u8g2, 2, 15, "USAGE FAULT");
+			putStrAligned("USAGE FAULT", 0, align_center);
 			break;
 		case error_RUNAWAY25:
-			u8g2_DrawStr(&u8g2, 0, 0, "TEMP RUNAWAY");
-			u8g2_DrawStr(&u8g2, 38, 17, ">25\260C");
-			break;
 		case error_RUNAWAY50:
-			u8g2_DrawStr(&u8g2, 0, 0, "TEMP RUNAWAY");
-			u8g2_DrawStr(&u8g2, 38, 17, ">50\260C");
-			break;
 		case error_RUNAWAY75:
-			u8g2_DrawStr(&u8g2, 0, 0, "TEMP RUNAWAY");
-			u8g2_DrawStr(&u8g2, 38, 17, ">75\260C");
-			break;
 		case error_RUNAWAY100:
-			u8g2_DrawStr(&u8g2, 0, 0, "TEMP RUNAWAY");
-			u8g2_DrawStr(&u8g2, 33, 17, ">100\260C");
+		{
+			uint8_t level = 25 * ((type - error_RUNAWAY25)+1);
+			char strRunawayLevel[8];
+			sprintf(strRunawayLevel,">%u\260C\n",level);
+			putStrAligned("TEMP RUNAWAY", 0, align_center);
+			putStrAligned(strRunawayLevel, 15, align_center);
 			break;
+		}
 		case error_RUNAWAY500:
-			u8g2_DrawStr(&u8g2, 23, 0, "EXCEEDED");
-			u8g2_DrawStr(&u8g2, 33, 17, "500\260C!");
+			putStrAligned("EXCEEDED", 0, align_center);
+			putStrAligned("500\260C!", 15, align_center);
 			break;
 		case error_RUNAWAY_UNKNOWN:
-			u8g2_DrawStr(&u8g2, 0, 0, "TEMP RUNAWAY");
-			u8g2_DrawStr(&u8g2, 23, 17, "UNKNOWN");
+			putStrAligned("TEMP RUNAWAY", 0, align_center);
+			putStrAligned("UNDEFINED!", 15, align_center);
 			break;
 		default:
-			u8g2_DrawStr(&u8g2, 2, 15, "UNDEFINED");
+			putStrAligned("UNKNOWN ERROR", 0, align_center);
 			break;
 	}
-	u8g2_DrawStr(&u8g2, 24, 33, "ERROR!!");
+	putStrAligned("SYSTEM HALTED", 35, align_center);
+	putStrAligned("Use btn to reset", 50, align_center);
 
 	#if defined OLED_I2C || defined OLED_SPI
 	update_display_ErrorHandler();
