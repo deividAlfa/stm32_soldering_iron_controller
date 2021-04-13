@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f1xx_hal.h"
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -44,8 +44,6 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-extern IWDG_HandleTypeDef HIWDG;
-extern CRC_HandleTypeDef HCRC;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -78,37 +76,6 @@ void Program_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define EE_SCL_Pin GPIO_PIN_0
-#define EE_SCL_GPIO_Port GPIOA
-#define EE_SDA_Pin GPIO_PIN_1
-#define EE_SDA_GPIO_Port GPIOA
-#define TIP_TEMP_Pin GPIO_PIN_2
-#define TIP_TEMP_GPIO_Port GPIOA
-#define BUZ0_Pin GPIO_PIN_3
-#define BUZ0_GPIO_Port GPIOA
-#define BUZ1_Pin GPIO_PIN_4
-#define BUZ1_GPIO_Port GPIOA
-#define BUZ2_Pin GPIO_PIN_5
-#define BUZ2_GPIO_Port GPIOA
-#define WAKE_Pin GPIO_PIN_6
-#define WAKE_GPIO_Port GPIOA
-#define WAKE_EXTI_IRQn EXTI9_5_IRQn
-#define NTC_Pin GPIO_PIN_7
-#define NTC_GPIO_Port GPIOA
-#define PWM_Pin GPIO_PIN_0
-#define PWM_GPIO_Port GPIOB
-#define V_INPUT_Pin GPIO_PIN_1
-#define V_INPUT_GPIO_Port GPIOB
-#define OLED_SDA_Pin GPIO_PIN_12
-#define OLED_SDA_GPIO_Port GPIOB
-#define OLED_SCL_Pin GPIO_PIN_13
-#define OLED_SCL_GPIO_Port GPIOB
-#define ROT_ENC_BUTTON_Pin GPIO_PIN_15
-#define ROT_ENC_BUTTON_GPIO_Port GPIOA
-#define ROT_ENC_L_Pin GPIO_PIN_3
-#define ROT_ENC_L_GPIO_Port GPIOB
-#define ROT_ENC_R_Pin GPIO_PIN_4
-#define ROT_ENC_R_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 #define WAKE_input()		HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin)
 #define BUTTON_input()		HAL_GPIO_ReadPin(ROT_ENC_BUTTON_GPIO_Port, ROT_ENC_BUTTON_Pin)
