@@ -8,8 +8,6 @@
 #ifndef GRAPHICS_GUI_SCREEN_H_
 #define GRAPHICS_GUI_SCREEN_H_
 
-//#define ENABLE_DEBUG_SCREEN
-
 #include "main.h"
 #include "iron.h"
 #include "pid.h"
@@ -37,10 +35,8 @@ enum {	screen_boot,
 			screen_edit_calibration_start,
 			screen_edit_calibration_adjust,
 			screen_edit_calibration_input,
-#ifdef ENABLE_DEBUG_SCREEN
 		screen_debug,
 			screen_debug2,
-#endif
 		};
 
 typedef struct screen_t screen_t;
@@ -61,24 +57,7 @@ struct screen_t
 	void (*init)(screen_t *scr);
 };
 
-screen_t Screen_boot;
-screen_t Screen_main;
-screen_t Screen_settingsmenu;
-screen_t Screen_pid;
-screen_t Screen_iron;
-screen_t Screen_system;
-	screen_t Screen_reset;
-		screen_t Screen_reset_confirmation;
-screen_t Screen_edit_iron_tips;
-	screen_t Screen_edit_tip_name;
-	screen_t Screen_edit_calibration;
-	screen_t Screen_edit_calibration_start;
-	screen_t Screen_edit_calibration_adjust;
-	screen_t Screen_edit_calibration_input;
-#ifdef ENABLE_DEBUG_SCREEN
-screen_t Screen_debug;
-	screen_t Screen_debug2;
-#endif
+
 
 widget_t *screen_tabToWidget(screen_t * scr, uint8_t tab);
 void screen_addWidget(widget_t *widget, screen_t *scr);

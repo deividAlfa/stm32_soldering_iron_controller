@@ -10,6 +10,7 @@
 #include "oled.h"
 #include "gui.h"
 
+
 #ifdef ENABLE_DEBUG_SCREEN
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug screen variables
@@ -19,6 +20,10 @@ int32_t debugTemperature = 0;
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
+
+screen_t Screen_debug;
+screen_t Screen_debug2;
+
 static widget_t Debug_ADC_Val;
 static widget_t Debug_ADC_ValRaw;
 static widget_t Debug2_ADC_Val;
@@ -95,7 +100,7 @@ static void * debug_screen_getD() {
 	return &temp;
 }
 static void * debug_screen_getError() {
-	temp = getError();
+	temp = getPID_Error();
 	return &temp;
 }
 static void * debug_screen_getOutput() {

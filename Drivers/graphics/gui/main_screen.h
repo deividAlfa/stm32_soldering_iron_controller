@@ -10,6 +10,10 @@
 
 #include "screen.h"
 
+
+
+extern screen_t Screen_main;
+
 void main_screen_setup(screen_t *scr);
 void main_screen_draw(screen_t *scr);
 extern volatile uint16_t seconds2;

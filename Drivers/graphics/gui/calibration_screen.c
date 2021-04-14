@@ -6,6 +6,7 @@
  */
 
 #include "calibration_screen.h"
+#include "settings_screen.h"
 #include "oled.h"
 #include "gui.h"
 
@@ -33,6 +34,10 @@ static uint16_t adcCal[3];
 static uint8_t processCalibration();
 static tipData * Currtip;
 
+screen_t Screen_edit_calibration;
+screen_t Screen_edit_calibration_start;
+screen_t Screen_edit_calibration_adjust;
+screen_t Screen_edit_calibration_input;
 
 static widget_t comboWidget_Cal;
 static comboBox_item_t Cal_Combo_Start;

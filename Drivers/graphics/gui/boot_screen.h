@@ -7,8 +7,11 @@
 
 #ifndef GRAPHICS_GUI_BOOT_H_
 #define GRAPHICS_GUI_BOOT_H_
-
 #include "screen.h"
+
+
+extern screen_t Screen_boot;
+
 
 void boot_screen_setup(screen_t * scr);
 int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *);

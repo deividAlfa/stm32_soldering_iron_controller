@@ -6,6 +6,8 @@
  */
 
 #include "settings_screen.h"
+#include "main_screen.h"
+#include "debug_screen.h"
 #include "oled.h"
 #include "gui.h"
 #include "board.h"
@@ -22,6 +24,14 @@ static uint32_t settingsTimer;
 //-------------------------------------------------------------------------------------------------------------------------------
 // Settings screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
+screen_t Screen_settingsmenu;
+screen_t Screen_pid;
+screen_t Screen_iron;
+screen_t Screen_system;
+screen_t Screen_reset;
+screen_t Screen_reset_confirmation;
+screen_t Screen_edit_iron_tips;
+screen_t Screen_edit_tip_name;
 
 // SETTINGS SCREEM
 static widget_t comboWidget_Settings;
@@ -224,7 +234,8 @@ static void * getKp() {
 static void setKp(int32_t *val) {
 	currentPID.Kp = *val;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kp=currentPID.Kp ;
-	setupPIDFromStruct();
+	setupPID(&currentPID);
+	resetPID();
 }
 static void * getKi() {
 	temp = currentPID.Ki;
@@ -233,7 +244,8 @@ static void * getKi() {
 static void setKi(int32_t *val) {
 	currentPID.Ki = *val;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Ki=currentPID.Ki;
-	setupPIDFromStruct();
+	setupPID(&currentPID);
+	resetPID();
 }
 static void * getKd() {
 	temp = currentPID.Kd;
@@ -242,7 +254,8 @@ static void * getKd() {
 static void setKd(int32_t *val) {
 	currentPID.Kd = *val;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kd=currentPID.Kd;
-	setupPIDFromStruct();
+	setupPID(&currentPID);
+	resetPID();
 }
 
 static void * getPWMPeriod() {
@@ -921,7 +934,7 @@ void settings_screen_setup(screen_t *scr) {
 	screen_addWidget(w,sc);
 	widgetDefaultsInit(w, widget_button);
 	w->displayString="CANCEL";
-	w->posX = 74;
+	w->posX = 72;
 	w->posY = 48;
 	w->width = 56;
 	w->buttonWidget.selectable.tab = 0;
@@ -945,8 +958,8 @@ void settings_screen_setup(screen_t *scr) {
 	dis->getData = &getKp;
 	dis->number_of_dec = 2;
 	w->editableWidget.max_value=65000;
-	w->editableWidget.big_step = 1000;
-	w->editableWidget.step = 50;
+	w->editableWidget.big_step = 10;
+	w->editableWidget.step = 1;
 	w->editableWidget.setData =  (void (*)(void *))&setKp;
 
 	//********[ KI Widget ]***********************************************************
@@ -958,8 +971,8 @@ void settings_screen_setup(screen_t *scr) {
 	dis->getData = &getKi;
 	dis->number_of_dec = 2;
 	w->editableWidget.max_value=65000;
-	w->editableWidget.big_step = 1000;
-	w->editableWidget.step = 50;
+	w->editableWidget.big_step = 10;
+	w->editableWidget.step = 1;
 	w->editableWidget.setData = (void (*)(void *))&setKi;
 
 	//********[ KD Widget ]***********************************************************
@@ -971,8 +984,8 @@ void settings_screen_setup(screen_t *scr) {
 	dis->getData = &getKd;
 	dis->number_of_dec = 2;
 	w->editableWidget.max_value=65000;
-	w->editableWidget.big_step = 1000;
-	w->editableWidget.step = 50;
+	w->editableWidget.big_step = 10;
+	w->editableWidget.step = 1;
 	w->editableWidget.setData = (void (*)(void *))&setKd;
 
 	//========[ PID COMBO ]===========================================================

@@ -12,9 +12,7 @@
 #include "calibration_screen.h"
 #include "oled.h"
 #include "screen.h"
-#ifdef ENABLE_DEBUG_SCREEN
 #include "debug_screen.h"
-#endif
 
 u8g2_t u8g2;
 
