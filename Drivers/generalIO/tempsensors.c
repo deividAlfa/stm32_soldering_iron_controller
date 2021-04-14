@@ -10,14 +10,17 @@
 #define temp_minC  100                 // Minimum calibration temperature in degrees of Celsius
 #define temp_maxC  480                 // Maximum calibration temperature in degrees of Celsius
 static tipData *currentTipData;
+uint16_t last_TIP_Raw;
+uint16_t last_TIP;
+int16_t last_NTC;
 
 #ifdef USE_NTC
 const int NTC_TABLE;					// Defined in board.h
 #endif
 
 int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
-	int16_t temp;
 #ifdef USE_NTC
+	int16_t temp;
 	int16_t p1, p2;
 	int16_t lastavg=NTC.last_avg;
 	/* Estimate the interpolating point before and after the ADC value. */
@@ -32,39 +35,51 @@ int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
 	if(tempUnit==mode_Farenheit){
 		temp=TempConversion(temp, mode_Farenheit, 1);
 	}
-	return temp;
+	last_NTC = temp;
+	return last_NTC;
 #else
-	temp=350;				// If no NTC is used, assume 35ºC
-	return temp;
+	last_NTC=350;				// If no NTC is used, assume 35ºC
+	return last_NTC;
 #endif
 }
 // Read tip temperature
 uint16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
+	uint16_t temp, temp_Raw;
 	if(systemSettings.setupMode==setup_On){
 		return 0;
 	}
 	if(update){
-		last_value_Filtered = adc2Human(TIP.last_avg,1,systemSettings.settings.tempUnit);
-		last_value_Raw = adc2Human(TIP.last_RawAvg,1,systemSettings.settings.tempUnit);
-		if(last_value_Filtered>999){
-			last_value_Filtered=999;								// Limit output
+		temp = adc2Human(TIP.last_avg,1,systemSettings.settings.tempUnit);
+		temp_Raw = adc2Human(TIP.last_RawAvg,1,systemSettings.settings.tempUnit);
+
+		// Limit output values
+		if(temp>999){
+			temp=999;
 		}
-		if(last_value_Raw>999){
-			last_value_Raw=999;								// Limit output
+		else if(temp<0){
+			temp=0;
 		}
+		if(temp_Raw>999){
+			temp_Raw=999;
+		}
+		else if(temp_Raw<0){
+			temp_Raw = 0;
+		}
+		last_TIP = temp;
+		last_TIP_Raw = temp_Raw;
 	}
 	if(ReadRaw){
-		return last_value_Raw;
+		return last_TIP_Raw;
 	}
 	else{
-		return last_value_Filtered;
+		return last_TIP;
 	}
 }
 
 void setCurrentTip(uint8_t tip) {
 	currentTipData = &systemSettings.Profile.tip[tip];
 	currentPID = currentTipData->PID;
-	setupPIDFromStruct();
+	setupPID(&currentPID);
 }
 
 tipData* getCurrentTip() {
