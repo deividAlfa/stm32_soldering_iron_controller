@@ -11,8 +11,8 @@
 #include "main.h"
 
 typedef struct pid_values {
-	uint16_t max;
-	uint16_t min;
+	int16_t max;
+	int16_t min;
 	uint16_t Kp;
 	uint16_t Ki;
 	uint16_t Kd;
@@ -20,18 +20,51 @@ typedef struct pid_values {
 	int16_t minI;
 } pid_values_t;
 
-extern volatile pid_values_t currentPID;
+typedef struct {
+	uint32_t lastTime;
+	int32_t lastMeasurement;
+	int32_t lastSetpoint;
 
-void setupPIDFromStruct();
-void setupPID(float max, float min, float Kp, float Kd, float Ki, int16_t _minI, int16_t _maxI );
-float calculatePID( float setpoint, float pv );
+	/* Controller gains */
+	float Kp;
+	float Ki;
+	float Kd;
+
+	/* Derivative low-pass filter time constant */
+	float tau;
+
+	/* Output limits */
+	float limMin;
+	float limMax;
+
+	/* Integrator limits */
+	float limMinInt;
+	float limMaxInt;
+
+	/* Controller "memory" */
+	float proportional;
+	float integrator;
+	float prevError;			/* Required for integrator */
+	float differentiator;
+	float prevMeasurement;		/* Required for differentiator */
+
+	/* Controller output */
+	float out;
+
+} PIDController_t;
+
+extern pid_values_t currentPID;
+extern PIDController_t pid;
+
+
+void setupPID(pid_values_t* p);
+int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc);
 void resetPID();
-float getError();
-float getIntegral();
-float getPID_D();
 float getPID_P();
 float getPID_I();
-float getOutput();
-float getPID_SetPoint();
-float getPID_PresentValue();
+float getPID_D();
+float getPID_Output();
+float getPID_Error();
+int32_t getPID_SetPoint();
+int32_t getPID_PresentValue();
 #endif /* PID_H_ */
