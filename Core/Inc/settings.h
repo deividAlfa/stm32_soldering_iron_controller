@@ -110,7 +110,7 @@ typedef struct tipData {
 __attribute__ ((aligned (4))) typedef struct{
 	uint8_t ID;
 	tipData tip[TipSize];
-	uint8_t initialized;
+	uint8_t NotInitialized;
 	uint8_t impedance;
 	uint16_t power;
 	uint8_t tempUnit;
@@ -144,7 +144,7 @@ __attribute__ ((aligned (4))) typedef struct{
 	bool wakeOnButton;
 	bool WakeInputMode;
 	bool EncoderMode;
-	bool initialized;			// Always 1 if flash is erased
+	bool NotInitialized;			// Always 1 if flash is erased
 }settings_t;
 
 typedef struct{

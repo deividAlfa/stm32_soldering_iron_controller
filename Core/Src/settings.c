@@ -25,8 +25,10 @@ void saveSettings(bool wipeAllProfileData) {
 	uint32_t error=0;
 	flashSettings_t flashBuffer=*flashSettings;	//Read stored data, as everything will be erased and we don't store data for all iron tips in ram (only the current tip type)
 
-	// Reset flag
-	systemSettings.settings.initialized=initialized;
+	// Check init flags
+	if( (systemSettings.settings.NotInitialized!=initialized) || (systemSettings.Profile.NotInitialized!=initialized) ){
+		Error_Handler();
+	}
 
 	// Compute checksum
 	systemSettings.settingsChecksum = ChecksumSettings(&systemSettings.settings);
@@ -42,7 +44,6 @@ void saveSettings(bool wipeAllProfileData) {
 					(systemSettings.settings.currentProfile==profile_C245))
 					&& (systemSettings.Profile.ID == systemSettings.settings.currentProfile ) 		){		// Ensure profile ID is correct
 
-				systemSettings.Profile.initialized=initialized;																		// Reset flag
 				systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);										// Compute checksum
 				flashBuffer.ProfileChecksum[systemSettings.settings.currentProfile]=systemSettings.ProfileChecksum;
 				memcpy(&flashBuffer.Profile[systemSettings.settings.currentProfile],&systemSettings.Profile,sizeof(profile_t));	// Transfer system profile to flash buffer
@@ -54,7 +55,7 @@ void saveSettings(bool wipeAllProfileData) {
 	}
 	else{																								// Wipe all tip data
 		for(uint8_t x=0;x<ProfileSize;x++){
-			flashBuffer.Profile[x].initialized=0xFF;													// Set all profile data to "1"
+			flashBuffer.Profile[x].NotInitialized=0xFF;													// Set all profile data to "1"
 			flashBuffer.ProfileChecksum[x]=0xFF;
 			memset(&flashBuffer.Profile[x],0xFF,sizeof(profile_t));
 		}
@@ -124,7 +125,7 @@ void restoreSettings() {
 	return;
 #endif
 
-	if(flashSettings->settings.initialized!=initialized){											// If flash not initialized (Erased flash is always read "1")
+	if(flashSettings->settings.NotInitialized!=initialized){											// If flash not initialized (Erased flash is always read "1")
 		resetSystemSettings();
 		saveSettings(saveWipingProfiles);
 	}
@@ -171,6 +172,7 @@ void resetSystemSettings(void) {
 	systemSettings.settings.wakeOnButton		= wakeButton_On;
 	systemSettings.settings.WakeInputMode		= wakeInputmode_shake;
 	systemSettings.settings.EncoderMode			= RE_Mode_One;
+	systemSettings.settings.NotInitialized		= initialized;
 }
 
 
@@ -182,26 +184,26 @@ void resetCurrentProfile(void){
 	if(systemSettings.settings.currentProfile==profile_T12){
 		systemSettings.Profile.ID = profile_T12;
 		for(uint8_t x = 0; x < TipSize; x++) {
-			systemSettings.Profile.tip[x].calADC_At_250 = T12_Cal250;
-			systemSettings.Profile.tip[x].calADC_At_350 = T12_Cal350;			// These values are way lower, but better to be safe than sorry
-			systemSettings.Profile.tip[x].calADC_At_450 = T12_Cal450;			// User needs to calibrate its station
-			systemSettings.Profile.tip[x].PID.Kp = 5200;
-			systemSettings.Profile.tip[x].PID.Ki = 2500;
-			systemSettings.Profile.tip[x].PID.Kd = 1400;
-			systemSettings.Profile.tip[x].PID.min = 0;
-			systemSettings.Profile.tip[x].PID.max = 1;
-			systemSettings.Profile.tip[x].PID.maxI = 200;
-			systemSettings.Profile.tip[x].PID.minI = 0;
+			systemSettings.Profile.tip[x].calADC_At_250	= T12_Cal250;
+			systemSettings.Profile.tip[x].calADC_At_350	= T12_Cal350;			// These values are way lower, but better to be safe than sorry
+			systemSettings.Profile.tip[x].calADC_At_450	= T12_Cal450;			// User needs to calibrate its station
+			systemSettings.Profile.tip[x].PID.Kp 		= 52;
+			systemSettings.Profile.tip[x].PID.Ki 		= 25;
+			systemSettings.Profile.tip[x].PID.Kd 		= 14;
+			systemSettings.Profile.tip[x].PID.min 		= 0;
+			systemSettings.Profile.tip[x].PID.max 		= 1;
+			systemSettings.Profile.tip[x].PID.maxI		= 200;
+			systemSettings.Profile.tip[x].PID.minI 		= 0;
 		}
-		systemSettings.Profile.currentNumberOfTips= 1;
-		systemSettings.Profile.currentTip = 0;
+		systemSettings.Profile.currentNumberOfTips		= 1;
+		systemSettings.Profile.currentTip 				= 0;
 		strcpy(systemSettings.Profile.tip[0].name, "T12 ");
-		systemSettings.Profile.impedance=80;
-		systemSettings.Profile.power=80;
-		systemSettings.Profile.noIronValue=4000;
-		systemSettings.Profile.Cal250_default=T12_Cal250;
-		systemSettings.Profile.Cal350_default=T12_Cal350;
-		systemSettings.Profile.Cal450_default=T12_Cal450;
+		systemSettings.Profile.impedance				= 80;					// 8.0 Ohms
+		systemSettings.Profile.power					= 80;					// 80W
+		systemSettings.Profile.noIronValue				= 4000;
+		systemSettings.Profile.Cal250_default			= T12_Cal250;
+		systemSettings.Profile.Cal350_default			= T12_Cal350;
+		systemSettings.Profile.Cal450_default			= T12_Cal450;
 
 	}
 
@@ -211,23 +213,23 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].calADC_At_250 = C245_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = C245_Cal350;
 			systemSettings.Profile.tip[x].calADC_At_450 = C245_Cal450;
-			systemSettings.Profile.tip[x].PID.Kp = 2800;
-			systemSettings.Profile.tip[x].PID.Ki = 1800;
-			systemSettings.Profile.tip[x].PID.Kd = 700;
-			systemSettings.Profile.tip[x].PID.min = 0;
-			systemSettings.Profile.tip[x].PID.max = 1;
-			systemSettings.Profile.tip[x].PID.maxI = 200;
-			systemSettings.Profile.tip[x].PID.minI = 0;
+			systemSettings.Profile.tip[x].PID.Kp 		= 28;
+			systemSettings.Profile.tip[x].PID.Ki 		= 18;
+			systemSettings.Profile.tip[x].PID.Kd 		= 7;
+			systemSettings.Profile.tip[x].PID.min 		= 0;
+			systemSettings.Profile.tip[x].PID.max 		= 1;
+			systemSettings.Profile.tip[x].PID.maxI 		= 200;
+			systemSettings.Profile.tip[x].PID.minI 		= 0;
 		}
-		systemSettings.Profile.currentNumberOfTips = 1;
-		systemSettings.Profile.currentTip = 0;
+		systemSettings.Profile.currentNumberOfTips		= 1;
+		systemSettings.Profile.currentTip 				= 0;
 		strcpy(systemSettings.Profile.tip[0].name, "C245");
-		systemSettings.Profile.impedance=26;
-		systemSettings.Profile.power=150;
-		systemSettings.Profile.noIronValue=4000;
-		systemSettings.Profile.Cal250_default=C245_Cal250;
-		systemSettings.Profile.Cal350_default=C245_Cal350;
-		systemSettings.Profile.Cal450_default=C245_Cal450;
+		systemSettings.Profile.impedance				= 26;
+		systemSettings.Profile.power					= 150;
+		systemSettings.Profile.noIronValue				= 4000;
+		systemSettings.Profile.Cal250_default			= C245_Cal250;
+		systemSettings.Profile.Cal350_default			= C245_Cal350;
+		systemSettings.Profile.Cal450_default			= C245_Cal450;
 	}
 
 	else if(systemSettings.settings.currentProfile==profile_C210){
@@ -236,23 +238,23 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].calADC_At_250 = C210_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = C210_Cal350;
 			systemSettings.Profile.tip[x].calADC_At_450 = C210_Cal450;
-			systemSettings.Profile.tip[x].PID.Kp = 2800;
-			systemSettings.Profile.tip[x].PID.Ki = 1800;
-			systemSettings.Profile.tip[x].PID.Kd = 700;
-			systemSettings.Profile.tip[x].PID.min = 0;
-			systemSettings.Profile.tip[x].PID.max = 1;
-			systemSettings.Profile.tip[x].PID.maxI = 200;
-			systemSettings.Profile.tip[x].PID.minI = 0;
+			systemSettings.Profile.tip[x].PID.Kp 		= 28;
+			systemSettings.Profile.tip[x].PID.Ki 		= 18;
+			systemSettings.Profile.tip[x].PID.Kd 		= 7;
+			systemSettings.Profile.tip[x].PID.min 		= 0;
+			systemSettings.Profile.tip[x].PID.max 		= 1;
+			systemSettings.Profile.tip[x].PID.maxI 		= 200;
+			systemSettings.Profile.tip[x].PID.minI 		= 0;
 		}
-		systemSettings.Profile.currentNumberOfTips = 1;
-		systemSettings.Profile.currentTip = 0;
+		systemSettings.Profile.currentNumberOfTips 		= 1;
+		systemSettings.Profile.currentTip 				= 0;
 		strcpy(systemSettings.Profile.tip[0].name, "C210");
-		systemSettings.Profile.power=80;
-		systemSettings.Profile.impedance=21;
-		systemSettings.Profile.noIronValue=1200;
-		systemSettings.Profile.Cal250_default=C210_Cal250;
-		systemSettings.Profile.Cal350_default=C210_Cal350;
-		systemSettings.Profile.Cal450_default=C210_Cal450;
+		systemSettings.Profile.power					= 80;
+		systemSettings.Profile.impedance				= 21;
+		systemSettings.Profile.noIronValue				= 1200;
+		systemSettings.Profile.Cal250_default			= C210_Cal250;
+		systemSettings.Profile.Cal350_default			= C210_Cal350;
+		systemSettings.Profile.Cal450_default			= C210_Cal450;
 	}
 	else if(systemSettings.settings.currentProfile==profile_None){
 		asm("nop");																		// We shouldn't get here
@@ -261,14 +263,15 @@ void resetCurrentProfile(void){
 	else{
 		Error_Handler();
 	}
-	systemSettings.Profile.CalNTC=25;
-	systemSettings.Profile.sleepTimeout = 10;
-	systemSettings.Profile.UserSetTemperature = 320;
-	systemSettings.Profile.pwmPeriod=19999;
-	systemSettings.Profile.pwmDelay=1999;
-	systemSettings.Profile.filterFactor=2;
-	systemSettings.Profile.filterMode=filter_ema;
-	systemSettings.Profile.tempUnit=mode_Celsius;
+	systemSettings.Profile.CalNTC				= 25;
+	systemSettings.Profile.sleepTimeout 		= 10;
+	systemSettings.Profile.UserSetTemperature 	= 320;
+	systemSettings.Profile.pwmPeriod			= 19999;
+	systemSettings.Profile.pwmDelay				= 1999;
+	systemSettings.Profile.filterFactor			= 2;
+	systemSettings.Profile.filterMode			= filter_ema;
+	systemSettings.Profile.tempUnit				= mode_Celsius;
+	systemSettings.Profile.NotInitialized		= initialized;
 }
 
 void loadProfile(uint8_t profile){
@@ -281,7 +284,7 @@ void loadProfile(uint8_t profile){
 		systemSettings.Profile = flashSettings->Profile[profile];						// Load stored tip data
 		systemSettings.ProfileChecksum = flashSettings->ProfileChecksum[profile];		// Load stored checksum
 
-		if(systemSettings.Profile.initialized!=initialized){							// Check if initialized
+		if(systemSettings.Profile.NotInitialized!=initialized){							// Check if initialized
 			resetCurrentProfile();														// Load defaults if not
 			systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);	// Compute checksum
 		}
