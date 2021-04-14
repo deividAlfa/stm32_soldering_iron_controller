@@ -171,9 +171,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 void boot_screen_init(screen_t * scr){
 	profile=systemSettings.settings.currentProfile;
 
-	if(		(profile!=profile_T12)	&&					// If unknown tip
-			(profile!=profile_C210)	&&
-			(profile!=profile_C245))	{
+	if( !systemSettings.settings.initialized ){
 
 		profile=profile_C210;							// For safety, set C210 profile by default, has the lowest Output TC
 		systemSettings.setupMode=setup_On;				// (Failure state is set in the iron routine when unknown iron profile is detected)
@@ -201,7 +199,7 @@ void boot_screen_setup(screen_t *scr) {
 	dis->reservedChars=4;
 	w->posX = 12;
 	w->posY = 40;
-	w->width = 32;
+	w->width = 48;
 	dis->getData = &getProfile;
 	w->editableWidget.big_step = 1;
 	w->editableWidget.step = 1;
@@ -219,7 +217,7 @@ void boot_screen_setup(screen_t *scr) {
 	w->displayString="OK";
 	w->posX = 95;
 	w->posY = 40;
-	w->width = 16;
+	w->width = 32;
 	w->buttonWidget.selectable.tab = 1;
 	w->buttonWidget.action = &profile_OK;
 	w->enabled=0;
