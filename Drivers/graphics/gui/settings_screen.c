@@ -911,6 +911,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->displayString="RESET";
 	w->posX = 0;
 	w->posY = 48;
+	w->width = 50;
 	w->buttonWidget.selectable.tab = 1;
 	w->buttonWidget.action = &doReset;
 
@@ -922,6 +923,7 @@ void settings_screen_setup(screen_t *scr) {
 	w->displayString="CANCEL";
 	w->posX = 74;
 	w->posY = 48;
+	w->width = 56;
 	w->buttonWidget.selectable.tab = 0;
 	w->buttonWidget.action = &cancelReset;
 
