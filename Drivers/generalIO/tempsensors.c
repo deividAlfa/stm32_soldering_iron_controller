@@ -40,8 +40,9 @@ int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
 }
 // Read tip temperature
 uint16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
-	static uint16_t last_value_Filtered;
-	static uint16_t last_value_Raw;
+	if(systemSettings.setupMode==setup_On){
+		return 0;
+	}
 	if(update){
 		last_value_Filtered = adc2Human(TIP.last_avg,1,systemSettings.settings.tempUnit);
 		last_value_Raw = adc2Human(TIP.last_RawAvg,1,systemSettings.settings.tempUnit);
