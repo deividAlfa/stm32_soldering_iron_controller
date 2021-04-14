@@ -9,8 +9,12 @@
 #define IRON_H_
 #include "pid.h"
 #include "settings.h"
-typedef void (*setTemperatureReachedCallback)(uint16_t);
 
+#define PWMminOutput 	1							// Min pwm level to maintain iron detection
+#define PIDdiff 		30							// Max temp diff between tip and setpoint to disable PID and force PWM 100%
+#define PIDmintemp 		100							// Min setpoint in ºC to actually enable PWM
+
+typedef void (*setTemperatureReachedCallback)(uint16_t);
 
 
 typedef void (*currentModeChanged)(uint8_t);
@@ -64,7 +68,10 @@ typedef struct {
 extern volatile iron_t Iron;
 void IronWake(bool source);
 void checkIronError(void);
+void checkSettings(void);
 bool GetIronError(void);
+void updatePowerLimit(void);
+void runAwayCheck(void);
 void SetFailState(bool FailState);
 bool GetFailState(void);
 void setCurrentMode(uint8_t mode);
