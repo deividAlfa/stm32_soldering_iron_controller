@@ -34,10 +34,10 @@ static void setProfile(int32_t *val) {
 	profile = *val;
 }
 static int profile_OK(widget_t *w) {
-	loadProfile((uint8_t)profile);											// Load profile
+	loadProfile((uint8_t)profile);									// Load profile
 	saveSettings(saveKeepingProfiles);								// Save
-	SetFailState(noError);									// Enable normal operation
 	systemSettings.setupMode=setup_Off;								// Reset setup mode
+	SetFailState(noError);											// Enable normal operation
 	return screen_main;
 }
 
@@ -171,7 +171,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 void boot_screen_init(screen_t * scr){
 	profile=systemSettings.settings.currentProfile;
 
-	if( !systemSettings.settings.initialized ){
+	if( (systemSettings.settings.NotInitialized!=initialized) || (systemSettings.settings.currentProfile>profile_C210) ){
 
 		profile=profile_C210;							// For safety, set C210 profile by default, has the lowest Output TC
 		systemSettings.setupMode=setup_On;				// (Failure state is set in the iron routine when unknown iron profile is detected)
