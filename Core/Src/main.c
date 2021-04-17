@@ -109,6 +109,9 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HAL_IWDG_Refresh(&hiwdg);             // Wait 500mS for voltage to stabilize? (Before calibrating ADC)
+  HAL_Delay(500);
+
   Init();
   while (1){
     /* USER CODE END WHILE */
