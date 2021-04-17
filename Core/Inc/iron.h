@@ -11,8 +11,6 @@
 #include "settings.h"
 
 #define PWMminOutput 	1							// Min pwm level to maintain iron detection
-#define PIDdiff 		30							// Max temp diff between tip and setpoint to disable PID and force PWM 100%
-#define PIDmintemp 		100							// Min setpoint in ºC to actually enable PWM
 
 typedef void (*setTemperatureReachedCallback)(uint16_t);
 
