@@ -37,25 +37,23 @@ void saveSettings(bool wipeAllProfileData) {
 	flashBuffer.settingsChecksum=systemSettings.settingsChecksum;
 	flashBuffer.settings=systemSettings.settings;
 
-	if(!wipeAllProfileData){																				// If wipe all tips is not set
-		if(systemSettings.settings.currentProfile!=profile_None){											// If current tip is initialized
-			if( 	((systemSettings.settings.currentProfile==profile_T12)	||								// Check valid Profile
-					(systemSettings.settings.currentProfile==profile_C210)	||
-					(systemSettings.settings.currentProfile==profile_C245))
-					&& (systemSettings.Profile.ID == systemSettings.settings.currentProfile ) 		){		// Ensure profile ID is correct
+	if(!wipeAllProfileData){																				                                      // If wipe all tips is not set
+		if(systemSettings.settings.currentProfile!=profile_None){										                        // If current tip is initialized
+			if((systemSettings.settings.currentProfile<=profile_C210) &&                                      // Check valid Profile
+				 (systemSettings.Profile.ID == systemSettings.settings.currentProfile )){		                    // Ensure profile ID is correct
 
-				systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);										// Compute checksum
+				systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);										  // Compute checksum
 				flashBuffer.ProfileChecksum[systemSettings.settings.currentProfile]=systemSettings.ProfileChecksum;
 				memcpy(&flashBuffer.Profile[systemSettings.settings.currentProfile],&systemSettings.Profile,sizeof(profile_t));	// Transfer system profile to flash buffer
 			}
 			else{
-				Error_Handler();																								// Invalid tip (uncontrolled state)
+				Error_Handler(); // Invalid tip (uncontrolled state)
 			}
 		}
 	}
-	else{																								// Wipe all tip data
+	else{																								                                                  // Wipe all tip data
 		for(uint8_t x=0;x<ProfileSize;x++){
-			flashBuffer.Profile[x].NotInitialized=0xFF;													// Set all profile data to "1"
+			flashBuffer.Profile[x].NotInitialized=0xFF;													                              // Set all profile data to "1"
 			flashBuffer.ProfileChecksum[x]=0xFF;
 			memset(&flashBuffer.Profile[x],0xFF,sizeof(profile_t));
 		}
@@ -64,7 +62,7 @@ void saveSettings(bool wipeAllProfileData) {
 	//Clear watchdog before unlocking flash
 	HAL_IWDG_Refresh(&HIWDG);
 
-	HAL_FLASH_Unlock(); //unlock flash writing
+	HAL_FLASH_Unlock();                                                                                   //unlock flash writing
 	FLASH_EraseInitTypeDef erase;
 	erase.NbPages = (1024*StoreSize)/FLASH_PAGE_SIZE;
 	erase.PageAddress = FLASH_ADDR;
@@ -111,8 +109,8 @@ void saveSettings(bool wipeAllProfileData) {
 
 	uint32_t SettingsFlash	= ChecksumSettings(&flashSettings->settings);
 	uint32_t SettingsRam	= ChecksumSettings(&systemSettings.settings);
-	if(SettingsFlash != SettingsRam){			// Check flash and system settings have same checksum
-		Flash_error();							// Error if data mismatch
+	if(SettingsFlash != SettingsRam){			                                            // Check flash and system settings have same checksum
+		Flash_error();							                                                    // Error if data mismatch
 	}
 
 }
@@ -133,9 +131,9 @@ void restoreSettings() {
 		Button_reset();																	// Check for button reset
 	}
 
-	systemSettings.settings=flashSettings->settings;									// Load system settings from flash
+	systemSettings.settings=flashSettings->settings;									        // Load system settings from flash
 	systemSettings.settingsChecksum=flashSettings->settingsChecksum;					// Load stored checksum
-	loadProfile(systemSettings.settings.currentProfile);								// Load current tip data into system memory
+	loadProfile(systemSettings.settings.currentProfile);								      // Load current tip data into system memory
 
 	// Compare loaded checksum with calculated checksum
 	if( (systemSettings.settings.version != SETTINGS_VERSION) || (ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum) ){
@@ -158,20 +156,20 @@ uint32_t ChecksumProfile(profile_t* profile){
 }
 
 void resetSystemSettings(void) {
-	systemSettings.settings.version 			= SETTINGS_VERSION;
-	systemSettings.settings.contrast 			= 255;
-	systemSettings.settings.OledOffset 			= 2;
-	systemSettings.settings.errorDelay			= 500;
-	systemSettings.settings.guiUpdateDelay		= 200;
-	systemSettings.settings.tempUnit			= mode_Celsius;
-	systemSettings.settings.tempStep			= 5;
+	systemSettings.settings.version 		      = SETTINGS_VERSION;
+	systemSettings.settings.contrast 			    = 255;
+	systemSettings.settings.OledOffset 			  = 2;
+	systemSettings.settings.errorDelay			  = 500;
+	systemSettings.settings.guiUpdateDelay	  = 200;
+	systemSettings.settings.tempUnit			    = mode_Celsius;
+	systemSettings.settings.tempStep			    = 5;
 	systemSettings.settings.saveSettingsDelay	= 5;
 	systemSettings.settings.currentProfile		= profile_None;
-	systemSettings.settings.initMode			= mode_run;
-	systemSettings.settings.buzzerMode			= buzzer_Off;
-	systemSettings.settings.wakeOnButton		= wakeButton_On;
-	systemSettings.settings.WakeInputMode		= wakeInputmode_shake;
-	systemSettings.settings.EncoderMode			= RE_Mode_One;
+	systemSettings.settings.initMode			    = mode_run;
+	systemSettings.settings.buzzerMode			  = buzzer_Off;
+	systemSettings.settings.wakeOnButton		  = wakeButton_On;
+	systemSettings.settings.WakeInputMode		  = wakeInputmode_shake;
+	systemSettings.settings.EncoderMode			  = RE_Mode_One;
 	systemSettings.settings.NotInitialized		= initialized;
 }
 
@@ -187,23 +185,21 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].calADC_At_250	= T12_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350	= T12_Cal350;			// These values are way lower, but better to be safe than sorry
 			systemSettings.Profile.tip[x].calADC_At_450	= T12_Cal450;			// User needs to calibrate its station
-			systemSettings.Profile.tip[x].PID.Kp 		= 52;
-			systemSettings.Profile.tip[x].PID.Ki 		= 25;
-			systemSettings.Profile.tip[x].PID.Kd 		= 14;
-			systemSettings.Profile.tip[x].PID.min 		= 0;
-			systemSettings.Profile.tip[x].PID.max 		= 1;
-			systemSettings.Profile.tip[x].PID.maxI		= 200;
-			systemSettings.Profile.tip[x].PID.minI 		= 0;
+			systemSettings.Profile.tip[x].PID.Kp 		    = 5200;           // val = /1.000.000
+			systemSettings.Profile.tip[x].PID.Ki 		    = 2500;           // val = /1.000.000
+			systemSettings.Profile.tip[x].PID.Kd 		    = 1400;           // val = /1.000.000
+			systemSettings.Profile.tip[x].PID.maxI	    = 50;             // val = /100
+			systemSettings.Profile.tip[x].PID.minI 	    = -30;            // val = /100
 		}
-		systemSettings.Profile.currentNumberOfTips		= 1;
-		systemSettings.Profile.currentTip 				= 0;
 		strcpy(systemSettings.Profile.tip[0].name, "T12 ");
-		systemSettings.Profile.impedance				= 80;					// 8.0 Ohms
-		systemSettings.Profile.power					= 80;					// 80W
-		systemSettings.Profile.noIronValue				= 4000;
-		systemSettings.Profile.Cal250_default			= T12_Cal250;
-		systemSettings.Profile.Cal350_default			= T12_Cal350;
-		systemSettings.Profile.Cal450_default			= T12_Cal450;
+		systemSettings.Profile.currentNumberOfTips  = 1;
+		systemSettings.Profile.currentTip           = 0;
+		systemSettings.Profile.impedance            = 80;					// 8.0 Ohms
+		systemSettings.Profile.power                = 80;					// 80W
+		systemSettings.Profile.noIronValue				  = 4000;
+		systemSettings.Profile.Cal250_default			  = T12_Cal250;
+		systemSettings.Profile.Cal350_default			  = T12_Cal350;
+		systemSettings.Profile.Cal450_default			  = T12_Cal450;
 
 	}
 
@@ -213,23 +209,21 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].calADC_At_250 = C245_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = C245_Cal350;
 			systemSettings.Profile.tip[x].calADC_At_450 = C245_Cal450;
-			systemSettings.Profile.tip[x].PID.Kp 		= 28;
-			systemSettings.Profile.tip[x].PID.Ki 		= 18;
-			systemSettings.Profile.tip[x].PID.Kd 		= 7;
-			systemSettings.Profile.tip[x].PID.min 		= 0;
-			systemSettings.Profile.tip[x].PID.max 		= 1;
-			systemSettings.Profile.tip[x].PID.maxI 		= 200;
-			systemSettings.Profile.tip[x].PID.minI 		= 0;
+			systemSettings.Profile.tip[x].PID.Kp 		    = 2800;
+			systemSettings.Profile.tip[x].PID.Ki 		    = 1800;
+			systemSettings.Profile.tip[x].PID.Kd 		    = 700;
+			systemSettings.Profile.tip[x].PID.maxI 	    = 50;
+			systemSettings.Profile.tip[x].PID.minI 	    = -30;
 		}
-		systemSettings.Profile.currentNumberOfTips		= 1;
-		systemSettings.Profile.currentTip 				= 0;
 		strcpy(systemSettings.Profile.tip[0].name, "C245");
-		systemSettings.Profile.impedance				= 26;
-		systemSettings.Profile.power					= 150;
-		systemSettings.Profile.noIronValue				= 4000;
-		systemSettings.Profile.Cal250_default			= C245_Cal250;
-		systemSettings.Profile.Cal350_default			= C245_Cal350;
-		systemSettings.Profile.Cal450_default			= C245_Cal450;
+		systemSettings.Profile.currentNumberOfTips	= 1;
+		systemSettings.Profile.currentTip 				  = 0;
+		systemSettings.Profile.impedance				    = 26;
+		systemSettings.Profile.power					      = 150;
+		systemSettings.Profile.noIronValue				  = 4000;
+		systemSettings.Profile.Cal250_default			  = C245_Cal250;
+		systemSettings.Profile.Cal350_default			  = C245_Cal350;
+		systemSettings.Profile.Cal450_default			  = C245_Cal450;
 	}
 
 	else if(systemSettings.settings.currentProfile==profile_C210){
@@ -238,73 +232,61 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].calADC_At_250 = C210_Cal250;
 			systemSettings.Profile.tip[x].calADC_At_350 = C210_Cal350;
 			systemSettings.Profile.tip[x].calADC_At_450 = C210_Cal450;
-			systemSettings.Profile.tip[x].PID.Kp 		= 28;
-			systemSettings.Profile.tip[x].PID.Ki 		= 18;
-			systemSettings.Profile.tip[x].PID.Kd 		= 7;
-			systemSettings.Profile.tip[x].PID.min 		= 0;
-			systemSettings.Profile.tip[x].PID.max 		= 1;
-			systemSettings.Profile.tip[x].PID.maxI 		= 200;
-			systemSettings.Profile.tip[x].PID.minI 		= 0;
+			systemSettings.Profile.tip[x].PID.Kp 		    = 2800;
+			systemSettings.Profile.tip[x].PID.Ki 		    = 1800;
+			systemSettings.Profile.tip[x].PID.Kd 		    = 700;
+			systemSettings.Profile.tip[x].PID.maxI 	    = 50;
+			systemSettings.Profile.tip[x].PID.minI 	    = -30;
 		}
-		systemSettings.Profile.currentNumberOfTips 		= 1;
-		systemSettings.Profile.currentTip 				= 0;
 		strcpy(systemSettings.Profile.tip[0].name, "C210");
-		systemSettings.Profile.power					= 80;
-		systemSettings.Profile.impedance				= 21;
-		systemSettings.Profile.noIronValue				= 1200;
-		systemSettings.Profile.Cal250_default			= C210_Cal250;
-		systemSettings.Profile.Cal350_default			= C210_Cal350;
-		systemSettings.Profile.Cal450_default			= C210_Cal450;
-	}
-	else if(systemSettings.settings.currentProfile==profile_None){
-		asm("nop");																		// We shouldn't get here
-		return;
+		systemSettings.Profile.currentNumberOfTips  = 1;
+		systemSettings.Profile.currentTip           = 0;
+		systemSettings.Profile.power					      = 80;
+		systemSettings.Profile.impedance			      = 21;
+		systemSettings.Profile.noIronValue		      = 1200;
+		systemSettings.Profile.Cal250_default	      = C210_Cal250;
+		systemSettings.Profile.Cal350_default	      = C210_Cal350;
+		systemSettings.Profile.Cal450_default	      = C210_Cal450;
 	}
 	else{
-		Error_Handler();
+		Error_Handler();  // We shouldn't get here!
 	}
-	systemSettings.Profile.CalNTC				= 25;
-	systemSettings.Profile.sleepTimeout 		= 10;
+	systemSettings.Profile.CalNTC				        = 25;
+	systemSettings.Profile.sleepTimeout 		    = 10;
 	systemSettings.Profile.UserSetTemperature 	= 320;
-	systemSettings.Profile.pwmPeriod			= 19999;
-	systemSettings.Profile.pwmDelay				= 1999;
-	systemSettings.Profile.filterFactor			= 2;
-	systemSettings.Profile.filterMode			= filter_ema;
-	systemSettings.Profile.tempUnit				= mode_Celsius;
-	systemSettings.Profile.NotInitialized		= initialized;
+	systemSettings.Profile.pwmPeriod			      = 19999;
+	systemSettings.Profile.pwmDelay				      = 1999;
+	systemSettings.Profile.filterFactor		    	= 2;
+	systemSettings.Profile.filterMode			      = filter_ema;
+	systemSettings.Profile.tempUnit				      = mode_Celsius;
+	systemSettings.Profile.NotInitialized		    = initialized;
 }
 
 void loadProfile(uint8_t profile){
-	if(	(profile==profile_T12)	||														// If current tip type is valid
-		(profile==profile_C210)	||
-		(profile==profile_C245)	){
-
-		systemSettings.settings.currentProfile=profile;									// Set system profile
-
-		systemSettings.Profile = flashSettings->Profile[profile];						// Load stored tip data
-		systemSettings.ProfileChecksum = flashSettings->ProfileChecksum[profile];		// Load stored checksum
-
-		if(systemSettings.Profile.NotInitialized!=initialized){							// Check if initialized
-			resetCurrentProfile();														// Load defaults if not
-			systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);	// Compute checksum
+  systemSettings.settings.currentProfile=profile;									                      // Update system profile
+	if(profile<=profile_C210){                                                            // If current tip type is valid
+		systemSettings.Profile = flashSettings->Profile[profile];						                // Load stored tip data
+		systemSettings.ProfileChecksum = flashSettings->ProfileChecksum[profile];		        // Load stored checksum
+		if(systemSettings.Profile.NotInitialized!=initialized){							                // Check if initialized
+			resetCurrentProfile();														                                // Load defaults if not
+			systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);	      // Compute checksum
 		}
 		// Calculate data checksum and compare with stored checksum, also ensure the stored ID is the same as the requested profile
 		if( (profile!=systemSettings.Profile.ID) || (systemSettings.ProfileChecksum != ChecksumProfile(&systemSettings.Profile)) ){
-			ProfileChkErr();															// Checksum mismatch, reset current tip data
+			ProfileChkErr();															                                    // Checksum mismatch, reset current tip data
 		}
-		setSetTemperature(systemSettings.Profile.UserSetTemperature);					// Load user set temperature
-		setCurrentTip(systemSettings.Profile.currentTip);								// Load TIP data
+		setSetTemperature(systemSettings.Profile.UserSetTemperature);				                // Load user set temperature
+		setCurrentTip(systemSettings.Profile.currentTip);								                    // Load TIP data
 	}
 	else if(profile==profile_None){
-		systemSettings.settings.currentProfile=profile;									// Set system profile
-		return;																			// Profiles not initialized, load nothing
+		return;																			                                        // Profiles not initialized, load nothing
 	}
-	else{
+	else{                                                                                 // Unknown profile
 		Error_Handler();
 	}
-	if(systemSettings.settings.tempUnit != systemSettings.Profile.tempUnit){			// If stored temps are in different units
-		setSystemTempUnit(systemSettings.settings.tempUnit);							// Convert temperatures
-		systemSettings.Profile.tempUnit = systemSettings.settings.tempUnit;				// Store unit in profile
+	if(systemSettings.settings.tempUnit != systemSettings.Profile.tempUnit){			        // If stored temps are in different units
+		setSystemTempUnit(systemSettings.settings.tempUnit);							                  // Convert temperatures
+		systemSettings.Profile.tempUnit = systemSettings.settings.tempUnit;				          // Store unit in profile
 	}
 }
 
@@ -327,33 +309,29 @@ void Flash_error(void){
 }
 void settingsChkErr(void){
 	Diag_init();
-	systemSettings.settings.OledOffset = 2;		// Set known value
+	systemSettings.settings.OledOffset = 2;		// Set default value
 	putStrAligned("SETTING ERR!", 0, align_center);
 	putStrAligned("RESTORING", 16, align_center);
 	putStrAligned("DEFAULTS...", 32, align_center);
 	update_display();
 	ErrCountDown(3,117,50);
 
-	if(	(systemSettings.settings.currentProfile==profile_T12)		||		// I current tip type is valid
-		(systemSettings.settings.currentProfile==profile_C210)	||
-		(systemSettings.settings.currentProfile==profile_C245)	){
+	if(systemSettings.settings.currentProfile<=profile_C210){                         // If current tip type is valid
 
-		if(systemSettings.ProfileChecksum==ChecksumProfile(&systemSettings.Profile)){	// If current profile checksum is correct
-			uint8_t tip = systemSettings.settings.currentProfile;				// save current tip
-			resetSystemSettings();												// reset settings
-			systemSettings.settings.currentProfile=tip;							// Restore tip type
-			saveSettings(saveKeepingProfiles);									// Save settings preserving tip data
+		if(systemSettings.ProfileChecksum==ChecksumProfile(&systemSettings.Profile)){	  // If current profile checksum is correct
+			uint8_t tip = systemSettings.settings.currentProfile;				                  // save current tip
+			resetSystemSettings();												                                // reset settings
+			systemSettings.settings.currentProfile=tip;							                      // Restore tip type
+			saveSettings(saveKeepingProfiles);									                          // Save settings preserving tip data
 		}
-		else{
-			resetSystemSettings();									// reset settings
-			saveSettings(saveWipingProfiles);						// Save settings erasing tip data
+		else{                                                                           // If checksum wrong
+			resetSystemSettings();									                                      // reset settings
+			saveSettings(saveWipingProfiles);						                                  // Save settings erasing tip data
 		}
-
-
 	}
-	else{
-		resetSystemSettings();									// Reset settings
-		saveSettings(saveKeepingProfiles);									// Save wiping tip data
+	else{                                                                             // If current tip not valid
+		resetSystemSettings();									                                        // Assume something went wrong, reset settings
+		saveSettings(saveKeepingProfiles);									                            // Save keeping tip data
 	}
 }
 
