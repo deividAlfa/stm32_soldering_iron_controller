@@ -203,8 +203,6 @@ static void Cal_Start_onEnter(screen_t *scr) {
 		backupTempUnit=systemSettings.settings.tempUnit;
 		setSystemTempUnit(mode_Celsius);
 
-		Currtip = getCurrentTip();
-
 		backupCal250 = Currtip->calADC_At_250;
 		backupCal350 = Currtip->calADC_At_350;
 		backupCal450 = Currtip->calADC_At_450;
@@ -212,6 +210,8 @@ static void Cal_Start_onEnter(screen_t *scr) {
 		Currtip->calADC_At_250 = systemSettings.Profile.Cal250_default;
 		Currtip->calADC_At_350 =  systemSettings.Profile.Cal350_default;
 		Currtip->calADC_At_450 =  systemSettings.Profile.Cal450_default;
+
+		setCalState(cal_250);
 	}
 }
 
