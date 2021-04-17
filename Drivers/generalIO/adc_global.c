@@ -189,11 +189,11 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 		// Compute EMA of input
 		int32_t EMA = InputData->EMA_of_Input>>12;
 		int32_t diff = (int32_t)avg_data - EMA;										// Check difference between stored EMA and last average
-		if(abs(diff)>=200){															// If huge (Filtering will delay too much the response)
+		if(abs(diff)>299){															// If huge (Filtering will delay too much the response)
 			InputData->EMA_of_Input = (uint32_t)avg_data<<12;						// Reset stored to last average
 		}
-		else if(abs(diff)>100){														// If medium, smoothen the difference
-			uint8_t ratio = abs(diff)-100;											// 1-99%
+		else if(abs(diff)>200){														// If medium, smoothen the difference
+			uint8_t ratio = abs(diff)-100;										// 1-99%
 			// Output: (100-ratio)% of old value + (ratio)% of new value
 			InputData->EMA_of_Input = ((uint32_t)(((avg_data*ratio)/100)+((EMA*(100-ratio))/100)))<<12;
 		}
