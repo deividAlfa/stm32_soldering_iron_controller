@@ -27,7 +27,6 @@
 #include "settings.h"
 #include "adc_global.h"
 #include "buzzer.h"
-#include "buzzer.h"
 #include "rotary_encoder.h"
 #include "tempsensors.h"
 #include "voltagesensors.h"
