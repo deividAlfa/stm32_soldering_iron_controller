@@ -182,7 +182,6 @@ void Error_Handler(void)
   /* User can add his own implementation to report the HAL error return state */
 
 #ifdef DEBUG_ERROR
-	char chars[6];
 	#if defined OLED_I2C || defined OLED_SPI
 	display_abort();
 	#endif
