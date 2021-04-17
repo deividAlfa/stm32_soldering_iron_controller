@@ -51,14 +51,20 @@ screen_t Screen_main;
 
 #ifdef USE_NTC
 static widget_t Widget_AmbTemp;
+static displayOnly_widget_t display_AmbTemp;
 #endif
 #ifdef USE_VIN
 static widget_t Widget_Vsupply;
+static displayOnly_widget_t display_Vsupply;
 #endif
 static widget_t Widget_IronTemp;
-static widget_t Widget_TipSelect;
-static widget_t Widget_SetPoint;
+static displayOnly_widget_t display_IronTemp;
 
+static widget_t Widget_TipSelect;
+static editable_widget_t editable_TipSelect;
+
+static widget_t Widget_SetPoint;
+static editable_widget_t editable_SetPoint;
 
 static struct{
 	uint32_t updateTick;
@@ -179,32 +185,33 @@ static void setMainWidget(widget_t* w){
 // Main screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 static void setMainScrTempUnit(void) {
+  editable_widget_t* edit =extractEditablePartFromWidget(&Widget_SetPoint);
 	if(systemSettings.settings.tempUnit==mode_Farenheit){
-		Widget_IronTemp.endString="\260F";
+		display_IronTemp.endString="\260F";
 		#ifdef USE_NTC
-		Widget_AmbTemp.endString="F";
+		display_AmbTemp.endString="F";
 		#endif
-		Widget_SetPoint.endString="\260F";
-		Widget_SetPoint.editableWidget.max_value=900;
-		Widget_SetPoint.editableWidget.min_value=350;
+		editable_SetPoint.inputData.endString="\260F";
+		edit->max_value=900;
+		edit->min_value=350;
 	}
 	else{
-		Widget_IronTemp.endString="\260C";		// \260 = ASCII dec. 176(°) in octal representation
+	  display_IronTemp.endString="\260C";		// \260 = ASCII dec. 176(°) in octal representation
 		#ifdef USE_NTC
-		Widget_AmbTemp.endString="C";
+	  display_AmbTemp.endString="C";
 		#endif
-		Widget_SetPoint.endString="\260C";
-		Widget_SetPoint.editableWidget.max_value=480;
-		Widget_SetPoint.editableWidget.min_value=180;
+	  editable_SetPoint.inputData.endString="\260C";
+		edit->max_value=480;
+		edit->min_value=180;
 	}
 }
 
 
 static void main_screen_init(screen_t *scr) {
 	default_init(scr);
-	Widget_TipSelect.multiOptionWidget.numberOfOptions = systemSettings.Profile.currentNumberOfTips;
-	Widget_SetPoint.editableWidget.step = systemSettings.settings.tempStep;
-	Widget_SetPoint.editableWidget.big_step = systemSettings.settings.tempStep;
+	editable_TipSelect.numberOfOptions = systemSettings.Profile.currentNumberOfTips;
+  editable_SetPoint.step = systemSettings.settings.tempStep;
+  editable_SetPoint.big_step = systemSettings.settings.tempStep;
 	setMainScrTempUnit();
 	mainScr.idleTick=HAL_GetTick();
 
@@ -619,32 +626,35 @@ void main_screen_setup(screen_t *scr) {
 	scr->processInput = &main_screenProcessInput;
 	widget_t *w;
 	displayOnly_widget_t* dis;
+  editable_widget_t* edit;
 
 	//iron tip temperature display
 	w=&Widget_IronTemp;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_display);
+	widgetDefaultsInit(w, widget_display, &display_IronTemp);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->reservedChars=5;
-	w->textAlign=align_center;
-	w->dispAlign=align_center;
-	w->font=u8g2_font_iron;
+	dis->textAlign=align_center;
+	dis->dispAlign=align_center;
+	dis->font=u8g2_font_iron;
 	w->posY = 17;
-	w->displayWidget.getData = &main_screen_getIronTemp;
+	dis->getData = &main_screen_getIronTemp;
 
 	// Tip temperature setpoint
 	w=&Widget_SetPoint;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_editable);
+	widgetDefaultsInit(w, widget_editable, &editable_SetPoint);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->reservedChars=5;
 	w->posY = Widget_IronTemp.posY-2;
 	dis->getData = &getTemp;
-	w->dispAlign=align_center;
-	w->textAlign=align_center;
-	w->font=Widget_IronTemp.font;
-	w->editableWidget.selectable.tab = 1;
-	w->editableWidget.setData = (void (*)(void *))&setTemp;
+	dis->dispAlign=align_center;
+	dis->textAlign=align_center;
+	dis->font=display_IronTemp.font;
+	edit->selectable.tab = 1;
+	edit->setData = (void (*)(void *))&setTemp;
 	w->frameType=frame_solid;
 	w->radius=0;
 	w->enabled=0;
@@ -653,14 +663,14 @@ void main_screen_setup(screen_t *scr) {
 	//V input display
 	w = &Widget_Vsupply;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	widgetDefaultsInit(w, widget_display, &display_Vsupply);
 	dis=extractDisplayPartFromWidget(w);
-	w->endString="V";
+	edit=extractEditablePartFromWidget(w);
+	dis->endString="V";
 	dis->reservedChars=5;
-	w->textAlign=align_center;
+	dis->textAlign=align_center;
 	dis->number_of_dec=1;
-	//w->font=u8g2_font_wizzard12labels;
-	w->font=u8g2_font_labels;
+	dis->font=u8g2_font_labels;
 	w->posX = voltXBM[0]+2;
 	w->posY= 2;
 	dis->getData = &main_screen_getVin;
@@ -671,33 +681,35 @@ void main_screen_setup(screen_t *scr) {
 	//Ambient temperature display
 	w=&Widget_AmbTemp;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_display);
+	widgetDefaultsInit(w, widget_display, &display_AmbTemp);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->reservedChars=7;
-	w->dispAlign=align_right;
-	w->textAlign=align_center;
+	dis->dispAlign=align_right;
+	dis->textAlign=align_center;
 	w->posY= 2;
 	dis->number_of_dec=1;
-	w->font=u8g2_font_labels;
+	dis->font=u8g2_font_labels;
 	dis->getData = &main_screen_getAmbTemp;
 	#endif
 
 	// Tips
 	w=&Widget_TipSelect;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_multi_option);
+	widgetDefaultsInit(w, widget_multi_option, &editable_TipSelect);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->reservedChars=TipCharSize-1;
 	w->posY = 32;
-	w->dispAlign=align_center;
-	w->textAlign=align_center;
-	w->multiOptionWidget.editable.inputData.getData = &getTip;
-	w->multiOptionWidget.editable.inputData.number_of_dec = 0;
-	w->multiOptionWidget.editable.big_step = 0;
-	w->multiOptionWidget.editable.step = 0;
-	w->multiOptionWidget.editable.selectable.tab = 2;
-	w->multiOptionWidget.editable.setData = (void (*)(void *))&setTip;
-	w->multiOptionWidget.options = tipName;
+	dis->dispAlign=align_center;
+	dis->textAlign=align_center;
+	edit->inputData.getData = &getTip;
+	edit->inputData.number_of_dec = 0;
+	edit->big_step = 0;
+	edit->step = 0;
+	edit->selectable.tab = 2;
+	edit->setData = (void (*)(void *))&setTip;
+	edit->options = tipName;
 	w->enabled=0;
 	w->frameType=frame_disabled;
 

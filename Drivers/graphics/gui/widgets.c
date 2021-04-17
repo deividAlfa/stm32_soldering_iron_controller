@@ -11,17 +11,20 @@
 #include "gui.h"
 char displayString[32];
 displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *w) {
+  comboBox_widget_t* combo;
 	if(!w)
 		return NULL;
 	switch (w->type) {
 		case widget_display:
-			return &w->displayWidget;
-			break;
+		  return (displayOnly_widget_t*)w->content;
 		case widget_editable:
-			return &w->editableWidget.inputData;
-			break;
 		case widget_multi_option:
-			return &w->multiOptionWidget.editable.inputData;
+		  return &((editable_widget_t*)w->content)->inputData;
+		case widget_combo:
+		  combo = (comboBox_widget_t*)w->content;
+		  if(((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption))&&(combo->currentItem)){
+        return &((comboBox_widget_t*)w->content)->currentItem->widget->inputData;
+      }
 		default:
 			return NULL;
 			break;
@@ -29,14 +32,18 @@ displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *w) {
 }
 
 editable_widget_t * extractEditablePartFromWidget(widget_t *w) {
+  comboBox_widget_t* combo;
 	if(!w)
 		return NULL;
 	switch (w->type) {
 		case widget_editable:
-			return &w->editableWidget;
-			break;
 		case widget_multi_option:
-			return &w->multiOptionWidget.editable;
+      return (editable_widget_t*)w->content;
+    case widget_combo:
+      combo = (comboBox_widget_t*)w->content;
+      if(((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption))&&(combo->currentItem)){
+        return ((comboBox_widget_t*)w->content)->currentItem->widget;
+      }
 		default:
 			return NULL;
 			break;
@@ -48,22 +55,20 @@ selectable_widget_t * extractSelectablePartFromWidget(widget_t *w) {
 		return NULL;
 	switch (w->type) {
 		case widget_editable:
-			return &w->editableWidget.selectable;
-			break;
 		case widget_multi_option:
-			return &w->multiOptionWidget.editable.selectable;
+      return &((editable_widget_t*)w->content)->selectable;
 		case widget_button:
 		case widget_bmp_button:
-			return &w->buttonWidget.selectable;
-		case widget_combo:
-			return &w->comboBoxWidget.selectable;
+      return &((button_widget_t*)w->content)->selectable;
+    case widget_combo:
+      return &((comboBox_widget_t*)w->content)->selectable;
 		default:
 			return NULL;
 			break;
 	}
 }
-void widgetDefaultsInit(widget_t *w, widgetType t){
-	if(!w){ return; }
+void widgetDefaultsInit(widget_t *w, widgetType t, void* content){
+	if(!w || !content){ return; }
 	w->type = t;
 	w->draw = &default_widgetDraw;
 	w->update = &default_widgetUpdate;
@@ -73,68 +78,80 @@ void widgetDefaultsInit(widget_t *w, widgetType t){
 	w->radius=-1;
 	w->posX = 0;
 	w->posY = 0;
-	w->displayString = NULL;
-	w->endString = NULL;
-	w->stringPos = 0;
-	w->last_value = 0;
-	w->xbm = NULL;
-	w->last_xbm = NULL;
-	w->textAlign = align_center;
-	w->dispAlign = align_disabled;
-	w->font = default_font ;
+	w->content = content;
 	w->next_widget = NULL;
 	selectable_widget_t *sel = extractSelectablePartFromWidget(w);
 	displayOnly_widget_t *dis = extractDisplayPartFromWidget(w);
 	editable_widget_t *edit = extractEditablePartFromWidget(w);
-
-	if(sel) {
-		sel->previous_state = widget_idle;
-		sel->state = widget_idle;
-		sel->tab = 0;
-		sel->processInput = &default_widgetProcessInput;
-		sel->longPressAction = NULL;
-	}
-	if(dis){
-		dis->getData = NULL;
-		dis->reservedChars = 0;
-		dis->number_of_dec = 0;
-		dis->type = field_int32;
-		w->displayString=displayString;
-	}
-	if(edit){
-		edit->step=1;
-		edit->big_step=1;
-		edit->current_edit=0;
-		edit->max_value=2147483647;
-		edit->min_value=0;
-		edit->setData=NULL;
-	}
+  if(sel) {
+    sel->previous_state = widget_idle;
+    sel->state = widget_idle;
+    sel->tab = 0;
+    sel->processInput = &default_widgetProcessInput;
+    sel->longPressAction = NULL;
+  }
+  if(dis){
+    dis->font = default_font;
+    dis->getData = NULL;
+    dis->reservedChars = 0;
+    dis->number_of_dec = 0;
+    dis->type = field_int32;
+    dis->displayString=displayString;
+    dis->endString=NULL;
+    dis->stringStart=0;
+    dis->last_value = 0;
+    dis->textAlign = align_center;
+    dis->dispAlign = align_disabled;
+  }
+  if(edit){
+    edit->step=1;
+    edit->big_step=1;
+    edit->current_edit=0;
+    edit->max_value=2147483647;
+    edit->min_value=0;
+    edit->setData=NULL;
+  }
 	switch (t) {
 		case widget_multi_option:
 			edit->max_value = 255;
-			//w->multiOptionWidget.currentOption = 0;
-			//w->multiOptionWidget.defaultOption = 0;
-			w->multiOptionWidget.numberOfOptions = 0;
-			w->multiOptionWidget.options = NULL;
+			edit->numberOfOptions = 0;
+			edit->options = NULL;
 			break;
 		case widget_combo:
-			w->comboBoxWidget.currentItem = NULL;
+		{
+		  comboBox_widget_t* combo = content;
+			combo->currentItem = NULL;
 			w->frameType = frame_combo;
-			w->comboBoxWidget.first = NULL;
+			combo->first = NULL;
 			w->draw = &comboBoxDraw;
-			w->comboBoxWidget.currentScroll = 0;
-			w->comboBoxWidget.selectable.processInput = &comboBoxProcessInput;
+			combo->currentScroll = 0;
+			combo->selectable.processInput = &comboBoxProcessInput;
 			w->parent->current_widget = w;
-
+			combo->font = default_font;
 			break;
+		}
 		case widget_button:
-			w->buttonWidget.action = NULL;
+		{
+		  button_widget_t* button = (button_widget_t*)content;
+			button->action = NULL;
+			button->displayString = NULL;
+			button->xbm = NULL;
+			button->last_xbm = NULL;
+			button->font = default_font;
 			break;
+		}
 		default:
 			break;
 	}
-}
+	sel = extractSelectablePartFromWidget(w);
+	dis = extractDisplayPartFromWidget(w);
+	edit = extractEditablePartFromWidget(w);
 
+}
+void editableDefaultsInit(editable_widget_t* editable, widgetType type){
+  widget_t w;
+  widgetDefaultsInit(&w, type, editable);
+}
 
 static void insertDot(char *str, uint8_t dec) {
 	for(int x = strlen(str); x > (int)strlen(str) - (int)dec - 2; --x) {
@@ -147,7 +164,6 @@ void widgetEnable(widget_t* w){
 	if(w && !w->enabled){
 		w->enabled = 1;
 		w->refresh = refresh_triggered;
-		//default_widgetUpdate(w);	// Update widget before drawing
 	}
 }
 
@@ -164,24 +180,35 @@ void default_widgetUpdate(widget_t *w) {
 		w->refresh=refresh_idle;
 		return;
 	}
+	button_widget_t* button;
+  bmp_widget_t* bmp;
 	int32_t val_ui=0;
 	displayOnly_widget_t* dis = extractDisplayPartFromWidget(w);
+  editable_widget_t *edit = extractEditablePartFromWidget(w);
+
 	switch(w->type){
 		case widget_bmp_button:
-		case widget_bmp:
-			if(!w->xbm){
+      button = ((button_widget_t*)w->content);
+			if(!button->xbm){
 				widgetDisable(w);
 				return;
 			}
 			break;
 
+		case widget_bmp:
+      bmp = ((bmp_widget_t*)w->content);
+      if(!bmp->xbm){
+        widgetDisable(w);
+        return;
+      }
+      break;
 		case widget_button:
-		case widget_label:
-			if(!w->displayString){
+		  button = ((button_widget_t*)w->content);
+			if(!button->displayString){
 				widgetDisable(w);
 				return;
 			}
-			val_ui=strsum(w->displayString);				// Get string sum
+			val_ui=strsum(button->displayString);				// Get string sum
 			break;
 
 		case widget_multi_option:
@@ -189,7 +216,7 @@ void default_widgetUpdate(widget_t *w) {
 				widgetDisable(w);
 				return;
 			};
-			val_ui=strsum(w->multiOptionWidget.options[*(uint8_t*)dis->getData()]);				// Get string sum
+			val_ui=strsum(edit->options[*(uint8_t*)dis->getData()]);				// Get string sum
 			break;
 
 		case widget_display:
@@ -204,25 +231,8 @@ void default_widgetUpdate(widget_t *w) {
 			}
 			else{
 				val_ui = *(int32_t*)dis->getData();
-				uint8_t sum = strsum(w->endString);
+				uint8_t sum = strsum(dis->endString);
 				widgetDetectChange(w,(val_ui + sum));						// Check for changes in value and endString
-/*
-				if((w->refresh) || (!*w->displayString)){										// Ensure displaystring is initialized
-					snprintf(w->displayString, dis->reservedChars+1, "%0*ld", dis->number_of_dec+1, (int32_t)val_ui);	// Convert value into string
-					uint8_t dispLen=strlen(w->displayString);
-					uint8_t endLen=strlen(w->endString);
-
-					if(dis->number_of_dec){																// If there're decimals
-						if(dis->reservedChars >= (dispLen+1)){						// Ensure there's enough space in the string for adding the decimal point
-							insertDot(w->displayString,  dis->number_of_dec);							// Insert decimal dot
-						}
-					}
-					if(dis->reservedChars >= (dispLen+endLen)){	// Ensure there's enough space in the string for adding the end String
-						strcat(w->displayString, w->endString);									// Append endString
-					}
-					w->displayString[dis->reservedChars]=0;											// Ensure last string char is 0
-				}
-				*/
 				return;
 			}
 			break;
@@ -233,33 +243,51 @@ void default_widgetUpdate(widget_t *w) {
 }
 
 void widgetDetectChange(widget_t* w, int32_t val){
-	switch(w->type){
-	case widget_display:
-	case widget_editable:
-	case widget_multi_option:
-	case widget_label:
-	case widget_button:
-		if(w->last_value!=val){
-			w->last_value=val;
-			if(w->refresh==refresh_idle){
-				w->refresh=refresh_triggered;
-			}
-		}
-		break;
+  displayOnly_widget_t* dis;
+  bmp_widget_t* bmp;
+  button_widget_t* button;
+  bool refresh=0;
+  switch(w->type){
+    case widget_display:
+    case widget_editable:
+    case widget_multi_option:
+      dis=extractDisplayPartFromWidget(w);
+      if(dis->last_value!=val){
+        dis->last_value=val;
+        refresh=1;
+      }
+      break;
 
-	case widget_bmp_button:
-	case widget_bmp:
-		if(w->last_xbm != w->xbm){
-			w->last_xbm = w->xbm;
-			if(w->refresh==refresh_idle){
-				w->refresh=refresh_triggered;
-			}
-		}
-		break;
+    case widget_button:
+      button = (button_widget_t*)w->content;
+      if(button->last_value != val){
+        button->last_value = val;
+        refresh=1;
+      }
+      break;
 
-	default:
-		break;
-	}
+    case widget_bmp_button:
+      button = (button_widget_t*)w->content;
+      if(button->last_xbm != button->xbm){
+        button->last_xbm = button->xbm;
+        refresh=1;
+      }
+      break;
+
+    case widget_bmp:
+      bmp = (bmp_widget_t*)w->content;
+      if(bmp->last_xbm != bmp->xbm){
+        bmp->last_xbm = bmp->xbm;
+        refresh=1;
+      }
+      break;
+
+    default:
+      break;
+  }
+  if(refresh && w->refresh==refresh_idle){
+    w->refresh=refresh_triggered;
+  }
 }
 
 // Clear widget field before drawing widget with new data
@@ -267,8 +295,10 @@ void widgetClearField(widget_t* w){
 	if(!w){ return; }
 	selectable_widget_t* sel = extractSelectablePartFromWidget(w);
 	displayOnly_widget_t* dis = extractDisplayPartFromWidget(w);
+	button_widget_t* button;
+	bmp_widget_t* bmp;
 	uint8_t cHeight = u8g2_GetMaxCharHeight(&u8g2);
-	if(w->font==u8g2_font_iron){ cHeight+=3; }
+	if(dis && dis->font==u8g2_font_iron){ cHeight+=3; }// TODO this font reports lower height, needs to be manually adjusted
 	uint8_t r;
 
 	if(w->frameType!=frame_combo){
@@ -276,22 +306,28 @@ void widgetClearField(widget_t* w){
 		if(w->parent->refresh < screen_eraseAndRefresh ){
 			switch((uint8_t)w->type){
 				case widget_bmp:
-					u8g2_DrawBox(&u8g2, w->posX, w->posY, w->xbm[0], w->xbm[1]);
+				  bmp = (bmp_widget_t*)w->content;
+					u8g2_DrawBox(&u8g2, w->posX, w->posY, bmp->xbm[0], bmp->xbm[1]);
 					break;
 
 				case widget_bmp_button:
-					u8g2_DrawBox(&u8g2, w->posX, w->posY, w->xbm[0]+4, w->xbm[1]+4);
+          button = (button_widget_t*)w->content;
+					u8g2_DrawBox(&u8g2, w->posX, w->posY, button->xbm[0]+4, button->xbm[1]+4);
 					break;
 
-				case widget_label:
+				case widget_button:
+          button = (button_widget_t*)w->content;
+				  if(button->font==u8g2_font_iron){ cHeight+=3; }               // TODO this font reports lower height, needs to be manually adjusted
+					u8g2_DrawBox(&u8g2, w->posX, w->posY, w->width, cHeight+1);
+					break;
+
 				case widget_display:
 					u8g2_DrawBox(&u8g2, w->posX, w->posY, w->width, cHeight+1);			// Draw black square to erase previous data
 					break;
 
 				case widget_editable:
-				case widget_button:
 				case widget_multi_option:
-					if(w->font==u8g2_font_iron){ cHeight+=3; }
+					if(dis->font==u8g2_font_iron){ cHeight+=3; }                  // TODO this font reports lower height, needs to be manually adjusted
 					u8g2_DrawBox(&u8g2, w->posX ,w->posY, w->width, cHeight+1);
 					break;
 			}
@@ -326,17 +362,19 @@ void widgetClearField(widget_t* w){
 	}
 }
 
-// -2: Not applicable, -1: Error, else: xPos for drawing string
+
 void widgetAlign(widget_t* w){
 	if(!w || w->frameType==frame_combo){ return; }
 
-	uint8_t strWidth;
+	uint8_t strWidth=0, stringStart=0, textAlign=align_disabled, dispAlign=align_disabled;
 	displayOnly_widget_t *dis=extractDisplayPartFromWidget(w);
 	selectable_widget_t *sel=extractSelectablePartFromWidget(w);
+  editable_widget_t *edit = extractEditablePartFromWidget(w);
+  button_widget_t* button = NULL;
 	switch(w->type){
 		case widget_button:
-		case widget_label:
-			strWidth=u8g2_GetStrWidth(&u8g2, w->displayString);
+		  button = (button_widget_t *)w->content;
+			strWidth=u8g2_GetStrWidth(&u8g2, button->displayString);
 			break;
 
 		case widget_display:
@@ -350,8 +388,8 @@ void widgetAlign(widget_t* w){
 			break;
 
 		case widget_multi_option:
-			strWidth=u8g2_GetStrWidth(&u8g2,  (char *)w->multiOptionWidget.options[*(uint8_t*)dis->getData()]);
-                                        			break;
+			strWidth=u8g2_GetStrWidth(&u8g2,  (char *)edit->options[*(uint8_t*)dis->getData()]);
+			break;
 		default:
 			return;
 	}
@@ -359,23 +397,41 @@ void widgetAlign(widget_t* w){
 		widgetDisable(w);					// Disable widget
 		return;
 	}
-	if(sel){									// If selectable, extra space for not overlapping the frame
-		if(w->width < strWidth+7){				// If width too small
-			w->width=strWidth+7;				// Use width from str width
+	if(dis){
+    textAlign = dis->textAlign;
+    dispAlign = dis->dispAlign;
+	}
+	else if(w->type == widget_button){
+	  textAlign = align_center;
+	  dispAlign = align_disabled;
+	}
+	else{
+	  return;
+	}
+	if(sel && (w->frameType!=frame_disabled)){			// If selectable, extra space for not overlapping the frame
+		if(w->width < strWidth+7){				            // If width too small
+		  if(strWidth+7<OledWidth){                   // If fits oled size
+		    w->width=strWidth+7;                      // Use width from str width
+		  }
+		  else{
+		    w->width = strWidth;                      // Else, don't add extra space
+		  }
 		}
 	}
 	else{
-		if(w->width < strWidth){			// If width too small
+		if(w->width < strWidth){		// If width too small
 			w->width=strWidth;				// Use width from str width
 		}
 	}
+
 	if(w->width > OledWidth){
-		w->posX = 0;
-		w->stringPos = 0;
-		return;
+	  if(textAlign != align_disabled)
+	    textAlign = align_left;
+	  if(dispAlign != align_disabled)
+	    dispAlign = align_left;
 	}
 
-	switch(w->dispAlign){
+	switch(dispAlign){
 		case align_disabled:
 			break;
 		case align_center:
@@ -390,28 +446,36 @@ void widgetAlign(widget_t* w){
 			break;
 	}
 
-	switch(w->textAlign){
+	switch(textAlign){
+		case align_disabled:
+		  break;
 		case align_center:
-			w->stringPos = (w->posX + ((w->width-strWidth)/2));
+			stringStart = (w->posX + ((w->width-strWidth)/2));
 			break;
 		case align_right:
-			w->stringPos =(w->posX + (w->width-strWidth));
+			stringStart =(w->posX + (w->width-strWidth));
 			if(sel){
-				if(w->stringPos >= 3){
-					w->stringPos -= 3;
+				if(stringStart >= 3){
+					stringStart -= 3;
 				}
 			}
 			break;
-		case align_disabled:
 		case align_left:
 		default:
 			if(sel && ((w->posX+3)<=OledWidth)){
-				w->stringPos=w->posX+3;
+				stringStart=w->posX+3;
 			}
 			else{
-				w->stringPos = w->posX;
+				stringStart = w->posX;
 			}
 			break;
+	}
+
+	if(w->type == widget_button){
+	  button->stringStart=stringStart;
+	}
+	else if(dis){
+	  dis->stringStart = stringStart;
 	}
 }
 
@@ -423,12 +487,27 @@ void default_widgetDraw(widget_t *w) {
 	displayOnly_widget_t* dis = extractDisplayPartFromWidget(w);
 	editable_widget_t* edit = extractEditablePartFromWidget(w);
 	selectable_widget_t* sel = extractSelectablePartFromWidget(w);
+  button_widget_t* button = NULL;
+  bmp_widget_t* bmp = NULL;
+	const uint8_t* font = NULL;
 	uint8_t refresh = w->refresh | w->parent->refresh;
 	uint8_t cHeight = 0;
 
-	if((sel  || dis || (w->type ==widget_label)) && (w->type != widget_bmp_button)){
-		u8g2_SetFont(&u8g2, w->font);
+	if( dis ){
+		u8g2_SetFont(&u8g2, dis->font);
 		cHeight = u8g2_GetMaxCharHeight(&u8g2);
+		font = dis->font;
+	}
+	else if((w->type == widget_button)||(w->type == widget_bmp_button)){
+    button = (button_widget_t*)w->content;
+	  if(w->type == widget_button){
+	    u8g2_SetFont(&u8g2, button->font);
+      cHeight = u8g2_GetMaxCharHeight(&u8g2);
+      font = button->font;
+	  }
+	}
+	else if(w->type == widget_bmp){
+	  bmp = (bmp_widget_t*)w->content;
 	}
 	if(w->frameType==frame_outline){
 		frameDraw=1;
@@ -480,24 +559,24 @@ void default_widgetDraw(widget_t *w) {
 	if(refresh){
 		if(dis && dis->type==field_int32){
 			int32_t val_ui = *(int32_t*)dis->getData();
-			if(dis->number_of_dec>10){ dis->number_of_dec = 10; }	// Put some limits, otherwise the compiler will get anxiety
-			if(val_ui<0){
-				snprintf(w->displayString, dis->reservedChars+1, "%0*ld", dis->number_of_dec+2, (int32_t)val_ui);		// Convert value into string
-			}
-			else{
-				snprintf(w->displayString, dis->reservedChars+1, "%0*ld", dis->number_of_dec+1, (int32_t)val_ui);		// Convert value into string
-			}
-			uint8_t dispLen=strlen(w->displayString);
-			uint8_t endLen=strlen(w->endString);
+      uint8_t decimals = dis->number_of_dec+1;
+      if(val_ui<0){
+        decimals++;
+      }
+      if(decimals>10){ decimals=10; }
+			snprintf(dis->displayString, dis->reservedChars+1, "%0*ld", decimals, (int32_t)val_ui);		// Convert value into string
+
+			uint8_t dispLen=strlen(dis->displayString);
+			uint8_t endLen=strlen(dis->endString);
 			if(dis->number_of_dec){																				// If there're decimals
 				if(dis->reservedChars >= (dispLen+1)){															// Ensure there's enough space in the string for adding the decimal point
-					insertDot(w->displayString,  dis->number_of_dec);												// Insert decimal dot
+					insertDot(dis->displayString,  dis->number_of_dec);												// Insert decimal dot
 				}
 			}
 			if(dis->reservedChars >= (dispLen+endLen)){															// Ensure there's enough space in the string for adding the end String
-				strcat(w->displayString, w->endString);															// Append endString
+				strcat(dis->displayString, dis->endString);															// Append endString
 			}
-			w->displayString[dis->reservedChars]=0;																// Ensure last string char is 0
+			dis->displayString[dis->reservedChars]=0;																// Ensure last string char is 0
 		}
 
 		widgetAlign(w);				// Align
@@ -510,26 +589,30 @@ void default_widgetDraw(widget_t *w) {
 
 			case widget_bmp:
 				u8g2_SetDrawColor(&u8g2, WHITE);
-				u8g2_DrawXBMP(&u8g2, w->posX, w->posY, w->xbm[0], w->xbm[1], &w->xbm[2]);
+				u8g2_DrawXBMP(&u8g2, w->posX, w->posY, bmp->xbm[0], bmp->xbm[1], &bmp->xbm[2]);
 				return;
 
 			case widget_bmp_button:
 				u8g2_SetDrawColor(&u8g2, WHITE);
-				u8g2_DrawXBMP(&u8g2, w->posX+2, w->posY+2, w->xbm[0], w->xbm[1], &w->xbm[2]);
+				u8g2_DrawXBMP(&u8g2, w->posX+2, w->posY+2, button->xbm[0], button->xbm[1], &button->xbm[2]);
 				break;
+
+      case widget_button:
+        u8g2_DrawStr(&u8g2, button->stringStart, w->posY+2,  button->displayString);// Draw string
+        break;
 
 			case widget_display:
 				if(dis->type == field_string){
-					u8g2_DrawStr(&u8g2, w->stringPos, w->posY,  dis->getData());
+					u8g2_DrawStr(&u8g2, dis->stringStart, w->posY,  dis->getData());
 				}
 				else{
-					u8g2_DrawStr(&u8g2, w->stringPos, w->posY,  w->displayString);
+					u8g2_DrawStr(&u8g2, dis->stringStart, w->posY,  dis->displayString);
 				}
 				break;
 
 			case widget_editable:
 				if(dis->type == field_string){
-					u8g2_DrawStr(&u8g2,  w->stringPos, w->posY+2,  dis->getData());
+					u8g2_DrawStr(&u8g2,  dis->stringStart, w->posY+2,  dis->getData());
 					if(sel->state == widget_edit){
 						char t[20];
 						strcpy(t,dis->getData());
@@ -541,32 +624,24 @@ void default_widgetDraw(widget_t *w) {
 						uint8_t x1=u8g2_GetStrWidth(&u8g2, t);
 
 						u8g2_SetDrawColor(&u8g2, BLACK);
-						u8g2_DrawBox(&u8g2, w->stringPos, w->posY+ cHeight, w->width, 2);
+						u8g2_DrawBox(&u8g2, dis->stringStart, w->posY+ cHeight, w->width, 2);
 
 						u8g2_SetDrawColor(&u8g2, WHITE);
-						u8g2_DrawBox(&u8g2,  w->stringPos+x1, w->posY+ cHeight, x2-x1, 2);
+						u8g2_DrawBox(&u8g2,  dis->stringStart+x1, w->posY+ cHeight, x2-x1, 2);
 
 					}
 					else if(sel->previous_state == widget_edit){
 						u8g2_SetDrawColor(&u8g2, BLACK);
-						u8g2_DrawBox(&u8g2, w->stringPos, w->posY+ cHeight, w->width, 2);
+						u8g2_DrawBox(&u8g2, dis->stringStart, w->posY+ cHeight, w->width, 2);
 					}
 				}
 				else{
-					u8g2_DrawStr(&u8g2,w->stringPos, w->posY+2,  w->displayString);
+					u8g2_DrawStr(&u8g2,dis->stringStart, w->posY+2,  dis->displayString);
 				}
 				break;
 
-			case widget_button:
-				u8g2_DrawStr(&u8g2, w->stringPos, w->posY+2,  w->displayString);// Draw string
-				break;
-
-			case widget_label:
-				u8g2_DrawStr(&u8g2, w->stringPos, w->posY,  w->displayString);// Draw string
-				break;
-
 			case widget_multi_option:
-				u8g2_DrawStr(&u8g2, w->stringPos, w->posY+2, w->multiOptionWidget.options[*(uint8_t*)dis->getData()]);// Draw string
+				u8g2_DrawStr(&u8g2, dis->stringStart, w->posY+2, edit->options[*(uint8_t*)dis->getData()]);// Draw string
 				break;
 
 			default:
@@ -579,11 +654,11 @@ void default_widgetDraw(widget_t *w) {
 	}
 
 	if(frameDraw || w->frameType==frame_outline){
-		if(w->font==u8g2_font_iron){ cHeight+=3; }
+		if(font==u8g2_font_iron){ cHeight+=3; }
 		switch(w->type){
 			case widget_bmp_button:
 				u8g2_SetDrawColor(&u8g2, frameColor);
-				u8g2_DrawRFrame(&u8g2, w->posX, w->posY, w->xbm[0]+4,  w->xbm[1]+4, 4);
+				u8g2_DrawRFrame(&u8g2, w->posX, w->posY, button->xbm[0]+4,  button->xbm[1]+4, 4);
 				break;
 			case widget_editable:
 			case widget_button:
@@ -608,15 +683,18 @@ void default_widgetDraw(widget_t *w) {
 void comboBoxDraw(widget_t *w) {
 	uint16_t yDim = OledHeight - w->posY;
 	uint8_t height;
-	int8_t frameY=0;
+  int8_t frameY=0;
+  int8_t posY;;
 	uint8_t drawFrame=1;
-	comboBox_item_t *item = w->comboBoxWidget.first;
+	comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
+	comboBox_item_t *item = combo->first;
 	uint8_t scroll = 0;
-	uint8_t r;
-
+  uint8_t r;
 	if(!w || ((w->refresh==refresh_idle) && (w->parent->refresh==screen_idle))){
 		return;
 	}
+
+
 	if(w->refresh==refresh_triggered){
 		w->refresh=refresh_idle;
 	}
@@ -627,7 +705,7 @@ void comboBoxDraw(widget_t *w) {
 
 	if(!item){ return; }										// Return if null item
 
-	u8g2_SetFont(&u8g2, w->font);
+	u8g2_SetFont(&u8g2, combo->font);
 	height= u8g2_GetMaxCharHeight(&u8g2)+1;// +1 to allow separation between combobox items
 
 	if(w->radius<0){
@@ -638,7 +716,7 @@ void comboBoxDraw(widget_t *w) {
 	}
 
 
-	while(scroll < w->comboBoxWidget.currentScroll) {
+	while(scroll < combo->currentScroll) {
 		if(!item->next_item)
 			break;
 		item = item->next_item;
@@ -647,7 +725,7 @@ void comboBoxDraw(widget_t *w) {
 	}
 	for(uint8_t y = 0; y < yDim / height; ++y) {
 																												// Store Y position
-		if(item == w->comboBoxWidget.currentItem) {																					// If the current combo item is selected
+		if(item == combo->currentItem) {																					// If the current combo item is selected
 			frameY=y * height + w->posY;
 		}
 
@@ -666,10 +744,11 @@ void comboBoxDraw(widget_t *w) {
 				}
 			}
 		}
-		else if (item->type==combo_Option){
-			selectable_widget_t *sel = extractSelectablePartFromWidget(item->widget);
-			displayOnly_widget_t* dis = extractDisplayPartFromWidget(item->widget);
-			default_widgetUpdate(item->widget);
+		else if ((item->type==combo_Editable)||(item->type==combo_MultiOption)){
+      editable_widget_t* edit = item->widget;
+			selectable_widget_t *sel = &edit->selectable;
+      displayOnly_widget_t* dis = &edit->inputData;
+			default_widgetUpdate(w);
 			uint8_t len=0;
 			if(sel->state==widget_edit){																									// If edit mode
 				drawFrame=0;
@@ -681,32 +760,37 @@ void comboBoxDraw(widget_t *w) {
 				u8g2_SetDrawColor(&u8g2, WHITE);
 			}
 
-			if(item->widget->type==widget_multi_option){
-				len = u8g2_GetStrWidth(&u8g2,item->widget->multiOptionWidget.options[*(uint8_t*)dis->getData()]);
+			if(item->type==combo_MultiOption){
+				len = u8g2_GetStrWidth(&u8g2,edit->options[*(uint8_t*)dis->getData()]);
 			}
-			else if(item->widget->type==widget_editable){
+			else if(item->type==combo_Editable){
 				int32_t val_ui = *(int32_t*)dis->getData();
-				snprintf(item->widget->displayString, dis->reservedChars+1, "%0*ld", dis->number_of_dec+1, (int32_t)val_ui);		// Convert value into string
-				uint8_t dispLen=strlen(item->widget->displayString);
-				uint8_t endLen=strlen(item->widget->endString);
+	      uint8_t decimals = dis->number_of_dec+1;
+	      if(val_ui<0){
+	        decimals++;
+	      }
+	      if(decimals>10){ decimals=10; }
+				snprintf(dis->displayString, dis->reservedChars+1, "%0*ld", decimals, (int32_t)val_ui);		// Convert value into string
+				uint8_t dispLen=strlen(dis->displayString);
+				uint8_t endLen=strlen(dis->endString);
 				if(dis->number_of_dec){																				// If there're decimals
 					if(dis->reservedChars >= (dispLen+1)){															// Ensure there's enough space in the string for adding the decimal point
-						insertDot(item->widget->displayString,  dis->number_of_dec);												// Insert decimal dot
+						insertDot(dis->displayString,  dis->number_of_dec);												// Insert decimal dot
 					}
 				}
 				if(dis->reservedChars >= (dispLen+endLen)){															// Ensure there's enough space in the string for adding the end String
-					strcat(item->widget->displayString, item->widget->endString);															// Append endString
+					strcat(dis->displayString, dis->endString);															// Append endString
 				}
-				item->widget->displayString[dis->reservedChars]=0;																// Ensure last string char is 0
-				len=u8g2_GetStrWidth(&u8g2,item->widget->displayString);
+				dis->displayString[dis->reservedChars]=0;																// Ensure last string char is 0
+				len=u8g2_GetStrWidth(&u8g2,dis->displayString);
 			}
-			item->widget->posY = y * height + w->posY;																						// Set widget Ypos same as the current combo option
-			item->widget->stringPos = OledWidth-len-5;																							// Align to the left measuring actual string width
-			if(item->widget->type==widget_editable){
-				u8g2_DrawStr(&u8g2,item->widget->stringPos, item->widget->posY+2,  item->widget->displayString);
+			posY = y * height + w->posY;																						// Set widget Ypos same as the current combo option
+			dis->stringStart = OledWidth-len-5;																							// Align to the left measuring actual string width
+			if(item->type==combo_Editable){
+				u8g2_DrawStr(&u8g2,dis->stringStart, posY+2,  dis->displayString);
 			}
 			else{
-				u8g2_DrawStr(&u8g2,item->widget->stringPos, item->widget->posY+2,  item->widget->multiOptionWidget.options[*(uint8_t*)dis->getData()]);
+				u8g2_DrawStr(&u8g2,dis->stringStart, posY+2,  edit->options[*(uint8_t*)dis->getData()]);
 			}
 			u8g2_DrawStr(&u8g2, 4, y * height + w->posY +2, item->text);																// Draw the label
 			//default_widgetDraw(item->widget);																								// Draw widget
@@ -729,7 +813,7 @@ void comboBoxDraw(widget_t *w) {
 uint8_t comboItemToIndex(widget_t *combo, comboBox_item_t *item) {
 	if(!combo || !item){ return 0; }
 	uint8_t index = 0;
-	comboBox_item_t *i = combo->comboBoxWidget.first;
+	comboBox_item_t *i = ((comboBox_widget_t*)combo->content)->first;
 	while(i && i != item) {
 		i = i->next_item;
 		if(i->enabled)
@@ -739,25 +823,28 @@ uint8_t comboItemToIndex(widget_t *combo, comboBox_item_t *item) {
 }
 
 int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
+
+  comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
+
 	if(!w || (input == Rotate_Nothing)){
 		return -1;
 	}
-	u8g2_SetFont(&u8g2, w->font);
+	u8g2_SetFont(&u8g2, combo->font);
 
-	uint8_t firstIndex = w->comboBoxWidget.currentScroll;
+	uint8_t firstIndex = combo->currentScroll;
 	uint16_t yDim = OledHeight - w->posY;
 	uint16_t height = u8g2_GetMaxCharHeight(&u8g2)+1;
 	uint8_t maxIndex = yDim / height;
-	uint8_t lastIndex = w->comboBoxWidget.currentScroll + maxIndex -1;
+	uint8_t lastIndex = combo->currentScroll + maxIndex -1;
 	selectable_widget_t *sel;
 	if(w->refresh==refresh_idle){
 		w->refresh=refresh_triggered;
 	}
-	if (w->comboBoxWidget.currentItem->type==combo_Option){													// If combo option type
-		sel = extractSelectablePartFromWidget(w->comboBoxWidget.currentItem->widget);									// Get selectable data
+	if ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){													// If combo editable type
+		sel = &combo->currentItem->widget->selectable;									    // Get selectable data
 	}
 	if((input == Click)||(input == LongClick)){																								// If clicked
-		if (w->comboBoxWidget.currentItem->type==combo_Option){												// If combo option type
+	  if ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){												// If combo editable type
 			if(sel->state==widget_idle){																					// If widget idle
 				sel->state=widget_edit;																				// Change to edit
 			}
@@ -766,49 +853,50 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
 			}
 			return -1;																								// Do nothing else
 		}
-		if (w->comboBoxWidget.currentItem->type==combo_Action){												// If combo option type
-			return w->comboBoxWidget.currentItem->action();
+		if (combo->currentItem->type==combo_Action){												// If combo option type
+			return combo->currentItem->action();
 		}
-		else if (w->comboBoxWidget.currentItem->type==combo_Screen){											// If combo screen type
-			return w->comboBoxWidget.currentItem->action_screen;												// Return screen index
+		else if (combo->currentItem->type==combo_Screen){											// If combo screen type
+			return combo->currentItem->action_screen;												// Return screen index
 		}
 	}
-	if((input == Rotate_Increment)||(input == Rotate_Decrement)){													// If rotation data
-		if(w->comboBoxWidget.currentItem->type==combo_Option){													// If combo option type
+	if((input == Rotate_Increment) || (input == Rotate_Decrement) ||													// If rotation data
+	  (input == Rotate_Increment_while_click) || (input == Rotate_Decrement_while_click)){
+	  if ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){													// If combo option type
 			if(sel->state==widget_edit){																			// If widget in edit mode
-				default_widgetProcessInput(w->comboBoxWidget.currentItem->widget, input, state);				// Process widget
+				default_widgetProcessInput(w, input, state);				// Process widget
 				return -1;																							// Return
 			}
 		}
 		if(input == Rotate_Increment) {
 			//Set comboBox item to next comboBox
-			comboBox_item_t *current = w->comboBoxWidget.currentItem->next_item;
+			comboBox_item_t *current = combo->currentItem->next_item;
 			// if comboBox is disabled, skip. While comboBox still valid
 			while(current && !current->enabled) {
 				current = current->next_item;
 			}
 			// If comboBox valid(didn't reach end)
 			if(current) {
-				w->comboBoxWidget.currentItem = current;
+				combo->currentItem = current;
 				uint8_t index = comboItemToIndex(w, current);
 				if(index > lastIndex)
-					++w->comboBoxWidget.currentScroll;
+					++combo->currentScroll;
 			}
 		}
 		else if(input == Rotate_Decrement) {
 			comboBox_item_t *current = NULL;
 			// If comboBox is not the first element
-			if(w->comboBoxWidget.currentItem != w->comboBoxWidget.first){
+			if(combo->currentItem != combo->first){
 				do {
-					current = w->comboBoxWidget.first;
-					while(current->next_item != w->comboBoxWidget.currentItem) {
+					current = combo->first;
+					while(current->next_item != combo->currentItem) {
 						current = current->next_item;
 					}
-					w->comboBoxWidget.currentItem = current;
+					combo->currentItem = current;
 				}while(!current->enabled);
 				uint8_t index = comboItemToIndex(w, current);
 				if(index < firstIndex)
-					--w->comboBoxWidget.currentScroll;
+					--combo->currentScroll;
 			}
 		}
 	}
@@ -829,10 +917,13 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 	displayOnly_widget_t* dis = extractDisplayPartFromWidget(w);
 	selectable_widget_t* sel = extractSelectablePartFromWidget(w);
 	editable_widget_t* edit = extractEditablePartFromWidget(w);
-
+	comboBox_widget_t* combo = NULL;
 	if(!w || (input == Rotate_Nothing)){ return -1;	}
 	if(!sel) {	return -2;	}
 
+	if(w->type==widget_combo){
+	  combo = (comboBox_widget_t*)w->content;
+	}
 	if(input == LongClick) {
 		if(sel->longPressAction){
 			return sel->longPressAction(w);
@@ -849,10 +940,10 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 					w->refresh = refresh_triggered;
 				}
 				if((w->type == widget_button)||(w->type == widget_bmp_button)){
-					return w->buttonWidget.action(w);
+				  return ((button_widget_t*)w->content)->action(w);
 				}
 				if(dis->type == field_string){
-					strcpy(w->displayString, (char*)w->editableWidget.inputData.getData());
+					strcpy(dis->displayString, (char*)edit->inputData.getData());
 					edit->current_edit = 0;
 				}
 				sel->state = widget_edit;
@@ -882,23 +973,28 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 		}
 		return -1;
 	}
-	if((w->type == widget_editable) && (sel->state == widget_edit)) {
+	if(((w->type == widget_editable) && (sel->state == widget_edit)) || ((w->type == widget_combo)&&combo->currentItem->type==combo_Editable)) {  // Combo only calls this when incrementing or decrementing
 		int32_t val_ui;
 		int32_t inc;
 		if(w->refresh==refresh_idle){
 			w->refresh=refresh_triggered;
 		}
-
-		if(abs(state->Diff) > 1) {//TODO test
-			inc = w->editableWidget.big_step;
-			if(state->Diff < 0)
+		if(input == Rotate_Increment_while_click){
+		  input = Rotate_Increment;
+		  inc = edit->big_step;
+		}
+		else if(input == Rotate_Decrement_while_click){
+		  input = Rotate_Decrement;
+		  inc = edit->big_step;
+		}
+		else{
+			inc = edit->step;
+		}
+		if(state->Diff < 0){
 				inc = -inc;
 		}
-		else
-			inc = w->editableWidget.step * state->Diff;
-
 		if(edit->inputData.type==field_string){
-			int16_t current_edit = (char)w->displayString[edit->current_edit];
+			int16_t current_edit = (char)dis->displayString[edit->current_edit];
 			current_edit += inc;
 
 			switch(current_edit){//     \0, ' ', 0-9, A-Z
@@ -927,12 +1023,12 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 				default:
 					break;
 			}
-			w->displayString[edit->current_edit]=(char)current_edit;
-			w->editableWidget.setData(w->displayString);
+			dis->displayString[edit->current_edit]=(char)current_edit;
+			edit->setData(dis->displayString);
 		}
 
 		else if(edit->inputData.type==field_int32){
-			if(!w->displayString){	// If empty
+			if(!dis->displayString){	// If empty
 				widgetDisable(w);
 				return -1;
 			}
@@ -953,11 +1049,11 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 					val_ui= edit->max_value;
 				}
 			}
-			w->editableWidget.setData(&val_ui);
+			edit->setData(&val_ui);
 		}
 		return -1;
 	}
-	else if((w->type == widget_multi_option) && (sel->state == widget_edit)) {
+	else if( ((w->type == widget_multi_option) && (sel->state == widget_edit)) || ((w->type == widget_combo)&&combo->currentItem->type==combo_MultiOption)) {
 		if(w->refresh==refresh_idle){
 			w->refresh=refresh_triggered;
 		}
@@ -967,10 +1063,10 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 		else if(input == Rotate_Decrement)
 			--temp;
 		if(temp < 0)
-			temp = w->multiOptionWidget.numberOfOptions - 1;
-		else if(temp > w->multiOptionWidget.numberOfOptions -1)
+			temp = edit->numberOfOptions - 1;
+		else if(temp > edit->numberOfOptions -1)
 			temp = 0;
-		w->multiOptionWidget.editable.setData(&temp);
+		edit->setData(&temp);
 	}
 	else if (sel->state == widget_selected) {
 		uint8_t next = 0xFF;
@@ -1024,6 +1120,7 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 
 void comboAddScreen(comboBox_item_t* item,widget_t *combo, char *label, uint8_t actionScreen){
 	if(!item || !combo || !label){ return; }
+  comboBox_widget_t* comboW = (comboBox_widget_t*)combo->content;
 	if(combo->type==widget_combo){
 		item->text = label;
 		item->next_item = NULL;
@@ -1032,11 +1129,11 @@ void comboAddScreen(comboBox_item_t* item,widget_t *combo, char *label, uint8_t 
 		item->enabled = 1;
 		item->dispAlign= align_center;
 
-		comboBox_item_t *next = combo->comboBoxWidget.first;
+		comboBox_item_t *next = comboW->first;
 
 		if(!next) {
-			combo->comboBoxWidget.first = item;
-			combo->comboBoxWidget.currentItem = item;
+		  comboW->first = item;
+		  comboW->currentItem = item;
 			return;
 		}
 		while(next->next_item){
@@ -1046,33 +1143,59 @@ void comboAddScreen(comboBox_item_t* item,widget_t *combo, char *label, uint8_t 
 	}
 }
 
-void comboAddOption(comboBox_item_t* item, widget_t *combo, char *label, widget_t *w){
-	if(!item || !combo || !label || !w){ return; }
-	if( (w->type==widget_editable) || (w->type==widget_multi_option) ){				// Only allow Editable  or multioption widgets
-		item->text = label;
-		item->next_item = NULL;
-		item->widget = w;
-		item->type = combo_Option;
-		item->enabled = 1;
-		w->frameType = frame_combo;
-		w->font = combo->font;
-		w->textAlign = align_disabled;
-		w->dispAlign = align_disabled;
-		comboBox_item_t *next = combo->comboBoxWidget.first;
-
-		if(!next) {
-			combo->comboBoxWidget.first = item;
-			combo->comboBoxWidget.currentItem = item;
-			return;
-		}
-		while(next->next_item){
-			next = next->next_item;
-		}
-		next->next_item = item;
+// Only allows Editable or multioption widgets
+void comboAddEditable(comboBox_item_t* item, widget_t *combo, char *label, editable_widget_t *editable){
+	if(!item || !combo || !label || !editable ){
+	  return;
 	}
+  comboBox_widget_t* comboW = (comboBox_widget_t*)combo->content;
+
+  item->text = label;
+  item->next_item = NULL;
+  item->widget = editable;
+  item->type = combo_Editable;
+  item->enabled = 1;
+  comboBox_item_t *next = comboW->first;
+
+  if(!next) {
+    comboW->first = item;
+    comboW->currentItem = item;
+    return;
+  }
+  while(next->next_item){
+    next = next->next_item;
+  }
+  next->next_item = item;
 }
+
+// Only allows Editable or multioption widgets
+void comboAddMultiOption(comboBox_item_t* item, widget_t *combo, char *label, editable_widget_t *editable){
+  if(!item || !combo || !label || !editable ){
+    return;
+  }
+  comboBox_widget_t* comboW = (comboBox_widget_t*)combo->content;
+
+  item->text = label;
+  item->next_item = NULL;
+  item->widget = editable;
+  item->type = combo_MultiOption;
+  item->enabled = 1;
+  comboBox_item_t *next = comboW->first;
+
+  if(!next) {
+    comboW->first = item;
+    comboW->currentItem = item;
+    return;
+  }
+  while(next->next_item){
+    next = next->next_item;
+  }
+  next->next_item = item;
+}
+
 void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, int (*action)()){
 	if(!item || !combo || !label || !action){ return; }
+  comboBox_widget_t* comboW = (comboBox_widget_t*)combo->content;
 	if(action){												// If not null
 		item->text = label;
 		item->next_item = NULL;
@@ -1080,11 +1203,11 @@ void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, int (*a
 		item->type = combo_Action;
 		item->enabled = 1;
 		item->dispAlign= align_center;
-		comboBox_item_t *next = combo->comboBoxWidget.first;
+		comboBox_item_t *next = comboW->first;
 
 		if(!next) {
-			combo->comboBoxWidget.first = item;
-			combo->comboBoxWidget.currentItem = item;
+			comboW->first = item;
+			comboW->currentItem = item;
 			return;
 		}
 		while(next->next_item){
@@ -1095,13 +1218,14 @@ void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, int (*a
 }
 
 void comboResetIndex(widget_t *combo){
-	if(combo->comboBoxWidget.currentItem->type==combo_Option){
-		selectable_widget_t* sel = extractSelectablePartFromWidget(combo->comboBoxWidget.currentItem->widget);
+  comboBox_widget_t* comboW = (comboBox_widget_t*)combo->content;
+	if((comboW->currentItem->type==combo_Editable)||(comboW->currentItem->type==combo_MultiOption)){
+			selectable_widget_t* sel = &comboW->currentItem->widget->selectable;
 		if(sel){
 			sel->state = widget_idle;
 			sel->previous_state = widget_idle;
 		}
 	}
-	combo->comboBoxWidget.currentItem = combo->comboBoxWidget.first;
-	combo->comboBoxWidget.currentScroll=0;
+	comboW->currentItem = comboW->first;
+	comboW->currentScroll=0;
 }

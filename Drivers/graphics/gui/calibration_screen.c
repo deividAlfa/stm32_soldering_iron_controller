@@ -40,24 +40,35 @@ screen_t Screen_edit_calibration_adjust;
 screen_t Screen_edit_calibration_input;
 
 static widget_t comboWidget_Cal;
+static comboBox_widget_t comboBox_Cal;
 static comboBox_item_t Cal_Combo_Start;
 static comboBox_item_t Cal_Combo_Adjust;
 static comboBox_item_t Cal_Combo_Exit;
 
 static widget_t Widget_Cal_Start_Cancel;
+static button_widget_t button_Cal_Start_Cancel;
 
 static widget_t comboWidget_Cal_Adjust;
+static comboBox_widget_t comboBox_Cal_Adjust;
 static comboBox_item_t Cal_Combo_Adjust_Target;
 static comboBox_item_t Cal_Combo_Adjust_Setpoint;
 static comboBox_item_t Cal_Combo_Adjust_Save;
 static comboBox_item_t Cal_Combo_Adjust_Cancel;
 
 static widget_t Widget_Cal_Adjust_Select;
-static widget_t Widget_Cal_Adjust_Setpoint;
+static editable_widget_t editable_Cal_Adjust_Select;
 
-static widget_t Widget_Cal_Input_MeasuredTemp_edit;
+static widget_t Widget_Cal_Adjust_Setpoint;
+static editable_widget_t editable_Cal_Adjust_Setpoint;
+
+static widget_t Widget_Cal_Input_Measured;
+static editable_widget_t editable_Cal_Input_Measured;
+
 static widget_t Widget_Cal_Input_Cancel;
+static button_widget_t button_Cal_Input_Cancel;
+
 static widget_t Widget_Cal_Input_OK;
+static button_widget_t button_Cal_Input_OK;
 
 static void tempReached(uint16_t temp) {
 	if(temp == state_temps[(int)current_state])
@@ -195,7 +206,7 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
 
 static void Cal_Start_onEnter(screen_t *scr) {
 	if(scr != &Screen_edit_calibration_input) {
-		setCalState(cal_250);
+		Currtip = getCurrentTip();
 		Iron.calibrating=1;
 		tempReady = 0;
 		setCurrentMode(mode_run);
@@ -291,17 +302,16 @@ static void Cal_Input_init(screen_t *scr) {
 }
 
 static void Cal_Input_OnExit(screen_t *scr) {
+  button_Cal_Input_OK.selectable.previous_state=widget_idle;;
+  button_Cal_Input_OK.selectable.state=widget_idle;
 
-	Widget_Cal_Input_OK.buttonWidget.selectable.previous_state=widget_idle;
-	Widget_Cal_Input_OK.buttonWidget.selectable.state=widget_idle;
+  button_Cal_Input_Cancel.selectable.previous_state=widget_idle;
+  button_Cal_Input_Cancel.selectable.state=widget_idle;
 
-	Widget_Cal_Input_Cancel.buttonWidget.selectable.previous_state=widget_idle;
-	Widget_Cal_Input_Cancel.buttonWidget.selectable.state=widget_idle;
+  editable_Cal_Input_Measured.selectable.previous_state=widget_selected;
+  editable_Cal_Input_Measured.selectable.state=widget_edit;
 
-	Widget_Cal_Input_MeasuredTemp_edit.editableWidget.selectable.previous_state=widget_selected;
-	Widget_Cal_Input_MeasuredTemp_edit.editableWidget.selectable.state=widget_edit;
-
-	Screen_edit_calibration_input.current_widget=&Widget_Cal_Input_MeasuredTemp_edit;
+	Screen_edit_calibration_input.current_widget=&Widget_Cal_Input_Measured;
 }
 
 static int Cal_Input_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
@@ -361,6 +371,7 @@ void calibration_screen_setup(screen_t *scr) {
 
 	widget_t* w;
 	displayOnly_widget_t *dis;
+  editable_widget_t* edit;
 	screen_t* sc;
 
 	//########################################## CALIBRATION SCREEN ##########################################
@@ -372,8 +383,9 @@ void calibration_screen_setup(screen_t *scr) {
 	addSetTemperatureReachedCallback(tempReachedCallback);
 
 	w = &comboWidget_Cal;
+  w->content = &comboBox_Cal;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_combo);
+	widgetDefaultsInit(w, widget_combo, &comboBox_Cal);
 	comboAddScreen(&Cal_Combo_Start, w, 	"START",		screen_edit_calibration_start);
 	comboAddScreen(&Cal_Combo_Adjust, w, 	"ADJUST", 		screen_edit_calibration_adjust);
 	comboAddScreen(&Cal_Combo_Exit, w, 		"BACK", 		screen_settingsmenu);
@@ -391,13 +403,13 @@ void calibration_screen_setup(screen_t *scr) {
 
 	w = &Widget_Cal_Start_Cancel;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button);
-	w->displayString="BACK";
+	widgetDefaultsInit(w, widget_button, &button_Cal_Start_Cancel);
+	button_Cal_Start_Cancel.displayString="BACK";
 	w->posX = 86;
 	w->posY = 48;
 	w->width = 42;
-	w->buttonWidget.selectable.tab = 0;
-	w->buttonWidget.action = &cancelAction;
+	((button_widget_t*)w->content)->selectable.tab = 0;
+	((button_widget_t*)w->content)->action = &cancelAction;
 
 	//########################################## CALIBRATION ADJUST SCREEN ##########################################
 	//
@@ -409,39 +421,41 @@ void calibration_screen_setup(screen_t *scr) {
 	sc->onExit = &Cal_Adjust_OnExit;
 
 	w = &Widget_Cal_Adjust_Select;
-	widgetDefaultsInit(w, widget_multi_option);
+	widgetDefaultsInit(w, widget_multi_option, &editable_Cal_Adjust_Select);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->getData = &getCalStep;
-	w->editableWidget.big_step = 1;
-	w->editableWidget.step = 1;
-	w->editableWidget.setData = (void (*)(void *))&setCalStep;
-	w->editableWidget.max_value = cal_450;
-	w->editableWidget.min_value = cal_250 ;
-	w->multiOptionWidget.options = state_tempstr;
-	w->multiOptionWidget.numberOfOptions = 3;
+	edit->big_step = 1;
+	edit->step = 1;
+	edit->setData = (void (*)(void *))&setCalStep;
+	edit->max_value = cal_450;
+	edit->min_value = cal_250 ;
+	edit->options = state_tempstr;
+	edit->numberOfOptions = 3;
 	w->posX = 20;
 	w->posY = 20;
 	w->width = 40;
 
 	w = &Widget_Cal_Adjust_Setpoint;
-	widgetDefaultsInit(w, widget_editable);
+	widgetDefaultsInit(w, widget_editable, &editable_Cal_Adjust_Setpoint);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->reservedChars=4;
 	dis->getData = &getAdjustSetpoint;
-	w->editableWidget.big_step = 100;
-	w->editableWidget.step = 50;
-	w->editableWidget.setData = (void (*)(void *))&setAdjustSetpoint;
-	w->editableWidget.max_value = 4000;
-	w->editableWidget.min_value = 0;
+	edit->big_step = 100;
+	edit->step = 50;
+	edit->setData = (void (*)(void *))&setAdjustSetpoint;
+	edit->max_value = 4000;
+	edit->min_value = 0;
 	w->posX = 80;
 	w->posY = 20;
 	w->width = 40;
 
 	w = &comboWidget_Cal_Adjust;
 	screen_addWidget(w, sc);
-	widgetDefaultsInit(w, widget_combo);
-	comboAddOption(&Cal_Combo_Adjust_Target, w, 	"Cal. Step",		&Widget_Cal_Adjust_Select);
-	comboAddOption(&Cal_Combo_Adjust_Setpoint, w, 	"ADC Value", 		&Widget_Cal_Adjust_Setpoint);
+	widgetDefaultsInit(w, widget_combo, &comboBox_Cal_Adjust);
+	comboAddMultiOption(&Cal_Combo_Adjust_Target, w, 	"Cal. Step",		&editable_Cal_Adjust_Select);
+	comboAddEditable(&Cal_Combo_Adjust_Setpoint, w, 	"ADC Value", 		&editable_Cal_Adjust_Setpoint);
 	comboAddAction(&Cal_Combo_Adjust_Save, w, 		"SAVE", 			&cal_adjust_SaveAction);
 	comboAddAction(&Cal_Combo_Adjust_Cancel, w, 	"CANCEL", 			&cal_adjust_CancelAction);
 
@@ -455,35 +469,36 @@ void calibration_screen_setup(screen_t *scr) {
 	sc->onExit = &Cal_Input_OnExit;;
 	sc->processInput = &Cal_Input_ProcessInput;
 
-	w=&Widget_Cal_Input_MeasuredTemp_edit;
-	widgetDefaultsInit(w, widget_editable);
+	w=&Widget_Cal_Input_Measured;
+	widgetDefaultsInit(w, widget_editable, &editable_Cal_Input_Measured);
 	screen_addWidget(w,sc);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->reservedChars = 5;
-	w->endString = "\260C";
+	dis->endString = "\260C";
 	w->posX = 86;
 	w->posY = 17;
 	w->width = 42;
 	dis->getData = &getMeasuredTemp;
-	w->editableWidget.setData =  (void (*)(void *)) &setMeasuredTemp;
-	w->editableWidget.selectable.tab = 0;
+	edit->setData =  (void (*)(void *)) &setMeasuredTemp;
+	edit->selectable.tab = 0;
 
 	w=&Widget_Cal_Input_OK;
-	widgetDefaultsInit(w, widget_button);
 	screen_addWidget(w,sc);
-	w->displayString="SAVE";
-	w->buttonWidget.selectable.tab = 1;
-	w->buttonWidget.action = &okAction;
+	widgetDefaultsInit(w, widget_button, &button_Cal_Input_OK);
+	button_Cal_Input_OK.displayString="SAVE";
+	((button_widget_t*)w->content)->selectable.tab = 1;
+	((button_widget_t*)w->content)->action = &okAction;
 	w->posX = 86;
 	w->posY = 48;
 	w->width = 42;
 
 	w=&Widget_Cal_Input_Cancel;
 	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button);
-	w->displayString="CANCEL";
-	w->buttonWidget.selectable.tab = 2;
-	w->buttonWidget.action = &cancelAction;
+	widgetDefaultsInit(w, widget_button, &button_Cal_Input_Cancel);
+	button_Cal_Input_Cancel.displayString="CANCEL";
+	((button_widget_t*)w->content)->selectable.tab = 2;
+	((button_widget_t*)w->content)->action = &cancelAction;
 	w->posX = 0;
 	w->posY = 48;
 	w->width = 56;

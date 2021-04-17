@@ -30,7 +30,7 @@ widget_t * screen_tabToWidget(screen_t * scr, uint8_t tab) {
 		last_widget = scr->widgets;
 		while(last_widget) {
 			if(last_widget->type == widget_editable) {
-				if(last_widget->editableWidget.selectable.tab == tab)
+				if(((editable_widget_t*)last_widget->content)->selectable.tab == tab)
 					return last_widget;
 			}
 			last_widget = last_widget->next_widget;

@@ -40,14 +40,14 @@ enum {	screen_boot,
 		};
 
 typedef struct screen_t screen_t;
-enum{ screen_idle=0, screen_refresh, screen_eraseAndRefresh, screen_blankRefresh};
+typedef enum{ screen_idle=0, screen_refresh, screen_eraseAndRefresh, screen_blankRefresh} screenRefreshType;
 struct screen_t
 {
 	struct screen_t *next_screen;
 	widget_t *widgets;
 	widget_t *current_widget;
 	bool enabled;
-	uint8_t refresh;
+	screenRefreshType refresh;
 	int (*processInput)(struct screen_t *scr, RE_Rotation_t input, RE_State_t *);
 	void (*update)(screen_t *scr);
 	void (*draw)(screen_t *scr);

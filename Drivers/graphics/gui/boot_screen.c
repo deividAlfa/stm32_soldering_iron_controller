@@ -23,7 +23,11 @@ uint32_t splash_time;
 screen_t Screen_boot;
 
 static widget_t Widget_profile_edit;
+static editable_widget_t editable_Profile_edit;
+
 static widget_t Widget_profile_OK;
+static button_widget_t button_Profile_OK;
+
 static uint8_t boot_step=0;
 //-------------------------------------------------------------------------------------------------------------------------------
 // Boot Screen widget functions
@@ -188,40 +192,44 @@ void boot_screen_init(screen_t * scr){
 void boot_screen_setup(screen_t *scr) {
 	widget_t* w;
 	displayOnly_widget_t* dis;
+  editable_widget_t* edit;
 	screen_setDefaults(scr);
 	scr->draw = &boot_screen_draw;
 	scr->processInput = &boot_screen_processInput;
 	scr->init = &boot_screen_init;
 
 	// Profile select
+	//
 	w = &Widget_profile_edit;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_multi_option);
+	widgetDefaultsInit(w, widget_multi_option, &editable_Profile_edit);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->reservedChars=4;
 	w->posX = 12;
 	w->posY = 40;
 	w->width = 48;
 	dis->getData = &getProfile;
-	w->editableWidget.big_step = 1;
-	w->editableWidget.step = 1;
-	w->editableWidget.selectable.tab = 0;
-	w->editableWidget.setData = (void (*)(void *))&setProfile;
-	w->editableWidget.max_value = ProfileSize-1;
-	w->multiOptionWidget.options = profileStr;
-	w->multiOptionWidget.numberOfOptions = 3;
+	edit->big_step = 1;
+	edit->step = 1;
+	edit->selectable.tab = 0;
+	edit->setData = (void (*)(void *))&setProfile;
+	edit->max_value = ProfileSize-1;
+	edit->options = profileStr;
+	edit->numberOfOptions = 3;
 	w->enabled=0;
 
 	// OK Button
+	//
 	w = &Widget_profile_OK;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_button);
-	w->displayString="OK";
+	widgetDefaultsInit(w, widget_button, &button_Profile_OK);
+	button_Profile_OK.displayString="OK";
+	button_Profile_OK.selectable.tab = 1;
+	button_Profile_OK.action = &profile_OK;
 	w->posX = 95;
 	w->posY = 40;
 	w->width = 32;
-	w->buttonWidget.selectable.tab = 1;
-	w->buttonWidget.action = &profile_OK;
 	w->enabled=0;
 
 }

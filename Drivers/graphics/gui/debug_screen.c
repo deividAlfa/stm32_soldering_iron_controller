@@ -24,21 +24,29 @@ int32_t debugTemperature = 0;
 screen_t Screen_debug;
 screen_t Screen_debug2;
 
-static widget_t Debug_ADC_Val;
-static widget_t Debug_ADC_ValRaw;
-static widget_t Debug2_ADC_Val;
-static widget_t Debug2_ADC_ValRaw;
-static widget_t Debug_PID_P;
-static widget_t Debug_PID_I;
-static widget_t Debug_PID_D;
-static widget_t Debug_PID_Err;
-static widget_t Debug_PID_Out;
-static widget_t Debug_SetPoint_edit;
-static widget_t Debug_Cal250_edit;
-static widget_t Debug_Cal350_edit;
-static widget_t Debug_Cal450_edit;
-static widget_t Widget_Power_dbg;
-static widget_t Widget_Power_dbg2;
+static widget_t widget_Debug_ADC_Val;
+static displayOnly_widget_t display_Debug_ADC_Val;
+
+static widget_t widget_Debug_ADC_ValRaw;
+static displayOnly_widget_t display_Debug_ADC_ValRaw;
+
+static widget_t widget_Debug_SetPoint;
+static editable_widget_t editable_Debug_SetPoint;
+
+static widget_t widget_Debug_Cal250;
+static editable_widget_t editable_Debug_Cal250;
+
+static widget_t widget_Debug_Cal350;
+static editable_widget_t editable_Debug_Cal350;
+
+static widget_t widget_Debug_Cal450;
+static editable_widget_t editable_Debug_Cal450;
+
+static widget_t widget_Debug_Power;
+static displayOnly_widget_t display_Debug_Power;
+
+
+
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug screen widgets functions
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -87,26 +95,6 @@ static void setCalcAt450(uint16_t *val) {
 	getCurrentTip()->calADC_At_450 = *val;
 }
 
-static void * debug_screen_getP() {
-	temp = getPID_P()* 1000;
-	return &temp;
-}
-static void * debug_screen_getI() {
-	temp = getPID_I()* 1000;
-	return &temp;
-}
-static void * debug_screen_getD() {
-	temp = getPID_D()* 1000;
-	return &temp;
-}
-static void * debug_screen_getError() {
-	temp = getPID_Error();
-	return &temp;
-}
-static void * debug_screen_getOutput() {
-	temp = Iron.Pwm_Out;
-	return &temp;
-}
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug screen functions
@@ -128,20 +116,37 @@ int debug2_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *s
 // Debug screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void debug_screenDraw(screen_t *scr){
-	default_screenDraw(scr);
-}
-void debug_onEnter(screen_t *scr){
-	u8g2_SetFont(&u8g2,default_font );
-	u8g2_SetDrawColor(&u8g2, WHITE);
-	u8g2_DrawStr(&u8g2,65,0,"ADC");
-	u8g2_DrawStr(&u8g2,65,16,"RAW");
-	u8g2_DrawStr(&u8g2,65,33,"ERR");
-	u8g2_DrawStr(&u8g2,60,50,"PWM");
+  static uint32_t time=0;
+  if(HAL_GetTick()-time > systemSettings.settings.guiUpdateDelay){
+    char str[16];
+    time = HAL_GetTick();
+    u8g2_SetFont(&u8g2,default_font  );
+    u8g2_SetDrawColor(&u8g2, WHITE);
+    FillBuffer(BLACK,fill_dma);
 
-	u8g2_DrawStr(&u8g2,0,0,"P");
-	u8g2_DrawStr(&u8g2,0,16,"I");
-	u8g2_DrawStr(&u8g2,0,33,"D");
+    sprintf(str, "ADC %u", TIP.last_avg);
+    u8g2_DrawStr(&u8g2,65,0,str);
+
+    sprintf(str, "RAW %u", TIP.last_RawAvg);
+    u8g2_DrawStr(&u8g2,65,16,str);
+
+    sprintf(str, "PWM %u", Iron.Pwm_Out);
+    u8g2_DrawStr(&u8g2,60,50,str);
+
+    sprintf(str, "ERR %ld", (int32_t)getPID_Error());
+    u8g2_DrawStr(&u8g2,65,33,str);
+
+    sprintf(str, "P %ld", (int32_t)(getPID_P()* 1000));
+    u8g2_DrawStr(&u8g2,0,0,str);
+
+    sprintf(str, "I %ld", (int32_t)(getPID_I()* 1000));
+    u8g2_DrawStr(&u8g2,0,16,str);
+
+    sprintf(str, "D %04ld", (int32_t)(getPID_D()* 1000));
+    u8g2_DrawStr(&u8g2,0,33,str);
+  }
 }
+
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug2 screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -152,126 +157,18 @@ static void debug2_onEnter(screen_t *scr) {
 	setDebugMode(SET);
 	u8g2_SetFont(&u8g2,default_font );
 	u8g2_SetDrawColor(&u8g2, WHITE);
-
-	//u8g2_DrawStr(&u8g2,65,0,"ADC");
-	//u8g2_DrawStr(&u8g2,65,16,"RAW");
-	//u8g2_DrawStr(&u8g2,60,50,"OUT");
-
-	u8g2_DrawStr(&u8g2,0,0,"SetP");
-	u8g2_DrawStr(&u8g2,0,16,"C250");
-	u8g2_DrawStr(&u8g2,0,33,"C350");
+	u8g2_DrawStr(&u8g2,0,2,"SetP");
+	u8g2_DrawStr(&u8g2,0,18,"C250");
+	u8g2_DrawStr(&u8g2,0,34,"C350");
 	u8g2_DrawStr(&u8g2,0,50,"C450");
-	//u8g2_DrawStr(&u8g2,0,20,"SetP C250 C350 C450");//12
 }
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug screen setup
 //-------------------------------------------------------------------------------------------------------------------------------
 void debug_screen_setup(screen_t *scr) {
 	screen_setDefaults(scr);
-	scr->processInput = &debug_screenProcessInput;
-	scr->onEnter= &debug_onEnter;
-	widget_t *w;
-	displayOnly_widget_t* dis;
-
-	//ADC1 display, filtered
-	w = &Debug_ADC_Val;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
-	dis=extractDisplayPartFromWidget(w);
-	dis->reservedChars=4;
-	w->posX = 92;
-	w->posY = 0;
-	w->width = 32;
-	w->displayWidget.getData = &debug_screen_getADC1;
-	w->textAlign = align_right;
-
-	//ADC1 display, unfiltered
-	w = &Debug_ADC_ValRaw;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
-	dis=extractDisplayPartFromWidget(w);
-	dis->reservedChars=4;
-	w->posX = 92;
-	w->posY = 16;
-	w->width = 32;
-	w->displayWidget.getData = &debug_screen_getADC1_raw;
-	w->textAlign = align_right;
-
-	//P TERM
-	w = &Debug_PID_P;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
-	dis=extractDisplayPartFromWidget(w);
-	dis->reservedChars=6;
-	w->posX = 12;
-	w->posY = 0;
-	w->displayWidget.getData = &debug_screen_getP;
-	w->displayWidget.number_of_dec = 2;
-	w->textAlign = align_left;
-	
-
-	//I TERM
-	w = &Debug_PID_I;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
-	dis=extractDisplayPartFromWidget(w);
-	dis->reservedChars=6;
-	w->posX = 12;
-	w->posY = 16;
-	w->displayWidget.getData = &debug_screen_getI;
-	w->displayWidget.number_of_dec = 2;
-	w->textAlign = align_left;
-
-	//D TERM
-	w = &Debug_PID_D;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
-	dis=extractDisplayPartFromWidget(w);
-	dis->reservedChars=6;
-	w->posX = 12;
-	w->posY = 33;
-	w->displayWidget.getData = &debug_screen_getD;
-	w->displayWidget.number_of_dec = 2;
-	w->textAlign = align_left;
-	
-
-	//ERROR
-	w = &Debug_PID_Err;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
-	dis=extractDisplayPartFromWidget(w);
-	dis->reservedChars=4;
-	w->posX = 92;
-	w->posY = 33;
-	w->width = 32;
-	w->textAlign = align_right;
-	w->displayWidget.getData = &debug_screen_getError;
-	
-
-	// PWM VALUE OUTPUT
-	w = &Debug_PID_Out;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
-	dis=extractDisplayPartFromWidget(w);
-	dis->reservedChars=6;
-	w->posX = 87;
-	w->posY = 50;
-	w->width = 32;
-	w->displayWidget.getData = &debug_screen_getOutput;
-	w->textAlign = align_right;
-
-	// power display
-	w=&Widget_Power_dbg;
-	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_display);
-	dis=extractDisplayPartFromWidget(w);
-	w->endString="%";
-	dis->reservedChars=4;
-	w->posX = 12;
-	w->posY = 50;
-	w->width = 40;
-	w->displayWidget.getData = &debug_screen_getIronPower;
-	w->textAlign = align_right;
+  scr->processInput = &debug_screenProcessInput;
+  scr->draw = &debug_screenDraw;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -284,111 +181,118 @@ void debug2_screen_setup(screen_t *scr) {
 	scr->onExit = &debug2_onExit;
 	widget_t *w;
 	displayOnly_widget_t* dis;
+  editable_widget_t* edit;
 
 	//power display
-	w=&Widget_Power_dbg2;
+	w=&widget_Debug_Power;
 	screen_addWidget(w,scr);
-	widgetDefaultsInit(w, widget_display);
+	widgetDefaultsInit(w, widget_display, &display_Debug_Power);
 	dis=extractDisplayPartFromWidget(w);
-	w->endString="%";
+	edit=extractEditablePartFromWidget(w);
+	dis->endString="%";
 	dis->reservedChars=4;
 	w->posX = 92;
 	w->posY = 50;
 	w->width = 32;
-	w->displayWidget.getData = &debug_screen_getIronPower;
-	w->textAlign = align_right;
+	dis->getData = &debug_screen_getIronPower;
+	dis->textAlign = align_right;
 
 	//ADC1 display, filtered
-	w = &Debug2_ADC_Val;
+	w = &widget_Debug_ADC_Val;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	widgetDefaultsInit(w, widget_display, &display_Debug_ADC_Val);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->reservedChars=4;
 	w->posX = 92;
 	w->posY = 0;
 	w->width = 32;
-	w->displayWidget.getData = &debug_screen_getADC1;
-	w->textAlign = align_right;
+	dis->getData = &debug_screen_getADC1;
+	dis->textAlign = align_right;
 
 	//ADC1 display, unfiltered
-	w = &Debug2_ADC_ValRaw;
+	w = &widget_Debug_ADC_ValRaw;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_display);
+	widgetDefaultsInit(w, widget_display, &display_Debug_ADC_ValRaw);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->reservedChars=4;
 	w->posX = 92;
 	w->posY = 16;
 	w->width = 32;
-	w->displayWidget.getData = &debug_screen_getADC1_raw;
-	w->textAlign = align_right;
+	dis->getData = &debug_screen_getADC1_raw;
+	dis->textAlign = align_right;
 
 	//Debug setpoint
-	w = &Debug_SetPoint_edit;
+	w = &widget_Debug_SetPoint;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_editable);
+	widgetDefaultsInit(w, widget_editable, &editable_Debug_SetPoint);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->reservedChars=4;
 	w->posX = 36;
 	w->posY = 0;
 	w->width = 40;
 	dis->getData = &getDebugTemperature;
-	w->editableWidget.big_step = 200;
-	w->editableWidget.step = 20;
-	w->editableWidget.max_value = 4095;
-	w->editableWidget.selectable.tab = 0;
-	w->editableWidget.setData = (void (*)(void *))&setDebugTemperature;
+	edit->big_step = 200;
+	edit->step = 20;
+	edit->max_value = 4095;
+	edit->selectable.tab = 0;
+	edit->setData = (void (*)(void *))&setDebugTemperature;
 	
 
 	// Cal at 250
-	w = &Debug_Cal250_edit;
+	w = &widget_Debug_Cal250;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_editable);
-	dis=extractDisplayPartFromWidget(w);
+	widgetDefaultsInit(w, widget_editable, &editable_Debug_Cal250);
+	dis=extractDisplayPartFromWidget(w);edit=extractEditablePartFromWidget(w);
 	dis->reservedChars=4;
 	w->posX = 36;
 	w->posY = 16;
 	w->width = 40;
 	dis->getData = &getCalcAt250;
-	w->editableWidget.big_step = 200;
-	w->editableWidget.step = 20;
-	w->editableWidget.max_value = 4095;
-	w->editableWidget.selectable.tab = 1;
-	w->editableWidget.setData = (void (*)(void *))&setCalcAt250;
+	edit->big_step = 200;
+	edit->step = 20;
+	edit->max_value = 4095;
+	edit->selectable.tab = 1;
+	edit->setData = (void (*)(void *))&setCalcAt250;
 	
 
 	// Cal at 350
-	w = &Debug_Cal350_edit;
+	w = &widget_Debug_Cal350;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_editable);
+	widgetDefaultsInit(w, widget_editable, &editable_Debug_Cal350);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->reservedChars=4;
 	w->posX = 36;
 	w->posY = 32;
 	w->width = 40;
 	dis->getData = &getCalcAt350;
-	w->editableWidget.big_step = 200;
-	w->editableWidget.step = 20;
-	w->editableWidget.max_value = 4095;
-	w->editableWidget.selectable.tab = 2;
-	w->editableWidget.setData = (void (*)(void *))&setCalcAt350;
+	edit->big_step = 200;
+	edit->step = 20;
+	edit->max_value = 4095;
+	edit->selectable.tab = 2;
+	edit->setData = (void (*)(void *))&setCalcAt350;
 	
 
 	// Cal at 450
-	w = &Debug_Cal450_edit;
+	w = &widget_Debug_Cal450;
 	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_editable);
+	widgetDefaultsInit(w, widget_editable, &editable_Debug_Cal450);
 	dis=extractDisplayPartFromWidget(w);
+	edit=extractEditablePartFromWidget(w);
 	dis->reservedChars=4;
 	w->posX = 36;
 	w->posY = 48;
 	w->width=40;
 	dis->getData = &getCalcAt450;
-	w->editableWidget.big_step = 200;
-	w->editableWidget.step = 20;
-	w->editableWidget.max_value = 4095;
-	w->editableWidget.selectable.tab = 3;
-	w->editableWidget.setData = (void (*)(void *))&setCalcAt450;
-	
+	edit->big_step = 200;
+	edit->step = 20;
+	edit->max_value = 4095;
+	edit->selectable.tab = 3;
+	edit->setData = (void (*)(void *))&setCalcAt450;
+
 }
 
 #endif
