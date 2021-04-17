@@ -78,8 +78,7 @@ uint16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
 
 void setCurrentTip(uint8_t tip) {
 	currentTipData = &systemSettings.Profile.tip[tip];
-	currentPID = currentTipData->PID;
-	setupPID(&currentPID);
+	setupPID(&currentTipData->PID);
 }
 
 tipData* getCurrentTip() {

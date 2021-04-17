@@ -50,7 +50,6 @@ typedef struct {
 
 } PIDController_t;
 
-extern pid_values_t currentPID;
 extern PIDController_t pid;
 
 

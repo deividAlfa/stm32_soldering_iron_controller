@@ -118,8 +118,7 @@ void saveSettings(bool wipeAllProfileData) {
 void restoreSettings() {
 #ifdef NOSAVESETTINGS				// Stop erasing the flash every time while in debug mode
 	resetSystemSettings();			// TODO not tested with the new profile system
-	currentPID = systemSettings.Profile.tip[systemSettings.settings.currentTip[systemSettings.settings.currentProfile]].PID;
-	setupPIDFromStruct();
+	setupPID(systemSettings.Profile.tip[systemSettings.settings.currentTip[systemSettings.settings.currentProfile]].PID);
 	return;
 #endif
 

@@ -8,11 +8,9 @@
 #include "pid.h"
 #include "tempsensors.h"
 #include "settings.h"
-//static float max, min, Kp, Kd, Ki, pre_error, integral, mset, mpv, maxI, minI;
-//static float p, i, d, currentOutput;
+
 PIDController_t pid;
-//static int32_t lastTime, max, min, Kp, Kd, Ki, pre_error, integral, mset, mpv, maxI, minI,p,i,d,currentOutput;
-pid_values_t currentPID;
+
 
 void setupPID(pid_values_t* p) {
 	pid.Kp = (float)p->Kp/1000000;
@@ -22,7 +20,7 @@ void setupPID(pid_values_t* p) {
 	pid.limMaxInt = (float)p->maxI/100;
 	pid.limMin = (float)0;
 	pid.limMax = (float)1;
-	pid.tau = (float)0.2;	//TODO adjust this from menu?
+	//pid.tau = (float)0.2;	//TODO adjust this from menu? This is not used currently used (For New PID)
 }
 
 int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
@@ -34,7 +32,7 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
   pid.proportional = pid.Kp * error;
 
   // Integral
-// pid.integrator = pid.integrator + 0.5f * pid.Ki * dt * (error + pid.prevError); // New
+// pid.integrator = pid.integrator + 0.5f * pid.Ki * dt * (error + pid.prevError);  // New
   pid.integrator = pid.integrator + (pid.Ki*(error*dt));                            // Old
 
   // Integrator clamping
@@ -51,12 +49,11 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
     pid.derivative = 0;
   }
   else{
-    /*                                                // New
+    /*                                                                          // New
     pid.derivative = -(2.0f * pid.Kd * (measurement - pid.prevMeasurement)      // Note: derivative on measurement,
                           + (2.0f * pid.tau - dt) * pid.derivative)             // therefore minus sign in front of equation!
                           / (2.0f * pid.tau + dt);
     */
-
     pid.derivative = pid.Kd*((error-pid.prevError)/dt);                         // Old
   }
 

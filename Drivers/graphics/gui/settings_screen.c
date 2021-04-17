@@ -250,53 +250,48 @@ static void * getSleepTime() {
 }
 
 static void * getKp() {
-	temp = currentPID.Kp;
+	temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kp;
 	return &temp;
 }
 static void setKp(int32_t *val) {
-	currentPID.Kp = *val;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kp=*val;
-	setupPID(&currentPID);
+	setupPID(&systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID);
 	resetPID();
 }
 static void * getKi() {
-	temp = currentPID.Ki;
+	temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Ki;
 	return &temp;
 }
 static void setKi(int32_t *val) {
-	currentPID.Ki = *val;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Ki=*val;
-	setupPID(&currentPID);
+	setupPID(&systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID);
 	resetPID();
 }
 static void * getKd() {
-	temp = currentPID.Kd;
+	temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kd;
 	return &temp;
 }
 static void setKd(int32_t *val) {
-	currentPID.Kd = *val;
 	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kd=*val;
-	setupPID(&currentPID);
+	setupPID(&systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID);
 	resetPID();
 }
 static void * getImax() {
-  temp = currentPID.maxI;
+  temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.maxI;
   return &temp;
 }
 static void setImax(int32_t *val) {
-  currentPID.maxI = *val;
   systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.maxI=*val;
-  setupPID(&currentPID);
+  setupPID(&systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID);
   resetPID();
 }
 static void * getImin() {
-  temp = currentPID.minI;
+  temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.minI;
   return &temp;
 }
 static void setImin(int32_t *val) {
-  currentPID.minI = *val;
   systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.minI=*val;
-  setupPID(&currentPID);
+  setupPID(&systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID);
   resetPID();
 }
 static void * getPWMPeriod() {
