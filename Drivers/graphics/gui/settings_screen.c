@@ -696,6 +696,7 @@ void PID_onEnter(screen_t *scr){
 // IRON screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void IRON_onEnter(screen_t *scr){
+  setSettingsScrTempUnit();
 	comboResetIndex(&comboWidget_IRON);
 	if(systemSettings.Profile.filterMode == filter_avg){
 		comboitem_IRON_filterFactor.enabled=0;
@@ -1156,7 +1157,7 @@ void settings_screen_setup(screen_t *scr) {
   dis=&editable_IRON_MaxTemp.inputData;
   edit=&editable_IRON_MaxTemp;
   editableDefaultsInit(edit,widget_editable);
-  dis->reservedChars=4;
+  dis->reservedChars=5;
   dis->getData = &getMaxTemp;
   edit->big_step = 10;
   edit->step = 5;
@@ -1168,7 +1169,7 @@ void settings_screen_setup(screen_t *scr) {
   dis=&editable_IRON_MinTemp.inputData;
   edit=&editable_IRON_MinTemp;
   editableDefaultsInit(edit,widget_editable);
-  dis->reservedChars=4;
+  dis->reservedChars=5;
   dis->getData = &getMinTemp;
   edit->big_step = 10;
   edit->step = 5;
