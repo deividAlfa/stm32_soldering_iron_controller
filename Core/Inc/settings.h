@@ -117,6 +117,8 @@ __attribute__ ((aligned (4))) typedef struct{
 	uint8_t currentNumberOfTips;
 	uint8_t currentTip;
 	uint16_t UserSetTemperature;
+  uint16_t MaxSetTemperature;
+  uint16_t MinSetTemperature;
 	uint16_t sleepTimeout;
 	uint16_t pwmPeriod;
 	uint16_t pwmDelay;

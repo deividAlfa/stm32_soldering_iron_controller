@@ -185,15 +185,12 @@ static void setMainWidget(widget_t* w){
 // Main screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 static void setMainScrTempUnit(void) {
-  editable_widget_t* edit =extractEditablePartFromWidget(&Widget_SetPoint);
 	if(systemSettings.settings.tempUnit==mode_Farenheit){
 		display_IronTemp.endString="\260F";
 		#ifdef USE_NTC
 		display_AmbTemp.endString="F";
 		#endif
 		editable_SetPoint.inputData.endString="\260F";
-		edit->max_value=900;
-		edit->min_value=350;
 	}
 	else{
 	  display_IronTemp.endString="\260C";		// \260 = ASCII dec. 176(°) in octal representation
@@ -201,8 +198,6 @@ static void setMainScrTempUnit(void) {
 	  display_AmbTemp.endString="C";
 		#endif
 	  editable_SetPoint.inputData.endString="\260C";
-		edit->max_value=480;
-		edit->min_value=180;
 	}
 }
 
@@ -212,6 +207,8 @@ static void main_screen_init(screen_t *scr) {
 	editable_TipSelect.numberOfOptions = systemSettings.Profile.currentNumberOfTips;
   editable_SetPoint.step = systemSettings.settings.tempStep;
   editable_SetPoint.big_step = systemSettings.settings.tempStep;
+  editable_SetPoint.max_value = systemSettings.Profile.MaxSetTemperature;
+  editable_SetPoint.min_value = systemSettings.Profile.MinSetTemperature;
 	setMainScrTempUnit();
 	mainScr.idleTick=HAL_GetTick();
 

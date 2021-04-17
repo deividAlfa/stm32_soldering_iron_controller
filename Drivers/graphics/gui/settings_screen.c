@@ -103,6 +103,8 @@ static comboBox_widget_t comboBox_IRON;
 static comboBox_item_t comboitem_IRON_SleepTime;
 static comboBox_item_t comboitem_IRON_Power;
 static comboBox_item_t comboitem_IRON_Impedance;
+static comboBox_item_t comboitem_IRON_MaxTemp;
+static comboBox_item_t comboitem_IRON_MinTemp;
 static comboBox_item_t comboitem_IRON_PWMPeriod;
 static comboBox_item_t comboitem_IRON_ADCDelay;
 static comboBox_item_t comboitem_IRON_FilterMode;
@@ -114,6 +116,8 @@ static comboBox_item_t comboitem_IRON_Back;
 static editable_widget_t editable_IRON_SleepTime;
 static editable_widget_t editable_IRON_Power;
 static editable_widget_t editable_IRON_Impedance;
+static editable_widget_t editable_IRON_MaxTemp;
+static editable_widget_t editable_IRON_MinTemp;
 static editable_widget_t editable_IRON_ADCLimit;
 static editable_widget_t editable_IRON_PWMPeriod;
 static editable_widget_t editable_IRON_ADCDelay;
@@ -154,10 +158,14 @@ static button_widget_t button_Reset_CANCEL;
 //-------------------------------------------------------------------------------------------------------------------------------
 static void setSettingsScrTempUnit() {
 	if(systemSettings.settings.tempUnit==mode_Farenheit){
-	  editable_SYSTEM_TempStep.inputData.endString="\260F";
+    editable_SYSTEM_TempStep.inputData.endString="\260F";
+    editable_IRON_MaxTemp.inputData.endString="\260F";
+    editable_IRON_MinTemp.inputData.endString="\260F";
 	}
 	else{
 	  editable_SYSTEM_TempStep.inputData.endString="\260C";
+	  editable_IRON_MaxTemp.inputData.endString="\260C";
+	  editable_IRON_MinTemp.inputData.endString="\260C";
 	}
 }
 
@@ -321,6 +329,31 @@ static void setPWMDelay(uint16_t *val) {
 		  editable_IRON_PWMPeriod.min_value=20;
 		}
 	}
+}
+
+static void * getMaxTemp() {
+  temp=systemSettings.Profile.MaxSetTemperature;
+  return &temp;
+}
+static void setMaxTemp(uint16_t *val) {
+  if(*val<=systemSettings.Profile.MinSetTemperature){
+    *val=systemSettings.Profile.MinSetTemperature+1;
+  }
+  editable_IRON_MinTemp.max_value = *val-1;
+  systemSettings.Profile.MaxSetTemperature=*val;
+}
+
+static void * getMinTemp() {
+  temp=systemSettings.Profile.MinSetTemperature;
+  return &temp;
+}
+
+static void setMinTemp(uint16_t *val) {
+  if(*val>=systemSettings.Profile.MaxSetTemperature){
+    *val=systemSettings.Profile.MaxSetTemperature-1;
+  }
+  editable_IRON_MaxTemp.min_value = *val+1;
+  systemSettings.Profile.MinSetTemperature=*val;
 }
 
 static void * getTmpUnit() {
@@ -1118,6 +1151,30 @@ void settings_screen_setup(screen_t *scr) {
 	edit->max_value = 160;
 	edit->min_value = 10;
 
+  //********[ Max Temp Widget ]***********************************************************
+  //
+  dis=&editable_IRON_MaxTemp.inputData;
+  edit=&editable_IRON_MaxTemp;
+  editableDefaultsInit(edit,widget_editable);
+  dis->reservedChars=4;
+  dis->getData = &getMaxTemp;
+  edit->big_step = 10;
+  edit->step = 5;
+  edit->max_value = 480;
+  edit->setData = (void (*)(void *))&setMaxTemp;
+
+  //********[ Min Temp Widget ]***********************************************************
+  //
+  dis=&editable_IRON_MinTemp.inputData;
+  edit=&editable_IRON_MinTemp;
+  editableDefaultsInit(edit,widget_editable);
+  dis->reservedChars=4;
+  dis->getData = &getMinTemp;
+  edit->big_step = 10;
+  edit->step = 5;
+  edit->max_value = 480;
+  edit->setData = (void (*)(void *))&setMinTemp;
+
 	//********[ ADC Limit Widget ]***********************************************************
 	//
   dis=&editable_IRON_ADCLimit.inputData;
@@ -1205,8 +1262,10 @@ void settings_screen_setup(screen_t *scr) {
 	w = &comboWidget_IRON;
 	screen_addWidget(w, sc);
 	widgetDefaultsInit(w, widget_combo, &comboBox_IRON);
+  comboAddEditable(&comboitem_IRON_MaxTemp, w,        "Max temp",   &editable_IRON_MaxTemp);
+  comboAddEditable(&comboitem_IRON_MinTemp, w,        "Min temp",   &editable_IRON_MinTemp);
 	comboAddEditable(&comboitem_IRON_SleepTime, w,	    "Sleep", 		  &editable_IRON_SleepTime);
-	comboAddEditable(&comboitem_IRON_Impedance, w, 	    "Heater R.",	&editable_IRON_Impedance);
+  comboAddEditable(&comboitem_IRON_Impedance, w,      "Heater ohm", &editable_IRON_Impedance);
 	comboAddEditable(&comboitem_IRON_Power, w, 		      "Power",		  &editable_IRON_Power);
 	comboAddEditable(&comboitem_IRON_PWMPeriod,w, 	    "PWM Time", 	&editable_IRON_PWMPeriod);
 	comboAddEditable(&comboitem_IRON_ADCDelay, w,   	  "ADC Delay", 	&editable_IRON_ADCDelay);

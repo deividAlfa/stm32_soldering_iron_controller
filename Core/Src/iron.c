@@ -154,6 +154,8 @@ void setSystemTempUnit(bool unit){
   if(systemSettings.Profile.tempUnit != unit){
     systemSettings.Profile.tempUnit = unit;
     systemSettings.Profile.UserSetTemperature = round_10(TempConversion(systemSettings.Profile.UserSetTemperature,unit,0));
+    systemSettings.Profile.MaxSetTemperature = round_10(TempConversion(systemSettings.Profile.MaxSetTemperature,unit,0));
+    systemSettings.Profile.MinSetTemperature = round_10(TempConversion(systemSettings.Profile.MinSetTemperature,unit,0));
   }
 
   systemSettings.settings.tempUnit = unit;

@@ -253,7 +253,9 @@ void resetCurrentProfile(void){
 	}
 	systemSettings.Profile.CalNTC				        = 25;
 	systemSettings.Profile.sleepTimeout 		    = 10;
-	systemSettings.Profile.UserSetTemperature 	= 320;
+  systemSettings.Profile.UserSetTemperature   = 320;
+  systemSettings.Profile.MaxSetTemperature    = 450;
+  systemSettings.Profile.MinSetTemperature    = 180;
 	systemSettings.Profile.pwmPeriod			      = 19999;
 	systemSettings.Profile.pwmDelay				      = 1999;
 	systemSettings.Profile.filterFactor		    	= 2;
