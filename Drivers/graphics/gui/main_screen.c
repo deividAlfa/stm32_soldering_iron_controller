@@ -417,8 +417,8 @@ void main_screen_draw(screen_t *scr){
 	uint8_t scr_refresh;
 	static uint16_t lastState = 0;
 	uint16_t currentState = Iron.Error.Flags + mainScr.ironStatus + mainScr.currentMode;		// Simple checksum to detect changes
-	if(currentState!=lastState){
-		currentState=lastState;
+	if(lastState!=currentState){
+		lastState=currentState;
 		scr->refresh=screen_eraseAndRefresh;
 	}
 	if(Widget_SetPoint.refresh || Widget_IronTemp.refresh){
