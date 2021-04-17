@@ -23,6 +23,7 @@ void setupPID(pid_values_t* p) {
 	//pid.tau = (float)0.2;	//TODO adjust this from menu? This is not used currently used (For New PID)
 }
 
+// New part from Phil: https://github.com/pms67/PID
 int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
 
   float dt = (float)(HAL_GetTick() - pid.lastTime)/1000;
