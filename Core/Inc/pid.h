@@ -11,8 +11,6 @@
 #include "main.h"
 
 typedef struct pid_values {
-	int16_t max;
-	int16_t min;
 	uint16_t Kp;
 	uint16_t Ki;
 	uint16_t Kd;
@@ -24,7 +22,6 @@ typedef struct {
 	uint32_t lastTime;
 	int32_t lastMeasurement;
 	int32_t lastSetpoint;
-
 	/* Controller gains */
 	float Kp;
 	float Ki;
@@ -44,9 +41,9 @@ typedef struct {
 	/* Controller "memory" */
 	float proportional;
 	float integrator;
-	float prevError;			/* Required for integrator */
-	float differentiator;
-	float prevMeasurement;		/* Required for differentiator */
+	float derivative;
+	float prevError;			    /* Required for integrator */
+	float prevMeasurement;		/* Required for derivative */
 
 	/* Controller output */
 	float out;

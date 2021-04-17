@@ -15,91 +15,79 @@ PIDController_t pid;
 pid_values_t currentPID;
 
 void setupPID(pid_values_t* p) {
-	pid.Kp = (float)p->Kp/10000000;
-	pid.Ki = (float)p->Ki/10000000;
-	pid.Kd = (float)p->Kd/10000000;
-	pid.limMinInt = p->minI;
-	pid.limMaxInt = p->maxI;
-	pid.limMin = p->min;
-	pid.limMax = p->max;
+	pid.Kp = (float)p->Kp/1000000;
+	pid.Ki = (float)p->Ki/1000000;
+	pid.Kd = (float)p->Kd/1000000;
+	pid.limMinInt = (float)p->minI/100;
+	pid.limMaxInt = (float)p->maxI/100;
+	pid.limMin = (float)0;
+	pid.limMax = (float)1;
 	pid.tau = (float)0.2;	//TODO adjust this from menu?
 }
 
 int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
-	static uint32_t lastTime=0;
-	float timeStep = ((float)HAL_GetTick()-lastTime)/1000;
-	pid.lastTime = HAL_GetTick();
-	pid.lastSetpoint = setpoint;
-	pid.lastMeasurement = measurement;
 
-	/*
-	* Error signal
-	*/
-    float error = setpoint - measurement;
+  float dt = (float)(HAL_GetTick() - pid.lastTime)/1000;
+  float error = setpoint - measurement;
 
+  // Proportional term
+  pid.proportional = pid.Kp * error;
 
-	/*
-	* Proportional
-	*/
-    pid.proportional = pid.Kp * error;
+  // Integral
+// pid.integrator = pid.integrator + 0.5f * pid.Ki * dt * (error + pid.prevError); // New
+  pid.integrator = pid.integrator + (pid.Ki*(error*dt));                            // Old
 
-	/*
-	* Integral
-	*/
-	pid.integrator = pid.integrator + 0.5f * pid.Ki * timeStep * (error + pid.prevError);
-
-	/* Anti-wind-up via integrator clamping */
-	if (pid.integrator > pid.limMaxInt) {
-
-		pid.integrator = pid.limMaxInt;
-
-	} else if (pid.integrator < pid.limMinInt) {
-
-		pid.integrator = pid.limMinInt;
-
-	}
-
-	/*
-	* Derivative (band-limited differentiator)
-	*/
-
-    pid.differentiator = -(2.0f * pid.Kd * (measurement - pid.prevMeasurement)	/* Note: derivative on measurement, therefore minus sign in front of equation! */
-                        + (2.0f * pid.tau - timeStep) * pid.differentiator)
-                        / (2.0f * pid.tau + timeStep);
+  // Integrator clamping
+  if (pid.integrator > pid.limMaxInt) {
+    pid.integrator = pid.limMaxInt;
+  }
+  else if (pid.integrator < pid.limMinInt) {
+    pid.integrator = pid.limMinInt;
+  }
 
 
-	/*
-	* Compute output and apply limits
-	*/
-    pid.out = pid.proportional + pid.integrator + pid.differentiator;
+  // Derivative term
+  if(error==pid.prevError) {
+    pid.derivative = 0;
+  }
+  else{
+    /*                                                // New
+    pid.derivative = -(2.0f * pid.Kd * (measurement - pid.prevMeasurement)      // Note: derivative on measurement,
+                          + (2.0f * pid.tau - dt) * pid.derivative)             // therefore minus sign in front of equation!
+                          / (2.0f * pid.tau + dt);
+    */
 
-    if (pid.out > pid.limMax) {
+    pid.derivative = pid.Kd*((error-pid.prevError)/dt);                         // Old
+  }
 
-        pid.out = pid.limMax;
+  // Compute output and apply limits
+  pid.out = pid.proportional + pid.integrator + pid.derivative;
 
-    } else if (pid.out < pid.limMin) {
+  if(pid.out > pid.limMax){
+      pid.out = pid.limMax;
 
-        pid.out = pid.limMin;
+  } else if (pid.out < pid.limMin) {
+      pid.out = pid.limMin;
+  }
 
-    }
+  // Store error and measurement for later use
+  pid.prevMeasurement = measurement;
+  pid.lastTime = HAL_GetTick();
+  pid.prevError  = error;
 
-	/* Store error and measurement for later use */
-    pid.prevError       = error;
-    pid.prevMeasurement = measurement;
-
-	/* Return controller output */
-    return (pid.out*baseCalc);
-
+  return (pid.out*baseCalc);
 }
+
+
 void resetPID(void){
 	pid.integrator = 0;
-	pid.differentiator = 0;
+	pid.derivative = 0;
 	pid.prevError = 0;
 	pid.lastTime = HAL_GetTick();
 }
 
 float getPID_D() {
-	return pid.differentiator;
+	return pid.derivative;
 }
 float getPID_P() {
 	return pid.proportional;
