@@ -37,8 +37,11 @@ enum{
 	wakeInputmode_shake	= 0,
 	wakeInputmode_stand	= 1,
 
-	wakeButton_Off	= 0,
-	wakeButton_On	= 1,
+  wakeButton_Off  = 0,
+  wakeButton_On = 1,
+
+  wakeShake_Off  = 0,
+  wakeShake_On = 1,
 
 	source_wakeInput	= 0,
 	source_wakeButton	= 1,
@@ -143,7 +146,8 @@ __attribute__ ((aligned (4))) typedef struct{
 	uint8_t tempStep;
 	bool tempUnit;
 	bool buzzerMode;
-	bool wakeOnButton;
+  bool wakeOnButton;
+  bool wakeOnShake;
 	bool WakeInputMode;
 	bool EncoderMode;
 	bool NotInitialized;			// Always 1 if flash is erased

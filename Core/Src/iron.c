@@ -338,30 +338,31 @@ void setModefromStand(uint8_t mode){
 // Change the iron operating mode
 void setCurrentMode(uint8_t mode){
   Iron.CurrentModeTimer = HAL_GetTick();            // refresh current mode timer
-  if(Iron.CurrentMode != mode){
+  if(Iron.CurrentMode != mode){                     // If current mode is different
     if(mode==mode_run){
       resetPID();                                   // Reset PID if returning to run mode
     }
     buzzer_long_beep();
     Iron.CurrentMode = mode;
     Iron.Cal_TemperatureReachedFlag = 0;
+    modeChanged(mode);
   }
-  modeChanged(mode);
 }
 
 // Called from program timer if WAKE change is detected
-void IronWake(bool source){                      // source: 0 = handle, 1=encoder
-  if(GetIronError()){ return; }                  // Ignore if error present
-  if(source==source_wakeButton){                  // Wake from handle
-    if(!systemSettings.settings.wakeOnButton){ // If button
+void IronWake(bool source){                       // source: 0 = handle, 1=encoder
+  if(GetIronError()){ return; }                   // Ignore if error present
+  if(Iron.CurrentMode==mode_sleep){
+    // If in sleep mode, ignore if wake source disabled
+    if( (source==source_wakeButton && !systemSettings.settings.wakeOnButton) || (source==source_wakeInput && !systemSettings.settings.wakeOnShake)){
       return;
     }
   }
-  else{
-    Iron.newActivity=1;                      // Enable flag for oled pulse icon
-    Iron.lastActivityTime = HAL_GetTick();            // Store time for keeping the image on
+  if(source==source_wakeInput){                   // Else, if source wake input
+    Iron.newActivity=1;                           // Enable flag for oled pulse icon
+    Iron.lastActivityTime = HAL_GetTick();        // Store time for keeping the image on
   }
-  setCurrentMode(mode_run);            // Back to normal mode only if not in error state
+  setCurrentMode(mode_run);                       // Set run mode. If already in run mode, this will reset the run timer.
 }
 
 

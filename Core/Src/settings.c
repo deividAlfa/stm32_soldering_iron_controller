@@ -167,6 +167,7 @@ void resetSystemSettings(void) {
 	systemSettings.settings.initMode			    = mode_run;
 	systemSettings.settings.buzzerMode			  = buzzer_Off;
 	systemSettings.settings.wakeOnButton		  = wakeButton_On;
+	systemSettings.settings.wakeOnShake		    = wakeShake_On;
 	systemSettings.settings.WakeInputMode		  = wakeInputmode_shake;
 	systemSettings.settings.EncoderMode			  = RE_Mode_One;
 	systemSettings.settings.NotInitialized		= initialized;
