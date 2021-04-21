@@ -55,17 +55,17 @@
 /********************************
  * 			Buzzer				*
  ********************************/
-#define BUZZER_ON 			  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET)
-#define BUZZER_OFF 			  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET)
-#define BUZZER_TOGGLE 		HAL_GPIO_TogglePin(BUZZER_GPIO_Port, BUZZER_Pin)
+#define BUZZER_ON 			    HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET)
+#define BUZZER_OFF 			    HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET)
+#define BUZZER_TOGGLE 		  HAL_GPIO_TogglePin(BUZZER_GPIO_Port, BUZZER_Pin)
 
 /********************************
  * 			Misc		*
  ********************************/
-#define HIWDG				      hiwdg								    // iwdg used
-#define HCRC				      hcrc								    // crc used
-#define FLASH_SZ			    64									    // Flash Size (KB)
-//#define NOSAVESETTINGS										      // Don't use flash to save or load settings. Always use defaults (for debugging purposes)
+#define HIWDG				        hiwdg								    // iwdg used
+#define HCRC				        hcrc								    // crc used
+#define FLASH_SZ			      64									    // Flash Size (KB)
+//#define NOSAVESETTINGS										        // Don't use flash to save or load settings. Always use defaults (for debugging purposes)
 
 /********************************
  * 			NTC TABLE			*
