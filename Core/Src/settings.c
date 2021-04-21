@@ -109,8 +109,8 @@ void saveSettings(bool wipeAllProfileData) {
 
 	uint32_t SettingsFlash	= ChecksumSettings(&flashSettings->settings);
 	uint32_t SettingsRam	= ChecksumSettings(&systemSettings.settings);
-	if(SettingsFlash != SettingsRam){			                                            // Check flash and system settings have same checksum
-		Flash_error();							                                                    // Error if data mismatch
+	if(SettingsFlash != SettingsRam){			                                      // Check flash and system settings have same checksum
+		Flash_error();							                                              // Error if data mismatch
 	}
 
 }
@@ -122,12 +122,12 @@ void restoreSettings() {
 	return;
 #endif
 
-	if(flashSettings->settings.NotInitialized!=initialized){											// If flash not initialized (Erased flash is always read "1")
+	if(flashSettings->settings.NotInitialized!=initialized){								  // If flash not initialized (Erased flash is always read "1")
 		resetSystemSettings();
 		saveSettings(saveWipingProfiles);
 	}
 	else{
-		Button_reset();																	// Check for button reset
+		Button_reset();																	                        // Check for button reset
 	}
 
 	systemSettings.settings=flashSettings->settings;									        // Load system settings from flash
@@ -176,8 +176,7 @@ void resetSystemSettings(void) {
 
 void resetCurrentProfile(void){
 #ifdef NOSAVESETTINGS
-	systemSettings.settings.currentProfile=profile_T12;										// Force T12 when debugging
-																							// TODO this is not tested with the profiles update!
+	systemSettings.settings.currentProfile=profile_T12; /// Force T12 when debugging. TODO this is not tested with the profiles update!
 #endif
 	if(systemSettings.settings.currentProfile==profile_T12){
 		systemSettings.Profile.ID = profile_T12;
@@ -194,8 +193,8 @@ void resetCurrentProfile(void){
 		strcpy(systemSettings.Profile.tip[0].name, "T12 ");
 		systemSettings.Profile.currentNumberOfTips  = 1;
 		systemSettings.Profile.currentTip           = 0;
-		systemSettings.Profile.impedance            = 80;					// 8.0 Ohms
-		systemSettings.Profile.power                = 80;					// 80W
+		systemSettings.Profile.impedance            = 80;					      // 8.0 Ohms
+		systemSettings.Profile.power                = 80;					      // 80W
 		systemSettings.Profile.noIronValue				  = 4000;
 		systemSettings.Profile.Cal250_default			  = T12_Cal250;
 		systemSettings.Profile.Cal350_default			  = T12_Cal350;
@@ -383,8 +382,10 @@ void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
 	else{
 		length=1;
 	}
+	HAL_IWDG_Refresh(&HIWDG);
+	while(oled.status!=oled_idle);  // Wait for the srceen to be idle (few mS at most). Hanging here will cause a watchdog reset.
+	//HAL_Delay(20);				        // (Old) Dirty fix to ensure Oled DMA transfer has ended before writing to the buffer
 
-	HAL_Delay(20);				// Dirty fix to ensure Oled DMA transfer has ended before writing to the buffer
 	while(Start){
 		timErr=HAL_GetTick();
 		u8g2_SetDrawColor(&u8g2, BLACK);

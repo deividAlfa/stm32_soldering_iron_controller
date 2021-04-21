@@ -59,8 +59,8 @@ void ADC_Init(ADC_HandleTypeDef *adc){
 		buzzer_alarm_start();
 	}
 	else{
-		ADC_Status = ADC_StartTip;			// Set the ADC status
-		ADC_Start_DMA();					// Prepare ADC for next trigger
+		ADC_Status = ADC_StartTip;			                                        // Set the ADC status
+		ADC_Start_DMA();					                                              // Prepare ADC for next trigger
 		buzzer_short_beep();
 	}
 }
@@ -72,7 +72,7 @@ void ADC_Start_DMA(){
 		return;
 	}
 	#ifdef STM32F072xB
-		adc_device->Instance->CHSELR &= ~(0x7FFFF);		// Disable all regular channels
+		adc_device->Instance->CHSELR &= ~(0x7FFFF);		                          // Disable all regular channels
 		sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
 	#endif
 
@@ -80,10 +80,10 @@ void ADC_Start_DMA(){
 			#if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
 				adc_device->Init.NbrOfConversion = ADC_AuxNum;
 			#endif
-			adc_device->Init.ExternalTrigConv = ADC_SOFTWARE_START;								// Set software trigger
+			adc_device->Init.ExternalTrigConv = ADC_SOFTWARE_START;					      // Set software trigger
 			if (HAL_ADC_Init(adc_device) != HAL_OK) { Error_Handler(); }
 			ADC_Status = ADC_SamplingOthers;
-			sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;									// More sampling time to compensate high input impedances
+			sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;									    // More sampling time to compensate high input impedances
 
 			#ifdef ADC_CH_1ST
 				#if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
@@ -150,13 +150,13 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 	uint32_t adc_sum,avg_data;
 	uint16_t max=0, min=0xffff;
 	uint8_t step;
-	uint8_t shift = systemSettings.Profile.filterFactor;						// Set EMA / DEMA factor setting from system settings
+	uint8_t shift = systemSettings.Profile.filterFactor;						// Set EMA factor setting from system settings
 
 	if(InputData==&TIP){
-		step=1;																	// Tip uses its own buffer
+		step=1;																	                      // Tip uses its own buffer
 	}
 	else{
-		step=ADC_AuxNum;														// Number of elements in secondary buffer
+		step=ADC_AuxNum;														                  // Number of elements in secondary buffer
 	}
 	// Make the average of the ADC buffer
 	adc_sum = 0;
@@ -177,9 +177,9 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 	avg_data = adc_sum / (ADC_BFSIZ -2) ;
 	InputData->last_RawAvg = avg_data;
 	
-	if(systemSettings.Profile.filterMode == filter_ema) {					// Advanced filtering enabled?
+	if(systemSettings.Profile.filterMode == filter_ema) {					  // Advanced filtering enabled?
 
-		if(systemSettings.Profile.filterFactor>4){						// Limit coefficient
+		if(systemSettings.Profile.filterFactor>4){						        // Limit coefficient (3 is already to much in most cases)
 			systemSettings.Profile.filterFactor=4;
 		}
 
@@ -188,12 +188,12 @@ void DoAverage(ADCDataTypeDef_t* InputData){
 
 		// Compute EMA of input
 		int32_t EMA = InputData->EMA_of_Input>>12;
-		int32_t diff = (int32_t)avg_data - EMA;										// Check difference between stored EMA and last average
-		if(abs(diff)>299){															// If huge (Filtering will delay too much the response)
-			InputData->EMA_of_Input = (uint32_t)avg_data<<12;						// Reset stored to last average
+		int32_t diff = (int32_t)avg_data - EMA;										  // Check difference between stored EMA and last average
+		if(abs(diff)>299){															            // If huge (Filtering will delay too much the response)
+			InputData->EMA_of_Input = (uint32_t)avg_data<<12;					// Reset stored to last average
 		}
-		else if(abs(diff)>200){														// If medium, smoothen the difference
-			uint8_t ratio = abs(diff)-100;										// 1-99%
+		else if(abs(diff)>200){														          // If medium, smoothen the difference
+			uint8_t ratio = abs(diff)-100;										        // 1-99%
 			// Output: (100-ratio)% of old value + (ratio)% of new value
 			InputData->EMA_of_Input = ((uint32_t)(((avg_data*ratio)/100)+((EMA*(100-ratio))/100)))<<12;
 		}
@@ -246,23 +246,23 @@ void handle_ADC(void){
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
 	if(_hadc == adc_device){
-		ADC_Stop_DMA();												// Reset the ADC
-		handle_ADC();												// Process the data.
+		ADC_Stop_DMA();												                                      // Reset the ADC
+		handle_ADC();												                                        // Process the data.
 		switch (ADC_Status){
-			case ADC_SamplingTip:									// Finished sampling tip
-				ADC_Status = ADC_StartOthers;						// Set the ADC status
+			case ADC_SamplingTip:									                                    // Finished sampling tip
+				ADC_Status = ADC_StartOthers;						                                // Set the ADC status
 				handleIron();
-				__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);	//Load calculated PWM Duty
-				HAL_IWDG_Refresh(&HIWDG);							// Clear watchdog
+				__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);	// Load calculated PWM Duty
+				HAL_IWDG_Refresh(&HIWDG);							                                  // Clear watchdog
 				break;
 
-			case ADC_SamplingOthers:								// Finished sampling secondary channels
-				ADC_Status = ADC_StartTip;							// Set the ADC status
+			case ADC_SamplingOthers:								                                  // Finished sampling secondary channels
+				ADC_Status = ADC_StartTip;							                                // Set the ADC status
 				break;
 
 			default:
 				Error_Handler();
 		}
-		ADC_Start_DMA();											// Start ADC with new new status
+		ADC_Start_DMA();											                                      // Start ADC in new status
 	}
 }

@@ -40,10 +40,10 @@ static void setProfile(int32_t *val) {
 	profile = *val;
 }
 static int profile_OK(widget_t *w) {
-	loadProfile((uint8_t)profile);									// Load profile
+	loadProfile((uint8_t)profile);									  // Load profile
 	saveSettings(saveKeepingProfiles);								// Save
 	systemSettings.setupMode=setup_Off;								// Reset setup mode
-	SetFailState(noError);											// Enable normal operation
+	SetFailState(noError);											    // Enable normal operation
 	return screen_main;
 }
 
@@ -155,7 +155,7 @@ void boot_screen_draw(screen_t *scr){
 }
 int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 
-	if(HAL_GetTick() - splash_time > SPLASH_TIMEOUT){		// After splash timeout
+	if(HAL_GetTick() - splash_time > SPLASH_TIMEOUT){		    // After splash timeout
 
 		if(!systemSettings.setupMode){
 			return screen_main;
@@ -164,7 +164,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 			boot_step=1;
 			widgetEnable(&Widget_profile_edit);
 			widgetEnable(&Widget_profile_OK);
-			scr->refresh = screen_eraseAndRefresh;
+			scr->refresh = screenRefresh_eraseNow;
 		}
 	}
 	else{
@@ -179,7 +179,7 @@ void boot_screen_init(screen_t * scr){
 
 	if( (systemSettings.settings.NotInitialized!=initialized) || (systemSettings.settings.currentProfile>profile_C210) ){
 
-		profile=profile_C210;							// For safety, set C210 profile by default, has the lowest Output TC
+		profile=profile_C210;							        // For safety, set C210 profile by default, has the lowest Output TC
 		systemSettings.setupMode=setup_On;				// (Failure state is set in the iron routine when unknown iron profile is detected)
 	}
 	default_init(scr);

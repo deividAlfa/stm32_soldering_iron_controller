@@ -167,7 +167,7 @@ static void Cal_draw(screen_t *scr){
 		if(errorTimer==0){
 			errorTimer=HAL_GetTick();
 			FillBuffer(BLACK,fill_dma);
-			scr->refresh=screen_blankRefresh;
+			scr->refresh=screenRefresh_alreadyErased;
 			putStrAligned("ERROR DETECTED!", 10, align_center);
 			putStrAligned("Aborting...", 25, align_center);
 		}
@@ -253,7 +253,7 @@ static void Cal_Start_OnExit(screen_t *scr) {
 static void Cal_Start_draw(screen_t *scr){
 	if((HAL_GetTick()-lastUpdateTick)>200){										// Refresh every 200mS
 		lastUpdateTick=HAL_GetTick();
-		scr->refresh=screen_eraseAndRefresh;
+		scr->refresh=screenRefresh_eraseNow;
 		default_screenDraw(scr);
 		u8g2_SetDrawColor(&u8g2, WHITE);
 		char waitstr[6];

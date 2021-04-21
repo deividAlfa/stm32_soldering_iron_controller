@@ -303,7 +303,7 @@ void widgetClearField(widget_t* w){
 
 	if(w->frameType!=frame_combo){
 		u8g2_SetDrawColor(&u8g2, BLACK);
-		if(w->parent->refresh < screen_eraseAndRefresh ){
+		if(w->parent->refresh < screenRefresh_eraseNow ){
 			switch((uint8_t)w->type){
 				case widget_bmp:
 				  bmp = (bmp_widget_t*)w->content;
@@ -353,11 +353,11 @@ void widgetClearField(widget_t* w){
 		u8g2_SetDrawColor(&u8g2, WHITE);
 	}
 	else{																							// In combo
-		if(sel->state==widget_edit){																// Being edited
-			u8g2_SetDrawColor(&u8g2, XOR);															// Set XOR color
+		if(sel->state==widget_edit){										// Being edited
+			u8g2_SetDrawColor(&u8g2, XOR);								// Set XOR color
 		}
 		else{																						// Not editing
-			u8g2_SetDrawColor(&u8g2, WHITE);														// Set white color
+			u8g2_SetDrawColor(&u8g2, WHITE);							// Set white color
 		}
 	}
 }
@@ -540,7 +540,7 @@ void default_widgetDraw(widget_t *w) {
 						return;
 				}
 			}
-			else{																	// Else, redraw frames
+			else{																	                  // Else, redraw frames
 				switch (sel->state) {
 					case widget_selected:
 							frameDraw=1;
@@ -568,15 +568,15 @@ void default_widgetDraw(widget_t *w) {
 
 			uint8_t dispLen=strlen(dis->displayString);
 			uint8_t endLen=strlen(dis->endString);
-			if(dis->number_of_dec){																				// If there're decimals
+			if(dis->number_of_dec){																				        // If there're decimals
 				if(dis->reservedChars >= (dispLen+1)){															// Ensure there's enough space in the string for adding the decimal point
-					insertDot(dis->displayString,  dis->number_of_dec);												// Insert decimal dot
+					insertDot(dis->displayString,  dis->number_of_dec);								// Insert decimal dot
 				}
 			}
-			if(dis->reservedChars >= (dispLen+endLen)){															// Ensure there's enough space in the string for adding the end String
-				strcat(dis->displayString, dis->endString);															// Append endString
+			if(dis->reservedChars >= (dispLen+endLen)){														// Ensure there's enough space in the string for adding the end String
+				strcat(dis->displayString, dis->endString);													// Append endString
 			}
-			dis->displayString[dis->reservedChars]=0;																// Ensure last string char is 0
+			dis->displayString[dis->reservedChars]=0;															// Ensure last string char is 0
 		}
 
 		widgetAlign(w);				// Align
@@ -690,7 +690,7 @@ void comboBoxDraw(widget_t *w) {
 	comboBox_item_t *item = combo->first;
 	uint8_t scroll = 0;
   uint8_t r;
-	if(!w || ((w->refresh==refresh_idle) && (w->parent->refresh==screen_idle))){
+	if(!w || ((w->refresh==refresh_idle) && (w->parent->refresh==screenRefresh_idle))){
 		return;
 	}
 
@@ -698,15 +698,15 @@ void comboBoxDraw(widget_t *w) {
 	if(w->refresh==refresh_triggered){
 		w->refresh=refresh_idle;
 	}
-	if(w->parent->refresh < screen_eraseAndRefresh){				// If screen not erased already
-		w->parent->refresh = screen_blankRefresh;
-		FillBuffer(BLACK, fill_dma);							// Erase fast using dma
+	if(w->parent->refresh < screenRefresh_eraseNow){				// If screen not erased already
+		w->parent->refresh = screenRefresh_alreadyErased;
+		FillBuffer(BLACK, fill_dma);							            // Erase fast using dma
 	}
 
-	if(!item){ return; }										// Return if null item
+	if(!item){ return; }										                // Return if null item
 
 	u8g2_SetFont(&u8g2, combo->font);
-	height= u8g2_GetMaxCharHeight(&u8g2)+1;// +1 to allow separation between combobox items
+	height= u8g2_GetMaxCharHeight(&u8g2)+1;                 // +1 to allow separation between combobox items
 
 	if(w->radius<0){
 		r=(height-1)/2;
@@ -724,12 +724,12 @@ void comboBoxDraw(widget_t *w) {
 			++scroll;
 	}
 	for(uint8_t y = 0; y < yDim / height; ++y) {
-																												// Store Y position
-		if(item == combo->currentItem) {																					// If the current combo item is selected
+																												              // Store Y position
+		if(item == combo->currentItem) {																	// If the current combo item is selected
 			frameY=y * height + w->posY;
 		}
 
-		if ((item->type==combo_Screen)||(item->type==combo_Action)){	// If screen or action item, just draw the label
+		if ((item->type==combo_Screen)||(item->type==combo_Action)){	    // If screen or action item, just draw the label
 			u8g2_SetDrawColor(&u8g2, WHITE);
 			if(item->dispAlign==align_left){
 				u8g2_DrawStr(&u8g2, 4, y * height + w->posY +2, item->text);
@@ -750,7 +750,7 @@ void comboBoxDraw(widget_t *w) {
       displayOnly_widget_t* dis = &edit->inputData;
 			default_widgetUpdate(w);
 			uint8_t len=0;
-			if(sel->state==widget_edit){																									// If edit mode
+			if(sel->state==widget_edit){																	  // If edit mode
 				drawFrame=0;
 				u8g2_SetDrawColor(&u8g2, WHITE);
 				u8g2_DrawRBox(&u8g2, 0, frameY, OledWidth, height, r);
@@ -764,36 +764,35 @@ void comboBoxDraw(widget_t *w) {
 				len = u8g2_GetStrWidth(&u8g2,edit->options[*(uint8_t*)dis->getData()]);
 			}
 			else if(item->type==combo_Editable){
-				int32_t val_ui = *(int32_t*)dis->getData();
-	      uint8_t decimals = dis->number_of_dec+1;
-	      if(val_ui<0){
+				int32_t val_ui = *(int32_t*)dis->getData();                       // Get data
+	      uint8_t decimals = dis->number_of_dec+1;                          // Load decimal count
+	      if(val_ui<0){                                                     // If negatiove, add a decimal (decimals are just used as min char output in sprintf)
 	        decimals++;
 	      }
-	      if(decimals>10){ decimals=10; }
+	      if(decimals>10){ decimals=10; }                                   // Limit max decimals
 				snprintf(dis->displayString, dis->reservedChars+1, "%0*ld", decimals, (int32_t)val_ui);		// Convert value into string
-				uint8_t dispLen=strlen(dis->displayString);
-				uint8_t endLen=strlen(dis->endString);
-				if(dis->number_of_dec){																				// If there're decimals
-					if(dis->reservedChars >= (dispLen+1)){															// Ensure there's enough space in the string for adding the decimal point
-						insertDot(dis->displayString,  dis->number_of_dec);												// Insert decimal dot
+				uint8_t dispLen=strlen(dis->displayString);                       // Get string len
+				uint8_t endLen=strlen(dis->endString);                            // Get endStr len
+				if(dis->number_of_dec){																				    // If there're decimals
+					if(dis->reservedChars >= (dispLen+1)){													// Ensure there's enough space in the string for adding the decimal point
+						insertDot(dis->displayString,  dis->number_of_dec);						// Insert decimal dot
 					}
 				}
-				if(dis->reservedChars >= (dispLen+endLen)){															// Ensure there's enough space in the string for adding the end String
-					strcat(dis->displayString, dis->endString);															// Append endString
+				if(dis->reservedChars >= (dispLen+endLen)){												// Ensure there's enough space in the string for adding the end String
+					strcat(dis->displayString, dis->endString);											// Append endString
 				}
-				dis->displayString[dis->reservedChars]=0;																// Ensure last string char is 0
+				dis->displayString[dis->reservedChars]=0;													// Ensure last string char is 0
 				len=u8g2_GetStrWidth(&u8g2,dis->displayString);
 			}
-			posY = y * height + w->posY;																						// Set widget Ypos same as the current combo option
-			dis->stringStart = OledWidth-len-5;																							// Align to the left measuring actual string width
+			posY = y * height + w->posY;																				// Set widget Ypos same as the current combo option
+			dis->stringStart = OledWidth-len-5;																	// Align to the left measuring actual string width
 			if(item->type==combo_Editable){
-				u8g2_DrawStr(&u8g2,dis->stringStart, posY+2,  dis->displayString);
+				u8g2_DrawStr(&u8g2,dis->stringStart, posY+2,  dis->displayString);  // Draw  widget data
 			}
 			else{
 				u8g2_DrawStr(&u8g2,dis->stringStart, posY+2,  edit->options[*(uint8_t*)dis->getData()]);
 			}
-			u8g2_DrawStr(&u8g2, 4, y * height + w->posY +2, item->text);																// Draw the label
-			//default_widgetDraw(item->widget);																								// Draw widget
+			u8g2_DrawStr(&u8g2, 4, y * height + w->posY +2, item->text);				// Draw the combo item label
 		}
 		do {
 			item = item->next_item;
@@ -838,34 +837,34 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
 	uint8_t lastIndex = combo->currentScroll + maxIndex -1;
 	selectable_widget_t *sel;
 	if(w->refresh==refresh_idle){
-		w->refresh=refresh_triggered;
+		w->refresh=refresh_triggered;                                                                                         // Update in combo erases whole screen (to avoid possible leftovers)
 	}
 	if ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){													// If combo editable type
-		sel = &combo->currentItem->widget->selectable;									    // Get selectable data
+		sel = &combo->currentItem->widget->selectable;									                                                      // Get selectable data
 	}
-	if((input == Click)||(input == LongClick)){																								// If clicked
+	if((input == Click)||(input == LongClick)){																								                              // If clicked
 	  if ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){												// If combo editable type
-			if(sel->state==widget_idle){																					// If widget idle
-				sel->state=widget_edit;																				// Change to edit
+			if(sel->state==widget_idle){																					                                              // If widget idle
+				sel->state=widget_edit;																				                                                    // Change to edit
 			}
-			else if(sel->state==widget_edit){																			// If widget in edit mode
-				sel->state=widget_idle;																				// Change to idle
+			else if(sel->state==widget_edit){																			                                              // If widget in edit mode
+				sel->state=widget_idle;																				                                                    // Change to idle
 			}
-			return -1;																								// Do nothing else
+			return -1;																								                                                          // Do nothing else
 		}
-		if (combo->currentItem->type==combo_Action){												// If combo option type
-			return combo->currentItem->action();
+		if (combo->currentItem->type==combo_Action){												                                                  // If combo Action type
+			return combo->currentItem->action();                                                                                // Process action
 		}
-		else if (combo->currentItem->type==combo_Screen){											// If combo screen type
-			return combo->currentItem->action_screen;												// Return screen index
+		else if (combo->currentItem->type==combo_Screen){											                                                // If combo screen type
+			return combo->currentItem->action_screen;												                                                    // Return screen index
 		}
 	}
-	if((input == Rotate_Increment) || (input == Rotate_Decrement) ||													// If rotation data
+	if((input == Rotate_Increment) || (input == Rotate_Decrement) ||													                              // If rotation data
 	  (input == Rotate_Increment_while_click) || (input == Rotate_Decrement_while_click)){
-	  if ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){													// If combo option type
-			if(sel->state==widget_edit){																			// If widget in edit mode
-				default_widgetProcessInput(w, input, state);				// Process widget
-				return -1;																							// Return
+	  if ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){												// If combo option type
+			if(sel->state==widget_edit){																			                                                  // If widget in edit mode
+				default_widgetProcessInput(w, input, state);				                                                              // Process widget
+				return -1;																							                                                          // Return
 			}
 		}
 		if(input == Rotate_Increment) {
@@ -1028,21 +1027,21 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 		}
 
 		else if(edit->inputData.type==field_int32){
-			if(!dis->displayString){	// If empty
-				widgetDisable(w);
+			if(!dis->displayString){	                // If empty
+				widgetDisable(w);                       // This shouldn't happen. Disable widget to avoid possible errors.
 				return -1;
 			}
 			val_ui = *(int32_t*)dis->getData();
 
-			if( (inc>0) && ((val_ui+inc) < val_ui) ){					// Check of overflow
+			if( (inc>0) && ((val_ui+inc) < val_ui) ){					  // Check for overflow
 				val_ui = edit->max_value;
 			}
-			else if( (inc<0) && ((val_ui+inc) > val_ui) ){				// Check for underflow
+			else if( (inc<0) && ((val_ui+inc) > val_ui) ){		  // Check for underflow
 				val_ui = edit->min_value;
 			}
 			else{
 				val_ui += inc;
-				if(val_ui < edit->min_value) {							// Check limits
+				if(val_ui < edit->min_value) {							      // Check limits
 					val_ui = edit->min_value;
 				}
 				if(val_ui > edit->max_value) {

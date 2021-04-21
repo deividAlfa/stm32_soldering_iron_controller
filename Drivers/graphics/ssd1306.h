@@ -36,6 +36,7 @@ typedef enum{
 #define OledWidth	128
 #define OledHeight	64
 
+// buffer needs to be aligned to 32bit(4byte) boundary, as FillBuffer() uses 32bit transfer for increased speed
 typedef struct{
 	__attribute__((aligned(4))) uint8_t buffer[128*8]; // 128x64 1BPP OLED
 	uint8_t *ptr;

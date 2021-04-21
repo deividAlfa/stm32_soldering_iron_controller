@@ -486,30 +486,30 @@ static int cancelReset(widget_t *w) {
 }
 static int doReset(widget_t *w) {
 	switch(resStatus){
-		case 0:																	// Reset system settings
+		case 0:																	                                // Reset system settings
 		{
 			uint8_t currentProfile=systemSettings.settings.currentProfile;				// Store current profile
-			resetSystemSettings();												// Reset system settings
-			systemSettings.settings.currentProfile=currentProfile;				// Restore profile
-			saveSettings(saveKeepingProfiles);													// Save settings preserving tip data
+			resetSystemSettings();												                        // Reset system settings
+			systemSettings.settings.currentProfile=currentProfile;				        // Restore profile
+			saveSettings(saveKeepingProfiles);													          // Save settings preserving tip data
 			NVIC_SystemReset();
 			break;
 		}
-		case 1:																	// Reset current profile
-			resetCurrentProfile();												// Set current profile to defaults
-			saveSettings(saveKeepingProfiles);													// Save settings preserving tip data
+		case 1:																	                                // Reset current profile
+			resetCurrentProfile();												                        // Set current profile to defaults
+			saveSettings(saveKeepingProfiles);													          // Save settings preserving tip data
 			NVIC_SystemReset();
 			break;
 
-		case 2:																	// Reset all Profiles
-			systemSettings.settings.currentProfile=profile_None;				// Set factory value
-			saveSettings(saveWipingProfiles);													// Save settings, but wiping all tip data
+		case 2:																	                                // Reset all Profiles
+			systemSettings.settings.currentProfile=profile_None;				          // Set factory value
+			saveSettings(saveWipingProfiles);													            // Save settings, but wiping all tip data
 			NVIC_SystemReset();
 			break;
 
-		case 3:																	// Reset everything
-			resetSystemSettings();												// Reset system settings
-			saveSettings(saveWipingProfiles);													// Save settings wiping all tip data
+		case 3:																	                                // Reset everything
+			resetSystemSettings();												                        // Reset system settings
+			saveSettings(saveWipingProfiles);													            // Save settings wiping all tip data
 			NVIC_SystemReset();
 			break;
 
@@ -625,7 +625,7 @@ void edit_tip_screen_init(screen_t *scr) {
 
 	u8g2_SetFont(&u8g2,default_font);
 	u8g2_SetDrawColor(&u8g2, WHITE);
-	u8g2_DrawStr(&u8g2,20,19,"NAME:");//12
+	u8g2_DrawStr(&u8g2,20,19,"NAME:");
 
 	default_init(scr);
 }
@@ -664,8 +664,8 @@ void Reset_onEnter(screen_t *scr){
 // Reset confirmation screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void Reset_confirmation_onEnter(screen_t *scr){
-	FillBuffer(BLACK, fill_dma);								// Manually clear the screen
-	Screen_reset_confirmation.refresh=screen_blankRefresh;		// Set to already cleared so it doesn't get erased automatically
+	FillBuffer(BLACK, fill_dma);								                    // Manually clear the screen
+	Screen_reset_confirmation.refresh=screenRefresh_alreadyErased;		      // Set to already cleared so it doesn't get erased automatically
 
 	u8g2_SetFont(&u8g2,default_font);
 	u8g2_SetDrawColor(&u8g2, WHITE);
@@ -719,14 +719,14 @@ void SYSTEM_onEnter(screen_t *scr){
 		comboResetIndex(&comboWidget_SYSTEM);
 	}
 	if(ChecksumProfile(&systemSettings.Profile)!=systemSettings.ProfileChecksum){					// If there's unsaved profile data
-		saveSettings(saveKeepingProfiles);															// Save settings
+		saveSettings(saveKeepingProfiles);															                    // Save settings
 	}
 	profile=systemSettings.settings.currentProfile;
 }
 void SYSTEM_onExit(screen_t *scr){
-	if(profile!=systemSettings.settings.currentProfile){	// If profile changed
+	if(profile!=systemSettings.settings.currentProfile){	                                // If profile changed
 		loadProfile(profile);
-		saveSettings(saveKeepingProfiles);									// Save
+		saveSettings(saveKeepingProfiles);									                                // Save
 	}
 }
 
@@ -986,11 +986,11 @@ void settings_screen_setup(screen_t *scr) {
 	w = &comboWidget_RESET;
 	screen_addWidget(w, sc);
 	widgetDefaultsInit(w, widget_combo, &comboBox_RESET);
-	comboAddAction(&comboitem_RESET_SETTINGS,w, 	"Reset Settings", &goSettingsReset );
-	comboAddAction(&comboitem_RESET_TIP,w, 			  "Reset Profile",  &goProfileReset );
-	comboAddAction(&comboitem_RESET_ALLTIP,w, 		"Reset Profiles", &goAllProfileReset );
-	comboAddAction(&comboitem_RESET_EVERYTHING,w, "Reset All", 	  	&goFactoryReset);
-	comboAddScreen(&comboitem_RESET_Back,w, 		  "BACK", 			    screen_system);
+	comboAddAction(&comboitem_RESET_SETTINGS,w, 	    "Reset Settings", &goSettingsReset );
+	comboAddAction(&comboitem_RESET_TIP,w, 			      "Reset Profile",  &goProfileReset );
+	comboAddAction(&comboitem_RESET_ALLTIP,w, 		    "Reset Profiles", &goAllProfileReset );
+	comboAddAction(&comboitem_RESET_EVERYTHING,w,     "Reset All", 	  	&goFactoryReset);
+	comboAddScreen(&comboitem_RESET_Back,w, 		      "BACK", 			    screen_system);
 	comboitem_RESET_SETTINGS.dispAlign=align_left;
 	comboitem_RESET_TIP.dispAlign=align_left;
 	comboitem_RESET_ALLTIP.dispAlign=align_left;
@@ -1114,12 +1114,12 @@ void settings_screen_setup(screen_t *scr) {
 	w = &comboWidget_PID;
 	screen_addWidget(w, sc);
 	widgetDefaultsInit(w, widget_combo, &comboBox_PID);
-	comboAddEditable(&comboitem_PID_KP, w, 	  "Kp", 	&editable_PID_Kp);
-	comboAddEditable(&comboitem_PID_KI, w,  	"Ki", 	&editable_PID_Ki);
-  comboAddEditable(&comboitem_PID_KD, w,    "Kd",   &editable_PID_Kd);
-  comboAddEditable(&comboitem_PID_Imax, w,  "Imax", &editable_PID_Imax);
-  comboAddEditable(&comboitem_PID_Imin, w,  "Imin", &editable_PID_Imin);
-	comboAddScreen(&comboitem_PID_Back, w, 	"BACK", screen_settingsmenu);
+	comboAddEditable(&comboitem_PID_KP, w, 	    "Kp", 	&editable_PID_Kp);
+	comboAddEditable(&comboitem_PID_KI, w,  	  "Ki", 	&editable_PID_Ki);
+  comboAddEditable(&comboitem_PID_KD, w,      "Kd",   &editable_PID_Kd);
+  comboAddEditable(&comboitem_PID_Imax, w,    "Imax", &editable_PID_Imax);
+  comboAddEditable(&comboitem_PID_Imin, w,    "Imin", &editable_PID_Imin);
+	comboAddScreen(&comboitem_PID_Back, w, 	    "BACK", screen_settingsmenu);
 
 	//########################################## IRON SCREEN ##########################################
 	//

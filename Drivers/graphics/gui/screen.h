@@ -21,26 +21,27 @@
 #include "tempsensors.h"
 #include "voltagesensors.h"
 
-enum {	screen_boot,
+enum {
+    screen_boot,
 		screen_main,
-		screen_settingsmenu,
-		screen_pid,
-		screen_iron,
-		screen_system,
-			screen_reset,
-				screen_reset_confirmation,
-		screen_edit_iron_tips,
-			screen_edit_tip_name,
-		screen_edit_calibration,
-			screen_edit_calibration_start,
-			screen_edit_calibration_adjust,
-			screen_edit_calibration_input,
-		screen_debug,
-			screen_debug2,
+      screen_settingsmenu,
+          screen_pid,
+          screen_iron,
+          screen_system,
+              screen_reset,
+                screen_reset_confirmation,
+          screen_edit_iron_tips,
+              screen_edit_tip_name,
+          screen_edit_calibration,
+              screen_edit_calibration_start,
+              screen_edit_calibration_adjust,
+              screen_edit_calibration_input,
+          screen_debug,
+              screen_debug2,
 		};
 
 typedef struct screen_t screen_t;
-typedef enum{ screen_idle=0, screen_refresh, screen_eraseAndRefresh, screen_blankRefresh} screenRefreshType;
+typedef enum{ screenRefresh_idle=0, screenRefresh_eraseNow, screenRefresh_alreadyErased} screenRefreshType;
 struct screen_t
 {
 	struct screen_t *next_screen;

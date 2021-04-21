@@ -10,8 +10,9 @@
 
 #include "rotary_encoder.h"
 #define default_font u8g2_font_t0_16_tr
-//u8g2_font_helvR10_tr //ok
-//u8g2_font_t0_16_tr //bien
+// Just some fonts I tried and wanted to remember
+//u8g2_font_helvR10_tr  // ok
+//u8g2_font_t0_16_tr    // meh
 //u8g2_font_DigitalDisco_tr
 //u8g2_font_timB10_tr
 //u8g2_font_timB12_tr

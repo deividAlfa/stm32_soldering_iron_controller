@@ -21,9 +21,9 @@ void guiInit(void) {
 	u8g2_SetupDisplay(&u8g2, u8x8_d_ssd1306_128x64_noname, u8x8_cad_001, u8x8_dummy_cb, u8x8_dummy_cb);	// Use 128x64 ssd1306 settings, dummy functions (u8g2 won't send data to screen)
 	u8g2_SetupBuffer(&u8g2, oled.buffer, 8, u8g2_ll_hvline_vertical_top_lsb, U8G2_R0);					//
 
-	u8g2_SetFontMode(&u8g2,1);																// Set font transparent
+	u8g2_SetFontMode(&u8g2,1);																  // Set font transparent
 	u8g2_SetFontDirection(&u8g2, 0);														// No rotation
-	u8g2_SetFontPosTop(&u8g2);																// Take upper font ref. as start drawing position
+	u8g2_SetFontPosTop(&u8g2);																  // Take upper font ref. as start drawing position
 
 	oled_addScreen(&Screen_boot, screen_boot);
 	boot_screen_setup(&Screen_boot);

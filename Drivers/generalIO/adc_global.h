@@ -18,10 +18,10 @@
 
 
 typedef struct{
-	volatile uint16_t	*adc_buffer;	// Ptr to ADC buffer data
-	volatile uint32_t	EMA_of_Input;	// EMA of Input averages
-	volatile uint16_t	last_avg;		// Filtered (DEMA calculation)
-	volatile uint16_t	last_RawAvg; 	// Unfiltered, for quick Iron detection
+	volatile uint16_t	*adc_buffer;	        // Ptr to ADC buffer data
+	volatile uint16_t	last_avg;		          // Filtered (DEMA calculation)
+	volatile uint16_t	last_RawAvg; 	        // Unfiltered, for quick Iron detection
+	volatile uint32_t	EMA_of_Input;	        // EMA of Input averages
 } ADCDataTypeDef_t;
 
 

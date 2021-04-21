@@ -11,7 +11,6 @@
 
 static screen_t *screens = NULL;
 static screen_t *current_screen;
-//RE_Rotation_t input, RE_State_t *
 static RE_State_t* RE_State;
 
 RE_Rotation_t (*RE_GetData)(RE_State_t*);
@@ -78,7 +77,7 @@ void oled_processInput(void) {
 		while(scr) {
 			if(scr->index == ret) {
 				FillBuffer(BLACK, fill_dma);
-				scr->refresh=screen_blankRefresh;			// Changed screen, force full display erase using dma
+				scr->refresh=screenRefresh_alreadyErased;			// Changed screen, force full display erase using dma
 				if(current_screen->onExit)
 					current_screen->onExit(scr);
 				if(scr->onEnter)

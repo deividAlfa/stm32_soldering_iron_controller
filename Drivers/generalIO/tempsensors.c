@@ -96,8 +96,8 @@ uint16_t human2adc(int16_t t) {
 		t = TempConversion(t,mode_Celsius,0);
 	}
 	t-=ambTemp;
-	if (t < temp_minC){ return 0; } // If requested temp below min, return 0
-	else if (t > temp_maxC){ t = temp_maxC; } // If requested over max, apply limit
+	if (t < temp_minC){ return 0; }                                 // If requested temp below min, return 0
+	else if (t > temp_maxC){ t = temp_maxC; }                       // If requested over max, apply limit
 
 	// If t>350, map between ADC values Cal_350 - Cal_450
 	if (t >= 350){

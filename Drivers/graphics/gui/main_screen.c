@@ -111,10 +111,10 @@ static void * getTemp() {
 
 
 static void setTip(uint8_t *val) {
-	if(systemSettings.Profile.currentTip != *val){
+	if(systemSettings.Profile.currentTip != *val){      // Tip temp uses huge font that partially overlaps other widgets
 		systemSettings.Profile.currentTip = *val;
 		setCurrentTip(*val);
-		Screen_main.refresh=screen_eraseAndRefresh;	// Redraw screen erasing using dma (faster than erasing each widget)
+		Screen_main.refresh=screenRefresh_eraseNow;	      // So, we must redraw the screen. Tip temp is drawed first, then the rest go on top.
 	}
 }
 
@@ -170,7 +170,7 @@ static void updateIronPower() {
 static void setMainWidget(widget_t* w){
 	selectable_widget_t* sel =extractSelectablePartFromWidget(w);
 	mainScr.drawTick=HAL_GetTick();
-	Screen_main.refresh=screen_eraseAndRefresh;
+	Screen_main.refresh=screenRefresh_eraseNow;
 	widgetDisable(mainScr.Selected);
 	mainScr.Selected=w;
 	widgetEnable(w);
@@ -218,11 +218,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 	updateIronPower();
 	uint32_t currentTime = HAL_GetTick();
 
-	if(mainScr.update){							// This was set on a previous pass. We reset the flag now.
+	if(mainScr.update){							            // This was set on a previous pass. We reset the flag now.
 		mainScr.update = 0;
 	}
 	if((HAL_GetTick()-mainScr.updateTick)>systemSettings.settings.guiUpdateDelay){
-		mainScr.update=1;						// Update realtime readings slower than the rest of the GUI
+		mainScr.update=1;						              // Update realtime readings slower than the rest of the GUI
 		mainScr.updateTick=currentTime;
 	}
 
@@ -253,15 +253,16 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 		mainScr.idleTick=currentTime;
 	}
 
-	if(input==Click && ((mainScr.currentMode==main_irontemp) || (mainScr.currentMode==main_disabled)) && (currentTime - mainScr.enteredSleep) >500 ){		// Disable button wake for 500mS after manually entering sleep mode
+	// Check for click input and wake iron. Disable button wake for 500mS after manually entering sleep mode
+	if(input==Click && ((mainScr.currentMode==main_irontemp) || (mainScr.currentMode==main_disabled)) && (currentTime - mainScr.enteredSleep) >500 ){
 		IronWake(source_wakeButton);
 	}
 
 	switch(mainScr.currentMode){
 		case main_irontemp:
 			if(mainScr.ironStatus!=status_running){							// When the screen goes to disable state
-				memset(plotData,0,sizeof(plotData));						// Clear plotdata
-				plot_Index=0;													// Reset X
+				memset(plotData,0,sizeof(plotData));						  // Clear plotdata
+				plot_Index=0;													            // Reset X
 				mainScr.setMode=main_disabled;
 				mainScr.currentMode=main_setMode;
 				break;
@@ -283,7 +284,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			}
 			else if(input==Click){
 				mainScr.update=1;
-				scr->refresh=screen_eraseAndRefresh;
+				scr->refresh=screenRefresh_eraseNow;
 				if(mainScr.displayMode==temp_numeric){
 					mainScr.displayMode=temp_graph;
 					widgetDisable(&Widget_IronTemp);
@@ -388,7 +389,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 	if(mainScr.currentMode==main_setMode){
 		mainScr.update=1;
 		mainScr.idleTick=currentTime;
-		scr->refresh=screen_eraseAndRefresh;
+		scr->refresh=screenRefresh_eraseNow;
 		mainScr.currentMode=mainScr.setMode;
 		switch(mainScr.currentMode){
 		case main_disabled:
@@ -420,17 +421,17 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 void main_screen_draw(screen_t *scr){
 	uint8_t scr_refresh;
 	static uint16_t lastState = 0;
-	uint16_t currentState = Iron.Error.Flags + mainScr.ironStatus + mainScr.currentMode;		// Simple checksum to detect changes
+	uint16_t currentState = Iron.Error.Flags + mainScr.ironStatus + mainScr.currentMode;		// Simple checksum method to detect changes
 	if(lastState!=currentState){
 		lastState=currentState;
-		scr->refresh=screen_eraseAndRefresh;
+		scr->refresh=screenRefresh_eraseNow;
 	}
 	if(Widget_SetPoint.refresh || Widget_IronTemp.refresh){
-		scr->refresh=screen_eraseAndRefresh;
+		scr->refresh=screenRefresh_eraseNow;
 	}
-	if(mainScr.currentMode!=main_disabled && (HAL_GetTick()-plotTime)>99){			// Only store values if running
+	if(mainScr.currentMode!=main_disabled && (HAL_GetTick()-plotTime)>99){			            // Only store values if running
 		plotUpdate=1;
-		scr->refresh=screen_eraseAndRefresh;
+		scr->refresh=screenRefresh_eraseNow;
 		plotTime=HAL_GetTick();
 		int16_t t = readTipTemperatureCompensated(stored_reading,read_Avg);
 		if(systemSettings.settings.tempUnit==mode_Farenheit){
@@ -448,7 +449,7 @@ void main_screen_draw(screen_t *scr){
 	if(mainScr.ironStatus==status_sleep && mainScr.currentMode==main_disabled){
 		if((HAL_GetTick()-sleepTim)>50){
 			sleepTim=HAL_GetTick();
-			scr->refresh=screen_eraseAndRefresh;
+			scr->refresh=screenRefresh_eraseNow;
 			Slp_xpos += Slp_xadd;
 			Slp_ypos += Slp_yadd;
 			if((Slp_xpos+sleepWidth)>OledWidth){
@@ -466,9 +467,9 @@ void main_screen_draw(screen_t *scr){
 		}
 	}
 
-	if(scr->refresh==screen_eraseAndRefresh){
+	if(scr->refresh==screenRefresh_eraseNow){
 		FillBuffer(BLACK,fill_dma);
-		scr->refresh=screen_blankRefresh;
+		scr->refresh=screenRefresh_alreadyErased;
 		// Screen is erased now, draw anything here before main screen draws
 	}
 	scr_refresh=scr->refresh;
@@ -537,8 +538,8 @@ void main_screen_draw(screen_t *scr){
 
 	if(mainScr.ironStatus==status_running){
 		if( scr_refresh || (HAL_GetTick()-barTime)>9){	// Update every 10mS or if screen was erased
-			if(scr_refresh<screen_eraseAndRefresh){
- 				u8g2_SetDrawColor(&u8g2,BLACK);
+			if(scr_refresh<screenRefresh_eraseNow){       // If screen not erased
+ 				u8g2_SetDrawColor(&u8g2,BLACK);             // Draw a black square to wipe old widget data
 				u8g2_DrawBox(&u8g2, 13 , OledHeight-6, 100, 5);
 			}
 			u8g2_SetDrawColor(&u8g2,WHITE);
@@ -550,38 +551,38 @@ void main_screen_draw(screen_t *scr){
 			plotUpdate=0;
 			int16_t t = Iron.CurrentSetTemperature;
 
-			bool magnify = true;		// for future, to support both graph types
+			bool magnify = true;		                        // for future, to support both graph types
 
 			if(systemSettings.settings.tempUnit==mode_Farenheit){
 				t = TempConversion(t, mode_Celsius, 0);
 			}
 
 			// plot is 16-56 V, 14-113 H ?
-			u8g2_DrawVLine(&u8g2, 11, 16, 41);						// left scale
+			u8g2_DrawVLine(&u8g2, 11, 16, 41);						  // left scale
 
-			if (magnify) {											// graphing magnified
+			if (magnify) {											            // graphing magnified
 				for(uint8_t y=16; y<57; y+=10){
-					u8g2_DrawHLine(&u8g2, 7, y, 4); 				// left ticks
+					u8g2_DrawHLine(&u8g2, 7, y, 4); 				    // left ticks
 				}
 
 				for(uint8_t x=0; x<100; x++){
 					uint8_t pos=plot_Index+x;
-					if(pos>99){ pos-=100; }							// Reset index if > 99
+					if(pos>99){ pos-=100; }							        // Reset index if > 99
 
 					uint16_t plotV = plotData[pos];
 
 					if (plotV < t-20) plotV = 0;
 					else if (plotV >= t+20) plotV = 40;
-					else plotV = (plotV-t+20) ; 					// relative to t, +-20C
+					else plotV = (plotV-t+20) ; 					      // relative to t, +-20C
 					u8g2_DrawVLine(&u8g2, x+13, 56-plotV, plotV);	// data points
 				}
 
 				uint8_t set= 36;
 				u8g2_DrawTriangle(&u8g2, 124, set-5, 124, set+5, 115, set);		// set temp marker
 
-			} else {												// graphing full range
+			} else {												                // graphing full range
 				for(uint8_t y=16; y<57; y+=13){
-					u8g2_DrawHLine(&u8g2, 7, y, 4); 				// left ticks
+					u8g2_DrawHLine(&u8g2, 7, y, 4); 				    // left ticks
 				}
 
 				for(uint8_t x=0; x<100; x++){
@@ -591,7 +592,7 @@ void main_screen_draw(screen_t *scr){
 					uint16_t plotV = plotData[pos];
 
 					if (plotV<180) plotV = 0;
-					else plotV = (plotV-180) >> 3; 					// divide by 8, (500-180)/8=40
+					else plotV = (plotV-180) >> 3; 					      // divide by 8, (500-180)/8=40
 					u8g2_DrawVLine(&u8g2, x+13, 56-plotV, plotV);	// data points
 				}
 

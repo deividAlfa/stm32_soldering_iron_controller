@@ -4,8 +4,6 @@
 #include "iron.h"
 #include "gui.h"
 
-// Need to be aligned to 32bit(4byte) boundary, as FillBuffer() uses 32bit tranfer for increased speed
-
 oled_t oled = {
 	ptr: 		&oled.buffer[0],
 	status:		oled_idle,
@@ -160,7 +158,7 @@ void i2cBegin(bool isCmd){
 		i2cWait();
 		Oled_Set_SCL();
 		i2cWait();
-		//Oled_Set_SDA();											// As we don't care about the ACK, don't release SDA
+		//Oled_Set_SDA();											      // As we don't care about the ACK, don't release SDA
 		//i2cWait();
 		//Get ACK here
 		Oled_Clear_SCL();
@@ -175,7 +173,7 @@ void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
 	while(count--){
 		data = *bf++;
 		if( (data==0)||(data==0xFF)){								// If data 0 or 0xff, we don't have to toggle data line, send the data fast
-			if(data==0){											// Just toggling clock line
+			if(data==0){											        // Just toggling clock line
 				Oled_Clear_SDA();
 			}
 			else{
@@ -190,7 +188,7 @@ void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
 			i2cWait();
 			Oled_Set_SCL();
 			i2cWait();
-			//Oled_Set_SDA();										// As we don't care about the ACK, don't release SDA
+			//Oled_Set_SDA();										      // As we don't care about the ACK, don't release SDA
 			//i2cWait();
 			//Get ACK here
 			Oled_Clear_SCL();
@@ -213,7 +211,7 @@ void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
 			i2cWait();
 			Oled_Set_SCL();
 			i2cWait();
-			//Oled_Set_SDA();										// As we don't care about the ACK, don't release SDA
+			//Oled_Set_SDA();										      // As we don't care about the ACK, don't release SDA
 			//i2cWait();
 			//Get ACK here
 			Oled_Clear_SCL();
@@ -228,9 +226,7 @@ void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
 // Send command in blocking mode
 void write_cmd(uint8_t cmd) {
 #if defined OLED_SPI || defined OLED_I2C
-	while(oled.status==oled_busy){
-		asm("nop");	//Wait for DMA to finish
-	}
+	while(oled.status==oled_busy);              // Wait for DMA to finish
 #endif
 
 #if defined OLED_SPI || defined OLED_SOFT_SPI
@@ -271,7 +267,7 @@ void write_cmd(uint8_t cmd) {
 }
 
 void update_display( void ){
-		if(oled.status!=oled_idle) { return; }	// If OLED busy, skip update
+		if(oled.status!=oled_idle) { return; }	      // If OLED busy, skip update
 		if(oled.row!=0){ Error_Handler(); }
 
 		#if defined OLED_SOFT_SPI || defined OLED_SOFT_I2C
@@ -301,42 +297,24 @@ void update_display( void ){
 
 		}
 #elif defined OLED_SPI
-		HAL_SPI_TxCpltCallback(oled.device); 	// Call the DMA callback function to send the frame
+		HAL_SPI_TxCpltCallback(oled.device); 	        // Call the DMA callback function to start sending the frame
 
 #elif defined OLED_I2C
-		HAL_I2C_MemTxCpltCallback(oled.device);	// Call the DMA callback function to send the frame
+		HAL_I2C_MemTxCpltCallback(oled.device);	      // Call the DMA callback function to start sending the frame
 #endif
 }
-/*
-// Function for drawing a pixel in display buffer
-void pset(uint8_t x, uint8_t y, bool c){
-   unsigned int p;
-   while(oled.status!=oled_idle);	// If OLED busy, wait
 
-   if((x>127)||(y>63)) return;
-   p = y>>3; // y/8
-   p = p<<7; // *128
-   p +=x;
-
-   if(c){
-      oled.buffer[p] |= 1<<(y%8);
-   }
-   else{
-      oled.buffer[p] &= ~(1<<(y%8));
-   }
-}
-*/
 #if defined OLED_SOFT_SPI || defined OLED_SOFT_I2C
 void setOledRow(uint8_t row){
-	write_cmd(0xB0|row);									// Set the OLED Row address
+	write_cmd(0xB0|row);									          // Set the OLED Row address
 	write_cmd(systemSettings.settings.OledOffset);
 	write_cmd(0x10);
 }
 #endif
 
 void setContrast(uint8_t value) {
-	write_cmd(0x81);         // Set Contrast Control
-	write_cmd(value);         //   Default => 0xFF
+	write_cmd(0x81);                                // Set Contrast Control
+	write_cmd(value);                               // Default => 0xFF
 	lastContrast = value;
 }
 
@@ -371,38 +349,38 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 	#endif
 
 	#ifdef USE_CS
-	Oled_Set_CS();				// De-select
+	Oled_Set_CS();				  // De-select
 	#endif
 
 	#ifdef USE_RST
-	Oled_Clear_RES();			// Set RST
-	HAL_Delay(1);				// Delay
-	Oled_Set_RES();				// Release RST
+	Oled_Clear_RES();			  // Set RST
+	HAL_Delay(1);				    // Delay
+	Oled_Set_RES();				  // Release RST
 	#endif
 
 #endif
 
 #if defined OLED_I2C || defined OLED_SOFT_I2C
 	#ifdef USE_CS
-	Oled_Clear_CS();			// Unused in I2C mode, set low
+	Oled_Clear_CS();			  // Unused in I2C mode, set low
 	#endif
 
 	#ifdef USE_DC
-	Oled_Clear_DC();			// DC is the LSB address in I2C mode
+	Oled_Clear_DC();			  // DC is the LSB address in I2C mode
 	#endif
 
 	#ifdef USE_RST
-	Oled_Clear_RES();			// Set RST
-	HAL_Delay(1);				//
-	Oled_Set_RES();				// Release RST
+	Oled_Clear_RES();			  // Set RST
+	HAL_Delay(1);				    //
+	Oled_Set_RES();				  // Release RST
 	#endif
 
 #endif
 	systemSettings.settings.OledOffset = 2;		// Set by default while system settings are not loaded
-	HAL_IWDG_Refresh(&HIWDG);	// Clear watchdog
-	HAL_Delay(100);				// 100mS wait for internal initialization
+	HAL_IWDG_Refresh(&HIWDG);	              // Clear watchdog
+	HAL_Delay(100);				    // 100mS wait for internal initialization
 
-	write_cmd(0xAE);  			// Display Off
+	write_cmd(0xAE);  			  // Display Off
 	write_cmd(0xD5);         	// Set Display Clock Divide Ratio / Oscillator Frequency
 	write_cmd(0xF0);      		// Set max framerate
 	write_cmd(0xA8);         	// Set Multiplex Ratio
@@ -416,7 +394,7 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 	write_cmd(0xC0|0x08);   	// Set COM Output Scan Direction
 	write_cmd(0xDA);         	// Set COM Pins Hardware Configuration
 	write_cmd(0x02|0x10);   	// Default => 0x12 (0x10)
-	setContrast(0xFF);			// Init in max contrast
+	setContrast(0xFF);			  // Init in max contrast
 	write_cmd(0xD9);         	// Set Pre-Charge Period
 	write_cmd(0x22);         	// Default => 0x22 (2 Display Clocks [Phase 2] / 2 Display Clocks [Phase 1])
 
@@ -426,17 +404,15 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 	write_cmd(0xA4|0x00);   	// Set Entire Display On/Off
 	write_cmd(0xA6|0x00);   	// Set Inverse Display On/Off
 	write_cmd(0x8D);         	// Set Charge Pump command
-	write_cmd(0x14);   			// Enable charge pump
+	write_cmd(0x14);   			  // Enable charge pump
 	write_cmd(0x33);         	// Charge pump to 9V
     FillBuffer(BLACK,fill_dma);	// Clear buffer
-    update_display();			// Update display CGRAM
+    update_display();			  // Update display CGRAM
 
 	#if defined OLED_SPI || defined OLED_I2C
-	while(oled.status!=oled_idle){
-		asm("nop");	// Wait for DMA completion
-	}
+	while(oled.status!=oled_idle);  // Wait for DMA completion
 	#endif
-	write_cmd(0xAF);   			// Set Display On
+	write_cmd(0xAF);   			  // Set Display On
 }
 
 /*
@@ -450,20 +426,18 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 void FillBuffer(bool color, bool mode){
 	uint32_t fillVal;
 #if defined OLED_SPI || defined OLED_I2C
-	while(oled.status!=oled_idle){
-		asm("nop");				// Don't write to buffer while screen buffer is being transfered
-	}
+	while(oled.status!=oled_idle);          // Don't write to buffer while screen buffer is being transfered
 #endif
 
 	if(color==WHITE){ fillVal=0xffffffff; }	// Fill color = white
-	else{ fillVal=0; }						// Fill color = black
+	else{ fillVal=0; }						          // Fill color = black
 
-	if(mode==fill_dma){							// use DMA
+	if(mode==fill_dma){							        // use DMA
 		 HAL_DMA_Start(oled.fillDMA,(uint32_t)&fillVal,(uint32_t)oled.ptr,sizeof(oled.buffer)/sizeof(uint32_t));
 		 HAL_DMA_PollForTransfer(oled.fillDMA, HAL_DMA_FULL_TRANSFER, 3000);
 	}
-	else{										// use software
-		uint32_t* bf=(uint32_t*)oled.ptr;		// Pointer to oled buffer using 32bit data for faster operation
+	else{										                // use software
+		uint32_t* bf=(uint32_t*)oled.ptr;		  // Pointer to oled buffer using 32bit data for faster operation
 		for(uint16_t x=0;x<sizeof(oled.buffer)/sizeof(uint32_t);x++){	// Write to oled buffer
 			bf[x]=fillVal;
 		}
@@ -511,7 +485,7 @@ void update_display_ErrorHandler(void){
 		#endif
 
 		if(HAL_SPI_Transmit(oled.device, cmd, 3, 50)){
-			while(1){						// If error happens at this stage, just do nothing
+			while(1){						                        // If error happens at this stage, just do nothing
 				HAL_IWDG_Refresh(&HIWDG);
 			}
 		}
@@ -520,18 +494,18 @@ void update_display_ErrorHandler(void){
 		#endif
 
 		if(HAL_SPI_Transmit(oled.device, (uint8_t*)oled.ptr + (row * 128), 128, 1000)!=HAL_OK){
-			while(1){						// If error happens at this stage, just do nothing
+			while(1){						                        // If error happens at this stage, just do nothing
 				HAL_IWDG_Refresh(&HIWDG);
 			}
 		}
 		#elif defined OLED_I2C
 		if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, cmd, 3, 50)){
-			while(1){						// If error happens at this stage, just do nothing
+			while(1){						                        // If error happens at this stage, just do nothing
 				HAL_IWDG_Refresh(&HIWDG);
 			}
 		}
 		if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x40, 1, (uint8_t*)oled.ptr + (row * 128), 128, 1000)!=HAL_OK){
-			while(1){						// If error happens at this stage, just do nothing
+			while(1){						                        // If error happens at this stage, just do nothing
 				HAL_IWDG_Refresh(&HIWDG);
 			}
 		}
@@ -555,12 +529,12 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 		if(oled.row>7){
 
 			#if defined OLED_SPI && defined USE_CS
-			Oled_Set_CS();											// Release CS
+			Oled_Set_CS();											            // Release CS
 			#endif
 
-			oled.row=0;												// Reset row position
+			oled.row=0;												              // Reset row position
 			oled.status=oled_idle;
-			return;													// Return without retriggering DMA.
+			return;													                // Return without retriggering DMA.
 		}
 
 		uint8_t cmd[3]={
@@ -599,16 +573,16 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 		Oled_Set_DC();
 		#endif
 
-		if(HAL_SPI_Transmit_DMA(oled.device,(uint8_t *) oled.ptr+((uint16_t)128*oled.row), 128)!= HAL_OK){// Send row data in DMA interrupt mode
+		if(HAL_SPI_Transmit_DMA(oled.device,(uint8_t *) oled.ptr+((uint16_t)128*oled.row), 128)!= HAL_OK){    // Send row data in DMA interrupt mode
 			Error_Handler();
 		}
 
 #elif defined OLED_I2C
-		if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, cmd, 3, 50)){			// Send row command in blocking mode
+		if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, cmd, 3, 50)){			                          // Send row command in blocking mode
 			Error_Handler();
 		}
 		oled.status=oled_sending_data;
-		if( HAL_I2C_Mem_Write_DMA(oled.device, OLED_ADDRESS, 0x40, 1, oled.ptr+(128*oled.row), 128)){	// Send row data in DMA interrupt mode
+		if( HAL_I2C_Mem_Write_DMA(oled.device, OLED_ADDRESS, 0x40, 1, oled.ptr+(128*oled.row), 128)){	        // Send row data in DMA interrupt mode
 			Error_Handler();
 		}
 #endif
@@ -696,13 +670,13 @@ void putStrAligned(char* str, uint8_t y, AlignType align){
 	}
 }
 void Reset_onError(void){
-	while(BUTTON_input()){							// Wait until the button is pressed
+	while(BUTTON_input()){							    // Wait until the button is pressed
 		for(uint16_t i=0;i<50000;i++);				// Small delay
-		HAL_IWDG_Refresh(&HIWDG);					// Clear watchdog
+		HAL_IWDG_Refresh(&HIWDG);					    // Clear watchdog
 	}
-	while(!BUTTON_input()){							// Wait until the button is released
+	while(!BUTTON_input()){							    // Wait until the button is released
 		for(uint16_t i=0;i<50000;i++);				// Small delay
-		HAL_IWDG_Refresh(&HIWDG);					// Clear watchdog
+		HAL_IWDG_Refresh(&HIWDG);					    // Clear watchdog
 	}
-	NVIC_SystemReset();							// Reset system
+	NVIC_SystemReset();							        // Reset system
 }
