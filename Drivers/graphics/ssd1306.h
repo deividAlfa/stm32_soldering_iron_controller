@@ -40,8 +40,8 @@ typedef enum{
 typedef struct{
 	__attribute__((aligned(4))) uint8_t buffer[128*8]; // 128x64 1BPP OLED
 	uint8_t *ptr;
-	uint8_t status;
-	uint8_t row;
+	volatile uint8_t status;
+	volatile uint8_t row;
 
 	#ifdef OLED_SPI
 	SPI_HandleTypeDef *device;
