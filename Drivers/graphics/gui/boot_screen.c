@@ -216,7 +216,7 @@ void boot_screen_setup(screen_t *scr) {
 	edit->setData = (void (*)(void *))&setProfile;
 	edit->max_value = ProfileSize-1;
 	edit->options = profileStr;
-	edit->numberOfOptions = 3;
+	edit->numberOfOptions = ProfileSize;
 	w->enabled=0;
 
 	// OK Button

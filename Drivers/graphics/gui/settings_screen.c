@@ -782,7 +782,7 @@ void settings_screen_setup(screen_t *scr) {
 	edit->max_value = ProfileSize-1;
 	edit->min_value = 0;
 	edit->options = profileStr;
-	edit->numberOfOptions = 3;
+	edit->numberOfOptions = ProfileSize;
 
 	//********[ Contrast Widget ]***********************************************************
 	//
