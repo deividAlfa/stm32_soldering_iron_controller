@@ -253,7 +253,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 		mainScr.idleTick=currentTime;
 	}
 
-	if(input==Click && (currentTime - mainScr.enteredSleep) >500 ){		// Disable button wake for 500mS after manually entering sleep mode
+	if(input==Click && ((mainScr.currentMode==main_irontemp) || (mainScr.currentMode==main_disabled)) && (currentTime - mainScr.enteredSleep) >500 ){		// Disable button wake for 500mS after manually entering sleep mode
 		IronWake(source_wakeButton);
 	}
 
