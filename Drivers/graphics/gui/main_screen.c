@@ -29,7 +29,7 @@ static int8_t Slp_xadd=1, Slp_yadd=1;
 
 static int32_t temp;
 static char *tipName[TipSize];
-enum mode{  main_irontemp=0, main_disabled, main_ironstatus, main_setpoint, main_tipselect, main_menu,  main_setMode};
+enum mode{  main_irontemp=0, main_disabled, main_ironstatus, main_setpoint, main_tipselect, main_setMode};
 enum{ status_running=0x20, status_sleep, status_error };
 enum { temp_numeric, temp_graph };
 const uint8_t shakeXBM[] ={
@@ -363,15 +363,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			}
 			break;
 		}
-		case main_menu:
-			if(currentTime-mainScr.idleTick > 5000){
-				mainScr.currentMode=main_setMode;
-				mainScr.setMode=main_irontemp;
-			}
-			break;
-		case main_setpoint:
 		case main_tipselect:
-
+      if(input==LongClick){
+        return screen_edit_tip_settings;
+      }
+		case main_setpoint:
 			switch((uint8_t)input){
 				case LongClick:
 					return -1;
@@ -411,8 +407,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			if(mainScr.displayMode==temp_graph){
 				widgetDisable(&Widget_IronTemp);
 			}
-			break;
-		case main_menu:
 			break;
 		case main_setpoint:
 			setMainWidget(&Widget_SetPoint);
