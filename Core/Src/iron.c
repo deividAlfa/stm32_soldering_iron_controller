@@ -89,8 +89,13 @@ void handleIron(void) {
   }
   
   // If sleeping, stop here
-  if(Iron.CurrentMode==mode_sleep) {
-    Iron.Pwm_Out = PWMminOutput;                                            // For safety, update this everytime
+  if(Iron.CurrentMode==mode_sleep) {                                            // For safety, update PWM out everytime
+    if(systemSettings.settings.activeDetection){
+      Iron.Pwm_Out = PWMminOutput;
+    }
+    else{
+      Iron.Pwm_Out = 0;
+    }
     return;
   }
   
@@ -118,7 +123,7 @@ void handleIron(void) {
   else{                                                                     // Else, use current setpoint value
     Iron.Pwm_Out = calculatePID(human2adc(Iron.CurrentSetTemperature), TIP.last_avg, Iron.Pwm_Max);
   }
-  if(Iron.Pwm_Out<=PWMminOutput){
+  if(systemSettings.settings.activeDetection && Iron.Pwm_Out<=PWMminOutput){
     Iron.CurrentIronPower = 0;
     Iron.Pwm_Out = PWMminOutput;                                            // Maintain iron detection
   }

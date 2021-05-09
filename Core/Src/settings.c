@@ -163,6 +163,7 @@ void resetSystemSettings(void) {
 	systemSettings.settings.guiUpdateDelay	  = 200;
 	systemSettings.settings.tempUnit			    = mode_Celsius;
 	systemSettings.settings.tempStep			    = 5;
+	systemSettings.settings.activeDetection		= 1;
 	systemSettings.settings.saveSettingsDelay	= 5;
 	systemSettings.settings.currentProfile		= profile_None;
 	systemSettings.settings.initMode			    = mode_run;

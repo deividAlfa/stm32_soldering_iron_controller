@@ -63,6 +63,7 @@ static comboBox_item_t comboitem_SYSTEM_Buzzer;
 static comboBox_item_t comboitem_SYSTEM_InitMode;
 static comboBox_item_t comboitem_SYSTEM_ButtonWake;
 static comboBox_item_t comboitem_SYSTEM_ShakeWake;
+static comboBox_item_t comboitem_SYSTEM_ActiveDetection;
 static comboBox_item_t comboitem_SYSTEM_Reset;
 static comboBox_item_t comboitem_SYSTEM_SW;
 static comboBox_item_t comboitem_SYSTEM_HW;
@@ -82,6 +83,7 @@ static editable_widget_t editable_SYSTEM_Buzzer;
 static editable_widget_t editable_SYSTEM_InitMode;
 static editable_widget_t editable_SYSTEM_ButtonWake;
 static editable_widget_t editable_SYSTEM_ShakeWake;
+static editable_widget_t editable_SYSTEM_ActiveDetection;
 
 
 
@@ -387,6 +389,15 @@ static void * getOledDimming() {
 }
 static void setOledDimming(uint16_t *val) {
   systemSettings.settings.screenDimming = * val;
+}
+
+
+static void * getActiveDetection() {
+	temp = systemSettings.settings.activeDetection;
+	return &temp;
+}
+static void setActiveDetection(uint16_t *val) {
+  systemSettings.settings.activeDetection = * val;
 }
 
 static void * getWakeMode() {
@@ -975,6 +986,20 @@ void settings_screen_setup(screen_t *scr) {
   edit->options = OffOn;
   edit->numberOfOptions = 2;
 
+  //********[ Active detection Widget ]***********************************************************
+  //
+  dis=&editable_SYSTEM_ActiveDetection.inputData;
+  edit=&editable_SYSTEM_ActiveDetection;
+  editableDefaultsInit(edit,widget_multi_option);
+  dis->getData = &getActiveDetection;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setActiveDetection;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options = OffOn;
+  edit->numberOfOptions = 2;
+
 	//========[ SYSTEM COMBO ]===========================================================
 	//
 	w = &comboWidget_SYSTEM;
@@ -989,6 +1014,7 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddMultiOption(&comboitem_SYSTEM_WakeMode, w, 		"Wake Mode", 	&editable_SYSTEM_WakeMode);
   comboAddMultiOption(&comboitem_SYSTEM_ButtonWake, w,  "Btn. wake",  &editable_SYSTEM_ButtonWake);
   comboAddMultiOption(&comboitem_SYSTEM_ShakeWake, w,   "Shake wake", &editable_SYSTEM_ShakeWake);
+  comboAddMultiOption(&comboitem_SYSTEM_ActiveDetection, w,   "Active det.",&editable_SYSTEM_ActiveDetection);
 	comboAddMultiOption(&comboitem_SYSTEM_Buzzer, w, 		  "Buzzer", 		&editable_SYSTEM_Buzzer);
 	comboAddMultiOption(&comboitem_SYSTEM_TempUnit, w, 		"Unit", 	    &editable_SYSTEM_TempUnit);
 	comboAddEditable(&comboitem_SYSTEM_TempStep, w, 	    "Step",	      &editable_SYSTEM_TempStep);
