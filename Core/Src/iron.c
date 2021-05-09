@@ -408,6 +408,9 @@ void checkIronError(void){
     Iron.Error.Flags |= Err.Flags;                                            // Update flags
     Iron.LastErrorTime = CurrentTime;                                         // Save time
     if(!Iron.Error.globalFlag){                                               // If first detection
+      if(Err.Flags==1 && Iron.CurrentMode == mode_sleep){                      // If in sleep mode and only no iron flag is set
+        return;                                                               // Ignore
+      }
       Iron.Error.globalFlag = 1;                                              // Set global flag
       setCurrentMode(mode_sleep);                                             // Force sleep mode
       Iron.Pwm_Out = PWMminOutput;                                            // Maintain iron detection because it's not critical error
