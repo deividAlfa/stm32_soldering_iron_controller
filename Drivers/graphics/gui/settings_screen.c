@@ -51,6 +51,7 @@ static widget_t comboWidget_SYSTEM;
 static comboBox_widget_t comboBox_SYSTEM;
 static comboBox_item_t comboitem_SYSTEM_Profile;
 static comboBox_item_t comboitem_SYSTEM_Contrast;
+static comboBox_item_t comboitem_SYSTEM_OledDimming;
 static comboBox_item_t comboitem_SYSTEM_OledOffset;
 static comboBox_item_t comboitem_SYSTEM_WakeMode;
 static comboBox_item_t comboitem_SYSTEM_EncoderMode;
@@ -69,6 +70,7 @@ static comboBox_item_t comboitem_SYSTEM_Back;
 
 static editable_widget_t editable_SYSTEM_Profile;
 static editable_widget_t editable_SYSTEM_Contrast;
+static editable_widget_t editable_SYSTEM_OledDimming;
 static editable_widget_t editable_SYSTEM_OledOffset;
 static editable_widget_t editable_SYSTEM_WakeMode;
 static editable_widget_t editable_SYSTEM_EncoderMode;
@@ -233,14 +235,6 @@ static void * getTipImpedance() {
 static void setTipImpedance(uint16_t *val) {
 	systemSettings.Profile.impedance = *val;
 }
-static void * getContrast_() {
-	temp = systemSettings.settings.contrast;
-	return &temp;
-}
-static void setContrast_(uint8_t *val) {
-	systemSettings.settings.contrast=*val;
-	setContrast(*val);
-}
 
 static void setSleepTime(uint8_t *val) {
 	systemSettings.Profile.sleepTimeout= *val;
@@ -370,12 +364,29 @@ static void setTmpStep(uint16_t *val) {
 	systemSettings.settings.tempStep = *val;
 }
 
+static void * getContrast_() {
+  temp = systemSettings.settings.contrast;
+  return &temp;
+}
+static void setContrast_(uint8_t *val) {
+  systemSettings.settings.contrast=*val;
+  setContrast(*val);
+}
+
 static void * getOledOffset() {
 	temp = systemSettings.settings.OledOffset;
 	return &temp;
 }
 static void setOledOffset(uint16_t *val) {
 	systemSettings.settings.OledOffset= * val;
+}
+
+static void * getOledDimming() {
+	temp = systemSettings.settings.screenDimming;
+	return &temp;
+}
+static void setOledDimming(uint16_t *val) {
+  systemSettings.settings.screenDimming = * val;
 }
 
 static void * getWakeMode() {
@@ -809,6 +820,20 @@ void settings_screen_setup(screen_t *scr) {
 	edit->setData = (void (*)(void *))&setOledOffset;
 	edit->max_value = 15;
 	edit->min_value = 0;
+
+	//********[ Oled dimming Widget ]***********************************************************
+	//
+  dis=&editable_SYSTEM_OledDimming.inputData;
+  edit=&editable_SYSTEM_OledDimming;
+  editableDefaultsInit(edit,widget_multi_option);
+	dis->getData = &getOledDimming;
+	edit->big_step = 1;
+	edit->step = 1;
+	edit->setData = (void (*)(void *))&setOledDimming;
+	edit->max_value = 1;
+	edit->min_value = 0;
+	edit->options = OffOn;
+	edit->numberOfOptions = 2;
 	//********[ Wake mode Widget ]***********************************************************
 	//
   dis=&editable_SYSTEM_WakeMode.inputData;
@@ -957,6 +982,7 @@ void settings_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(w, widget_combo, &comboBox_SYSTEM);
 	comboAddMultiOption(&comboitem_SYSTEM_Profile,w,      "Profile", 		&editable_SYSTEM_Profile);
 	comboAddEditable(&comboitem_SYSTEM_Contrast,w, 		    "Contrast", 	&editable_SYSTEM_Contrast);
+	comboAddMultiOption(&comboitem_SYSTEM_OledDimming,w,  "Auto dim", 	&editable_SYSTEM_OledDimming);
 	comboAddEditable(&comboitem_SYSTEM_OledOffset, w,     "Offset", 	  &editable_SYSTEM_OledOffset);
 	comboAddMultiOption(&comboitem_SYSTEM_EncoderMode, w, "Encoder",		&editable_SYSTEM_EncoderMode);
 	comboAddMultiOption(&comboitem_SYSTEM_InitMode, w, 		"Boot", 	    &editable_SYSTEM_InitMode);

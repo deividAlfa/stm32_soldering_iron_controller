@@ -157,6 +157,7 @@ uint32_t ChecksumProfile(profile_t* profile){
 void resetSystemSettings(void) {
 	systemSettings.settings.version 		      = SETTINGS_VERSION;
 	systemSettings.settings.contrast 			    = 255;
+	systemSettings.settings.screenDimming 	  = true;
 	systemSettings.settings.OledOffset 			  = 2;
 	systemSettings.settings.errorDelay			  = 500;
 	systemSettings.settings.guiUpdateDelay	  = 200;
