@@ -32,9 +32,11 @@ static char *tipName[TipSize];
 enum mode{  main_irontemp=0, main_disabled, main_ironstatus, main_setpoint, main_tipselect, main_menu,  main_setMode};
 enum{ status_running=0x20, status_sleep, status_error };
 enum { temp_numeric, temp_graph };
-const uint8_t pulseXBM[] ={
-	8,9,
-	0x04, 0x0A, 0x0A, 0x0A, 0x89, 0x50, 0x50, 0x50, 0x20, };
+const uint8_t shakeXBM[] ={
+	9, 9,
+	0x70, 0x00, 0x80, 0x00, 0x30, 0x01, 0x40, 0x01, 0x45, 0x01, 0x05, 0x00,
+  0x19, 0x00, 0x02, 0x00, 0x1C, 0x00, };
+
 
 const uint8_t tempXBM[] ={
 	10, 13,
@@ -43,14 +45,11 @@ const uint8_t tempXBM[] ={
   0xF8, 0x00, };
 
 const uint8_t voltXBM[] ={
-	13, 13,
-  0xFC, 0x07, 0x02, 0x08, 0x01, 0x13, 0x81, 0x11, 0xC1, 0x10, 0x61, 0x10,
-  0xF1, 0x11, 0x81, 0x11, 0xC1, 0x10, 0x61, 0x10, 0x11, 0x10, 0x02, 0x08,
-  0xFC, 0x07, };
-
+	6, 9,
+	0x30, 0x18, 0x0C, 0x06, 0x1F, 0x18, 0x0C, 0x06, 0x01, };
 
 const uint8_t warningXBM[] ={
-  13,13,
+  13, 13,
   0x40, 0x00, 0xA0, 0x00, 0xA0, 0x00, 0x10, 0x01, 0x10, 0x01, 0x48, 0x02,
   0x48, 0x02, 0x44, 0x04, 0x44, 0x04, 0x02, 0x08, 0x42, 0x08, 0x01, 0x10,
   0xFF, 0x1F, };
@@ -254,7 +253,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 	else if(Iron.newActivity && mainScr.ActivityOn){
 		if((currentTime-Iron.lastActivityTime)>200){
 			u8g2_SetDrawColor(&u8g2, BLACK);
-			u8g2_DrawBox(&u8g2, 0,OledHeight-pulseXBM[1], pulseXBM[0], pulseXBM[1]);
+			u8g2_DrawBox(&u8g2, 0,OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1]);
 			mainScr.ActivityOn=0;
 			Iron.newActivity=0;
 		}
@@ -312,7 +311,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			enum{ dim_idle, dim_down, dim_up };
 			static uint8_t dimDisplay=dim_idle;
 			static uint32_t dimTimer=0;
-			if(((currentTime-mainScr.idleTick)>5000) && (getContrast()>5)){
+			uint8_t contrast = getContrast();
+
+			if((currentTime-mainScr.idleTick)>15000 && contrast>5){
 				dimDisplay=dim_down;
 			}
 			if((input==Rotate_Decrement) || (input==Rotate_Increment)){
@@ -325,7 +326,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 			if(dimDisplay!=dim_idle){
 				if(systemSettings.settings.screenDimming && currentTime-dimTimer>9){
-					uint8_t contrast = getContrast();
 					dimTimer = currentTime;
 					mainScr.idleTick = currentTime;
 					if(dimDisplay==dim_down){
@@ -494,10 +494,10 @@ void main_screen_draw(screen_t *scr){
 		#endif
 
 		#ifdef USE_VIN
-		u8g2_DrawXBMP(&u8g2, 0, 0, voltXBM[0], voltXBM[1], &voltXBM[2]);
+		u8g2_DrawXBMP(&u8g2, 0, 2, voltXBM[0], voltXBM[1], &voltXBM[2]);
 		#endif
 		if(mainScr.ActivityOn){
-			u8g2_DrawXBMP(&u8g2, 0,OledHeight-pulseXBM[1], pulseXBM[0], pulseXBM[1], &pulseXBM[2]);
+			u8g2_DrawXBMP(&u8g2, 57, 2, shakeXBM[0], shakeXBM[1], &shakeXBM[2]);
 		}
 		if(mainScr.currentMode==main_disabled){
 			u8g2_SetFont(&u8g2, u8g2_font_mainBig);
@@ -540,9 +540,9 @@ void main_screen_draw(screen_t *scr){
 			else if(mainScr.ironStatus==status_sleep){
 				u8g2_DrawStr(&u8g2, Slp_xpos, Slp_ypos, "SLEEP");
 				u8g2_SetFont(&u8g2, u8g2_font_labels);
-				if(TipT>120){
-				  u8g2_DrawXBMP(&u8g2, 45,0, warningXBM[0], warningXBM[1], &warningXBM[2]);
-				  u8g2_DrawStr(&u8g2, 58, 2, "HOT!");
+				if(readTipTemperatureCompensated(0,0)>120){
+				  u8g2_DrawXBMP(&u8g2, 42,0, warningXBM[0], warningXBM[1], &warningXBM[2]);
+				  u8g2_DrawStr(&u8g2, 55, 2, "HOT!");
 				}
 			}
 		}
