@@ -105,6 +105,8 @@ The ADC reading which signals that no iron is present. When no iron is plugged i
 Default 4000, max 4100 (Over 4095 will disable "no iron" detection).<br>
   - #### _Detection_
 Time in miliSeconds that an iron must be plugged in before it is considered present.<br>
+  - #### _Back_
+Return to system menu.<br>
 
 ---
 
@@ -134,9 +136,9 @@ Allow waking the controller by the shake sensor.<br>
 Use iron active detection by leaving the PWM slightly on all the time. If your amp has a pullup resistor it can be disabled.<br>
   - #### _Buzzer_
 Buzz/beep when notable conditions occur.<br>
-  - - Changing operating mode (sleep, run)<br>
-  - - Temperature reached after the setpoint was changed<br>
-  - - Alarm when no iron is detected or system error happens<br>
+   - Changing operating mode (sleep, run)<br>
+   - Temperature reached after the setpoint was changed<br>
+   - Alarm when no iron is detected or system error happens<br>
   - #### _Unit_
 Temperature scale, Celsius or Fahrenheit<br>
   - #### _Step_
@@ -152,24 +154,22 @@ Defines the delay with no changes before storing changed settings in flash memor
 Flash has a limited number of write cycles (~100,000).<br>
 Higher values reduce writes, but settings changes could be forgotten when the controller is powered off or reset.<br>
 Default: 5 seconds.
-
----
-
   - #### _RESET MENU_
 Reset various configuration sections:<br>
-  - ##### _Settings_
+    - _Settings_
 Reset Settings menu items to default.<br>
-  - ##### _Profile_
+    - _Profile_
 Reset the current profile (iron/tips) to default.<br>
-  - ##### _Profiles_
+    - _Profiles_
 Reset all profiles to default.<br>
-  - ##### _All_
+    - _All_
 Reset everything.<br>
-
   - #### _SW:_
 Displays the current software version. The version number is from a hash - higher is not necessarily newer.<br>
   - #### _HW:_
 Displays the hardware type.<br>
+  - #### _Back_
+Return to system menu.<br>
 
 ---
 
