@@ -180,6 +180,12 @@ void resetCurrentProfile(void){
 #ifdef NOSAVESETTINGS
 	systemSettings.settings.currentProfile=profile_T12; /// Force T12 when debugging. TODO this is not tested with the profiles update!
 #endif
+	char str[TipCharSize];
+	for(uint8_t x=0;x<TipCharSize;x++){
+	  str[x] = ' ';
+	}
+	str[TipCharSize-1] = 0;
+
 	if(systemSettings.settings.currentProfile==profile_T12){
 		systemSettings.Profile.ID = profile_T12;
 		for(uint8_t x = 0; x < TipSize; x++) {
@@ -191,6 +197,7 @@ void resetCurrentProfile(void){
 			systemSettings.Profile.tip[x].PID.Kd 		    = 3000;           // val = /1.000.000
 			systemSettings.Profile.tip[x].PID.maxI	    = 30;             // val = /100
 			systemSettings.Profile.tip[x].PID.minI 	    = 0;              // val = /100
+			strcpy(systemSettings.Profile.tip[x].name, str);              // Empty name
 		}
 		strcpy(systemSettings.Profile.tip[0].name, "T12 ");
 		systemSettings.Profile.currentNumberOfTips  = 1;
@@ -215,6 +222,7 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.Kd        = 3000;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.maxI      = 30;             // val = /100
       systemSettings.Profile.tip[x].PID.minI      = 0;              // val = /100
+      strcpy(systemSettings.Profile.tip[x].name, str);              // Empty name
 		}
 		strcpy(systemSettings.Profile.tip[0].name, "C245");
 		systemSettings.Profile.currentNumberOfTips	= 1;
@@ -238,6 +246,7 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.Kd        = 3000;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.maxI      = 30;             // val = /100
       systemSettings.Profile.tip[x].PID.minI      = 0;              // val = /100
+      strcpy(systemSettings.Profile.tip[x].name, str);              // Empty name
 		}
 		strcpy(systemSettings.Profile.tip[0].name, "C210");
 		systemSettings.Profile.currentNumberOfTips  = 1;
