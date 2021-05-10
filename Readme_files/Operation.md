@@ -94,9 +94,9 @@ Default 20 ms.<br>
 </pre>
   * #### _Filtering_
 Used to filter the temperature measurements before they are passed to the PID. This helps remove noise and provides more stability.<br>
-   * * ##### _Avg_
+   * * #### _Avg_
 This uses a simple moving average, and is the default filter.<br>
-   * * ##### _EMA_
+   * * #### _EMA_
 Exponential Moving Average. A more sophisticated filter.<br>
   * #### _Factor_
 Only for EMA. The higher, the heavier the filtering (also more delay).<br>
@@ -216,18 +216,18 @@ Back button will return discarding any the changes.<br>
 ---
 
 ### CALIBRATION
-  * ##### _Start_
+  * #### _Start_
 Requires a tip thermometer (e.g. Hakko FG-100 or similar). Calibrates the current tip at temperatures of 250, 350 and 450C.<br>
 Wait for tip temperature to settle (When the thermomether reading stops moving), it can take up to 20 seconds in some cases.<br>
 Then enter temperature as measured by the thermometer for each step.<br>
 If the entered temperature is more than 50ºC higher than the target calibration value, the process will be aborted and you will have to adjust it manually<br>
-  * ##### _Adjust_
+  * #### _Adjust_
 Here you can adjust the default calibration values. For every step (250,350,450ºC) adjust the value until it's close to the target temperature.<br>
 This is a coarse adjustment, made to avoid burning the tip in the calibration process if your controllers reads too low values.<br> 
 This values have nothing to do with the Tip Settings calibration values (Those are temperature-compensated).<br>
 Click on save to apply and store the changes, or cancel to discard.<br>
 The Save button will be hidden if no changes were made, or the entered data is invalid.<br>
-  * ##### _Back_
+  * #### _Back_
 Return to system menu.<br>
 
 ---
@@ -237,16 +237,16 @@ A lot of effort was done to protect the tips from overheating.<br>
 Any detected error will disable PWM and show a message on the display.<br>
 To recover from an error, simply press the button and it will reboot.<br>
 There are multiple error types:<br>
-  * ##### _Iron warning_
+  * #### _Iron warning_
 Non critical errors, a warning will be shown: iron not detected, supply voltage too low, ambient temperature too high or too low.<br>
-  * ##### _Iron runaway_
+  * #### _Iron runaway_
 If by any means the iron temperature is higher than requested and the PWM is still active, it will trigger a timer depending on the temperature diference.<br>
 The condition must dissapear within the specified time, otherwise it will trigger a critical runaway error, shutting down the power stage<br>
-  * ##### _Internal function errors_
+  * #### _Internal function errors_
 If any internal function detects undefined or not expected state, it will lock the station and show a message trying to show where the error happened (File, line).<br>
-  * ##### _Hardware exceptions_
+  * #### _Hardware exceptions_
 If a hardware exception happens, the station will lock up and display an error message about the exception.<br>
-  * ##### _Data error detection_
+  * #### _Data error detection_
 The data is stored as separate blocks: System settings, profile 1, profile 2 and profile 3.<br>
 Each one has it's own CRC checksum. When a block is read, the checksum is computed and compared.<br>
 If a mismatch occurs, the block will be erased and resetted to defaults, trying to preserve the rest of the data.<br>
