@@ -79,7 +79,7 @@ void RE_Process(RE_State_t* data) {
 	bool now_b = HAL_GPIO_ReadPin(data->GPIO_B, data->GPIO_PIN_B);
 	bool now_button = HAL_GPIO_ReadPin(data->GPIO_BUTTON, data->GPIO_PIN_BUTTON);
 
-	if(last_button_read != now_button){                   // If different than last reading and changes less than xxx mS ago
+	if(last_button_read != now_button){                   // If different than last reading
     last_button_read = now_button;                      // Update last reading value
     if(stable_time<20){                                 // If <debounce time
       debounce_time = current_time;                     // Reset debounce timer
