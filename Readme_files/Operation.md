@@ -4,9 +4,9 @@
 When an unconfigured (new or fully reset) controller starts, it first offers a choice of which tip profile to use.<br>
 Select the one appropriate for your iron. (JBC cartidges usually require electrical changes to the controller).<br>
 
-* Hakko __T12__ (T15 Series in North America & EU) This is the handle normally used with these controllers.<br>
-* JBC __C210__<br>
-* JBC __C245__<br>
+- Hakko __T12__ (T15 Series in North America & EU) This is the handle normally used with these controllers.<br>
+- JBC __C210__<br>
+- JBC __C245__<br>
 
 ---
 
@@ -41,20 +41,20 @@ The PID (Proportional, Integral, Derivitive) algorithm determines the PWM duty c
 
 ## Main screen<br>
 
-  * #### _Temperature display modes_
+  - #### _Temperature display modes_
 While in run mode, a single click will switch between numeric and graph (10 second history).<br>
-  * #### _Temperature setpoint adjustment_
+  - #### _Temperature setpoint adjustment_
 Rotate the encoder, the setpoint will be shown, continue rotating to adjust it.<br>  
 After 1 second of inactivity it will return to normal mode.<br>
-  * #### _Sleep mode_
+  - #### _Sleep mode_
 You can force entering sleep mode by clicking and rotating counter-clockwise.<br>  
 To wake up you can make a click (If button wake is enabled) or move the handle (If shake wake is enabled or in stand mode). <br>
 If the display brighntess is dimmed, you can wake up the display by rotating the encoder.<br>
 If the tip reading is higher than 120ºC, it will show a "HOT!" warning.<br>
-  * #### _Tip selection_
+  - #### _Tip selection_
 Click and rotate clockwise to show the tip selection. Then, long-pressing will enter the selected tip settings.<br>  
 It will return to normal mode after 5 seconds of inactivity.<br>
-  * #### _System menu_
+  - #### _System menu_
 A long click will enter the system menu (Except while in tip selection).<br>
 
 ---
@@ -66,20 +66,20 @@ Also, long clicking will have the same effect.<br>
 ### IRON
 
 Iron settings control the operation of the handle/tips. <br>
-  * #### _Max temp_
+  - #### _Max temp_
 Upper adjustable temperature limit.<br>
-  * #### _Min temp_
+  - #### _Min temp_
 Lower adjustable temperature limit.<br>
-  * #### _Sleep_
+  - #### _Sleep_
 If there is no soldering activity for this period, the controller will "sleep" and stop providing power to the tip, allowing it to cool. This helps increase tip lifetime. Activity (e.g. shaking the handle for a T12) will wake it up and heating will resume.<br>
-  * #### _Heater R(esistance)._
+  - #### _Heater R(esistance)._
 The resistance of the tip's heating element. There is normally no need to change this from the default.<br>
-  * #### _Power_
+  - #### _Power_
 The maximum power which will be delivered to the tip. This sets a maximum for the PWM duty cycle, based on the power supply voltage and the heater resistance.<br>
-  * #### _PWM Time_
+  - #### _PWM Time_
 Sets the PWM period. The controller will check and adjust the tip temperature once each period. Default 200 ms.<br>
 Lower values will increase the PWM frequency and also the audible switching noise.<br>
-  * #### _ADC Delay_
+  - #### _ADC Delay_
 Near the end of each PWM period, the temperature is measured by the ADC.<br>
 _ADC Delay_ controls how soon before the end of a period the temperature is measured.<br> 
 This delay is needed to have a clean reading of the thermocouple. If the delay is too low, it will read switching noise and be very unstable.<br>
@@ -92,62 +92,62 @@ Default 20 ms.<br>
 |_____________________________|<-DELAY->[ADC READ]| NEXT CYCLE
 |<- POWER ->|_____________________________________|
 </pre>
-  * #### _Filtering_
+  - #### _Filtering_
 Used to filter the temperature measurements before they are passed to the PID. This helps remove noise and provides more stability.<br>
-   * * #### _Avg_
+   - - #### _Avg_
 This uses a simple moving average, and is the default filter.<br>
-   * * #### _EMA_
+   - - #### _EMA_
 Exponential Moving Average. A more sophisticated filter.<br>
-  * #### _Factor_
+  - #### _Factor_
 Only for EMA. The higher, the heavier the filtering (also more delay).<br>
-  * #### _No iron_
+  - #### _No iron_
 The ADC reading which signals that no iron is present. When no iron is plugged in, the measured temperature will read at or near maximum (ADC = 4095).
 Default 4000, max 4100 (Over 4095 will disable "no iron" detection).<br>
-  * #### _Detection_
+  - #### _Detection_
 Time in miliSeconds that an iron must be plugged in before it is considered present.<br>
 
 ---
 
 ### SYSTEM
 General settings for the controller.<br>
-  * #### _Profile_
+  - #### _Profile_
 Sets which iron profile (__T12__, __C210__, __C245__) to use.<br>
-  * #### _Contrast_
+  - #### _Contrast_
 Screen Contrast/brightness.<br>
-  * #### _Auto dim_
+  - #### _Auto dim_
 Fade the display after 15s in skleep or error modes to prevent display burning.<br>
-  * #### _Offset_
+  - #### _Offset_
 Screen offset. This can accomodate the different screens which the controllers have come with. Use it to center the display on the screen. Default = 2.<br>
-  * #### _Encoder_
+  - #### _Encoder_
 If rotating the encoder moves in the wrong direction, change this.<br>
-  * #### _Boot_
+  - #### _Boot_
 Operation mode when powered on. __RUN__ or __SLEEP__.<br>
-  * #### _Wake mode_
+  - #### _Wake mode_
 How to detect activity. SHAKE or STAND.<br>
 SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip up to wake.
 STAND can use the same handle shake wire, but must be disconnected from the handle and connected so when the tip is in the stand, this wire is shorted to GND. Shorted = sleep, open = wake.<br>
-  * #### _Btn. Wake_
+  - #### _Btn. Wake_
 Allow waking the controller by pressing the encoder button.<br>
-  * #### _Shake Wake_
+  - #### _Shake Wake_
 Allow waking the controller by the shake sensor.<br>
-  * #### _Active det._
+  - #### _Active det._
 Use iron active detection by leaving the PWM slightly on all the time. If your amp has a pullup resistor it can be disabled.<br>
-  * #### _Buzzer_
+  - #### _Buzzer_
 Buzz/beep when notable conditions occur.<br>
-  * * Changing operating mode (sleep, run)<br>
-  * * Temperature reached after the setpoint was changed<br>
-  * * Alarm when no iron is detected or system error happens<br>
-  * #### _Unit_
+  - - Changing operating mode (sleep, run)<br>
+  - - Temperature reached after the setpoint was changed<br>
+  - - Alarm when no iron is detected or system error happens<br>
+  - #### _Unit_
 Temperature scale, Celsius or Fahrenheit<br>
-  * #### _Step_
+  - #### _Step_
 Temperature step when adjusting tip temperature.<br>
-  * #### _GUI Time_
+  - #### _GUI Time_
 To offer maximum respoiveness, , the screen is updated between few 10s to more than 100 times per second (depends on the MCU used and display interface).<br> 
 If the display reading were updated at the same speed, it would be impossible to read anything.<br> 
 This setting defines the time in mS that the main screen readings are updated (voltage, temperatures).<br>
 The real update rate will be limited by the PWM frequency (ADC is read at the every PWM cycle end),<br> 
 Use a higher setting for less "flicker" in the display (more steady values).<br>
-  * #### _Save time_
+  - #### _Save time_
 Defines the delay with no changes before storing changed settings in flash memory.<br>
 Flash has a limited number of write cycles (~100,000).<br>
 Higher values reduce writes, but settings changes could be forgotten when the controller is powered off or reset.<br>
@@ -155,20 +155,20 @@ Default: 5 seconds.
 
 ---
 
-  * #### _RESET MENU_
+  - #### _RESET MENU_
 Reset various configuration sections:<br>
-  **  #### _Settings_
+    -  #### _Settings_
 Reset Settings menu items to default.<br>
-  ** #### _Profile_
+    - #### _Profile_
 Reset the current profile (iron/tips) to default.<br>
-  ** #### _Profiles_
+    - #### _Profiles_
 Reset all profiles to default.<br>
-  ** #### _All_
+    - #### _All_
 Reset everything.<br>
 
-  * #### _SW:_
+  - #### _SW:_
 Displays the current software version. The version number is from a hash - higher is not necessarily newer.<br>
-  * #### _HW:_
+  - #### _HW:_
 Displays the hardware type.<br>
 
 ---
@@ -177,7 +177,7 @@ Displays the hardware type.<br>
 Different tips may have different characteristics. Tips may be added or edited here.<br>
 Select a tip to enter tip settings edit screen, or select Add New to create a new tip.<br>
 The new tip will be created by copying the PID/calibration settings from the first in the system.<br>
-Individual tip data includes info from both the *IRON* and *PID* menus.<br>
+Individual tip data includes info from both the *IRON- and *PID- menus.<br>
 
 ### EDIT TIP SETTINGS
 This menu allows Tip editing/removing, PID tuning and adjustment of stored tip calibration values.<br>
@@ -185,25 +185,25 @@ PID tuning is an advanced topic, _**incorrect settings here can result in instab
 Most users should not change these settings, but here are the basics. Kp, Ki, Kd, Imax, Imin are the coefficients which control the PID's behavior.<br>
 Calibration values are not meant for manual adjustment. Only to restore a previous calibration result.<br>
 Use calibration for optimal results.<br>
-  * #### _TIP NAME_ 
+  - #### _TIP NAME_ 
 Shows the tip name, click on it to access tip name editing/removing.<br>
-  * #### _PID Kp_ 
+  - #### _PID Kp_ 
 The proportional term, changes the PWM duty cycle based on how far the measured temperature is from the desired temperature.<br>
-  * #### _PID Ki_ 
+  - #### _PID Ki_ 
 The integral term, changes the duty cycle based on how long the temperatures have been different.<br>
-  * #### _PID Kd_ 
+  - #### _PID Kd_ 
 PID differential term, changes the duty cycle based on how fast the measured temperature has changed.<br>
-  * #### _PID Imax_ 
+  - #### _PID Imax_ 
 The integral acumulator higher limit.<br>
-  * #### _PID Imin_ 
+  - #### _PID Imin_ 
 The integral acumulator lower limit.<br>
-  * #### _Cal250_ 
+  - #### _Cal250_ 
 The stored value for 250ºC calibration.<br>
-  * #### _Cal350_ 
+  - #### _Cal350_ 
 The stored value for 350ºC calibration.<br>
-  * #### _Cal450_ 
+  - #### _Cal450_ 
 The stored value for 450ºC calibration.<br>
-  * #### _Back_
+  - #### _Back_
 Return to system menu.<br>
 
 ### EDIT TIP NAME
@@ -216,18 +216,18 @@ Back button will return discarding any the changes.<br>
 ---
 
 ### CALIBRATION
-  * #### _Start_
+  - #### _Start_
 Requires a tip thermometer (e.g. Hakko FG-100 or similar). Calibrates the current tip at temperatures of 250, 350 and 450C.<br>
 Wait for tip temperature to settle (When the thermomether reading stops moving), it can take up to 20 seconds in some cases.<br>
 Then enter temperature as measured by the thermometer for each step.<br>
 If the entered temperature is more than 50ºC higher than the target calibration value, the process will be aborted and you will have to adjust it manually<br>
-  * #### _Adjust_
+  - #### _Adjust_
 Here you can adjust the default calibration values. For every step (250,350,450ºC) adjust the value until it's close to the target temperature.<br>
 This is a coarse adjustment, made to avoid burning the tip in the calibration process if your controllers reads too low values.<br> 
 This values have nothing to do with the Tip Settings calibration values (Those are temperature-compensated).<br>
 Click on save to apply and store the changes, or cancel to discard.<br>
 The Save button will be hidden if no changes were made, or the entered data is invalid.<br>
-  * #### _Back_
+  - #### _Back_
 Return to system menu.<br>
 
 ---
@@ -237,16 +237,16 @@ A lot of effort was done to protect the tips from overheating.<br>
 Any detected error will disable PWM and show a message on the display.<br>
 To recover from an error, simply press the button and it will reboot.<br>
 There are multiple error types:<br>
-  * #### _Iron warning_
+  - #### _Iron warning_
 Non critical errors, a warning will be shown: iron not detected, supply voltage too low, ambient temperature too high or too low.<br>
-  * #### _Iron runaway_
+  - #### _Iron runaway_
 If by any means the iron temperature is higher than requested and the PWM is still active, it will trigger a timer depending on the temperature diference.<br>
 The condition must dissapear within the specified time, otherwise it will trigger a critical runaway error, shutting down the power stage<br>
-  * #### _Internal function errors_
+  - #### _Internal function errors_
 If any internal function detects undefined or not expected state, it will lock the station and show a message trying to show where the error happened (File, line).<br>
-  * #### _Hardware exceptions_
+  - #### _Hardware exceptions_
 If a hardware exception happens, the station will lock up and display an error message about the exception.<br>
-  * #### _Data error detection_
+  - #### _Data error detection_
 The data is stored as separate blocks: System settings, profile 1, profile 2 and profile 3.<br>
 Each one has it's own CRC checksum. When a block is read, the checksum is computed and compared.<br>
 If a mismatch occurs, the block will be erased and resetted to defaults, trying to preserve the rest of the data.<br>
