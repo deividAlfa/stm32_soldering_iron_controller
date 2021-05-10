@@ -359,7 +359,7 @@ void IronWake(bool source){                       // source: handle shake, encod
   if(GetIronError()){ return; }                   // Ignore if error present
   if(Iron.CurrentMode==mode_sleep){
     // If in sleep mode, ignore if wake source disabled
-    if( (source==source_wakeButton && !systemSettings.settings.wakeOnButton) || (source==source_wakeInput && !systemSettings.settings.wakeOnShake)){
+    if( (source==source_wakeButton && (!systemSettings.settings.wakeOnButton || (systemSettings.settings.WakeInputMode==wakeInputmode_stand) )) || (source==source_wakeInput && !systemSettings.settings.wakeOnShake)){
       return;
     }
   }
@@ -409,12 +409,12 @@ void checkIronError(void){
   if(CurrentTime<1000 || systemSettings.setupMode==setup_On){                 // Don't check sensor errors during first second or in setup mode, wait for readings need to get stable
     Err.Flags &= 0x10;                                                        // Only check failure state
   }
-  if(Err.Flags & ErrorMask){                                                  // If there are errors
+  if(Err.Flags){                                                              // If there are errors
     Iron.Error.Flags |= Err.Flags;                                            // Update flags
     Iron.LastErrorTime = CurrentTime;                                         // Save time
     if(!Iron.Error.globalFlag){                                               // If first detection
-      if(Err.Flags==1 && Iron.CurrentMode == mode_sleep){                      // If in sleep mode and only no iron flag is set
-        return;                                                               // Ignore
+      if(Err.Flags==1 && Iron.CurrentMode == mode_sleep){                     // If in sleep mode and only no iron flag is set
+        return;                                                               // return
       }
       Iron.Error.globalFlag = 1;                                              // Set global flag
       setCurrentMode(mode_sleep);                                             // Force sleep mode
@@ -422,6 +422,9 @@ void checkIronError(void){
       __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);  // Load now the value into the PWM hardware
       buzzer_alarm_start();                                                   // Start alarm
     }
+  }
+  else if(!Err.Flags && Iron.Error.Flags==1){                                 // If no errors and only no iron flag was active (And no global flag, so it was detected while in sleep mode)
+    Iron.Error.Flags=0;                                                       // Clear
   }
   else if (Iron.Error.globalFlag && Err.Flags==noError){                      // If global flag set, but there are no errors anymore
     if((CurrentTime-Iron.LastErrorTime)>systemSettings.settings.errorDelay){  // Check enough time has passed
