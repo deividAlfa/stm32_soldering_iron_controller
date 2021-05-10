@@ -43,11 +43,16 @@ Video can be seen there: (Project in active development, the features will chang
 
 The actual requirements are 10KB RAM and 64KB flash. Don't even try if your MCU has less than that.<br>
 The BOARDS folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.<br>
+Actually all the KSGER boards are supported. Some have not been tested yet and need feedback from users.<br>
 These board profiles are being tested:<br>
 * Quicko T12 [STABLE]: Profiles compatible with STM32F072 C8/CB and STM32F103 C8/CB.<br>
 * JCD T12    [STABLE]: Different board layout, but it's 100% the same as the KSGER v2.1. Use that firmware.
+* KSGER v1.5 [TESTING]: Recently added. Not tested yet.<br>
+* KSGER v2.0 [TESTING]: Seems to use the as the 2.1. Use that firmware, not tested yet.<br>
 * KSGER v2.1 [STABLE]: Profile compatible with STM32F101/102/103 C8/CB/R8/RB 48/64-pin. Use 101R8 profile.<br>
-* KSGER v3.0 [STABLE]: Profile compatible with STM32F101/102/103 R8/RB. Use 101R8 profile.<br>
+* KSGER v3.0 [TESTING]: Seems to use the same as the 3.1. Use that firmware, not tested yet.<br>
+* KSGER v3.1 [STABLE]: Profile compatible with STM32F101/102/103 R8/RB. Use 101R8 profile.<br>
+
 
 
 
