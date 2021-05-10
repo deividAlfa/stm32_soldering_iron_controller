@@ -157,13 +157,13 @@ Default: 5 seconds.
 
   - #### _RESET MENU_
 Reset various configuration sections:<br>
-    - _*Settings*_
+    - ##### _Settings_
 Reset Settings menu items to default.<br>
-    - _*Profile*_
+    - ##### _Profile_
 Reset the current profile (iron/tips) to default.<br>
-    - _*Profiles*_
+    - #####_Profiles_
 Reset all profiles to default.<br>
-    - _*All*_
+    - #####_All_
 Reset everything.<br>
 
   - #### _SW:_
