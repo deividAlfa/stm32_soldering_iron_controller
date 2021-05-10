@@ -8,6 +8,8 @@ Select the one appropriate for your iron. (JBC cartidges usually require electri
 * JBC __C210__<br>
 * JBC __C245__<br>
 
+---
+
 ## Basic Controls<br>
 Changes are made using the rotary encoder and its push button.<br>
 The power supply voltage is shown upper left, room temperature in the upper right, bar graph of relative power going to the tip on the bottom.<br>
@@ -16,6 +18,8 @@ To operate the menus, rotate to scroll to the desired selection, quick press to 
 Quick press again to stop editing the setting.<br>
 Widgets have fine and coarse adjustment.<br>
 While editing the widget, normal rotation will make fine adjustement. Click and rotate will do coarse adjustment.<br>
+
+---
 
 ## Theory of Operation<br>
 Before covering the settings, it is useful to understand how it works.<br>
@@ -33,6 +37,7 @@ The time the tip is powered on during each period is called the duty cycle.<br>
 </pre>
 The PID (Proportional, Integral, Derivitive) algorithm determines the PWM duty cycle based on the difference between desired and measured tip temperatures.<br>
 
+---
 
 ## Main screen<br>
 
@@ -51,6 +56,8 @@ Click and rotate clockwise to show the tip selection. Then, long-pressing will e
 It will return to normal mode after 5 seconds of inactivity.<br>
   * #### _System menu_
 A long click will enter the system menu (Except while in tip selection).<br>
+
+---
 
 ## System menu<br>
 Most screens will return to main screen after 15 seconds of inactivity.<br>
@@ -99,6 +106,8 @@ Default 4000, max 4100 (Over 4095 will disable "no iron" detection).<br>
   * #### _Detection_
 Time in miliSeconds that an iron must be plugged in before it is considered present.<br>
 
+---
+
 ### SYSTEM
 General settings for the controller.<br>
   * #### _Profile_
@@ -143,6 +152,9 @@ Defines the delay with no changes before storing changed settings in flash memor
 Flash has a limited number of write cycles (~100,000).<br>
 Higher values reduce writes, but settings changes could be forgotten when the controller is powered off or reset.<br>
 Default: 5 seconds.
+
+---
+
   * #### _RESET MENU_
 Reset various configuration sections:<br>
   * * #### _Settings_
@@ -158,6 +170,8 @@ Reset everything.<br>
 Displays the current software version. The version number is from a hash - higher is not necessarily newer.<br>
   * #### _HW:_
 Displays the hardware type.<br>
+
+---
 
 ### EDIT TIPS
 Different tips may have different characteristics. Tips may be added or edited here.<br>
@@ -199,6 +213,7 @@ Delete button will only appear if there's more than one tip in the system.<br>
 Save button will only appear if the name was modified and there're no other tips with the same name. Empty names are not allowed.<br>
 Back button will return discarding any the changes.<br>
 
+---
 
 ### CALIBRATION
   * ##### _Start_
@@ -215,6 +230,7 @@ The Save button will be hidden if no changes were made, or the entered data is i
   * ##### _Back_
 Return to system menu.<br>
 
+---
 
 ### ERROR REPORTING
 A lot of effort was done to protect the tips from overheating.<br>
