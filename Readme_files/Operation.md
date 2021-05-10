@@ -1,8 +1,8 @@
 # Operating Instructions<br>
 
 ## Initial Startup<br>
-When an unconfigured (new or fully reset) controller starts, it first offers a choice of which tip profile to use.
-Select the one appropriate for your iron. (JBC cartidges usually require electrical changes to the controller)<br>
+When an unconfigured (new or fully reset) controller starts, it first offers a choice of which tip profile to use.<br>
+Select the one appropriate for your iron. (JBC cartidges usually require electrical changes to the controller).<br>
 
 * Hakko __T12__ (T15 Series in North America & EU) This is the handle normally used with these controllers.<br>
 * JBC __C210__<br>
@@ -12,8 +12,10 @@ Select the one appropriate for your iron. (JBC cartidges usually require electri
 Changes are made using the rotary encoder and its push button.<br>
 The power supply voltage is shown upper left, room temperature in the upper right, bar graph of relative power going to the tip on the bottom.<br>
 While in normal operation, shake sensor activity will be shown briefly in the top center.<br>
-To operate the menus, rotate to scroll to the desired selection, quick press to select it, rotate to change. Quick press again to exit the setting.<br>
-Widgets have fine and coarse adjustment. While editing the widget, normal rotation will make fine adjustement. Click and rotate will do coarse adjustment.<br>
+To operate the menus, rotate to scroll to the desired selection, quick press to select it, rotate to change.<br>
+Quick press again to stop editing the setting.<br>
+Widgets have fine and coarse adjustment.<br>
+While editing the widget, normal rotation will make fine adjustement. Click and rotate will do coarse adjustment.<br>
 
 ## Theory of Operation<br>
 Before covering the settings, it is useful to understand how it works.<br>
@@ -34,20 +36,20 @@ The PID (Proportional, Integral, Derivitive) algorithm determines the PWM duty c
 
 ## Main screen<br>
 
-  * ##### _Temperature display modes_
+  * #### _Temperature display modes_
 While in run mode, a single click will switch between numeric and graph (10 second history).<br>
-  * ##### _Temperature setpoint adjustment_
-Rotate the encoder, the setpoint will be shown, continue rotating to asjust it.<br>  
+  * #### _Temperature setpoint adjustment_
+Rotate the encoder, the setpoint will be shown, continue rotating to adjust it.<br>  
 After 1 second of inactivity it will return to normal mode.<br>
-  * ##### _Sleep mode_
+  * #### _Sleep mode_
 You can force entering sleep mode by clicking and rotating counter-clockwise.<br>  
 To wake up you can make a click (If button wake is enabled) or move the handle (If shake wake is enabled or in stand mode). <br>
 If the display brighntess is dimmed, you can wake up the display by rotating the encoder.<br>
 If the tip reading is higher than 120ºC, it will show a "HOT!" warning.<br>
-  * ##### _Tip selection_
+  * #### _Tip selection_
 Click and rotate clockwise to show the tip selection. Then, long-pressing will enter the selected tip settings.<br>  
 It will return to normal mode after 5 seconds of inactivity.<br>
-  * ##### _System menu_
+  * #### _System menu_
 A long click will enter the system menu (Except while in tip selection).<br>
 
 ## System menu<br>
@@ -55,21 +57,22 @@ Most screens will return to main screen after 15 seconds of inactivity.<br>
 Also, long clicking will have the same effect.<br>
 
 ### IRON
+
 Iron settings control the operation of the handle/tips. <br>
-  * ##### _Max temp_
+  * #### _Max temp_
 Upper adjustable temperature limit.<br>
-  * ##### _Min temp_
+  * #### _Min temp_
 Lower adjustable temperature limit.<br>
-  * ##### _Sleep_
+  * #### _Sleep_
 If there is no soldering activity for this period, the controller will "sleep" and stop providing power to the tip, allowing it to cool. This helps increase tip lifetime. Activity (e.g. shaking the handle for a T12) will wake it up and heating will resume.<br>
-  * ##### _Heater R(esistance)._
+  * #### _Heater R(esistance)._
 The resistance of the tip's heating element. There is normally no need to change this from the default.<br>
-  * ##### _Power_
+  * #### _Power_
 The maximum power which will be delivered to the tip. This sets a maximum for the PWM duty cycle, based on the power supply voltage and the heater resistance.<br>
-  * ##### _PWM Time_
+  * #### _PWM Time_
 Sets the PWM period. The controller will check and adjust the tip temperature once each period. Default 200 ms.<br>
 Lower values will increase the PWM frequency and also the audible switching noise.<br>
-  * ##### _ADC Delay_
+  * #### _ADC Delay_
 Near the end of each PWM period, the temperature is measured by the ADC.<br>
 _ADC Delay_ controls how soon before the end of a period the temperature is measured.<br> 
 This delay is needed to have a clean reading of the thermocouple. If the delay is too low, it will read switching noise and be very unstable.<br>
@@ -142,13 +145,13 @@ Higher values reduce writes, but settings changes could be forgotten when the co
 Default: 5 seconds.
   * #### _RESET MENU_
 Reset various configuration sections:<br>
-  * * ##### _Settings_
+  * * #### _Settings_
 Reset Settings menu items to default.<br>
-  * * ##### _Profile_
+  * * #### _Profile_
 Reset the current profile (iron/tips) to default.<br>
-  * * ##### _Profiles_
+  * * #### _Profiles_
 Reset all profiles to default.<br>
-  * * ##### _All_
+  * * #### _All_
 Reset everything.<br>
 
   * #### _SW:_
@@ -166,25 +169,27 @@ Individual tip data includes info from both the *IRON* and *PID* menus.<br>
 This menu allows Tip editing/removing, PID tuning and adjustment of stored tip calibration values.<br>
 PID tuning is an advanced topic, _**incorrect settings here can result in instability and damage to tips and possibly the controller**_.<br>
 Most users should not change these settings, but here are the basics. Kp, Ki, Kd, Imax, Imin are the coefficients which control the PID's behavior.<br>
-  * ##### _TIP NAME_ 
+Calibration values are not meant for manual adjustment. Only to restore a previous calibration result.<br>
+Use calibration for optimal results.<br>
+  * #### _TIP NAME_ 
 Shows the tip name, click on it to access tip name editing/removing.<br>
-  * ##### _PID Kp_ 
+  * #### _PID Kp_ 
 The proportional term, changes the PWM duty cycle based on how far the measured temperature is from the desired temperature.<br>
-  * ##### _PID Ki_ 
+  * #### _PID Ki_ 
 The integral term, changes the duty cycle based on how long the temperatures have been different.<br>
-  * ##### _PID Kd_ 
+  * #### _PID Kd_ 
 PID differential term, changes the duty cycle based on how fast the measured temperature has changed.<br>
-  * ##### _PID Imax_ 
+  * #### _PID Imax_ 
 The integral acumulator higher limit.<br>
-  * ##### _PID Imin_ 
+  * #### _PID Imin_ 
 The integral acumulator lower limit.<br>
-  * ##### _Cal250_ 
+  * #### _Cal250_ 
 The stored value for 250ºC calibration.<br>
-  * ##### _Cal350_ 
+  * #### _Cal350_ 
 The stored value for 350ºC calibration.<br>
-  * ##### _Cal450_ 
+  * #### _Cal450_ 
 The stored value for 450ºC calibration.<br>
-  * ##### _Back_
+  * #### _Back_
 Return to system menu.<br>
 
 ### EDIT TIP NAME
@@ -198,10 +203,13 @@ Back button will return discarding any the changes.<br>
 ### CALIBRATION
   * ##### _Start_
 Requires a tip thermometer (e.g. Hakko FG-100 or similar). Calibrates the current tip at temperatures of 250, 350 and 450C.<br>
-Wait for tip temperature to settle, then enter temperature as measured by the thermometer for each step.<br>
+Wait for tip temperature to settle (When the thermomether reading stops moving), it can take up to 20 seconds in some cases.<br>
+Then enter temperature as measured by the thermometer for each step.<br>
 If the entered temperature is more than 50ºC higher than the target calibration value, the process will be aborted and you will have to adjust it manually<br>
   * ##### _Adjust_
-Here you can adjust the default calibration values. For every step (250,350,450ºC) adjust the value until it's close to the target temperature.<br> 
+Here you can adjust the default calibration values. For every step (250,350,450ºC) adjust the value until it's close to the target temperature.<br>
+This is a coarse adjustment, made to avoid burning the tip in the calibration process if your controllers reads too low values.<br> 
+This values have nothing to do with the Tip Settings calibration values (Those are temperature-compensated).<br>
 Click on save to apply and store the changes, or cancel to discard.<br>
 The Save button will be hidden if no changes were made, or the entered data is invalid.<br>
   * ##### _Back_
