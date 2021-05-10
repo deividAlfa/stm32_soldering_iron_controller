@@ -10,7 +10,6 @@
 /Core/Startup/*.*
 /Drivers/CMSIS
 /Drivers/STM32*
-/Drivers/graphics/u8g2/tools
 /*.launch
 /Debug
 /Release

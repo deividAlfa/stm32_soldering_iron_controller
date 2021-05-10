@@ -570,6 +570,7 @@ void main_screen_draw(screen_t *scr){
 
 		if((scr_refresh || plotUpdate) && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){	//Update every 100mS or if screen is erased
 			plotUpdate=0;
+			uint8_t set;
 			int16_t t = Iron.CurrentSetTemperature;
 
 			bool magnify = true;		                        // for future, to support both graph types
@@ -597,9 +598,7 @@ void main_screen_draw(screen_t *scr){
 					else plotV = (plotV-t+20) ; 					      // relative to t, +-20C
 					u8g2_DrawVLine(&u8g2, x+13, 56-plotV, plotV);	// data points
 				}
-
-				uint8_t set= 36;
-				u8g2_DrawTriangle(&u8g2, 124, set-5, 124, set+5, 115, set);		// set temp marker
+				set= 36;
 
 			} else {												                // graphing full range
 				for(uint8_t y=16; y<57; y+=13){
@@ -616,15 +615,14 @@ void main_screen_draw(screen_t *scr){
 					else plotV = (plotV-180) >> 3; 					      // divide by 8, (500-180)/8=40
 					u8g2_DrawVLine(&u8g2, x+13, 56-plotV, plotV);	// data points
 				}
-
-				uint8_t set;
 				if(t<188){ set = 1; }
 				else {
 					set=(t-180)>>3;
 				}
 				set= 56-set;
-				u8g2_DrawTriangle(&u8g2, 124, set-5, 124, set+5, 115, set);		// set temp marker
 			}
+
+			u8g2_DrawTriangle(&u8g2, 122, set-4, 122, set+4, 115, set);		// set temp marker
 		}
 	}
 }
