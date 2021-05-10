@@ -94,11 +94,11 @@ Default 20 ms.<br>
 </pre>
   - #### _Filtering_
 Used to filter the temperature measurements before they are passed to the PID. This helps remove noise and provides more stability.<br>
-   - - #### _Avg_
+     - _Avg_
 This uses a simple moving average, and is the default filter.<br>
-   - - #### _EMA_
+     - _EMA_
 Exponential Moving Average. A more sophisticated filter.<br>
-  - #### _Factor_
+    - #### _Factor_
 Only for EMA. The higher, the heavier the filtering (also more delay).<br>
   - #### _No iron_
 The ADC reading which signals that no iron is present. When no iron is plugged in, the measured temperature will read at or near maximum (ADC = 4095).
