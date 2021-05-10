@@ -156,13 +156,13 @@ Higher values reduce writes, but settings changes could be forgotten when the co
 Default: 5 seconds.
   - #### _RESET MENU_
 Reset various configuration sections:<br>
-    - _*Settings*_<br>
+    - #### _Settings_<br>
 Reset Settings menu items to default.<br>
-    - _Profile*_<br>
+    - #### _Profile_<br>
 Reset the current profile (iron/tips) to default.<br>
-    - _*Profiles*_<br>
+    - #### _Profiles_<br>
 Reset all profiles to default.<br>
-    - _*All*_<br>
+    - #### _All_<br>
 Reset everything.<br>
   - #### _SW:_
 Displays the current software version. The version number is from a hash - higher is not necessarily newer.<br>
