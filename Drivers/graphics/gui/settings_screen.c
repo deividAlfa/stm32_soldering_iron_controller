@@ -20,8 +20,9 @@ static int32_t temp;
 static uint8_t resStatus, profile;
 char str[5];
 static uint32_t settingsTimer;
-uint8_t Last_Tip;
 uint8_t Selected_Tip;
+uint8_t is_New_Tip;
+uint8_t Tip_name_return;
 //-------------------------------------------------------------------------------------------------------------------------------
 // Settings screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -190,43 +191,44 @@ static void setTipStr(char *s) {
 	strcpy(str, s);
 }
 static int saveTip(widget_t *w) {
-	if(strcmp(comboBox_IRONTIPS.currentItem->text, "ADD NEW") == 0) {
+	if(comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {
 		for(uint8_t x=0;x<TipSize;x++){
 			if(strcmp(systemSettings.Profile.tip[x].name, "    ")!=0){														// Find first tip
 				systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips] = systemSettings.Profile.tip[x];	// Copy TIP data to new tip
 				break;
 			}
 		}
-		strcpy(systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips].name, str);						// Copy new string
-		++systemSettings.Profile.currentNumberOfTips;
-
+		strcpy(systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips++].name, str);						// Copy new string and increase tip count
 	}
 	else {
-		for(int x = 0; x < TipSize;x++) {
-			if(strcmp(comboBox_IRONTIPS.currentItem->text, systemSettings.Profile.tip[x].name) == 0 ) {
-				strcpy(systemSettings.Profile.tip[x].name, str);
-				break;
-			}
-		}
+	  strcpy(systemSettings.Profile.tip[Selected_Tip].name, str);
 	}
-	return screen_edit_iron_tips;
+	return Tip_name_return;
 }
 static int cancelTip(widget_t *w) {
-	return screen_edit_iron_tips;
+	return Tip_name_return;
 }
 static int delTip(widget_t *w) {
-	uint8_t itemIndex = 0;
-	for(int x = 0; x < TipSize; x++) {
-		if(strcmp(comboBox_IRONTIPS.currentItem->text, systemSettings.Profile.tip[x].name) == 0) {
-			itemIndex = x;
-			break;
-		}
-	}
-	for(int x = itemIndex; x < TipSize;x++) {
-		systemSettings.Profile.tip[x] = systemSettings.Profile.tip[x+1];
-	}
-	--systemSettings.Profile.currentNumberOfTips;
-	return screen_edit_iron_tips;
+  char str[TipCharSize];
+  for(uint8_t x=0;x<TipCharSize;x++){
+    str[x] = ' ';
+  }
+  str[TipCharSize-1] = 0;
+	systemSettings.Profile.currentNumberOfTips--;
+
+
+  for(int x = Selected_Tip; x < TipSize-1;x++) {
+    systemSettings.Profile.tip[x] = systemSettings.Profile.tip[x+1];
+  }
+
+  for(int x = systemSettings.Profile.currentNumberOfTips; x < TipSize;x++) {
+    strcpy(systemSettings.Profile.tip[x].name, str);
+  }
+
+  if(systemSettings.Profile.currentTip >= systemSettings.Profile.currentNumberOfTips){
+    systemSettings.Profile.currentTip = systemSettings.Profile.currentNumberOfTips-1;
+  }
+	return comboitem_IRONTIPS_Settings_Back.action_screen;
 }
 
 static void * getMaxPower() {
@@ -441,10 +443,11 @@ static void setWakeMode(uint32_t *val) {
 	systemSettings.settings.WakeInputMode= * val;
 	if(*val==wakeInputmode_stand){
 		comboitem_SYSTEM_ButtonWake.enabled=0;
-		systemSettings.settings.wakeOnButton=wakeButton_Off;
+    comboitem_SYSTEM_ShakeWake.enabled=0;
 	}
 	else{
 		comboitem_SYSTEM_ButtonWake.enabled=1;
+    comboitem_SYSTEM_ShakeWake.enabled=1;
 	}
 }
 
@@ -636,37 +639,48 @@ int settings_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t 
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
-// Edit Tip screen functions
+// Edit Tip Name screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 
 void edit_tip_screenDraw(screen_t *scr){
-	if((strcmp(str, "    ") == 0) || (strcmp(str, comboBox_IRONTIPS.currentItem->text) == 0) ) {
-		if(Widget_IRONTIPS_Name_Save.enabled){
-			widgetDisable(&Widget_IRONTIPS_Name_Save);
-		}
-	}
-	else{
-		if(!Widget_IRONTIPS_Name_Save.enabled){
-			widgetEnable(&Widget_IRONTIPS_Name_Save);
-		}
-	}
-	default_screenDraw(scr);
+  if(strcmp(str, "    ") == 0){
+    widgetDisable(&Widget_IRONTIPS_Name_Save);  // If empty
+  }
+  else{
+    uint8_t x = 0;
+
+    while(x<TipSize){                     // Check existing name
+      if(strcmp(str, systemSettings.Profile.tip[x].name) == 0){
+        break;
+      }
+      x++;
+    }
+    if(x<TipSize){
+      widgetDisable(&Widget_IRONTIPS_Name_Save);
+    }
+    else{
+      widgetEnable(&Widget_IRONTIPS_Name_Save);
+    }
+  }
+  default_screenDraw(scr);
 }
 
 
 void edit_tip_screen_init(screen_t *scr) {
-	if(strcmp(comboBox_IRONTIPS.currentItem->text, "ADD NEW") == 0) {
+	if(Tip_name_return == screen_edit_iron_tips &&  comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {
 		strcpy(str, "    ");
 		widgetDisable(&Widget_IRONTIPS_Name_Delete);
+		is_New_Tip = 1;
 	}
 	else {
-		strcpy(str, comboBox_IRONTIPS.currentItem->text);
+		strcpy(str, systemSettings.Profile.tip[Selected_Tip].name);
 		if(systemSettings.Profile.currentNumberOfTips>1){
 			widgetEnable(&Widget_IRONTIPS_Name_Delete);
 		}
 		else{
 			widgetDisable(&Widget_IRONTIPS_Name_Delete);
 		}
+		is_New_Tip = 0;
 	}
 	scr->current_widget=&Widget_IRONTIPS_Name_Edit;
 	editable_IRONTIPS_Name_Edit.selectable.previous_state=widget_idle;
@@ -685,44 +699,46 @@ void edit_tip_screen_init(screen_t *scr) {
 	u8g2_SetDrawColor(&u8g2, WHITE);
 	u8g2_DrawStr(&u8g2,20,19,"NAME:");
 
+	widgetDisable(&Widget_IRONTIPS_Name_Save);
 	default_init(scr);
 }
+
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Tips screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+
 void edit_iron_screen_init(screen_t *scr) {
 	comboBox_item_t *i = comboBox_IRONTIPS.first;
-	uint8_t pos=0;
-
 	for(int x = 0; x < TipSize; x++) {
 		if(x < systemSettings.Profile.currentNumberOfTips) {
 			strcpy(i->text, systemSettings.Profile.tip[x].name);
 			i->enabled = 1;
-			pos++;
 		}
 		else
 			i->enabled = 0;
 		i = i->next_item;
 	}
-	Last_Tip = pos;
 	comboBox_IRONTIPS.currentItem = comboBox_IRONTIPS.first;
 	comboBox_IRONTIPS.currentScroll = 0;
 	comboitem_IRONTIPS_addNewTip.enabled = (systemSettings.Profile.currentNumberOfTips < TipSize);
 }
 
+void edit_iron_screen_onEnter(screen_t *scr) {
+  if(scr == &Screen_edit_iron_tips){
+    Tip_name_return = screen_edit_iron_tips;
+  }
+  else if(scr == &Screen_edit_tip_settings){
+    Tip_name_return = screen_edit_tip_settings;
+  }
 
+}
 int edit_iron_screen_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   if(input!=Rotate_Nothing){
     settingsTimer=HAL_GetTick();
+
   }
-  if(input==LongClick){
-    if(comboBox_IRONTIPS.currentItem!=&comboitem_IRONTIPS_Back && comboBox_IRONTIPS.currentItem!=&comboitem_IRONTIPS_addNewTip){
-      for(uint8_t x = 0; x < TipSize; x++) {
-        if(strcmp(comboBox_IRONTIPS.currentItem->text, systemSettings.Profile.tip[x].name)==0){
-          Selected_Tip = x;
-        }
-      }
-      return screen_edit_tip_settings;
-    }
-  }
-  else if((HAL_GetTick()-settingsTimer)>15000){
+  if((input==LongClick) || (HAL_GetTick()-settingsTimer)>15000){
     return screen_main;
   }
   return default_screenProcessInput(scr, input, state);
@@ -776,14 +792,19 @@ void IRONTIPS_Settings_onEnter(screen_t *scr){
 	  comboitem_IRONTIPS_Settings_Back.action_screen = screen_main;
 	  Selected_Tip = systemSettings.Profile.currentTip;
 	}
-	else{
-    comboitem_IRONTIPS_Settings_Back.action_screen = screen_edit_iron_tips;
+	else if(scr==&Screen_edit_iron_tips){
+	  for(uint8_t x = 0; x < TipSize; x++) {
+	    if(strcmp(comboBox_IRONTIPS.currentItem->text, systemSettings.Profile.tip[x].name)==0){
+	      Selected_Tip = x;
+	    }
+	  }
+	  comboitem_IRONTIPS_Settings_Back.action_screen = screen_edit_iron_tips;
 	}
 	comboitem_IRONTIPS_Settings_TipLabel.text = systemSettings.Profile.tip[Selected_Tip].name;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
-// IRON screen functions
+// IRON settings screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void IRON_onEnter(screen_t *scr){
   setSettingsScrTempUnit();
@@ -795,8 +816,9 @@ void IRON_onEnter(screen_t *scr){
 		comboitem_IRON_filterFactor.enabled=1;
 	}
 }
+
 //-------------------------------------------------------------------------------------------------------------------------------
-// SYSTEM screen functions
+// SYSTEM settings screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void SYSTEM_onEnter(screen_t *scr){
 	setSettingsScrTempUnit();
@@ -1336,20 +1358,21 @@ void settings_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(w, widget_combo, &comboBox_IRONTIPS);
 	for(int x = 0; x < TipSize; x++) {
 		t[x][0] = '\0';
-		comboAddScreen(&comboitem_IRONTIPS[x],w, &t[x][0], screen_edit_tip_name);
+		comboAddScreen(&comboitem_IRONTIPS[x],w, &t[x][0], screen_edit_tip_settings);
 	}
 	comboAddScreen(&comboitem_IRONTIPS_addNewTip, w, "ADD NEW", screen_edit_tip_name);
 	comboAddScreen(&comboitem_IRONTIPS_Back, w, "BACK", screen_settingsmenu);
 
 
 
-	//########################################## IRON TIPS EDIT SCREEN ##########################################
+	//########################################## IRON TIP EDIT NAME SCREEN ##########################################
 	//
 	sc=&Screen_edit_tip_name;
 	oled_addScreen(sc, screen_edit_tip_name);
 	screen_setDefaults(sc);
 	sc->draw = &edit_tip_screenDraw;
 	sc->init = &edit_tip_screen_init;
+	sc->onEnter= &edit_iron_screen_onEnter;
 
 	//********[ Name Edit Widget ]***********************************************************
 	//
@@ -1408,138 +1431,138 @@ void settings_screen_setup(screen_t *scr) {
 	((button_widget_t*)w->content)->action = &delTip;
 
 	//########################################## [ TIP SETTINGS SCREEN ] ##########################################
-	  //
-	  sc=&Screen_edit_tip_settings;
-	  oled_addScreen(sc,screen_edit_tip_settings);
-	  screen_setDefaults(sc);
-	  sc->onEnter = &IRONTIPS_Settings_onEnter;
+  //
+  sc=&Screen_edit_tip_settings;
+  oled_addScreen(sc,screen_edit_tip_settings);
+  screen_setDefaults(sc);
+  sc->onEnter = &IRONTIPS_Settings_onEnter;
 
-    //********[ TIP label]***********************************************************
-    //
-	  comboitem_IRONTIPS_Settings_TipLabel.dispAlign = align_center;
+  //********[ TIP label]***********************************************************
+  //
+  comboitem_IRONTIPS_Settings_TipLabel.dispAlign = align_center;
 
-	  //********[ KP Widget]***********************************************************
-	  //
-	  dis = &editable_IRONTIPS_Settings_PID_Kp.inputData;
-	  edit = &editable_IRONTIPS_Settings_PID_Kp;
-	  editableDefaultsInit(edit,widget_editable);
-	  dis->reservedChars=6;
-	  dis->getData = &getKp;
-	  dis->number_of_dec = 2;
-	  edit->max_value=65000;
-	  edit->big_step = 500;
-	  edit->step = 50;
-	  edit->setData =  (void (*)(void *))&setKp;
+  //********[ KP Widget]***********************************************************
+  //
+  dis = &editable_IRONTIPS_Settings_PID_Kp.inputData;
+  edit = &editable_IRONTIPS_Settings_PID_Kp;
+  editableDefaultsInit(edit,widget_editable);
+  dis->reservedChars=6;
+  dis->getData = &getKp;
+  dis->number_of_dec = 2;
+  edit->max_value=65000;
+  edit->big_step = 500;
+  edit->step = 50;
+  edit->setData =  (void (*)(void *))&setKp;
 
-	  //********[ KI Widget ]***********************************************************
-	  //
-	  dis = &editable_IRONTIPS_Settings_PID_Ki.inputData;
-	  edit = &editable_IRONTIPS_Settings_PID_Ki;
-	  editableDefaultsInit(edit,widget_editable);
-	  dis->reservedChars=6;
-	  dis->getData = &getKi;
-	  dis->number_of_dec = 2;
-	  edit->max_value=65000;
-	  edit->big_step = 500;
-	  edit->step = 50;
-	  edit->setData = (void (*)(void *))&setKi;
+  //********[ KI Widget ]***********************************************************
+  //
+  dis = &editable_IRONTIPS_Settings_PID_Ki.inputData;
+  edit = &editable_IRONTIPS_Settings_PID_Ki;
+  editableDefaultsInit(edit,widget_editable);
+  dis->reservedChars=6;
+  dis->getData = &getKi;
+  dis->number_of_dec = 2;
+  edit->max_value=65000;
+  edit->big_step = 500;
+  edit->step = 50;
+  edit->setData = (void (*)(void *))&setKi;
 
-	  //********[ KD Widget ]***********************************************************
-	  //
-	  dis = &editable_IRONTIPS_Settings_PID_Kd.inputData;
-	  edit = &editable_IRONTIPS_Settings_PID_Kd;
-	  editableDefaultsInit(edit,widget_editable);
-	  dis->reservedChars=6;
-	  dis->getData = &getKd;
-	  dis->number_of_dec = 2;
-	  edit->max_value=65000;
-	  edit->big_step = 500;
-	  edit->step = 50;
-	  edit->setData = (void (*)(void *))&setKd;
+  //********[ KD Widget ]***********************************************************
+  //
+  dis = &editable_IRONTIPS_Settings_PID_Kd.inputData;
+  edit = &editable_IRONTIPS_Settings_PID_Kd;
+  editableDefaultsInit(edit,widget_editable);
+  dis->reservedChars=6;
+  dis->getData = &getKd;
+  dis->number_of_dec = 2;
+  edit->max_value=65000;
+  edit->big_step = 500;
+  edit->step = 50;
+  edit->setData = (void (*)(void *))&setKd;
 
-	  //********[ Imax Widget ]***********************************************************
-	  //
-	  dis = &editable_IRONTIPS_Settings_PID_Imax.inputData;
-	  edit = &editable_IRONTIPS_Settings_PID_Imax;
-	  editableDefaultsInit(edit,widget_editable);
-	  dis->reservedChars=6;
-	  dis->getData = &getImax;
-	  dis->number_of_dec = 2;
-	  edit->max_value=1000;
-	  edit->big_step = 20;
-	  edit->step = 1;
-	  edit->setData = (void (*)(void *))&setImax;
-
-
-	  //********[ Imin Widget ]***********************************************************
-	  //
-	  dis = &editable_IRONTIPS_Settings_PID_Imin.inputData;
-	  edit = &editable_IRONTIPS_Settings_PID_Imin;
-	  editableDefaultsInit(edit,widget_editable);
-	  dis->reservedChars=6;
-	  dis->getData = &getImin;
-	  dis->number_of_dec = 2;
-	  edit->max_value = 0;
-	  edit->min_value = -1000;
-	  edit->big_step = -20;
-	  edit->step = -1;
-	  edit->setData = (void (*)(void *))&setImin;
+  //********[ Imax Widget ]***********************************************************
+  //
+  dis = &editable_IRONTIPS_Settings_PID_Imax.inputData;
+  edit = &editable_IRONTIPS_Settings_PID_Imax;
+  editableDefaultsInit(edit,widget_editable);
+  dis->reservedChars=6;
+  dis->getData = &getImax;
+  dis->number_of_dec = 2;
+  edit->max_value=1000;
+  edit->big_step = 20;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setImax;
 
 
-	  //********[ Cal250 Widget ]***********************************************************
-	  //
-	  dis = &editable_IRONTIPS_Settings_Cal250.inputData;
-	  edit = &editable_IRONTIPS_Settings_Cal250;
-	  editableDefaultsInit(edit,widget_editable);
-	  dis->reservedChars=4;
-	  dis->getData = &getCal250;
-	  edit->max_value = 4095;
-	  edit->min_value = 0;
-	  edit->big_step = 50;
-	  edit->step = 1;
-	  edit->setData = (void (*)(void *))&setCal250;
+  //********[ Imin Widget ]***********************************************************
+  //
+  dis = &editable_IRONTIPS_Settings_PID_Imin.inputData;
+  edit = &editable_IRONTIPS_Settings_PID_Imin;
+  editableDefaultsInit(edit,widget_editable);
+  dis->reservedChars=6;
+  dis->getData = &getImin;
+  dis->number_of_dec = 2;
+  edit->max_value = 0;
+  edit->min_value = -1000;
+  edit->big_step = -20;
+  edit->step = -1;
+  edit->setData = (void (*)(void *))&setImin;
 
 
-	  //********[ Cal350 Widget ]***********************************************************
-	  //
-	  dis = &editable_IRONTIPS_Settings_Cal350.inputData;
-	  edit = &editable_IRONTIPS_Settings_Cal350;
-	  editableDefaultsInit(edit,widget_editable);
-	  dis->reservedChars=4;
-	  dis->getData = &getCal350;
-	  edit->max_value = 4095;
-	  edit->min_value = 0;
-	  edit->big_step = 50;
-	  edit->step = 1;
-	  edit->setData = (void (*)(void *))&setCal350;
+  //********[ Cal250 Widget ]***********************************************************
+  //
+  dis = &editable_IRONTIPS_Settings_Cal250.inputData;
+  edit = &editable_IRONTIPS_Settings_Cal250;
+  editableDefaultsInit(edit,widget_editable);
+  dis->reservedChars=4;
+  dis->getData = &getCal250;
+  edit->max_value = 4095;
+  edit->min_value = 0;
+  edit->big_step = 50;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setCal250;
 
 
-	  //********[ Cal450 Widget ]***********************************************************
-	  //
-	  dis = &editable_IRONTIPS_Settings_Cal450.inputData;
-	  edit = &editable_IRONTIPS_Settings_Cal450;
-	  editableDefaultsInit(edit,widget_editable);
-	  dis->reservedChars=4;
-	  dis->getData = &getCal450;
-	  edit->max_value = 4095;
-	  edit->min_value = 0;
-	  edit->big_step = 50;
-	  edit->step = 1;
-	  edit->setData = (void (*)(void *))&setCal450;
+  //********[ Cal350 Widget ]***********************************************************
+  //
+  dis = &editable_IRONTIPS_Settings_Cal350.inputData;
+  edit = &editable_IRONTIPS_Settings_Cal350;
+  editableDefaultsInit(edit,widget_editable);
+  dis->reservedChars=4;
+  dis->getData = &getCal350;
+  edit->max_value = 4095;
+  edit->min_value = 0;
+  edit->big_step = 50;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setCal350;
 
-	  //========[ PID COMBO ]===========================================================
-	  //
-	  w = &comboWidget_IRONTIPS_Settings;
-	  screen_addWidget(w, sc);
-	  widgetDefaultsInit(w, widget_combo, &comboBox_IRONTIPS_Settings);
-	  comboAddScreen(&comboitem_IRONTIPS_Settings_TipLabel,   w,  "",           -1);                                        // Set automatically on enter
-	  comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KP,   w,  "PID Kp",     &editable_IRONTIPS_Settings_PID_Kp);
-	  comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KI,   w,  "PID Ki",     &editable_IRONTIPS_Settings_PID_Ki);
-	  comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KD,   w,  "PID Kd",     &editable_IRONTIPS_Settings_PID_Kd);
-	  comboAddEditable(&comboitem_IRONTIPS_Settings_PID_Imax, w,  "PID Imax",   &editable_IRONTIPS_Settings_PID_Imax);
-	  comboAddEditable(&comboitem_IRONTIPS_Settings_PID_Imin, w,  "PID Imin",   &editable_IRONTIPS_Settings_PID_Imin);
-	  comboAddEditable(&comboitem_IRONTIPS_Settings_Cal250,   w,  "Cal250",     &editable_IRONTIPS_Settings_Cal250);
-	  comboAddEditable(&comboitem_IRONTIPS_Settings_Cal350,   w,  "Cal350",     &editable_IRONTIPS_Settings_Cal350);
-	  comboAddEditable(&comboitem_IRONTIPS_Settings_Cal450,   w,  "Cal450",     &editable_IRONTIPS_Settings_Cal450);
-	  comboAddScreen(&comboitem_IRONTIPS_Settings_Back,       w,  "BACK",       -1);                                        // Set automatically on enter
+
+  //********[ Cal450 Widget ]***********************************************************
+  //
+  dis = &editable_IRONTIPS_Settings_Cal450.inputData;
+  edit = &editable_IRONTIPS_Settings_Cal450;
+  editableDefaultsInit(edit,widget_editable);
+  dis->reservedChars=4;
+  dis->getData = &getCal450;
+  edit->max_value = 4095;
+  edit->min_value = 0;
+  edit->big_step = 50;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setCal450;
+
+  //========[ PID COMBO ]===========================================================
+  //
+  w = &comboWidget_IRONTIPS_Settings;
+  screen_addWidget(w, sc);
+  widgetDefaultsInit(w, widget_combo, &comboBox_IRONTIPS_Settings);
+  comboAddScreen(&comboitem_IRONTIPS_Settings_TipLabel,   w,  "",           screen_edit_tip_name);                      // Name set automatically on enter
+  comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KP,   w,  "PID Kp",     &editable_IRONTIPS_Settings_PID_Kp);
+  comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KI,   w,  "PID Ki",     &editable_IRONTIPS_Settings_PID_Ki);
+  comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KD,   w,  "PID Kd",     &editable_IRONTIPS_Settings_PID_Kd);
+  comboAddEditable(&comboitem_IRONTIPS_Settings_PID_Imax, w,  "PID Imax",   &editable_IRONTIPS_Settings_PID_Imax);
+  comboAddEditable(&comboitem_IRONTIPS_Settings_PID_Imin, w,  "PID Imin",   &editable_IRONTIPS_Settings_PID_Imin);
+  comboAddEditable(&comboitem_IRONTIPS_Settings_Cal250,   w,  "Cal250",     &editable_IRONTIPS_Settings_Cal250);
+  comboAddEditable(&comboitem_IRONTIPS_Settings_Cal350,   w,  "Cal350",     &editable_IRONTIPS_Settings_Cal350);
+  comboAddEditable(&comboitem_IRONTIPS_Settings_Cal450,   w,  "Cal450",     &editable_IRONTIPS_Settings_Cal450);
+  comboAddScreen(&comboitem_IRONTIPS_Settings_Back,       w,  "BACK",       -1);                                        // Return value set automatically on enter
 }
