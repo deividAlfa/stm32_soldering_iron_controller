@@ -18,7 +18,7 @@
 
 #define T12_Cal250		1400                                        // Default values to be used in the calibration if not adjusted
 #define T12_Cal350		2050
-#define T12_Cal450		2700
+#define T12_Cal450		2200
 
 #define C210_Cal250		400
 #define C210_Cal350		600
@@ -27,6 +27,7 @@
 #define C245_Cal250		1000
 #define C245_Cal350		1500
 #define C245_Cal450		2000
+
 //#define SWSTRING    "SW: v1.10"                                 // For releases
 #define SWSTRING		  "SW: git 0db5201"                           // For git
 #define SETTINGS_VERSION 3											                  // Change this if you change the struct below to prevent people getting out of sync
