@@ -48,7 +48,7 @@ Rotate the encoder, the setpoint will be shown, continue rotating to adjust it.<
 After 1 second of inactivity it will return to normal mode.<br>
   - **Sleep mode**<br>
 You can force entering sleep mode by clicking and rotating counter-clockwise.<br>  
-To wake up you can make a click (If button wake is enabled) or move the handle (If shake wake is enabled or in stand mode). <br>
+To wake up you can make a click (If button wake is enabled) or move the handle (If shake wake is enabled or in stand mode).<br>
 If the display brighntess is dimmed, you can wake up the display by rotating the encoder.<br>
 If the tip reading is higher than 120ºC, it will show a "HOT!" warning.<br>
   - **Tip selection**<br>
@@ -98,7 +98,7 @@ Used to filter the temperature measurements before they are passed to the PID. T
 This uses a simple moving average, and is the default filter.<br>
      - **EMA**<br>
 Exponential Moving Average. A more sophisticated filter.<br>
-    - **Factor**<br>
+  - **Factor**<br>
 Only for EMA. The higher, the heavier the filtering (also more delay).<br>
   - **No iron**<br>
 The ADC reading which signals that no iron is present. When no iron is plugged in, the measured temperature will read at or near maximum (ADC = 4095).
@@ -154,7 +154,7 @@ Defines the delay with no changes before storing changed settings in flash memor
 Flash has a limited number of write cycles (~100,000).<br>
 Higher values reduce writes, but settings changes could be forgotten when the controller is powered off or reset.<br>
 Default: 5 seconds.
-  - **RESET MENU_
+  - **RESET MENU**<br>
 Reset various configuration sections:<br>
     - **Settings**<br>
 Reset Settings menu items to default.<br>
