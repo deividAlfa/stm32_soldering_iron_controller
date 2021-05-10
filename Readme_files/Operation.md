@@ -194,9 +194,9 @@ The integral term, changes the duty cycle based on how long the temperatures hav
   - **PID Kd**<br>
 PID differential term, changes the duty cycle based on how fast the measured temperature has changed.<br>
   - **PID Imax**<br>
-The integral acumulator higher limit.<br>
+The integral accumulator higher limit.<br>
   - **PID Imin**<br>
-The integral acumulator lower limit.<br>
+The integral accumulator lower limit.<br>
   - **Cal250**<br>
 The stored value for 250ºC calibration.<br>
   - **Cal350**<br>
