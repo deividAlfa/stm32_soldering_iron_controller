@@ -185,25 +185,25 @@ PID tuning is an advanced topic, _**incorrect settings here can result in instab
 Most users should not change these settings, but here are the basics. Kp, Ki, Kd, Imax, Imin are the coefficients which control the PID's behavior.<br>
 Calibration values are not meant for manual adjustment. Only to restore a previous calibration result.<br>
 Use calibration for optimal results.<br>
-  - #### _TIP NAME_ 
+  - *TIP NAME*<br>
 Shows the tip name, click on it to access tip name editing/removing.<br>
-  - #### _PID Kp_ 
+  - *PID Kp* 
 The proportional term, changes the PWM duty cycle based on how far the measured temperature is from the desired temperature.<br>
-  - #### _PID Ki_ 
+  - *PID Ki*<br>
 The integral term, changes the duty cycle based on how long the temperatures have been different.<br>
-  - #### _PID Kd_ 
+  - *PID Kd*<br>
 PID differential term, changes the duty cycle based on how fast the measured temperature has changed.<br>
-  - #### _PID Imax_ 
+  - *PID Imax*<br>
 The integral acumulator higher limit.<br>
-  - #### _PID Imin_ 
+  - *PID Imin*<br>
 The integral acumulator lower limit.<br>
-  - #### _Cal250_ 
+  - *Cal250*<br>
 The stored value for 250ºC calibration.<br>
-  - #### _Cal350_ 
+  - *Cal350*<br>
 The stored value for 350ºC calibration.<br>
-  - #### _Cal450_ 
+  - *Cal450*<br>
 The stored value for 450ºC calibration.<br>
-  - #### _Back_
+  - *Back*<br>
 Return to system menu.<br>
 
 ### EDIT TIP NAME
