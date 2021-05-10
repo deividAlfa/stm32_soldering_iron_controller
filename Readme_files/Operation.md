@@ -241,7 +241,8 @@ There are multiple error types:<br>
 Non critical errors, a warning will be shown: iron not detected, supply voltage too low, ambient temperature too high or too low.<br>
   - **Iron runaway**<br>
 If by any means the iron temperature is higher than requested and the PWM is still active, it will trigger a timer depending on the temperature diference.<br>
-The condition must dissapear within the specified time, otherwise it will trigger a critical runaway error, shutting down the power stage<br>
+The condition must dissapear within the specified time, otherwise it will trigger a critical runaway error, shutting down the power stage.<br>
+This is very useful to protect the tip from wrong PID adjustemnts (Ex. high integral accumulator).<br>
   - **Internal function errors**<br>
 If any internal function detects undefined or not expected state, it will lock the station and show a message trying to show where the error happened (File, line).<br>
   - **Hardware exceptions**<br>
