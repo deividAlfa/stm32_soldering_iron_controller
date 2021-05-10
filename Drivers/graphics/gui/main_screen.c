@@ -214,6 +214,13 @@ static void setMainScrTempUnit(void) {
 
 static void main_screen_init(screen_t *scr) {
 	default_init(scr);
+
+	mainScr.currentMode = main_irontemp;
+  setMainWidget(&Widget_IronTemp);
+  if(mainScr.displayMode==temp_graph){
+    widgetDisable(&Widget_IronTemp);
+  }
+
 	editable_TipSelect.numberOfOptions = systemSettings.Profile.currentNumberOfTips;
   editable_SetPoint.step = systemSettings.settings.tempStep;
   editable_SetPoint.big_step = systemSettings.settings.tempStep;
@@ -227,6 +234,7 @@ static void main_screen_init(screen_t *scr) {
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 	updateIronPower();
 	uint32_t currentTime = HAL_GetTick();
+	uint8_t error = GetIronError();
 
 	if(mainScr.update){							            // This was set on a previous pass. We reset the flag now.
 		mainScr.update = 0;
@@ -236,8 +244,10 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 		mainScr.updateTick=currentTime;
 	}
 
-	if(GetIronError()){
-		mainScr.ironStatus = status_error;
+	if(error){
+	  if(!(mainScr.ironStatus == status_sleep && error==1)){
+	    mainScr.ironStatus = status_error;
+	  }
 	}
 	else if(getCurrentMode()==mode_sleep){
 		mainScr.ironStatus = status_sleep;
@@ -274,6 +284,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 				memset(plotData,0,sizeof(plotData));						  // Clear plotdata
 				plot_Index=0;													            // Reset X
 				mainScr.setMode=main_disabled;
+				mainScr.ActivityOn = 0;
 				mainScr.currentMode=main_setMode;
 				break;
 			}
@@ -534,7 +545,7 @@ void main_screen_draw(screen_t *scr){
 			else if(mainScr.ironStatus==status_sleep){
 				u8g2_DrawStr(&u8g2, Slp_xpos, Slp_ypos, "SLEEP");
 				u8g2_SetFont(&u8g2, u8g2_font_labels);
-				if(readTipTemperatureCompensated(0,0)>120){
+				if(!Iron.Error.Flags && readTipTemperatureCompensated(0,0)>120){
 				  u8g2_DrawXBMP(&u8g2, 42,0, warningXBM[0], warningXBM[1], &warningXBM[2]);
 				  u8g2_DrawStr(&u8g2, 55, 2, "HOT!");
 				}
@@ -618,6 +629,7 @@ void main_screen_draw(screen_t *scr){
 	}
 }
 
+
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen setup
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -631,7 +643,7 @@ void main_screen_setup(screen_t *scr) {
 	screen_setDefaults(scr);
 	scr->draw = &main_screen_draw;
 	scr->init = &main_screen_init;
-	scr->processInput = &main_screenProcessInput;
+  scr->processInput = &main_screenProcessInput;
 	widget_t *w;
 	displayOnly_widget_t* dis;
   editable_widget_t* edit;
