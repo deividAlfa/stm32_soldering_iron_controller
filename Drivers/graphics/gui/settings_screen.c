@@ -16,13 +16,9 @@
 // Settings screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
 static char t[TipSize][TipCharSize];
-static int32_t temp;
-static uint8_t resStatus, profile;
-char str[5];
-static uint32_t settingsTimer;
-uint8_t Selected_Tip;
-uint8_t is_New_Tip;
-uint8_t Tip_name_return;
+static int32_t temp, settingsTimer;
+static uint8_t resStatus, profile, Selected_Tip, Tip_name_return;
+static char str[5];
 //-------------------------------------------------------------------------------------------------------------------------------
 // Settings screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -191,22 +187,22 @@ static void setTipStr(char *s) {
 	strcpy(str, s);
 }
 static int saveTip(widget_t *w) {
-	if(comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {
-		for(uint8_t x=0;x<TipSize;x++){
-			if(strcmp(systemSettings.Profile.tip[x].name, "    ")!=0){														// Find first tip
-				systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips] = systemSettings.Profile.tip[x];	// Copy TIP data to new tip
+	if(comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {                                          // If coming from Add New tip option
+		for(uint8_t x=0;x<TipSize;x++){                                                                             // Find first valid tip
+			if(strcmp(systemSettings.Profile.tip[x].name, "    ")!=0){
+				systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips] = systemSettings.Profile.tip[x];	// Copy Tip data (calibration, PID) to new tip
 				break;
 			}
 		}
-		strcpy(systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips++].name, str);						// Copy new string and increase tip count
+		strcpy(systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips++].name, str);						      // Store new tip name and increase system tip count
 	}
 	else {
-	  strcpy(systemSettings.Profile.tip[Selected_Tip].name, str);
+	  strcpy(systemSettings.Profile.tip[Selected_Tip].name, str);                                                 // If existing tip, store the new name
 	}
-	return Tip_name_return;
+	return Tip_name_return;                                                                                       // Return to the screen we came from
 }
 static int cancelTip(widget_t *w) {
-	return Tip_name_return;
+	return Tip_name_return;                                                                                       // Return to the screen we came from
 }
 static int delTip(widget_t *w) {
   char str[TipCharSize];
@@ -214,21 +210,22 @@ static int delTip(widget_t *w) {
     str[x] = ' ';
   }
   str[TipCharSize-1] = 0;
-	systemSettings.Profile.currentNumberOfTips--;
+	systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
 
 
-  for(int x = Selected_Tip; x < TipSize-1;x++) {
+  for(int x = Selected_Tip; x < TipSize-1;x++) {                                                                // Overwrite selected tip and move the rest one position backwards
     systemSettings.Profile.tip[x] = systemSettings.Profile.tip[x+1];
   }
 
-  for(int x = systemSettings.Profile.currentNumberOfTips; x < TipSize;x++) {
+  for(int x = systemSettings.Profile.currentNumberOfTips; x < TipSize;x++) {                                    // Fill the unused tips with blank names
     strcpy(systemSettings.Profile.tip[x].name, str);
   }
 
-  if(systemSettings.Profile.currentTip >= systemSettings.Profile.currentNumberOfTips){
-    systemSettings.Profile.currentTip = systemSettings.Profile.currentNumberOfTips-1;
+  if(systemSettings.Profile.currentTip >= systemSettings.Profile.currentNumberOfTips){                          // Check the system tip is not pointing to a blank slot
+    systemSettings.Profile.currentTip = systemSettings.Profile.currentNumberOfTips-1;                           // Select the previous tip in the list if so
   }
-	return comboitem_IRONTIPS_Settings_Back.action_screen;
+                                                                                                                // Skip tip settings (As tip is now deleted)
+	return comboitem_IRONTIPS_Settings_Back.action_screen;                                                        // And teturn to main screen or system menu screen
 }
 
 static void * getMaxPower() {
@@ -361,26 +358,22 @@ static void setPWMDelay(uint32_t *val) {
 
 static void * getMaxTemp() {
   temp=systemSettings.Profile.MaxSetTemperature;
+  editable_IRON_MinTemp.max_value = temp-1;
+  editable_IRON_MaxTemp.min_value = systemSettings.Profile.MinSetTemperature+1;
   return &temp;
 }
 static void setMaxTemp(uint32_t *val) {
-  if(*val<=systemSettings.Profile.MinSetTemperature){
-    *val=systemSettings.Profile.MinSetTemperature+1;
-  }
-  editable_IRON_MinTemp.max_value = *val-1;
   systemSettings.Profile.MaxSetTemperature=*val;
 }
 
 static void * getMinTemp() {
   temp=systemSettings.Profile.MinSetTemperature;
+  editable_IRON_MaxTemp.min_value = temp+1;
+  editable_IRON_MinTemp.max_value = systemSettings.Profile.MaxSetTemperature-1;
   return &temp;
 }
 
 static void setMinTemp(uint32_t *val) {
-  if(*val>=systemSettings.Profile.MaxSetTemperature){
-    *val=systemSettings.Profile.MaxSetTemperature-1;
-  }
-  editable_IRON_MaxTemp.min_value = *val+1;
   systemSettings.Profile.MinSetTemperature=*val;
 }
 
@@ -440,15 +433,9 @@ static void * getWakeMode() {
 	return &temp;
 }
 static void setWakeMode(uint32_t *val) {
-	systemSettings.settings.WakeInputMode= * val;
-	if(*val==wakeInputmode_stand){
-		comboitem_SYSTEM_ButtonWake.enabled=0;
-    comboitem_SYSTEM_ShakeWake.enabled=0;
-	}
-	else{
-		comboitem_SYSTEM_ButtonWake.enabled=1;
-    comboitem_SYSTEM_ShakeWake.enabled=1;
-	}
+	systemSettings.settings.WakeInputMode = *val;
+	comboitem_SYSTEM_ButtonWake.enabled = !systemSettings.settings.WakeInputMode;   // 0=shake, 1=stand
+	comboitem_SYSTEM_ShakeWake.enabled = !systemSettings.settings.WakeInputMode;
 }
 
 static void * getEncoderMode() {
@@ -514,12 +501,7 @@ static void * getFilterMode() {
 }
 static void setFilterMode(uint32_t *val) {
 	systemSettings.Profile.filterMode = *val;
-	if(*val==filter_avg){
-		comboitem_IRON_filterFactor.enabled=0;
-	}
-	else{
-		comboitem_IRON_filterFactor.enabled=1;
-	}
+	comboitem_IRON_filterFactor.enabled = systemSettings.Profile.filterMode;  //0=AVG, 1=EMA
 }
 
 static void * getfilterFactor() {
@@ -642,45 +624,19 @@ int settings_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t 
 // Edit Tip Name screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 
-void edit_tip_screenDraw(screen_t *scr){
-  if(strcmp(str, "    ") == 0){
-    widgetDisable(&Widget_IRONTIPS_Name_Save);  // If empty
-  }
-  else{
-    uint8_t x = 0;
-
-    while(x<TipSize){                     // Check existing name
-      if(strcmp(str, systemSettings.Profile.tip[x].name) == 0){
-        break;
-      }
-      x++;
-    }
-    if(x<TipSize){
-      widgetDisable(&Widget_IRONTIPS_Name_Save);
-    }
-    else{
-      widgetEnable(&Widget_IRONTIPS_Name_Save);
-    }
-  }
-  default_screenDraw(scr);
-}
-
-
 void edit_tip_screen_init(screen_t *scr) {
-	if(Tip_name_return == screen_edit_iron_tips &&  comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {
-		strcpy(str, "    ");
-		widgetDisable(&Widget_IRONTIPS_Name_Delete);
-		is_New_Tip = 1;
+	if(Tip_name_return == screen_edit_iron_tips &&  comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {   // If we were in iron tips screen and came from "Add new tip"
+		strcpy(str, "    ");                                                                                              // Copy blanck str
+		widgetDisable(&Widget_IRONTIPS_Name_Delete);                                                                      // Disable delete widget
 	}
-	else {
-		strcpy(str, systemSettings.Profile.tip[Selected_Tip].name);
-		if(systemSettings.Profile.currentNumberOfTips>1){
+	else {                                                                                                              // Already existing tip
+		strcpy(str, systemSettings.Profile.tip[Selected_Tip].name);                                                       // Copy tip name
+		if(systemSettings.Profile.currentNumberOfTips>1){                                                                 // If more than 1 tip in the system, enable delete
 			widgetEnable(&Widget_IRONTIPS_Name_Delete);
 		}
 		else{
 			widgetDisable(&Widget_IRONTIPS_Name_Delete);
 		}
-		is_New_Tip = 0;
 	}
 	scr->current_widget=&Widget_IRONTIPS_Name_Edit;
 	editable_IRONTIPS_Name_Edit.selectable.previous_state=widget_idle;
@@ -703,6 +659,34 @@ void edit_tip_screen_init(screen_t *scr) {
 	default_init(scr);
 }
 
+int edit_tip_screen_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
+
+  int val = default_screenProcessInput(scr, input, state);
+
+  if(input!=Rotate_Nothing && editable_IRONTIPS_Name_Edit.selectable.state==widget_edit){                       // If tip name is being edited and there's encoder activity
+    if(strcmp(str, "    ") == 0){                                                                               // Check that the name is not empty
+      widgetDisable(&Widget_IRONTIPS_Name_Save);                                                                // If empty, disable save widget
+    }
+    else{
+      uint8_t x = 0;
+
+      while(x<TipSize){                                                                                         // Check existing name
+        if(strcmp(str, systemSettings.Profile.tip[x].name) == 0){                                               // If match is found, disable save widget
+          break;
+        }
+        x++;
+      }
+      if(x<TipSize){
+        widgetDisable(&Widget_IRONTIPS_Name_Save);
+      }
+      else{
+        widgetEnable(&Widget_IRONTIPS_Name_Save);                                                               // Else, enable widget
+      }
+    }
+  }
+
+  return val;
+}
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Tips screen functions
@@ -1239,6 +1223,7 @@ void settings_screen_setup(screen_t *scr) {
   edit->big_step = 10;
   edit->step = 5;
   edit->max_value = 480;
+  edit->min_value = 50;
   edit->setData = (void (*)(void *))&setMinTemp;
 
 	//********[ ADC Limit Widget ]***********************************************************
@@ -1370,7 +1355,7 @@ void settings_screen_setup(screen_t *scr) {
 	sc=&Screen_edit_tip_name;
 	oled_addScreen(sc, screen_edit_tip_name);
 	screen_setDefaults(sc);
-	sc->draw = &edit_tip_screenDraw;
+	sc->processInput = &edit_tip_screen_screenProcessInput;
 	sc->init = &edit_tip_screen_init;
 	sc->onEnter= &edit_iron_screen_onEnter;
 
