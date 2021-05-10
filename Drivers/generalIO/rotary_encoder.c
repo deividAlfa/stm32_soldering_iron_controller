@@ -9,7 +9,6 @@
 #include "rotary_encoder.h"
 #include "settings.h"
 volatile RE_State_t RE1_Data;
-static uint32_t push_time = 0, release_time=0, halfPointReachedTime=0;
 
 /* Return with status macro */
 #define RETURN_WITH_STATUS(p, s) (p)->Rotation = s; return s
@@ -36,7 +35,6 @@ void RE_Init(RE_State_t* data, GPIO_TypeDef* GPIO_A_Port, uint16_t GPIO_A_Pin, G
 }
 
 RE_Rotation_t RE_Get(RE_State_t* data) {
-	static uint32_t last_push=0;
 	/* Calculate everything */
 	data->Diff = data->RE_Count - data->Absolute;
 	data->Absolute += data->Diff;
@@ -44,17 +42,11 @@ RE_Rotation_t RE_Get(RE_State_t* data) {
 	/* Check */
 	if(data->pv_click == RE_BT_CLICKED) {
 		data->pv_click = RE_BT_UNRELEASED;
-		if((HAL_GetTick()-last_push)>100){
-			last_push=HAL_GetTick();
-			RETURN_WITH_STATUS(data, Click);
-		}
+		RETURN_WITH_STATUS(data, Click);
 	}
 	else if(data->pv_click == RE_BT_LONG_CLICK) {
 		data->pv_click = RE_BT_UNRELEASED;
-		if((HAL_GetTick()-last_push)>100){
-			last_push=HAL_GetTick();
-			RETURN_WITH_STATUS(data, LongClick);
-		}
+		RETURN_WITH_STATUS(data, LongClick);
 	}
 	else if (data->Diff < 0) {
 		if(data->pv_click == RE_BT_DRAG) {
@@ -76,15 +68,33 @@ void RE_SetMode(RE_State_t* data, RE_Mode_t mode) {
 }
 
 void RE_Process(RE_State_t* data) {
-	bool now_a;
-	bool now_b;
-	bool now_button;
-	uint32_t pressed_time;
+	static uint32_t push_time=0, halfPointReachedTime=0, debounce_time=0;
+	static bool last_button_read=1, last_button_stable=1;
+	uint32_t current_time = HAL_GetTick();
+  uint32_t pressed_time = current_time - push_time;
+  uint32_t stable_time = current_time - debounce_time;
+
 	/* Read inputs */
-	now_a = HAL_GPIO_ReadPin(data->GPIO_A, data->GPIO_PIN_A);
-	now_b = HAL_GPIO_ReadPin(data->GPIO_B, data->GPIO_PIN_B);
-	now_button = HAL_GPIO_ReadPin(data->GPIO_BUTTON, data->GPIO_PIN_BUTTON);
-	pressed_time = HAL_GetTick() - push_time;
+	bool now_a = HAL_GPIO_ReadPin(data->GPIO_A, data->GPIO_PIN_A);
+	bool now_b = HAL_GPIO_ReadPin(data->GPIO_B, data->GPIO_PIN_B);
+	bool now_button = HAL_GPIO_ReadPin(data->GPIO_BUTTON, data->GPIO_PIN_BUTTON);
+
+	if(last_button_read != now_button){                   // If different than last reading and changes less than xxx mS ago
+    last_button_read = now_button;                      // Update last reading value
+    if(stable_time<20){                                 // If <debounce time
+      debounce_time = current_time;                     // Reset debounce timer
+    }
+  }
+	if(last_button_stable!=now_button){                   // If button status different than stable status
+	  if(stable_time>20){                                 // If >debounce time
+	    last_button_stable = now_button;                  // Update last stable button value
+	    debounce_time = current_time;                     // Reset debounce timer
+	  }
+	  else{
+	    now_button = last_button_stable;                  // Ignore reading, use last stable button value
+	  }
+	}
+
 	if (now_a && now_b) {
 		if(data->halfPointReached) {
 			data->halfPointReached = 0;
@@ -107,13 +117,13 @@ void RE_Process(RE_State_t* data) {
 	}
 	else if(now_a == 0 && now_b == 0) {
 		if(!data->halfPointReached){
-			halfPointReachedTime = HAL_GetTick();
+			halfPointReachedTime = current_time;
 			data->halfPointReached = 1;
 			if(now_button == 0) {//button pressed
 				data->pv_click = RE_BT_DRAG;
 			}
 		}
-		else if((HAL_GetTick()-halfPointReachedTime)>500){
+		else if((current_time-halfPointReachedTime)>500){
 			if(now_button == 0 && data->pv_click == RE_BT_DRAG) {//button pressed
 				data->pv_click = RE_BT_PRESSED;
 			}
@@ -130,10 +140,8 @@ void RE_Process(RE_State_t* data) {
 		data->pv_click = RE_BT_HIDLE;
 	else if(data->pv_click != RE_BT_DRAG) {
 		if((data->pv_click == RE_BT_HIDLE) && (now_button == 0)) {
-			if((HAL_GetTick()-release_time)>100){
-				data->pv_click = RE_BT_PRESSED;
-				push_time = HAL_GetTick();
-			}
+		  data->pv_click = RE_BT_PRESSED;
+			push_time = current_time;
 		}
 		else if(data->pv_click == RE_BT_PRESSED) {
 			if((now_button == 0)&&(pressed_time > 500)){
@@ -146,7 +154,6 @@ void RE_Process(RE_State_t* data) {
 		}
 		if((data->pv_click == RE_BT_UNRELEASED) && (now_button == 1) ) {
 				data->pv_click = RE_BT_HIDLE;
-				release_time=HAL_GetTick();
 		}
 	}
 }
