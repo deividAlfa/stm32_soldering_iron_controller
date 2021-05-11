@@ -272,7 +272,7 @@ void update_display( void ){
 
 		#if defined OLED_SOFT_SPI || defined OLED_SOFT_I2C
 		for(uint8_t row=0;row<8;row++){
-			HAL_IWDG_Refresh(&HIWDG);
+			HAL_IWDG_Refresh(&hiwdg);
 			setOledRow(row);
 
 			#if defined OLED_SOFT_SPI
@@ -377,7 +377,7 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 
 #endif
 	systemSettings.settings.OledOffset = 2;		// Set by default while system settings are not loaded
-	HAL_IWDG_Refresh(&HIWDG);	              // Clear watchdog
+	HAL_IWDG_Refresh(&hiwdg);	              // Clear watchdog
 	HAL_Delay(100);				    // 100mS wait for internal initialization
 
 	write_cmd(0xAE);  			  // Display Off
@@ -486,7 +486,7 @@ void update_display_ErrorHandler(void){
 
 		if(HAL_SPI_Transmit(oled.device, cmd, 3, 50)){
 			while(1){						                        // If error happens at this stage, just do nothing
-				HAL_IWDG_Refresh(&HIWDG);
+				HAL_IWDG_Refresh(&hiwdg);
 			}
 		}
 		#ifdef USE_DC
@@ -495,18 +495,18 @@ void update_display_ErrorHandler(void){
 
 		if(HAL_SPI_Transmit(oled.device, (uint8_t*)oled.ptr + (row * 128), 128, 1000)!=HAL_OK){
 			while(1){						                        // If error happens at this stage, just do nothing
-				HAL_IWDG_Refresh(&HIWDG);
+				HAL_IWDG_Refresh(&hiwdg);
 			}
 		}
 		#elif defined OLED_I2C
 		if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, cmd, 3, 50)){
 			while(1){						                        // If error happens at this stage, just do nothing
-				HAL_IWDG_Refresh(&HIWDG);
+				HAL_IWDG_Refresh(&hiwdg);
 			}
 		}
 		if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x40, 1, (uint8_t*)oled.ptr + (row * 128), 128, 1000)!=HAL_OK){
 			while(1){						                        // If error happens at this stage, just do nothing
-				HAL_IWDG_Refresh(&HIWDG);
+				HAL_IWDG_Refresh(&hiwdg);
 			}
 		}
 		#endif
@@ -672,11 +672,11 @@ void putStrAligned(char* str, uint8_t y, AlignType align){
 void Reset_onError(void){
 	while(BUTTON_input()){							    // Wait until the button is pressed
 		for(uint16_t i=0;i<50000;i++);				// Small delay
-		HAL_IWDG_Refresh(&HIWDG);					    // Clear watchdog
+		HAL_IWDG_Refresh(&hiwdg);					    // Clear watchdog
 	}
 	while(!BUTTON_input()){							    // Wait until the button is released
 		for(uint16_t i=0;i<50000;i++);				// Small delay
-		HAL_IWDG_Refresh(&HIWDG);					    // Clear watchdog
+		HAL_IWDG_Refresh(&hiwdg);					    // Clear watchdog
 	}
 	NVIC_SystemReset();							        // Reset system
 }

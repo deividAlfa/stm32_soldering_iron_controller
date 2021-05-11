@@ -226,7 +226,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
 		handle_ADC_Data();									                                        // Process the new data.
 		handleIron();                                                               // Handle iron
 		__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);	    // Load new calculated PWM Duty
-		HAL_IWDG_Refresh(&HIWDG);							                                      // Clear watchdog
+		HAL_IWDG_Refresh(&hiwdg);							                                      // Clear watchdog
 		ADC_Status = ADC_Idle;                                                      // Set the ADC status
 	}
 }

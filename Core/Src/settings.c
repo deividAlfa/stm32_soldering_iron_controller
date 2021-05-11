@@ -60,7 +60,7 @@ void saveSettings(bool wipeAllProfileData) {
 	}
 
 	//Clear watchdog before unlocking flash
-	HAL_IWDG_Refresh(&HIWDG);
+	HAL_IWDG_Refresh(&hiwdg);
 
 	HAL_FLASH_Unlock();                                                                                   //unlock flash writing
 	FLASH_EraseInitTypeDef erase;
@@ -85,7 +85,7 @@ void saveSettings(bool wipeAllProfileData) {
 		}
 
 	//Clear watchdog before writing
-	HAL_IWDG_Refresh(&HIWDG);
+	HAL_IWDG_Refresh(&hiwdg);
 
 	//Store settings
 	for (uint16_t i = 0; i < sizeof(flashSettings_t) / 2; i++) {
@@ -144,13 +144,13 @@ void restoreSettings() {
 
 uint32_t ChecksumSettings(settings_t* settings){
 	uint32_t checksum;
-	checksum = HAL_CRC_Calculate(&HCRC, (uint32_t*)settings, sizeof(settings_t)/sizeof(uint32_t) );
+	checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)settings, sizeof(settings_t)/sizeof(uint32_t) );
 	return checksum;
 }
 
 uint32_t ChecksumProfile(profile_t* profile){
 	uint32_t checksum;
-	checksum = HAL_CRC_Calculate(&HCRC, (uint32_t*)profile, sizeof(profile_t)/sizeof(uint32_t));
+	checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)profile, sizeof(profile_t)/sizeof(uint32_t));
 	return checksum;
 }
 
@@ -316,7 +316,7 @@ void Flash_error(void){
 	putStrAligned("FLASH!", 32, align_center);
 	update_display();
 	while(1){
-		HAL_IWDG_Refresh(&HIWDG);
+		HAL_IWDG_Refresh(&hiwdg);
 	}
 }
 void settingsChkErr(void){
@@ -366,14 +366,14 @@ void Button_reset(void){
 		putStrAligned("DEFAULTS", 32, align_center);
 		update_display();
 		while(!BUTTON_input()){
-			HAL_IWDG_Refresh(&HIWDG);
+			HAL_IWDG_Refresh(&hiwdg);
 			if((HAL_GetTick()-ResetTimer)>5000){
 				FillBuffer(BLACK,fill_dma);
 				putStrAligned("RELEASE", 12, align_center);
 				putStrAligned("BUTTON NOW", 28, align_center);
 				update_display();
 				while(!BUTTON_input()){
-					HAL_IWDG_Refresh(&HIWDG);
+					HAL_IWDG_Refresh(&hiwdg);
 				}
 				resetSystemSettings();
 				saveSettings(saveWipingProfiles);
@@ -393,7 +393,7 @@ void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
 	else{
 		length=1;
 	}
-	HAL_IWDG_Refresh(&HIWDG);
+	HAL_IWDG_Refresh(&hiwdg);
 	while(oled.status!=oled_idle);  // Wait for the srceen to be idle (few mS at most). Hanging here will cause a watchdog reset.
 	//HAL_Delay(20);				        // (Old) Dirty fix to ensure Oled DMA transfer has ended before writing to the buffer
 
@@ -406,7 +406,7 @@ void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
 		u8g2_DrawStr(&u8g2,xpos,ypos,str);
 		update_display();
 		while( (HAL_GetTick()-timErr)<999 ){
-			HAL_IWDG_Refresh(&HIWDG);			// Clear watchdog
+			HAL_IWDG_Refresh(&hiwdg);			// Clear watchdog
 		}
 	}
 }

@@ -44,8 +44,8 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-extern IWDG_HandleTypeDef HIWDG;
-extern CRC_HandleTypeDef HCRC;
+extern IWDG_HandleTypeDef hiwdg;
+extern CRC_HandleTypeDef hcrc;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
