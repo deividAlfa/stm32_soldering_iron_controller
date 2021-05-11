@@ -281,21 +281,21 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
               The ADC channel order goes from 0 to 15 (unless otherwise set in regular config), skipping the disabled channels.
               You must define the ADC channels in these lines:
               
-                  #define ADC_CH_1ST          ADC_CHANNEL_1                     // First used channel:  CH1
-                  #define ADC_CH_2ND          ADC_CHANNEL_4                     // Second used channel: CH4
-                  #define ADC_CH_3RD          ADC_CHANNEL_7                     // Third used channel:  CH7
-                  #define ADC_CH_4TH          ADC_CHANNEL_9                     // Fourth used channel: CH9
+                  #define ADC_CH_1ST          ADC_CHANNEL_1             // First used channel:  CH1
+                  #define ADC_CH_2ND          ADC_CHANNEL_4             // Second used channel: CH4
+                  #define ADC_CH_3RD          ADC_CHANNEL_7             // Third used channel:  CH7
+                  #define ADC_CH_4TH          ADC_CHANNEL_9             // Fourth used channel: CH9
         
               Also, they must be adjusted depending on the signal connected to them:
       
-                  #define ADC_1st             VREF                              // First used channel measures VREF
-                  #define ADC_2nd             NTC                               // Second used channel measures NTC
-                  #define ADC_3rd             VIN                               // Third used channel measures VIN
-                  #define ADC_3rd             TIP                               // Fourth used channel measures TIP
+                  #define ADC_1st             VREF                     // First used channel measures VREF
+                  #define ADC_2nd             NTC                      // Second used channel measures NTC
+                  #define ADC_3rd             VIN                      // Third used channel measures VIN
+                  #define ADC_3rd             TIP                      // Fourth used channel measures TIP
                 
               Set the number for active ADC channels:
               
-                  #define ADC_Num            4                                 // Number of active channels
+                  #define ADC_Num            4                         // Number of active channels
                   
               Except the tip ADC input, all the others can be enabled or disabled:
               
@@ -324,7 +324,8 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * Master/Slave mode: Disable
             * Trigger event selection: Reset
             * Prescaler: Don't care, it's adjusted within the program. It asumes the timer runs at CPU speed.
-                         Some timers may take haf the clock speed, depending on the bus! In that case use **#define DELAY_TIMER_HALFCLOCK** in board.h!
+                         Some timers may take haf the clock speed, depending on the bus!
+                         In that case use #define DELAY_TIMER_HALFCLOCK in board.h!
                          Check the Clock config in CUBEMX!
             * Period: Don't care, it's adjusted within the program.
             * NVIC settings: General enabled.
@@ -341,7 +342,8 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * Select channel assigned to the pin
             * Mode: PWM Generation. Select CHx(N), as assigned to PIN. Ensure to select "N" if the pin has it!
             * Prescaler: Don't care, it's adjusted within the program. It asumes the timer runs at CPU speed.
-                         Some timers may take haf the clock speed, depending on the bus! In that case use **#define PWM_TIMER_HALFCLOCK** in board.h!
+                         Some timers may take haf the clock speed, depending on the bus!
+                         In that case use #define PWM_TIMER_HALFCLOCK in board.h!
                          Check the Clock config in CUBEMX!
             * Period: Don't care, it's adjusted within the program.
             * Pulse: Don't care, it's adjusted within the program.
