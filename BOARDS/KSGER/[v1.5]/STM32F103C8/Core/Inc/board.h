@@ -9,7 +9,7 @@
     BOARD PROFILE FOR KSGER v1.5
 */
 
-#define HWSTRING "HW: KSGER1.5F103"
+#define HWSTRING "HW: KSGER v1.5"
 
 /********************************
  *       Display Settings    *
