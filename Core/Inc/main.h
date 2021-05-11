@@ -50,6 +50,11 @@ extern CRC_HandleTypeDef hcrc;
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
+
+// This is left here just to have it handy for copying when debugging a specific function
+// Don't uncomment!!
+//               __attribute__((optimize("O0")))
+
 #define DEBUG_ERROR
 
 /* USER CODE END EC */
