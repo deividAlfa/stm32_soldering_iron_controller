@@ -86,7 +86,9 @@ void Init(void){
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	DebugOpts();
+  #ifdef DEBUG
+	  DebugOpts();          // Enable debug options in Debug build
+  #endif
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -127,48 +129,46 @@ int main(void)
 
 // Called from SysTick IRQ every 1mS
 void Program_Handler(void) {
-	handle_buzzer();
-	RE_Process(&RE1_Data);
-}
+  static bool last_wake=0;
+  bool now_wake = WAKE_input();
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+  if(last_wake!=now_wake){                                             // If wake sensor input changed
+    last_wake=now_wake;
+    if(systemSettings.settings.WakeInputMode==wakeInputmode_stand){   // In stand mode
+      if(now_wake){
+        setModefromStand(mode_run);
+      }
+      else{
+        setModefromStand(mode_sleep);
+      }
+    }
+    else{                                                             // In shake mode
+      IronWake(source_wakeInput);
+    }
+  }
 
-	if(GPIO_Pin==WAKE_Pin){																							// If wake sensor input changed
-		if(systemSettings.settings.WakeInputMode==wakeInputmode_stand){		// In stand mode
-			if(WAKE_input()){
-				setModefromStand(mode_run);
-			}
-			else{
-				setModefromStand(mode_sleep);
-			}
-		}
-		else{																															// In shake mode
-			IronWake(source_wakeInput);
-		}
-	}
+	handle_buzzer();                                                    // Handle buzzer state
+	RE_Process(&RE1_Data);                                              // Handle Encoder
+
 }
 
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim){
 	if(_htim == Iron.Pwm_Timer){																			// PWM output low
-		if(ADC_Status==ADC_InitTip){																		// ADC ready?
-			ADC_Status = ADC_SamplingTip;																	// Update status
+		if(ADC_Status==ADC_Idle){																		    // ADC idle?
+			ADC_Status = ADC_Waiting;																	    // Update status to waiting
 			__HAL_TIM_ENABLE(Iron.Delay_Timer);														// Enable Delay Timer and start counting
 																																		// It will trigger the ADC when it overflows and disable by itself (One-pulse mode).
+		}
+		else{
+		  Error_Handler();
 		}
 	}
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
 	if(_htim == Iron.Delay_Timer){																		// Delay Timer?
-		if(ADC_Status==ADC_SamplingTip){																// ADC ready?
-			__HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);				// Clear Delay Timer flag
-			if(HAL_ADC_Start_DMA(&ADC_DEVICE, (uint32_t*)Tip_measures, sizeof(Tip_measures)/ sizeof(uint16_t) )!=HAL_OK){	// Start ADC conversion
-				Error_Handler();
-			}
-		}
-		else{
-			Error_Handler();																						// If ADC_Status!=ADC_SamplingTip, lose of ADC_Status control happened somewhere
-		}
+		__HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);				  // Clear Delay Timer flag
+		ADC_Start_DMA();                                                // Start ADC conversion
 	}
 }
 

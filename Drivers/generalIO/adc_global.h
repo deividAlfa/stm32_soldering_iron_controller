@@ -42,8 +42,7 @@ typedef struct {
 	#endif
 } adc_measures_t;
 
-
-				extern ADCDataTypeDef_t TIP;
+extern ADCDataTypeDef_t TIP;
 
 #ifdef USE_VIN
 				extern ADCDataTypeDef_t VIN;
@@ -57,14 +56,14 @@ typedef struct {
 
 
 
-typedef enum { ADC_Idle, ADC_StartTip, ADC_InitTip, ADC_SamplingTip, ADC_StartOthers, ADC_SamplingOthers } ADC_Status_t;
+typedef enum { ADC_Idle, ADC_Waiting, ADC_Sampling } ADC_Status_t;
 
 extern ADC_Status_t ADC_Status;
 extern volatile uint16_t Tip_measures[ADC_BFSIZ];
 extern adc_measures_t adc_measures[ADC_BFSIZ];
 
 uint16_t ADC_to_mV (uint16_t adc);
-void handle_ADC(void);
+void handle_ADC_Data(void);
 void DoAverage(ADCDataTypeDef_t* InputData);
 void DEMA_Filter(ADCDataTypeDef_t* InputData);
 void ADC_Init(ADC_HandleTypeDef *adc);
