@@ -28,6 +28,8 @@
 /********************************
  *       PWM Settings        *
  ********************************/
+//#define PWM_TIMER_HALFCLOCK                                 // Timer runs at FCY/2
+//#define DELAY_TIMER_HALFCLOCK                               // Timer runs at FCY/2
 #define DELAY_TIMER         htim15                            // Timer for the dead time
 #define PWM_TIMER           htim17                            // PWM Timer
 #define PWM_CHANNEL         TIM_CHANNEL_1                     // PWM Timer Channel

@@ -162,10 +162,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 
 * MISC
 
-        -  Wake signal from handle: GPIO EXTI*, User label: WAKE, No pull
-           GPIO config: Rising/falling edge interrupt mode. 
-           Ensure that NVIC interrupt is enabled for it!
-          
+        -  Wake signal from handle: GPIO Input, User label: WAKE, No pull          
         -  Buzzer signal: GPIO Output, User label: BUZZER,  No pull
         -  DMA stream mem2mem, Mode: Normal, Size: Word, increase only dest address.
          
@@ -225,7 +222,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
              
         - DMA Settings:
             * SPIx_Tx
-            * Direction: Memory to pheripheral
+            * Direction: Memory to peripheral
             * Piority: Low
             * DMA request mode: Normal
             * Data width: Byte in both
@@ -266,10 +263,10 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 * ADC
 
        -   GPIO config:
-            * NTC pin label: NTC
-            * V Supply pin label: VINPUT
-            * VRef pin label: VREF
-            * Iron Temp pin label: IRON
+            * NTC pin label: NTC (Don't care)
+            * V Supply pin label: VINPUT (Don't care)
+            * VRef pin label: VREF  (Don't care)
+            * Iron Temp pin label: IRON  (Don't care)
             
         - Parameter settings:
             * Select channels assigned to the used inputs
@@ -292,18 +289,30 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
               The ADC channel order goes from 0 to 15 (unless otherwise set in regular config), skipping the disabled channels.
               You must define the ADC channels in these lines:
               
-              
-                #define ADC_VREF            ADC_CHANNEL_1                       //  CH1 = VREF
-                #define ADC_NTC             ADC_CHANNEL_2                       //  CH2 = NTC
-                #define ADC_VIN             ADC_CHANNEL_3                       //  CH3 = VIN
-                #define ADC_TIP             ADC_CHANNEL_5                       //  CH5 = IRON TIP (Sampled independently)
+              	#define ADC_CH_1ST          ADC_CHANNEL_1                     // First used channel:  CH1
+				#define ADC_CH_2ND          ADC_CHANNEL_4                     // Second used channel: CH4
+				#define ADC_CH_3RD          ADC_CHANNEL_7                     // Third used channel:  CH7
+				#define ADC_CH_4TH        	ADC_CHANNEL_9                     // Fourth used channel: CH9
 				
-              Also, as the secondary channels are samples together in sequence, they must be correctly ordered as follows:
+              Also, they must be adjusted depending on the signal connected to them:
 			
-                #define ADC_1st             VREF                                // ADC 1st used channel (CH1)
-                #define ADC_2nd             NTC                                 // ADC 2nd used channel (CH2)
-                #define ADC_3rd             VIN                                 // ADC 3rd used channel (CH3)
-                #define ADC_AuxNum          3                                   // Number of secondary elements
+                #define ADC_1st             VREF                              // First used channel measures VREF
+                #define ADC_2nd             NTC                               // Second used channel measures NTC
+                #define ADC_3rd             VIN                               // Third used channel measures VIN
+                #define ADC_3rd             TIP                               // Fourth used channel measures TIP
+                
+              Set the number for active ADC channels:
+              
+                #define ADC_Num          	4                                 // Number of active channels
+                  
+              Except the tip ADC input, all the others can be enabled or disabled:
+              
+                #define USE_VREF
+				#define USE_VIN
+				#define USE_NTC
+				
+			  Power limit will not be available if VIN is disabled.
+			  When disabling NTC, ambient temperature is internally set to 35ºC.
 				
         - DMA settings:
             * Pheripheral to memory
@@ -322,9 +331,8 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * Auto-reload preload: Enable
             * Master/Slave mode: Disable
             * Trigger event selection: Reset
-            * Prescaler: Don't care, adjusted within the program.
-                         Consider that the routine is designed for the timer running at CPU speed. Some timers may take haf the clock speed, depending on the bus!
-                         If the timer uses FCY/2, use #define DELAY_TIMER_HALFCLOCK in board.h!
+            * Prescaler: Don't care, it's adjusted within the program. It asumes the timer runs at CPU speed.
+                         Some timers may take haf the clock speed, depending on the bus! In that case use **#define DELAY_TIMER_HALFCLOCK** in board.h!
                          Check the Clock config in CUBEMX!
             * Period: Don't care, it's adjusted within the program.
             * NVIC settings: General enabled.
@@ -333,22 +341,19 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 * PWM
 
         - GPIO:
-           * User label: PWM_OUTPUT (Don't care actually)
-           * Mode: TIMxCHx(N) ("x" and "N" depends on the selected pin)
+           	* User label: PWM_OUTPUT (Don't care actually)
+           	* Mode: TIMxCHx(N) ("x" and "N" depends on the selected pin)
            
         - TIMER: Select timer assigned to the pin.
-            - Check Activated 
-            - Select channel assigned to the pin
-            - Mode: PWM Generation. Select CHx(N), as assigned to PIN. Ensure to select "N" if the pin has it!
-            - Prescaler: Don't care, it's adjusted within the program.
-                         Consider that the routine is designed for the timer running at CPU speed. Some timers may take haf the clock speed, depending on the bus!
-                         If the timer uses FCY/2, use #define PWM_TIMER_HALFCLOCK in board.h!
+           	* Check Activated 
+           	* Select channel assigned to the pin
+           	* Mode: PWM Generation. Select CHx(N), as assigned to PIN. Ensure to select "N" if the pin has it!
+           	* Prescaler: Don't care, it's adjusted within the program. It asumes the timer runs at CPU speed.
+                         Some timers may take haf the clock speed, depending on the bus! In that case use **#define PWM_TIMER_HALFCLOCK** in board.h!
                          Check the Clock config in CUBEMX!
-            - Period: Don't care, it's adjusted within the program.
-            - Pulse: Don't care, it's adjusted within the program.
-            - NVIC settings: Depending on the timer type, enable TIMx "Capture compare" if available, else use "Global interrupt".
-              Consider that some timers will run at CPU speed while other may take a slower clock.
-              Check the Clock config in CUBEMX!       
+           	* Period: Don't care, it's adjusted within the program.
+           	* Pulse: Don't care, it's adjusted within the program.
+           	* NVIC settings: Depending on the timer type, enable TIMx "Capture compare" if available, else use "Global interrupt".
        
        
             

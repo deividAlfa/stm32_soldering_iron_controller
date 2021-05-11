@@ -179,13 +179,23 @@ void initTimers(void){
     pwm=19999;
   }
   // Delay timer config
+  #ifdef DELAY_TIMER_HALFCLOCK
+  Iron.Delay_Timer->Init.Prescaler = (SystemCoreClock/50000)-1;         // 10uS input clock
+  #else
   Iron.Delay_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;        // 10uS input clock
+  #endif
+
   Iron.Delay_Timer->Init.Period = delay;
   if (HAL_TIM_Base_Init(Iron.Delay_Timer) != HAL_OK){
     Error_Handler();
   }
   // PWM timer config
+  #ifdef PWM_TIMER_HALFCLOCK
+  Iron.Pwm_Timer->Init.Prescaler = (SystemCoreClock/50000)-1;         // 10uS input clock
+  #else
   Iron.Pwm_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;        // 10uS input clock
+  #endif
+
   Iron.Pwm_Timer->Init.Period = pwm;
   if (HAL_TIM_Base_Init(Iron.Pwm_Timer) != HAL_OK){
     Error_Handler();
