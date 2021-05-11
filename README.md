@@ -30,13 +30,13 @@ Video can be seen there: (Project in active development, the features will chang
 * Intended to serve as an unified codebase that's easier to share across different boards / hardware.<br>
 * Different hardware support based on profiles, very few files need to be changed.<br>
 * Supports all display modes:<br>
-  	Boards where the display is connected to dedicated hardware:<br>
-  	- Hardware SPI with DMA<br>
-  	- Hardware I2C with DMA<br>
+    Boards where the display is connected to dedicated hardware:<br>
+    - Hardware SPI with DMA<br>
+    - Hardware I2C with DMA<br>
  
-  	Boards where the display is not connected to dedicated hardware:<br>
-  	- Software SPI<br>
-  	- Software I2C<br>
+    Boards where the display is not connected to dedicated hardware:<br>
+    - Software SPI<br>
+    - Software I2C<br>
 
 <a id="compatibility"></a>
 ## Compatibility
@@ -112,17 +112,17 @@ On the upper menu, Configuration, Select [All configurations]<br>
 Click on Add... Select Workspace and select these folder while holding Control key:<br>
 Ensure these are present:<br>
 
-	    /Core/Inc
-    	/Core/Src
-    	/Drivers/generalIO
-    	/Drivers/graphics
-    	/Drivers/graphics/gui    
-    	/Drivers/graphics/u8g2
-    	/Drivers/STM32Fxxx_HAL_Driver/Inc
-    	/Drivers/STM32Fxxx_HAL_Driver/Inc/Legacy
-    	/Drivers/CMSIS/Device/ST/STM32Fxxx/Include
-    	/Drivers/CMSIS/Include
-    	
+      /Core/Inc
+      /Core/Src
+      /Drivers/generalIO
+      /Drivers/graphics
+      /Drivers/graphics/gui    
+      /Drivers/graphics/u8g2
+      /Drivers/STM32Fxxx_HAL_Driver/Inc
+      /Drivers/STM32Fxxx_HAL_Driver/Inc/Legacy
+      /Drivers/CMSIS/Device/ST/STM32Fxxx/Include
+      /Drivers/CMSIS/Include
+      
 (STM32Fxxx matches your current mcu family, ex. STM32F0xx, STM32F1xx)
 ![Alt text](/Readme_files/Includes.jpg?raw=true "Title")
 
@@ -138,20 +138,20 @@ Keep in mind that in 64KB devices the flash is almost full and will not fit unle
 To debug MCUs where the flash space is unsufficient to store a unoptimized build, you can selectively disable build optimizations.<br>
 A line of code can be found at the start of board.h:
 
-	__attribute__((optimize("O0")))
+  __attribute__((optimize("O0")))
 
 Copy that line before the function like this:
 
-	 __attribute__((optimize("O0"))) void ThisFunctionWillNotBeOptimized(...)
-	 
+   __attribute__((optimize("O0"))) void ThisFunctionWillNotBeOptimized(...)
+   
 
 If you want to retarget the project, avoid mixing different profile files.<br>
 Run the included script "Clean_Profile.bat", or manually delete these files:<br>
 
-		/Core/Inc/*stm32*
-		/Core/Src/*stm32*
-		/Core/Src/system_stm32*
-		/Core/Startup/*
+    /Core/Inc/*stm32*
+    /Core/Src/*stm32*
+    /Core/Src/system_stm32*
+    /Core/Startup/*
 
 And then copy the board profile files overwriting any existing files.<br>
 
@@ -161,33 +161,28 @@ And then copy the board profile files overwriting any existing files.<br>
 If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 
 * MISC
-
         -  Wake signal from handle: GPIO Input, User label: WAKE, No pull          
         -  Buzzer signal: GPIO Output, User label: BUZZER,  No pull
         -  DMA stream mem2mem, Mode: Normal, Size: Word, increase only dest address.
          
 * CRC
-
         -  Enabled, default settings
         
 * ENCODER
-
         -  Rotatory encoder right signal: GPIO INPUT, name: ROT_ENC_R
         -  Rotatory encoder left signal: GPIO INPUT, name: ROT_ENC_L
         -  Rotatory encoder button signal: GPIO INPUT,name: ROT_ENC_BUTTON
         -  GPIO config: All inputs no pull
         
 * OLED 
-
         -  Oled CS signal: GPIO Output, name: OLED_CS
         -  Oled DC signal: GPIO Output, name: OLED_DC
         -  Oled RESET signal: GPIO Output, name: OLED_RST
     
 * Software SPI/I2C (If used)
-
         -  GPIO Settings:
              * Oled CLOCK signal
-                User Label: OLED_SCL
+             	User Label: OLED_SCL
                 No pull
                 Speed: High
                 
@@ -197,7 +192,6 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
                 Speed: High
 
 * Hardware SPI (If used)
-
         -  GPIO Settings:
              * Oled SPI CLOCK signal
                 User Label: OLED_SCL (Don't care actually)
@@ -232,7 +226,6 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * SPIx global interrupt disabled
             
 * Hardware I2C (If used)
-
          -  GPIO Settings:
              * Oled I2C CLOCK signal
                 User Label: OLED_SCL (Don't care actually)
@@ -261,7 +254,6 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * I2Cx global interrupt disabled
             
 * ADC
-
        -   GPIO config:
             * NTC pin label: NTC (Don't care)
             * V Supply pin label: VINPUT (Don't care)
@@ -289,31 +281,31 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
               The ADC channel order goes from 0 to 15 (unless otherwise set in regular config), skipping the disabled channels.
               You must define the ADC channels in these lines:
               
-              	#define ADC_CH_1ST          ADC_CHANNEL_1                     // First used channel:  CH1
-				#define ADC_CH_2ND          ADC_CHANNEL_4                     // Second used channel: CH4
-				#define ADC_CH_3RD          ADC_CHANNEL_7                     // Third used channel:  CH7
-				#define ADC_CH_4TH        	ADC_CHANNEL_9                     // Fourth used channel: CH9
-				
+                  #define ADC_CH_1ST          ADC_CHANNEL_1                     // First used channel:  CH1
+                  #define ADC_CH_2ND          ADC_CHANNEL_4                     // Second used channel: CH4
+                  #define ADC_CH_3RD          ADC_CHANNEL_7                     // Third used channel:  CH7
+                  #define ADC_CH_4TH          ADC_CHANNEL_9                     // Fourth used channel: CH9
+        
               Also, they must be adjusted depending on the signal connected to them:
-			
-                #define ADC_1st             VREF                              // First used channel measures VREF
-                #define ADC_2nd             NTC                               // Second used channel measures NTC
-                #define ADC_3rd             VIN                               // Third used channel measures VIN
-                #define ADC_3rd             TIP                               // Fourth used channel measures TIP
+      
+                  #define ADC_1st             VREF                              // First used channel measures VREF
+                  #define ADC_2nd             NTC                               // Second used channel measures NTC
+                  #define ADC_3rd             VIN                               // Third used channel measures VIN
+                  #define ADC_3rd             TIP                               // Fourth used channel measures TIP
                 
               Set the number for active ADC channels:
               
-                #define ADC_Num          	4                                 // Number of active channels
+                  #define ADC_Num            4                                 // Number of active channels
                   
               Except the tip ADC input, all the others can be enabled or disabled:
               
-                #define USE_VREF
-				#define USE_VIN
-				#define USE_NTC
-				
-			  Power limit will not be available if VIN is disabled.
-			  When disabling NTC, ambient temperature is internally set to 35ºC.
-				
+                  #define USE_VREF
+                  #define USE_VIN
+                  #define USE_NTC
+        
+              Power limit will not be available if VIN is disabled.
+              When disabling NTC, ambient temperature is internally set to 35ºC.
+        
         - DMA settings:
             * Pheripheral to memory
             * Mode: Circular
@@ -341,19 +333,19 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 * PWM
 
         - GPIO:
-           	* User label: PWM_OUTPUT (Don't care actually)
-           	* Mode: TIMxCHx(N) ("x" and "N" depends on the selected pin)
+            * User label: PWM_OUTPUT (Don't care actually)
+            * Mode: TIMxCHx(N) ("x" and "N" depends on the selected pin)
            
         - TIMER: Select timer assigned to the pin.
-           	* Check Activated 
-           	* Select channel assigned to the pin
-           	* Mode: PWM Generation. Select CHx(N), as assigned to PIN. Ensure to select "N" if the pin has it!
-           	* Prescaler: Don't care, it's adjusted within the program. It asumes the timer runs at CPU speed.
+            * Check Activated 
+            * Select channel assigned to the pin
+            * Mode: PWM Generation. Select CHx(N), as assigned to PIN. Ensure to select "N" if the pin has it!
+            * Prescaler: Don't care, it's adjusted within the program. It asumes the timer runs at CPU speed.
                          Some timers may take haf the clock speed, depending on the bus! In that case use **#define PWM_TIMER_HALFCLOCK** in board.h!
                          Check the Clock config in CUBEMX!
-           	* Period: Don't care, it's adjusted within the program.
-           	* Pulse: Don't care, it's adjusted within the program.
-           	* NVIC settings: Depending on the timer type, enable TIMx "Capture compare" if available, else use "Global interrupt".
+            * Period: Don't care, it's adjusted within the program.
+            * Pulse: Don't care, it's adjusted within the program.
+            * NVIC settings: Depending on the timer type, enable TIMx "Capture compare" if available, else use "Global interrupt".
        
        
             
