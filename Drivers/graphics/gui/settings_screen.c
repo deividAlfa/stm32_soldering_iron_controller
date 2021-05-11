@@ -87,8 +87,10 @@ static editable_widget_t editable_SYSTEM_ActiveDetection;
 static widget_t comboWidget_IRON;
 static comboBox_widget_t comboBox_IRON;
 static comboBox_item_t comboitem_IRON_SleepTime;
+#ifdef USE_VIN
 static comboBox_item_t comboitem_IRON_Power;
 static comboBox_item_t comboitem_IRON_Impedance;
+#endif
 static comboBox_item_t comboitem_IRON_MaxTemp;
 static comboBox_item_t comboitem_IRON_MinTemp;
 static comboBox_item_t comboitem_IRON_PWMPeriod;
@@ -100,8 +102,10 @@ static comboBox_item_t comboitem_IRON_ADCLimit;
 static comboBox_item_t comboitem_IRON_Back;
 
 static editable_widget_t editable_IRON_SleepTime;
+#ifdef USE_VIN
 static editable_widget_t editable_IRON_Power;
 static editable_widget_t editable_IRON_Impedance;
+#endif
 static editable_widget_t editable_IRON_MaxTemp;
 static editable_widget_t editable_IRON_MinTemp;
 static editable_widget_t editable_IRON_ADCLimit;
@@ -228,6 +232,7 @@ static int delTip(widget_t *w) {
 	return comboitem_IRONTIPS_Settings_Back.action_screen;                                                        // And teturn to main screen or system menu screen
 }
 
+#ifdef USE_VIN
 static void * getMaxPower() {
 	temp = systemSettings.Profile.power;
 	return &temp;
@@ -243,6 +248,7 @@ static void * getTipImpedance() {
 static void setTipImpedance(uint32_t *val) {
 	systemSettings.Profile.impedance = *val;
 }
+#endif
 
 static void setSleepTime(uint32_t *val) {
 	systemSettings.Profile.sleepTimeout= *val;
@@ -1172,6 +1178,8 @@ void settings_screen_setup(screen_t *scr) {
 	edit->max_value = 60;
 	edit->min_value = 0;
 
+  #ifdef USE_VIN
+
 	//********[ Power Widget ]***********************************************************
 	//
   dis=&editable_IRON_Power.inputData;
@@ -1200,6 +1208,8 @@ void settings_screen_setup(screen_t *scr) {
 	edit->setData = (void (*)(void *))&setTipImpedance;
 	edit->max_value = 160;
 	edit->min_value = 10;
+
+  #endif
 
   //********[ Max Temp Widget ]***********************************************************
   //
@@ -1316,8 +1326,10 @@ void settings_screen_setup(screen_t *scr) {
   comboAddEditable(&comboitem_IRON_MaxTemp, w,        "Max temp",   &editable_IRON_MaxTemp);
   comboAddEditable(&comboitem_IRON_MinTemp, w,        "Min temp",   &editable_IRON_MinTemp);
 	comboAddEditable(&comboitem_IRON_SleepTime, w,	    "Sleep", 		  &editable_IRON_SleepTime);
+  #ifdef USE_VIN
   comboAddEditable(&comboitem_IRON_Impedance, w,      "Heater ohm", &editable_IRON_Impedance);
 	comboAddEditable(&comboitem_IRON_Power, w, 		      "Power",		  &editable_IRON_Power);
+  #endif
 	comboAddEditable(&comboitem_IRON_PWMPeriod,w, 	    "PWM Time", 	&editable_IRON_PWMPeriod);
 	comboAddEditable(&comboitem_IRON_ADCDelay, w,   	  "ADC Delay", 	&editable_IRON_ADCDelay);
 	comboAddMultiOption(&comboitem_IRON_FilterMode, w,  "Filtering", 	&editable_IRON_FilterMode);

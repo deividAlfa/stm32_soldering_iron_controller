@@ -114,8 +114,9 @@ void handleIron(void) {
     Iron.Pwm_Limit = systemSettings.Profile.pwmPeriod - (systemSettings.Profile.pwmDelay + (uint16_t)ADC_MEASURE_TIME/10);
   }
 
-
+  #ifdef USE_VIN
   updatePowerLimit();                                                       // Update power limit values
+  #endif
 
   if(Iron.DebugMode==debug_On){                                             // If in debug mode, use debug setpoint value
     Iron.Pwm_Out = calculatePID(Iron.Debug_SetTemperature, TIP.last_avg, Iron.Pwm_Max);
@@ -288,6 +289,7 @@ void runAwayCheck(void){
 }
 
 // Update PWM max value based on current supply voltage, heater resistance and power limit setting
+#ifdef USE_VIN
 void updatePowerLimit(void){
   volatile uint32_t volts = getSupplyVoltage_v_x10();                     // Get last voltage reading x10
   volts = (volts*volts)/10;                                               // (Vx10 * Vx10)/10 = (V*V)*10 (x10 for fixed point precision)
@@ -306,6 +308,7 @@ void updatePowerLimit(void){
     }
   }
 }
+#endif
 
 // Loads the PWM delay
 bool setPwmDelay(uint16_t delay){
@@ -403,7 +406,9 @@ void checkIronError(void){
   Err.failState = Iron.Error.failState;                                       // Get failState flag
   Err.NTC_high = ambTemp > 700 ? 1 : 0;                                       // Check NTC too high (Wrong NTC wiring or overheating, >70ºC)
   Err.NTC_low = ambTemp < -600 ? 1 : 0;                                       // Check NTC too low (If NTC is mounted in the handle, open circuit reports -70ºC or so)
+  #ifdef USE_VIN
   Err.V_low = getSupplyVoltage_v_x10() < 110 ? 1 : 0;                         // Check supply voltage (Mosfet will not work ok <12V, it will heat up) TODO: maybe set a menu item for this?
+  #endif
   Err.noIron = TIP.last_RawAvg>systemSettings.Profile.noIronValue ? 1 : 0;    // Check tip temperature too high (Wrong connection or not connected)
 
   if(CurrentTime<1000 || systemSettings.setupMode==setup_On){                 // Don't check sensor errors during first second or in setup mode, wait for readings need to get stable
