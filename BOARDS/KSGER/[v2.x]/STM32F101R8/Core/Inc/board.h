@@ -18,7 +18,7 @@
 //#define OLED_I2C                                            // Hardware DMA I2C
 //#define OLED_SOFT_SPI                                       // Software bitbang SPI
 #define OLED_SOFT_I2C                                         // Software bitbang I2C
-#define OLED_ADDRESS        0x3c<<1)                          // Only used for i2c
+#define OLED_ADDRESS        (0x3c<<1)                          // Only used for i2c
 #define OLED_DEVICE         hspi2                             // SPI / I2C handler if used
 #define FILL_DMA            hdma_memtomem_dma1_channel2       // DMA mem2mem for filling
 //#define USE_RST
