@@ -161,18 +161,18 @@ And then copy the board profile files overwriting any existing files.<br>
 If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 
 * MISC
-        -  Wake signal from handle: GPIO Input, User label: WAKE, No pull          
-        -  Buzzer signal: GPIO Output, User label: BUZZER,  No pull
-        -  DMA stream mem2mem, Mode: Normal, Size: Word, increase only dest address.
+        *  Wake signal from handle: GPIO Input, User label: WAKE, No pull          
+        *  Buzzer signal: GPIO Output, User label: BUZZER,  No pull
+        *  DMA stream mem2mem, Mode: Normal, Size: Word, increase only dest address.
          
 * CRC
-        -  Enabled, default settings
+        *  Enabled, default settings
         
 * ENCODER
-        -  Rotatory encoder right signal: GPIO INPUT, name: ROT_ENC_R
-        -  Rotatory encoder left signal: GPIO INPUT, name: ROT_ENC_L
-        -  Rotatory encoder button signal: GPIO INPUT,name: ROT_ENC_BUTTON
-        -  GPIO config: All inputs no pull
+        *  Rotatory encoder right signal: GPIO INPUT, name: ROT_ENC_R
+        *  Rotatory encoder left signal: GPIO INPUT, name: ROT_ENC_L
+        *  Rotatory encoder button signal: GPIO INPUT,name: ROT_ENC_BUTTON
+        *  GPIO config: All inputs no pull
         
 * OLED 
         -  Oled CS signal: GPIO Output, name: OLED_CS
@@ -181,7 +181,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
     
 * Software SPI/I2C (If used)
         -  GPIO Settings:
-             * Oled CLOCK signal
+             * Oled CLOCK signal: 
              	- User Label: OLED_SCL
                 - No pull
                 - Speed: High
