@@ -160,26 +160,26 @@ And then copy the board profile files overwriting any existing files.<br>
 
 If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 
-* MISC
+  * MISC
         *  Wake signal from handle: GPIO Input, User label: WAKE, No pull          
         *  Buzzer signal: GPIO Output, User label: BUZZER,  No pull
         *  DMA stream mem2mem, Mode: Normal, Size: Word, increase only dest address.
          
-* CRC
+  * CRC
         *  Enabled, default settings
         
-* ENCODER
+  * ENCODER
         *  Rotatory encoder right signal: GPIO INPUT, name: ROT_ENC_R
         *  Rotatory encoder left signal: GPIO INPUT, name: ROT_ENC_L
         *  Rotatory encoder button signal: GPIO INPUT,name: ROT_ENC_BUTTON
         *  GPIO config: All inputs no pull
         
-* OLED 
+  * OLED 
         -  Oled CS signal: GPIO Output, name: OLED_CS
         -  Oled DC signal: GPIO Output, name: OLED_DC
         -  Oled RESET signal: GPIO Output, name: OLED_RST
     
-* Software SPI/I2C (If used)
+  * Software SPI/I2C (If used)
         -  GPIO Settings:
              * Oled CLOCK signal: 
              	- User Label: OLED_SCL
@@ -191,7 +191,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
                 - No pull
                 - Speed: High
 
-* Hardware SPI (If used)
+  * Hardware SPI (If used)
         -  GPIO Settings:
              * Oled SPI CLOCK signal
                 - User Label: OLED_SCL (Don't care actually)<br>
@@ -225,7 +225,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * DMAx channel interrupt enabled.
             * SPIx global interrupt disabled
             
-* Hardware I2C (If used)
+  * Hardware I2C (If used)
          -  GPIO Settings:
              * Oled I2C CLOCK signal
                 User Label: OLED_SCL (Don't care actually)<br>
