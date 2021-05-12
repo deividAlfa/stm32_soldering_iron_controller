@@ -181,26 +181,26 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
     
 * Software SPI/I2C (If used)
         -  GPIO Settings:
-             * Oled CLOCK signal<br>
-             	User Label: OLED_SCL<br>
-                No pull<br>
-                Speed: High<br>
+             * Oled CLOCK signal
+             	- User Label: OLED_SCL
+                - No pull
+                - Speed: High
                 
              * Oled DATA signal
-                User Label: OLED_SDA<br>
-                No pull<br>
-                Speed: High<br>
+                - User Label: OLED_SDA
+                - No pull
+                - Speed: High
 
 * Hardware SPI (If used)
         -  GPIO Settings:
              * Oled SPI CLOCK signal
-                User Label: OLED_SCL (Don't care actually)<br>
-                No pull<br>
-                Speed: High<br>
+                - User Label: OLED_SCL (Don't care actually)<br>
+                - No pull
+                - Speed: High
              * Oled SPI MOSI signal
-                User Label: OLED_SDA (Don't care actually)<br>
-                No pull<br>
-                Speed: High<br>
+                - User Label: OLED_SDA (Don't care actually)<br>
+                - No pull
+                - Speed: High
                 
         -  Parameter settings:
              * Mode: Half-Duplex master or master transmit only<br>
@@ -277,34 +277,34 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * External trigger Conversion Edge: None
             * Watchdog disabled.
             
-            * IMPORTANT: Configure in board.h the order of the channels and set their labels accordingly!<br>
-              The ADC channel order goes from 0 to 15 (unless otherwise set in regular config), skipping the disabled channels.<br>
-              You must define the ADC channels in these lines:<br>
+            * IMPORTANT: Configure in board.h the order of the channels and set their labels accordingly!
+              The ADC channel order goes from 0 to 15 (unless otherwise set in regular config), skipping the disabled channels.
+              You must define the ADC channels in these lines:
               
-                  #define ADC_CH_1ST          ADC_CHANNEL_1             // First used channel:  CH1<br>
-                  #define ADC_CH_2ND          ADC_CHANNEL_4             // Second used channel: CH4<br>
-                  #define ADC_CH_3RD          ADC_CHANNEL_7             // Third used channel:  CH7<br>
-                  #define ADC_CH_4TH          ADC_CHANNEL_9             // Fourth used channel: CH9<br>
+                  #define ADC_CH_1ST          ADC_CHANNEL_1             // First used channel:  CH1
+                  #define ADC_CH_2ND          ADC_CHANNEL_4             // Second used channel: CH4
+                  #define ADC_CH_3RD          ADC_CHANNEL_7             // Third used channel:  CH7
+                  #define ADC_CH_4TH          ADC_CHANNEL_9             // Fourth used channel: CH9
         
-              Also, they must be adjusted depending on the signal connected to them:<br>
+              Also, they must be adjusted depending on the signal connected to them:
       
-                  #define ADC_1st             VREF                     // First used channel measures VREF<br>
-                  #define ADC_2nd             NTC                      // Second used channel measures NTC<br>
-                  #define ADC_3rd             VIN                      // Third used channel measures VIN<br>
-                  #define ADC_3rd             TIP                      // Fourth used channel measures TIP<br>
+                  #define ADC_1st             VREF                     // First used channel measures VREF
+                  #define ADC_2nd             NTC                      // Second used channel measures NTC
+                  #define ADC_3rd             VIN                      // Third used channel measures VIN
+                  #define ADC_3rd             TIP                      // Fourth used channel measures TIP
                 
-              Set the number for active ADC channels:<br>
+              Set the number for active ADC channels:
               
-                  #define ADC_Num            4                         // Number of active channels<br>
+                  #define ADC_Num            4                         // Number of active channels
                   
-              Except the tip ADC input, all the others can be enabled or disabled:<br>
+              Except the tip ADC input, all the others can be enabled or disabled:
               
-                  #define USE_VREF<br>
-                  #define USE_VIN<br>
-                  #define USE_NTC<br>
-        
-              Power limit will not be available if VIN is disabled.<br>
-              When disabling NTC, ambient temperature is internally set to 35ºC.<br>
+                  #define USE_VREF
+                  #define USE_VIN
+                  #define USE_NTC
+       
+              Power limit will not be available if VIN is disabled.
+              When disabling NTC, ambient temperature is internally set to 35ºC.
         
         - DMA settings:
             * Pheripheral to memory
@@ -323,10 +323,10 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * Auto-reload preload: Enable
             * Master/Slave mode: Disable
             * Trigger event selection: Reset
-            * Prescaler: Don't care, it's adjusted within the program. It asumes the timer runs at CPU speed.<br>
-                         Some timers may take haf the clock speed, depending on the bus!<br><br>
-                         In that case use #define DELAY_TIMER_HALFCLOCK in board.h!<br>
-                         Check the Clock config in CUBEMX!<br>
+            * Prescaler: Don't care, it's adjusted within the program. It asumes the timer runs at CPU speed.
+                         Some timers may take haf the clock speed, depending on the bus!
+                         In that case use #define DELAY_TIMER_HALFCLOCK in board.h!
+                         Check the Clock config in CUBEMX!
             * Period: Don't care, it's adjusted within the program.
             * NVIC settings: General enabled.
               
@@ -341,10 +341,10 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
             * Check Activated 
             * Select channel assigned to the pin
             * Mode: PWM Generation. Select CHx(N), as assigned to PIN. Ensure to select "N" if the pin has it!
-            * Prescaler: Don't care, it's adjusted within the program. It asumes the timer runs at CPU speed.<br>
-                         Some timers may take haf the clock speed, depending on the bus!<br>
-                         In that case use #define PWM_TIMER_HALFCLOCK in board.h!<br>
-                         Check the Clock config in CUBEMX!<br>
+            * Prescaler: Don't care, it's adjusted within the program. It asumes the timer runs at CPU speed.
+                         Some timers may take haf the clock speed, depending on the bus!
+                         In that case use #define PWM_TIMER_HALFCLOCK in board.h!
+                         Check the Clock config in CUBEMX!
             * Period: Don't care, it's adjusted within the program.
             * Pulse: Don't care, it's adjusted within the program.
             * NVIC settings: Depending on the timer type, enable TIMx "Capture compare" if available, else use "Global interrupt".
