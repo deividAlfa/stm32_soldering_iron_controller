@@ -51,12 +51,14 @@ static comboBox_item_t comboitem_SYSTEM_Contrast;
 static comboBox_item_t comboitem_SYSTEM_OledDimming;
 static comboBox_item_t comboitem_SYSTEM_OledOffset;
 static comboBox_item_t comboitem_SYSTEM_WakeMode;
+static comboBox_item_t comboitem_SYSTEM_StandMode;
 static comboBox_item_t comboitem_SYSTEM_EncoderMode;
 static comboBox_item_t comboitem_SYSTEM_TempUnit;
 static comboBox_item_t comboitem_SYSTEM_TempStep;
 static comboBox_item_t comboitem_SYSTEM_GuiUpd;
 static comboBox_item_t comboitem_SYSTEM_SaveInterval;
 static comboBox_item_t comboitem_SYSTEM_Buzzer;
+static comboBox_item_t comboitem_SYSTEM_LVP;
 static comboBox_item_t comboitem_SYSTEM_InitMode;
 static comboBox_item_t comboitem_SYSTEM_ButtonWake;
 static comboBox_item_t comboitem_SYSTEM_ShakeWake;
@@ -71,12 +73,14 @@ static editable_widget_t editable_SYSTEM_Contrast;
 static editable_widget_t editable_SYSTEM_OledDimming;
 static editable_widget_t editable_SYSTEM_OledOffset;
 static editable_widget_t editable_SYSTEM_WakeMode;
+static editable_widget_t editable_SYSTEM_StandMode;
 static editable_widget_t editable_SYSTEM_EncoderMode;
 static editable_widget_t editable_SYSTEM_TempUnit;
 static editable_widget_t editable_SYSTEM_TempStep;
 static editable_widget_t editable_SYSTEM_GuiUpd;
 static editable_widget_t editable_SYSTEM_SaveInterval;
 static editable_widget_t editable_SYSTEM_Buzzer;
+static editable_widget_t editable_SYSTEM_LVP;
 static editable_widget_t editable_SYSTEM_InitMode;
 static editable_widget_t editable_SYSTEM_ButtonWake;
 static editable_widget_t editable_SYSTEM_ShakeWake;
@@ -87,6 +91,8 @@ static editable_widget_t editable_SYSTEM_ActiveDetection;
 static widget_t comboWidget_IRON;
 static comboBox_widget_t comboBox_IRON;
 static comboBox_item_t comboitem_IRON_SleepTime;
+static comboBox_item_t comboitem_IRON_StandbyTime;
+static comboBox_item_t comboitem_IRON_StandbyTemp;
 #ifdef USE_VIN
 static comboBox_item_t comboitem_IRON_Power;
 static comboBox_item_t comboitem_IRON_Impedance;
@@ -102,6 +108,8 @@ static comboBox_item_t comboitem_IRON_ADCLimit;
 static comboBox_item_t comboitem_IRON_Back;
 
 static editable_widget_t editable_IRON_SleepTime;
+static editable_widget_t editable_IRON_StandbyTime;
+static editable_widget_t editable_IRON_StandbyTemp;
 #ifdef USE_VIN
 static editable_widget_t editable_IRON_Power;
 static editable_widget_t editable_IRON_Impedance;
@@ -175,11 +183,13 @@ static void setSettingsScrTempUnit() {
     editable_SYSTEM_TempStep.inputData.endString="\260F";
     editable_IRON_MaxTemp.inputData.endString="\260F";
     editable_IRON_MinTemp.inputData.endString="\260F";
+    editable_IRON_StandbyTemp.inputData.endString="\260F";
 	}
 	else{
 	  editable_SYSTEM_TempStep.inputData.endString="\260C";
 	  editable_IRON_MaxTemp.inputData.endString="\260C";
 	  editable_IRON_MinTemp.inputData.endString="\260C";
+    editable_IRON_StandbyTemp.inputData.endString="\260C";
 	}
 }
 
@@ -253,12 +263,27 @@ static void setTipImpedance(uint32_t *val) {
 static void setSleepTime(uint32_t *val) {
 	systemSettings.Profile.sleepTimeout= *val;
 }
-
 static void * getSleepTime() {
 	temp = systemSettings.Profile.sleepTimeout;
 	return &temp;
 }
 
+
+static void setStandbyTime(uint32_t *val) {
+  systemSettings.Profile.standbyTimeout= *val;
+}
+static void * getStandbyTime() {
+  temp = systemSettings.Profile.standbyTimeout;
+  return &temp;
+}
+
+static void setStandbyTemp(uint32_t *val) {
+  systemSettings.Profile.standbyTemperature= *val;
+}
+static void * getStandbyTemp() {
+  temp = systemSettings.Profile.standbyTemperature;
+  return &temp;
+}
 static void * getKp() {
 	temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kp;
 	return &temp;
@@ -436,22 +461,31 @@ static void setActiveDetection(uint32_t *val) {
 
 static void * getWakeMode() {
 	temp = systemSettings.settings.WakeInputMode;
+	comboitem_SYSTEM_ButtonWake.enabled = !systemSettings.settings.WakeInputMode;   // 0=shake, 1=stand
+  comboitem_SYSTEM_ShakeWake.enabled = !systemSettings.settings.WakeInputMode;
+  comboitem_SYSTEM_InitMode.enabled = !systemSettings.settings.WakeInputMode;
+  comboitem_SYSTEM_StandMode.enabled = systemSettings.settings.WakeInputMode;
 	return &temp;
 }
 static void setWakeMode(uint32_t *val) {
 	systemSettings.settings.WakeInputMode = *val;
-	comboitem_SYSTEM_ButtonWake.enabled = !systemSettings.settings.WakeInputMode;   // 0=shake, 1=stand
-	comboitem_SYSTEM_ShakeWake.enabled = !systemSettings.settings.WakeInputMode;
+}
+
+static void * getStandMode() {
+  temp = systemSettings.settings.StandMode;
+  return &temp;
+}
+static void setStandMode(uint32_t *val) {
+  systemSettings.settings.StandMode = *val;
 }
 
 static void * getEncoderMode() {
-
 	temp = systemSettings.settings.EncoderMode;
+	RE_SetMode(&RE1_Data, systemSettings.settings.EncoderMode);
 	return &temp;
 }
 static void setEncoderMode(uint32_t *val) {
 	systemSettings.settings.EncoderMode = * val;
-	RE_SetMode(&RE1_Data, systemSettings.settings.EncoderMode);
 }
 
 static void * getGuiUpd_ms() {
@@ -469,6 +503,14 @@ static void * getSavDelay() {
 }
 static void setSavDelay(uint32_t *val) {
 	systemSettings.settings.saveSettingsDelay = *val;
+}
+
+static void * getLVP() {
+	temp = systemSettings.settings.lvp;
+	return &temp;
+}
+static void setLVP(uint32_t *val) {
+  systemSettings.settings.lvp = *val;
 }
 
 static void * geterrorDelay() {
@@ -919,6 +961,7 @@ void settings_screen_setup(screen_t *scr) {
 	edit->min_value = 0;
 	edit->options = OffOn;
 	edit->numberOfOptions = 2;
+
 	//********[ Wake mode Widget ]***********************************************************
 	//
   dis=&editable_SYSTEM_WakeMode.inputData;
@@ -933,6 +976,20 @@ void settings_screen_setup(screen_t *scr) {
 	edit->options = wakeMode;
 	edit->numberOfOptions = 2;
 
+
+  //********[ Stand mode Widget ]***********************************************************
+  //
+  dis=&editable_SYSTEM_StandMode.inputData;
+  edit=&editable_SYSTEM_StandMode;
+  editableDefaultsInit(edit,widget_multi_option);
+  dis->getData = &getStandMode;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setStandMode;
+  edit->max_value = mode_standby;
+  edit->min_value = mode_sleep;
+  edit->options = InitMode;
+  edit->numberOfOptions = 2;
 
 	//********[ Encoder inversion Widget ]***********************************************************
 	//
@@ -1030,7 +1087,7 @@ void settings_screen_setup(screen_t *scr) {
 	edit->max_value = mode_run;
 	edit->min_value = mode_sleep;
 	edit->options = InitMode;
-	edit->numberOfOptions = 2;
+	edit->numberOfOptions = 3;
 
   //********[ Encoder wake Widget ]***********************************************************
   //
@@ -1074,6 +1131,20 @@ void settings_screen_setup(screen_t *scr) {
   edit->options = OffOn;
   edit->numberOfOptions = 2;
 
+  //********[ Low voltage protection Widget ]***********************************************************
+  //
+  dis=&editable_SYSTEM_LVP.inputData;
+  edit=&editable_SYSTEM_LVP;
+  editableDefaultsInit(edit,widget_editable);
+  dis->endString="V";
+  dis->reservedChars=5;
+  dis->getData = &getLVP;
+  dis->number_of_dec = 1;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setLVP;
+  edit->max_value = 240;
+  edit->min_value = 90;
 	//========[ SYSTEM COMBO ]===========================================================
 	//
 	w = &comboWidget_SYSTEM;
@@ -1084,14 +1155,16 @@ void settings_screen_setup(screen_t *scr) {
 	comboAddMultiOption(&comboitem_SYSTEM_OledDimming,w,  "Auto dim", 	&editable_SYSTEM_OledDimming);
 	comboAddEditable(&comboitem_SYSTEM_OledOffset, w,     "Offset", 	  &editable_SYSTEM_OledOffset);
 	comboAddMultiOption(&comboitem_SYSTEM_EncoderMode, w, "Encoder",		&editable_SYSTEM_EncoderMode);
+  comboAddMultiOption(&comboitem_SYSTEM_WakeMode, w,    "Wake Mode",  &editable_SYSTEM_WakeMode);
 	comboAddMultiOption(&comboitem_SYSTEM_InitMode, w, 		"Boot", 	    &editable_SYSTEM_InitMode);
-	comboAddMultiOption(&comboitem_SYSTEM_WakeMode, w, 		"Wake Mode", 	&editable_SYSTEM_WakeMode);
+  comboAddMultiOption(&comboitem_SYSTEM_StandMode, w,   "Stand idle",&editable_SYSTEM_StandMode);
   comboAddMultiOption(&comboitem_SYSTEM_ButtonWake, w,  "Btn. wake",  &editable_SYSTEM_ButtonWake);
   comboAddMultiOption(&comboitem_SYSTEM_ShakeWake, w,   "Shake wake", &editable_SYSTEM_ShakeWake);
   comboAddMultiOption(&comboitem_SYSTEM_ActiveDetection, w,   "Active det.",&editable_SYSTEM_ActiveDetection);
 	comboAddMultiOption(&comboitem_SYSTEM_Buzzer, w, 		  "Buzzer", 		&editable_SYSTEM_Buzzer);
 	comboAddMultiOption(&comboitem_SYSTEM_TempUnit, w, 		"Unit", 	    &editable_SYSTEM_TempUnit);
 	comboAddEditable(&comboitem_SYSTEM_TempStep, w, 	    "Step",	      &editable_SYSTEM_TempStep);
+	comboAddEditable(&comboitem_SYSTEM_LVP, w, 		        "LVP",	      &editable_SYSTEM_LVP);
 	comboAddEditable(&comboitem_SYSTEM_GuiUpd, w, 		    "Gui time", 	&editable_SYSTEM_GuiUpd);
 	comboAddEditable(&comboitem_SYSTEM_SaveInterval, w,   "Save time",	&editable_SYSTEM_SaveInterval);
 	comboAddScreen(&comboitem_SYSTEM_Reset, w, 			      "RESET MENU",	screen_reset);
@@ -1164,19 +1237,47 @@ void settings_screen_setup(screen_t *scr) {
 	sc->onEnter = &IRON_onEnter;
 	sc->processInput=&settings_screenProcessInput;
 
-	//********[ Sleep Time Widget ]***********************************************************
-	//
+  //********[ Sleep Time Widget ]***********************************************************
+  //
   dis=&editable_IRON_SleepTime.inputData;
   edit=&editable_IRON_SleepTime;
   editableDefaultsInit(edit,widget_editable);
-	dis->endString="min";
-	dis->reservedChars=5;
-	dis->getData = &getSleepTime;
-	edit->big_step = 5;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setSleepTime;
-	edit->max_value = 60;
-	edit->min_value = 0;
+  dis->endString="min";
+  dis->reservedChars=5;
+  dis->getData = &getSleepTime;
+  edit->big_step = 5;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setSleepTime;
+  edit->max_value = 60;
+  edit->min_value = 0;
+
+  //********[ Stby Time Widget ]***********************************************************
+  //
+  dis=&editable_IRON_StandbyTime.inputData;
+  edit=&editable_IRON_StandbyTime;
+  editableDefaultsInit(edit,widget_editable);
+  dis->endString="min";
+  dis->reservedChars=5;
+  dis->getData = &getStandbyTime;
+  edit->big_step = 5;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setStandbyTime;
+  edit->max_value = 60;
+  edit->min_value = 0;
+
+  //********[ Stby Temp Widget ]***********************************************************
+  //
+  dis=&editable_IRON_StandbyTemp.inputData;
+  edit=&editable_IRON_StandbyTemp;
+  editableDefaultsInit(edit,widget_editable);
+  dis->endString="C";
+  dis->reservedChars=5;
+  dis->getData = &getStandbyTemp;
+  edit->big_step = 10;
+  edit->step = 5;
+  edit->max_value = 350;
+  edit->min_value = 50;
+  edit->setData = (void (*)(void *))&setStandbyTemp;
 
   #ifdef USE_VIN
 
@@ -1325,7 +1426,9 @@ void settings_screen_setup(screen_t *scr) {
 	widgetDefaultsInit(w, widget_combo, &comboBox_IRON);
   comboAddEditable(&comboitem_IRON_MaxTemp, w,        "Max temp",   &editable_IRON_MaxTemp);
   comboAddEditable(&comboitem_IRON_MinTemp, w,        "Min temp",   &editable_IRON_MinTemp);
-	comboAddEditable(&comboitem_IRON_SleepTime, w,	    "Sleep", 		  &editable_IRON_SleepTime);
+  comboAddEditable(&comboitem_IRON_StandbyTemp, w,    "Stby temp",  &editable_IRON_StandbyTemp);
+  comboAddEditable(&comboitem_IRON_StandbyTime, w,    "Stby tim",   &editable_IRON_StandbyTime);
+  comboAddEditable(&comboitem_IRON_SleepTime, w,      "Sleep tim",  &editable_IRON_SleepTime);
   #ifdef USE_VIN
   comboAddEditable(&comboitem_IRON_Impedance, w,      "Heater ohm", &editable_IRON_Impedance);
 	comboAddEditable(&comboitem_IRON_Power, w, 		      "Power",		  &editable_IRON_Power);

@@ -12,5 +12,5 @@ char *OffOn[] = 		  { "OFF", " ON" };
 char *tempUnit[] = 		{ "\260C", "\260F" };
 char *wakeMode[] = 		{ "SHAKE", "STAND" };
 char *encMode[] = 		{ "REVERSE", "NORMAL" };
-char *InitMode[] = 		{ "SLEEP","RUN"};
+char *InitMode[] = 		{ "SLP", "SBY", "RUN"};
 char *filterMode[] = 	{ "AVG", "EMA"};

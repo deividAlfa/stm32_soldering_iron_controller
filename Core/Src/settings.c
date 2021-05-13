@@ -165,12 +165,14 @@ void resetSystemSettings(void) {
 	systemSettings.settings.tempStep			    = 5;
 	systemSettings.settings.activeDetection		= 1;
 	systemSettings.settings.saveSettingsDelay	= 5;
+	systemSettings.settings.lvp	              = 110;              // 11.0V Low voltage
 	systemSettings.settings.currentProfile		= profile_None;
 	systemSettings.settings.initMode			    = mode_run;
 	systemSettings.settings.buzzerMode			  = buzzer_Off;
 	systemSettings.settings.wakeOnButton		  = wakeButton_On;
 	systemSettings.settings.wakeOnShake		    = wakeShake_On;
 	systemSettings.settings.WakeInputMode		  = wakeInputmode_shake;
+	systemSettings.settings.StandMode		      = mode_sleep;
 	systemSettings.settings.EncoderMode			  = RE_Mode_One;
 	systemSettings.settings.NotInitialized		= initialized;
 }
@@ -262,7 +264,9 @@ void resetCurrentProfile(void){
 		Error_Handler();  // We shouldn't get here!
 	}
 	systemSettings.Profile.CalNTC				        = 25;
-	systemSettings.Profile.sleepTimeout 		    = 10;
+	systemSettings.Profile.sleepTimeout 		    = 5;
+	systemSettings.Profile.standbyTimeout 		  = 5;
+	systemSettings.Profile.standbyTemperature 	= 180;
   systemSettings.Profile.UserSetTemperature   = 320;
   systemSettings.Profile.MaxSetTemperature    = 450;
   systemSettings.Profile.MinSetTemperature    = 180;
@@ -287,7 +291,7 @@ void loadProfile(uint8_t profile){
 		if( (profile!=systemSettings.Profile.ID) || (systemSettings.ProfileChecksum != ChecksumProfile(&systemSettings.Profile)) ){
 			ProfileChkErr();															                                    // Checksum mismatch, reset current tip data
 		}
-		setSetTemperature(systemSettings.Profile.UserSetTemperature);				                // Load user set temperature
+		setUserTemperature(systemSettings.Profile.UserSetTemperature);				                // Load user set temperature
 		setCurrentTip(systemSettings.Profile.currentTip);								                    // Load TIP data
 	}
 	else if(profile==profile_None){

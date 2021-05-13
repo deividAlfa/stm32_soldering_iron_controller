@@ -132,17 +132,17 @@ void Program_Handler(void) {
   static bool last_wake=0;
   bool now_wake = WAKE_input();
 
-  if(last_wake!=now_wake){                                             // If wake sensor input changed
+  if(last_wake!=now_wake){                                              // If wake sensor input changed
     last_wake=now_wake;
-    if(systemSettings.settings.WakeInputMode==wakeInputmode_stand){   // In stand mode
+    if(systemSettings.settings.WakeInputMode==wakeInputmode_stand){     // In stand mode
       if(now_wake){
         setModefromStand(mode_run);
       }
       else{
-        setModefromStand(mode_sleep);
+        setModefromStand(systemSettings.settings.StandMode);            // Set sleep or standby mode depending on system setting
       }
     }
-    else{                                                             // In shake mode
+    else{
       IronWake(source_wakeInput);
     }
   }

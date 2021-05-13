@@ -55,7 +55,18 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
   Iron.Delay_Timer    = delaytimer;
   Iron.Pwm_Channel     = pwmchannel;
   Iron.Error.Flags    = noError;                                                              // Clear all errors
-  setCurrentMode(systemSettings.settings.initMode);                                           // Set mode
+
+  if(systemSettings.settings.WakeInputMode==wakeInputmode_shake){                             // If in shake mode, apply init mode
+    setCurrentMode(systemSettings.settings.initMode);
+  }
+  else{                                                                                       // If in stand mode, read WAKE status
+    if(WAKE_input()){
+      setCurrentMode(mode_run);                                                               // Set run mode
+    }
+    else{
+      setCurrentMode(systemSettings.settings.StandMode);                                      // Set stand idle mode
+    }
+  }
   initTimers();                                                                               // Initialize timers
                                                                                               // Now the PWM and ADC are working in the background.
 }
@@ -82,7 +93,7 @@ void handleIron(void) {
 
   // Controls external mode changes (from stand mode changes), this acts as a debouncing timer
   if(Iron.updateMode==needs_update){                                        // If pending mode change
-    if((CurrentTime-Iron.LastModeChangeTime)>500){                          // Wait 500mS with steady mode (de-bouncing)
+    if((CurrentTime-Iron.LastModeChangeTime)>100){                          // Wait 100mS with steady mode (de-bouncing)
       Iron.updateMode=no_update;                                            // reset flag
       setCurrentMode(Iron.changeMode);                                      // Apply stand mode
     }
@@ -100,9 +111,23 @@ void handleIron(void) {
   }
   
   // Controls inactivity timer and enters low power modes
-  if(Iron.CurrentMode==mode_run) {
-    if((Iron.calibrating==calibration_Off ) && (systemSettings.Profile.sleepTimeout>0) && ((CurrentTime - Iron.CurrentModeTimer)>(uint32_t)systemSettings.Profile.sleepTimeout*60000) ) {
-      setCurrentMode(mode_sleep);
+  uint32_t mode_time = CurrentTime - Iron.CurrentModeTimer;
+  uint32_t sleep_time = (uint32_t)systemSettings.Profile.sleepTimeout*60000;
+  uint32_t standby_time = (uint32_t)systemSettings.Profile.standbyTimeout*60000;
+
+  if(Iron.calibrating==calibration_Off){                                                          // Don't enter low power states while calibrating
+    if(Iron.CurrentMode==mode_run) {                                                              // If running
+      if(systemSettings.Profile.standbyTimeout>0 && mode_time>standby_time) {                     // If standbyTimeout not zero, check time
+        setCurrentMode(mode_standby);
+      }
+      else if(systemSettings.Profile.standbyTimeout==0 && mode_time>sleep_time) {                 // If standbyTimeout zero, check sleep time
+        setCurrentMode(mode_sleep);
+      }
+    }
+    else if(Iron.CurrentMode==mode_standby){                                                      // If in standby
+      if(systemSettings.Profile.standbyTimeout>0 && mode_time>sleep_time) {                       // Check sleep time
+        setCurrentMode(mode_sleep);                                                               // Only enter sleep if not zero
+      }
     }
   }
 
@@ -160,12 +185,13 @@ void setSystemTempUnit(bool unit){
   if(systemSettings.Profile.tempUnit != unit){
     systemSettings.Profile.tempUnit = unit;
     systemSettings.Profile.UserSetTemperature = round_10(TempConversion(systemSettings.Profile.UserSetTemperature,unit,0));
+    systemSettings.Profile.standbyTemperature = round_10(TempConversion(systemSettings.Profile.standbyTemperature,unit,0));
     systemSettings.Profile.MaxSetTemperature = round_10(TempConversion(systemSettings.Profile.MaxSetTemperature,unit,0));
     systemSettings.Profile.MinSetTemperature = round_10(TempConversion(systemSettings.Profile.MinSetTemperature,unit,0));
   }
 
   systemSettings.settings.tempUnit = unit;
-  Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature;
+  setCurrentMode(Iron.CurrentMode);     // Reload temps
 }
 
 // This function sets the prescaler settings depending on the system, core clock, and loads the stored period
@@ -347,19 +373,29 @@ void setNoIronValue(uint16_t noiron){
 
 // Change the iron operating mode in stand mode
 void setModefromStand(uint8_t mode){
-  if(GetIronError()){ return; }                     // Ignore if error present
-  Iron.changeMode = mode;                           // Update mode
-  Iron.LastModeChangeTime = HAL_GetTick();          // Reset timer
-  Iron.updateMode = needs_update;                   // Set flag
+  if( GetIronError() ||
+      ((Iron.changeMode==mode) && (Iron.CurrentMode==mode)) ||
+      ((Iron.CurrentMode==mode_sleep) && (mode==mode_standby))){ // Ignore if error present, same mode, or setting standby when already in sleep mode
+    return;
+  }
+  if(Iron.changeMode!=mode){
+    Iron.changeMode = mode;                           // Update mode
+    Iron.LastModeChangeTime = HAL_GetTick();          // Reset debounce timer
+  }
+  Iron.updateMode = needs_update;                     // Set flag
 }
 
 // Set the iron operating mode
 void setCurrentMode(uint8_t mode){
   Iron.CurrentModeTimer = HAL_GetTick();            // Refresh current mode timer
+  if(mode==mode_standby){
+    Iron.CurrentSetTemperature = systemSettings.Profile.standbyTemperature;     // Set standby temp
+  }
+  else{
+    Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature;     // Set user temp (sleep mode ignores this)
+  }
   if(Iron.CurrentMode != mode){                     // If current mode is different
-    if(mode==mode_run){
-      resetPID();                                   // Reset PID if returning to run mode
-    }
+    resetPID();
     buzzer_long_beep();
     Iron.CurrentMode = mode;
     Iron.Cal_TemperatureReachedFlag = 0;
@@ -370,7 +406,7 @@ void setCurrentMode(uint8_t mode){
 // Called from program timer if WAKE change is detected
 void IronWake(bool source){                       // source: handle shake, encoder push button
   if(GetIronError()){ return; }                   // Ignore if error present
-  if(Iron.CurrentMode==mode_sleep){
+  if(Iron.CurrentMode!=mode_run){
     // If in sleep mode, ignore if wake source disabled
     if( (source==source_wakeButton && (!systemSettings.settings.wakeOnButton || (systemSettings.settings.WakeInputMode==wakeInputmode_stand) )) || (source==source_wakeInput && !systemSettings.settings.wakeOnShake)){
       return;
@@ -415,9 +451,9 @@ void checkIronError(void){
   IronError_t Err = { 0 };
   Err.failState = Iron.Error.failState;                                       // Get failState flag
   Err.NTC_high = ambTemp > 700 ? 1 : 0;                                       // Check NTC too high (Wrong NTC wiring or overheating, >70ºC)
-  Err.NTC_low = ambTemp < -600 ? 1 : 0;                                       // Check NTC too low (If NTC is mounted in the handle, open circuit reports -70ºC or so)
+  Err.NTC_low = ambTemp < -500 ? 1 : 0;                                       // Check NTC too low (If NTC is mounted in the handle, open circuit reports -70ºC or so)
   #ifdef USE_VIN
-  Err.V_low = getSupplyVoltage_v_x10() < 110 ? 1 : 0;                         // Check supply voltage (Mosfet will not work ok <12V, it will heat up) TODO: maybe set a menu item for this?
+  Err.V_low = getSupplyVoltage_v_x10() < systemSettings.settings.lvp   ? 1 : 0;   // Check supply voltage (Mosfet will not work ok <10V, it will heat up)
   #endif
   Err.noIron = TIP.last_RawAvg>systemSettings.Profile.noIronValue ? 1 : 0;    // Check tip temperature too high (Wrong connection or not connected)
 
@@ -483,20 +519,20 @@ void setDebugMode(uint8_t value) {
 }
 
 // Sets the user temperature
-void setSetTemperature(uint16_t temperature) {
-  static uint8_t prevProfile=profile_None;
+void setUserTemperature(uint16_t temperature) {
   Iron.Cal_TemperatureReachedFlag = 0;
-  if((systemSettings.Profile.UserSetTemperature != temperature)||(prevProfile!=systemSettings.settings.currentProfile)){
-    prevProfile=systemSettings.settings.currentProfile;
+  if(systemSettings.Profile.UserSetTemperature != temperature){
     systemSettings.Profile.UserSetTemperature = temperature;
-    Iron.CurrentSetTemperature=temperature;
-    resetPID();
+    if(Iron.CurrentMode==mode_run){
+      Iron.CurrentSetTemperature=temperature;
+      resetPID();
+    }
   }
 }
 
 // Returns the actual set temperature
-uint16_t getSetTemperature() {
-  return Iron.CurrentSetTemperature;
+uint16_t getUserTemperature() {
+  return systemSettings.Profile.UserSetTemperature;
 }
 
 // Returns the actual working mode of the iron

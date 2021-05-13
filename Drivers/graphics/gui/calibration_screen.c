@@ -116,7 +116,7 @@ static void setCalState(state_t s) {
 	current_state = s;
 	if(current_state < cal_suceed) {
 		setCurrentMode(mode_run);
-		setSetTemperature(state_temps[(int)s]);
+		setUserTemperature(state_temps[(int)s]);
 		measuredTemp = state_temps[(int)s];
 	}
 	else if(current_state == cal_suceed) {
@@ -210,7 +210,7 @@ static void Cal_Start_onEnter(screen_t *scr) {
 		Iron.calibrating=1;
 		tempReady = 0;
 		setCurrentMode(mode_run);
-		backupTemp = getSetTemperature();
+		backupTemp = getUserTemperature();
 		backupTempUnit=systemSettings.settings.tempUnit;
 		setSystemTempUnit(mode_Celsius);
 
@@ -241,7 +241,7 @@ static void Cal_Start_OnExit(screen_t *scr) {
 		setSystemTempUnit(backupTempUnit);
 		tempReady = 0;
 		current_state = cal_250;
-		setSetTemperature(backupTemp);
+		setUserTemperature(backupTemp);
 		setCurrentMode(mode_run);
 		Iron.calibrating=0;
 		Currtip->calADC_At_250 = backupCal250;

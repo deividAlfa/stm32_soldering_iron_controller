@@ -30,7 +30,7 @@ static int8_t Slp_xadd=1, Slp_yadd=1;
 static int32_t temp;
 static char *tipName[TipSize];
 enum mode{  main_irontemp=0, main_disabled, main_ironstatus, main_setpoint, main_tipselect, main_setMode};
-enum{ status_running=0x20, status_sleep, status_error };
+enum{ status_running=0x20, status_standby, status_sleep, status_error };
 enum { temp_numeric, temp_graph };
 const uint8_t shakeXBM[] ={
 	9, 9,
@@ -113,11 +113,11 @@ static struct{
 
 
 static void setTemp(uint16_t *val) {
-	setSetTemperature(*val);
+	setUserTemperature(*val);
 }
 
 static void * getTemp() {
-	temp = systemSettings.Profile.UserSetTemperature;
+	temp = getUserTemperature();
 	return &temp;
 }
 
@@ -246,24 +246,28 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 		mainScr.updateTick=currentTime;
 	}
 
+  uint8_t current_mode = getCurrentMode();
 	if(error){
 	  if(!(mainScr.ironStatus == status_sleep && error==1)){
 	    mainScr.ironStatus = status_error;
 	  }
 	}
-	else if(getCurrentMode()==mode_sleep){
+	else if(current_mode==mode_sleep){
 		mainScr.ironStatus = status_sleep;
+    mainScr.ActivityOn = 0;
 	}
 	else{
 		mainScr.ironStatus = status_running;
+		if(current_mode==mode_standby){
+		  mainScr.ActivityOn=0;
+		}
+		else if(Iron.newActivity && !mainScr.ActivityOn && mainScr.currentMode==main_irontemp){
+      mainScr.ActivityOn=1;
+    }
 	}
 
-	if(Iron.newActivity && !mainScr.ActivityOn && mainScr.currentMode==main_irontemp){
-		mainScr.ActivityOn=1;
-	}
-
-	else if(Iron.newActivity && mainScr.ActivityOn){
-		if((currentTime-Iron.lastActivityTime)>200){
+	if(Iron.newActivity && mainScr.ActivityOn){
+		if((currentTime-Iron.lastActivityTime)>50){
 			u8g2_SetDrawColor(&u8g2, BLACK);
 			u8g2_DrawBox(&u8g2, 0,OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1]);
 			mainScr.ActivityOn=0;
@@ -286,7 +290,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 				memset(plotData,0,sizeof(plotData));						  // Clear plotdata
 				plot_Index=0;													            // Reset X
 				mainScr.setMode=main_disabled;
-				mainScr.ActivityOn = 0;
 				mainScr.currentMode=main_setMode;
 				break;
 			}
@@ -299,11 +302,19 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 			}
 			else if((input==Rotate_Decrement_while_click)){
 				mainScr.enteredSleep = currentTime;
-				setCurrentMode(mode_sleep);
+				if(Iron.CurrentMode==mode_run){
+				  setCurrentMode(mode_standby);
+				}
+				else if(Iron.CurrentMode==mode_standby){
+          setCurrentMode(mode_sleep);
+        }
 			}
 			else if((input==Rotate_Increment)||(input==Rotate_Decrement)){
 				mainScr.setMode=main_setpoint;
 				mainScr.currentMode=main_setMode;
+				if(current_mode==mode_standby){
+				  IronWake(source_wakeButton);
+				}
 			}
 			else if(input==Click){
 				mainScr.update=1;
@@ -560,6 +571,10 @@ void main_screen_draw(screen_t *scr){
 	}
 
 	if(mainScr.ironStatus==status_running){
+		if(scr_refresh && getCurrentMode()==mode_standby){
+      u8g2_SetFont(&u8g2, u8g2_font_labels);
+      u8g2_DrawStr(&u8g2, 47, 2, "STBY");
+		}
 		if( scr_refresh || (HAL_GetTick()-barTime)>9){	// Update every 10mS or if screen was erased
 			if(scr_refresh<screenRefresh_eraseNow){       // If screen not erased
  				u8g2_SetDrawColor(&u8g2,BLACK);             // Draw a black square to wipe old widget data
