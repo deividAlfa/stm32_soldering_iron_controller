@@ -85,7 +85,7 @@ void handleIron(void) {
       SetFailState(setError);
     }
   }
-  checkSettings();                                                                          // Check if settings were modified
+
   checkIronError();                                                                         // Error detection.
   if( Iron.Error.globalFlag ){                                                            // If any error flag active, stop here
     return;                             // Do nothing else (PWM already disabled)
@@ -439,7 +439,9 @@ void checkSettings(void){
       Iron.LastSysChangeTime=CurrentTime;                                                                       // Reset timer (we don't save anything until we pass a certain time without changes)
     }
     else if((CurrentTime-Iron.LastSysChangeTime)>((uint32_t)systemSettings.settings.saveSettingsDelay*1000)){   // If different from the previous calculated checksum, and timer expired (No changes for enough time)
+      Iron.savingSata = 1;
       saveSettings(saveKeepingProfiles);                                                                        // Save settings, this also updates the checksums
+      Iron.savingSata = 0;
     }
   }
 }

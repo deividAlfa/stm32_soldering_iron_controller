@@ -59,7 +59,8 @@ typedef struct {
 	uint8_t 				    RunawayLevel;				                // Runaway actual level
 	uint8_t 				    prevRunawayLevel;			              // Runaway previous level
 	bool 					      RunawayStatus;				              // Runaway triggered flag
-	bool					    updatePwm;					                  // Set when timer values need to be updated
+	bool					      updatePwm;					                // Set when timer values need to be updated
+  bool                savingSata;                         // Flag set when the system is writing to flash
 }iron_t;
 
 

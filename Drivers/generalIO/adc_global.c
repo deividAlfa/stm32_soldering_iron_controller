@@ -124,7 +124,9 @@ void ADC_Start_DMA(){
 
 
 void ADC_Stop_DMA(void){
-	HAL_ADC_Stop_DMA(adc_device);
+  if(adc_device->DMA_Handle->State != HAL_DMA_STATE_READY){
+    HAL_ADC_Stop_DMA(adc_device);
+  }
 }
 
 /*

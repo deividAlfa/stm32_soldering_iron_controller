@@ -61,7 +61,6 @@ void saveSettings(bool wipeAllProfileData) {
 
 	//Clear watchdog before unlocking flash
 	HAL_IWDG_Refresh(&hiwdg);
-
 	HAL_FLASH_Unlock();                                                                                   //unlock flash writing
 	FLASH_EraseInitTypeDef erase;
 	erase.NbPages = (1024*StoreSize)/FLASH_PAGE_SIZE;
@@ -74,8 +73,6 @@ void saveSettings(bool wipeAllProfileData) {
 	}
 	if(error!=0xFFFFFFFF){
 		Flash_error();
-		HAL_FLASH_Lock();
-		return;
 	}
 	// Ensure that the flash was erased
 	for (uint16_t i = 0; i < sizeof(flashSettings_t)/2; i++) {
@@ -112,7 +109,6 @@ void saveSettings(bool wipeAllProfileData) {
 	if(SettingsFlash != SettingsRam){			                                      // Check flash and system settings have same checksum
 		Flash_error();							                                              // Error if data mismatch
 	}
-
 }
 
 void restoreSettings() {
@@ -314,10 +310,10 @@ void Diag_init(void){
 }
 
 void Flash_error(void){
+  HAL_FLASH_Lock();
 	Diag_init();
-	putStrAligned("ERROR WHILE", 0, align_center);
-	putStrAligned("WRITING TO", 16, align_center);
-	putStrAligned("FLASH!", 32, align_center);
+	putStrAligned("FLASH ERROR!", 15, align_center);
+	putStrAligned("HALTING SYSTEM", 32, align_center);
 	update_display();
 	while(1){
 		HAL_IWDG_Refresh(&hiwdg);
