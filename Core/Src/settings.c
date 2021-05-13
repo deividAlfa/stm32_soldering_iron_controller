@@ -61,6 +61,7 @@ void saveSettings(bool wipeAllProfileData) {
 
 	//Clear watchdog before unlocking flash
 	HAL_IWDG_Refresh(&hiwdg);
+	__disable_irq();
 	HAL_FLASH_Unlock();                                                                                   //unlock flash writing
 	FLASH_EraseInitTypeDef erase;
 	erase.NbPages = (1024*StoreSize)/FLASH_PAGE_SIZE;
@@ -91,7 +92,7 @@ void saveSettings(bool wipeAllProfileData) {
 		}
 	}
 	HAL_FLASH_Lock();
-
+	__enable_irq();
 	if(!wipeAllProfileData){
 		uint32_t ProfileFlash	= ChecksumProfile(&flashSettings->Profile[systemSettings.settings.currentProfile]);
 		uint32_t ProfileRam		= ChecksumProfile(&systemSettings.Profile);

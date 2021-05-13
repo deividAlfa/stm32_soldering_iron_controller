@@ -154,26 +154,27 @@ void Program_Handler(void) {
 
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim){
 	if(_htim == Iron.Pwm_Timer){																			// PWM output low
+	  // If there are pending PWM settings to be applied, apply them before new calculation
 		if(ADC_Status==ADC_Idle){																		    // ADC idle?
 			ADC_Status = ADC_Waiting;																	    // Update status to waiting
-			__HAL_TIM_ENABLE(Iron.Delay_Timer);														// Enable Delay Timer and start counting
-																																		// It will trigger the ADC when it overflows and disable by itself (One-pulse mode).
+			__HAL_TIM_ENABLE(Iron.Delay_Timer);														// Enable Delay Timer and start counting (One-pulse mode)
 		}
-		else{
-		  Error_Handler();
+		else if(ADC_Status!=ADC_Sampling){                              // ADC busy?
+		  if(!Iron.savingData){                                         // Not caused by data save
+		    Error_Handler();                                            // Error
+		  }
+		  else if(Iron.savingData==2){                                  // Data was being saved
+		    Iron.savingData=0;                                          // Delete flag and ignore (Sampling, ADC callback should happen soon)
+		  }
 		}
 	}
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
 	if(_htim == Iron.Delay_Timer){																		// Delay Timer?
-	  if(ADC_Status==ADC_Waiting){                                    // ADC idle?
-      __HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);				// Clear Delay Timer flag
-      ADC_Start_DMA();                                              // Start ADC conversion
-	  }
-    else{
-      Error_Handler();
-    }
+	  __HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);				// Clear Delay Timer flag
+    HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 1);
+    ADC_Start_DMA();                                              // Start ADC conversion
 	}
 }
 

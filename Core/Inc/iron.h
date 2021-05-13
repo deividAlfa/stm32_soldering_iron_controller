@@ -49,18 +49,18 @@ typedef struct {
 	uint8_t					    CurrentMode;				                // Actual working mode (Standby, Sleep, Normal, Boost)
 	uint8_t					    changeMode;					                // change working mode to (Standby, Sleep, Normal, Boost)
 	uint32_t 				    CurrentModeTimer;			              // Time since actual mode was set
-	bool 					      Cal_TemperatureReachedFlag;	        // Flag for temperature calibration
-	bool 					      DebugMode ;					                // Flag to indicate Debug is enabled
 	IronError_t 			  Error;						                  // Error flags
-	bool 					      calibrating;				                // Flag to indicate calibration state (don't save temperature settings)
-	bool 					      updateMode;					                // Flag to indicate the mode must be changed
-	bool 					      newActivity;				                // Flag to indicate handle movement
 	uint32_t 				    RunawayTimer;				                // Runaway timer
 	uint8_t 				    RunawayLevel;				                // Runaway actual level
 	uint8_t 				    prevRunawayLevel;			              // Runaway previous level
+  uint8_t             savingData;                         // Flag set when the system is writing to flash
 	bool 					      RunawayStatus;				              // Runaway triggered flag
 	bool					      updatePwm;					                // Set when timer values need to be updated
-  bool                savingSata;                         // Flag set when the system is writing to flash
+	bool 					      calibrating;				                // Flag to indicate calibration state (don't save temperature settings)
+	bool 					      updateMode;					                // Flag to indicate the mode must be changed
+	bool 					      newActivity;				                // Flag to indicate handle movement
+	bool 					      Cal_TemperatureReachedFlag;	        // Flag for temperature calibration
+	bool 					      DebugMode ;					                // Flag to indicate Debug is enabled
 }iron_t;
 
 

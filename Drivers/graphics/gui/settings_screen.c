@@ -361,14 +361,7 @@ static void * getPWMPeriod() {
 }
 static void setPWMPeriod(uint32_t *val) {
 	uint16_t period=(*val*100)-1;
-	if(!setPwmPeriod(period)){
-		if(*val<=200){
-		  editable_IRON_ADCDelay.max_value = temp-1;
-		}
-		else{
-		  editable_IRON_ADCDelay.max_value = 200;
-		}
-	}
+	setPwmPeriod(period);
 }
 
 static void * getPWMDelay() {
@@ -377,14 +370,7 @@ static void * getPWMDelay() {
 }
 static void setPWMDelay(uint32_t *val) {
 	uint16_t delay=(*val*100)-1;
-	if(!setPwmDelay(delay)){
-		if(*val>=20){
-			editable_IRON_PWMPeriod.min_value = temp+1;
-		}
-		else{
-		  editable_IRON_PWMPeriod.min_value=20;
-		}
-	}
+	setPwmDelay(delay);
 }
 
 static void * getMaxTemp() {
@@ -1362,7 +1348,7 @@ void settings_screen_setup(screen_t *scr) {
 	edit->step = 1;
 	edit->setData = (void (*)(void *))&setPWMPeriod;
 	edit->max_value = 500;
-	edit->min_value = 20;
+	edit->min_value = 10;
 
 	//********[ ADC Delay Widget ]***********************************************************
 	//
@@ -1375,7 +1361,7 @@ void settings_screen_setup(screen_t *scr) {
 	edit->big_step = 10;
 	edit->step = 1;
 	edit->setData = (void (*)(void *))&setPWMDelay;
-	edit->max_value = 200;
+	edit->max_value = 100;
 	edit->min_value = 1;
 
 	//********[ Filter Mode Widget ]***********************************************************

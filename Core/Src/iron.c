@@ -131,11 +131,7 @@ void handleIron(void) {
     }
   }
 
-  // If there are pending PWM settings to be applied, apply them before new calculation
   if(Iron.updatePwm==needs_update){
-    Iron.updatePwm=no_update;
-    __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.Profile.pwmPeriod);
-    __HAL_TIM_SET_AUTORELOAD(Iron.Delay_Timer,systemSettings.Profile.pwmDelay);
     Iron.Pwm_Limit = systemSettings.Profile.pwmPeriod - (systemSettings.Profile.pwmDelay + (uint16_t)ADC_MEASURE_TIME/10);
   }
 
@@ -143,11 +139,14 @@ void handleIron(void) {
   updatePowerLimit();                                                       // Update power limit values
   #endif
 
+  // Update PID
+  volatile uint16_t PID_temp;
   if(Iron.DebugMode==debug_On){                                             // If in debug mode, use debug setpoint value
     Iron.Pwm_Out = calculatePID(Iron.Debug_SetTemperature, TIP.last_avg, Iron.Pwm_Max);
   }
   else{                                                                     // Else, use current setpoint value
-    Iron.Pwm_Out = calculatePID(human2adc(Iron.CurrentSetTemperature), TIP.last_avg, Iron.Pwm_Max);
+    PID_temp = human2adc(Iron.CurrentSetTemperature);
+    Iron.Pwm_Out = calculatePID(PID_temp, TIP.last_avg, Iron.Pwm_Max);
   }
   if(systemSettings.settings.activeDetection && Iron.Pwm_Out<=PWMminOutput){
     Iron.CurrentIronPower = 0;
@@ -342,13 +341,16 @@ void updatePowerLimit(void){
     if(Iron.Pwm_Max > Iron.Pwm_Limit){                                    // Ensure it doesn't exceed the limits
       Iron.Pwm_Max = Iron.Pwm_Limit;
     }
+    else if(Iron.Pwm_Max==0){                                    // Ensure it doesn't exceed the limits
+      Iron.Pwm_Max = 1;
+    }
   }
 }
 #endif
 
 // Loads the PWM delay
 bool setPwmDelay(uint16_t delay){
-  if(systemSettings.Profile.pwmPeriod>delay){
+  if(systemSettings.Profile.pwmPeriod>delay && delay>0){
     systemSettings.Profile.pwmDelay=delay;
     Iron.updatePwm=needs_update;
     return 0;
@@ -358,7 +360,7 @@ bool setPwmDelay(uint16_t delay){
 
 // Loads the PWM period
 bool setPwmPeriod(uint16_t period){
-  if(systemSettings.Profile.pwmDelay<period){
+  if(systemSettings.Profile.pwmDelay<period && period>90){
     systemSettings.Profile.pwmPeriod=period;
     Iron.updatePwm=needs_update;
     return 0;
@@ -439,9 +441,9 @@ void checkSettings(void){
       Iron.LastSysChangeTime=CurrentTime;                                                                       // Reset timer (we don't save anything until we pass a certain time without changes)
     }
     else if((CurrentTime-Iron.LastSysChangeTime)>((uint32_t)systemSettings.settings.saveSettingsDelay*1000)){   // If different from the previous calculated checksum, and timer expired (No changes for enough time)
-      Iron.savingSata = 1;
+      Iron.savingData = 1;                                                                                      // We are saving data
       saveSettings(saveKeepingProfiles);                                                                        // Save settings, this also updates the checksums
-      Iron.savingSata = 0;
+      Iron.savingData = 2;                                                                                      // Data was saved (so any pending interrupt knows this)
     }
   }
 }
@@ -471,7 +473,12 @@ void checkIronError(void){
       }
       Iron.Error.globalFlag = 1;                                              // Set global flag
       setCurrentMode(mode_sleep);                                             // Force sleep mode
-      Iron.Pwm_Out = PWMminOutput;                                            // Maintain iron detection because it's not critical error
+      if(systemSettings.settings.activeDetection && !Err.failState){
+        Iron.Pwm_Out = PWMminOutput;
+      }
+      else{
+        Iron.Pwm_Out = 0;
+      }
       __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);  // Load now the value into the PWM hardware
       buzzer_alarm_start();                                                   // Start alarm
     }
