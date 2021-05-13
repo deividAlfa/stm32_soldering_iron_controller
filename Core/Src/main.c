@@ -122,7 +122,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	oled_handle();
+    checkSettings();                                                                          // Check if settings were modified
+    oled_handle();                                                                            // Handle oled drawing
 
   }
   /* USER CODE END 3 */
