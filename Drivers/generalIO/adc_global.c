@@ -236,5 +236,4 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
 		HAL_IWDG_Refresh(&hiwdg);							                                      // Clear watchdog
 		ADC_Status = ADC_Idle;                                                      // Set the ADC status
 	}
-	HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 0);
 }

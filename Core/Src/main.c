@@ -88,6 +88,9 @@ int main(void)
   /* USER CODE BEGIN 1 */
   #ifdef DEBUG
 	  DebugOpts();          // Enable debug options in Debug build
+	  DWT->CTRL |= 1 ; // enable the counter
+	  DWT->CYCCNT = 0; // reset the counter
+	  // Now CPU cycles can be read in DWT->CYCCNT;
   #endif
   /* USER CODE END 1 */
 
@@ -173,7 +176,6 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim){
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
 	if(_htim == Iron.Delay_Timer){																		// Delay Timer?
 	  __HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);				// Clear Delay Timer flag
-    HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 1);
     ADC_Start_DMA();                                              // Start ADC conversion
 	}
 }
