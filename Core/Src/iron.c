@@ -400,8 +400,10 @@ void setCurrentMode(uint8_t mode){
     resetPID();
     buzzer_long_beep();
     Iron.CurrentMode = mode;
-    Iron.Cal_TemperatureReachedFlag = 0;
     modeChanged(mode);
+    if(Iron.CurrentMode == mode_run){
+      Iron.Cal_TemperatureReachedFlag = 0;
+    }
   }
 }
 
