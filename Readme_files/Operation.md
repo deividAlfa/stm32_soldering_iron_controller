@@ -136,10 +136,10 @@ Allow waking the controller by the shake sensor.<br>
   - **Active det.**<br>
 Use iron active detection by leaving the PWM slightly on all the time. If your amp has a pullup resistor it can be disabled.<br>
   - **Buzzer**<br>
-Buzz/beep when notable conditions occur.<br>
-   - Changing operating mode (sleep, run)<br>
-   - Temperature reached after the setpoint was changed<br>
-   - Alarm when no iron is detected or system error happens<br>
+	Buzz/beep when notable conditions occur.<br>
+   	- Changing operating mode (sleep, run)<br>
+   	- Temperature reached after the setpoint was changed<br>
+   	- Alarm when no iron is detected or system error happens<br>
   - **Unit**<br>
 Temperature scale, Celsius or Fahrenheit<br>
   - **Step**<br>
