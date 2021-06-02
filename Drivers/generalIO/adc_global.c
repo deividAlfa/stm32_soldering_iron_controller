@@ -134,7 +134,7 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 	volatile uint16_t *inputBuffer=InputData->adc_buffer;
 	uint32_t adc_sum,avg_data;
 	uint16_t max=0, min=0xffff;
-	uint8_t shift = systemSettings.Profile.filterFactor;						// Set EMA factor setting from system settings
+	uint8_t shift;
 
 	// Make the average of the ADC buffer
 	adc_sum = 0;
@@ -155,11 +155,12 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 	avg_data = adc_sum / (ADC_BFSIZ -2) ;
 	InputData->last_RawAvg = avg_data;
 	
-	if(systemSettings.Profile.filterMode == filter_ema) {					  // Advanced filtering enabled?
+	if(systemSettings.Profile.filterMode == filter_ema) {					// Advanced filtering enabled?
 
-		if(systemSettings.Profile.filterFactor>4){						        // Limit coefficient (3 is already to much in most cases)
+		if(systemSettings.Profile.filterFactor>4){						      // Limit coefficient (3 is already to much in most cases)
 			systemSettings.Profile.filterFactor=4;
 		}
+	  shift = systemSettings.Profile.filterFactor;                // Set EMA factor setting from system settings
 
 		// Fixed point shift
 		uint32_t RawData = avg_data << 12;
