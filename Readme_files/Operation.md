@@ -52,10 +52,10 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
   To wake up you can make a click (If button wake is enabled) or move the handle (If shake wake is enabled or in stand mode).<br>
   If the display brighntess is dimmed, you can wake up the display by rotating the encoder.<br>
   If the tip reading is higher than 120ºC, it will show a "HOT!" warning.<br>
-  - **Tip selection**<br>
+- **Tip selection**<br>
   Click and rotate clockwise to show the tip selection. Then, long-pressing will enter the selected tip settings.<br>
   It will return to normal mode after 5 seconds of inactivity.<br>
-  - **System menu**<br>
+- **System menu**<br>
   A long click will enter the system menu (Except while in tip selection).<br>
 
 ---
