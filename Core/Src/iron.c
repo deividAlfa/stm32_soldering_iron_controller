@@ -237,8 +237,14 @@ void initTimers(void){
   #else
     #error No PWM ouput set (See PWM_CHx / PWM_CHxN in board.h)
   #endif
-    __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, 1);               // Set min value into PWM (To enable detection)
-    Iron.Pwm_Limit = pwm - (delay + (uint16_t)ADC_MEASURE_TIME/10);
+  if(systemSettings.settings.activeDetection){
+    Iron.Pwm_Out = PWMminOutput;
+  }
+  else{
+    Iron.Pwm_Out = 0;
+  }
+  __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);               // Set min value into PWM (To enable detection)
+  Iron.Pwm_Limit = pwm - (delay + (uint16_t)ADC_MEASURE_TIME/10);
 }
 
 
