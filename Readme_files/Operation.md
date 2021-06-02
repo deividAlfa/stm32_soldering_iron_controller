@@ -46,8 +46,9 @@ While in run mode, a single click will switch between numeric and graph (10 seco
   - **Temperature setpoint adjustment**<br>
 Rotate the encoder, the setpoint will be shown, continue rotating to adjust it.<br>  
 After 1 second of inactivity it will return to normal mode.<br>
-  - **Sleep mode**<br>
-You can force entering sleep mode by clicking and rotating counter-clockwise.<br>  
+  - **Sleep/Standby modes**<br>
+You can force entering standby mode by clicking and rotating counter-clockwise.<br>
+Repeat to enter sleep mode.  
 To wake up you can make a click (If button wake is enabled) or move the handle (If shake wake is enabled or in stand mode).<br>
 If the display brighntess is dimmed, you can wake up the display by rotating the encoder.<br>
 If the tip reading is higher than 120ºC, it will show a "HOT!" warning.<br>
@@ -143,6 +144,8 @@ Buzz/beep when notable conditions occur.<br>
 Temperature scale, Celsius or Fahrenheit<br>
   - **Step**<br>
 Temperature step when adjusting tip temperature.<br>
+  - **LVP**<br>
+Adjust Low voltage protection.<br>
   - **GUI Time**<br>
 To offer maximum respoiveness, , the screen is updated between few 10s to more than 100 times per second (depends on the MCU used and display interface).<br> 
 If the display reading were updated at the same speed, it would be impossible to read anything.<br> 
