@@ -53,7 +53,7 @@ To wake up you can make a click (If button wake is enabled) or move the handle (
 If the display brighntess is dimmed, you can wake up the display by rotating the encoder.<br>
 If the tip reading is higher than 120ºC, it will show a "HOT!" warning.<br>
   - **Tip selection**<br>
-Click and rotate clockwise to show the tip selection. Then, long-pressing will enter the selected tip settings.<br>  
+Click and rotate clockwise to show the tip selection. Then, long-pressing will enter the selected tip settings.<br>
 It will return to normal mode after 5 seconds of inactivity.<br>
   - **System menu**<br>
 A long click will enter the system menu (Except while in tip selection).<br>
@@ -91,7 +91,7 @@ Default 20 ms.<br>
 <pre>
 |<----------------- PWM TIME -------------------->|
 |_____________________________|<-DELAY->[ADC READ]| NEXT CYCLE
-|<- POWER ->|_____________________________________|
+|<-          POWER          ->|___________________|
 </pre>
   - **Filtering**<br>
 Used to filter the temperature measurements before they are passed to the PID. This helps remove noise and provides more stability.<br>
