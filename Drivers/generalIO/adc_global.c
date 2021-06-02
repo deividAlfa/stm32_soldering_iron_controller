@@ -225,7 +225,15 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
 		if(ADC_Status!=ADC_Sampling){                                               // Check correct status
       Error_Handler();
     }
-		handle_ADC_Data();									                                        // Process the new data.
+    if(Iron.savingData){                                                        // Data was being saved, ignore ADC data
+      if(Iron.savingData==2){                                                   // because saving takes time, it usually will overlap with the PWM and cause wrong readings
+        Iron.savingData=0;                                                      // Clear flag
+      }                                                                       
+    }
+    else{
+      handle_ADC_Data();                                                        // Process the new data.
+    }
+		
 		handleIron();                                                               // Handle iron
 		if(Iron.updatePwm==needs_update){
       Iron.updatePwm=no_update;
