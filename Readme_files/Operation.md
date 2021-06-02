@@ -42,21 +42,21 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
 ## Main screen<br>
 
   - **Temperature display modes**<br>
-While in run mode, a single click will switch between numeric and graph (10 second history).<br>
+  While in run mode, a single click will switch between numeric and graph (10 second history).<br>
   - **Temperature setpoint adjustment**<br>
-Rotate the encoder, the setpoint will be shown, continue rotating to adjust it.<br>  
-After 1 second of inactivity it will return to normal mode.<br>
-  - **Sleep/Standby modes**<br>
-You can force entering standby mode by clicking and rotating counter-clockwise.<br>
-Repeat to enter sleep mode.  
-To wake up you can make a click (If button wake is enabled) or move the handle (If shake wake is enabled or in stand mode).<br>
-If the display brighntess is dimmed, you can wake up the display by rotating the encoder.<br>
-If the tip reading is higher than 120ºC, it will show a "HOT!" warning.<br>
+  Rotate the encoder, the setpoint will be shown, continue rotating to adjust it.<br>
+  After 1 second of inactivity it will return to normal mode.<br>
+- **Sleep/Standby modes**<br>
+  You can force entering standby mode by clicking and rotating counter-clockwise.<br>
+  Repeat to enter sleep mode.<br>
+  To wake up you can make a click (If button wake is enabled) or move the handle (If shake wake is enabled or in stand mode).<br>
+  If the display brighntess is dimmed, you can wake up the display by rotating the encoder.<br>
+  If the tip reading is higher than 120ºC, it will show a "HOT!" warning.<br>
   - **Tip selection**<br>
-Click and rotate clockwise to show the tip selection. Then, long-pressing will enter the selected tip settings.<br>
-It will return to normal mode after 5 seconds of inactivity.<br>
+  Click and rotate clockwise to show the tip selection. Then, long-pressing will enter the selected tip settings.<br>
+  It will return to normal mode after 5 seconds of inactivity.<br>
   - **System menu**<br>
-A long click will enter the system menu (Except while in tip selection).<br>
+  A long click will enter the system menu (Except while in tip selection).<br>
 
 ---
 
