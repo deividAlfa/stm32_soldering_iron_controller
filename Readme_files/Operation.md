@@ -147,10 +147,11 @@ Temperature step when adjusting tip temperature.<br>
   - **LVP**<br>
 Adjust Low voltage protection.<br>
   - **GUI Time**<br>
-To offer maximum respoiveness, , the screen is updated between few 10s to more than 100 times per second (depends on the MCU used and display interface).<br> 
-If the display reading were updated at the same speed, it would be impossible to read anything.<br> 
+To offer maximum responsiveness, , the screen is updated between fastest as possible when the cpu is free.<br>
+It depends on the MCU used and display interface, it can reach more than 100 fps in DMA SPI mode.<br>
+If the display reading were updated at the same speed, it would be impossible to read anything.<br>
 This setting defines the time in mS that the main screen readings are updated (voltage, temperatures).<br>
-The real update rate will be limited by the PWM frequency (ADC is read at the every PWM cycle end),<br> 
+The real update rate will be limited by the PWM frequency (ADC is read at every PWM cycle end).<br> 
 Use a higher setting for less "flicker" in the display (more steady values).<br>
   - **Save time**<br>
 Defines the delay with no changes before storing changed settings in flash memory.<br>
