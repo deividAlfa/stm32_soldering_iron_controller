@@ -3,6 +3,7 @@
 <!-- MarkdownTOC -->
 
 * [Operations guide](Readme_files/Operation.md)
+* [Frequently asked questions](#faq)
 * [Status](#status)
 * [Compatibility](#Compatibility)
 * [Warning](#warning)
@@ -54,7 +55,38 @@ These board profiles are being tested:
 * KSGER v3.1 [STABLE]: Profile compatible with STM32F101/102/103 R8/RB. Use 101R8 profile.
 
 
+<a id="faq"></a>
+## Frequently asked questions<br>
 
+### Display issues<br>
+If your the display has right/left line like this picture: Go to system / Offset and adjustthat value until it's centered.
+![Alt text](/Readme_files/oled_offset.jpg?raw=true)
+
+### Temperature unstability<br>
+Never modify any PWM / Delay settings by default. Doing so may cause such issues.<br>
+Also, new tips are often unstable, leading to temperature jumps. Don't try to calibrate the tip in this state, neither set a high temperature, because it could go under control.<br>
+They usually settle after some burning time. It's recommended to set a middle temperature (250-300ºC) and leave like that for 15-20 minutes until it stabilizes.<br>
+If the temps are still unstable, you might be having power supply noise. Try increasing the Iron/Delay option, allowing more time for the temop signal to settle in.<br>
+Some boards are defective, with broken/badly soldered capacitors, leading to similar issues.<br>
+A damaged, loose or defective connection in the handle will also cause this issues. Make sure you contacts are clean.<br>
+
+### Calibration issues<br>
+To calibrate, go into Calibration / Start.<br>
+If the difference between measured and real is more than 50ºC, the calibration will be aborted, telling you to go into Calibration / Adjust.<br>
+That menu has two fields: Calibration step (for 250, 350 and 450ºC steps), and the internal value associated to that step.<br>
+Once you enter this menu, the value will be applied in real time, so be careful. Attach a temperature probe to the tip and change the values.<br>
+If you got higher temperatures, it's recommended to lower the value quicky to prevent tip overheating. <br>
+Then, slowly rise the values until it gets close to the calibration target.<br>
+Repeat for each step and save.<br>
+This values are only used by the calibration process. It's there with the only purpose to prevent tip burning if your board reads lower than real.<br>
+After adjusting, repeat calibration, this time it should work right away.<br>
+The calibration results for the current tip can be seen in the tip settings menu.<br>
+In the case you lose, wipe or reset the data, you can go back into that menu and adjust these based on previous calibration results.<br>
+These values aren't meant to be another calibration menu! Only for viewing (Ex. reporting calibration results) and making backup/restore of the values.<br>
+
+### Other issues<br>
+After fully reading the documentaion, if you still have problems or doubts, please ask in the EEVblog thread:<br>
+https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle<br>
 
 <a id="warning"></a>
 ## Warning
