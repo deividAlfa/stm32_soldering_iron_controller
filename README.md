@@ -74,16 +74,16 @@ A damaged, loose or defective connection in the handle will also cause this issu
 ### Calibration issues<br>
 To calibrate, go into Calibration / Start.<br>
 If the difference between measured and real is more than 50ºC, the calibration will be aborted, telling you to go into Calibration / Adjust.<br>
-That menu has two fields: Calibration step (for 250, 350 and 450ºC steps), and the internal value associated to that step.<br>
-Once you enter this menu, the value will be applied in real time, so be careful. Attach a temperature probe to the tip and change the values.<br>
+The calibration adjustment menu has two fields: Calibration step (250, 350, 450ºC), and the internal value associated to each step.<br>
+Once you enter this menu, the value will be applied in real time, so be careful!<br>
+Attach a temperature probe to the tip before adjusting anything!<br>
 If you got higher temperatures, it's recommended to lower the value quicky to prevent tip overheating. <br>
-Then, slowly rise the values until it gets close to the calibration target.<br>
-Repeat for each step and save.<br>
-This values are only used by the calibration process. It's there with the only purpose to prevent tip burning if your board reads lower than real.<br>
+Then, slowly rise the values until it gets close to the calibration target.  Repeat for each step and save.<br>
+This values are only used by the calibration process, to prevent burning the tip if your board reads too lower than real.<br>
 After adjusting, repeat calibration, this time it should work right away.<br>
 The calibration results for the current tip can be seen in the tip settings menu.<br>
-In the case you lose, wipe or reset the data, you can go back into that menu and adjust these based on previous calibration results.<br>
-These values aren't meant to be another calibration menu! Only for viewing (Ex. reporting calibration results) and making backup/restore of the values.<br>
+In the case you lose, wipe or reset the data, you can go back into that menu and adjust the values based on previous calibration results.<br>
+Otherwise, they aren't meant to be another calibration menu! Only for viewing (Ex. reporting calibration results) and making backup/restore of the values.<br>
 
 ### Other issues<br>
 After fully reading the documentaion, if you still have problems or doubts, please ask in the EEVblog thread:<br>
