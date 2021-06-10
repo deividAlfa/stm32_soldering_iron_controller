@@ -2,13 +2,10 @@
 
 <!-- MarkdownTOC -->
 
+* [Project details](#Details)
+* [Compatibility](#Compatibility)
 * [Operations guide](Readme_files/Operation.md)
 * [Frequently asked questions](#faq)
-* [Status](#status)
-* [Compatibility](#Compatibility)
-* [Warning](#warning)
-* [Backup First!](#backup-first)
-* [Flashing the firmware](#flashing)
 * [Building](#build)
 * [Creating a .ioc file from scratch](Readme_files/Creating_ioc.md)
 * [Additional Documentation](#docs)
@@ -19,11 +16,10 @@
 Video can be seen there: (Project in active development, the features will change continuously)
 [![IMAGE ALT TEXT](https://img.youtube.com/vi/l7mDah2jRSI/0.jpg)](https://www.youtube.com/watch?v=l7mDah2jRSI "STM32 T12 custom firmware")
 
+---
 
-
-
-<a id="status"></a>
-## Status
+<a id="Details"></a>
+## Project details
 * This project started by forking [PTDreamer's firmware](https://github.com/PTDreamer/stm32_soldering_iron_controller). There was a lot of development since then.
 * Developed on STM32Cube IDE - download and use that for compiling.
 * Basic configuration is easily done in CubeMx (Included in STM32Cube IDE).
@@ -39,12 +35,14 @@ Video can be seen there: (Project in active development, the features will chang
     - Software SPI
     - Software I2C
 
-<a id="compatibility"></a>
+---
+
+<a id="Compatibility"></a>
 ## Compatibility
 
-The actual requirements are 10KB RAM and 64KB flash. Don't even try if your MCU has less than that.
-The BOARDS folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.
-Actually all the KSGER boards are supported. Some have not been tested yet and need feedback from users.
+The actual requirements are 10KB RAM and 64KB flash. Don't even try if your MCU has less than that.<br>
+The BOARDS folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.<br>
+Actually all the KSGER boards are supported. Some have not been tested yet and need feedback from users.<br>
 These board profiles are being tested:
 * Quicko T12 [STABLE]: Profiles compatible with STM32F072 C8/CB and STM32F103 C8/CB.
 * JCD T12    [STABLE]: Different board layout, but it's 100% the same as the KSGER v2.1. Use that firmware.
@@ -54,24 +52,49 @@ These board profiles are being tested:
 * KSGER v3.0 [TESTING]: Seems to use the same as the 3.1. Use that firmware, not tested yet.
 * KSGER v3.1 [STABLE]: Profile compatible with STM32F101/102/103 R8/RB. Use 101R8 profile.
 
+---
 
 <a id="faq"></a>
 ## Frequently asked questions<br>
 
+### Backing up the original firmware
+Be warned, usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.<br>
+For KSGER boards, some can be found over internet.<br>
+The simplest way to not loose the original FW is actually to buy a new MCU, replace it, and store the original MCU in a safe place.<br>
+Any difference in the pinout will require firmware tuning, although easing that that is one of the main proposits of this firmware.<br>
+There are some hacks / vulnerabilities that can be used to backup protected firmware, more details here:<br>
+**[STM32 power glitching timing attack](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/tools/software/STM32CubeIDE#option-2-power-glitching-timing-attack
+)**<br>
+
+### Flashing the firmware
+Download the binary **STM32SolderingStation.bin** already compiled from the /BOARDS folder and flash it using stlink.<br>
+There's no support for custom bootloaders, and there won't be, as flash is almost full in 64KB devices.<br>
+Use one of these ST-LINK clones ($3 or less), refer to the schematics for the SWD pinout.<br>
 ### Display issues<br>
-If the display has right/left line like this picture: Go to system / Offset and adjust the value until it's centered.<br>
+If the display has right/left line like this picture: Go to [System menu](Readme_files/Operation.md#system) / Offset and adjust the value until it's centered.<br>
 <img src="/Readme_files/oled_offset.jpg?raw=true" width="320"><br>
 
 ### Temperature unstability<br>
-Never modify any PWM / Delay settings by default. Doing so may cause such issues.<br>
+By default, never modify any PWM / Delay settings in the [Iron menu](Readme_files/Operation.md#menu). Doing so may cause such issues.<br>
 Also, new tips are often unstable, leading to temperature jumps.<br>
 Don't try to calibrate the tip in this state, neither set a high temperature, because it could go under control.<br>
 They usually settle after some burning time. It's recommended to set a middle temperature (250-300ºC) and leave like that for 15-20 minutes until it stabilizes.<br>
-If the temps are still unstable, you might be having power supply noise. Try increasing the Iron/Delay option, allowing more time for the temp signal to settle.<br>
-Some boards have broken/badly soldered capacitors, leading to similar issues.<br>
+If the temps are still unstable, try increasing the Iron/Delay option, allowing more time for the temp signal to settle.<br>
 A damaged, loose or defective connection in the handle will also cause this issues. Ensure the contacts are clean.<br>
+There have been problems with some board/stations like:<br>
+* Noisy power supply
+* Broken / badly soldered capacitors
+* Bad Op-Amp
+* Bad 3v3 Regulator
+
+### Temperature accuracy
+Buying a cheap high temperature meter is highly recommended!<br>
+These boards can have pretty different readings and tolerances. Even between T12 tips.<br>
+So the factory calibration is intentionally set lower than real, to avoid possible overheating problems.<br>
+Once you set the firmware, go to calibration and set there the real temperature measured with the external probe.<br>
 
 ### Calibration issues<br>
+Ensure to read [Calibration menu](Readme_files/Operation.md#calibration) first!.<br>
 To calibrate, go into Calibration / Start.<br>
 If the difference between measured and real is more than 50ºC, the calibration will be aborted, telling you to go into Calibration / Adjust.<br>
 The calibration adjustment menu has two fields: Calibration step (250, 350, 450ºC), and the internal value associated to each step.<br>
@@ -89,49 +112,18 @@ Otherwise, they aren't meant to be another calibration menu! Only for viewing (E
 After fully reading the documentaion, if you still have problems or doubts, please ask in the EEVblog thread:<br>
 https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle<br>
 
-<a id="warning"></a>
-## Warning
-#### Temperature accuracy
-Buying a cheap high temperature meter is highly recommended!
-These boards can have pretty different readings and tolerances. It can even change a lot between T12 tips.
-So the factory calibration is intentionally set lower than real, to avoid possible overheating problems.
-Once you set the firmware, go to calibration and set there the real temperature measured with the external probe.
-#### Hardware issues
-Newer hardware is often inferior, causing temperature regulation issues, with low quality components such as:
-* Bad Op-Amp
-* Bad 3v3 Regulator
-
-It is recommended to check and replace the problematic parts with better alternatives before proceeding.
-This is especially true for many of the newer v2.1 boards and v3.x boards by KSGER.
-
-<a id="backup-first"></a>
-## Backup First!
-Be warned, usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.
-The simplest way to not loose the original FW is actually to buy a new MCU, replace it, and store the original MCU in a safe place.
-Keep in mind that there are many revisions, specially with KSGER, that can make the firmware not compatible even sharing the same MCU.
-Any difference in the pinout will require firmware tuning, although easing that that is one of the main proposits of this firmware.
-There are some hacks / vulnerabilities that can be used to backup protected firmware, more details here:
-**[STM32 power glitching timing attack](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/tools/software/STM32CubeIDE#option-2-power-glitching-timing-attack
-)**
-
-
-<a id="flashing"></a>
-## Flashing the firmware
-Download the binary **STM32SolderingStation.bin** already compiled from the /BOARDS folder and flash it using stlink.
-There's no support for custom bootloaders, and there won't be, as flash is almost full in 64KB devices.
-Use one of these ST-LINK clones ($3 or less), refer to the schematics for the SWD pinout.
-
 
 <a id="build"></a>     
 ## Building
 
-#### Board profiles<br>
+Video of building steps:<br>
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/8oeGVSSxudk/0.jpg)](https://www.youtube.com/watch?v=8oeGVSSxudk "Firmware build")
+
 If you use an existing project template and modify it, the changes must be reflected in /Core/Inc/board.h.<br>
 All the project code takes the data from there. The file it's pretty much self-explaining.<br>
 So, any changes you make in CubeMX, ex. use PWM timer6 intead timer2, or SPI1 instead SPI2...all that should be configured in their respective define.<br>
 As long as the GPIO names are called the same way, no further changes are needed.<br>
 
-#### Building the code<br>
 If you want to build your own, clone or download the source.<br>
 The source is stripped from ST own libraries and unnecesary stuff, only includes the very basic code owning to the project.<br>
 CubeMX will add the STM32 and CMSIS libraries automatically after a code generation.<br>
@@ -163,9 +155,6 @@ Ensure these are present:<br>
 Click in the right arrow of the build button (Hammer icon), select Release, then click on the build button and should build right away.<br>
 <img src="/Readme_files/release.jpg?raw=true">
 
-Video of building steps:<br>
-
-[![IMAGE ALT TEXT](http://img.youtube.com/vi/8oeGVSSxudk/0.jpg)](https://www.youtube.com/watch?v=8oeGVSSxudk "Firmware build")
 Keep in mind that in 64KB devices the flash is almost full and will not fit unless optimization is set to "Optimize for size".<br>
 To debug MCUs where the flash space is unsufficient to store a unoptimized build, you can selectively disable build optimizations.<br>
 A line of code can be found at the start of main.h:<br>
@@ -186,14 +175,15 @@ Run the included script "Clean_Profile.bat", or manually delete these files:<br>
     /Core/Startup/*
 
 And then copy the board profile files overwriting any existing files.<br>
-            
+ 
+---
+           
 <a id="pending"></a>
 ### Non working features
 * I2C eeprom. Some boards have it, some doesn't. So internal flash storage is used for all.
 * RTC clock. And probably never will.
 
-
-
+---
 
 <a id="docs"></a>
 ## Additional Documentation
