@@ -226,7 +226,8 @@ Wait for tip temperature to settle (When the thermomether reading stops moving),
 Then enter temperature as measured by the thermometer for each step.<br>
 If the entered temperature is more than 50ºC higher than the target calibration value, the process will be aborted and you will have to adjust it manually<br>
   - **Adjust**<br>
-Here you can adjust the default calibration values. For every step (250,350,450ºC) adjust the value until it's close to the target temperature.<br>
+Here you can adjust the default calibration values. These values are applied in real time!<br>
+For every step (250,350,450ºC), adjust the value until the tip temperature it's close to the target temperature.<br>
 This is a coarse adjustment, made to avoid burning the tip in the calibration process if your controllers reads too low values.<br> 
 This values have nothing to do with the Tip Settings calibration values (Those are temperature-compensated).<br>
 Click on save to apply and store the changes, or cancel to discard.<br>
