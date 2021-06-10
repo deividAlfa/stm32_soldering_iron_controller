@@ -67,8 +67,8 @@ Never modify any PWM / Delay settings by default. Doing so may cause such issues
 Also, new tips are often unstable, leading to temperature jumps.<br>
 Don't try to calibrate the tip in this state, neither set a high temperature, because it could go under control.<br>
 They usually settle after some burning time. It's recommended to set a middle temperature (250-300ºC) and leave like that for 15-20 minutes until it stabilizes.<br>
-If the temps are still unstable, you might be having power supply noise. Try increasing the Iron/Delay option, allowing more time for the temop signal to settle in.<br>
-Some boards are defective, with broken/badly soldered capacitors, leading to similar issues.<br>
+If the temps are still unstable, you might be having power supply noise. Try increasing the Iron/Delay option, allowing more time for the temp signal to settle.<br>
+Some boards have broken/badly soldered capacitors, leading to similar issues.<br>
 A damaged, loose or defective connection in the handle will also cause this issues. Make sure you contacts are clean.<br>
 
 ### Calibration issues<br>
