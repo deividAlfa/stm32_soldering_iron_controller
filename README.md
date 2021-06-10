@@ -57,6 +57,8 @@ These board profiles are being tested:
 <a id="faq"></a>
 ## Frequently asked questions<br>
 
+First, make sure to read the [Operations guide](Readme_files/Operation.md)!<br>
+
 ### Backing up the original firmware
 Be warned, usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.<br>
 For KSGER boards, some can be found over internet.<br>
