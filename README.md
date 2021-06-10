@@ -59,10 +59,10 @@ These board profiles are being tested:
 ## Frequently asked questions<br>
 
 ### Display issues<br>
-If your the display has right/left line like this picture: Go to system / Offset and adjustthat value until it's centered.
-![Alt text](/Readme_files/oled_offset.jpg?raw=true)
+If the display has right/left line like this picture: Go to system / Offset and adjust the value until it's centered.
+<img src="/Readme_files/oled_offset.jpg?raw=true" width="320">
 
-### Temperature unstability<br>
+### Temperature unstabilitit<br>
 Never modify any PWM / Delay settings by default. Doing so may cause such issues.<br>
 Also, new tips are often unstable, leading to temperature jumps. Don't try to calibrate the tip in this state, neither set a high temperature, because it could go under control.<br>
 They usually settle after some burning time. It's recommended to set a middle temperature (250-300ºC) and leave like that for 15-20 minutes until it stabilizes.<br>
@@ -156,12 +156,11 @@ Ensure these are present:<br>
       /Drivers/CMSIS/Include
       
 (STM32Fxxx matches your current mcu family, ex. STM32F0xx, STM32F1xx)<br>
-![Alt text](/Readme_files/Includes.jpg?raw=true "Title")
+<img src="/Readme_files/Includes.jpg?raw=true">
 
 
 Click in the right arrow of the build button (Hammer icon), select Release, then click on the build button and should build right away.<br>
-![Alt text](/Readme_files/release.jpg?raw=true "Title")
-
+<img src="/Readme_files/release.jpg?raw=true">
 
 Video of building steps:<br>
 
