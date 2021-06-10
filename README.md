@@ -69,7 +69,7 @@ Don't try to calibrate the tip in this state, neither set a high temperature, be
 They usually settle after some burning time. It's recommended to set a middle temperature (250-300ºC) and leave like that for 15-20 minutes until it stabilizes.<br>
 If the temps are still unstable, you might be having power supply noise. Try increasing the Iron/Delay option, allowing more time for the temp signal to settle.<br>
 Some boards have broken/badly soldered capacitors, leading to similar issues.<br>
-A damaged, loose or defective connection in the handle will also cause this issues. Make sure you contacts are clean.<br>
+A damaged, loose or defective connection in the handle will also cause this issues. Ensure the contacts are clean.<br>
 
 ### Calibration issues<br>
 To calibrate, go into Calibration / Start.<br>
