@@ -12,7 +12,7 @@
 #include "ssd1306.h"
 #include "tempsensors.h"
 
-__attribute__((aligned(4))) systemSettings_t systemSettings;
+systemSettings_t systemSettings;
 flashSettings_t* flashSettings = (flashSettings_t*)FLASH_ADDR;
 void settingsChkErr(void);
 void ProfileChkErr(void);
@@ -20,6 +20,32 @@ void Flash_error(void);
 void Button_reset(void);
 void Diag_init(void);
 void ErrCountDown(uint8_t Start,uint8_t xpos, uint8_t ypos);
+
+
+// Check for changes in system settings.
+void checkSettings(void){
+  static uint32_t prevSysChecksum=0, newSysChecksum=0, prevTipChecksum=0, newTipChecksum=0, checksumtime=0;
+  uint32_t CurrentTime = HAL_GetTick();
+
+  // Don't check if in: Calibration mode, Setup mode, Save delay==0, failure error active
+  if( (systemSettings.setupMode==setup_On) || (Iron.calibrating==calibration_On) || (systemSettings.settings.saveSettingsDelay==0) || (Iron.Error.failState!=noError) || (CurrentTime-checksumtime<999)){
+    return;
+  }
+  checksumtime=CurrentTime;                                                                                     // Store current time
+  newSysChecksum=ChecksumSettings(&systemSettings.settings);                                                    // Calculate system checksum
+  newTipChecksum=ChecksumProfile(&systemSettings.Profile);                                                      // Calculate tip profile checksum
+  if((systemSettings.settingsChecksum!=newSysChecksum)||(systemSettings.ProfileChecksum!=newTipChecksum)){      // If anything was changed (Checksum mismatch)
+    if((prevSysChecksum!=newSysChecksum)||(prevTipChecksum!=newTipChecksum)){                                   // If different from the previous calculated checksum (settings are being changed quickly, don't save every time).
+      prevSysChecksum=newSysChecksum;                                                                           // Store last computed checksum
+      prevTipChecksum=newTipChecksum;
+      Iron.LastSysChangeTime=CurrentTime;                                                                       // Reset timer (we don't save anything until we pass a certain time without changes)
+    }
+    else if((CurrentTime-Iron.LastSysChangeTime)>((uint32_t)systemSettings.settings.saveSettingsDelay*1000)){   // If different from the previous calculated checksum, and timer expired (No changes for enough time)
+      saveSettings(saveKeepingProfiles);                                                                         // Data was saved (so any pending interrupt knows this)
+    }
+  }
+}
+
 
 void saveSettings(bool wipeAllProfileData) {
 	uint32_t error=0;
@@ -60,46 +86,59 @@ void saveSettings(bool wipeAllProfileData) {
 	}
 
 	//Clear watchdog before unlocking flash
-	HAL_IWDG_Refresh(&hiwdg);
 	__disable_irq();
 	HAL_FLASH_Unlock();                                                                                   //unlock flash writing
+  __enable_irq();
 	FLASH_EraseInitTypeDef erase;
 	erase.NbPages = (1024*StoreSize)/FLASH_PAGE_SIZE;
 	erase.PageAddress = FLASH_ADDR;
 	erase.TypeErase = FLASH_TYPEERASE_PAGES;
 
 	//Erase flash page
-	if(HAL_FLASHEx_Erase(&erase, &error)!=HAL_OK){
+	if((HAL_FLASHEx_Erase(&erase, &error)!=HAL_OK) || (error!=0xFFFFFFFF)){
 		Flash_error();
 	}
-	if(error!=0xFFFFFFFF){
-		Flash_error();
-	}
-	// Ensure that the flash was erased
+
+	__disable_irq();
+	HAL_FLASH_Lock();                                                                                   //unlock flash writing
+	__enable_irq();
+
+	// Ensure flash was erased
 	for (uint16_t i = 0; i < sizeof(flashSettings_t)/2; i++) {
 			if( *(uint16_t*)(FLASH_ADDR+(i*2)) != 0xFFFF){
 				Flash_error();
 			}
 		}
 
-	//Clear watchdog before writing
-	HAL_IWDG_Refresh(&hiwdg);
-
 	//Store settings
-	for (uint16_t i = 0; i < sizeof(flashSettings_t) / 2; i++) {
-		if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (((uint32_t)flashSettings+i*2)), *(((uint16_t*)&flashBuffer)+i) ) != HAL_OK){
-			Flash_error();
-		}
+	uint32_t dest = (uint32_t)flashSettings;
+	uint16_t *data = (uint16_t*)&flashBuffer;
+
+	__disable_irq();
+	  HAL_FLASH_Unlock();
+	__enable_irq();
+
+	// written = number of 16-bit data written
+	for(uint16_t written=0; written < (sizeof(flashSettings_t)/2); written++){
+	  //__disable_irq();          // Disable IRQ while writing to flash
+	  if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, dest, *data ) != HAL_OK){
+	    Flash_error();
+	  }
+	  dest += 2;                // +2 because we write 16 bit data
+	  data++;                   // +1 because it's 16b pointer
+	  //__enable_irq();           // Enable IRQ to handle any pending interrupt before writing next byte
 	}
+  __disable_irq();
 	HAL_FLASH_Lock();
 	__enable_irq();
+
 	if(!wipeAllProfileData){
 		uint32_t ProfileFlash	= ChecksumProfile(&flashSettings->Profile[systemSettings.settings.currentProfile]);
 		uint32_t ProfileRam		= ChecksumProfile(&systemSettings.Profile);
 
 		// Check flash and system profiles have same checksum and type
 		if((ProfileFlash != ProfileRam) ||	(flashSettings->settings.currentProfile != systemSettings.settings.currentProfile)){
-			Flash_error();						// Error if data mismatch
+			Flash_error();						// Error if data mismatchº
 		}
 	}
 
@@ -311,7 +350,11 @@ void Diag_init(void){
 }
 
 void Flash_error(void){
+
+  __disable_irq();
   HAL_FLASH_Lock();
+  __enable_irq();
+
 	Diag_init();
 	putStrAligned("FLASH ERROR!", 15, align_center);
 	putStrAligned("HALTING SYSTEM", 32, align_center);

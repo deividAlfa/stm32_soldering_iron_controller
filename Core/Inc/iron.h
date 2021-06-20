@@ -53,7 +53,6 @@ typedef struct {
 	uint32_t 				    RunawayTimer;				                // Runaway timer
 	uint8_t 				    RunawayLevel;				                // Runaway actual level
 	uint8_t 				    prevRunawayLevel;			              // Runaway previous level
-  uint8_t             savingData;                         // Flag set when the system is writing to flash
 	bool 					      RunawayStatus;				              // Runaway triggered flag
 	bool					      updatePwm;					                // Set when timer values need to be updated
 	bool 					      calibrating;				                // Flag to indicate calibration state (don't save temperature settings)
@@ -67,7 +66,6 @@ typedef struct {
 extern volatile iron_t Iron;
 void IronWake(bool source);
 void checkIronError(void);
-void checkSettings(void);
 bool GetIronError(void);
 void updatePowerLimit(void);
 void runAwayCheck(void);

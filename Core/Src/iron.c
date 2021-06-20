@@ -232,6 +232,7 @@ void initTimers(void){
   __HAL_TIM_CLEAR_FLAG(Iron.Pwm_Timer,TIM_FLAG_UPDATE | TIM_FLAG_COM | TIM_FLAG_CC1 | TIM_FLAG_CC2 | TIM_FLAG_CC3 | TIM_FLAG_CC4 );  // Clear all flags
   #ifdef  PWM_CHx                                                             // Start PWM
     HAL_TIM_PWM_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);                   // PWM output uses CHx channel
+    __HAL_TIM_ENABLE_IT(Iron.Pwm_Timer, TIM_IT_UPDATE);                       //
   #elif defined PWM_CHxN
     HAL_TIMEx_PWMN_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);                // PWM output uses CHxN channel
   #else
@@ -430,32 +431,6 @@ void IronWake(bool source){                       // source: handle shake, encod
 }
 
 
-// Check for changes in system settings.
-void checkSettings(void){
-  static uint32_t prevSysChecksum=0, newSysChecksum=0, prevTipChecksum=0, newTipChecksum=0, checksumtime=0;
-  uint32_t CurrentTime = HAL_GetTick();
-
-  // Don't check if in: Calibration mode, Setup mode, Save delay==0, failure error active
-  if( (systemSettings.setupMode==setup_On) || (Iron.calibrating==calibration_On) || (systemSettings.settings.saveSettingsDelay==0) || (Iron.Error.failState!=noError) || (CurrentTime-checksumtime<999)){
-    return;
-  }
-  checksumtime=CurrentTime;                                                                                     // Store current time
-  newSysChecksum=ChecksumSettings(&systemSettings.settings);                                                    // Calculate system checksum
-  newTipChecksum=ChecksumProfile(&systemSettings.Profile);                                                      // Calculate tip profile checksum
-  if((systemSettings.settingsChecksum!=newSysChecksum)||(systemSettings.ProfileChecksum!=newTipChecksum)){      // If anything was changed (Checksum mismatch)
-    if((prevSysChecksum!=newSysChecksum)||(prevTipChecksum!=newTipChecksum)){                                   // If different from the previous calculated checksum (settings are being changed quickly, don't save every time).
-      prevSysChecksum=newSysChecksum;                                                                           // Store last computed checksum
-      prevTipChecksum=newTipChecksum;
-      Iron.LastSysChangeTime=CurrentTime;                                                                       // Reset timer (we don't save anything until we pass a certain time without changes)
-    }
-    else if((CurrentTime-Iron.LastSysChangeTime)>((uint32_t)systemSettings.settings.saveSettingsDelay*1000)){   // If different from the previous calculated checksum, and timer expired (No changes for enough time)
-      Iron.savingData = 1;                                                                                      // We are saving data
-      saveSettings(saveKeepingProfiles);                                                                        // Save settings, this also updates the checksums
-      Iron.savingData = 2;                                                                                      // Data was saved (so any pending interrupt knows this)
-    }
-  }
-}
-
 // Checks for non critical iron errors (Errors that can be cleared)
 void checkIronError(void){
   uint32_t CurrentTime = HAL_GetTick();                                       // Get current time
@@ -463,7 +438,7 @@ void checkIronError(void){
   IronError_t Err = { 0 };
   Err.failState = Iron.Error.failState;                                       // Get failState flag
   Err.NTC_high = ambTemp > 700 ? 1 : 0;                                       // Check NTC too high (Wrong NTC wiring or overheating, >70ºC)
-  Err.NTC_low = ambTemp < -500 ? 1 : 0;                                       // Check NTC too low (If NTC is mounted in the handle, open circuit reports -70ºC or so)
+  Err.NTC_low = ambTemp < -500 ? 1 : 0;    
   #ifdef USE_VIN
   Err.V_low = getSupplyVoltage_v_x10() < systemSettings.settings.lvp   ? 1 : 0;   // Check supply voltage (Mosfet will not work ok <10V, it will heat up)
   #endif

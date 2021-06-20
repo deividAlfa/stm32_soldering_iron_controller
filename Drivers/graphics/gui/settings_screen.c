@@ -1003,7 +1003,7 @@ void settings_screen_setup(screen_t *scr) {
 	edit->step = 1;
 	edit->setData = (void (*)(void *))&setSavDelay;
 	edit->max_value = 60;
-	edit->min_value = 1;
+	edit->min_value = 0;
 
 	//********[ Gui refresh rate Widget ]***********************************************************
 	//
@@ -1348,7 +1348,7 @@ void settings_screen_setup(screen_t *scr) {
 	edit->step = 1;
 	edit->setData = (void (*)(void *))&setPWMPeriod;
 	edit->max_value = 500;
-	edit->min_value = 10;
+	edit->min_value = 20;
 
 	//********[ ADC Delay Widget ]***********************************************************
 	//
@@ -1413,8 +1413,8 @@ void settings_screen_setup(screen_t *scr) {
   comboAddEditable(&comboitem_IRON_MaxTemp, w,        "Max temp",   &editable_IRON_MaxTemp);
   comboAddEditable(&comboitem_IRON_MinTemp, w,        "Min temp",   &editable_IRON_MinTemp);
   comboAddEditable(&comboitem_IRON_StandbyTemp, w,    "Stby temp",  &editable_IRON_StandbyTemp);
-  comboAddEditable(&comboitem_IRON_StandbyTime, w,    "Stby tim",   &editable_IRON_StandbyTime);
-  comboAddEditable(&comboitem_IRON_SleepTime, w,      "Sleep tim",  &editable_IRON_SleepTime);
+  comboAddEditable(&comboitem_IRON_StandbyTime, w,    "Stby time",   &editable_IRON_StandbyTime);
+  comboAddEditable(&comboitem_IRON_SleepTime, w,      "Sleep time",  &editable_IRON_SleepTime);
   #ifdef USE_VIN
   comboAddEditable(&comboitem_IRON_Impedance, w,      "Heater ohm", &editable_IRON_Impedance);
 	comboAddEditable(&comboitem_IRON_Power, w, 		      "Power",		  &editable_IRON_Power);

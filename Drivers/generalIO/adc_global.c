@@ -108,9 +108,15 @@ void ADC_Init(ADC_HandleTypeDef *adc){
 }
 
 void ADC_Start_DMA(){
-  if(ADC_Status!=ADC_Waiting){
+  if(ADC_Status!=ADC_Waiting){    // Check if PWM is enabled
     Error_Handler();
   }
+  if( PWM_GPIO_Port->IDR & PWM_Pin ){                                         // Check if PWM is enabled
+    buzzer_short_beep();
+    ADC_Status = ADC_Idle;                                                      // Set the ADC status
+    return;
+  }
+  HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 1);
   ADC_Status=ADC_Sampling;
   if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)ADC_measures, sizeof(ADC_measures)/ sizeof(uint16_t) )!=HAL_OK){  // Start ADC conversion now
     Error_Handler();
@@ -125,6 +131,7 @@ void ADC_Stop_DMA(void){
   else{
     HAL_ADC_Stop(adc_device);
   }
+  HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 0);
 }
 
 /*
@@ -220,28 +227,21 @@ void handle_ADC_Data(void){
 
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
-
 	if(_hadc == adc_device){
-		ADC_Stop_DMA();												                                      // Reset the ADC
-		if(ADC_Status!=ADC_Sampling){                                               // Check correct status
+	  if(ADC_Status!=ADC_Sampling){
       Error_Handler();
     }
-    if(Iron.savingData){                                                        // Data was being saved, ignore ADC data
-      if(Iron.savingData==2){                                                   // because saving takes time, it usually will overlap with the PWM and cause wrong readings
-        Iron.savingData=0;                                                      // Clear flag
-      }                                                                       
-    }
-    else{
-      handle_ADC_Data();                                                        // Process the new data.
-    }
-		
+
+	  if( PWM_GPIO_Port->IDR & PWM_Pin ){                                         // Check if PWM is enabled
+	    buzzer_short_beep();
+	  }
+	  else{
+	    handle_ADC_Data();
+	  }
+
+	  ADC_Stop_DMA();												                                      // Reset the ADC
+
 		handleIron();                                                               // Handle iron
-		if(Iron.updatePwm==needs_update){
-      Iron.updatePwm=no_update;
-      __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.Profile.pwmPeriod);
-      __HAL_TIM_SET_AUTORELOAD(Iron.Delay_Timer,systemSettings.Profile.pwmDelay);
-    }
-		__HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);	    // Load new calculated PWM Duty
 		HAL_IWDG_Refresh(&hiwdg);							                                      // Clear watchdog
 		ADC_Status = ADC_Idle;                                                      // Set the ADC status
 	}

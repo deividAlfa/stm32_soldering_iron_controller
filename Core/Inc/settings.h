@@ -107,7 +107,7 @@ typedef struct tipData {
 	pid_values_t PID;
 }tipData;
 
-__attribute__ ((aligned (4))) typedef struct{
+typedef struct{
 	uint8_t     NotInitialized;
 	uint8_t     ID;
 	uint8_t     impedance;
@@ -133,7 +133,7 @@ __attribute__ ((aligned (4))) typedef struct{
   tipData     tip[TipSize];
 }profile_t;
 
-__attribute__ ((aligned (4))) typedef struct{
+typedef struct{
   uint8_t     NotInitialized;                     // Always 1 if flash is erased
 	uint8_t     contrast;
 	uint8_t     OledOffset;
@@ -156,15 +156,7 @@ __attribute__ ((aligned (4))) typedef struct{
   uint32_t    version;                              // Used to track if a reset is needed on firmware upgrade
 }settings_t;
 
-typedef struct{
-	profile_t   Profile[ProfileSize];
-	uint32_t    ProfileChecksum[ProfileSize];
-	settings_t  settings;
-	uint32_t    settingsChecksum;
-}flashSettings_t;
-
-
-typedef struct{
+typedef __attribute__((aligned(4)))  struct{
 	settings_t  settings;
 	uint32_t    settingsChecksum;
 	profile_t   Profile;
@@ -172,10 +164,18 @@ typedef struct{
 	bool        setupMode;
 }systemSettings_t;
 
+typedef __attribute__((aligned(4)))  struct{
+	profile_t   Profile[ProfileSize];
+	uint32_t    ProfileChecksum[ProfileSize];
+	settings_t  settings;
+	uint32_t    settingsChecksum;
+}flashSettings_t;
+
 extern systemSettings_t systemSettings;
 extern flashSettings_t* flashSettings;
 
 void Diag_init(void);
+void checkSettings(void);
 void saveSettings(bool wipeAllProfileData);
 void restoreSettings();
 uint32_t ChecksumSettings(settings_t* settings);

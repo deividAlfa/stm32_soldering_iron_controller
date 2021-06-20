@@ -156,30 +156,46 @@ void Program_Handler(void) {
 
 }
 
+
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim){
 	if(_htim == Iron.Pwm_Timer){																			// PWM output low
+	  __HAL_TIM_CLEAR_FLAG(Iron.Pwm_Timer,TIM_FLAG_CC1|TIM_FLAG_CC2|TIM_FLAG_CC3|TIM_FLAG_CC4);   // Clear compare flags
 	  // If there are pending PWM settings to be applied, apply them before new calculation
 		if(ADC_Status==ADC_Idle){																		    // ADC idle
 			ADC_Status = ADC_Waiting;																	    // Update status to waiting
 			__HAL_TIM_ENABLE(Iron.Delay_Timer);														// Enable Delay Timer and start counting (One-pulse mode)
 		}
 		else if(ADC_Status==ADC_Sampling){                              // ADC busy?
-		  if(!Iron.savingData){                                         // Not caused by data save
-		    Error_Handler();                                            // Error
-		  }
+	    ADC_Stop_DMA();                                               // Stop ADC. Skip conversion.
+	    ADC_Status = ADC_Idle;                                        // Set the ADC status
 		}
-		else if(ADC_Status==ADC_Waiting){                                   // ADC waiting(Delay timer running)
-		  __HAL_TIM_DISABLE(Iron.Delay_Timer);
-		  __HAL_TIM_SET_COUNTER(Iron.Delay_Timer,0);                    // Clear counter
-		  __HAL_TIM_ENABLE(Iron.Delay_Timer);
+		else if(ADC_Status==ADC_Waiting){                               // ADC waiting(Delay timer running)
+		  if(Iron.Delay_Timer->Instance->CR1 & TIM_CR1_CEN){            // Delay timer running?
+        __disable_irq();
+        __HAL_TIM_DISABLE(Iron.Delay_Timer);                          // Stop timer
+        __HAL_TIM_SET_COUNTER(Iron.Delay_Timer,0);                    // Clear counter
+        __HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);       // Clear flag
+        __HAL_TIM_ENABLE(Iron.Delay_Timer);                           // Re-enable
+        __enable_irq();
+		  }
 	  }
 	}
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
+  if(_htim == Iron.Pwm_Timer){                                    // Delay Timer?
+    __HAL_TIM_CLEAR_FLAG(Iron.Pwm_Timer,TIM_FLAG_UPDATE);         // Clear PWM Timer flag
+    if(Iron.updatePwm==needs_update){
+      Iron.updatePwm=no_update;
+      __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.Profile.pwmPeriod);
+      __HAL_TIM_SET_AUTORELOAD(Iron.Delay_Timer,systemSettings.Profile.pwmDelay);
+    }
+    __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);      // Load new calculated PWM Duty
+
+  }
 	if(_htim == Iron.Delay_Timer){																		// Delay Timer?
-	  __HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);				// Clear Delay Timer flag
-    ADC_Start_DMA();                                              // Start ADC conversion
+	  __HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);				  // Clear Delay Timer flag
+    ADC_Start_DMA();                                                // Start ADC conversion
 	}
 }
 
