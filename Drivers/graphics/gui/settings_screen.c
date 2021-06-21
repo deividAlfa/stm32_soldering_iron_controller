@@ -361,16 +361,27 @@ static void * getPWMPeriod() {
 }
 static void setPWMPeriod(uint32_t *val) {
 	uint16_t period=(*val*100)-1;
-	setPwmPeriod(period);
+	if(period>systemSettings.Profile.pwmDelay+199){
+	  setPwmPeriod(period);
+  }
+	else{
+	  uint16_t t=(((systemSettings.Profile.pwmDelay+50)/100)+2)*100;
+	  setPwmPeriod(t);
+	}
 }
 
 static void * getPWMDelay() {
-	temp=(systemSettings.Profile.pwmDelay+1)/100;
+	temp=(systemSettings.Profile.pwmDelay+1)/10;
 	return &temp;
 }
 static void setPWMDelay(uint32_t *val) {
-	uint16_t delay=(*val*100)-1;
-	setPwmDelay(delay);
+	uint16_t delay=(*val*10)-1;
+	if(delay<(systemSettings.Profile.pwmPeriod-199)){
+	  setPwmDelay(delay);
+	}
+	else{
+	  setPwmDelay(systemSettings.Profile.pwmPeriod-200);
+	}
 }
 
 static void * getMaxTemp() {
@@ -1344,7 +1355,7 @@ void settings_screen_setup(screen_t *scr) {
 	dis->endString="mS";
 	dis->reservedChars=5;
 	dis->getData = &getPWMPeriod;
-	edit->big_step = 20;
+	edit->big_step = 10;
 	edit->step = 1;
 	edit->setData = (void (*)(void *))&setPWMPeriod;
 	edit->max_value = 500;
@@ -1356,12 +1367,13 @@ void settings_screen_setup(screen_t *scr) {
   edit=&editable_IRON_ADCDelay;
   editableDefaultsInit(edit,widget_editable);
 	dis->endString="mS";
-	dis->reservedChars=5;
+	dis->reservedChars=7;
+  dis->number_of_dec = 1;
 	dis->getData = &getPWMDelay;
 	edit->big_step = 10;
 	edit->step = 1;
 	edit->setData = (void (*)(void *))&setPWMDelay;
-	edit->max_value = 100;
+	edit->max_value = 500;
 	edit->min_value = 1;
 
 	//********[ Filter Mode Widget ]***********************************************************
