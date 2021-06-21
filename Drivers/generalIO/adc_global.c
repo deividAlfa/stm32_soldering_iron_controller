@@ -113,10 +113,7 @@ void ADC_Start_DMA(){
   }
   if( PWM_GPIO_Port->IDR & PWM_Pin ){                                         // Check if PWM is enabled
     buzzer_short_beep();
-    ADC_Status = ADC_Idle;                                                      // Set the ADC status
-    return;
   }
-  //HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 1);
   ADC_Status=ADC_Sampling;
   if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)ADC_measures, sizeof(ADC_measures)/ sizeof(uint16_t) )!=HAL_OK){  // Start ADC conversion now
     Error_Handler();
@@ -131,7 +128,6 @@ void ADC_Stop_DMA(void){
   else{
     HAL_ADC_Stop(adc_device);
   }
-  //HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 0);
 }
 
 /*
@@ -231,18 +227,15 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
 	  if(ADC_Status!=ADC_Sampling){
       Error_Handler();
     }
-
+    ADC_Status = ADC_Idle;
+    HAL_IWDG_Refresh(&hiwdg);
 	  if( PWM_GPIO_Port->IDR & PWM_Pin ){                                         // Check if PWM is enabled
 	    buzzer_short_beep();
 	  }
-	  else{
-	    handle_ADC_Data();
-	  }
+	  handle_ADC_Data();
 
 	  ADC_Stop_DMA();												                                      // Reset the ADC
 
 		handleIron();                                                               // Handle iron
-		HAL_IWDG_Refresh(&hiwdg);							                                      // Clear watchdog
-		ADC_Status = ADC_Idle;                                                      // Set the ADC status
 	}
 }
