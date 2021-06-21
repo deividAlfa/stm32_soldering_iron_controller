@@ -232,91 +232,91 @@ void resetCurrentProfile(void){
   if(systemSettings.settings.currentProfile==profile_T12){
     systemSettings.Profile.ID = profile_T12;
     for(uint8_t x = 0; x < TipSize; x++) {
-      systemSettings.Profile.tip[x].calADC_At_250  = T12_Cal250;
-      systemSettings.Profile.tip[x].calADC_At_350  = T12_Cal350;    // These values are way lower, but better to be safe than sorry
-      systemSettings.Profile.tip[x].calADC_At_450  = T12_Cal450;    // User needs to calibrate its station
-      systemSettings.Profile.tip[x].PID.Kp         = 6500;          // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki         = 2500;          // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd         = 3000;          // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI      = 30;             // val = /100
-      systemSettings.Profile.tip[x].PID.minI       = 0;             // val = /100
-      strcpy(systemSettings.Profile.tip[x].name, str);              // Empty name
+      systemSettings.Profile.tip[x].calADC_At_250   = T12_Cal250;
+      systemSettings.Profile.tip[x].calADC_At_350   = T12_Cal350;     // These values are way lower, but better to be safe than sorry
+      systemSettings.Profile.tip[x].calADC_At_450   = T12_Cal450;     // User needs to calibrate its station
+      systemSettings.Profile.tip[x].PID.Kp          = 7500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 4000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 1000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 40;             // val = /100
+      systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
+      strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
     strcpy(systemSettings.Profile.tip[0].name, "T12 ");
-    systemSettings.Profile.currentNumberOfTips  = 1;
-    systemSettings.Profile.currentTip           = 0;
-    systemSettings.Profile.impedance            = 80;                // 8.0 Ohms
-    systemSettings.Profile.power                = 80;                // 80W
-    systemSettings.Profile.noIronValue          = 4000;
-    systemSettings.Profile.Cal250_default        = T12_Cal250;
-    systemSettings.Profile.Cal350_default        = T12_Cal350;
-    systemSettings.Profile.Cal450_default        = T12_Cal450;
+    systemSettings.Profile.currentNumberOfTips      = 1;
+    systemSettings.Profile.currentTip               = 0;
+    systemSettings.Profile.impedance                = 80;             // 8.0 Ohms
+    systemSettings.Profile.power                    = 80;             // 80W
+    systemSettings.Profile.noIronValue              = 4000;
+    systemSettings.Profile.Cal250_default           = T12_Cal250;
+    systemSettings.Profile.Cal350_default           = T12_Cal350;
+    systemSettings.Profile.Cal450_default           = T12_Cal450;
 
   }
 
   else if(systemSettings.settings.currentProfile==profile_C245){
     systemSettings.Profile.ID = profile_C245;
     for(uint8_t x = 0; x < TipSize; x++) {
-      systemSettings.Profile.tip[x].calADC_At_250 = C245_Cal250;
-      systemSettings.Profile.tip[x].calADC_At_350 = C245_Cal350;
-      systemSettings.Profile.tip[x].calADC_At_450 = C245_Cal450;
-      systemSettings.Profile.tip[x].PID.Kp        = 6500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki        = 2500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd        = 3000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI      = 30;             // val = /100
-      systemSettings.Profile.tip[x].PID.minI      = 0;              // val = /100
-      strcpy(systemSettings.Profile.tip[x].name, str);              // Empty name
+      systemSettings.Profile.tip[x].calADC_At_250   = C245_Cal250;
+      systemSettings.Profile.tip[x].calADC_At_350   = C245_Cal350;
+      systemSettings.Profile.tip[x].calADC_At_450   = C245_Cal450;
+      systemSettings.Profile.tip[x].PID.Kp          = 6500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 2500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 3000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 30;             // val = /100
+      systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
+      strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
     strcpy(systemSettings.Profile.tip[0].name, "C245");
-    systemSettings.Profile.currentNumberOfTips  = 1;
-    systemSettings.Profile.currentTip           = 0;
-    systemSettings.Profile.impedance            = 26;
-    systemSettings.Profile.power                = 150;
-    systemSettings.Profile.noIronValue          = 4000;
-    systemSettings.Profile.Cal250_default        = C245_Cal250;
-    systemSettings.Profile.Cal350_default        = C245_Cal350;
-    systemSettings.Profile.Cal450_default        = C245_Cal450;
+    systemSettings.Profile.currentNumberOfTips      = 1;
+    systemSettings.Profile.currentTip               = 0;
+    systemSettings.Profile.impedance                = 26;
+    systemSettings.Profile.power                    = 150;
+    systemSettings.Profile.noIronValue              = 4000;
+    systemSettings.Profile.Cal250_default           = C245_Cal250;
+    systemSettings.Profile.Cal350_default           = C245_Cal350;
+    systemSettings.Profile.Cal450_default           = C245_Cal450;
   }
 
   else if(systemSettings.settings.currentProfile==profile_C210){
     systemSettings.Profile.ID = profile_C210;
     for(uint8_t x = 0; x < TipSize; x++) {
-      systemSettings.Profile.tip[x].calADC_At_250 = C210_Cal250;
-      systemSettings.Profile.tip[x].calADC_At_350 = C210_Cal350;
-      systemSettings.Profile.tip[x].calADC_At_450 = C210_Cal450;
-      systemSettings.Profile.tip[x].PID.Kp        = 6500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki        = 2500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd        = 3000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI      = 30;             // val = /100
-      systemSettings.Profile.tip[x].PID.minI      = 0;              // val = /100
-      strcpy(systemSettings.Profile.tip[x].name, str);              // Empty name
+      systemSettings.Profile.tip[x].calADC_At_250   = C210_Cal250;
+      systemSettings.Profile.tip[x].calADC_At_350   = C210_Cal350;
+      systemSettings.Profile.tip[x].calADC_At_450   = C210_Cal450;
+      systemSettings.Profile.tip[x].PID.Kp          = 6500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 2500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 3000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 30;             // val = /100
+      systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
+      strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
     strcpy(systemSettings.Profile.tip[0].name, "C210");
-    systemSettings.Profile.currentNumberOfTips  = 1;
-    systemSettings.Profile.currentTip           = 0;
-    systemSettings.Profile.power                = 80;
-    systemSettings.Profile.impedance            = 21;
-    systemSettings.Profile.noIronValue          = 1200;
-    systemSettings.Profile.Cal250_default        = C210_Cal250;
-    systemSettings.Profile.Cal350_default        = C210_Cal350;
-    systemSettings.Profile.Cal450_default        = C210_Cal450;
+    systemSettings.Profile.currentNumberOfTips      = 1;
+    systemSettings.Profile.currentTip             = 0;
+    systemSettings.Profile.power                  = 80;
+    systemSettings.Profile.impedance              = 21;
+    systemSettings.Profile.noIronValue            = 1200;
+    systemSettings.Profile.Cal250_default         = C210_Cal250;
+    systemSettings.Profile.Cal350_default         = C210_Cal350;
+    systemSettings.Profile.Cal450_default         = C210_Cal450;
   }
   else{
     Error_Handler();  // We shouldn't get here!
   }
-  systemSettings.Profile.CalNTC                = 25;
-  systemSettings.Profile.sleepTimeout         = 5;
-  systemSettings.Profile.standbyTimeout       = 5;
-  systemSettings.Profile.standbyTemperature   = 180;
-  systemSettings.Profile.UserSetTemperature   = 320;
-  systemSettings.Profile.MaxSetTemperature    = 450;
-  systemSettings.Profile.MinSetTemperature    = 180;
-  systemSettings.Profile.pwmPeriod            = 19999;
-  systemSettings.Profile.pwmDelay              = 1999;
-  systemSettings.Profile.filterFactor          = 2;
-  systemSettings.Profile.filterMode            = filter_ema;
-  systemSettings.Profile.tempUnit              = mode_Celsius;
-  systemSettings.Profile.NotInitialized        = initialized;
+  systemSettings.Profile.CalNTC                   = 25;
+  systemSettings.Profile.sleepTimeout             = 5;
+  systemSettings.Profile.standbyTimeout           = 5;
+  systemSettings.Profile.standbyTemperature       = 180;
+  systemSettings.Profile.UserSetTemperature       = 320;
+  systemSettings.Profile.MaxSetTemperature        = 450;
+  systemSettings.Profile.MinSetTemperature        = 180;
+  systemSettings.Profile.pwmPeriod                = 19999;
+  systemSettings.Profile.pwmDelay                 = 1999;
+  systemSettings.Profile.filterFactor             = 2;
+  systemSettings.Profile.filterMode               = filter_ema;
+  systemSettings.Profile.tempUnit                 = mode_Celsius;
+  systemSettings.Profile.NotInitialized           = initialized;
 }
 
 void loadProfile(uint8_t profile){
