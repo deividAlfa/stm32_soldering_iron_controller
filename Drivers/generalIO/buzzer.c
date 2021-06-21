@@ -25,27 +25,32 @@ void buzzer_init() {
 }
 
 void buzzer_short_beep() {
-	if(!systemSettings.settings.buzzerMode){ return; }
 	buzzer_state = STATE_SB;
-	BUZZER_ON;
+	if(systemSettings.settings.buzzerMode){
+	  BUZZER_ON;
+	}
 	last_time = HAL_GetTick();
 }
 void buzzer_long_beep() {
-	if(!systemSettings.settings.buzzerMode){ return; }
 	buzzer_state = STATE_LB;
-	BUZZER_ON;
+  if(systemSettings.settings.buzzerMode){
+    BUZZER_ON;
+  }
 	last_time = HAL_GetTick();
 }
 void buzzer_fatal_beep() {
-	if(!systemSettings.settings.buzzerMode){ return; }
 	buzzer_state = STATE_FB;
-	BUZZER_ON;
+  if(systemSettings.settings.buzzerMode){
+    BUZZER_ON;
+  }
 	last_time = HAL_GetTick();
 }
 void buzzer_alarm_start(){
 	if(!systemSettings.settings.buzzerMode){ return; }
 	buzzer_state = STATE_AL_H;
-	BUZZER_ON;
+  if(systemSettings.settings.buzzerMode){
+    BUZZER_ON;
+  }
 	last_time = HAL_GetTick();
 }
 void buzzer_alarm_stop() {
@@ -54,13 +59,6 @@ void buzzer_alarm_stop() {
 }
 void handle_buzzer() {
 	uint32_t delta = HAL_GetTick() - last_time;
-	if(!systemSettings.settings.buzzerMode){
-		if(buzzer_state != STATE_IDLE){
-			buzzer_state = STATE_IDLE;
-			BUZZER_OFF;
-		}
-		return;
-	}
 	switch (buzzer_state) {
 	case STATE_SB:
 		if (delta > SHORT_BEEP) {
@@ -90,7 +88,9 @@ void handle_buzzer() {
 	case STATE_AL_L:
 		if(delta > ALARM_LOW){
 			buzzer_state=STATE_AL_H;
-			BUZZER_ON;
+		  if(systemSettings.settings.buzzerMode){
+		    BUZZER_ON;
+		  }
 			last_time = HAL_GetTick();
 		}
 		break;
