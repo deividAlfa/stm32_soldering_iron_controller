@@ -63,7 +63,7 @@ First, make sure to read the [Operations guide](Readme_files/Operation.md)!<br>
 Be warned, usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.<br>
 For KSGER boards, some can be found over internet.<br>
 The simplest way to not loose the original FW is actually to buy a new MCU, replace it, and store the original MCU in a safe place.<br>
-Any difference in the pinout will require firmware tuning, although easing that that is one of the main proposits of this firmware.<br>
+Any difference in the pinout will require firmware tuning, although one of the main proposits of this firmware is easing that.<br>
 There are some hacks / vulnerabilities that can be used to backup protected firmware, more details here:<br>
 **[STM32 power glitching timing attack](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/tools/software/STM32CubeIDE#option-2-power-glitching-timing-attack
 )**<br>
