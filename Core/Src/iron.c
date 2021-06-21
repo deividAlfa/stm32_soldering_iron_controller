@@ -356,23 +356,15 @@ void updatePowerLimit(void){
 #endif
 
 // Loads the PWM delay
-bool setPwmDelay(uint16_t delay){
-  if(systemSettings.Profile.pwmPeriod>delay && delay>0){
-    systemSettings.Profile.pwmDelay=delay;
-    Iron.updatePwm=needs_update;
-    return 0;
-  }
-  return 1;
+void setPwmDelay(uint16_t delay){
+ systemSettings.Profile.pwmDelay=delay;
+ Iron.updatePwm=needs_update;
 }
 
 // Loads the PWM period
-bool setPwmPeriod(uint16_t period){
-  if(systemSettings.Profile.pwmDelay<period && period>90){
-    systemSettings.Profile.pwmPeriod=period;
-    Iron.updatePwm=needs_update;
-    return 0;
-  }
-  return 1;
+void setPwmPeriod(uint16_t period){
+  systemSettings.Profile.pwmPeriod=period;
+  Iron.updatePwm=needs_update;
 }
 
 // Sets no Iron detection threshold
