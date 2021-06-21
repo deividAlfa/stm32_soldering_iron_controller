@@ -116,7 +116,7 @@ void ADC_Start_DMA(){
     ADC_Status = ADC_Idle;                                                      // Set the ADC status
     return;
   }
-  HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 1);
+  //HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 1);
   ADC_Status=ADC_Sampling;
   if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)ADC_measures, sizeof(ADC_measures)/ sizeof(uint16_t) )!=HAL_OK){  // Start ADC conversion now
     Error_Handler();
@@ -131,7 +131,7 @@ void ADC_Stop_DMA(void){
   else{
     HAL_ADC_Stop(adc_device);
   }
-  HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 0);
+  //HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 0);
 }
 
 /*
