@@ -8,11 +8,9 @@
 #include "adc_global.h"
 #include "buzzer.h"
 #include "iron.h"
-
-
-
-
-
+#include "tempsensors.h"
+#include "voltagesensors.h"
+#include "board.h"
 
 
 volatile adc_measures_t ADC_measures[ADC_BFSIZ];
@@ -114,6 +112,9 @@ void ADC_Start_DMA(){
   if( PWM_GPIO_Port->IDR & PWM_Pin ){                                         // Check if PWM is enabled
     buzzer_short_beep();
   }
+  #ifdef DEBUG
+  HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 1);                           // Toggle TEST High (Start of ADC conversion)
+  #endif
   ADC_Status=ADC_Sampling;
   if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)ADC_measures, sizeof(ADC_measures)/ sizeof(uint16_t) )!=HAL_OK){  // Start ADC conversion now
     Error_Handler();
@@ -178,15 +179,24 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 #define SMOOTH_START  50       // Start difference to apply partial filtering override
 #define SMOOTH_END    150       // Max difference to completely override filter
 #define SMOOTH_DIFF  (SMOOTH_END-SMOOTH_START)
+#ifdef DEBUG
+    extern bool dbg_NewData;
+#endif
 
 		int32_t diff = (int32_t)avg_data - (int32_t)(InputData->EMA_of_Input>>12); // Check difference between stored EMA and last average
 		int32_t abs_diff=abs(diff);
 
 		if(abs_diff>SMOOTH_END){															                      // If huge (Filtering will delay too much the response)
 			InputData->EMA_of_Input = RawData;					                              // Reset filter
+      #ifdef DEBUG
+			dbg_NewData=1;
+      #endif
 		}
 		else if(abs_diff>SMOOTH_START){														                  // If medium, smooth the difference
 		  InputData->EMA_of_Input += ((diff*(abs_diff-SMOOTH_START))/SMOOTH_DIFF)<<12;
+      #ifdef DEBUG
+		  dbg_NewData=1;
+      #endif
 		}
 		else{
 			InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
@@ -234,18 +244,40 @@ void handle_ADC_Data(void){
 
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
+#ifdef DEBUG
+    extern bool dbg_NewData;
+    extern uint16_t dbg_prev_TIP_Raw, dbg_prev_TIP, dbg_prev_VIN, dbg_prev_PWR;
+    extern int16_t dbg_prev_NTC;
+    bool dbg_t=dbg_NewData;
+#endif
 	if(_hadc == adc_device){
 	  if(ADC_Status!=ADC_Sampling){
       Error_Handler();
     }
+	  ADC_Stop_DMA();                                                             // Reset the ADC
     ADC_Status = ADC_Idle;
-    HAL_IWDG_Refresh(&hiwdg);
+    #ifdef DEBUG
+    HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 0);                             // Toggle TEST Low (End of ADC conversion)
+    #endif
+
+    HAL_IWDG_Refresh(&hiwdg);                                                   // This is the main reset of the watchdog
+                                                                                // If anything critical stalls (PWM, ADC, hanlleIron) this won't be updated anymore
+                                                                                // causing a system reset
+
 	  if( PWM_GPIO_Port->IDR & PWM_Pin ){                                         // Check if PWM is enabled
 	    buzzer_short_beep();
 	  }
 	  handle_ADC_Data();
 
-	  ADC_Stop_DMA();												                                      // Reset the ADC
+#ifdef DEBUG
+    if(dbg_t!=dbg_NewData){                                                         // Save values before handleIron() updates them
+      dbg_prev_TIP_Raw=last_TIP_Raw;
+      dbg_prev_TIP=last_TIP;
+      dbg_prev_VIN=last_VIN;
+      dbg_prev_NTC=last_NTC;
+      dbg_prev_PWR=Iron.CurrentIronPower;
+    }
+#endif
 
 		handleIron();                                                               // Handle iron
 	}

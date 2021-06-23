@@ -52,7 +52,11 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+#ifdef DEBUG
+uint16_t dbg_prev_TIP_Raw, dbg_prev_TIP, dbg_prev_VIN, dbg_prev_PWR;
+int16_t dbg_prev_NTC;
+bool dbg_NewData;
+#endif
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,7 +65,16 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+#ifdef DEBUG
+int _write(int32_t file, uint8_t *ptr, int32_t len)
+{
+  for (int i = 0; i < len; i++)
+  {
+    ITM_SendChar(*ptr++);
+  }
+  return len;
+}
+#endif
 void Init(void){
 #if defined OLED_SOFT_SPI || defined OLED_SOFT_I2C
 	  ssd1306_init(&FILL_DMA);
@@ -122,9 +135,23 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+#ifdef DEBUG
+    if(NewData){
+      NewData=0;
+      Iron.lastActivityTime=HAL_GetTick();
+      Iron.newActivity=1;
+      __disable_irq();
+
+      printf("     LAST  VAL    RAW   VAL      PREV  VAL    RAW   VAL\n"
+             "TIP: %4u  %3u\260C  %4u  %3u\260C    %4u  %3u\260C  %4u  %3u\260C \n"
+             "PID: %3u%%                        %3u%%\n\n",
+            TIP.last_avg, dbg_last_TIP, TIP.last_raw, dbg_last_TIP_Raw, TIP.prev_avg, dbg_prev_TIP, TIP.prev_raw, dbg_prev_TIP_Raw,
+            Iron.CurrentIronPower, dbg_prev_PWR);
+      __enable_irq();
+    }
+#endif
     checkSettings();                                                                          // Check if settings were modified
     oled_handle();                                                                            // Handle oled drawing
-
   }
   /* USER CODE END 3 */
 }
