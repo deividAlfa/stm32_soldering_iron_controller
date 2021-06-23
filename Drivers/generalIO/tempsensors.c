@@ -7,7 +7,7 @@
 
 #include "tempsensors.h"
 #include "math.h"
-#define temp_minC  100                 // Minimum calibration temperature in degrees of Celsius
+#define temp_minC  50                 // Minimum calibration temperature in degrees of Celsius
 #define temp_maxC  480                 // Maximum calibration temperature in degrees of Celsius
 static tipData *currentTipData;
 uint16_t last_TIP_Raw;

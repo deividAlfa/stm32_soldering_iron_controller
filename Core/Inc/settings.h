@@ -16,9 +16,11 @@
 #define TipSize			  10		                                      // Number of tips for each profile
 #define TipCharSize		5		                                        // String size for each tip name (Including null terminator)
 
+#ifndef T12_Cal250
 #define T12_Cal250		1100                                        // Default values to be used in the calibration if not adjusted
 #define T12_Cal350		1200                                        // TODO: Move these values to the board profile, so each board can have a closer default calibration
 #define T12_Cal450		1300                                        // But we don't have calibration data from users!
+#endif
 
 #define C210_Cal250		300
 #define C210_Cal350		400
@@ -86,9 +88,6 @@ enum{
 
 	initialized		      = 0,
 
-	filter_avg		      = 0,
-	filter_ema		      = 1,
-
 	buzzer_Off		      = 0,
 	buzzer_On		        = 1,
 
@@ -114,7 +113,6 @@ typedef struct{
 	uint8_t     tempUnit;
 	uint8_t     currentNumberOfTips;
 	uint8_t     currentTip;
-	uint8_t     filterMode;
 	uint8_t     filterFactor;
 	int8_t      CalNTC;
 	uint16_t    UserSetTemperature;

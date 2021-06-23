@@ -311,10 +311,9 @@ void resetCurrentProfile(void){
   systemSettings.Profile.UserSetTemperature       = 320;
   systemSettings.Profile.MaxSetTemperature        = 450;
   systemSettings.Profile.MinSetTemperature        = 180;
-  systemSettings.Profile.pwmPeriod                = 19999;
-  systemSettings.Profile.pwmDelay                 = 1999;
-  systemSettings.Profile.filterFactor             = 2;
-  systemSettings.Profile.filterMode               = filter_ema;
+  systemSettings.Profile.pwmPeriod                = 1999;
+  systemSettings.Profile.pwmDelay                 = 30;
+  systemSettings.Profile.filterFactor             = 4;
   systemSettings.Profile.tempUnit                 = mode_Celsius;
   systemSettings.Profile.NotInitialized           = initialized;
 }

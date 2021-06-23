@@ -101,7 +101,6 @@ static comboBox_item_t comboitem_IRON_MaxTemp;
 static comboBox_item_t comboitem_IRON_MinTemp;
 static comboBox_item_t comboitem_IRON_PWMPeriod;
 static comboBox_item_t comboitem_IRON_ADCDelay;
-static comboBox_item_t comboitem_IRON_FilterMode;
 static comboBox_item_t comboitem_IRON_filterFactor;
 static comboBox_item_t comboitem_IRON_errorDelay;
 static comboBox_item_t comboitem_IRON_ADCLimit;
@@ -119,7 +118,6 @@ static editable_widget_t editable_IRON_MinTemp;
 static editable_widget_t editable_IRON_ADCLimit;
 static editable_widget_t editable_IRON_PWMPeriod;
 static editable_widget_t editable_IRON_ADCDelay;
-static editable_widget_t editable_IRON_FilterMode;
 static editable_widget_t editable_IRON_filterFactor;
 static editable_widget_t editable_IRON_errorDelay;
 
@@ -540,15 +538,6 @@ static void setInitMode(uint32_t *val) {
 	systemSettings.settings.initMode = *val;
 }
 
-static void * getFilterMode() {
-	temp = systemSettings.Profile.filterMode;
-	return &temp;
-}
-static void setFilterMode(uint32_t *val) {
-	systemSettings.Profile.filterMode = *val;
-	comboitem_IRON_filterFactor.enabled = systemSettings.Profile.filterMode;  //0=AVG, 1=EMA
-}
-
 static void * getfilterFactor() {
 	temp = systemSettings.Profile.filterFactor;
 	return &temp;
@@ -845,12 +834,7 @@ void IRONTIPS_Settings_onEnter(screen_t *scr){
 void IRON_onEnter(screen_t *scr){
   setSettingsScrTempUnit();
 	comboResetIndex(&comboWidget_IRON);
-	if(systemSettings.Profile.filterMode == filter_avg){
-		comboitem_IRON_filterFactor.enabled=0;
-	}
-	else{
-		comboitem_IRON_filterFactor.enabled=1;
-	}
+
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -1383,20 +1367,6 @@ void settings_screen_setup(screen_t *scr) {
 	edit->max_value = 500;
 	edit->min_value = 1;
 
-	//********[ Filter Mode Widget ]***********************************************************
-	//
-  dis=&editable_IRON_FilterMode.inputData;
-  edit=&editable_IRON_FilterMode;
-  editableDefaultsInit(edit,widget_multi_option);
-	dis->getData = &getFilterMode;
-	edit->big_step = 1;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setFilterMode;
-	edit->max_value = filter_ema;
-	edit->min_value = filter_avg;
-	edit->options = filterMode;
-	edit->numberOfOptions = 2;
-
 	//********[ Filter Coefficient Widget ]***********************************************************
 	//
   dis=&editable_IRON_filterFactor.inputData;
@@ -1407,8 +1377,8 @@ void settings_screen_setup(screen_t *scr) {
 	edit->big_step = 1;
 	edit->step = 1;
 	edit->setData = (void (*)(void *))&setfilterFactor;
-	edit->max_value = 4;
-	edit->min_value = 1;
+	edit->max_value = 8;
+	edit->min_value = 0;
 
 	//********[ No Iron Delay Widget ]***********************************************************
 	//
@@ -1440,8 +1410,7 @@ void settings_screen_setup(screen_t *scr) {
   #endif
 	comboAddEditable(&comboitem_IRON_PWMPeriod,w, 	    "PWM", 	      &editable_IRON_PWMPeriod);
 	comboAddEditable(&comboitem_IRON_ADCDelay, w,   	  "Delay", 	    &editable_IRON_ADCDelay);
-	comboAddMultiOption(&comboitem_IRON_FilterMode, w,  "Filter", 	  &editable_IRON_FilterMode);
-	comboAddEditable(&comboitem_IRON_filterFactor, w,   "Factor",		  &editable_IRON_filterFactor);
+	comboAddEditable(&comboitem_IRON_filterFactor, w,   "Filter",		  &editable_IRON_filterFactor);
 	comboAddEditable(&comboitem_IRON_ADCLimit, w, 	    "No iron",		&editable_IRON_ADCLimit);
 	comboAddEditable(&comboitem_IRON_errorDelay, w, 	  "Detect",	    &editable_IRON_errorDelay);
 	comboAddScreen(&comboitem_IRON_Back, w, 		        "BACK", 		  screen_settingsmenu);

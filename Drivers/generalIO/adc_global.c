@@ -106,7 +106,7 @@ void ADC_Init(ADC_HandleTypeDef *adc){
 }
 
 void ADC_Start_DMA(){
-  if(ADC_Status!=ADC_Waiting){    // Check if PWM is enabled
+  if(ADC_Status!=ADC_Waiting){
     Error_Handler();
   }
   if( PWM_GPIO_Port->IDR & PWM_Pin ){                                         // Check if PWM is enabled
@@ -162,10 +162,10 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 	avg_data = adc_sum / (ADC_BFSIZ -2) ;
 	InputData->last_raw = avg_data;
 	
-	if(systemSettings.Profile.filterMode == filter_ema) {					// Advanced filtering enabled?
+	if(systemSettings.Profile.filterFactor > 0) {					        // Advanced filtering enabled?
 
-		if(systemSettings.Profile.filterFactor>4){						      // Limit coefficient (3 is already to much in most cases)
-			systemSettings.Profile.filterFactor=4;
+		if(systemSettings.Profile.filterFactor>8){						      // Limit coefficient, more than 8 will cause overflow
+			systemSettings.Profile.filterFactor=8;
 		}
 	  shift = systemSettings.Profile.filterFactor;                // Set EMA factor setting from system settings
 
