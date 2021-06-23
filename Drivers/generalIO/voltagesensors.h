@@ -11,6 +11,7 @@
 #include "adc_global.h"
 #ifdef USE_VIN
 uint16_t getSupplyVoltage_v_x10();
+extern uint16_t last_VIN;
 #endif
 #ifdef USE_VREF
 uint16_t getReferenceVoltage_mv_x10();

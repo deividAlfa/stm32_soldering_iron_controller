@@ -139,6 +139,9 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 	uint16_t max=0, min=0xffff;
 	uint8_t shift;
 
+	InputData->prev_avg=InputData->last_avg;
+	InputData->prev_raw=InputData->last_raw;
+
 	// Make the average of the ADC buffer
 	adc_sum = 0;
 	for(uint16_t x = 0; x < ADC_BFSIZ; x++) {
@@ -156,7 +159,7 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 
 	// Calculate average
 	avg_data = adc_sum / (ADC_BFSIZ -2) ;
-	InputData->last_RawAvg = avg_data;
+	InputData->last_raw = avg_data;
 	
 	if(systemSettings.Profile.filterMode == filter_ema) {					// Advanced filtering enabled?
 
@@ -169,20 +172,28 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 		uint32_t RawData = avg_data << 12;
 
 		// Compute EMA of input
+#define LIMIT_FILTERING
 
-		int32_t EMA = InputData->EMA_of_Input>>12;
-		int32_t diff = (int32_t)avg_data - EMA;										  // Check difference between stored EMA and last average
-		if(abs(diff)>300){															            // If huge (Filtering will delay too much the response)
-			InputData->EMA_of_Input = (uint32_t)avg_data<<12;					// Reset stored to last average
+#ifdef LIMIT_FILTERING
+#define SMOOTH_START  50       // Start difference to apply partial filtering override
+#define SMOOTH_END    150       // Max difference to completely override filter
+#define SMOOTH_DIFF  (SMOOTH_END-SMOOTH_START)
+
+		int32_t diff = (int32_t)avg_data - (int32_t)(InputData->EMA_of_Input>>12); // Check difference between stored EMA and last average
+		int32_t abs_diff=abs(diff);
+
+		if(abs_diff>SMOOTH_END){															                      // If huge (Filtering will delay too much the response)
+			InputData->EMA_of_Input = RawData;					                              // Reset filter
 		}
-		else if(abs(diff)>200){														          // If medium, smoothen the difference
-			uint8_t ratio = abs(diff)-200;										        // 1-99%
-			// Output: (100-ratio)% of old value + (ratio)% of new value
-			InputData->EMA_of_Input = ((uint32_t)(((avg_data*ratio)/100)+((EMA*(100-ratio))/100)))<<12;
+		else if(abs_diff>SMOOTH_START){														                  // If medium, smooth the difference
+		  InputData->EMA_of_Input += ((diff*(abs_diff-SMOOTH_START))/SMOOTH_DIFF)<<12;
 		}
 		else{
 			InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
 		}
+#else
+		InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
+#endif
 		InputData->last_avg = InputData->EMA_of_Input>>12;
 	}
 	else {

@@ -239,7 +239,7 @@ static int delTip(widget_t *w) {
     systemSettings.Profile.currentTip = systemSettings.Profile.currentNumberOfTips-1;                           // Select the previous tip in the list if so
   }
                                                                                                                 // Skip tip settings (As tip is now deleted)
-	return comboitem_IRONTIPS_Settings_Back.action_screen;                                                        // And teturn to main screen or system menu screen
+	return comboitem_IRONTIPS_Settings_Back.action_screen;                                                        // And return to main screen or system menu screen
 }
 
 #ifdef USE_VIN
@@ -671,7 +671,7 @@ int settings_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t 
 
 void edit_tip_screen_init(screen_t *scr) {
 	if(Tip_name_return == screen_edit_iron_tips &&  comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {   // If we were in iron tips screen and came from "Add new tip"
-		strcpy(str, "    ");                                                                                              // Copy blanck str
+		strcpy(str, "    ");                                                                                              // Copy blank str
 		widgetDisable(&Widget_IRONTIPS_Name_Delete);                                                                      // Disable delete widget
 	}
 	else {                                                                                                              // Already existing tip
@@ -708,26 +708,33 @@ int edit_tip_screen_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_S
 
   int val = default_screenProcessInput(scr, input, state);
 
-  if(input!=Rotate_Nothing && editable_IRONTIPS_Name_Edit.selectable.state==widget_edit){                       // If tip name is being edited and there's encoder activity
-    if(strcmp(str, "    ") == 0){                                                                               // Check that the name is not empty
-      widgetDisable(&Widget_IRONTIPS_Name_Save);                                                                // If empty, disable save widget
-    }
-    else{
-      uint8_t x = 0;
+  if(input!=Rotate_Nothing){
+    settingsTimer=HAL_GetTick();
 
-      while(x<TipSize){                                                                                         // Check existing name
-        if(strcmp(str, systemSettings.Profile.tip[x].name) == 0){                                               // If match is found, disable save widget
-          break;
-        }
-        x++;
-      }
-      if(x<TipSize){
-        widgetDisable(&Widget_IRONTIPS_Name_Save);
+    if(editable_IRONTIPS_Name_Edit.selectable.state==widget_edit){                                              // If tip name is being edited and there's encoder activity
+      if(strcmp(str, "    ") == 0){                                                                               // Check that the name is not empty
+        widgetDisable(&Widget_IRONTIPS_Name_Save);                                                                // If empty, disable save widget
       }
       else{
-        widgetEnable(&Widget_IRONTIPS_Name_Save);                                                               // Else, enable widget
+        uint8_t x = 0;
+
+        while(x<TipSize){                                                                                         // Check existing name
+          if(strcmp(str, systemSettings.Profile.tip[x].name) == 0){                                               // If match is found, disable save widget
+            break;
+          }
+          x++;
+        }
+        if(x<TipSize){
+          widgetDisable(&Widget_IRONTIPS_Name_Save);
+        }
+        else{
+          widgetEnable(&Widget_IRONTIPS_Name_Save);                                                               // Else, enable widget
+        }
       }
     }
+  }
+  else if((HAL_GetTick()-settingsTimer)>15000){
+    return screen_main;
   }
 
   return val;
@@ -760,12 +767,10 @@ void edit_iron_screen_onEnter(screen_t *scr) {
   else if(scr == &Screen_edit_tip_settings){
     Tip_name_return = screen_edit_tip_settings;
   }
-
 }
 int edit_iron_screen_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   if(input!=Rotate_Nothing){
     settingsTimer=HAL_GetTick();
-
   }
   if((input==LongClick) || (HAL_GetTick()-settingsTimer)>15000){
     return screen_main;
@@ -816,6 +821,8 @@ void Reset_confirmation_onEnter(screen_t *scr){
 // IRONTIPS Settings screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void IRONTIPS_Settings_onEnter(screen_t *scr){
+  settingsTimer=HAL_GetTick();
+
 	comboResetIndex(&comboWidget_IRONTIPS_Settings);
 	if(scr==&Screen_main){
 	  comboitem_IRONTIPS_Settings_Back.action_screen = screen_main;
@@ -1425,18 +1432,18 @@ void settings_screen_setup(screen_t *scr) {
   comboAddEditable(&comboitem_IRON_MaxTemp, w,        "Max temp",   &editable_IRON_MaxTemp);
   comboAddEditable(&comboitem_IRON_MinTemp, w,        "Min temp",   &editable_IRON_MinTemp);
   comboAddEditable(&comboitem_IRON_StandbyTemp, w,    "Stby temp",  &editable_IRON_StandbyTemp);
-  comboAddEditable(&comboitem_IRON_StandbyTime, w,    "Stby time",   &editable_IRON_StandbyTime);
-  comboAddEditable(&comboitem_IRON_SleepTime, w,      "Sleep time",  &editable_IRON_SleepTime);
+  comboAddEditable(&comboitem_IRON_StandbyTime, w,    "Stby time",  &editable_IRON_StandbyTime);
+  comboAddEditable(&comboitem_IRON_SleepTime, w,      "Sleep time", &editable_IRON_SleepTime);
   #ifdef USE_VIN
   comboAddEditable(&comboitem_IRON_Impedance, w,      "Heater ohm", &editable_IRON_Impedance);
 	comboAddEditable(&comboitem_IRON_Power, w, 		      "Power",		  &editable_IRON_Power);
   #endif
-	comboAddEditable(&comboitem_IRON_PWMPeriod,w, 	    "PWM Time", 	&editable_IRON_PWMPeriod);
-	comboAddEditable(&comboitem_IRON_ADCDelay, w,   	  "ADC Delay", 	&editable_IRON_ADCDelay);
-	comboAddMultiOption(&comboitem_IRON_FilterMode, w,  "Filtering", 	&editable_IRON_FilterMode);
+	comboAddEditable(&comboitem_IRON_PWMPeriod,w, 	    "PWM", 	      &editable_IRON_PWMPeriod);
+	comboAddEditable(&comboitem_IRON_ADCDelay, w,   	  "Delay", 	    &editable_IRON_ADCDelay);
+	comboAddMultiOption(&comboitem_IRON_FilterMode, w,  "Filter", 	  &editable_IRON_FilterMode);
 	comboAddEditable(&comboitem_IRON_filterFactor, w,   "Factor",		  &editable_IRON_filterFactor);
 	comboAddEditable(&comboitem_IRON_ADCLimit, w, 	    "No iron",		&editable_IRON_ADCLimit);
-	comboAddEditable(&comboitem_IRON_errorDelay, w, 	  "Detection",	&editable_IRON_errorDelay);
+	comboAddEditable(&comboitem_IRON_errorDelay, w, 	  "Detect",	    &editable_IRON_errorDelay);
 	comboAddScreen(&comboitem_IRON_Back, w, 		        "BACK", 		  screen_settingsmenu);
 
 
@@ -1534,6 +1541,7 @@ void settings_screen_setup(screen_t *scr) {
   oled_addScreen(sc,screen_edit_tip_settings);
   screen_setDefaults(sc);
   sc->onEnter = &IRONTIPS_Settings_onEnter;
+  sc->processInput=&settings_screenProcessInput;
 
   //********[ TIP label]***********************************************************
   //

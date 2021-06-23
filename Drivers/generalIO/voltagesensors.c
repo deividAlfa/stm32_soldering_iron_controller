@@ -7,6 +7,7 @@
 
 #include "voltagesensors.h"
 #ifdef USE_VIN
+uint16_t last_VIN;
 uint16_t getSupplyVoltage_v_x10() {
 	uint32_t temp;
 
@@ -18,6 +19,7 @@ uint16_t getSupplyVoltage_v_x10() {
 	temp = (uint32_t)720896 * ADC_to_mV(VIN.last_avg);		    // Constant multiply
 	temp >>= 16; 											                        // Bit shifting (divide by 65536) = mV corrected
 	temp+=50;												                          // Round number
+	last_VIN=temp;
 	return (temp/100);										                    // Return Supply  V*10
 }
 #endif

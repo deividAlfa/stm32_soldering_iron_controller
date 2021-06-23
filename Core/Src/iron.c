@@ -434,7 +434,7 @@ void checkIronError(void){
   #ifdef USE_VIN
   Err.V_low = getSupplyVoltage_v_x10() < systemSettings.settings.lvp   ? 1 : 0;   // Check supply voltage (Mosfet will not work ok <10V, it will heat up)
   #endif
-  Err.noIron = TIP.last_RawAvg>systemSettings.Profile.noIronValue ? 1 : 0;    // Check tip temperature too high (Wrong connection or not connected)
+  Err.noIron = TIP.last_raw>systemSettings.Profile.noIronValue ? 1 : 0;    // Check tip temperature too high (Wrong connection or not connected)
 
   if(CurrentTime<1000 || systemSettings.setupMode==setup_On){                 // Don't check sensor errors during first second or in setup mode, wait for readings need to get stable
     Err.Flags &= 0x10;                                                        // Only check failure state

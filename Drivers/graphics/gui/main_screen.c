@@ -266,13 +266,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     }
 	}
 
-	if(Iron.newActivity && mainScr.ActivityOn){
-		if((currentTime-Iron.lastActivityTime)>50){
-			u8g2_SetDrawColor(&u8g2, BLACK);
-			u8g2_DrawBox(&u8g2, 0,OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1]);
-			mainScr.ActivityOn=0;
-			Iron.newActivity=0;
-		}
+	if(mainScr.ActivityOn && (currentTime-Iron.lastActivityTime)>50){
+	  u8g2_SetDrawColor(&u8g2, BLACK);
+		u8g2_DrawBox(&u8g2, 0,OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1]);
+		mainScr.ActivityOn=0;
+		Iron.newActivity=0;
 	}
 
 	if(input!=Rotate_Nothing){

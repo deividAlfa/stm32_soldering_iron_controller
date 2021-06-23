@@ -55,7 +55,7 @@ static void * debug_screen_getADC1() {
 	return &temp;
 }
 static void * debug_screen_getADC1_raw() {
-	temp = TIP.last_RawAvg;
+	temp = TIP.last_raw;
 	return &temp;
 }
 
@@ -127,7 +127,7 @@ void debug_screenDraw(screen_t *scr){
     sprintf(str, "ADC %u", TIP.last_avg);
     u8g2_DrawStr(&u8g2,65,0,str);
 
-    sprintf(str, "RAW %u", TIP.last_RawAvg);
+    sprintf(str, "RAW %u", TIP.last_raw);
     u8g2_DrawStr(&u8g2,65,16,str);
 
     sprintf(str, "PWM %u", Iron.Pwm_Out);

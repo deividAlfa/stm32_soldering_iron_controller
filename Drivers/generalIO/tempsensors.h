@@ -19,6 +19,12 @@
 #define   read_Avg	0
 #define   read_Raw	1
 
+extern uint16_t last_TIP_Raw;
+extern uint16_t last_TIP;
+extern int16_t last_NTC;
+
+
+
 int16_t   readColdJunctionSensorTemp_C_x10(void);
 uint16_t  coldJunctionTemp_mC_To_uV(int tempX10);
 uint16_t  readIntTemp_mC(void);

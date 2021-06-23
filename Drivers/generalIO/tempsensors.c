@@ -50,7 +50,7 @@ uint16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
 	}
 	if(update){
 		temp = adc2Human(TIP.last_avg,1,systemSettings.settings.tempUnit);
-		temp_Raw = adc2Human(TIP.last_RawAvg,1,systemSettings.settings.tempUnit);
+		temp_Raw = adc2Human(TIP.last_raw,1,systemSettings.settings.tempUnit);
 
 		// Limit output values
 		if(temp>999){
