@@ -52,10 +52,10 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-#ifdef DEBUG
+#ifdef DEBUG_ADC
 uint16_t dbg_prev_TIP_Raw, dbg_prev_TIP, dbg_prev_VIN, dbg_prev_PWR;
 int16_t dbg_prev_NTC;
-bool dbg_NewData;
+bool dbg_newData;
 #endif
 /* USER CODE END PV */
 
@@ -135,9 +135,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-#ifdef DEBUG
-    if(NewData){
-      NewData=0;
+#ifdef DEBUG_ADC
+    if(dbg_newData){
+      dbg_newData=0;
       Iron.lastActivityTime=HAL_GetTick();
       Iron.newActivity=1;
       __disable_irq();
@@ -145,7 +145,7 @@ int main(void)
       printf("     LAST  VAL    RAW   VAL      PREV  VAL    RAW   VAL\n"
              "TIP: %4u  %3u\260C  %4u  %3u\260C    %4u  %3u\260C  %4u  %3u\260C \n"
              "PID: %3u%%                        %3u%%\n\n",
-            TIP.last_avg, dbg_last_TIP, TIP.last_raw, dbg_last_TIP_Raw, TIP.prev_avg, dbg_prev_TIP, TIP.prev_raw, dbg_prev_TIP_Raw,
+            TIP.last_avg, last_TIP, TIP.last_raw, last_TIP_Raw, TIP.prev_avg, dbg_prev_TIP, TIP.prev_raw, dbg_prev_TIP_Raw,
             Iron.CurrentIronPower, dbg_prev_PWR);
       __enable_irq();
     }

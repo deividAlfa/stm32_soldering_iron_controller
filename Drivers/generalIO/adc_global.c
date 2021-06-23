@@ -112,7 +112,7 @@ void ADC_Start_DMA(){
   if( PWM_GPIO_Port->IDR & PWM_Pin ){                                         // Check if PWM is enabled
     buzzer_short_beep();
   }
-  #ifdef DEBUG
+  #ifdef DEBUG_ADC
   HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 1);                           // Toggle TEST High (Start of ADC conversion)
   #endif
   ADC_Status=ADC_Sampling;
@@ -177,10 +177,10 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 
 #ifdef LIMIT_FILTERING
 #define SMOOTH_START  50       // Start difference to apply partial filtering override
-#define SMOOTH_END    150       // Max difference to completely override filter
+#define SMOOTH_END    150      // Max difference to completely override filter
 #define SMOOTH_DIFF  (SMOOTH_END-SMOOTH_START)
-#ifdef DEBUG
-    extern bool dbg_NewData;
+#ifdef DEBUG_ADC
+    extern bool dbg_newData;
 #endif
 
 		int32_t diff = (int32_t)avg_data - (int32_t)(InputData->EMA_of_Input>>12); // Check difference between stored EMA and last average
@@ -188,14 +188,14 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 
 		if(abs_diff>SMOOTH_END){															                      // If huge (Filtering will delay too much the response)
 			InputData->EMA_of_Input = RawData;					                              // Reset filter
-      #ifdef DEBUG
-			dbg_NewData=1;
+      #ifdef DEBUG_ADC
+			dbg_newData=1;
       #endif
 		}
 		else if(abs_diff>SMOOTH_START){														                  // If medium, smooth the difference
 		  InputData->EMA_of_Input += ((diff*(abs_diff-SMOOTH_START))/SMOOTH_DIFF)<<12;
-      #ifdef DEBUG
-		  dbg_NewData=1;
+      #ifdef DEBUG_ADC
+		  dbg_newData=1;
       #endif
 		}
 		else{
@@ -244,11 +244,11 @@ void handle_ADC_Data(void){
 
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
-#ifdef DEBUG
-    extern bool dbg_NewData;
+#ifdef DEBUG_ADC
+    extern bool dbg_newData;
     extern uint16_t dbg_prev_TIP_Raw, dbg_prev_TIP, dbg_prev_VIN, dbg_prev_PWR;
     extern int16_t dbg_prev_NTC;
-    bool dbg_t=dbg_NewData;
+    bool dbg_t=dbg_newData;
 #endif
 	if(_hadc == adc_device){
 	  if(ADC_Status!=ADC_Sampling){
@@ -256,7 +256,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     }
 	  ADC_Stop_DMA();                                                             // Reset the ADC
     ADC_Status = ADC_Idle;
-    #ifdef DEBUG
+    #ifdef DEBUG_ADC
     HAL_GPIO_WritePin(TEST_GPIO_Port, TEST_Pin, 0);                             // Toggle TEST Low (End of ADC conversion)
     #endif
 
@@ -269,8 +269,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
 	  }
 	  handle_ADC_Data();
 
-#ifdef DEBUG
-    if(dbg_t!=dbg_NewData){                                                         // Save values before handleIron() updates them
+#ifdef DEBUG_ADC
+    if(dbg_t!=dbg_newData){                                                         // Save values before handleIron() updates them
       dbg_prev_TIP_Raw=last_TIP_Raw;
       dbg_prev_TIP=last_TIP;
       dbg_prev_VIN=last_VIN;
