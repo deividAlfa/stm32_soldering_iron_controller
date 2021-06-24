@@ -231,12 +231,12 @@ void initTimers(void){
 
   __HAL_TIM_CLEAR_FLAG(Iron.Pwm_Timer,TIM_FLAG_UPDATE | TIM_FLAG_COM | TIM_FLAG_CC1 | TIM_FLAG_CC2 | TIM_FLAG_CC3 | TIM_FLAG_CC4 );  // Clear all flags
   #ifdef  PWM_CHx                                                             // Start PWM
-    HAL_TIM_PWM_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);                   // PWM output uses CHx channel
-    __HAL_TIM_ENABLE_IT(Iron.Pwm_Timer, TIM_IT_UPDATE);                       //
+  HAL_TIM_PWM_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);                   // PWM output uses CHx channel
+  __HAL_TIM_ENABLE_IT(Iron.Pwm_Timer, TIM_IT_UPDATE);                       //
   #elif defined PWM_CHxN
-    HAL_TIMEx_PWMN_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);                // PWM output uses CHxN channel
+  HAL_TIMEx_PWMN_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);                // PWM output uses CHxN channel
   #else
-    #error No PWM ouput set (See PWM_CHx / PWM_CHxN in board.h)
+  #error No PWM ouput set (See PWM_CHx / PWM_CHxN in board.h)
   #endif
   if(systemSettings.settings.activeDetection){
     Iron.Pwm_Out = PWMminOutput;

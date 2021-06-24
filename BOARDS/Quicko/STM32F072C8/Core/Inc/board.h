@@ -40,7 +40,7 @@
  *       ADC Settings    *
  ********************************/
 #define ADC_DEVICE          hadc                              // ADC device
-#define ADC_MEASURE_TIME    300                               // in uS. Time to subtract from the Period where PWM output will be low, so the ADC can measure the tip (Measured 26uS)
+#define ADC_MEASURE_TIME    350                               // in uS. Time to subtract from the Period where PWM output will be low, so the ADC can measure the tip (Measured 26uS)
 #define ADC_BFSIZ           16 + 2                            // ADC DMA buffer size Buffer[ADC_BFSIZ][Adc_Buffer_Elements](+2 to compensate min/max value discard in filtering)
 
 // Order for secondary measurements, ADC channels not requiring sampling in the PWM low period. Order as ADC rank order (usually ch0-ch18)
