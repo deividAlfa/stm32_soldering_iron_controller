@@ -93,14 +93,10 @@ Default 20 ms.<br>
 |_____________________________|<-DELAY->[ADC READ]| NEXT CYCLE
 |<-          POWER          ->|___________________|
 </pre>
-  - **Filtering**<br>
-Used to filter the temperature measurements before they are passed to the PID. This helps remove noise and provides more stability.<br>
-     - **Avg**<br>
-This uses a simple moving average, and is the default filter.<br>
-     - **EMA**<br>
-Exponential Moving Average. A more sophisticated filter.<br>
-  - **Factor**<br>
-Only for EMA. The higher, the heavier the filtering (also more delay).<br>
+  - **Filter**<br>
+Adjust the filtering factor applied to the temperature measurements before they are passed to the PID.<br>
+The value adjust the EMA (Exponential Moving Average) value. A value of 0 disables it and uses simple average.<br>
+This helps remove noise and provides more stability, but too high values will add delay and cause oscillation.<br>
   - **No iron**<br>
 The ADC reading which signals that no iron is present. When no iron is plugged in, the measured temperature will read at or near maximum (ADC = 4095).
 Default 4000, max 4100 (Over 4095 will disable "no iron" detection).<br>
