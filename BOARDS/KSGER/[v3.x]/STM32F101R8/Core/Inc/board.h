@@ -35,6 +35,7 @@
 #define PWM_CHANNEL         TIM_CHANNEL_1                     // PWM Timer Channel
 //#define PWM_CHxN                                            // Using CHxN Output type
 #define PWM_CHx                                               // Using CHx Output type
+//#define DEBUG_PWM                                           // To enable a test signal and some printing through SWO (Create a output GPIO called PWM_DBG)
 
 /********************************
  *       ADC Settings        *
@@ -60,6 +61,7 @@
 //#define USE_VREF
 #define USE_VIN
 #define USE_NTC
+
 /********************************
  *       Buzzer        *
  ********************************/
@@ -77,7 +79,7 @@
  ********************************/
 #define FLASH_SZ            64                            // Flash Size (KB)
 //#define NOSAVESETTINGS                                  // Don't use flash to save or load settings. Always use defaults (for debugging purposes)
-
+//#define SWO_PRINT                                           // To enable printing through SWO
 
 /********************************
  *       NTC TABLE      *

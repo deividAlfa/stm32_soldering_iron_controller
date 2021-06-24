@@ -196,7 +196,7 @@ void setSystemTempUnit(bool unit){
 // This function sets the prescaler settings depending on the system, core clock, and loads the stored period
 void initTimers(void){
   uint16_t delay, pwm;
-  if(systemSettings.settings.currentProfile<=profile_C210 && (systemSettings.Profile.pwmPeriod)>=(delay+((ADC_MEASURE_TIME/10))) ){
+  if(systemSettings.settings.currentProfile<=profile_C210 && (systemSettings.Profile.pwmPeriod)>=(systemSettings.Profile.pwmDelay+((ADC_MEASURE_TIME/10))) ){
     delay=systemSettings.Profile.pwmDelay;
     pwm=systemSettings.Profile.pwmPeriod;
   }else{
@@ -230,9 +230,13 @@ void initTimers(void){
   __HAL_TIM_ENABLE_IT(Iron.Delay_Timer,TIM_IT_UPDATE);        // Enable Delay timer interrupt
 
   __HAL_TIM_CLEAR_FLAG(Iron.Pwm_Timer,TIM_FLAG_UPDATE | TIM_FLAG_COM | TIM_FLAG_CC1 | TIM_FLAG_CC2 | TIM_FLAG_CC3 | TIM_FLAG_CC4 );  // Clear all flags
+
+  #ifdef DEBUG_PWM
+  __HAL_TIM_ENABLE_IT(Iron.Pwm_Timer, TIM_IT_UPDATE);                       // For debugging PWM (TEST pin)
+  #endif
+
   #ifdef  PWM_CHx                                                             // Start PWM
   HAL_TIM_PWM_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);                   // PWM output uses CHx channel
-  __HAL_TIM_ENABLE_IT(Iron.Pwm_Timer, TIM_IT_UPDATE);                       //
   #elif defined PWM_CHxN
   HAL_TIMEx_PWMN_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);                // PWM output uses CHxN channel
   #else

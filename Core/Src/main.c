@@ -52,7 +52,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-#ifdef DEBUG_ADC
+#if defined DEBUG_PWM
 uint16_t dbg_prev_TIP_Raw, dbg_prev_TIP, dbg_prev_VIN, dbg_prev_PWR;
 int16_t dbg_prev_NTC;
 bool dbg_newData;
@@ -65,7 +65,7 @@ bool dbg_newData;
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#ifdef DEBUG
+#if defined DEBUG_PWM || defined SWO_PRINT
 int _write(int32_t file, uint8_t *ptr, int32_t len)
 {
   for (int i = 0; i < len; i++)
@@ -127,27 +127,25 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_IWDG_Refresh(&hiwdg);             // Wait 500mS for voltage to stabilize? (Before calibrating ADC)
-  HAL_Delay(500);
+  for(uint32_t t=HAL_GetTick();(HAL_GetTick()-t)<500; ){  // Wait 500mS for voltage to stabilize? (Before calibrating ADC)
+    HAL_IWDG_Refresh(&hiwdg);
+  }
 
   Init();
   while (1){
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-#ifdef DEBUG_ADC
+
+#if defined DEBUG_PWM
     if(dbg_newData){
       dbg_newData=0;
-      Iron.lastActivityTime=HAL_GetTick();
-      Iron.newActivity=1;
-      __disable_irq();
 
       printf("     LAST  VAL    RAW   VAL      PREV  VAL    RAW   VAL\n"
              "TIP: %4u  %3u\260C  %4u  %3u\260C    %4u  %3u\260C  %4u  %3u\260C \n"
              "PID: %3u%%                        %3u%%\n\n",
             TIP.last_avg, last_TIP, TIP.last_raw, last_TIP_Raw, TIP.prev_avg, dbg_prev_TIP, TIP.prev_raw, dbg_prev_TIP_Raw,
             Iron.CurrentIronPower, dbg_prev_PWR);
-      __enable_irq();
     }
 #endif
     checkSettings();                                                                          // Check if settings were modified
@@ -185,9 +183,14 @@ void Program_Handler(void) {
 
 
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim){
-	if(_htim == Iron.Pwm_Timer){																			// PWM output low
+	if(_htim == Iron.Pwm_Timer){
+
+	  #ifdef DEBUG_PWM
+	  HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,0);                   // Toggle TEST// PWM output low
+    #endif
+
 	  __HAL_TIM_CLEAR_FLAG(Iron.Pwm_Timer,TIM_FLAG_CC1|TIM_FLAG_CC2|TIM_FLAG_CC3|TIM_FLAG_CC4);   // Clear compare flags
-	  // If there are pending PWM settings to be applied, apply them before new calculation
+
 		if(ADC_Status==ADC_Idle){																		    // ADC idle
 			ADC_Status = ADC_Waiting;																	    // Update status to waiting
 			__HAL_TIM_ENABLE(Iron.Delay_Timer);														// Enable Delay Timer and start counting (One-pulse mode)
@@ -210,16 +213,13 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim){
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
-  if(_htim == Iron.Pwm_Timer){                                    // Delay Timer?
-    __HAL_TIM_CLEAR_FLAG(Iron.Pwm_Timer,TIM_FLAG_UPDATE);         // Clear PWM Timer flag
-    if(Iron.updatePwm==needs_update){
-      Iron.updatePwm=no_update;
-      __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.Profile.pwmPeriod);
-      __HAL_TIM_SET_AUTORELOAD(Iron.Delay_Timer,systemSettings.Profile.pwmDelay);
-    }
-    __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);      // Load new calculated PWM Duty
 
+  #ifdef DEBUG_PWM
+  if(_htim == Iron.Pwm_Timer){                                    // Delay Timer?
+   HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,1);                   // Toggle TEST
   }
+  #endif
+
 	if(_htim == Iron.Delay_Timer){																		// Delay Timer?
 	  __HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);				  // Clear Delay Timer flag
     ADC_Start_DMA();                                                // Start ADC conversion
