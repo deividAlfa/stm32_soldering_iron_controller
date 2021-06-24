@@ -19,6 +19,8 @@ static char t[TipSize][TipCharSize];
 static int32_t temp, settingsTimer;
 static uint8_t resStatus, profile, Selected_Tip, Tip_name_return;
 static char str[5];
+static tipData tipCfg;
+
 //-------------------------------------------------------------------------------------------------------------------------------
 // Settings screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -158,7 +160,8 @@ static editable_widget_t editable_IRONTIPS_Settings_PID_Imin;
 static editable_widget_t editable_IRONTIPS_Settings_Cal250;
 static editable_widget_t editable_IRONTIPS_Settings_Cal350;
 static editable_widget_t editable_IRONTIPS_Settings_Cal450;
-static comboBox_item_t comboitem_IRONTIPS_Settings_Back;
+static comboBox_item_t comboitem_IRONTIPS_Settings_Save;
+static comboBox_item_t comboitem_IRONTIPS_Settings_Cancel;
 
 // RESET SCREEN
 static widget_t comboWidget_RESET;
@@ -237,7 +240,7 @@ static int delTip(widget_t *w) {
     systemSettings.Profile.currentTip = systemSettings.Profile.currentNumberOfTips-1;                           // Select the previous tip in the list if so
   }
                                                                                                                 // Skip tip settings (As tip is now deleted)
-	return comboitem_IRONTIPS_Settings_Back.action_screen;                                                        // And return to main screen or system menu screen
+	return comboitem_IRONTIPS_Settings_Cancel.action_screen;                                                        // And return to main screen or system menu screen
 }
 
 #ifdef USE_VIN
@@ -283,74 +286,72 @@ static void * getStandbyTemp() {
   return &temp;
 }
 static void * getKp() {
-	temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kp;
+	temp = tipCfg.PID.Kp;
 	return &temp;
 }
 static void setKp(int32_t *val) {
-	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kp=*val;
-	setupPID(&systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID);
-	resetPID();
+  tipCfg.PID.Kp = *val;
 }
 static void * getKi() {
-	temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Ki;
+  temp = tipCfg.PID.Ki;
 	return &temp;
 }
 static void setKi(int32_t *val) {
-	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Ki=*val;
-	setupPID(&systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID);
-	resetPID();
+  tipCfg.PID.Ki = *val;
 }
 static void * getKd() {
-	temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kd;
+  temp = tipCfg.PID.Kd;
 	return &temp;
 }
 static void setKd(int32_t *val) {
-	systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.Kd=*val;
-	setupPID(&systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID);
-	resetPID();
+  tipCfg.PID.Kd = *val;
 }
 static void * getImax() {
-  temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.maxI;
+  temp = tipCfg.PID.maxI;
   return &temp;
 }
 static void setImax(int32_t *val) {
-  systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.maxI=*val;
-  setupPID(&systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID);
-  resetPID();
+  tipCfg.PID.maxI = *val;
 }
 static void * getImin() {
-  temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.minI;
+  temp = tipCfg.PID.minI;
   return &temp;
 }
 static void setImin(int32_t *val) {
-  systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID.minI=*val;
-  setupPID(&systemSettings.Profile.tip[systemSettings.Profile.currentTip].PID);
-  resetPID();
+  tipCfg.PID.minI= *val;
 }
 static void * getCal250() {
-  temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].calADC_At_250;
-  editable_IRONTIPS_Settings_Cal250.max_value = systemSettings.Profile.tip[systemSettings.Profile.currentTip].calADC_At_350 - 1;
+  temp = tipCfg.calADC_At_250;
   return &temp;
 }
 static void setCal250(int32_t *val) {
-  systemSettings.Profile.tip[systemSettings.Profile.currentTip].calADC_At_250 = *val;
+  tipCfg.calADC_At_250 = *val;
 }
 static void * getCal350() {
-  temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].calADC_At_350;
-  editable_IRONTIPS_Settings_Cal350.min_value = systemSettings.Profile.tip[systemSettings.Profile.currentTip].calADC_At_250 + 1;
-  editable_IRONTIPS_Settings_Cal350.max_value = systemSettings.Profile.tip[systemSettings.Profile.currentTip].calADC_At_450 - 1;
+  temp = tipCfg.calADC_At_350;
+  editable_IRONTIPS_Settings_Cal350.min_value = tipCfg.calADC_At_250 + 1;
+  editable_IRONTIPS_Settings_Cal350.max_value = tipCfg.calADC_At_450 - 1;
   return &temp;
 }
 static void setCal350(int32_t *val) {
-  systemSettings.Profile.tip[systemSettings.Profile.currentTip].calADC_At_350 = *val;
+  tipCfg.calADC_At_350 = *val;
 }
 static void * getCal450() {
-  temp = systemSettings.Profile.tip[systemSettings.Profile.currentTip].calADC_At_450;
-  editable_IRONTIPS_Settings_Cal450.min_value = systemSettings.Profile.tip[systemSettings.Profile.currentTip].calADC_At_350 + 1;
+  temp = tipCfg.calADC_At_450;
+  editable_IRONTIPS_Settings_Cal450.min_value = tipCfg.calADC_At_350 + 1;
   return &temp;
 }
 static void setCal450(int32_t *val) {
-  systemSettings.Profile.tip[systemSettings.Profile.currentTip].calADC_At_450 = *val;
+  tipCfg.calADC_At_450 = *val;
+}
+
+static int IRONTIPS_Save(widget_t *w) {
+  __disable_irq();
+  systemSettings.Profile.tip[systemSettings.Profile.currentTip] = tipCfg;
+  setupPID(&tipCfg.PID);
+  resetPID();
+  __enable_irq();
+  return comboitem_IRONTIPS_Settings_Cancel.action_screen;
 }
 
 static void * getPWMPeriod() {
@@ -554,6 +555,7 @@ static void * getProfile() {
 static void setProfile(uint32_t *val) {
 	profile=*val;
 }
+
 
 static int cancelReset(widget_t *w) {
 	return screen_reset;
@@ -811,21 +813,27 @@ void Reset_confirmation_onEnter(screen_t *scr){
 //-------------------------------------------------------------------------------------------------------------------------------
 void IRONTIPS_Settings_onEnter(screen_t *scr){
   settingsTimer=HAL_GetTick();
-
+  bool backup=0;
 	comboResetIndex(&comboWidget_IRONTIPS_Settings);
 	if(scr==&Screen_main){
-	  comboitem_IRONTIPS_Settings_Back.action_screen = screen_main;
+	  backup=1;
+	  comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_edit_iron_tips;
 	  Selected_Tip = systemSettings.Profile.currentTip;
 	}
 	else if(scr==&Screen_edit_iron_tips){
+    backup=1;
 	  for(uint8_t x = 0; x < TipSize; x++) {
 	    if(strcmp(comboBox_IRONTIPS.currentItem->text, systemSettings.Profile.tip[x].name)==0){
 	      Selected_Tip = x;
 	    }
 	  }
-	  comboitem_IRONTIPS_Settings_Back.action_screen = screen_edit_iron_tips;
+    comboitem_IRONTIPS_Settings_Save.action_screen = screen_edit_iron_tips;
+    comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_edit_iron_tips;
 	}
 	comboitem_IRONTIPS_Settings_TipLabel.text = systemSettings.Profile.tip[Selected_Tip].name;
+	if(backup){
+	  tipCfg = systemSettings.Profile.tip[systemSettings.Profile.currentTip];
+	}
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -1639,5 +1647,6 @@ void settings_screen_setup(screen_t *scr) {
   comboAddEditable(&comboitem_IRONTIPS_Settings_Cal250,   w,  "Cal250",     &editable_IRONTIPS_Settings_Cal250);
   comboAddEditable(&comboitem_IRONTIPS_Settings_Cal350,   w,  "Cal350",     &editable_IRONTIPS_Settings_Cal350);
   comboAddEditable(&comboitem_IRONTIPS_Settings_Cal450,   w,  "Cal450",     &editable_IRONTIPS_Settings_Cal450);
-  comboAddScreen(&comboitem_IRONTIPS_Settings_Back,       w,  "BACK",       -1);                                        // Return value set automatically on enter
+  comboAddAction(&comboitem_IRONTIPS_Settings_Save,       w,  "SAVE",       &IRONTIPS_Save);
+  comboAddScreen(&comboitem_IRONTIPS_Settings_Cancel,     w,  "CANCEL",     -1);                                               // Return value set automatically on enter
 }
