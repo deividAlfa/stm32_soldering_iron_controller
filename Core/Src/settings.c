@@ -363,7 +363,7 @@ void Flash_error(void){
   __enable_irq();
 
   Diag_init();
-  putStrAligned("FLASH ERROR!", 15, align_center);
+  putStrAligned("FLASH ERROR!", 16, align_center);
   putStrAligned("HALTING SYSTEM", 32, align_center);
   update_display();
   while(1){
@@ -373,9 +373,9 @@ void Flash_error(void){
 void settingsChkErr(void){
   Diag_init();
   systemSettings.settings.OledOffset = 2;                                           // Set default value
-  putStrAligned("SETTING ERR!", 0, align_center);
-  putStrAligned("RESTORING", 16, align_center);
-  putStrAligned("DEFAULTS...", 32, align_center);
+  putStrAligned("SETTING ERR!", 20, align_center);
+  putStrAligned("RESTORING", 26, align_center);
+  putStrAligned("DEFAULTS...", 42, align_center);
   update_display();
   ErrCountDown(3,117,50);
 
@@ -399,9 +399,9 @@ void settingsChkErr(void){
 
 void ProfileChkErr(void){
   Diag_init();
-  putStrAligned("PROFILE ERR!", 0, align_center);
-  putStrAligned("RESTORING", 16, align_center);
-  putStrAligned("DEFAULTS...", 32, align_center);
+  putStrAligned("PROFILE ERR!", 10, align_center);
+  putStrAligned("RESTORING", 26, align_center);
+  putStrAligned("DEFAULTS...", 42, align_center);
   update_display();
   ErrCountDown(3,117,50);
   resetCurrentProfile();              // Reset current tip type data only
@@ -411,16 +411,16 @@ void Button_reset(void){
   uint16_t ResetTimer= HAL_GetTick();
   if(!BUTTON_input()){
     Diag_init();
-    putStrAligned("HOLD BUTTON", 0, align_center);
-    putStrAligned("TO RESTORE", 16, align_center);
-    putStrAligned("DEFAULTS", 32, align_center);
+    putStrAligned("HOLD BUTTON", 10, align_center);
+    putStrAligned("TO RESTORE", 26, align_center);
+    putStrAligned("DEFAULTS", 42, align_center);
     update_display();
     while(!BUTTON_input()){
       HAL_IWDG_Refresh(&hiwdg);
       if((HAL_GetTick()-ResetTimer)>5000){
         FillBuffer(BLACK,fill_dma);
-        putStrAligned("RELEASE", 12, align_center);
-        putStrAligned("BUTTON NOW", 28, align_center);
+        putStrAligned("RELEASE", 16, align_center);
+        putStrAligned("BUTTON NOW", 32, align_center);
         update_display();
         while(!BUTTON_input()){
           HAL_IWDG_Refresh(&hiwdg);
