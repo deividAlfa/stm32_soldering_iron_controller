@@ -334,6 +334,8 @@ void loadProfile(uint8_t profile){
     }
     setUserTemperature(systemSettings.Profile.UserSetTemperature);                      // Load user set temperature
     setCurrentTip(systemSettings.Profile.currentTip);                                   // Load TIP data
+    setPwmPeriod(systemSettings.Profile.pwmPeriod);                                     // Apply profile PWM settings
+    setPwmDelay(systemSettings.Profile.pwmDelay);
   }
   else if(profile==profile_None){
     return;                                                                             // Profiles not initialized, load nothing
@@ -345,9 +347,6 @@ void loadProfile(uint8_t profile){
     setSystemTempUnit(systemSettings.settings.tempUnit);                                // Convert temperatures
     systemSettings.Profile.tempUnit = systemSettings.settings.tempUnit;                 // Store unit in profile
   }
-  setPwmPeriod(systemSettings.Profile.pwmPeriod);
-  setPwmDelay(systemSettings.Profile.pwmDelay);
-
 }
 
 void Diag_init(void){
