@@ -196,7 +196,7 @@ void setSystemTempUnit(bool unit){
 // This function sets the prescaler settings depending on the system, core clock, and loads the stored period
 void initTimers(void){
   uint16_t delay, pwm;
-  if(systemSettings.settings.currentProfile!=profile_None){
+  if(systemSettings.settings.currentProfile<=profile_C210 && (systemSettings.Profile.pwmPeriod)>=(delay+((ADC_MEASURE_TIME/10))) ){
     delay=systemSettings.Profile.pwmDelay;
     pwm=systemSettings.Profile.pwmPeriod;
   }else{
@@ -245,7 +245,7 @@ void initTimers(void){
     Iron.Pwm_Out = 0;
   }
   __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);               // Set min value into PWM (To enable detection)
-  Iron.Pwm_Limit = pwm - (delay + (uint16_t)ADC_MEASURE_TIME/10);
+  Iron.Pwm_Limit = pwm - (delay + (ADC_MEASURE_TIME/10));
 }
 
 
