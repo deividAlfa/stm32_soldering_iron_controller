@@ -236,9 +236,9 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_350   = T12_Cal350;     // These values are way lower, but better to be safe than sorry
       systemSettings.Profile.tip[x].calADC_At_450   = T12_Cal450;     // User needs to calibrate its station
       systemSettings.Profile.tip[x].PID.Kp          = 10000;          // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 10000;          // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 8000;          // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Kd          = 500;            // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
+      systemSettings.Profile.tip[x].PID.maxI        = 60;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
@@ -261,10 +261,9 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_350   = C245_Cal350;
       systemSettings.Profile.tip[x].calADC_At_450   = C245_Cal450;
       systemSettings.Profile.tip[x].PID.Kp          = 10000;          // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 10000;          // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 8000;          // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Kd          = 500;            // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
-      systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
+      systemSettings.Profile.tip[x].PID.maxI        = 60;             // val = /100
       strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
     strcpy(systemSettings.Profile.tip[0].name, "C245");
@@ -285,9 +284,9 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_350   = C210_Cal350;
       systemSettings.Profile.tip[x].calADC_At_450   = C210_Cal450;
       systemSettings.Profile.tip[x].PID.Kp          = 10000;          // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 10000;          // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 8000;          // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Kd          = 500;            // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
+      systemSettings.Profile.tip[x].PID.maxI        = 60;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
@@ -346,6 +345,9 @@ void loadProfile(uint8_t profile){
     setSystemTempUnit(systemSettings.settings.tempUnit);                                // Convert temperatures
     systemSettings.Profile.tempUnit = systemSettings.settings.tempUnit;                 // Store unit in profile
   }
+  setPwmPeriod(systemSettings.Profile.pwmPeriod);
+  setPwmDelay(systemSettings.Profile.pwmDelay);
+
 }
 
 void Diag_init(void){
