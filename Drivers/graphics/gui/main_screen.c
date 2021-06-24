@@ -173,7 +173,7 @@ static void updateIronPower() {
 			tmpPwr = 0 ;
 		}
 		tmpPwr = tmpPwr<<12;
-		stored = ( ((stored<<6)-stored)+tmpPwr+(1<<11))>>6 ;
+		stored = ( ((stored<<3)-stored)+tmpPwr+(1<<11))>>3 ;
 		tmpPwr = stored>>12;
 		mainScr.lastPwr=tmpPwr;
 	}
