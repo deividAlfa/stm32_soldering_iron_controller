@@ -193,16 +193,9 @@ void setSystemTempUnit(bool unit){
   setCurrentMode(Iron.CurrentMode);     // Reload temps
 }
 
-// This function sets the prescaler settings depending on the system, core clock, and loads the stored period
+// This function inits the timers and sets the prescaler settings depending on the system core clock
+// The final PWM settings are applied by LoadProfile
 void initTimers(void){
-  uint16_t delay, pwm;
-  if(systemSettings.settings.currentProfile<=profile_C210 && (systemSettings.Profile.pwmPeriod)>=(systemSettings.Profile.pwmDelay+((ADC_MEASURE_TIME/10))) ){
-    delay=systemSettings.Profile.pwmDelay;
-    pwm=systemSettings.Profile.pwmPeriod;
-  }else{
-    delay=1999;                                                         // Safe values if profile not initialized
-    pwm=19999;
-  }
   // Delay timer config
   #ifdef DELAY_TIMER_HALFCLOCK
   Iron.Delay_Timer->Init.Prescaler = (SystemCoreClock/50000)-1;         // 10uS input clock
@@ -210,7 +203,7 @@ void initTimers(void){
   Iron.Delay_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;        // 10uS input clock
   #endif
 
-  Iron.Delay_Timer->Init.Period = delay;
+  Iron.Delay_Timer->Init.Period = 99;                                  // 10mS by default
   if (HAL_TIM_Base_Init(Iron.Delay_Timer) != HAL_OK){
     Error_Handler();
   }
@@ -221,7 +214,7 @@ void initTimers(void){
   Iron.Pwm_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;        // 10uS input clock
   #endif
 
-  Iron.Pwm_Timer->Init.Period = pwm;
+  Iron.Pwm_Timer->Init.Period = 999;                                  // 100mS by default
   if (HAL_TIM_Base_Init(Iron.Pwm_Timer) != HAL_OK){
     Error_Handler();
   }
@@ -248,8 +241,8 @@ void initTimers(void){
   else{
     Iron.Pwm_Out = 0;
   }
+  Iron.Pwm_Limit = 999 - (99 + (uint16_t)ADC_MEASURE_TIME/10);
   __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);               // Set min value into PWM (To enable detection)
-  Iron.Pwm_Limit = pwm - (delay + (ADC_MEASURE_TIME/10));
 }
 
 
