@@ -456,7 +456,7 @@ void main_screen_draw(screen_t *scr){
 	uint32_t currentState = (uint32_t)Iron.Error.Flags<<24 | (uint32_t)mainScr.ironStatus<<16 | mainScr.currentMode;		// Simple method to detect changes
 
 	uint16_t plot_t = (systemSettings.Profile.pwmPeriod+1)/100;                                                         // Update at the same rate as the system pwm
-	if(plot_t<50){ plot_t = 50; }
+	if(plot_t<20){ plot_t = 20; }
 	if(mainScr.currentMode!=main_disabled && (HAL_GetTick()-plotTime)>plot_t){			            // Only store values if running
 		plotUpdate=1;
 		plotTime=HAL_GetTick();
