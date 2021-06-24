@@ -235,14 +235,14 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = T12_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = T12_Cal350;     // These values are way lower, but better to be safe than sorry
       systemSettings.Profile.tip[x].calADC_At_450   = T12_Cal450;     // User needs to calibrate its station
-      systemSettings.Profile.tip[x].PID.Kp          = 7500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 4000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 1000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 40;             // val = /100
+      systemSettings.Profile.tip[x].PID.Kp          = 10000;          // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 10000;          // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 500;            // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
-    strcpy(systemSettings.Profile.tip[0].name, "T12 ");
+    strcpy(systemSettings.Profile.tip[0].name, "BC3 ");               // Put some generic name
     systemSettings.Profile.currentNumberOfTips      = 1;
     systemSettings.Profile.currentTip               = 0;
     systemSettings.Profile.impedance                = 80;             // 8.0 Ohms
@@ -260,10 +260,10 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = C245_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = C245_Cal350;
       systemSettings.Profile.tip[x].calADC_At_450   = C245_Cal450;
-      systemSettings.Profile.tip[x].PID.Kp          = 6500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 2500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 3000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 30;             // val = /100
+      systemSettings.Profile.tip[x].PID.Kp          = 10000;          // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 10000;          // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 500;            // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
@@ -284,10 +284,10 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = C210_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = C210_Cal350;
       systemSettings.Profile.tip[x].calADC_At_450   = C210_Cal450;
-      systemSettings.Profile.tip[x].PID.Kp          = 6500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 2500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 3000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 30;             // val = /100
+      systemSettings.Profile.tip[x].PID.Kp          = 10000;          // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 10000;          // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 500;            // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
@@ -308,11 +308,11 @@ void resetCurrentProfile(void){
   systemSettings.Profile.sleepTimeout             = 5;
   systemSettings.Profile.standbyTimeout           = 5;
   systemSettings.Profile.standbyTemperature       = 180;
-  systemSettings.Profile.UserSetTemperature       = 320;
+  systemSettings.Profile.UserSetTemperature       = 180;
   systemSettings.Profile.MaxSetTemperature        = 450;
   systemSettings.Profile.MinSetTemperature        = 180;
   systemSettings.Profile.pwmPeriod                = 1999;
-  systemSettings.Profile.pwmDelay                 = 30;
+  systemSettings.Profile.pwmDelay                 = 10;
   systemSettings.Profile.filterFactor             = 4;
   systemSettings.Profile.tempUnit                 = mode_Celsius;
   systemSettings.Profile.NotInitialized           = initialized;
