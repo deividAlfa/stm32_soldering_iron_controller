@@ -212,7 +212,7 @@ static int saveTip(widget_t *w) {
 		strcpy(systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips++].name, str);						      // Store new tip name and increase system tip count
 	}
 	else {
-	  strcpy(systemSettings.Profile.tip[Selected_Tip].name, str);                                                 // If existing tip, store the new name
+	  strcpy(tipCfg.name, str);                                                 // If existing tip, store the new name
 	}
 	return Tip_name_return;                                                                                       // Return to the screen we came from
 }
@@ -347,9 +347,11 @@ static void setCal450(int32_t *val) {
 
 static int IRONTIPS_Save(widget_t *w) {
   __disable_irq();
-  systemSettings.Profile.tip[systemSettings.Profile.currentTip] = tipCfg;
-  setupPID(&tipCfg.PID);
-  resetPID();
+  systemSettings.Profile.tip[Selected_Tip] = tipCfg;
+  if(Selected_Tip==systemSettings.Profile.currentTip){
+    setupPID(&tipCfg.PID);
+    resetPID();
+  }
   __enable_irq();
   return comboitem_IRONTIPS_Settings_Cancel.action_screen;
 }
@@ -752,11 +754,11 @@ void edit_iron_screen_init(screen_t *scr) {
 }
 
 void edit_iron_screen_onEnter(screen_t *scr) {
-  if(scr == &Screen_edit_iron_tips){
-    Tip_name_return = screen_edit_iron_tips;
-  }
-  else if(scr == &Screen_edit_tip_settings){
+  if(scr == &Screen_edit_tip_settings){             // Normal edit
     Tip_name_return = screen_edit_tip_settings;
+  }
+  else if(scr == &Screen_edit_iron_tips){           // Coming from "Add new"
+    Tip_name_return = screen_edit_iron_tips;
   }
 }
 int edit_iron_screen_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
@@ -817,7 +819,7 @@ void IRONTIPS_Settings_onEnter(screen_t *scr){
 	comboResetIndex(&comboWidget_IRONTIPS_Settings);
 	if(scr==&Screen_main){
 	  backup=1;
-	  comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_edit_iron_tips;
+	  comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_main;
 	  Selected_Tip = systemSettings.Profile.currentTip;
 	}
 	else if(scr==&Screen_edit_iron_tips){
@@ -827,13 +829,12 @@ void IRONTIPS_Settings_onEnter(screen_t *scr){
 	      Selected_Tip = x;
 	    }
 	  }
-    comboitem_IRONTIPS_Settings_Save.action_screen = screen_edit_iron_tips;
     comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_edit_iron_tips;
 	}
-	comboitem_IRONTIPS_Settings_TipLabel.text = systemSettings.Profile.tip[Selected_Tip].name;
 	if(backup){
-	  tipCfg = systemSettings.Profile.tip[systemSettings.Profile.currentTip];
+	  tipCfg = systemSettings.Profile.tip[Selected_Tip];
 	}
+	comboitem_IRONTIPS_Settings_TipLabel.text = tipCfg.name;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
