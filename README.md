@@ -80,7 +80,7 @@ If the display has right/left line like this picture: Go to [System menu](Readme
 By default, never modify any PWM / Delay settings in the [Iron menu](Readme_files/Operation.md#menu). Doing so may cause such issues.<br>
 Also, new tips are often unstable, leading to temperature jumps.<br>
 Don't try to calibrate the tip in this state, neither set a high temperature, because it could go under control.<br>
-They usually settle after some burning time. It's recommended to set a middle temperature (250-300ºC) and leave like that for 15-20 minutes until it stabilizes.<br>
+They usually settle after some burning time. It's recommended to set a medium temperature (250-300ºC) and leave like that for 15-20 minutes until it stabilizes.<br>
 If the temps are still unstable, try increasing the Iron/Delay option, allowing more time for the temp signal to settle.<br>
 A damaged, loose or defective connection in the handle will also cause this issues. Ensure the contacts are clean.<br>
 There have been problems with some board/stations like:<br>
