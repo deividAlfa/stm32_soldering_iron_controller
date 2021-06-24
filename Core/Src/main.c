@@ -202,12 +202,11 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim){
 		else if(ADC_Status==ADC_Waiting){                               // ADC waiting(Delay timer running)
 		  if(Iron.Delay_Timer->Instance->CR1 & TIM_CR1_CEN){            // Delay timer running?
         __disable_irq();
-        __HAL_TIM_DISABLE(Iron.Delay_Timer);                          // Stop timer
-        __HAL_TIM_SET_COUNTER(Iron.Delay_Timer,0);                    // Clear counter
-        __HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);       // Clear flag
-        __HAL_TIM_ENABLE(Iron.Delay_Timer);                           // Re-enable
+        __HAL_TIM_SET_COUNTER(Iron.Delay_Timer,0);                  // Clear counter
+        __HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);     // Clear flag
         __enable_irq();
 		  }
+		  __HAL_TIM_ENABLE(Iron.Delay_Timer);                           // Enable
 	  }
 	}
 }
