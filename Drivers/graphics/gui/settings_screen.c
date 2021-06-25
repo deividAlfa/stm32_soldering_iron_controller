@@ -1024,11 +1024,11 @@ void settings_screen_setup(screen_t *scr) {
 	dis->endString="mS";
 	dis->reservedChars=5;
 	dis->getData = &getGuiUpd_ms;
-	edit->big_step = 100;
+	edit->big_step = 50;
 	edit->step = 10;
 	edit->setData = (void (*)(void *))&setGuiUpd_ms;
 	edit->max_value = 500;
-	edit->min_value = 0;
+	edit->min_value = 20;
 
 	//********[ Temp display unit Widget ]***********************************************************
 	//
@@ -1358,7 +1358,7 @@ void settings_screen_setup(screen_t *scr) {
 	edit->big_step = 10;
 	edit->step = 1;
 	edit->setData = (void (*)(void *))&setPWMPeriod;
-	edit->max_value = 500;
+	edit->max_value = 200;
 	edit->min_value = 20;
 
 	//********[ ADC Delay Widget ]***********************************************************
