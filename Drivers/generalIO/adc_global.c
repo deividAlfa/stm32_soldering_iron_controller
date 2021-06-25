@@ -179,7 +179,7 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 #define SMOOTH_START  50       // Start difference to apply partial filtering override
 #define SMOOTH_END    150      // Max difference to completely override filter
 #define SMOOTH_DIFF  (SMOOTH_END-SMOOTH_START)
-#if defined DEBUG_PWM
+#if defined DEBUG_PWM && SWO_PRINT
     extern bool dbg_newData;
 #endif
 
@@ -188,13 +188,13 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 
     if(abs_diff>SMOOTH_END){                                                    // If huge (Filtering will delay too much the response)
       InputData->EMA_of_Input = RawData;                                        // Reset filter
-      #if defined DEBUG_PWM
+      #if defined DEBUG_PWM && SWO_PRINT
       dbg_newData=1;                                                            // Enable flag to debug the data
       #endif
     }
     else if(abs_diff>SMOOTH_START){                                              // If medium, smooth the difference
       InputData->EMA_of_Input += ((diff*(abs_diff-SMOOTH_START))/SMOOTH_DIFF)<<12;
-      #if defined DEBUG_PWM
+      #if defined DEBUG_PWM && SWO_PRINT
       //dbg_newData=1;                                                          // Meh, just some noise, not important
       #endif
     }
@@ -244,7 +244,7 @@ void handle_ADC_Data(void){
 
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
-#if defined DEBUG_PWM
+#if defined DEBUG_PWM && SWO_PRINT
     extern bool dbg_newData;
     extern uint16_t dbg_prev_TIP_Raw, dbg_prev_TIP, dbg_prev_VIN, dbg_prev_PWR;
     extern int16_t dbg_prev_NTC;
