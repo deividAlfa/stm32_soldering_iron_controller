@@ -187,7 +187,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim){
 	if(_htim == Iron.Pwm_Timer){
 
 	  #ifdef DEBUG_PWM
-	  HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,0);                   // Toggle TEST// PWM output low
+	  //HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,0);                   // Toggle TEST// PWM output low
     #endif
 
 	  __HAL_TIM_CLEAR_FLAG(Iron.Pwm_Timer,TIM_FLAG_CC1|TIM_FLAG_CC2|TIM_FLAG_CC3|TIM_FLAG_CC4);   // Clear compare flags
@@ -216,7 +216,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
 
   #ifdef DEBUG_PWM
   if(_htim == Iron.Pwm_Timer){                                    // Delay Timer?
-   HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,1);                   // Toggle TEST
+   //HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,1);                   // Toggle TEST
   }
   #endif
 
