@@ -285,13 +285,5 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     #ifdef DEBUG_PWM
     HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,0);                        // Toggle TEST
     #endif
-
-    if(Iron.updatePwm==needs_update){                                           // Update PWM if pending changes
-      Iron.updatePwm=no_update;
-      __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.Profile.pwmPeriod);
-      __HAL_TIM_SET_AUTORELOAD(Iron.Delay_Timer,systemSettings.Profile.pwmDelay);
-    }
-    __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);      // Load new calculated PWM Duty
-
   }
 }

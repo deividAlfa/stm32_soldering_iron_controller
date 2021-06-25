@@ -132,6 +132,9 @@ void handleIron(void) {
   }
 
   if(Iron.updatePwm==needs_update){
+    Iron.updatePwm=no_update;
+    __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.Profile.pwmPeriod);
+    __HAL_TIM_SET_AUTORELOAD(Iron.Delay_Timer,systemSettings.Profile.pwmDelay);
     Iron.Pwm_Limit = systemSettings.Profile.pwmPeriod - (systemSettings.Profile.pwmDelay + (uint16_t)ADC_MEASURE_TIME/10);
   }
 
@@ -148,6 +151,9 @@ void handleIron(void) {
     PID_temp = human2adc(Iron.CurrentSetTemperature);
     Iron.Pwm_Out = calculatePID(PID_temp, TIP.last_avg, Iron.Pwm_Max);
   }
+
+  __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);      // Load new calculated PWM Duty
+
   if(systemSettings.settings.activeDetection && Iron.Pwm_Out<=PWMminOutput){
     Iron.CurrentIronPower = 0;
     Iron.Pwm_Out = PWMminOutput;                                            // Maintain iron detection
