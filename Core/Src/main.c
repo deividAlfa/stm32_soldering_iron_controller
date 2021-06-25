@@ -52,10 +52,10 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-#if defined DEBUG_PWM
-uint16_t dbg_prev_TIP_Raw, dbg_prev_TIP, dbg_prev_VIN, dbg_prev_PWR;
-int16_t dbg_prev_NTC;
-bool dbg_newData;
+#if defined DEBUG_PWM && defined SWO_PRINT
+volatile uint16_t dbg_prev_TIP_Raw, dbg_prev_TIP, dbg_prev_VIN, dbg_prev_PWR;
+volatile int16_t dbg_prev_NTC;
+volatile bool dbg_newData;
 #endif
 /* USER CODE END PV */
 
@@ -65,7 +65,7 @@ bool dbg_newData;
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#if defined DEBUG_PWM || defined SWO_PRINT
+#if defined DEBUG_PWM && defined SWO_PRINT
 int _write(int32_t file, uint8_t *ptr, int32_t len)
 {
   for (int i = 0; i < len; i++)
@@ -137,7 +137,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-#if defined DEBUG_PWM
+#if defined DEBUG_PWM && defined SWO_PRINT
     if(dbg_newData){
       dbg_newData=0;
 
@@ -146,6 +146,7 @@ int main(void)
              "PID: %3u%%                        %3u%%\n\n",
             TIP.last_avg, last_TIP, TIP.last_raw, last_TIP_Raw, TIP.prev_avg, dbg_prev_TIP, TIP.prev_raw, dbg_prev_TIP_Raw,
             Iron.CurrentIronPower, dbg_prev_PWR);
+
     }
 #endif
     checkSettings();                                                                          // Check if settings were modified
