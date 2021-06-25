@@ -2,7 +2,7 @@
  * tempsensors.h
  *
  *  Created on: Jan 12, 2021
- *      Author: David		Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose (PTDreamer), 2017
  */
 
 #ifndef GENERALIO_TEMPSENSORS_H_
@@ -14,14 +14,14 @@
 #include "iron.h"
 
 
-#define   update_reading 1
-#define   stored_reading 0
-#define   read_Avg	0
-#define   read_Raw	1
+#define   update_reading  1
+#define   stored_reading  0
+#define   read_Avg        0
+#define   read_Raw        1
 
-extern uint16_t last_TIP_Raw;
-extern uint16_t last_TIP;
-extern int16_t last_NTC;
+extern uint16_t   last_TIP_Raw;
+extern uint16_t   last_TIP;
+extern int16_t    last_NTC;
 
 
 

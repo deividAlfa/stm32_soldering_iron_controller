@@ -2,7 +2,7 @@
  * adc_global.h
  *
  *  Created on: Jan 12, 2021
- *      Author: David		Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose (PTDreamer), 2017
  */
 
 #ifndef GENERALIO_ADC_GLOBAL_H_
@@ -13,40 +13,40 @@
 
 
 typedef struct{
-	volatile uint16_t	*adc_buffer;	        // Ptr to ADC buffer data
-  volatile uint16_t prev_avg;
-	volatile uint16_t	last_avg;		          // Filtered (EMA calculation)
-  volatile uint16_t prev_raw;
-	volatile uint16_t	last_raw; 	          // Unfiltered, for quick Iron detection
-	volatile uint32_t	EMA_of_Input;	        // Stored filter data (acumulator for EMA)
+  volatile uint16_t   *adc_buffer;            // Ptr to ADC buffer data
+  volatile uint16_t   prev_avg;
+  volatile uint16_t   last_avg;               // Filtered (EMA calculation)
+  volatile uint16_t   prev_raw;
+  volatile uint16_t   last_raw;               // Unfiltered, for quick Iron detection
+  volatile uint32_t   EMA_of_Input;           // Stored filter data (acumulator for EMA)
 } ADCDataTypeDef_t;
 
 
 typedef struct {
-	#ifdef ADC_1st
-					uint16_t ADC_1st;
-	#endif
-	#ifdef ADC_2nd
-					uint16_t ADC_2nd;
-	#endif
-	#ifdef ADC_3rd
-					uint16_t ADC_3rd;
-	#endif
-	#ifdef ADC_4th
-					uint16_t ADC_4th;
-	#endif
+  #ifdef ADC_1st
+          uint16_t  ADC_1st;
+  #endif
+  #ifdef ADC_2nd
+          uint16_t  ADC_2nd;
+  #endif
+  #ifdef ADC_3rd
+          uint16_t  ADC_3rd;
+  #endif
+  #ifdef ADC_4th
+          uint16_t  ADC_4th;
+  #endif
 } adc_measures_t;
 
 extern volatile ADCDataTypeDef_t TIP;
 
 #ifdef USE_VIN
-				extern volatile ADCDataTypeDef_t VIN;
+        extern volatile ADCDataTypeDef_t VIN;
 #endif
 #ifdef USE_NTC
-				extern volatile ADCDataTypeDef_t NTC;
+        extern volatile ADCDataTypeDef_t NTC;
 #endif
 #ifdef USE_VREF
-				extern volatile ADCDataTypeDef_t VREF;
+        extern volatile ADCDataTypeDef_t VREF;
 #endif
 
 

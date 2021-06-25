@@ -52,7 +52,7 @@ void ADC_Init(ADC_HandleTypeDef *adc){
   ADC_ChannelConfTypeDef sConfig = {0};
 
   #ifdef STM32F072xB
-    adc_device->Instance->CHSELR &= ~(0x7FFFF);                           // Disable all regular channels
+    adc_device->Instance->CHSELR &= ~(0x7FFFF);                                             // Disable all regular channels
     sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
   #endif
 
@@ -60,10 +60,10 @@ void ADC_Init(ADC_HandleTypeDef *adc){
     adc_device->Init.NbrOfConversion = ADC_Num;
   #endif
 
-  adc_device->Init.ExternalTrigConv = ADC_SOFTWARE_START;                 // Set software trigger
+  adc_device->Init.ExternalTrigConv = ADC_SOFTWARE_START;                                   // Set software trigger
   if (HAL_ADC_Init(adc_device) != HAL_OK) { Error_Handler(); }
 
-  sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;                       // More sampling time to compensate high input impedances
+  sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;                                         // More sampling time to compensate high input impedances
 
   #ifdef ADC_CH_1ST
     #if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
@@ -109,11 +109,11 @@ void ADC_Start_DMA(){
   if(ADC_Status!=ADC_Waiting){
     Error_Handler();
   }
-  if( PWM_GPIO_Port->IDR & PWM_Pin ){                                   // Check if PWM is active
-    buzzer_long_beep();                                                 // Generate warning with a beep
+  if( PWM_GPIO_Port->IDR & PWM_Pin ){                                                       // Check if PWM is active
+    buzzer_long_beep();                                                                     // Generate warning with a beep
   }
   #ifdef DEBUG_PWM
-  HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,1);                  // Toggle TEST
+  HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,1);                                      // Toggle TEST
   #endif
   ADC_Status=ADC_Sampling;
   if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)ADC_measures, sizeof(ADC_measures)/ sizeof(uint16_t) )!=HAL_OK){  // Start ADC conversion now
@@ -162,12 +162,12 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
   avg_data = adc_sum / (ADC_BFSIZ -2) ;
   InputData->last_raw = avg_data;
 
-  if(systemSettings.Profile.filterFactor > 0) {                  // Advanced filtering enabled?
+  if(systemSettings.Profile.filterFactor > 0) {                                             // Advanced filtering enabled?
 
-    if(systemSettings.Profile.filterFactor>8){                  // Limit coefficient, more than 8 will cause overflow
+    if(systemSettings.Profile.filterFactor>8){                                              // Limit coefficient, more than 8 will cause overflow
       systemSettings.Profile.filterFactor=8;
     }
-    shift = systemSettings.Profile.filterFactor;                // Set EMA factor setting from system settings
+    shift = systemSettings.Profile.filterFactor;                                            // Set EMA factor setting from system settings
 
     // Fixed point shift
     uint32_t RawData = avg_data << 12;
@@ -183,19 +183,19 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
     extern bool dbg_newData;
 #endif
 
-    int32_t diff = (int32_t)avg_data - (int32_t)(InputData->EMA_of_Input>>12);  // Check difference between stored EMA and last average
+    int32_t diff = (int32_t)avg_data - (int32_t)(InputData->EMA_of_Input>>12);              // Check difference between stored EMA and last average
     int32_t abs_diff=abs(diff);
 
-    if(abs_diff>SMOOTH_END){                                                    // If huge (Filtering will delay too much the response)
-      InputData->EMA_of_Input = RawData;                                        // Reset filter
+    if(abs_diff>SMOOTH_END){                                                                // If huge (Filtering will delay too much the response)
+      InputData->EMA_of_Input = RawData;                                                    // Reset filter
       #if defined DEBUG_PWM && SWO_PRINT
-      dbg_newData=1;                                                            // Enable flag to debug the data
+      dbg_newData=1;                                                                        // Enable flag to debug the data
       #endif
     }
-    else if(abs_diff>SMOOTH_START){                                              // If medium, smooth the difference
+    else if(abs_diff>SMOOTH_START){                                                         // If medium, smoothen the difference
       InputData->EMA_of_Input += ((diff*(abs_diff-SMOOTH_START))/SMOOTH_DIFF)<<12;
       #if defined DEBUG_PWM && SWO_PRINT
-      //dbg_newData=1;                                                          // Meh, just some noise, not important
+      //dbg_newData=1;                                                                      // Meh, just some noise, not important
       #endif
     }
     else{
@@ -254,25 +254,25 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     if(ADC_Status!=ADC_Sampling){
       Error_Handler();
     }
-    ADC_Stop_DMA();                                                             // Reset the ADC
+    ADC_Stop_DMA();                                                                         // Reset the ADC
     ADC_Status = ADC_Idle;
 
-    HAL_IWDG_Refresh(&hiwdg);                                                   // This is the main reset of the watchdog
-                                                                                // If anything critical stalls (PWM, ADC, hanlleIron) this won't be updated anymore
-                                                                                // causing a system reset
+    HAL_IWDG_Refresh(&hiwdg);                                                               // This is the main reset of the watchdog
+                                                                                            // If anything critical stalls (PWM, ADC, hanlleIron) this won't be updated anymore
+                                                                                            // causing a system reset
 
-    if( PWM_GPIO_Port->IDR & PWM_Pin ){                                         // If PWM is active
-      buzzer_long_beep();                                                       // Beep to warn the issue, skip adc
-      TIP.last_avg = systemSettings.Profile.noIronValue - 1;                    // Set reading = max temperature to force PID to throttle down
-      TIP.last_raw = systemSettings.Profile.noIronValue - 1;                    // But avoiding no iron error
+    if( PWM_GPIO_Port->IDR & PWM_Pin ){                                                     // If PWM is active
+      buzzer_long_beep();                                                                   // Beep to warn the issue, skip adc
+      TIP.last_avg = systemSettings.Profile.noIronValue - 1;                                // Set reading = max temperature to force PID to throttle down
+      TIP.last_raw = systemSettings.Profile.noIronValue - 1;                                // But avoiding no iron error
     }
     else{
-      handle_ADC_Data();                                                        // Else, update data normally
+      handle_ADC_Data();                                                                    // Else, update data normally
     }
 
 #if defined DEBUG_PWM && defined SWO_PRINT
-    if(dbg_t!=dbg_newData){                                                     // Save values before handleIron() updates them
-      dbg_prev_TIP_Raw=last_TIP_Raw;                                            // If filter was resetted, print values
+    if(dbg_t!=dbg_newData){                                                                 // Save values before handleIron() updates them
+      dbg_prev_TIP_Raw=last_TIP_Raw;                                                        // If filter was resetted, print values
       dbg_prev_TIP=last_TIP;
       dbg_prev_VIN=last_VIN;
       dbg_prev_NTC=last_NTC;
@@ -280,10 +280,10 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     }
 #endif
 
-    handleIron();                                                               // Handle iron
+    handleIron();                                                                           // Handle iron
 
     #ifdef DEBUG_PWM
-    HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,0);                        // Toggle TEST
+    HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,0);                                    // Toggle TEST
     #endif
   }
 }

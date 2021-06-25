@@ -2,7 +2,7 @@
  * screen.h
  *
  *  Created on: Jan 12, 2021
- *      Author: David		Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose (PTDreamer), 2017
  */
 
 #ifndef GRAPHICS_GUI_SCREEN_H_
@@ -23,7 +23,7 @@
 
 enum {
     screen_boot,
-		screen_main,
+    screen_main,
       screen_settingsmenu,
           screen_iron,
           screen_system,
@@ -38,24 +38,24 @@ enum {
               screen_edit_calibration_input,
           screen_debug,
               screen_debug2,
-		};
+    };
 
 typedef struct screen_t screen_t;
 typedef enum{ screenRefresh_idle=0, screenRefresh_eraseNow, screenRefresh_alreadyErased} screenRefreshType;
 struct screen_t
 {
-	struct screen_t *next_screen;
-	widget_t *widgets;
-	widget_t *current_widget;
-	bool enabled;
-	screenRefreshType refresh;
-	int (*processInput)(struct screen_t *scr, RE_Rotation_t input, RE_State_t *);
-	void (*update)(screen_t *scr);
-	void (*draw)(screen_t *scr);
-	void (*onExit)(screen_t *scr);
-	void (*onEnter)(screen_t *scr);
-	uint8_t index;
-	void (*init)(screen_t *scr);
+  struct screen_t *next_screen;
+  widget_t *widgets;
+  widget_t *current_widget;
+  bool enabled;
+  screenRefreshType refresh;
+  int (*processInput)(struct screen_t *scr, RE_Rotation_t input, RE_State_t *);
+  void (*update)(screen_t *scr);
+  void (*draw)(screen_t *scr);
+  void (*onExit)(screen_t *scr);
+  void (*onEnter)(screen_t *scr);
+  uint8_t index;
+  void (*init)(screen_t *scr);
 };
 
 

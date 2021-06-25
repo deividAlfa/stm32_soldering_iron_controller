@@ -235,8 +235,8 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = T12_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = T12_Cal350;     // These values are way lower, but better to be safe than sorry
       systemSettings.Profile.tip[x].calADC_At_450   = T12_Cal450;     // User needs to calibrate its station
-      systemSettings.Profile.tip[x].PID.Kp          = 7000;          // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 4500;          // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kp          = 7000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 4500;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Kd          = 500;            // val = /1.000.000
       systemSettings.Profile.tip[x].PID.maxI        = 40;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
@@ -260,8 +260,8 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = C245_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = C245_Cal350;
       systemSettings.Profile.tip[x].calADC_At_450   = C245_Cal450;
-      systemSettings.Profile.tip[x].PID.Kp          = 7000;          // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 4500;          // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kp          = 7000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 4500;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Kd          = 500;            // val = /1.000.000
       systemSettings.Profile.tip[x].PID.maxI        = 40;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
@@ -284,8 +284,8 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = C210_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = C210_Cal350;
       systemSettings.Profile.tip[x].calADC_At_450   = C210_Cal450;
-      systemSettings.Profile.tip[x].PID.Kp          = 7000;          // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 4500;          // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kp          = 7000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 4500;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Kd          = 500;            // val = /1.000.000
       systemSettings.Profile.tip[x].PID.maxI        = 40;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
@@ -444,7 +444,7 @@ void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
     length=1;
   }
   HAL_IWDG_Refresh(&hiwdg);
-  while(oled.status!=oled_idle);  // Wait for the srceen to be idle (few mS at most). Hanging here will cause a watchdog reset.
+  while(oled.status!=oled_idle);  // Wait for the screen to be idle (few mS at most). Hanging here will cause a watchdog reset.
 
   while(Start){
     timErr=HAL_GetTick();

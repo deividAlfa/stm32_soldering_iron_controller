@@ -2,7 +2,7 @@
  * debug_screen.c
  *
  *  Created on: Jan 12, 2021
- *      Author: David		Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose (PTDreamer), 2017
  */
 
 #include "settings_screen.h"
@@ -180,44 +180,44 @@ static button_widget_t button_Reset_CANCEL;
 // Settings screen widgets functions
 //-------------------------------------------------------------------------------------------------------------------------------
 static void setSettingsScrTempUnit() {
-	if(systemSettings.settings.tempUnit==mode_Farenheit){
+  if(systemSettings.settings.tempUnit==mode_Farenheit){
     editable_SYSTEM_TempStep.inputData.endString="\260F";
     editable_IRON_MaxTemp.inputData.endString="\260F";
     editable_IRON_MinTemp.inputData.endString="\260F";
     editable_IRON_StandbyTemp.inputData.endString="\260F";
-	}
-	else{
-	  editable_SYSTEM_TempStep.inputData.endString="\260C";
-	  editable_IRON_MaxTemp.inputData.endString="\260C";
-	  editable_IRON_MinTemp.inputData.endString="\260C";
+  }
+  else{
+    editable_SYSTEM_TempStep.inputData.endString="\260C";
+    editable_IRON_MaxTemp.inputData.endString="\260C";
+    editable_IRON_MinTemp.inputData.endString="\260C";
     editable_IRON_StandbyTemp.inputData.endString="\260C";
-	}
+  }
 }
 
 static void *getTipStr() {
-	return str;
+  return str;
 }
 
 static void setTipStr(char *s) {
-	strcpy(str, s);
+  strcpy(str, s);
 }
 static int saveTip(widget_t *w) {
-	if(comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {                                          // If coming from Add New tip option
-		for(uint8_t x=0;x<TipSize;x++){                                                                             // Find first valid tip
-			if(strcmp(systemSettings.Profile.tip[x].name, "    ")!=0){
-				systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips] = systemSettings.Profile.tip[x];	// Copy Tip data (calibration, PID) to new tip
-				break;
-			}
-		}
-		strcpy(systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips++].name, str);						      // Store new tip name and increase system tip count
-	}
-	else {
-	  strcpy(tipCfg.name, str);                                                 // If existing tip, store the new name
-	}
-	return Tip_name_return;                                                                                       // Return to the screen we came from
+  if(comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {                                          // If coming from Add New tip option
+    for(uint8_t x=0;x<TipSize;x++){                                                                             // Find first valid tip
+      if(strcmp(systemSettings.Profile.tip[x].name, "    ")!=0){
+        systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips] = systemSettings.Profile.tip[x]; // Copy Tip data (calibration, PID) to new tip
+        break;
+      }
+    }
+    strcpy(systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips++].name, str);                 // Store new tip name and increase system tip count
+  }
+  else {
+    strcpy(tipCfg.name, str);                                                                                   // If existing tip, store the new name
+  }
+  return Tip_name_return;                                                                                       // Return to the screen we came from
 }
 static int cancelTip(widget_t *w) {
-	return Tip_name_return;                                                                                       // Return to the screen we came from
+  return Tip_name_return;                                                                                       // Return to the screen we came from
 }
 static int delTip(widget_t *w) {
   char str[TipCharSize];
@@ -225,7 +225,7 @@ static int delTip(widget_t *w) {
     str[x] = ' ';
   }
   str[TipCharSize-1] = 0;
-	systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
+  systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
 
 
   for(int x = Selected_Tip; x < TipSize-1;x++) {                                                                // Overwrite selected tip and move the rest one position backwards
@@ -240,33 +240,33 @@ static int delTip(widget_t *w) {
     systemSettings.Profile.currentTip = systemSettings.Profile.currentNumberOfTips-1;                           // Select the previous tip in the list if so
   }
                                                                                                                 // Skip tip settings (As tip is now deleted)
-	return comboitem_IRONTIPS_Settings_Cancel.action_screen;                                                        // And return to main screen or system menu screen
+  return comboitem_IRONTIPS_Settings_Cancel.action_screen;                                                      // And return to main screen or system menu screen
 }
 
 #ifdef USE_VIN
 static void * getMaxPower() {
-	temp = systemSettings.Profile.power;
-	return &temp;
+  temp = systemSettings.Profile.power;
+  return &temp;
 }
 static void setMaxPower(uint32_t *val) {
-	systemSettings.Profile.power = *val;
+  systemSettings.Profile.power = *val;
 }
 
 static void * getTipImpedance() {
-	temp = systemSettings.Profile.impedance;
-	return &temp;
+  temp = systemSettings.Profile.impedance;
+  return &temp;
 }
 static void setTipImpedance(uint32_t *val) {
-	systemSettings.Profile.impedance = *val;
+  systemSettings.Profile.impedance = *val;
 }
 #endif
 
 static void setSleepTime(uint32_t *val) {
-	systemSettings.Profile.sleepTimeout= *val;
+  systemSettings.Profile.sleepTimeout= *val;
 }
 static void * getSleepTime() {
-	temp = systemSettings.Profile.sleepTimeout;
-	return &temp;
+  temp = systemSettings.Profile.sleepTimeout;
+  return &temp;
 }
 
 
@@ -286,22 +286,22 @@ static void * getStandbyTemp() {
   return &temp;
 }
 static void * getKp() {
-	temp = tipCfg.PID.Kp;
-	return &temp;
+  temp = tipCfg.PID.Kp;
+  return &temp;
 }
 static void setKp(int32_t *val) {
   tipCfg.PID.Kp = *val;
 }
 static void * getKi() {
   temp = tipCfg.PID.Ki;
-	return &temp;
+  return &temp;
 }
 static void setKi(int32_t *val) {
   tipCfg.PID.Ki = *val;
 }
 static void * getKd() {
   temp = tipCfg.PID.Kd;
-	return &temp;
+  return &temp;
 }
 static void setKd(int32_t *val) {
   tipCfg.PID.Kd = *val;
@@ -357,32 +357,32 @@ static int IRONTIPS_Save(widget_t *w) {
 }
 
 static void * getPWMPeriod() {
-	temp=(systemSettings.Profile.pwmPeriod+1)/100;
-	return &temp;
+  temp=(systemSettings.Profile.pwmPeriod+1)/100;
+  return &temp;
 }
 static void setPWMPeriod(uint32_t *val) {
-	uint16_t period=(*val*100)-1;
-	if(period>=systemSettings.Profile.pwmDelay+(ADC_MEASURE_TIME/10)){
-	  setPwmPeriod(period);
+  uint16_t period=(*val*100)-1;
+  if(period>=systemSettings.Profile.pwmDelay+(ADC_MEASURE_TIME/10)){
+    setPwmPeriod(period);
   }
-	else{
-	  uint16_t t=(systemSettings.Profile.pwmDelay+(ADC_MEASURE_TIME/10));
-	  setPwmPeriod(t);
-	}
+  else{
+    uint16_t t=(systemSettings.Profile.pwmDelay+(ADC_MEASURE_TIME/10));
+    setPwmPeriod(t);
+  }
 }
 
 static void * getPWMDelay() {
-	temp=(systemSettings.Profile.pwmDelay+1)/10;
-	return &temp;
+  temp=(systemSettings.Profile.pwmDelay+1)/10;
+  return &temp;
 }
 static void setPWMDelay(uint32_t *val) {
-	uint16_t delay=(*val*10)-1;
-	if(delay<=(systemSettings.Profile.pwmPeriod-(ADC_MEASURE_TIME/10))){
-	  setPwmDelay(delay);
-	}
-	else{
-	  setPwmDelay(systemSettings.Profile.pwmPeriod-(ADC_MEASURE_TIME/10));
-	}
+  uint16_t delay=(*val*10)-1;
+  if(delay<=(systemSettings.Profile.pwmPeriod-(ADC_MEASURE_TIME/10))){
+    setPwmDelay(delay);
+  }
+  else{
+    setPwmDelay(systemSettings.Profile.pwmPeriod-(ADC_MEASURE_TIME/10));
+  }
 }
 
 static void * getMaxTemp() {
@@ -407,20 +407,20 @@ static void setMinTemp(uint32_t *val) {
 }
 
 static void * getTmpUnit() {
-	temp = systemSettings.settings.tempUnit;
-	return &temp;
+  temp = systemSettings.settings.tempUnit;
+  return &temp;
 }
 static void setTmpUnit(uint32_t *val) {
-	setSystemTempUnit(*val);
-	setSettingsScrTempUnit();
+  setSystemTempUnit(*val);
+  setSettingsScrTempUnit();
 }
 
 static void * getTmpStep() {
-	temp = systemSettings.settings.tempStep;
-	return &temp;
+  temp = systemSettings.settings.tempStep;
+  return &temp;
 }
 static void setTmpStep(uint32_t *val) {
-	systemSettings.settings.tempStep = *val;
+  systemSettings.settings.tempStep = *val;
 }
 
 static void * getContrast_() {
@@ -433,16 +433,16 @@ static void setContrast_(uint32_t *val) {
 }
 
 static void * getOledOffset() {
-	temp = systemSettings.settings.OledOffset;
-	return &temp;
+  temp = systemSettings.settings.OledOffset;
+  return &temp;
 }
 static void setOledOffset(uint32_t *val) {
-	systemSettings.settings.OledOffset= * val;
+  systemSettings.settings.OledOffset= * val;
 }
 
 static void * getOledDimming() {
-	temp = systemSettings.settings.screenDimming;
-	return &temp;
+  temp = systemSettings.settings.screenDimming;
+  return &temp;
 }
 static void setOledDimming(uint32_t *val) {
   systemSettings.settings.screenDimming = * val;
@@ -450,23 +450,23 @@ static void setOledDimming(uint32_t *val) {
 
 
 static void * getActiveDetection() {
-	temp = systemSettings.settings.activeDetection;
-	return &temp;
+  temp = systemSettings.settings.activeDetection;
+  return &temp;
 }
 static void setActiveDetection(uint32_t *val) {
   systemSettings.settings.activeDetection = * val;
 }
 
 static void * getWakeMode() {
-	temp = systemSettings.settings.WakeInputMode;
-	comboitem_SYSTEM_ButtonWake.enabled = !systemSettings.settings.WakeInputMode;   // 0=shake, 1=stand
+  temp = systemSettings.settings.WakeInputMode;
+  comboitem_SYSTEM_ButtonWake.enabled = !systemSettings.settings.WakeInputMode;   // 0=shake, 1=stand
   comboitem_SYSTEM_ShakeWake.enabled = !systemSettings.settings.WakeInputMode;
   comboitem_SYSTEM_InitMode.enabled = !systemSettings.settings.WakeInputMode;
   comboitem_SYSTEM_StandMode.enabled = systemSettings.settings.WakeInputMode;
-	return &temp;
+  return &temp;
 }
 static void setWakeMode(uint32_t *val) {
-	systemSettings.settings.WakeInputMode = *val;
+  systemSettings.settings.WakeInputMode = *val;
 }
 
 static void * getStandMode() {
@@ -478,139 +478,139 @@ static void setStandMode(uint32_t *val) {
 }
 
 static void * getEncoderMode() {
-	temp = systemSettings.settings.EncoderMode;
-	RE_SetMode(&RE1_Data, systemSettings.settings.EncoderMode);
-	return &temp;
+  temp = systemSettings.settings.EncoderMode;
+  RE_SetMode(&RE1_Data, systemSettings.settings.EncoderMode);
+  return &temp;
 }
 static void setEncoderMode(uint32_t *val) {
-	systemSettings.settings.EncoderMode = * val;
+  systemSettings.settings.EncoderMode = * val;
 }
 
 static void * getGuiUpd_ms() {
-	temp = systemSettings.settings.guiUpdateDelay;
-	return &temp;
+  temp = systemSettings.settings.guiUpdateDelay;
+  return &temp;
 }
 static void setGuiUpd_ms(uint32_t *val) {
-	systemSettings.settings.guiUpdateDelay = *val;
+  systemSettings.settings.guiUpdateDelay = *val;
 
 }
 
 static void * getSavDelay() {
-	temp =systemSettings.settings.saveSettingsDelay;
-	return &temp;
+  temp =systemSettings.settings.saveSettingsDelay;
+  return &temp;
 }
 static void setSavDelay(uint32_t *val) {
-	systemSettings.settings.saveSettingsDelay = *val;
+  systemSettings.settings.saveSettingsDelay = *val;
 }
 
 static void * getLVP() {
-	temp = systemSettings.settings.lvp;
-	return &temp;
+  temp = systemSettings.settings.lvp;
+  return &temp;
 }
 static void setLVP(uint32_t *val) {
   systemSettings.settings.lvp = *val;
 }
 
 static void * geterrorDelay() {
-	temp = systemSettings.settings.errorDelay;
-	return &temp;
+  temp = systemSettings.settings.errorDelay;
+  return &temp;
 }
 static void seterrorDelay(uint32_t *val) {
-	systemSettings.settings.errorDelay = *val;
+  systemSettings.settings.errorDelay = *val;
 }
 
 static void * getNoIronADC() {
-	temp = systemSettings.Profile.noIronValue;
-	return &temp;
+  temp = systemSettings.Profile.noIronValue;
+  return &temp;
 }
 static void setNoIronADC(uint32_t *val) {
-	systemSettings.Profile.noIronValue = *val;
+  systemSettings.Profile.noIronValue = *val;
 }
 static void * getbuzzerMode() {
-	temp = systemSettings.settings.buzzerMode;
-	return &temp;
+  temp = systemSettings.settings.buzzerMode;
+  return &temp;
 }
 static void setbuzzerMode(uint32_t *val) {
-	systemSettings.settings.buzzerMode = *val;
+  systemSettings.settings.buzzerMode = *val;
 }
 static void * getInitMode() {
-	temp = systemSettings.settings.initMode;
-	return &temp;
+  temp = systemSettings.settings.initMode;
+  return &temp;
 }
 static void setInitMode(uint32_t *val) {
-	systemSettings.settings.initMode = *val;
+  systemSettings.settings.initMode = *val;
 }
 
 static void * getfilterFactor() {
-	temp = systemSettings.Profile.filterFactor;
-	return &temp;
+  temp = systemSettings.Profile.filterFactor;
+  return &temp;
 }
 static void setfilterFactor(uint32_t *val) {
-	systemSettings.Profile.filterFactor = *val;
+  systemSettings.Profile.filterFactor = *val;
 }
 
 static void * getProfile() {
-	temp = profile;
-	return &temp;
+  temp = profile;
+  return &temp;
 }
 
 static void setProfile(uint32_t *val) {
-	profile=*val;
+  profile=*val;
 }
 
 
 static int cancelReset(widget_t *w) {
-	return screen_reset;
+  return screen_reset;
 }
 static int doReset(widget_t *w) {
-	switch(resStatus){
-		case 0:																	                                // Reset system settings
-		{
-			uint8_t currentProfile=systemSettings.settings.currentProfile;				// Store current profile
-			resetSystemSettings();												                        // Reset system settings
-			systemSettings.settings.currentProfile=currentProfile;				        // Restore profile
-			saveSettings(saveKeepingProfiles);													          // Save settings preserving tip data
-			NVIC_SystemReset();
-			break;
-		}
-		case 1:																	                                // Reset current profile
-			resetCurrentProfile();												                        // Set current profile to defaults
-			saveSettings(saveKeepingProfiles);													          // Save settings preserving tip data
-			NVIC_SystemReset();
-			break;
+  switch(resStatus){
+    case 0:                                                                 // Reset system settings
+    {
+      uint8_t currentProfile=systemSettings.settings.currentProfile;        // Store current profile
+      resetSystemSettings();                                                // Reset system settings
+      systemSettings.settings.currentProfile=currentProfile;                // Restore profile
+      saveSettings(saveKeepingProfiles);                                    // Save settings preserving tip data
+      NVIC_SystemReset();
+      break;
+    }
+    case 1:                                                                 // Reset current profile
+      resetCurrentProfile();                                                // Set current profile to defaults
+      saveSettings(saveKeepingProfiles);                                    // Save settings preserving tip data
+      NVIC_SystemReset();
+      break;
 
-		case 2:																	                                // Reset all Profiles
-			systemSettings.settings.currentProfile=profile_None;				          // Set factory value
-			saveSettings(saveWipingProfiles);													            // Save settings, but wiping all tip data
-			NVIC_SystemReset();
-			break;
+    case 2:                                                                 // Reset all Profiles
+      systemSettings.settings.currentProfile=profile_None;                  // Set factory value
+      saveSettings(saveWipingProfiles);                                     // Save settings, but wiping all tip data
+      NVIC_SystemReset();
+      break;
 
-		case 3:																	                                // Reset everything
-			resetSystemSettings();												                        // Reset system settings
-			saveSettings(saveWipingProfiles);													            // Save settings wiping all tip data
-			NVIC_SystemReset();
-			break;
+    case 3:                                                                 // Reset everything
+      resetSystemSettings();                                                // Reset system settings
+      saveSettings(saveWipingProfiles);                                     // Save settings wiping all tip data
+      NVIC_SystemReset();
+      break;
 
-		default:
-			return screen_main;
-		}
+    default:
+      return screen_main;
+    }
 }
 
 static int goSettingsReset(void) {
-	resStatus=0;
-	return screen_reset_confirmation;
+  resStatus=0;
+  return screen_reset_confirmation;
 }
 static int goProfileReset(void) {
-	resStatus=1;
-	return screen_reset_confirmation;
+  resStatus=1;
+  return screen_reset_confirmation;
 }
 static int goAllProfileReset(void) {
-	resStatus=2;
-	return screen_reset_confirmation;
+  resStatus=2;
+  return screen_reset_confirmation;
 }
 static int goFactoryReset(void) {
-	resStatus=3;
-	return screen_reset_confirmation;
+  resStatus=3;
+  return screen_reset_confirmation;
 }
 
 static void setButtonWake(uint32_t *val) {
@@ -633,17 +633,17 @@ static void * getShakeWake() {
 //-------------------------------------------------------------------------------------------------------------------------------
 
 static void settings_screen_init(screen_t *scr) {
-	default_init(scr);
-	scr->current_widget = &comboWidget_Settings;
-	comboBox_IRONTIPS.selectable.state = widget_selected;
-	settingsTimer=HAL_GetTick();
+  default_init(scr);
+  scr->current_widget = &comboWidget_Settings;
+  comboBox_IRONTIPS.selectable.state = widget_selected;
+  settingsTimer=HAL_GetTick();
 }
 
 
 static void settings_screen_OnEnter(screen_t *scr) {
-	if(scr==&Screen_main){
-		comboResetIndex(&comboWidget_Settings);
-	}
+  if(scr==&Screen_main){
+    comboResetIndex(&comboWidget_Settings);
+  }
 }
 
 int settings_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
@@ -651,10 +651,10 @@ int settings_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t 
     settingsTimer=HAL_GetTick();
   }
 
-	if((input==LongClick) || (HAL_GetTick()-settingsTimer)>15000){
-	  return screen_main;
-	}
-	return default_screenProcessInput(scr, input, state);
+  if((input==LongClick) || (HAL_GetTick()-settingsTimer)>15000){
+    return screen_main;
+  }
+  return default_screenProcessInput(scr, input, state);
 }
 
 
@@ -663,38 +663,38 @@ int settings_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t 
 //-------------------------------------------------------------------------------------------------------------------------------
 
 void edit_tip_screen_init(screen_t *scr) {
-	if(Tip_name_return == screen_edit_iron_tips &&  comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {   // If we were in iron tips screen and came from "Add new tip"
-		strcpy(str, "    ");                                                                                              // Copy blank str
-		widgetDisable(&Widget_IRONTIPS_Name_Delete);                                                                      // Disable delete widget
-	}
-	else {                                                                                                              // Already existing tip
-		strcpy(str, systemSettings.Profile.tip[Selected_Tip].name);                                                       // Copy tip name
-		if(systemSettings.Profile.currentNumberOfTips>1){                                                                 // If more than 1 tip in the system, enable delete
-			widgetEnable(&Widget_IRONTIPS_Name_Delete);
-		}
-		else{
-			widgetDisable(&Widget_IRONTIPS_Name_Delete);
-		}
-	}
-	scr->current_widget=&Widget_IRONTIPS_Name_Edit;
-	editable_IRONTIPS_Name_Edit.selectable.previous_state=widget_idle;
-	editable_IRONTIPS_Name_Edit.selectable.state=widget_selected;
+  if(Tip_name_return == screen_edit_iron_tips &&  comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {   // If we were in iron tips screen and came from "Add new tip"
+    strcpy(str, "    ");                                                                                              // Copy blank str
+    widgetDisable(&Widget_IRONTIPS_Name_Delete);                                                                      // Disable delete widget
+  }
+  else {                                                                                                              // Already existing tip
+    strcpy(str, systemSettings.Profile.tip[Selected_Tip].name);                                                       // Copy tip name
+    if(systemSettings.Profile.currentNumberOfTips>1){                                                                 // If more than 1 tip in the system, enable delete
+      widgetEnable(&Widget_IRONTIPS_Name_Delete);
+    }
+    else{
+      widgetDisable(&Widget_IRONTIPS_Name_Delete);
+    }
+  }
+  scr->current_widget=&Widget_IRONTIPS_Name_Edit;
+  editable_IRONTIPS_Name_Edit.selectable.previous_state=widget_idle;
+  editable_IRONTIPS_Name_Edit.selectable.state=widget_selected;
 
-	button_IRONTIPS_Name_Save.selectable.previous_state=widget_idle;
-	button_IRONTIPS_Name_Save.selectable.state=widget_idle;
+  button_IRONTIPS_Name_Save.selectable.previous_state=widget_idle;
+  button_IRONTIPS_Name_Save.selectable.state=widget_idle;
 
-	button_IRONTIPS_Name_Back.selectable.previous_state=widget_idle;
-	button_IRONTIPS_Name_Back.selectable.state=widget_idle;
+  button_IRONTIPS_Name_Back.selectable.previous_state=widget_idle;
+  button_IRONTIPS_Name_Back.selectable.state=widget_idle;
 
-	button_IRONTIPS_Name_Delete.selectable.previous_state=widget_idle;
-	button_IRONTIPS_Name_Delete.selectable.state=widget_idle;
+  button_IRONTIPS_Name_Delete.selectable.previous_state=widget_idle;
+  button_IRONTIPS_Name_Delete.selectable.state=widget_idle;
 
-	u8g2_SetFont(&u8g2,default_font);
-	u8g2_SetDrawColor(&u8g2, WHITE);
-	u8g2_DrawStr(&u8g2,20,19,"NAME:");
+  u8g2_SetFont(&u8g2,default_font);
+  u8g2_SetDrawColor(&u8g2, WHITE);
+  u8g2_DrawStr(&u8g2,20,19,"NAME:");
 
-	widgetDisable(&Widget_IRONTIPS_Name_Save);
-	default_init(scr);
+  widgetDisable(&Widget_IRONTIPS_Name_Save);
+  default_init(scr);
 }
 
 int edit_tip_screen_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
@@ -704,7 +704,7 @@ int edit_tip_screen_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_S
   if(input!=Rotate_Nothing){
     settingsTimer=HAL_GetTick();
 
-    if(editable_IRONTIPS_Name_Edit.selectable.state==widget_edit){                                              // If tip name is being edited and there's encoder activity
+    if(editable_IRONTIPS_Name_Edit.selectable.state==widget_edit){                                                // If tip name is being edited and there's encoder activity
       if(strcmp(str, "    ") == 0){                                                                               // Check that the name is not empty
         widgetDisable(&Widget_IRONTIPS_Name_Save);                                                                // If empty, disable save widget
       }
@@ -738,19 +738,19 @@ int edit_tip_screen_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_S
 //-------------------------------------------------------------------------------------------------------------------------------
 
 void edit_iron_screen_init(screen_t *scr) {
-	comboBox_item_t *i = comboBox_IRONTIPS.first;
-	for(int x = 0; x < TipSize; x++) {
-		if(x < systemSettings.Profile.currentNumberOfTips) {
-			strcpy(i->text, systemSettings.Profile.tip[x].name);
-			i->enabled = 1;
-		}
-		else
-			i->enabled = 0;
-		i = i->next_item;
-	}
-	comboBox_IRONTIPS.currentItem = comboBox_IRONTIPS.first;
-	comboBox_IRONTIPS.currentScroll = 0;
-	comboitem_IRONTIPS_addNewTip.enabled = (systemSettings.Profile.currentNumberOfTips < TipSize);
+  comboBox_item_t *i = comboBox_IRONTIPS.first;
+  for(int x = 0; x < TipSize; x++) {
+    if(x < systemSettings.Profile.currentNumberOfTips) {
+      strcpy(i->text, systemSettings.Profile.tip[x].name);
+      i->enabled = 1;
+    }
+    else
+      i->enabled = 0;
+    i = i->next_item;
+  }
+  comboBox_IRONTIPS.currentItem = comboBox_IRONTIPS.first;
+  comboBox_IRONTIPS.currentScroll = 0;
+  comboitem_IRONTIPS_addNewTip.enabled = (systemSettings.Profile.currentNumberOfTips < TipSize);
 }
 
 void edit_iron_screen_onEnter(screen_t *scr) {
@@ -775,39 +775,39 @@ int edit_iron_screen_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_
 // Reset screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void Reset_onEnter(screen_t *scr){
-	if(scr==&Screen_system){
-		comboResetIndex(&comboWidget_RESET);
-	}
+  if(scr==&Screen_system){
+    comboResetIndex(&comboWidget_RESET);
+  }
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Reset confirmation screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void Reset_confirmation_onEnter(screen_t *scr){
-	FillBuffer(BLACK, fill_dma);								                    // Manually clear the screen
-	Screen_reset_confirmation.refresh=screenRefresh_alreadyErased;		      // Set to already cleared so it doesn't get erased automatically
+  FillBuffer(BLACK, fill_dma);                                            // Manually clear the screen
+  Screen_reset_confirmation.refresh=screenRefresh_alreadyErased;          // Set to already cleared so it doesn't get erased automatically
 
-	u8g2_SetFont(&u8g2,default_font);
-	u8g2_SetDrawColor(&u8g2, WHITE);
+  u8g2_SetFont(&u8g2,default_font);
+  u8g2_SetDrawColor(&u8g2, WHITE);
 
-	switch(resStatus){
-	case 0:
-		putStrAligned("RESET SYSTEM", 0, align_center);
-		putStrAligned("SETTINGS?", 16, align_center);
-		break;
-	case 1:
-		putStrAligned("RESET CURRENT",0 , align_center);
-		putStrAligned("PROFILE?", 16, align_center);
-		break;
-	case 2:
-		putStrAligned("RESET ALL",0 , align_center);
-		putStrAligned("PROFILES?", 16, align_center);
-		break;
-	case 3:
-		putStrAligned("PERFORM FULL", 0, align_center);
-		putStrAligned("SYSTEM RESET?", 16, align_center);
-		break;
-	}
+  switch(resStatus){
+  case 0:
+    putStrAligned("RESET SYSTEM", 0, align_center);
+    putStrAligned("SETTINGS?", 16, align_center);
+    break;
+  case 1:
+    putStrAligned("RESET CURRENT",0 , align_center);
+    putStrAligned("PROFILE?", 16, align_center);
+    break;
+  case 2:
+    putStrAligned("RESET ALL",0 , align_center);
+    putStrAligned("PROFILES?", 16, align_center);
+    break;
+  case 3:
+    putStrAligned("PERFORM FULL", 0, align_center);
+    putStrAligned("SYSTEM RESET?", 16, align_center);
+    break;
+  }
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -816,25 +816,25 @@ void Reset_confirmation_onEnter(screen_t *scr){
 void IRONTIPS_Settings_onEnter(screen_t *scr){
   settingsTimer=HAL_GetTick();
   bool backup=0;
-	comboResetIndex(&comboWidget_IRONTIPS_Settings);
-	if(scr==&Screen_main){
-	  backup=1;
-	  comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_main;
-	  Selected_Tip = systemSettings.Profile.currentTip;
-	}
-	else if(scr==&Screen_edit_iron_tips){
+  comboResetIndex(&comboWidget_IRONTIPS_Settings);
+  if(scr==&Screen_main){
     backup=1;
-	  for(uint8_t x = 0; x < TipSize; x++) {
-	    if(strcmp(comboBox_IRONTIPS.currentItem->text, systemSettings.Profile.tip[x].name)==0){
-	      Selected_Tip = x;
-	    }
-	  }
+    comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_main;
+    Selected_Tip = systemSettings.Profile.currentTip;
+  }
+  else if(scr==&Screen_edit_iron_tips){
+    backup=1;
+    for(uint8_t x = 0; x < TipSize; x++) {
+      if(strcmp(comboBox_IRONTIPS.currentItem->text, systemSettings.Profile.tip[x].name)==0){
+        Selected_Tip = x;
+      }
+    }
     comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_edit_iron_tips;
-	}
-	if(backup){
-	  tipCfg = systemSettings.Profile.tip[Selected_Tip];
-	}
-	comboitem_IRONTIPS_Settings_TipLabel.text = tipCfg.name;
+  }
+  if(backup){
+    tipCfg = systemSettings.Profile.tip[Selected_Tip];
+  }
+  comboitem_IRONTIPS_Settings_TipLabel.text = tipCfg.name;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -842,7 +842,7 @@ void IRONTIPS_Settings_onEnter(screen_t *scr){
 //-------------------------------------------------------------------------------------------------------------------------------
 void IRON_onEnter(screen_t *scr){
   setSettingsScrTempUnit();
-	comboResetIndex(&comboWidget_IRON);
+  comboResetIndex(&comboWidget_IRON);
 
 }
 
@@ -850,128 +850,129 @@ void IRON_onEnter(screen_t *scr){
 // SYSTEM settings screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void SYSTEM_onEnter(screen_t *scr){
-	setSettingsScrTempUnit();
-	if(scr!=&Screen_reset){
-		comboResetIndex(&comboWidget_SYSTEM);
-	}
-	if(ChecksumProfile(&systemSettings.Profile)!=systemSettings.ProfileChecksum){					// If there's unsaved profile data
-		saveSettings(saveKeepingProfiles);															                    // Save settings
-	}
-	profile=systemSettings.settings.currentProfile;
+  setSettingsScrTempUnit();
+  if(scr!=&Screen_reset){
+    comboResetIndex(&comboWidget_SYSTEM);
+  }
+  if(ChecksumProfile(&systemSettings.Profile)!=systemSettings.ProfileChecksum){         // If there's unsaved profile data
+    saveSettings(saveKeepingProfiles);                                                  // Save settings
+  }
+  profile=systemSettings.settings.currentProfile;
 }
 void SYSTEM_onExit(screen_t *scr){
-	if(profile!=systemSettings.settings.currentProfile){	                                // If profile changed
-		loadProfile(profile);
-		saveSettings(saveKeepingProfiles);									                                // Save
-	}
+  if(profile!=systemSettings.settings.currentProfile){                                  // If profile changed
+    loadProfile(profile);
+    saveSettings(saveKeepingProfiles);                                                  // Save
+  }
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Settings screen setup
 //-------------------------------------------------------------------------------------------------------------------------------
 void settings_screen_setup(screen_t *scr) {
-	screen_t* sc;
-	widget_t* w;
+  screen_t* sc;
+  widget_t* w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
 
-	screen_setDefaults(scr);
-	scr->init = &settings_screen_init;
-	scr->onEnter = &settings_screen_OnEnter;
-	scr->processInput=&settings_screenProcessInput;
+  screen_setDefaults(scr);
+  scr->init = &settings_screen_init;
+  scr->onEnter = &settings_screen_OnEnter;
+  scr->processInput=&settings_screenProcessInput;
 
 
-	//#################################### [ SETTINGS MAIN SCREEN ]#######################################
-	//
-	w = &comboWidget_Settings;
-	screen_addWidget(w, scr);
-	widgetDefaultsInit(w, widget_combo, &comboBox_Settings);
-	comboAddScreen(&Settings_Combo_IRON, w, 		  "IRON", 		  screen_iron);
-	comboAddScreen(&Settings_Combo_SYSTEM, w, 		"SYSTEM", 		screen_system);
-	comboAddScreen(&Settings_Combo_TIPS, w, 		  "EDIT TIPS", 	screen_edit_iron_tips);
-	comboAddScreen(&Settings_Combo_CALIBRATION, w,"CALIBRATION",screen_edit_calibration);
-	#ifdef ENABLE_DEBUG_SCREEN
-	comboAddScreen(&Settings_Combo_DEBUG, w, 		  "DEBUG", 		  screen_debug);
-	#endif
-	comboAddScreen(&Settings_Combo_EXIT, w, 		  "EXIT", 		  screen_main);
+  //#################################### [ SETTINGS MAIN SCREEN ]#######################################
+  //
+  w = &comboWidget_Settings;
+  screen_addWidget(w, scr);
+  widgetDefaultsInit(w, widget_combo, &comboBox_Settings);
+
+  comboAddScreen(&Settings_Combo_IRON, w,         "IRON",         screen_iron);
+  comboAddScreen(&Settings_Combo_SYSTEM, w,       "SYSTEM",       screen_system);
+  comboAddScreen(&Settings_Combo_TIPS, w,         "EDIT TIPS",    screen_edit_iron_tips);
+  comboAddScreen(&Settings_Combo_CALIBRATION, w,  "CALIBRATION",  screen_edit_calibration);
+  #ifdef ENABLE_DEBUG_SCREEN
+  comboAddScreen(&Settings_Combo_DEBUG, w,        "DEBUG",        screen_debug);
+  #endif
+  comboAddScreen(&Settings_Combo_EXIT, w,         "EXIT",         screen_main);
 
 
-	//########################################## SYSTEM SCREEN ##########################################
-	//
-	sc=&Screen_system;
-	oled_addScreen(sc,screen_system);
-	screen_setDefaults(sc);
-	sc->onEnter = &SYSTEM_onEnter;
-	sc->onExit = &SYSTEM_onExit;
-	sc->processInput=&settings_screenProcessInput;
+  //########################################## SYSTEM SCREEN ##########################################
+  //
+  sc=&Screen_system;
+  oled_addScreen(sc,screen_system);
+  screen_setDefaults(sc);
+  sc->onEnter = &SYSTEM_onEnter;
+  sc->onExit = &SYSTEM_onExit;
+  sc->processInput=&settings_screenProcessInput;
 
-	//********[ Profile Widget ]***********************************************************
-	//
+  //********[ Profile Widget ]***********************************************************
+  //
   dis=&editable_SYSTEM_Profile.inputData;
   edit=&editable_SYSTEM_Profile;
   editableDefaultsInit(edit,widget_multi_option);
-	dis->getData = &getProfile;
-	edit->big_step = 1;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setProfile;
-	edit->max_value = ProfileSize-1;
-	edit->min_value = 0;
-	edit->options = profileStr;
-	edit->numberOfOptions = ProfileSize;
+  dis->getData = &getProfile;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setProfile;
+  edit->max_value = ProfileSize-1;
+  edit->min_value = 0;
+  edit->options = profileStr;
+  edit->numberOfOptions = ProfileSize;
 
-	//********[ Contrast Widget ]***********************************************************
-	//
-	dis=&editable_SYSTEM_Contrast.inputData;
+  //********[ Contrast Widget ]***********************************************************
+  //
+  dis=&editable_SYSTEM_Contrast.inputData;
   edit=&editable_SYSTEM_Contrast;
   editableDefaultsInit(edit,widget_editable);
-	dis->reservedChars=3;
-	dis->getData = &getContrast_;
-	edit->big_step = 25;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setContrast_;
-	edit->max_value = 255;
-	edit->min_value = 5;
+  dis->reservedChars=3;
+  dis->getData = &getContrast_;
+  edit->big_step = 25;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setContrast_;
+  edit->max_value = 255;
+  edit->min_value = 5;
 
-	//********[ Oled Offset Widget ]***********************************************************
-	//
-	dis=&editable_SYSTEM_OledOffset.inputData;
-	edit=&editable_SYSTEM_OledOffset;
+  //********[ Oled Offset Widget ]***********************************************************
+  //
+  dis=&editable_SYSTEM_OledOffset.inputData;
+  edit=&editable_SYSTEM_OledOffset;
   editableDefaultsInit(edit,widget_editable);
-	dis->reservedChars=2;
-	dis->getData = &getOledOffset;
-	edit->big_step = 10;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setOledOffset;
-	edit->max_value = 15;
-	edit->min_value = 0;
+  dis->reservedChars=2;
+  dis->getData = &getOledOffset;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setOledOffset;
+  edit->max_value = 15;
+  edit->min_value = 0;
 
-	//********[ Oled dimming Widget ]***********************************************************
-	//
+  //********[ Oled dimming Widget ]***********************************************************
+  //
   dis=&editable_SYSTEM_OledDimming.inputData;
   edit=&editable_SYSTEM_OledDimming;
   editableDefaultsInit(edit,widget_multi_option);
-	dis->getData = &getOledDimming;
-	edit->big_step = 1;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setOledDimming;
-	edit->max_value = 1;
-	edit->min_value = 0;
-	edit->options = OffOn;
-	edit->numberOfOptions = 2;
+  dis->getData = &getOledDimming;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setOledDimming;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options = OffOn;
+  edit->numberOfOptions = 2;
 
-	//********[ Wake mode Widget ]***********************************************************
-	//
+  //********[ Wake mode Widget ]***********************************************************
+  //
   dis=&editable_SYSTEM_WakeMode.inputData;
   edit=&editable_SYSTEM_WakeMode;
   editableDefaultsInit(edit,widget_multi_option);
-	dis->getData = &getWakeMode;
-	edit->big_step = 1;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setWakeMode;
-	edit->max_value = wakeInputmode_stand;
-	edit->min_value = wakeInputmode_shake;
-	edit->options = wakeMode;
-	edit->numberOfOptions = 2;
+  dis->getData = &getWakeMode;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setWakeMode;
+  edit->max_value = wakeInputmode_stand;
+  edit->min_value = wakeInputmode_shake;
+  edit->options = wakeMode;
+  edit->numberOfOptions = 2;
 
 
   //********[ Stand mode Widget ]***********************************************************
@@ -988,103 +989,103 @@ void settings_screen_setup(screen_t *scr) {
   edit->options = InitMode;
   edit->numberOfOptions = 2;
 
-	//********[ Encoder inversion Widget ]***********************************************************
-	//
+  //********[ Encoder inversion Widget ]***********************************************************
+  //
   dis=&editable_SYSTEM_EncoderMode.inputData;
   edit=&editable_SYSTEM_EncoderMode;
   editableDefaultsInit(edit,widget_multi_option);
-	dis->getData = &getEncoderMode;
-	edit->big_step = 1;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setEncoderMode;
-	edit->max_value = encoder_reverse;
-	edit->min_value = encoder_normal;
-	edit->options = encMode;
-	edit->numberOfOptions = 2;
+  dis->getData = &getEncoderMode;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setEncoderMode;
+  edit->max_value = encoder_reverse;
+  edit->min_value = encoder_normal;
+  edit->options = encMode;
+  edit->numberOfOptions = 2;
 
-	//********[ Save Delay Widget ]***********************************************************
-	//
+  //********[ Save Delay Widget ]***********************************************************
+  //
   dis=&editable_SYSTEM_SaveInterval.inputData;
   edit=&editable_SYSTEM_SaveInterval;
   editableDefaultsInit(edit,widget_editable);
-	dis->reservedChars=3;
-	dis->endString="s";
-	dis->getData = &getSavDelay;
-	edit->big_step = 1;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setSavDelay;
-	edit->max_value = 60;
-	edit->min_value = 0;
+  dis->reservedChars=3;
+  dis->endString="s";
+  dis->getData = &getSavDelay;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setSavDelay;
+  edit->max_value = 60;
+  edit->min_value = 0;
 
-	//********[ Gui refresh rate Widget ]***********************************************************
-	//
+  //********[ Gui refresh rate Widget ]***********************************************************
+  //
   dis=&editable_SYSTEM_GuiUpd.inputData;
   edit=&editable_SYSTEM_GuiUpd;
   editableDefaultsInit(edit,widget_editable);
-	dis->endString="mS";
-	dis->reservedChars=5;
-	dis->getData = &getGuiUpd_ms;
-	edit->big_step = 50;
-	edit->step = 10;
-	edit->setData = (void (*)(void *))&setGuiUpd_ms;
-	edit->max_value = 500;
-	edit->min_value = 20;
+  dis->endString="mS";
+  dis->reservedChars=5;
+  dis->getData = &getGuiUpd_ms;
+  edit->big_step = 50;
+  edit->step = 10;
+  edit->setData = (void (*)(void *))&setGuiUpd_ms;
+  edit->max_value = 500;
+  edit->min_value = 20;
 
-	//********[ Temp display unit Widget ]***********************************************************
-	//
+  //********[ Temp display unit Widget ]***********************************************************
+  //
   dis=&editable_SYSTEM_TempUnit.inputData;
   edit=&editable_SYSTEM_TempUnit;
   editableDefaultsInit(edit,widget_multi_option);
-	dis->getData = &getTmpUnit;
-	edit->big_step = 1;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setTmpUnit;
-	edit->max_value = mode_Farenheit;
-	edit->min_value = mode_Celsius;
-	edit->options = tempUnit;
-	edit->numberOfOptions = 2;
+  dis->getData = &getTmpUnit;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setTmpUnit;
+  edit->max_value = mode_Farenheit;
+  edit->min_value = mode_Celsius;
+  edit->options = tempUnit;
+  edit->numberOfOptions = 2;
 
 
-	//********[ Temp step Widget ]***********************************************************
-	//
+  //********[ Temp step Widget ]***********************************************************
+  //
   dis=&editable_SYSTEM_TempStep.inputData;
   edit=&editable_SYSTEM_TempStep;
   editableDefaultsInit(edit,widget_editable);
-	dis->reservedChars=4;
-	dis->getData = &getTmpStep;
-	edit->big_step = 5;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setTmpStep;
-	edit->max_value = 50;
-	edit->min_value = 1;
+  dis->reservedChars=4;
+  dis->getData = &getTmpStep;
+  edit->big_step = 5;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setTmpStep;
+  edit->max_value = 50;
+  edit->min_value = 1;
 
-	//********[ Buzzer Widget ]***********************************************************
-	//
+  //********[ Buzzer Widget ]***********************************************************
+  //
   dis=&editable_SYSTEM_Buzzer.inputData;
   edit=&editable_SYSTEM_Buzzer;
   editableDefaultsInit(edit,widget_multi_option);
-	dis->getData = &getbuzzerMode;
-	edit->big_step = 1;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setbuzzerMode;
-	edit->max_value = 1;
-	edit->min_value = 0;
-	edit->options = OffOn;
-	edit->numberOfOptions = 2;
+  dis->getData = &getbuzzerMode;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setbuzzerMode;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options = OffOn;
+  edit->numberOfOptions = 2;
 
-	//********[ Init mode Widget ]***********************************************************
-	//
+  //********[ Init mode Widget ]***********************************************************
+  //
   dis=&editable_SYSTEM_InitMode.inputData;
   edit=&editable_SYSTEM_InitMode;
   editableDefaultsInit(edit,widget_multi_option);
-	dis->getData = &getInitMode;
-	edit->big_step = 1;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setInitMode;
-	edit->max_value = mode_run;
-	edit->min_value = mode_sleep;
-	edit->options = InitMode;
-	edit->numberOfOptions = 3;
+  dis->getData = &getInitMode;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setInitMode;
+  edit->max_value = mode_run;
+  edit->min_value = mode_sleep;
+  edit->options = InitMode;
+  edit->numberOfOptions = 3;
 
   //********[ Encoder wake Widget ]***********************************************************
   //
@@ -1142,97 +1143,97 @@ void settings_screen_setup(screen_t *scr) {
   edit->setData = (void (*)(void *))&setLVP;
   edit->max_value = 240;
   edit->min_value = 90;
-	//========[ SYSTEM COMBO ]===========================================================
-	//
-	w = &comboWidget_SYSTEM;
-	screen_addWidget(w, sc);
-	widgetDefaultsInit(w, widget_combo, &comboBox_SYSTEM);
-	comboAddMultiOption(&comboitem_SYSTEM_Profile,w,      "Profile", 		&editable_SYSTEM_Profile);
-	comboAddEditable(&comboitem_SYSTEM_Contrast,w, 		    "Contrast", 	&editable_SYSTEM_Contrast);
-	comboAddMultiOption(&comboitem_SYSTEM_OledDimming,w,  "Auto dim", 	&editable_SYSTEM_OledDimming);
-	comboAddEditable(&comboitem_SYSTEM_OledOffset, w,     "Offset", 	  &editable_SYSTEM_OledOffset);
-	comboAddMultiOption(&comboitem_SYSTEM_EncoderMode, w, "Encoder",		&editable_SYSTEM_EncoderMode);
-  comboAddMultiOption(&comboitem_SYSTEM_WakeMode, w,    "Wake Mode",  &editable_SYSTEM_WakeMode);
-	comboAddMultiOption(&comboitem_SYSTEM_InitMode, w, 		"Boot", 	    &editable_SYSTEM_InitMode);
-  comboAddMultiOption(&comboitem_SYSTEM_StandMode, w,   "Stand idle",&editable_SYSTEM_StandMode);
-  comboAddMultiOption(&comboitem_SYSTEM_ButtonWake, w,  "Btn. wake",  &editable_SYSTEM_ButtonWake);
-  comboAddMultiOption(&comboitem_SYSTEM_ShakeWake, w,   "Shake wake", &editable_SYSTEM_ShakeWake);
-  comboAddMultiOption(&comboitem_SYSTEM_ActiveDetection, w,   "Active det.",&editable_SYSTEM_ActiveDetection);
-	comboAddMultiOption(&comboitem_SYSTEM_Buzzer, w, 		  "Buzzer", 		&editable_SYSTEM_Buzzer);
-	comboAddMultiOption(&comboitem_SYSTEM_TempUnit, w, 		"Unit", 	    &editable_SYSTEM_TempUnit);
-	comboAddEditable(&comboitem_SYSTEM_TempStep, w, 	    "Step",	      &editable_SYSTEM_TempStep);
-	comboAddEditable(&comboitem_SYSTEM_LVP, w, 		        "LVP",	      &editable_SYSTEM_LVP);
-	comboAddEditable(&comboitem_SYSTEM_GuiUpd, w, 		    "Gui time", 	&editable_SYSTEM_GuiUpd);
-	comboAddEditable(&comboitem_SYSTEM_SaveInterval, w,   "Save time",	&editable_SYSTEM_SaveInterval);
-	comboAddScreen(&comboitem_SYSTEM_Reset, w, 			      "RESET MENU",	screen_reset);
-	comboAddScreen(&comboitem_SYSTEM_SW, w, 			        SWSTRING,		  -1);
-	comboAddScreen(&comboitem_SYSTEM_HW, w, 			        HWSTRING,		  -1);
-	comboAddScreen(&comboitem_SYSTEM_Back, w, 			      "BACK", 		  screen_settingsmenu);
+  //========[ SYSTEM COMBO ]===========================================================
+  //
+  w = &comboWidget_SYSTEM;
+  screen_addWidget(w, sc);
+  widgetDefaultsInit(w, widget_combo, &comboBox_SYSTEM);
+  comboAddMultiOption(&comboitem_SYSTEM_Profile,w,          "Profile",    &editable_SYSTEM_Profile);
+  comboAddEditable(&comboitem_SYSTEM_Contrast,w,            "Contrast",   &editable_SYSTEM_Contrast);
+  comboAddMultiOption(&comboitem_SYSTEM_OledDimming,w,      "Auto dim",   &editable_SYSTEM_OledDimming);
+  comboAddEditable(&comboitem_SYSTEM_OledOffset, w,         "Offset",     &editable_SYSTEM_OledOffset);
+  comboAddMultiOption(&comboitem_SYSTEM_EncoderMode, w,     "Encoder",    &editable_SYSTEM_EncoderMode);
+  comboAddMultiOption(&comboitem_SYSTEM_WakeMode, w,        "Wake Mode",  &editable_SYSTEM_WakeMode);
+  comboAddMultiOption(&comboitem_SYSTEM_InitMode, w,        "Boot",       &editable_SYSTEM_InitMode);
+  comboAddMultiOption(&comboitem_SYSTEM_StandMode, w,       "Stand idle", &editable_SYSTEM_StandMode);
+  comboAddMultiOption(&comboitem_SYSTEM_ButtonWake, w,      "Btn. wake",  &editable_SYSTEM_ButtonWake);
+  comboAddMultiOption(&comboitem_SYSTEM_ShakeWake, w,       "Shake wake", &editable_SYSTEM_ShakeWake);
+  comboAddMultiOption(&comboitem_SYSTEM_ActiveDetection, w, "Active det.",&editable_SYSTEM_ActiveDetection);
+  comboAddMultiOption(&comboitem_SYSTEM_Buzzer, w,          "Buzzer",     &editable_SYSTEM_Buzzer);
+  comboAddMultiOption(&comboitem_SYSTEM_TempUnit, w,        "Unit",       &editable_SYSTEM_TempUnit);
+  comboAddEditable(&comboitem_SYSTEM_TempStep, w,           "Step",       &editable_SYSTEM_TempStep);
+  comboAddEditable(&comboitem_SYSTEM_LVP, w,                "LVP",        &editable_SYSTEM_LVP);
+  comboAddEditable(&comboitem_SYSTEM_GuiUpd, w,             "Gui time",   &editable_SYSTEM_GuiUpd);
+  comboAddEditable(&comboitem_SYSTEM_SaveInterval, w,       "Save time",  &editable_SYSTEM_SaveInterval);
+  comboAddScreen(&comboitem_SYSTEM_Reset, w,                "RESET MENU", screen_reset);
+  comboAddScreen(&comboitem_SYSTEM_SW, w,                   SWSTRING,     -1);
+  comboAddScreen(&comboitem_SYSTEM_HW, w,                   HWSTRING,     -1);
+  comboAddScreen(&comboitem_SYSTEM_Back, w,                 "BACK",       screen_settingsmenu);
 
-	//########################################## RESET SCREEN ##########################################
-	//
-	sc=&Screen_reset;
-	oled_addScreen(sc, screen_reset);
-	screen_setDefaults(sc);
-	sc->onEnter = &Reset_onEnter;
-	sc->processInput=&settings_screenProcessInput;
+  //########################################## RESET SCREEN ##########################################
+  //
+  sc=&Screen_reset;
+  oled_addScreen(sc, screen_reset);
+  screen_setDefaults(sc);
+  sc->onEnter = &Reset_onEnter;
+  sc->processInput=&settings_screenProcessInput;
 
-	//========[ RESET OPTIONS COMBO ]===========================================================
-	//
-	w = &comboWidget_RESET;
-	screen_addWidget(w, sc);
-	widgetDefaultsInit(w, widget_combo, &comboBox_RESET);
-	comboAddAction(&comboitem_RESET_SETTINGS,w, 	    "Reset Settings", &goSettingsReset );
-	comboAddAction(&comboitem_RESET_TIP,w, 			      "Reset Profile",  &goProfileReset );
-	comboAddAction(&comboitem_RESET_ALLTIP,w, 		    "Reset Profiles", &goAllProfileReset );
-	comboAddAction(&comboitem_RESET_EVERYTHING,w,     "Reset All", 	  	&goFactoryReset);
-	comboAddScreen(&comboitem_RESET_Back,w, 		      "BACK", 			    screen_system);
-	comboitem_RESET_SETTINGS.dispAlign=align_left;
-	comboitem_RESET_TIP.dispAlign=align_left;
-	comboitem_RESET_ALLTIP.dispAlign=align_left;
-	comboitem_RESET_EVERYTHING.dispAlign=align_left;
+  //========[ RESET OPTIONS COMBO ]===========================================================
+  //
+  w = &comboWidget_RESET;
+  screen_addWidget(w, sc);
+  widgetDefaultsInit(w, widget_combo, &comboBox_RESET);
+  comboAddAction(&comboitem_RESET_SETTINGS,w,       "Reset Settings", &goSettingsReset );
+  comboAddAction(&comboitem_RESET_TIP,w,            "Reset Profile",  &goProfileReset );
+  comboAddAction(&comboitem_RESET_ALLTIP,w,         "Reset Profiles", &goAllProfileReset );
+  comboAddAction(&comboitem_RESET_EVERYTHING,w,     "Reset All",      &goFactoryReset);
+  comboAddScreen(&comboitem_RESET_Back,w,           "BACK",           screen_system);
+  comboitem_RESET_SETTINGS.dispAlign=align_left;
+  comboitem_RESET_TIP.dispAlign=align_left;
+  comboitem_RESET_ALLTIP.dispAlign=align_left;
+  comboitem_RESET_EVERYTHING.dispAlign=align_left;
 
-	//########################################## RESET CONFIRMATION SCREEN ##########################################
-	//
-	sc=&Screen_reset_confirmation;
-	oled_addScreen(sc, screen_reset_confirmation);
-	screen_setDefaults(sc);
-	sc->onEnter = &Reset_confirmation_onEnter;
-	sc->processInput=&settings_screenProcessInput;
-
-
-	// ********[ Name Save Button Widget ]***********************************************************
-	//
-	w = &Widget_Reset_OK;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button, &button_Reset_OK);
-	button_Reset_OK.displayString="RESET";
-	w->posX = 0;
-	w->posY = 48;
-	w->width = 50;
-	((button_widget_t*)w->content)->selectable.tab = 1;
-	((button_widget_t*)w->content)->action = &doReset;
-
-	// ********[ Name Back Button Widget ]***********************************************************
-	//
-	w = &Widget_Reset_CANCEL;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button, &button_Reset_CANCEL);
-	button_Reset_CANCEL.displayString="CANCEL";
-	w->posX = 72;
-	w->posY = 48;
-	w->width = 56;
-	((button_widget_t*)w->content)->selectable.tab = 0;
-	((button_widget_t*)w->content)->action = &cancelReset;
+  //########################################## RESET CONFIRMATION SCREEN ##########################################
+  //
+  sc=&Screen_reset_confirmation;
+  oled_addScreen(sc, screen_reset_confirmation);
+  screen_setDefaults(sc);
+  sc->onEnter = &Reset_confirmation_onEnter;
+  sc->processInput=&settings_screenProcessInput;
 
 
-	//########################################## IRON SCREEN ##########################################
-	//
-	sc=&Screen_iron;
-	oled_addScreen(sc,screen_iron);
-	screen_setDefaults(sc);
-	sc->onEnter = &IRON_onEnter;
-	sc->processInput=&settings_screenProcessInput;
+  // ********[ Name Save Button Widget ]***********************************************************
+  //
+  w = &Widget_Reset_OK;
+  screen_addWidget(w,sc);
+  widgetDefaultsInit(w, widget_button, &button_Reset_OK);
+  button_Reset_OK.displayString="RESET";
+  w->posX = 0;
+  w->posY = 48;
+  w->width = 50;
+  ((button_widget_t*)w->content)->selectable.tab = 1;
+  ((button_widget_t*)w->content)->action = &doReset;
+
+  // ********[ Name Back Button Widget ]***********************************************************
+  //
+  w = &Widget_Reset_CANCEL;
+  screen_addWidget(w,sc);
+  widgetDefaultsInit(w, widget_button, &button_Reset_CANCEL);
+  button_Reset_CANCEL.displayString="CANCEL";
+  w->posX = 72;
+  w->posY = 48;
+  w->width = 56;
+  ((button_widget_t*)w->content)->selectable.tab = 0;
+  ((button_widget_t*)w->content)->action = &cancelReset;
+
+
+  //########################################## IRON SCREEN ##########################################
+  //
+  sc=&Screen_iron;
+  oled_addScreen(sc,screen_iron);
+  screen_setDefaults(sc);
+  sc->onEnter = &IRON_onEnter;
+  sc->processInput=&settings_screenProcessInput;
 
   //********[ Sleep Time Widget ]***********************************************************
   //
@@ -1278,34 +1279,34 @@ void settings_screen_setup(screen_t *scr) {
 
   #ifdef USE_VIN
 
-	//********[ Power Widget ]***********************************************************
-	//
+  //********[ Power Widget ]***********************************************************
+  //
   dis=&editable_IRON_Power.inputData;
   edit=&editable_IRON_Power;
   editableDefaultsInit(edit,widget_editable);
-	dis->reservedChars=4;
-	dis->endString="W";
-	dis->getData = &getMaxPower;
-	edit->big_step = 20;
-	edit->step = 5;
-	edit->setData = (void (*)(void *))&setMaxPower;
-	edit->max_value = 500;
-	edit->min_value = 5;
+  dis->reservedChars=4;
+  dis->endString="W";
+  dis->getData = &getMaxPower;
+  edit->big_step = 20;
+  edit->step = 5;
+  edit->setData = (void (*)(void *))&setMaxPower;
+  edit->max_value = 500;
+  edit->min_value = 5;
 
-	//********[ Impedance Widget ]***********************************************************
-	//
+  //********[ Impedance Widget ]***********************************************************
+  //
   dis=&editable_IRON_Impedance.inputData;
   edit=&editable_IRON_Impedance;
   editableDefaultsInit(edit,widget_editable);
-	dis->reservedChars=4;
-	dis->number_of_dec=1;
-	//dis->endString="";
-	dis->getData = &getTipImpedance;
-	edit->big_step = 10;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setTipImpedance;
-	edit->max_value = 160;
-	edit->min_value = 10;
+  dis->reservedChars=4;
+  dis->number_of_dec=1;
+  //dis->endString="";
+  dis->getData = &getTipImpedance;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setTipImpedance;
+  edit->max_value = 160;
+  edit->min_value = 10;
 
   #endif
 
@@ -1334,186 +1335,186 @@ void settings_screen_setup(screen_t *scr) {
   edit->min_value = 50;
   edit->setData = (void (*)(void *))&setMinTemp;
 
-	//********[ ADC Limit Widget ]***********************************************************
-	//
+  //********[ ADC Limit Widget ]***********************************************************
+  //
   dis=&editable_IRON_ADCLimit.inputData;
   edit=&editable_IRON_ADCLimit;
   editableDefaultsInit(edit,widget_editable);
-	dis->reservedChars=4;
-	dis->getData = &getNoIronADC;
-	edit->big_step = 200;
-	edit->step = 10;
-	edit->setData = (void (*)(void *))&setNoIronADC;
-	edit->max_value = 4100;
-	edit->min_value = 200;
+  dis->reservedChars=4;
+  dis->getData = &getNoIronADC;
+  edit->big_step = 200;
+  edit->step = 10;
+  edit->setData = (void (*)(void *))&setNoIronADC;
+  edit->max_value = 4100;
+  edit->min_value = 200;
 
-	//********[ PWM Period Widget ]***********************************************************
-	//
+  //********[ PWM Period Widget ]***********************************************************
+  //
   dis=&editable_IRON_PWMPeriod.inputData;
   edit=&editable_IRON_PWMPeriod;
   editableDefaultsInit(edit,widget_editable);
-	dis->endString="mS";
-	dis->reservedChars=5;
-	dis->getData = &getPWMPeriod;
-	edit->big_step = 10;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setPWMPeriod;
-	edit->max_value = 200;
-	edit->min_value = 20;
+  dis->endString="mS";
+  dis->reservedChars=5;
+  dis->getData = &getPWMPeriod;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setPWMPeriod;
+  edit->max_value = 200;
+  edit->min_value = 20;
 
-	//********[ ADC Delay Widget ]***********************************************************
-	//
+  //********[ ADC Delay Widget ]***********************************************************
+  //
   dis=&editable_IRON_ADCDelay.inputData;
   edit=&editable_IRON_ADCDelay;
   editableDefaultsInit(edit,widget_editable);
-	dis->endString="mS";
-	dis->reservedChars=7;
+  dis->endString="mS";
+  dis->reservedChars=7;
   dis->number_of_dec = 1;
-	dis->getData = &getPWMDelay;
-	edit->big_step = 10;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setPWMDelay;
-	edit->max_value = 500;
-	edit->min_value = 1;
+  dis->getData = &getPWMDelay;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setPWMDelay;
+  edit->max_value = 500;
+  edit->min_value = 1;
 
-	//********[ Filter Coefficient Widget ]***********************************************************
-	//
+  //********[ Filter Coefficient Widget ]***********************************************************
+  //
   dis=&editable_IRON_filterFactor.inputData;
   edit=&editable_IRON_filterFactor;
   editableDefaultsInit(edit,widget_editable);
-	dis->reservedChars=1;
-	dis->getData = &getfilterFactor;
-	edit->big_step = 1;
-	edit->step = 1;
-	edit->setData = (void (*)(void *))&setfilterFactor;
-	edit->max_value = 8;
-	edit->min_value = 0;
+  dis->reservedChars=1;
+  dis->getData = &getfilterFactor;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setfilterFactor;
+  edit->max_value = 8;
+  edit->min_value = 0;
 
-	//********[ No Iron Delay Widget ]***********************************************************
-	//
+  //********[ No Iron Delay Widget ]***********************************************************
+  //
   dis=&editable_IRON_errorDelay.inputData;
   edit=&editable_IRON_errorDelay;
   editableDefaultsInit(edit,widget_editable);
-	dis->endString="mS";
-	dis->reservedChars=5;
-	dis->getData = &geterrorDelay;
-	edit->big_step = 100;
-	edit->step = 50;
-	edit->setData = (void (*)(void *))&seterrorDelay;
-	edit->max_value = 950;
-	edit->min_value = 100;
+  dis->endString="mS";
+  dis->reservedChars=5;
+  dis->getData = &geterrorDelay;
+  edit->big_step = 100;
+  edit->step = 50;
+  edit->setData = (void (*)(void *))&seterrorDelay;
+  edit->max_value = 950;
+  edit->min_value = 100;
 
-	//========[ IRON COMBO ]===========================================================
-	//
-	w = &comboWidget_IRON;
-	screen_addWidget(w, sc);
-	widgetDefaultsInit(w, widget_combo, &comboBox_IRON);
-  comboAddEditable(&comboitem_IRON_MaxTemp, w,        "Max temp",   &editable_IRON_MaxTemp);
-  comboAddEditable(&comboitem_IRON_MinTemp, w,        "Min temp",   &editable_IRON_MinTemp);
-  comboAddEditable(&comboitem_IRON_StandbyTemp, w,    "Stby temp",  &editable_IRON_StandbyTemp);
-  comboAddEditable(&comboitem_IRON_StandbyTime, w,    "Stby time",  &editable_IRON_StandbyTime);
-  comboAddEditable(&comboitem_IRON_SleepTime, w,      "Sleep time", &editable_IRON_SleepTime);
+  //========[ IRON COMBO ]===========================================================
+  //
+  w = &comboWidget_IRON;
+  screen_addWidget(w, sc);
+  widgetDefaultsInit(w, widget_combo, &comboBox_IRON);
+  comboAddEditable(&comboitem_IRON_MaxTemp, w,      "Max temp",   &editable_IRON_MaxTemp);
+  comboAddEditable(&comboitem_IRON_MinTemp, w,      "Min temp",   &editable_IRON_MinTemp);
+  comboAddEditable(&comboitem_IRON_StandbyTemp, w,  "Stby temp",  &editable_IRON_StandbyTemp);
+  comboAddEditable(&comboitem_IRON_StandbyTime, w,  "Stby time",  &editable_IRON_StandbyTime);
+  comboAddEditable(&comboitem_IRON_SleepTime, w,    "Sleep time", &editable_IRON_SleepTime);
   #ifdef USE_VIN
-  comboAddEditable(&comboitem_IRON_Impedance, w,      "Heater ohm", &editable_IRON_Impedance);
-	comboAddEditable(&comboitem_IRON_Power, w, 		      "Power",		  &editable_IRON_Power);
+  comboAddEditable(&comboitem_IRON_Impedance, w,    "Heater ohm", &editable_IRON_Impedance);
+  comboAddEditable(&comboitem_IRON_Power, w,        "Power",      &editable_IRON_Power);
   #endif
-	comboAddEditable(&comboitem_IRON_PWMPeriod,w, 	    "PWM", 	      &editable_IRON_PWMPeriod);
-	comboAddEditable(&comboitem_IRON_ADCDelay, w,   	  "Delay", 	    &editable_IRON_ADCDelay);
-	comboAddEditable(&comboitem_IRON_filterFactor, w,   "Filter",		  &editable_IRON_filterFactor);
-	comboAddEditable(&comboitem_IRON_ADCLimit, w, 	    "No iron",		&editable_IRON_ADCLimit);
-	comboAddEditable(&comboitem_IRON_errorDelay, w, 	  "Detect",	    &editable_IRON_errorDelay);
-	comboAddScreen(&comboitem_IRON_Back, w, 		        "BACK", 		  screen_settingsmenu);
+  comboAddEditable(&comboitem_IRON_PWMPeriod,w,     "PWM",        &editable_IRON_PWMPeriod);
+  comboAddEditable(&comboitem_IRON_ADCDelay, w,     "Delay",      &editable_IRON_ADCDelay);
+  comboAddEditable(&comboitem_IRON_filterFactor, w, "Filter",     &editable_IRON_filterFactor);
+  comboAddEditable(&comboitem_IRON_ADCLimit, w,     "No iron",    &editable_IRON_ADCLimit);
+  comboAddEditable(&comboitem_IRON_errorDelay, w,   "Detect",     &editable_IRON_errorDelay);
+  comboAddScreen(&comboitem_IRON_Back, w,           "BACK",       screen_settingsmenu);
 
 
-	//########################################## IRON TIPS SCREEN ##########################################
-	//
-	sc=&Screen_edit_iron_tips;
-	oled_addScreen(sc, screen_edit_iron_tips);
-	screen_setDefaults(sc);
-	sc->init = &edit_iron_screen_init;
-	sc->processInput=&edit_iron_screen_screenProcessInput;
+  //########################################## IRON TIPS SCREEN ##########################################
+  //
+  sc=&Screen_edit_iron_tips;
+  oled_addScreen(sc, screen_edit_iron_tips);
+  screen_setDefaults(sc);
+  sc->init = &edit_iron_screen_init;
+  sc->processInput=&edit_iron_screen_screenProcessInput;
 
-	//========[ IRON TIPS COMBO ]===========================================================
-	//
-	w = &comboWidget_IRONTIPS;
+  //========[ IRON TIPS COMBO ]===========================================================
+  //
+  w = &comboWidget_IRONTIPS;
   w->content = &comboBox_IRONTIPS;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_combo, &comboBox_IRONTIPS);
-	for(int x = 0; x < TipSize; x++) {
-		t[x][0] = '\0';
-		comboAddScreen(&comboitem_IRONTIPS[x],w, &t[x][0], screen_edit_tip_settings);
-	}
-	comboAddScreen(&comboitem_IRONTIPS_addNewTip, w, "ADD NEW", screen_edit_tip_name);
-	comboAddScreen(&comboitem_IRONTIPS_Back, w, "BACK", screen_settingsmenu);
+  screen_addWidget(w,sc);
+  widgetDefaultsInit(w, widget_combo, &comboBox_IRONTIPS);
+  for(int x = 0; x < TipSize; x++) {
+    t[x][0] = '\0';
+    comboAddScreen(&comboitem_IRONTIPS[x],w, &t[x][0], screen_edit_tip_settings);
+  }
+  comboAddScreen(&comboitem_IRONTIPS_addNewTip, w,  "ADD NEW",  screen_edit_tip_name);
+  comboAddScreen(&comboitem_IRONTIPS_Back, w,       "BACK",     screen_settingsmenu);
 
 
 
-	//########################################## IRON TIP EDIT NAME SCREEN ##########################################
-	//
-	sc=&Screen_edit_tip_name;
-	oled_addScreen(sc, screen_edit_tip_name);
-	screen_setDefaults(sc);
-	sc->processInput = &edit_tip_screen_screenProcessInput;
-	sc->init = &edit_tip_screen_init;
-	sc->onEnter= &edit_iron_screen_onEnter;
+  //########################################## IRON TIP EDIT NAME SCREEN ##########################################
+  //
+  sc=&Screen_edit_tip_name;
+  oled_addScreen(sc, screen_edit_tip_name);
+  screen_setDefaults(sc);
+  sc->processInput = &edit_tip_screen_screenProcessInput;
+  sc->init = &edit_tip_screen_init;
+  sc->onEnter= &edit_iron_screen_onEnter;
 
-	//********[ Name Edit Widget ]***********************************************************
-	//
-	w = &Widget_IRONTIPS_Name_Edit;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_editable, &editable_IRONTIPS_Name_Edit);
-	dis=extractDisplayPartFromWidget(w);
-	edit=extractEditablePartFromWidget(w);
-	dis->reservedChars=TipCharSize-1;
-	w->posX = 75;
-	w->posY = 17;
-	w->width = 46;
-	dis->getData = &getTipStr;
-	dis->number_of_dec = 0;
-	dis->type = field_string;
-	edit->big_step = 10;
-	edit->step = 1;
-	edit->selectable.tab = 0;
-	edit->setData = (void (*)(void *))&setTipStr;
-	
+  //********[ Name Edit Widget ]***********************************************************
+  //
+  w = &Widget_IRONTIPS_Name_Edit;
+  screen_addWidget(w,sc);
+  widgetDefaultsInit(w, widget_editable, &editable_IRONTIPS_Name_Edit);
+  dis=extractDisplayPartFromWidget(w);
+  edit=extractEditablePartFromWidget(w);
+  dis->reservedChars=TipCharSize-1;
+  w->posX = 75;
+  w->posY = 17;
+  w->width = 46;
+  dis->getData = &getTipStr;
+  dis->number_of_dec = 0;
+  dis->type = field_string;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->selectable.tab = 0;
+  edit->setData = (void (*)(void *))&setTipStr;
 
-	//********[ Name Save Button Widget ]***********************************************************
-	//
-	w = &Widget_IRONTIPS_Name_Save;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button, &button_IRONTIPS_Name_Save);
-	button_IRONTIPS_Name_Save.displayString="SAVE";
-	w->posX = 0;
-	w->posY = 48;
-	w->width = 42;
+
+  //********[ Name Save Button Widget ]***********************************************************
+  //
+  w = &Widget_IRONTIPS_Name_Save;
+  screen_addWidget(w,sc);
+  widgetDefaultsInit(w, widget_button, &button_IRONTIPS_Name_Save);
+  button_IRONTIPS_Name_Save.displayString="SAVE";
+  w->posX = 0;
+  w->posY = 48;
+  w->width = 42;
   ((button_widget_t*)w->content)->selectable.tab = 3;
   ((button_widget_t*)w->content)->action = &saveTip;
 
-	//********[ Name Back Button Widget ]***********************************************************
-	//
-	w = &Widget_IRONTIPS_Name_Back;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button, &button_IRONTIPS_Name_Back);
-	button_IRONTIPS_Name_Back.displayString="BACK";
-	w->posX = 86;
-	w->posY = 48;
-	w->width = 42;
-	((button_widget_t*)w->content)->selectable.tab = 1;
-	((button_widget_t*)w->content)->action = &cancelTip;
+  //********[ Name Back Button Widget ]***********************************************************
+  //
+  w = &Widget_IRONTIPS_Name_Back;
+  screen_addWidget(w,sc);
+  widgetDefaultsInit(w, widget_button, &button_IRONTIPS_Name_Back);
+  button_IRONTIPS_Name_Back.displayString="BACK";
+  w->posX = 86;
+  w->posY = 48;
+  w->width = 42;
+  ((button_widget_t*)w->content)->selectable.tab = 1;
+  ((button_widget_t*)w->content)->action = &cancelTip;
 
-	//********[ Name Delete Button Widget ]***********************************************************
-	//
-	w = &Widget_IRONTIPS_Name_Delete;
-	screen_addWidget(w,sc);
-	widgetDefaultsInit(w, widget_button, &button_IRONTIPS_Name_Delete);
-	button_IRONTIPS_Name_Delete.displayString="DEL.";
-	w->posX = 43 ;
-	w->posY = 48;
-	w->width = 42;
-	((button_widget_t*)w->content)->selectable.tab = 2;
-	((button_widget_t*)w->content)->action = &delTip;
+  //********[ Name Delete Button Widget ]***********************************************************
+  //
+  w = &Widget_IRONTIPS_Name_Delete;
+  screen_addWidget(w,sc);
+  widgetDefaultsInit(w, widget_button, &button_IRONTIPS_Name_Delete);
+  button_IRONTIPS_Name_Delete.displayString="DEL.";
+  w->posX = 43 ;
+  w->posY = 48;
+  w->width = 42;
+  ((button_widget_t*)w->content)->selectable.tab = 2;
+  ((button_widget_t*)w->content)->action = &delTip;
 
-	//########################################## [ TIP SETTINGS SCREEN ] ##########################################
+  //########################################## [ TIP SETTINGS SCREEN ] ##########################################
   //
   sc=&Screen_edit_tip_settings;
   oled_addScreen(sc,screen_edit_tip_settings);

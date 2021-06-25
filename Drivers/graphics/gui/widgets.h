@@ -2,7 +2,7 @@
  * widgets.h
  *
  *  Created on: Jan 12, 2021
- *      Author: David		Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose (PTDreamer), 2017
  */
 
 #ifndef GRAPHICS_GUI_WIDGETS_H_
@@ -35,11 +35,11 @@ typedef struct comboBox_widget_t comboBox_widget_t;
 typedef struct bmp_widget_t bmp_widget_t;
 
 struct selectable_widget_t {
-	widgetStateType state;
-	widgetStateType previous_state;
-	uint8_t tab;
-	int (*processInput)(widget_t*, RE_Rotation_t, RE_State_t *);
-	int (*longPressAction)(widget_t*);
+  widgetStateType state;
+  widgetStateType previous_state;
+  uint8_t tab;
+  int (*processInput)(widget_t*, RE_Rotation_t, RE_State_t *);
+  int (*longPressAction)(widget_t*);
 };
 
 struct displayOnly_widget_t {
@@ -47,26 +47,26 @@ struct displayOnly_widget_t {
   AlignType dispAlign;
   AlignType textAlign;
   int32_t last_value;
-	uint8_t number_of_dec;
-	uint8_t reservedChars;
+  uint8_t number_of_dec;
+  uint8_t reservedChars;
   uint8_t stringStart;
   const uint8_t *font;
   char* displayString;
   char* endString;
-	void * (*getData)();
+  void * (*getData)();
 };
 
 struct editable_widget_t {
-	int8_t current_edit;
-	uint8_t numberOfOptions;
-	int16_t step;
-	int16_t big_step;
-	int32_t min_value;
-	int32_t max_value;
-	char **options;
-	void (*setData)(void *);
-	selectable_widget_t selectable;
-	displayOnly_widget_t inputData;
+  int8_t current_edit;
+  uint8_t numberOfOptions;
+  int16_t step;
+  int16_t big_step;
+  int32_t min_value;
+  int32_t max_value;
+  char **options;
+  void (*setData)(void *);
+  selectable_widget_t selectable;
+  displayOnly_widget_t inputData;
 };
 
 struct button_widget_t {
@@ -82,8 +82,8 @@ struct button_widget_t {
       const uint8_t* last_xbm;
     };
   };
-	int (*action)(widget_t*);
-	selectable_widget_t selectable;
+  int (*action)(widget_t*);
+  selectable_widget_t selectable;
 };
 
 struct bmp_widget_t {
@@ -114,20 +114,20 @@ struct comboBox_item_t {
 
 struct widget_t
 {
-	widgetType type;
-	widget_t *next_widget;
-	widgetRefreshType refresh;
-	widgetFrameType frameType;
-	uint8_t posX;
-	uint8_t posY;
-	uint8_t width;
-	uint8_t enabled;
-	int8_t radius;
+  widgetType type;
+  widget_t *next_widget;
+  widgetRefreshType refresh;
+  widgetFrameType frameType;
+  uint8_t posX;
+  uint8_t posY;
+  uint8_t width;
+  uint8_t enabled;
+  int8_t radius;
 
-	struct screen_t *parent;
-	void (*draw)(widget_t*);
-	void (*update)(widget_t*);
-	void* content;
+  struct screen_t *parent;
+  void (*draw)(widget_t*);
+  void (*update)(widget_t*);
+  void* content;
 };
 
 displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *w);
