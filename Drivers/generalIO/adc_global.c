@@ -2,7 +2,7 @@
  * adc_global.c
  *
  *  Created on: Jan 12, 2021
- *      Author: David		Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose (PTDreamer), 2017
  */
 
 #include "adc_global.h"
@@ -17,24 +17,24 @@ volatile adc_measures_t ADC_measures[ADC_BFSIZ];
 volatile ADC_Status_t ADC_Status;
 
 volatile ADCDataTypeDef_t TIP = {
-		adc_buffer: &ADC_measures[0].TIP
+    adc_buffer: &ADC_measures[0].TIP
 };
 
 #ifdef USE_VIN
 volatile ADCDataTypeDef_t VIN = {
-		adc_buffer: &ADC_measures[0].VIN
+    adc_buffer: &ADC_measures[0].VIN
 };
 #endif
 
 #ifdef USE_NTC
 volatile ADCDataTypeDef_t NTC = {
-		adc_buffer: &ADC_measures[0].NTC
+    adc_buffer: &ADC_measures[0].NTC
 };
 #endif
 
 #ifdef USE_VREF
 volatile ADCDataTypeDef_t VREF = {
-		adc_buffer: &ADC_measures[0].VREF
+    adc_buffer: &ADC_measures[0].VREF
 };
 #endif
 
@@ -43,12 +43,12 @@ static ADC_HandleTypeDef *adc_device;
 
 
 uint8_t ADC_Cal(void){
-	return HAL_ADCEx_Calibration_Start(adc_device);
+  return HAL_ADCEx_Calibration_Start(adc_device);
 }
 
 
 void ADC_Init(ADC_HandleTypeDef *adc){
-	adc_device=adc;
+  adc_device=adc;
   ADC_ChannelConfTypeDef sConfig = {0};
 
   #ifdef STM32F072xB
@@ -97,12 +97,12 @@ void ADC_Init(ADC_HandleTypeDef *adc){
   if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
   #endif
 
-	if(ADC_Cal() != HAL_OK ){
-	  Error_Handler();
-	}
+  if(ADC_Cal() != HAL_OK ){
+    Error_Handler();
+  }
 
-	ADC_Status = ADC_Idle;
-	buzzer_short_beep();
+  ADC_Status = ADC_Idle;
+  buzzer_short_beep();
 }
 
 void ADC_Start_DMA(){
@@ -135,44 +135,44 @@ void ADC_Stop_DMA(void){
  * Some credits: https://kiritchatterjee.wordpress.com/2014/11/10/a-simple-digital-low-pass-filter-in-c/
  */
 void DoAverage(volatile ADCDataTypeDef_t* InputData){
-	volatile uint16_t *inputBuffer=InputData->adc_buffer;
-	uint32_t adc_sum,avg_data;
-	uint16_t max=0, min=0xffff;
-	uint8_t shift;
+  volatile uint16_t *inputBuffer=InputData->adc_buffer;
+  uint32_t adc_sum,avg_data;
+  uint16_t max=0, min=0xffff;
+  uint8_t shift;
 
-	InputData->prev_avg=InputData->last_avg;
-	InputData->prev_raw=InputData->last_raw;
+  InputData->prev_avg=InputData->last_avg;
+  InputData->prev_raw=InputData->last_raw;
 
-	// Make the average of the ADC buffer
-	adc_sum = 0;
-	for(uint16_t x = 0; x < ADC_BFSIZ; x++) {
-		adc_sum += *inputBuffer;
-		if(*inputBuffer > max){
-			max = *inputBuffer;
-		}
-		if(*inputBuffer < min){
-			min = *inputBuffer;
-		}
-		inputBuffer += ADC_Num;
-	}
-	//Remove highest and lowest values
-	adc_sum -=  (min + max);
+  // Make the average of the ADC buffer
+  adc_sum = 0;
+  for(uint16_t x = 0; x < ADC_BFSIZ; x++) {
+    adc_sum += *inputBuffer;
+    if(*inputBuffer > max){
+      max = *inputBuffer;
+    }
+    if(*inputBuffer < min){
+      min = *inputBuffer;
+    }
+    inputBuffer += ADC_Num;
+  }
+  //Remove highest and lowest values
+  adc_sum -=  (min + max);
 
-	// Calculate average
-	avg_data = adc_sum / (ADC_BFSIZ -2) ;
-	InputData->last_raw = avg_data;
-	
-	if(systemSettings.Profile.filterFactor > 0) {					        // Advanced filtering enabled?
+  // Calculate average
+  avg_data = adc_sum / (ADC_BFSIZ -2) ;
+  InputData->last_raw = avg_data;
 
-		if(systemSettings.Profile.filterFactor>8){						      // Limit coefficient, more than 8 will cause overflow
-			systemSettings.Profile.filterFactor=8;
-		}
-	  shift = systemSettings.Profile.filterFactor;                // Set EMA factor setting from system settings
+  if(systemSettings.Profile.filterFactor > 0) {                  // Advanced filtering enabled?
 
-		// Fixed point shift
-		uint32_t RawData = avg_data << 12;
+    if(systemSettings.Profile.filterFactor>8){                  // Limit coefficient, more than 8 will cause overflow
+      systemSettings.Profile.filterFactor=8;
+    }
+    shift = systemSettings.Profile.filterFactor;                // Set EMA factor setting from system settings
 
-		// Compute EMA of input
+    // Fixed point shift
+    uint32_t RawData = avg_data << 12;
+
+    // Compute EMA of input
 #define LIMIT_FILTERING
 
 #ifdef LIMIT_FILTERING
@@ -183,48 +183,48 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
     extern bool dbg_newData;
 #endif
 
-		int32_t diff = (int32_t)avg_data - (int32_t)(InputData->EMA_of_Input>>12);  // Check difference between stored EMA and last average
-		int32_t abs_diff=abs(diff);
+    int32_t diff = (int32_t)avg_data - (int32_t)(InputData->EMA_of_Input>>12);  // Check difference between stored EMA and last average
+    int32_t abs_diff=abs(diff);
 
-		if(abs_diff>SMOOTH_END){															                      // If huge (Filtering will delay too much the response)
-			InputData->EMA_of_Input = RawData;					                              // Reset filter
+    if(abs_diff>SMOOTH_END){                                                    // If huge (Filtering will delay too much the response)
+      InputData->EMA_of_Input = RawData;                                        // Reset filter
       #if defined DEBUG_PWM
-			dbg_newData=1;                                                            // Enable flag to debug the data
+      dbg_newData=1;                                                            // Enable flag to debug the data
       #endif
-		}
-		else if(abs_diff>SMOOTH_START){														                  // If medium, smooth the difference
-		  InputData->EMA_of_Input += ((diff*(abs_diff-SMOOTH_START))/SMOOTH_DIFF)<<12;
+    }
+    else if(abs_diff>SMOOTH_START){                                              // If medium, smooth the difference
+      InputData->EMA_of_Input += ((diff*(abs_diff-SMOOTH_START))/SMOOTH_DIFF)<<12;
       #if defined DEBUG_PWM
-		  //dbg_newData=1;                                                          // Meh, just some noise, not important
+      //dbg_newData=1;                                                          // Meh, just some noise, not important
       #endif
-		}
-		else{
-			InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
-		}
+    }
+    else{
+      InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
+    }
 #else
-		InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
+    InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
 #endif
-		InputData->last_avg = InputData->EMA_of_Input>>12;
-	}
-	else {
-		InputData->last_avg=avg_data;
-	}
+    InputData->last_avg = InputData->EMA_of_Input>>12;
+  }
+  else {
+    InputData->last_avg=avg_data;
+  }
 }
 
 uint16_t ADC_to_mV (uint16_t adc){
-	/*
-	 * Instead running ( ADC*(3300/4095) ),
-	 * We previously multiply (3300/4095)*2^20 = 845006
-	 * Then we can use the fast hardware multiplier and
-	 * divide just with bit rotation.
-	 *
-	 * So it becomes Vadc = (ADC * 845006) >>20
-	 * Max possible input = 20 bit number, more will cause overflow to the 32 bit variable
-	 * Calculated to use  12 bit max input from ADC (4095)
-	 * Much, much faster than floats!
-	 */
+  /*
+   * Instead running ( ADC*(3300/4095) ),
+   * We previously multiply (3300/4095)*2^20 = 845006
+   * Then we can use the fast hardware multiplier and
+   * divide just with bit rotation.
+   *
+   * So it becomes Vadc = (ADC * 845006) >>20
+   * Max possible input = 20 bit number, more will cause overflow to the 32 bit variable
+   * Calculated to use  12 bit max input from ADC (4095)
+   * Much, much faster than floats!
+   */
 
-	return( ((uint32_t)845006*adc)>>20 );
+  return( ((uint32_t)845006*adc)>>20 );
 }
 
 
@@ -250,29 +250,29 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     extern int16_t dbg_prev_NTC;
     bool dbg_t=dbg_newData;
 #endif
-	if(_hadc == adc_device){
-	  if(ADC_Status!=ADC_Sampling){
+  if(_hadc == adc_device){
+    if(ADC_Status!=ADC_Sampling){
       Error_Handler();
     }
-	  ADC_Stop_DMA();                                                             // Reset the ADC
+    ADC_Stop_DMA();                                                             // Reset the ADC
     ADC_Status = ADC_Idle;
 
     HAL_IWDG_Refresh(&hiwdg);                                                   // This is the main reset of the watchdog
                                                                                 // If anything critical stalls (PWM, ADC, hanlleIron) this won't be updated anymore
                                                                                 // causing a system reset
 
-	  if( PWM_GPIO_Port->IDR & PWM_Pin ){                                         // If PWM is active
-	    buzzer_long_beep();                                                       // Beep to warn the issue, skip adc
-	    TIP.last_avg = systemSettings.Profile.noIronValue - 1;                    // Set reading = max temperature to force PID to throttle down
-	    TIP.last_raw = systemSettings.Profile.noIronValue - 1;                    // But avoiding no iron error
-	  }
-	  else{
-	    handle_ADC_Data();                                                        // Else, update data normally
-	  }
+    if( PWM_GPIO_Port->IDR & PWM_Pin ){                                         // If PWM is active
+      buzzer_long_beep();                                                       // Beep to warn the issue, skip adc
+      TIP.last_avg = systemSettings.Profile.noIronValue - 1;                    // Set reading = max temperature to force PID to throttle down
+      TIP.last_raw = systemSettings.Profile.noIronValue - 1;                    // But avoiding no iron error
+    }
+    else{
+      handle_ADC_Data();                                                        // Else, update data normally
+    }
 
-#if defined DEBUG_PWM
+#if defined DEBUG_PWM && defined SWO_PRINT
     if(dbg_t!=dbg_newData){                                                     // Save values before handleIron() updates them
-      dbg_prev_TIP_Raw=last_TIP_Raw;																						// If filter was resetted, print values
+      dbg_prev_TIP_Raw=last_TIP_Raw;                                            // If filter was resetted, print values
       dbg_prev_TIP=last_TIP;
       dbg_prev_VIN=last_VIN;
       dbg_prev_NTC=last_NTC;
@@ -280,18 +280,18 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     }
 #endif
 
-		handleIron();                                                               // Handle iron
+    handleIron();                                                               // Handle iron
 
     #ifdef DEBUG_PWM
     HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,0);                        // Toggle TEST
     #endif
 
-		if(Iron.updatePwm==needs_update){                                           // Update PWM if pending changes
+    if(Iron.updatePwm==needs_update){                                           // Update PWM if pending changes
       Iron.updatePwm=no_update;
       __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.Profile.pwmPeriod);
       __HAL_TIM_SET_AUTORELOAD(Iron.Delay_Timer,systemSettings.Profile.pwmDelay);
     }
     __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);      // Load new calculated PWM Duty
 
-	}
+  }
 }
