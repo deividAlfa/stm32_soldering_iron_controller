@@ -209,7 +209,7 @@ void initTimers(void){
   Iron.Delay_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;
   #endif
 
-  Iron.Delay_Timer->Init.Period = 99;                                                         // 10mS by default
+  Iron.Delay_Timer->Init.Period = 999;                                                         // 10mS by default
   if (HAL_TIM_Base_Init(Iron.Delay_Timer) != HAL_OK){
     Error_Handler();
   }
@@ -220,7 +220,7 @@ void initTimers(void){
   Iron.Pwm_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;
   #endif
 
-  Iron.Pwm_Timer->Init.Period = 999;                                                          // 100mS by default
+  Iron.Pwm_Timer->Init.Period = 9999;                                                          // 100mS by default
   if (HAL_TIM_Base_Init(Iron.Pwm_Timer) != HAL_OK){
     Error_Handler();
   }
@@ -248,7 +248,7 @@ void initTimers(void){
   else{
     Iron.Pwm_Out = 0;
   }
-  Iron.Pwm_Limit = 999 - (99 + (uint16_t)ADC_MEASURE_TIME/10);
+  Iron.Pwm_Limit = 9000 - (uint16_t)(ADC_MEASURE_TIME/10);
   __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Set min value into PWM
 }
 
@@ -337,13 +337,13 @@ void runAwayCheck(void){
 // Update PWM max value based on current supply voltage, heater resistance and power limit setting
 #ifdef USE_VIN
 void updatePowerLimit(void){
-  volatile uint32_t volts = getSupplyVoltage_v_x10();                                       // Get last voltage reading x10
+  uint32_t volts = getSupplyVoltage_v_x10();                                                // Get last voltage reading x10
   volts = (volts*volts)/10;                                                                 // (Vx10 * Vx10)/10 = (V*V)*10 (x10 for fixed point precision)
   if(volts==0){
     volts=1;                                                                                // set minimum value to avoid division by 0
   }
-  volatile uint32_t PwmPeriod=systemSettings.Profile.pwmPeriod;                             // Read complete PWM period
-  volatile uint32_t maxPower = volts/systemSettings.Profile.impedance;                      // Compute max power with current voltage and impedance(Impedance stored in x10)
+  uint32_t PwmPeriod=systemSettings.Profile.pwmPeriod;                                      // Read complete PWM period
+  uint32_t maxPower = volts/systemSettings.Profile.impedance;                                        // Compute max power with current voltage and impedance(Impedance stored in x10)
   if(systemSettings.Profile.power >= maxPower){                                             // If set power is already higher than the max possible power given the voltage and heater resistance
     Iron.Pwm_Max = Iron.Pwm_Limit;                                                          // Set max PWM
   }
@@ -439,7 +439,6 @@ void checkIronError(void){
   Err.V_low = getSupplyVoltage_v_x10() < systemSettings.settings.lvp   ? 1 : 0;             // Check supply voltage (Mosfet will not work ok <10V, it will heat up)
   #endif
   Err.noIron = TIP.last_raw>systemSettings.Profile.noIronValue ? 1 : 0;                     // Check tip temperature too high (Wrong connection or not connected)
-
   if(CurrentTime<1000 || systemSettings.setupMode==setup_On){                               // Don't check sensor errors during first second or in setup mode, wait for readings need to get stable
     Err.Flags &= 0x10;                                                                      // Only check failure state
   }
