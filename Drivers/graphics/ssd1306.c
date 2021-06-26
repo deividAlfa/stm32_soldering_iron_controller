@@ -664,6 +664,7 @@ void putStrAligned(char* str, uint8_t y, AlignType align){
   }
 }
 void Reset_onError(void){
+  __disable_irq();
   while(BUTTON_input()){                    // Wait until the button is pressed
     for(uint16_t i=0;i<50000;i++);          // Small delay
     HAL_IWDG_Refresh(&hiwdg);               // Clear watchdog

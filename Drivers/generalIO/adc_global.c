@@ -257,6 +257,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     ADC_Stop_DMA();                                                                         // Reset the ADC
     ADC_Status = ADC_Idle;
 
+
     HAL_IWDG_Refresh(&hiwdg);                                                               // This is the main reset of the watchdog
                                                                                             // If anything critical stalls (PWM, ADC, hanlleIron) this won't be updated anymore
                                                                                             // causing a system reset
@@ -281,6 +282,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
 #endif
 
     handleIron();                                                                           // Handle iron
+
+    runAwayCheck();                                                                         // Check runaway condition
 
     #ifdef DEBUG_PWM
     HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,0);                                    // Toggle TEST
