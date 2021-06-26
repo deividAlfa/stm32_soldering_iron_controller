@@ -362,11 +362,11 @@ static void * getPWMPeriod() {
 }
 static void setPWMPeriod(uint32_t *val) {
   uint16_t period=(*val*100)-1;
-  if(period>=systemSettings.Profile.pwmDelay+(ADC_MEASURE_TIME/10)){
+  if(period>systemSettings.Profile.pwmDelay+(ADC_MEASURE_TIME/10)){
     setPwmPeriod(period);
   }
   else{
-    uint16_t t=(systemSettings.Profile.pwmDelay+(ADC_MEASURE_TIME/10));
+    uint16_t t=(systemSettings.Profile.pwmDelay+((ADC_MEASURE_TIME/10)+1));
     setPwmPeriod(t);
   }
 }
@@ -377,11 +377,11 @@ static void * getPWMDelay() {
 }
 static void setPWMDelay(uint32_t *val) {
   uint16_t delay=(*val*10)-1;
-  if(delay<=(systemSettings.Profile.pwmPeriod-(ADC_MEASURE_TIME/10))){
+  if(delay<(systemSettings.Profile.pwmPeriod-(ADC_MEASURE_TIME/10))){
     setPwmDelay(delay);
   }
   else{
-    setPwmDelay(systemSettings.Profile.pwmPeriod-(ADC_MEASURE_TIME/10));
+    setPwmDelay(systemSettings.Profile.pwmPeriod-((ADC_MEASURE_TIME/10)+1));
   }
 }
 

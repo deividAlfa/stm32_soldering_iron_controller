@@ -135,7 +135,7 @@ void handleIron(void) {
     Iron.updatePwm=no_update;
     __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.Profile.pwmPeriod);
     __HAL_TIM_SET_AUTORELOAD(Iron.Delay_Timer,systemSettings.Profile.pwmDelay);
-    Iron.Pwm_Limit = systemSettings.Profile.pwmPeriod - (systemSettings.Profile.pwmDelay + (uint16_t)ADC_MEASURE_TIME/10);
+    Iron.Pwm_Limit = (systemSettings.Profile.pwmPeriod-1) - (systemSettings.Profile.pwmDelay + 1 + (uint16_t)ADC_MEASURE_TIME/10);
   }
 
   #ifdef USE_VIN
@@ -248,7 +248,7 @@ void initTimers(void){
   else{
     Iron.Pwm_Out = 0;
   }
-  Iron.Pwm_Limit = 9000 - (uint16_t)(ADC_MEASURE_TIME/10);
+  Iron.Pwm_Limit = 8999 - (uint16_t)(ADC_MEASURE_TIME/10);
   __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Set min value into PWM
 }
 
