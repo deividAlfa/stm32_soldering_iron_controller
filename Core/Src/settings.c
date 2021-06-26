@@ -235,10 +235,10 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = T12_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = T12_Cal350;     // These values are way lower, but better to be safe than sorry
       systemSettings.Profile.tip[x].calADC_At_450   = T12_Cal450;     // User needs to calibrate its station
-      systemSettings.Profile.tip[x].PID.Kp          = 7000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 3500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 2000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 35;             // val = /100
+      systemSettings.Profile.tip[x].PID.Kp          = 8000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 4500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 600;            // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 60;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
@@ -260,10 +260,10 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = C245_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = C245_Cal350;
       systemSettings.Profile.tip[x].calADC_At_450   = C245_Cal450;
-      systemSettings.Profile.tip[x].PID.Kp          = 7000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 3500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 2000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 35;             // val = /100
+      systemSettings.Profile.tip[x].PID.Kp          = 8000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 4500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 600;            // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 60;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
@@ -284,10 +284,10 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = C210_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = C210_Cal350;
       systemSettings.Profile.tip[x].calADC_At_450   = C210_Cal450;
-      systemSettings.Profile.tip[x].PID.Kp          = 7000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 3500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 2000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 35;             // val = /100
+      systemSettings.Profile.tip[x].PID.Kp          = 8000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 4500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 600;            // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 60;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
@@ -311,8 +311,8 @@ void resetCurrentProfile(void){
   systemSettings.Profile.UserSetTemperature       = 180;
   systemSettings.Profile.MaxSetTemperature        = 450;
   systemSettings.Profile.MinSetTemperature        = 180;
-  systemSettings.Profile.pwmPeriod                = 9999;
-  systemSettings.Profile.pwmDelay                 = 999;
+  systemSettings.Profile.pwmPeriod                = 19999;
+  systemSettings.Profile.pwmDelay                 = 1999;
   systemSettings.Profile.filterFactor             = 2;
   systemSettings.Profile.tempUnit                 = mode_Celsius;
   systemSettings.Profile.NotInitialized           = initialized;

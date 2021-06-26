@@ -107,6 +107,7 @@ void handleIron(void) {
     else{
       Iron.Pwm_Out = 0;
     }
+    __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                    // Load new calculated PWM Duty
     return;
   }
   
@@ -152,8 +153,6 @@ void handleIron(void) {
     Iron.Pwm_Out = calculatePID(PID_temp, TIP.last_avg, Iron.Pwm_Max);
   }
 
-  __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Load new calculated PWM Duty
-
   if(systemSettings.settings.activeDetection && Iron.Pwm_Out<=PWMminOutput){
     Iron.CurrentIronPower = 0;
     Iron.Pwm_Out = PWMminOutput;                                                              // Maintain iron detection
@@ -164,13 +163,13 @@ void handleIron(void) {
   else{
     Iron.CurrentIronPower = ((uint32_t)Iron.Pwm_Out*100)/Iron.Pwm_Max;                        // Compute new %
   }
+  __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Load new calculated PWM Duty
 
   // For calibration process. Add +-2ºC detection margin
   if(  (tipTemp>=(Iron.CurrentSetTemperature-2)) && (tipTemp<=(Iron.CurrentSetTemperature+2)) && !Iron.Cal_TemperatureReachedFlag) {
     temperatureReached( Iron.CurrentSetTemperature);
     Iron.Cal_TemperatureReachedFlag = 1;
   }
-  runAwayCheck();                                                                             // Check runaway condition
 }
 
 // Round to closest 10
@@ -209,7 +208,7 @@ void initTimers(void){
   Iron.Delay_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;
   #endif
 
-  Iron.Delay_Timer->Init.Period = 999;                                                         // 10mS by default
+  Iron.Delay_Timer->Init.Period = 1999;                                                         // 20mS by default
   if (HAL_TIM_Base_Init(Iron.Delay_Timer) != HAL_OK){
     Error_Handler();
   }
@@ -220,7 +219,7 @@ void initTimers(void){
   Iron.Pwm_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;
   #endif
 
-  Iron.Pwm_Timer->Init.Period = 9999;                                                          // 100mS by default
+  Iron.Pwm_Timer->Init.Period = 19999;                                                          // 200mS by default
   if (HAL_TIM_Base_Init(Iron.Pwm_Timer) != HAL_OK){
     Error_Handler();
   }
@@ -248,7 +247,7 @@ void initTimers(void){
   else{
     Iron.Pwm_Out = 0;
   }
-  Iron.Pwm_Limit = 8999 - (uint16_t)(ADC_MEASURE_TIME/10);
+  Iron.Pwm_Limit = 17999 - (uint16_t)(ADC_MEASURE_TIME/10);
   __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Set min value into PWM
 }
 
@@ -260,7 +259,7 @@ void runAwayCheck(void){
   uint16_t tipTemp = readTipTemperatureCompensated(stored_reading, read_Avg);
 
   // If by any means the PWM output is higher than max calculated, generate error
-  if(Iron.Pwm_Out > Iron.Pwm_Limit){
+  if((Iron.Pwm_Out > Iron.Pwm_Limit) || (Iron.Pwm_Out != __HAL_TIM_GET_COMPARE(Iron.Pwm_Timer,Iron.Pwm_Channel))){
     Error_Handler();
   }
   if(systemSettings.settings.tempUnit==mode_Celsius){
