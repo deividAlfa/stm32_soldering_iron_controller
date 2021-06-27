@@ -106,6 +106,7 @@ void ADC_Init(ADC_HandleTypeDef *adc){
 }
 
 void ADC_Start_DMA(){
+
   if(ADC_Status!=ADC_Waiting){
     Error_Handler();
   }
@@ -123,12 +124,7 @@ void ADC_Start_DMA(){
 
 
 void ADC_Stop_DMA(void){
-  if(adc_device->DMA_Handle->State != HAL_DMA_STATE_READY){
-    HAL_ADC_Stop_DMA(adc_device);
-  }
-  else{
-    HAL_ADC_Stop(adc_device);
-  }
+  HAL_ADC_Stop_DMA(adc_device);
 }
 
 /*
@@ -244,12 +240,14 @@ void handle_ADC_Data(void){
 
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
+
 #if defined DEBUG_PWM && SWO_PRINT
     extern bool dbg_newData;
     extern uint16_t dbg_prev_TIP_Raw, dbg_prev_TIP, dbg_prev_VIN, dbg_prev_PWR;
     extern int16_t dbg_prev_NTC;
     bool dbg_t=dbg_newData;
 #endif
+
   if(_hadc == adc_device){
     if(ADC_Status!=ADC_Sampling){
       Error_Handler();

@@ -182,7 +182,6 @@ void Program_Handler(void) {
 
 }
 
-
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim){
   if(_htim == Iron.Pwm_Timer){
 
@@ -222,7 +221,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
 
   if(_htim == Iron.Delay_Timer){                                      // Delay Timer?
     __HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE);           // Clear Delay Timer flag
-    ADC_Start_DMA();                                                  // Start ADC conversion
+    if(ADC_Status==ADC_Waiting){
+      ADC_Start_DMA();                                                  // Start ADC conversion
+    }
   }
 }
 
