@@ -42,11 +42,11 @@ typedef struct{
 	uint8_t *ptr;
 	volatile uint8_t status;
 	volatile uint8_t row;
-
-	#ifdef OLED_SPI
+	volatile uint8_t use_sw;
+	#if defined OLED_SPI && defined OLED_DEVICE
 	SPI_HandleTypeDef *device;
 
-	#elif defined OLED_I2C
+	#elif defined OLED_I2C && defined OLED_DEVICE
 	I2C_HandleTypeDef *device;
 	#endif
 
@@ -81,29 +81,42 @@ enum { fill_soft, fill_dma };
 #define WHITE 1
 #define XOR   2
 
-#ifdef OLED_SOFT_SPI
+#if !defined OLED_SPI && !defined OLED_I2C
+#error "No display configured in board.h!"
+#elif defined OLED_I2C && !defined OLED_ADDRESS
+#error "No display I2C address configured in board.h!"
+#endif
+
+#if defined OLED_SPI && defined OLED_DEVICE
+void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma);
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *device);
+
+#elif defined OLED_SPI
 void Enable_Soft_SPI(void);
 void ssd1306_init(DMA_HandleTypeDef *dma);
 void spi_send(uint8_t* bf, uint16_t count);
+#endif
 
-#elif defined OLED_SOFT_I2C
+
+#if defined OLED_I2C
 #define i2cData 0
-#define i2cCmd 	1
+#define i2cCmd  1
+
+#if !defined OLED_DEVICE || (defined OLED_DEVICE && defined I2C_TRY)
 void Enable_Soft_I2C(void);
-void ssd1306_init(DMA_HandleTypeDef *dma);
 void i2cStart(void);
 void i2cStop(void);
 void i2cBegin(bool isCmd);
 void i2cSend(uint8_t* bf, uint16_t count, bool isCmd);
 void i2cWait(void);
+#endif
 
-#elif defined OLED_SPI
-void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma);
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *device);
-
-#elif defined OLED_I2C
+#if defined OLED_DEVICE
 void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma);
 void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device);
+#else
+void ssd1306_init(DMA_HandleTypeDef *dma);
+#endif
 #endif
 
 void FatalError(uint8_t type);

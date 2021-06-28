@@ -75,12 +75,14 @@ int _write(int32_t file, uint8_t *ptr, int32_t len)
   return len;
 }
 #endif
+
 void Init(void){
-#if defined OLED_SOFT_SPI || defined OLED_SOFT_I2C
-    ssd1306_init(&FILL_DMA);
+#if (defined OLED_SPI || defined OLED_I2C) && defined OLED_DEVICE
+  ssd1306_init(&OLED_DEVICE, &FILL_DMA);
 #elif defined OLED_SPI || defined OLED_I2C
-    ssd1306_init(&OLED_DEVICE, &FILL_DMA);
+  ssd1306_init(&FILL_DMA);
 #endif
+
     guiInit();
     ADC_Init(&ADC_DEVICE);
     buzzer_init();
@@ -239,8 +241,10 @@ void Error_Handler(void)
   /* User can add his own implementation to report the HAL error return state */
 
 #ifdef DEBUG_ERROR
-  #if defined OLED_I2C || defined OLED_SPI
-  display_abort();
+  #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
+  if(!oled.use_sw){
+    display_abort();
+  }
   #endif
   SetFailState(setError);
   buzzer_fatal_beep();
@@ -274,14 +278,24 @@ void Error_Handler(void)
     }
   };
 
-  #if defined OLED_I2C || defined OLED_SPI
-  update_display_ErrorHandler();
+  #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
 
-  #elif defined OLED_SOFT_I2C || defined OLED_SOFT_SPI
+  #ifdef I2C_TRY
+  if(oled.use_sw){
+    update_display();
+  }
+  else{
+    update_display_ErrorHandler();
+  }
+  #else
+  update_display_ErrorHandler();
+  #endif
+
+  #else
   update_display();
   #endif
-  Reset_onError();
 #endif
+  Reset_onError();
   while(1){
   }
 
