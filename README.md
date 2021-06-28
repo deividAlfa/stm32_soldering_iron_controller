@@ -13,8 +13,19 @@
 
 <!-- /MarkdownTOC -->
 
-Video can be seen there: (Project in active development, the features will change continuously)
+--- 
+
+Video of operation here: (Project in active development, the features will change continuously)<br>
+
 [![IMAGE ALT TEXT](https://img.youtube.com/vi/j0HQq4aRiXw/0.jpg)](https://www.youtube.com/watch?v=j0HQq4aRiXw "STM32 T12 custom firmware")
+
+---
+
+Developing not only takes time, but also costs money.<br>
+When something goes wrong, the results are usually destructive: Tips / handle burning down, sometimes causing damage to the controller.<br>
+
+If you want to support the project, check my Paypal donation page. Thanks!<br>
+[![IMAGE ALT TEXT](/Readme_files/button-donate-paypal.png)](https://www.paypal.com/pools/c/8AHGirfrx2 "Paypal donation page")
 
 ---
 
