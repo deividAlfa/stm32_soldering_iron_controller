@@ -239,14 +239,18 @@ void write_cmd(uint8_t cmd) {
 
 
 #elif defined OLED_I2C
-  #if defined OLED_DEVICE
-  if(!oled.use_sw){
+  #if defined OLED_DEVICE && !defined I2C_TRY
+  if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, &cmd, 1, 100)){
+    Error_Handler();
+  }
+  #elif defined OLED_DEVICE && defined I2C_TRY
+  if(oled.use_sw){
+    i2cSend(&cmd,1,i2cCmd);
+  }
+  else{
     if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, &cmd, 1, 100)){
       Error_Handler();
     }
-  }
-  else{
-    i2cSend(&cmd,1,i2cCmd);
   }
   #else
   i2cSend(&cmd,1,i2cCmd);
