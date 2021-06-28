@@ -14,7 +14,7 @@
 <!-- /MarkdownTOC -->
 
 Video can be seen there: (Project in active development, the features will change continuously)
-[![IMAGE ALT TEXT](https://img.youtube.com/vi/l7mDah2jRSI/0.jpg)](https://www.youtube.com/watch?v=l7mDah2jRSI "STM32 T12 custom firmware")
+[![IMAGE ALT TEXT](https://img.youtube.com/vi/j0HQq4aRiXw/0.jpg)](https://www.youtube.com/watch?v=j0HQq4aRiXw "STM32 T12 custom firmware")
 
 ---
 
@@ -114,6 +114,7 @@ Otherwise, they aren't meant to be another calibration menu! Only for viewing (E
 After fully reading the documentaion, if you still have problems or doubts, please ask in the EEVblog thread:<br>
 https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle<br>
 
+---
 
 <a id="build"></a>     
 ## Building
