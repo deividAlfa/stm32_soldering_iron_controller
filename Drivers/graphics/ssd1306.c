@@ -55,7 +55,7 @@ void disable_soft_Oled(void){
 #endif
 
 #if defined OLED_SPI && !defined OLED_DEVICE
-__attribute__((section(".RamFunc")))
+
 void spi_send(uint8_t* bf, uint16_t count){
   uint8_t shift,data;
   while(count--){
@@ -116,7 +116,7 @@ void i2cStop(void){                                       // Stop condition, SCL
   Oled_Set_SDA();
   i2cWait();
 }
-__attribute__((section(".RamFunc")))
+
 void i2cBegin(bool isCmd){
   uint8_t bf[2]= { OLED_ADDRESS, 0x00 };
   if(!isCmd){
@@ -147,7 +147,7 @@ void i2cBegin(bool isCmd){
     Oled_Clear_SCL();
   }
 }
-__attribute__((section(".RamFunc")))
+
 void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
   volatile uint8_t shift,data;
   //bool ack=0;
