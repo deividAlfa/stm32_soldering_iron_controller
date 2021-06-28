@@ -16,15 +16,17 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
         
 **ENCODER**<br>
 
-    * Rotatory encoder right:  GPIO INPUT, name: ROT_ENC_R, no pull
-    * Rotatory encoder left:   GPIO INPUT, name: ROT_ENC_L, no pull
-    * Rotatory encoder button: GPIO INPUT,name: ROT_ENC_BUTTON, no pull
+    * Rotatory encoder right:  GPIO INPUT, name: ENC_R, no pull
+    * Rotatory encoder left:   GPIO INPUT, name: ENC_L, no pull
+    * Rotatory encoder button: GPIO INPUT, name: ENC_SW, no pull
+        
         
 **OLED**<br>
 
     * Oled CS:      GPIO Output, name: OLED_CS, no pull
     * Oled DC:      GPIO Output, name: OLED_DC, no pull
     * Oled RESET:   GPIO Output, name: OLED_RST, no pull
+
 
 **SOFTWARE SPI/I2C** (If used)<br>
 
