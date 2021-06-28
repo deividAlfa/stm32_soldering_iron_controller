@@ -29,12 +29,12 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 **SOFTWARE SPI/I2C** (If used)<br>
 
     * OLED CLOCK
-        Label: OLED_SCL
+        Label: SW_SCL
         No pull
         Speed: high
         
     * OLED DATA signal
-        Label: OLED_SDA
+        Label: SW_SDA
         No pull
         Speed: High
         
@@ -43,12 +43,10 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 
     * GPIO Settings
         * Oled SPI CLOCK
-            Label: OLED_SCL (Don't care actually)
             No pull
             Speed: High
             
         * Oled SPI MOSI
-            User Label: OLED_SDA (Don't care actually)
             No pull
             Speed: High
             
@@ -80,12 +78,10 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 
     * GPIO Settings
         Oled I2C CLOCK
-            User Label: OLED_SCL (Don't care actually)
             No pull
             Speed: High
             
         Oled I2C DATA
-            User Label: OLED_SDA (Don't care actually)
             No pull
             Speed: High
 
@@ -97,7 +93,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
         
     DMA Settings
         I2Cx_Tx
-        Direction: Memory to pheripheral
+        Direction: Memory to peripheral
         Piority: Low
         DMA request mode: Normal
         Data width: Byte in both           
@@ -191,7 +187,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
 **PWM**<br>
 
     * GPIO
-        User label: PWM_OUTPUT (Don't care actually)
+        User label: PWM
         Mode: TIMxCHx(N) ("x" and "N" depends on the selected pin)
         
     * TIMER
