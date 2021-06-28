@@ -56,11 +56,11 @@ extern oled_t oled;
 
 enum { fill_soft, fill_dma };
 
-#define Oled_Set_SCL() 		OLED_SCL_GPIO_Port->BSRR = (uint32_t)OLED_SCL_Pin
-#define Oled_Clear_SCL() 	OLED_SCL_GPIO_Port->BRR = (uint32_t)OLED_SCL_Pin
+#define Oled_Set_SCL() 		SW_SCL_GPIO_Port->BSRR = (uint32_t)SW_SCL_Pin
+#define Oled_Clear_SCL() 	SW_SCL_GPIO_Port->BRR = (uint32_t)SW_SCL_Pin
 
-#define Oled_Set_SDA() 		OLED_SDA_GPIO_Port->BSRR = (uint32_t)OLED_SDA_Pin
-#define Oled_Clear_SDA() 	OLED_SDA_GPIO_Port->BRR = (uint32_t)OLED_SDA_Pin
+#define Oled_Set_SDA() 		SW_SDA_GPIO_Port->BSRR = (uint32_t)SW_SDA_Pin
+#define Oled_Clear_SDA() 	SW_SDA_GPIO_Port->BRR = (uint32_t)SW_SDA_Pin
 
 #ifdef USE_CS
 #define Oled_Set_CS() 		OLED_CS_GPIO_Port->BSRR = (uint32_t)OLED_CS_Pin

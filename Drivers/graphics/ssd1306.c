@@ -10,22 +10,22 @@ oled_t oled = {
 
 static uint8_t lastContrast;
 
-#if defined OLED_I2C && (!defined OLED_DEVICE  || (defined OLED_DEVICE && defined I2C_TRY))
-void Enable_Soft_I2C(void){
+#if (defined OLED_SPI && !defined OLED_DEVICE)  || (defined OLED_I2C && (!defined OLED_DEVICE  || (defined OLED_DEVICE && defined I2C_TRY)))
+void enable_soft_Oled(void){
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   /*Configure GPIO pins : SCL_Pin */
-  GPIO_InitStruct.Pin =   OLED_SCL_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pin =   SW_SCL_Pin;
+  GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull =  GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(OLED_SCL_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(SW_SCL_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SDA_Pin */
-  GPIO_InitStruct.Pin =   OLED_SDA_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pin =   SW_SDA_Pin;
+  GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull =  GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(OLED_SDA_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(SW_SDA_GPIO_Port, &GPIO_InitStruct);
 
   Oled_Clear_SDA();
   HAL_Delay(1);
@@ -37,42 +37,24 @@ void Enable_Soft_I2C(void){
   HAL_Delay(1);
 }
 
-void Disable_Soft_I2C(void){
+void disable_soft_Oled(void){
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   /*Configure GPIO pins : SCL_Pin */
-  GPIO_InitStruct.Pin =   OLED_SCL_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(OLED_SCL_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin =   SW_SCL_Pin;
+  GPIO_InitStruct.Mode =  GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull =  GPIO_NOPULL;
+  HAL_GPIO_Init(SW_SCL_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SDA_Pin */
-  GPIO_InitStruct.Pin =   OLED_SDA_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(OLED_SDA_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin =   SW_SDA_Pin;
+  GPIO_InitStruct.Mode =  GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull =  GPIO_NOPULL;
+  HAL_GPIO_Init(SW_SDA_GPIO_Port, &GPIO_InitStruct);
 }
 
 #endif
+
 #if defined OLED_SPI && !defined OLED_DEVICE
-void Enable_Soft_SPI(void){
-  //HAL_SPI_MspDeInit(&OLED_DEVICE);
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  /*Configure GPIO pins : SCL_Pin */
-  GPIO_InitStruct.Pin =   OLED_SCL_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(OLED_SCL_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : SDA_Pin */
-  GPIO_InitStruct.Pin =   OLED_SDA_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(OLED_SDA_GPIO_Port, &GPIO_InitStruct);
-
-}
-
 __attribute__((section(".RamFunc")))
 void spi_send(uint8_t* bf, uint16_t count){
   uint8_t shift,data;
@@ -337,7 +319,7 @@ uint8_t getContrast(void) {
 
 #if defined OLED_SPI && !defined OLED_DEVICE
 void ssd1306_init(DMA_HandleTypeDef *dma){
-  Enable_Soft_SPI();
+  enable_soft_Oled();
 
 #elif defined OLED_SPI && defined OLED_DEVICE
 void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma){
@@ -349,7 +331,7 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 
 #elif defined OLED_I2C && !defined OLED_DEVICE && !defined I2C_TRY
 void ssd1306_init(DMA_HandleTypeDef *dma){
-  Enable_Soft_I2C();
+  enable_soft_Oled();
 #else
   #error "Wrong display configuration in board.h!"
 #endif
@@ -394,7 +376,7 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
   HAL_Delay(100);                                 // 100mS wait for internal initialization
 #if defined OLED_I2C && defined OLED_DEVICE && defined I2C_TRY
   oled.use_sw=1;
-  Disable_Soft_I2C();
+  disable_soft_Oled();
   HAL_Delay(1);
   // Check if OLED is connected to hardware I2C
   // TODO, this is only the initial code, needs testing (Don't enable I2C_TRY for now)
@@ -409,7 +391,7 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
     HAL_Delay(10);                                // Failed, wait before next try
   }
   if(oled.use_sw){                                // Display not detected
-    Enable_Soft_I2C();                            // Set sw mode
+    enable_soft_Oled();                            // Set sw mode
   }
 
 #elif !defined OLED_DEVICE
