@@ -10,6 +10,7 @@
 #include "oled.h"
 #include "gui.h"
 char displayString[32];
+
 displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *w) {
   comboBox_widget_t* combo;
   if(!w)
@@ -22,7 +23,7 @@ displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *w) {
       return &((editable_widget_t*)w->content)->inputData;
     case widget_combo:
       combo = (comboBox_widget_t*)w->content;
-      if(((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption))&&(combo->currentItem)){
+      if((combo->currentItem) && ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption))){
         return &((comboBox_widget_t*)w->content)->currentItem->widget->inputData;
       }
     default:
@@ -41,7 +42,7 @@ editable_widget_t * extractEditablePartFromWidget(widget_t *w) {
       return (editable_widget_t*)w->content;
     case widget_combo:
       combo = (comboBox_widget_t*)w->content;
-      if(((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption))&&(combo->currentItem)){
+      if((combo->currentItem) && ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption))){
         return ((comboBox_widget_t*)w->content)->currentItem->widget;
       }
     default:
