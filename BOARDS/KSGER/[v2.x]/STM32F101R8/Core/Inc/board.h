@@ -14,16 +14,15 @@
 /********************************
  *       Display Settings    *
  ********************************/
-//#define OLED_SPI                                            // Hardware DMA SPI
-//#define OLED_I2C                                            // Hardware DMA I2C
-//#define OLED_SOFT_SPI                                       // Software bitbang SPI
-#define OLED_SOFT_I2C                                         // Software bitbang I2C
-#define OLED_ADDRESS        (0x3c<<1)                          // Only used for i2c
-#define OLED_DEVICE         hspi2                             // SPI / I2C handler if used
+//#define OLED_SPI                                            // SPI display
+#define OLED_I2C                                              // I2C display
+#define I2C_TRY_HW                                            // Try I2C HW first, use I2C SW if not detected
+#define OLED_ADDRESS        (0x3c<<1)                         // Only used for I2C
+#define OLED_DEVICE         hi2c2                             // SPI / I2C handler if used. Enables HW mode, otherwise SW mode is used
 #define FILL_DMA            hdma_memtomem_dma1_channel2       // DMA mem2mem for filling
-//#define USE_RST
-//#define USE_DC
-//#define USE_CS
+//#define USE_RST                                             // Reset pin is used
+//#define USE_DC                                              // DC pin is used
+//#define USE_CS                                              // CS pin is used
 
 /********************************
  *       PWM Settings        *
@@ -41,7 +40,7 @@
  *       ADC Settings        *
  ********************************/
 #define ADC_DEVICE          hadc1                             // ADC device
-#define ADC_MEASURE_TIME    350                               // in uS
+#define ADC_MEASURE_TIME    350                               // in uS. Time to subtract from the Period where PWM output should be low to let the ADC measure the tip
 #define ADC_BFSIZ           16+2                              // ADC DMA buffer size Buffer[ADC_BFSIZ][Adc_Buffer_Elements](+2 to compensate min/max value discard in filtering)
 
 // Order for secondary measurements, ADC channels not requiring sampling in the PWM low period. Order as ADC rank order (usually ch0-ch18)
