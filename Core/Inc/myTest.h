@@ -8,7 +8,7 @@
 #ifndef INC_MYTEST_H_
 #define INC_MYTEST_H_
 
-#define RUN_MY_TEST
+//#define RUN_MY_TEST
 
 void myTest(void);
 
