@@ -97,7 +97,7 @@ void ssd1306_init(DMA_HandleTypeDef *dma);
 void spi_send(uint8_t* bf, uint16_t count);
 #endif
 
-#if !defined OLED_DEVICE || (defined OLED_DEVICE && defined I2C_TRY)
+#if !defined OLED_DEVICE || (defined OLED_DEVICE && defined I2C_TRY_HW)
 void enable_soft_Oled(void);
 void disable_soft_Oled(void);
 #endif
@@ -106,12 +106,12 @@ void disable_soft_Oled(void);
 #define i2cData 0
 #define i2cCmd  1
 
-#if !defined OLED_DEVICE || (defined OLED_DEVICE && defined I2C_TRY)
+#if !defined OLED_DEVICE || (defined OLED_DEVICE && defined I2C_TRY_HW)
 void i2cStart(void);
 void i2cStop(void);
 void i2cBegin(bool isCmd);
 void i2cSend(uint8_t* bf, uint16_t count, bool isCmd);
-void i2cWait(void);
+void i2cDelay(void);
 #endif
 
 #if defined OLED_DEVICE

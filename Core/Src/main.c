@@ -136,6 +136,7 @@ int main(void)
   Init();
 	/*
   setContrast(255);
+  FillBuffer(BLACK, fill_dma);
   u8g2_SetFont(&u8g2,default_font );
   u8g2_SetDrawColor(&u8g2, WHITE);
   if(oled.use_sw){
@@ -335,7 +336,7 @@ void Error_Handler(void)
 
   #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
 
-  #ifdef I2C_TRY
+  #ifdef I2C_TRY_HW
   if(oled.use_sw){
     update_display();
   }
