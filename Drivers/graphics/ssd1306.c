@@ -10,6 +10,91 @@ oled_t oled = {
 
 static uint8_t lastContrast;
 
+char *HAL_str[] = {
+  "HAL_OK",
+  "HAL_ERROR",
+  "HAL_BUSY",
+  "HAL_TIMEOUT"
+};
+
+#if defined OLED_I2C && defined OLED_DEVICE
+#define HW_SCL_GPIO_Port  SW_SCL_GPIO_Port
+#define HW_SCL_Pin        SW_SCL_Pin
+#define HW_SDA_GPIO_Port  SW_SDA_GPIO_Port
+#define HW_SDA_Pin        SW_SDA_Pin
+
+
+// Silicon bug workaround as ST document ES093 rev 7
+void i2c_workaround(void){
+/*
+  __HAL_I2C_DISABLE(device);
+
+  HW_SCL_GPIO_Port->ODR |= HW_SCL_Pin;
+  HW_SDA_GPIO_Port->ODR |= HW_SDA_Pin;
+
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin =   SW_SCL_Pin;
+  GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(SW_SCL_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin =   SW_SDA_Pin;
+  HAL_GPIO_Init(SW_SCL_GPIO_Port, &GPIO_InitStruct);
+
+  // SCL, SDA HIGH
+  while( !(HW_SDA_GPIO_Port->IDR & HW_SDA_Pin) || !(HW_SCL_GPIO_Port->IDR & HW_SCL_Pin) );
+
+  // SDA LOW
+  HW_SDA_GPIO_Port->ODR &= ~(HW_SDA_Pin);
+  while(HW_SDA_GPIO_Port->IDR & HW_SDA_Pin);
+
+  // SCL LOW
+  HW_SCL_GPIO_Port->ODR &= ~(HW_SCL_Pin);
+  while(HW_SCL_GPIO_Port->IDR & HW_SCL_Pin);
+
+  // SCL HIGH
+  HW_SCL_GPIO_Port->ODR |= HW_SCL_Pin;
+  while(!(HW_SCL_GPIO_Port->IDR & HW_SCL_Pin));
+
+  // SDA HIGH
+  HW_SDA_GPIO_Port->ODR |= HW_SDA_Pin;
+  while(!(HW_SDA_GPIO_Port->IDR & HW_SDA_Pin));
+
+
+  GPIO_InitStruct.Pin =   SW_SCL_Pin;
+  GPIO_InitStruct.Mode =  GPIO_MODE_AF_OD;
+  HAL_GPIO_Init(SW_SCL_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin =   SW_SDA_Pin;
+  HAL_GPIO_Init(SW_SCL_GPIO_Port, &GPIO_InitStruct);
+
+  device->Instance->CR1 |= I2C_CR1_SWRST;
+  device->Instance->CR1 &= ~(I2C_CR1_SWRST);
+  __HAL_I2C_ENABLE(device);
+  */
+  // Workaround for silicon bugs in STM32F103, force I2C RCC reset and re-init
+  __HAL_RCC_I2C1_FORCE_RESET();
+  __HAL_RCC_I2C2_FORCE_RESET();
+  HAL_Delay(10);
+  __HAL_RCC_I2C1_RELEASE_RESET();
+  __HAL_RCC_I2C2_RELEASE_RESET();
+  oled.device->State = HAL_I2C_STATE_RESET;
+  __HAL_RCC_DMA1_CLK_ENABLE();
+  oled.device->Instance = I2C1;
+  oled.device->Init.ClockSpeed = 1500000;
+  oled.device->Init.DutyCycle = I2C_DUTYCYCLE_2;
+  oled.device->Init.OwnAddress1 = 0;
+  oled.device->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  oled.device->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  oled.device->Init.OwnAddress2 = 0;
+  oled.device->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  oled.device->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(oled.device) != HAL_OK){
+    Error_Handler();
+  }
+}
+
+#endif
+
+
 #if (defined OLED_SPI && !defined OLED_DEVICE)  || (defined OLED_I2C && (!defined OLED_DEVICE  || (defined OLED_DEVICE && defined I2C_TRY)))
 void enable_soft_Oled(void){
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -22,9 +107,6 @@ void enable_soft_Oled(void){
 
   /*Configure GPIO pins : SDA_Pin */
   GPIO_InitStruct.Pin =   SW_SDA_Pin;
-  GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull =  GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(SW_SDA_GPIO_Port, &GPIO_InitStruct);
 
   Oled_Clear_SDA();
@@ -47,8 +129,6 @@ void disable_soft_Oled(void){
 
   /*Configure GPIO pins : SDA_Pin */
   GPIO_InitStruct.Pin =   SW_SDA_Pin;
-  GPIO_InitStruct.Mode =  GPIO_MODE_ANALOG;
-  GPIO_InitStruct.Pull =  GPIO_NOPULL;
   HAL_GPIO_Init(SW_SDA_GPIO_Port, &GPIO_InitStruct);
 }
 
@@ -162,7 +242,7 @@ void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
       else{
         Oled_Set_SDA();
       }
-      i2cWait();
+      //i2cWait();
       for(shift = 0; shift < 8; shift++){
         Oled_Set_SCL();
         i2cWait();
@@ -180,11 +260,11 @@ void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
       for(shift = 0; shift < 8; shift++){
         if(data & 0x80){
           Oled_Set_SDA();
-          i2cWait();
+          //i2cWait();
         }
         else{
           Oled_Clear_SDA();
-          i2cWait();
+          //i2cWait();
         }
         Oled_Set_SCL();
         i2cWait();
@@ -240,7 +320,7 @@ void write_cmd(uint8_t cmd) {
 
 #elif defined OLED_I2C
   #if defined OLED_DEVICE && !defined I2C_TRY
-  if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, &cmd, 1, 100)){
+  if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, &cmd, 1, 100)!=HAL_OK){
     Error_Handler();
   }
   #elif defined OLED_DEVICE && defined I2C_TRY
@@ -248,10 +328,9 @@ void write_cmd(uint8_t cmd) {
     i2cSend(&cmd,1,i2cCmd);
   }
   else{
-    if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, &cmd, 1, 100)){
-      Error_Handler();
-    }
-  }
+  	if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, &cmd, 1, 100)!=HAL_OK){
+    	Error_Handler();
+	  }
   #else
   i2cSend(&cmd,1,i2cCmd);
   #endif
@@ -292,6 +371,7 @@ void update_display( void ){
       return;
     }
 #endif
+    oled.status=oled_busy;
 #if defined OLED_SPI && defined OLED_DEVICE
     HAL_SPI_TxCpltCallback(oled.device);                  // Call the DMA callback function to start sending the frame
 
@@ -329,7 +409,7 @@ void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 #elif defined OLED_I2C && defined OLED_DEVICE
 void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
   oled.device  = device;
-
+  i2c_workaround();
 #elif defined OLED_I2C && !defined OLED_DEVICE && !defined I2C_TRY
 void ssd1306_init(DMA_HandleTypeDef *dma){
   enable_soft_Oled();
@@ -383,8 +463,8 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
   // TODO, this is only the initial code, needs testing (Don't enable I2C_TRY for now)
   for(uint8_t try=0; try<5; try++){
     uint8_t data;
-    uint8_t result = HAL_I2C_Mem_Read(oled.device, OLED_ADDRESS, 0x00, 1, &data, 1, 50);
-    if(result){
+    uint8_t res = HAL_I2C_Mem_Read(oled.device, OLED_ADDRESS, 0x00, 1, &data, 1, 10);
+    if(res==HAL_OK){
       oled.use_sw=0;                              // Detected, enable hw
       break;
     }
@@ -471,7 +551,7 @@ void display_abort(void){
     HAL_I2C_Master_Abort_IT(oled.device, 0);
 #endif
     __HAL_UNLOCK(oled.device);
-    HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 3000);  // Wait for DMA to finish
+    HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 100);  // Wait for DMA to finish
   }
   oled.status=oled_idle;                                                      // Force oled idle status
 }
@@ -539,7 +619,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 #endif
 
   if(device == oled.device){
-    HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 100);  //Wait for DMA to finish
+    HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 10);  //Wait for DMA to finish
     if(oled.row>7){
 
       #if defined OLED_SPI && defined USE_CS
@@ -556,7 +636,6 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
       systemSettings.settings.OledOffset,
       0x10
     };
-    oled.status=oled_busy;
 
 #ifdef OLED_SPI
 
@@ -592,11 +671,18 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
     }
 
 #elif defined OLED_I2C
-    if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, cmd, 3, 50)){                                  // Send row command in blocking mode
-      Error_Handler();
-    }
-    oled.status=oled_busy;
-    if( HAL_I2C_Mem_Write_DMA(oled.device, OLED_ADDRESS, 0x40, 1, oled.ptr+(128*oled.row), 128)){           // Send row data in DMA interrupt mode
+    uint8_t try =3;
+		while(try){
+      if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, cmd, 3, 50)==HAL_OK){
+      	break;
+	    }
+      else{
+        display_abort();
+        oled.status=oled_busy;
+        try--;
+      }
+    }    
+    if(HAL_I2C_Mem_Write_DMA(oled.device, OLED_ADDRESS, 0x40, 1, oled.ptr+(128*oled.row), 128)!=HAL_OK){
       Error_Handler();
     }
 #endif
