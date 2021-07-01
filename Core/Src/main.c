@@ -129,7 +129,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  for(uint32_t t=HAL_GetTick();(HAL_GetTick()-t)<500; ){  // Wait 500mS for voltage to stabilize? (Before calibrating ADC)
+  for(uint32_t t=HAL_GetTick();(HAL_GetTick()-t)<100; ){  // Wait 100mS for voltage to stabilize? (Before calibrating ADC)
     HAL_IWDG_Refresh(&hiwdg);
   }
 
