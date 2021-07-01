@@ -134,10 +134,8 @@ int main(void)
   }
 
   Init();
-
+	/*
   setContrast(255);
-
-  //FillBuffer(BLACK,fill_dma);
   u8g2_SetFont(&u8g2,default_font );
   u8g2_SetDrawColor(&u8g2, WHITE);
   if(oled.use_sw){
@@ -155,41 +153,47 @@ int main(void)
   uint32_t tim_fps=HAL_GetTick(), tim_move=HAL_GetTick();
   uint16_t fps=0;
   int8_t x=110,y=31,xdir=1,ydir=1;
+  */
   while (1){
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if(oled.status==oled_idle){
-      if((HAL_GetTick()-tim_fps)>999){
-          static uint16_t c=0;
-          c++;
-          tim_fps=HAL_GetTick();
-          u8g2_SetDrawColor(&u8g2, BLACK);
-          u8g2_DrawBox(&u8g2, 32, 16, 32, 32);
-          u8g2_SetDrawColor(&u8g2, WHITE);
-          char str[16];
-          sprintf(str,"%u", fps);
-          u8g2_DrawStr(&u8g2,32,16,str);
-          sprintf(str,"%u", c);
-          u8g2_DrawStr(&u8g2,32,32,str);
-          fps=0;
-      }
-      u8g2_SetDrawColor(&u8g2, BLACK);
-      u8g2_DrawBox(&u8g2, x-10, y-10, 21, 21);
-      u8g2_SetDrawColor(&u8g2, WHITE);
-      x += xdir;
-      y += ydir;
-      if(x>115 || x<(12+64)){
-       xdir = -xdir;
-      }
-      if(y>51 || y<12){
-       ydir = -ydir;
-      }
-      u8g2_DrawDisc(&u8g2, x, y, 10, U8G2_DRAW_ALL);
+    /*
+    while(1){
+      SetFailState(setError);
+      if(oled.status==oled_idle){
+        if((HAL_GetTick()-tim_fps)>999){
+            static uint16_t c=0;
+            c++;
+            tim_fps=HAL_GetTick();
+            u8g2_SetDrawColor(&u8g2, BLACK);
+            u8g2_DrawBox(&u8g2, 32, 16, 32, 32);
+            u8g2_SetDrawColor(&u8g2, WHITE);
+            char str[16];
+            sprintf(str,"%u", fps);
+            u8g2_DrawStr(&u8g2,32,16,str);
+            sprintf(str,"%u", c);
+            u8g2_DrawStr(&u8g2,32,32,str);
+            fps=0;
+        }
+        u8g2_SetDrawColor(&u8g2, BLACK);
+        u8g2_DrawBox(&u8g2, x-10, y-10, 21, 21);
+        u8g2_SetDrawColor(&u8g2, WHITE);
+        x += xdir;
+        y += ydir;
+        if(x>115 || x<(12+64)){
+         xdir = -xdir;
+        }
+        if(y>51 || y<12){
+         ydir = -ydir;
+        }
+        u8g2_DrawDisc(&u8g2, x, y, 10, U8G2_DRAW_ALL);
 
-      fps++;
-      update_display();
+        fps++;
+        update_display();
+      }
     }
+    /*
 #if defined DEBUG_PWM && defined SWO_PRINT
     if(dbg_newData){
       dbg_newData=0;
