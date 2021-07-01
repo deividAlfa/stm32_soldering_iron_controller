@@ -107,9 +107,12 @@ void enable_soft_Oled(void){
 
   Oled_Set_SDA();
   Oled_Set_SCL();
-
+  #ifdef OLED_I2C
   GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull =  GPIO_PULLUP;
+  #else
+  GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_PP;
+  #endif
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 
   /*Configure GPIO pins : SCL_Pin */
@@ -176,22 +179,30 @@ void spi_send(uint8_t* bf, uint16_t count){
   uint8_t shift,data;
   while(count--){
     data = *bf++;
-    if(data==0){
-      Oled_Clear_SDA();
-      for(shift = 0; shift < 8; shift++){
-        Oled_Set_SCL();
-        Oled_Clear_SCL();
-      }
-    }
+    if((data==0) || (data==0xFF)){
+      if(data==0)
+        Oled_Clear_SDA();
+      else
+        Oled_Set_SDA();
 
-    else if(data==0xFF){
-      Oled_Set_SDA();
-      for(shift = 0; shift < 8; shift++){
-        Oled_Set_SCL();
-        Oled_Clear_SCL();
-      }
+      // Much faster without a loop!
+      Oled_Set_SCL();
+      Oled_Clear_SCL();
+      Oled_Set_SCL();
+      Oled_Clear_SCL();
+      Oled_Set_SCL();
+      Oled_Clear_SCL();
+      Oled_Set_SCL();
+      Oled_Clear_SCL();
+      Oled_Set_SCL();
+      Oled_Clear_SCL();
+      Oled_Set_SCL();
+      Oled_Clear_SCL();
+      Oled_Set_SCL();
+      Oled_Clear_SCL();
+      Oled_Set_SCL();
+      Oled_Clear_SCL();
     }
-
     else{
       for(shift = 0; shift < 8; shift++){
         if(data & 0x80){
@@ -493,7 +504,7 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
   HAL_Delay(100);                                 // 100mS wait for internal initialization
 #if defined OLED_I2C && defined OLED_DEVICE && defined I2C_TRY_HW
   oled.use_sw=1;
-  disable_soft_Oled();
+  //disable_soft_Oled();
   HAL_Delay(1);
   // Check if OLED is connected to hardware I2C
   for(uint8_t try=0; try<5; try++){
