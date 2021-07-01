@@ -71,7 +71,7 @@ void i2c_workaround(void){
   oled.device->State = HAL_I2C_STATE_RESET;
   __HAL_RCC_DMA1_CLK_ENABLE();
   oled.device->Instance = I2C1;
-  oled.device->Init.ClockSpeed = 1500000;
+  oled.device->Init.ClockSpeed = 400000;
   oled.device->Init.DutyCycle = I2C_DUTYCYCLE_2;
   oled.device->Init.OwnAddress1 = 0;
   oled.device->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -496,7 +496,6 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
   disable_soft_Oled();
   HAL_Delay(1);
   // Check if OLED is connected to hardware I2C
-  // TODO, this is only the initial code, needs testing (Don't enable I2C_TRY_HW for now)
   for(uint8_t try=0; try<5; try++){
     uint8_t data;
     uint8_t res = HAL_I2C_Mem_Read(oled.device, OLED_ADDRESS, 0x00, 1, &data, 1, 10);
