@@ -373,7 +373,7 @@ void Flash_error(void){
 void settingsChkErr(void){
   Diag_init();
   systemSettings.settings.OledOffset = 2;                                           // Set default value
-  putStrAligned("SETTING ERR!", 20, align_center);
+  putStrAligned("SETTING ERR!", 10, align_center);
   putStrAligned("RESTORING", 26, align_center);
   putStrAligned("DEFAULTS...", 42, align_center);
   update_display();
