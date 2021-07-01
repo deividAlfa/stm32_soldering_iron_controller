@@ -88,37 +88,41 @@ void i2c_workaround(void){
 #if (defined OLED_SPI && !defined OLED_DEVICE)  || (defined OLED_I2C && (!defined OLED_DEVICE  || (defined OLED_DEVICE && defined I2C_TRY_HW)))
 void enable_soft_Oled(void){
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  /*Configure GPIO pins : SCL_Pin */
-  GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull =  GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 
-  #ifdef SW_SCL_Pin
-  GPIO_InitStruct.Pin =   SW_SCL_Pin;
-  HAL_GPIO_Init(SW_SCL_GPIO_Port, &GPIO_InitStruct);
-  Oled_Set_SCL();
-  #endif
-
-  #ifdef SW_SDA_Pin
-  /*Configure GPIO pins : SDA_Pin */
-  GPIO_InitStruct.Pin =   SW_SDA_Pin;
-  HAL_GPIO_Init(SW_SDA_GPIO_Port, &GPIO_InitStruct);
-  Oled_Set_SDA();
-  #endif
+  #if defined HW_SCL_Pin && defined HW_SDA_Pin
 
   GPIO_InitStruct.Mode =  GPIO_MODE_ANALOG;
-  #ifdef HW_SDA_Pin
+  GPIO_InitStruct.Pull =  GPIO_NOPULL;
+
   /*Configure GPIO pins : SDA_Pin */
   GPIO_InitStruct.Pin =   HW_SDA_Pin;
-  GPIO_InitStruct.Pull =  GPIO_NOPULL;
   HAL_GPIO_Init(HW_SDA_GPIO_Port, &GPIO_InitStruct);
-  #endif
 
-  #ifdef HW_SCL_Pin
   /*Configure GPIO pins : SDA_Pin */
   GPIO_InitStruct.Pin =   HW_SCL_Pin;
   HAL_GPIO_Init(HW_SCL_GPIO_Port, &GPIO_InitStruct);
   #endif
+
+  #if defined SW_SDA_Pin && defined SW_SCL_Pin
+
+  Oled_Set_SDA();
+  Oled_Set_SCL();
+
+  GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull =  GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+
+  /*Configure GPIO pins : SCL_Pin */
+  GPIO_InitStruct.Pin =   SW_SCL_Pin;
+  HAL_GPIO_Init(SW_SCL_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : SDA_Pin */
+  GPIO_InitStruct.Pin =   SW_SDA_Pin;
+  HAL_GPIO_Init(SW_SDA_GPIO_Port, &GPIO_InitStruct);
+  #endif
+
+
+
 
   #ifdef OLED_I2C
   // Reset the bus
@@ -136,31 +140,28 @@ void enable_soft_Oled(void){
 
 void disable_soft_Oled(void){
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  /*Configure GPIO pins : SCL_Pin */
+
+  #if defined SW_SCL_Pin && defined SW_SDA_Pin
   GPIO_InitStruct.Mode =  GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull =  GPIO_NOPULL;
 
-  #ifdef SW_SCL_Pin
+  /*Configure GPIO pins : SCL_Pin */
   GPIO_InitStruct.Pin =   SW_SCL_Pin;
   HAL_GPIO_Init(SW_SCL_GPIO_Port, &GPIO_InitStruct);
-  #endif
 
-  #ifdef SW_SDA_Pin
   /*Configure GPIO pins : SDA_Pin */
   GPIO_InitStruct.Pin =   SW_SDA_Pin;
   HAL_GPIO_Init(SW_SDA_GPIO_Port, &GPIO_InitStruct);
   #endif
 
+  #if defined HW_SCL_Pin && defined HW_SDA_PIN
   GPIO_InitStruct.Mode =  GPIO_MODE_AF_OD;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 
-  #ifdef HW_SDA_Pin
   /*Configure GPIO pins : SDA_Pin */
   GPIO_InitStruct.Pin =   HW_SDA_Pin;
   HAL_GPIO_Init(HW_SDA_GPIO_Port, &GPIO_InitStruct);
-  #endif
 
-  #ifdef HW_SCL_Pin
   /*Configure GPIO pins : SDA_Pin */
   GPIO_InitStruct.Pin =   HW_SCL_Pin;
   HAL_GPIO_Init(HW_SCL_GPIO_Port, &GPIO_InitStruct);
