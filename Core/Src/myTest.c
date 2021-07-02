@@ -15,7 +15,7 @@
 
 struct{
   uint32_t tim_fps, tim_move;
-  uint16_t fps, rate, seconds;
+  uint16_t fps,last_fps, rate, seconds;
   int8_t rad,x,y,xdir,ydir,run;
 }test;
 
@@ -58,6 +58,7 @@ void myTest(void){
           u8g2_DrawStr(&u8g2,30,16,str);
           sprintf(str,"%u", test.seconds);
           u8g2_DrawStr(&u8g2,30,32,str);
+          test.last_fps = test.fps;
           test.fps=0;
       }
       if((HAL_GetTick()-test.tim_move)>=test.rate){
