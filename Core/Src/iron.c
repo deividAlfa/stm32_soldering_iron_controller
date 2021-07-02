@@ -257,6 +257,9 @@ void runAwayCheck(void){
   uint16_t TempStep,TempLimit;
   uint32_t CurrentTime = HAL_GetTick();
   uint16_t tipTemp = readTipTemperatureCompensated(stored_reading, read_Avg);
+  static uint8_t prev_power=0;
+  uint8_t power = (Iron.CurrentIronPower+prev_power)/2;
+  prev_power=Iron.CurrentIronPower;
 
   // If by any means the PWM output is higher than max calculated, generate error
   if((Iron.Pwm_Out > Iron.Pwm_Limit) || (Iron.Pwm_Out != __HAL_TIM_GET_COMPARE(Iron.Pwm_Timer,Iron.Pwm_Channel))){
@@ -270,7 +273,7 @@ void runAwayCheck(void){
     TempLimit = 950;
   }
 
-  if((Iron.Pwm_Out>PWMminOutput) && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==debug_Off) &&(tipTemp > Iron.CurrentSetTemperature)){
+  if(power && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==debug_Off) &&(tipTemp > Iron.CurrentSetTemperature)){
 
     if(tipTemp>TempLimit){ Iron.RunawayLevel=runaway_500; }
     else{
