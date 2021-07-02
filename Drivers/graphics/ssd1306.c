@@ -146,11 +146,9 @@ void disable_soft_Oled(void){
   GPIO_InitStruct.Mode =  GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull =  GPIO_NOPULL;
 
-  /*Configure GPIO pins : SCL_Pin */
   GPIO_InitStruct.Pin =   SW_SCL_Pin;
   HAL_GPIO_Init(SW_SCL_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SDA_Pin */
   GPIO_InitStruct.Pin =   SW_SDA_Pin;
   HAL_GPIO_Init(SW_SDA_GPIO_Port, &GPIO_InitStruct);
   #endif
@@ -159,11 +157,9 @@ void disable_soft_Oled(void){
   GPIO_InitStruct.Mode =  GPIO_MODE_AF_OD;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 
-  /*Configure GPIO pins : SDA_Pin */
   GPIO_InitStruct.Pin =   HW_SDA_Pin;
   HAL_GPIO_Init(HW_SDA_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SDA_Pin */
   GPIO_InitStruct.Pin =   HW_SCL_Pin;
   HAL_GPIO_Init(HW_SCL_GPIO_Port, &GPIO_InitStruct);
   #endif
@@ -242,6 +238,9 @@ void i2cStop(void){                                       // Stop condition, SCL
   i2cDelay();
 }
 
+// This sw i2c driver is extremely timing optimized, done specially for ksger v2.1 and compatibles running at 36MHz.
+// Hacks clock low time using the slow rise time (i2c pullup resistors) as the delay.
+// Will start failing if the core runs faster than 44-48MHz because of the tight timing.
 void i2cBegin(uint8_t mode){
   uint8_t bytes, shift, data[2]= { OLED_ADDRESS, mode };
   uint8_t *bf=data;
