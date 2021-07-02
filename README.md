@@ -1,4 +1,4 @@
-# STM32 Soldering Iron Controller
+# STM32 Soldering Station Firmware
 
 <!-- MarkdownTOC -->
 
