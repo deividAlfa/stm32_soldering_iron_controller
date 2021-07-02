@@ -31,20 +31,12 @@ If you want to support the project, check my Paypal donation page. Thanks!<br>
 
 <a id="Details"></a>
 ## Project details
-* This project started by forking [PTDreamer's firmware](https://github.com/PTDreamer/stm32_soldering_iron_controller). There was a lot of development since then.
-* Developed on STM32Cube IDE - download and use that for compiling.
-* Basic configuration is easily done in CubeMx (Included in STM32Cube IDE).
-* Already compiled bins in each board folder (Test at your own risk).
-* Intended to serve as an unified codebase that's easier to share across different boards / hardware.
-* Different hardware support based on profiles, very few files need to be changed.
-* Supports all display modes:
-    Boards where the display is connected to dedicated hardware:
-    - Hardware SPI with DMA
-    - Hardware I2C with DMA
- 
-    Boards where the display is not connected to dedicated hardware:
-    - Software SPI
-    - Software I2C
+* This project started by forking [PTDreamer's firmware](https://github.com/PTDreamer/stm32_soldering_iron_controller). Since then it became a separate project.
+* Developed on STM32Cube IDE. Basic configuration is easily done in CubeMx (Included in STM32Cube IDE).
+* Unified codebase, different hardware support based on profiles, very few files need to be changed.
+* Supports all display modes: I2C, SPI, software and hardware+DMA (When connected to hardware pins).
+* Extremely customizable, lots of options.
+* Code highly optimized to avoid unnecesary processing waste, so slow devicers still run great.    
 
 ---
 
@@ -195,7 +187,7 @@ And then copy the board profile files overwriting any existing files.<br>
 <a id="pending"></a>
 ### Non working features
 * I2C eeprom. Some boards have it, some doesn't. So internal flash storage is used for all.
-* RTC clock. And probably never will.
+* RTC clock. There's very little space in the screen. Use it for what matters, instead showing a clock!
 
 ---
 
