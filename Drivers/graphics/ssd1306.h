@@ -103,14 +103,14 @@ void disable_soft_Oled(void);
 #endif
 
 #if defined OLED_I2C
-#define i2cData 0
-#define i2cCmd  1
+#define i2cData 0x40
+#define i2cCmd  0x00
 
 #if !defined OLED_DEVICE || (defined OLED_DEVICE && defined I2C_TRY_HW)
 void i2cStart(void);
 void i2cStop(void);
-void i2cBegin(bool isCmd);
-void i2cSend(uint8_t* bf, uint16_t count, bool isCmd);
+void i2cBegin(uint8_t mode);
+void i2cSend(uint8_t* bf, uint16_t count, uint8_t mode);
 void i2cDelay(void);
 #endif
 

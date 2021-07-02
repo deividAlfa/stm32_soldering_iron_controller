@@ -10,8 +10,6 @@ oled_t oled = {
 
 static uint8_t lastContrast;
 
-
-
 // Silicon bug workaround for STM32F103 as ST document ES093 rev 7
 /*
   __HAL_I2C_DISABLE(device);
@@ -108,8 +106,8 @@ void enable_soft_Oled(void){
   Oled_Set_SDA();
   Oled_Set_SCL();
   #ifdef OLED_I2C
-  GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull =  GPIO_PULLUP;
+  GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_OD;
   #else
   GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_PP;
   #endif
@@ -222,10 +220,10 @@ void spi_send(uint8_t* bf, uint16_t count){
 #endif
 
 #if defined OLED_I2C && (!defined OLED_DEVICE  || (defined OLED_DEVICE && defined I2C_TRY_HW))
-void i2cDelay(void){                                       // This is pretty adjusted for max speed without errors. Might need more time in specific boards/displays
-  asm(  "nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n\
-       nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n\
-       nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop");
+void i2cDelay(void){
+  asm( "nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n\
+        nop\nnop\nnop\nnop\nnop\nnop\nnop/*\nnop\n\
+        nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop*/");
 }
 void i2cStart(void){                                      // Start condition, SDA transition to low with SCL high
   Oled_Set_SCL();
@@ -244,27 +242,19 @@ void i2cStop(void){                                       // Stop condition, SCL
   i2cDelay();
 }
 
-void i2cBegin(bool isCmd){
-  uint8_t bf[2]= { OLED_ADDRESS, 0x00 };
-  if(!isCmd){
-    bf[1] = 0x40;
-  }
-  for(uint8_t d=0;d<2;d++){
-    uint8_t data = bf[d];
-    for(uint8_t shift = 0; shift < 8; shift++){
-      if(data & 0x80){
-        Oled_Set_SDA();
-        i2cDelay();
-      }
-      else{
-        Oled_Clear_SDA();
-        i2cDelay();
-      }
+void i2cBegin(uint8_t mode){
+  uint8_t bytes, shift, data[2]= { OLED_ADDRESS, mode };
+  uint8_t *bf=data;
+  bytes=1;
+  do{
+    shift=7;
+    do{
+    SW_SDA_GPIO_Port->BSRR = SW_SDA_Pin<<(16*!(*bf & (1<<shift)));
       Oled_Set_SCL();
       i2cDelay();
       Oled_Clear_SCL();
-      data <<= 1;
-    }
+    }while(shift--);
+
     i2cDelay();
     Oled_Set_SCL();
     i2cDelay();
@@ -272,61 +262,40 @@ void i2cBegin(bool isCmd){
     //i2cDelay();
     //Get ACK here
     Oled_Clear_SCL();
-  }
+    bf++;
+  }while(bytes--);
 }
 
-void i2cSend(uint8_t* bf, uint16_t count, bool isCmd){
-  volatile uint8_t shift,data;
-  //bool ack=0;
+void i2cSend(uint8_t* bf, uint16_t count, uint8_t mode){
+  uint8_t shift;
   i2cStart();
-  i2cBegin(isCmd);
+  i2cBegin(mode);
   while(count--){
-    data = *bf++;
-    if( (data==0)||(data==0xFF)){                         // If data 0 or 0xff, we don't have to toggle data line, send the data fast
-      if(data==0){                                        // Just toggling clock line
-        Oled_Clear_SDA();
-      }
-      else{
-        Oled_Set_SDA();
-      }
-      //i2cDelay();
-      for(shift = 0; shift < 8; shift++){
+    shift=7;
+    if( (*bf==0)||(*bf==0xFF)){                         // If data 0 or 0xff, we don't have to toggle data line, send the data fast
+      SW_SDA_GPIO_Port->BSRR = SW_SDA_Pin<<(16*(*bf==0));
+      do{
         Oled_Set_SCL();
         i2cDelay();
         Oled_Clear_SCL();
-      }
-      i2cDelay();
-      Oled_Set_SCL();
-      i2cDelay();
-      //Oled_Set_SDA();                                   // As we don't care about the ACK, don't release SDA
-      //i2cDelay();
-      //Get ACK here
-      Oled_Clear_SCL();
+      }while(shift--);
     }
     else{
-      for(shift = 0; shift < 8; shift++){
-        if(data & 0x80){
-          Oled_Set_SDA();
-          //i2cDelay();
-        }
-        else{
-          Oled_Clear_SDA();
-          //i2cDelay();
-        }
+      do{
+        SW_SDA_GPIO_Port->BSRR = SW_SDA_Pin<<(16*!(*bf & (1<<shift)));
         Oled_Set_SCL();
         i2cDelay();
         Oled_Clear_SCL();
-        data <<= 1;
-      }
-      i2cDelay();
-      Oled_Set_SCL();
-      i2cDelay();
-      //Oled_Set_SDA();                                   // As we don't care about the ACK, don't release SDA
-      //i2cDelay();
-      //Get ACK here
-      Oled_Clear_SCL();
+      }while(shift--);
     }
-
+    i2cDelay();
+    Oled_Set_SCL();
+    i2cDelay();
+    //Oled_Set_SDA();                                   // As we don't care about the ACK, don't release SDA
+    //i2cDelay();
+    //Get ACK here
+    Oled_Clear_SCL();
+    bf++;
   }
   i2cStop();
 }
@@ -505,7 +474,8 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
 #if defined OLED_I2C && defined OLED_DEVICE && defined I2C_TRY_HW
   oled.use_sw=1;
   //disable_soft_Oled();
-  HAL_Delay(1);
+  //HAL_Delay(1);
+
   // Check if OLED is connected to hardware I2C
   for(uint8_t try=0; try<5; try++){
     uint8_t data;
