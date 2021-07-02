@@ -28,9 +28,9 @@ void myTest(void){
   test.ydir=1;
   test.rate=20;
 
-  #ifndef DEBUG
+  //#ifndef DEBUG
   test.run=1;
-  #endif
+  //#endif
 
   char str[16];
   setContrast(255);
@@ -43,7 +43,7 @@ void myTest(void){
   else{
     u8g2_DrawStr(&u8g2,0,0,"HW Mode");
   }
-  u8g2_DrawStr(&u8g2,0,16,"FPS:");
+  u8g2_DrawStr(&u8g2,0,48,"FPS:");
   u8g2_DrawStr(&u8g2,0,32,"TIM:");
   while(1){
     SetFailState(setError);
@@ -52,10 +52,10 @@ void myTest(void){
           test.seconds++;
           test.tim_fps=HAL_GetTick();
           u8g2_SetDrawColor(&u8g2, BLACK);
-          u8g2_DrawBox(&u8g2, 30, 16, 34, 32);
+          u8g2_DrawBox(&u8g2, 30, 16, 34, 48);
           u8g2_SetDrawColor(&u8g2, WHITE);
           sprintf(str,"%u", test.fps);
-          u8g2_DrawStr(&u8g2,30,16,str);
+          u8g2_DrawStr(&u8g2,30,48,str);
           sprintf(str,"%u", test.seconds);
           u8g2_DrawStr(&u8g2,30,32,str);
           test.last_fps = test.fps;
