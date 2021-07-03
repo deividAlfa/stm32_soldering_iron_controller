@@ -366,7 +366,7 @@ static void setPWMPeriod(uint32_t *val) {
     setPwmPeriod(period);
   }
   else{
-    uint16_t t=(systemSettings.Profile.pwmDelay+((ADC_MEASURE_TIME/10)+1));
+    uint16_t t=(systemSettings.Profile.pwmDelay+((ADC_MEASURE_TIME/10)+2));
     setPwmPeriod(t);
   }
 }
@@ -381,7 +381,7 @@ static void setPWMDelay(uint32_t *val) {
     setPwmDelay(delay);
   }
   else{
-    setPwmDelay(systemSettings.Profile.pwmPeriod-((ADC_MEASURE_TIME/10)+1));
+    setPwmDelay(systemSettings.Profile.pwmPeriod-((ADC_MEASURE_TIME/10)+2));
   }
 }
 
