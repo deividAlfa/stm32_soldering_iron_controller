@@ -149,6 +149,7 @@ static comboBox_item_t comboitem_IRONTIPS_Settings_PID_KI;
 static comboBox_item_t comboitem_IRONTIPS_Settings_PID_KD;
 static comboBox_item_t comboitem_IRONTIPS_Settings_PID_Imax;
 static comboBox_item_t comboitem_IRONTIPS_Settings_PID_Imin;
+static comboBox_item_t comboitem_IRONTIPS_Settings_PID_tau;
 static comboBox_item_t comboitem_IRONTIPS_Settings_Cal250;
 static comboBox_item_t comboitem_IRONTIPS_Settings_Cal350;
 static comboBox_item_t comboitem_IRONTIPS_Settings_Cal450;
@@ -157,6 +158,7 @@ static editable_widget_t editable_IRONTIPS_Settings_PID_Ki;
 static editable_widget_t editable_IRONTIPS_Settings_PID_Kp;
 static editable_widget_t editable_IRONTIPS_Settings_PID_Imax;
 static editable_widget_t editable_IRONTIPS_Settings_PID_Imin;
+static editable_widget_t editable_IRONTIPS_Settings_PID_tau;
 static editable_widget_t editable_IRONTIPS_Settings_Cal250;
 static editable_widget_t editable_IRONTIPS_Settings_Cal350;
 static editable_widget_t editable_IRONTIPS_Settings_Cal450;
@@ -319,6 +321,13 @@ static void * getImin() {
 }
 static void setImin(int32_t *val) {
   tipCfg.PID.minI= *val;
+}
+static void * getTau() {
+  temp = tipCfg.PID.tau;
+  return &temp;
+}
+static void setTau(int32_t *val) {
+  tipCfg.PID.tau= *val;
 }
 static void * getCal250() {
   temp = tipCfg.calADC_At_250;
@@ -1594,6 +1603,21 @@ void settings_screen_setup(screen_t *scr) {
   edit->setData = (void (*)(void *))&setImin;
 
 
+  //********[ Tau Widget ]***********************************************************
+  //
+  dis = &editable_IRONTIPS_Settings_PID_tau.inputData;
+  edit = &editable_IRONTIPS_Settings_PID_tau;
+  editableDefaultsInit(edit,widget_editable);
+  dis->reservedChars=6;
+  dis->getData = &getTau;
+  dis->number_of_dec = 2;
+  edit->max_value = 200;
+  edit->min_value = 0;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setTau;
+
+
   //********[ Cal250 Widget ]***********************************************************
   //
   dis = &editable_IRONTIPS_Settings_Cal250.inputData;
@@ -1646,6 +1670,7 @@ void settings_screen_setup(screen_t *scr) {
   comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KD,   w,  "PID Kd",     &editable_IRONTIPS_Settings_PID_Kd);
   comboAddEditable(&comboitem_IRONTIPS_Settings_PID_Imax, w,  "PID Imax",   &editable_IRONTIPS_Settings_PID_Imax);
   comboAddEditable(&comboitem_IRONTIPS_Settings_PID_Imin, w,  "PID Imin",   &editable_IRONTIPS_Settings_PID_Imin);
+  comboAddEditable(&comboitem_IRONTIPS_Settings_PID_tau,  w,  "PID tau",    &editable_IRONTIPS_Settings_PID_tau);
   comboAddEditable(&comboitem_IRONTIPS_Settings_Cal250,   w,  "Cal250",     &editable_IRONTIPS_Settings_Cal250);
   comboAddEditable(&comboitem_IRONTIPS_Settings_Cal350,   w,  "Cal350",     &editable_IRONTIPS_Settings_Cal350);
   comboAddEditable(&comboitem_IRONTIPS_Settings_Cal450,   w,  "Cal450",     &editable_IRONTIPS_Settings_Cal450);

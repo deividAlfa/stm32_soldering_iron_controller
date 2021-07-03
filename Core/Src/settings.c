@@ -240,6 +240,7 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.Kd          = 1000;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.maxI        = 40;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
+      systemSettings.Profile.tip[x].PID.tau         = 10;             // val = /100
       strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
     strcpy(systemSettings.Profile.tip[0].name, "BC3 ");               // Put some generic name
@@ -260,11 +261,12 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = C245_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = C245_Cal350;
       systemSettings.Profile.tip[x].calADC_At_450   = C245_Cal450;
-      systemSettings.Profile.tip[x].PID.Kp          = 7500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 4000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 1000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 40;             // val = /100
+      systemSettings.Profile.tip[x].PID.Kp          = 1800;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 200;            // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 10;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
+      systemSettings.Profile.tip[x].PID.tau         = 10;             // val = /100
       strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
     strcpy(systemSettings.Profile.tip[0].name, "C245");
@@ -284,11 +286,12 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = C210_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = C210_Cal350;
       systemSettings.Profile.tip[x].calADC_At_450   = C210_Cal450;
-      systemSettings.Profile.tip[x].PID.Kp          = 7500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 4000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 1000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 40;             // val = /100
+      systemSettings.Profile.tip[x].PID.Kp          = 1800;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 500;            // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 200;            // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 10;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
+      systemSettings.Profile.tip[x].PID.tau         = 10;             // val = /100
       strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
     }
     strcpy(systemSettings.Profile.tip[0].name, "C210");
