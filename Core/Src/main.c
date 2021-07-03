@@ -101,7 +101,7 @@ void Init(void){
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  #ifdef DEBUG
+  #if defined DEBUG && !defined STM32F072xB
     DebugOpts();          // Enable debug options in Debug build
     DWT->CTRL |= 1 ; // enable the counter
     DWT->CYCCNT = 0; // reset the counter
