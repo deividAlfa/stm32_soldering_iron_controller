@@ -43,7 +43,7 @@ static int profile_OK(widget_t *w) {
   loadProfile((uint8_t)profile);                    // Load profile
   saveSettings(saveKeepingProfiles);                // Save
   systemSettings.setupMode=setup_Off;               // Reset setup mode
-  SetFailState(noError);                            // Enable normal operation
+  setSafeMode(noError);                            // Enable normal operation
   return screen_main;
 }
 

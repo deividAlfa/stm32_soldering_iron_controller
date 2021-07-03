@@ -251,7 +251,7 @@ void Error_Handler(void)
     display_abort();
   }
   #endif
-  SetFailState(setError);
+  setSafeMode(setError);
   buzzer_fatal_beep();
   Diag_init();
 

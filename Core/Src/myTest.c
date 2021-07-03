@@ -19,6 +19,9 @@ struct{
   int8_t rad,x,y,xdir,ydir,run;
 }test;
 
+
+// This is just a test that draws a bouncing ball and updates the screen as fast as possible
+// To measure display performance
 void myTest(void){
   test.tim_fps = test.tim_move = HAL_GetTick();
   test.rad=12;
@@ -46,7 +49,7 @@ void myTest(void){
   u8g2_DrawStr(&u8g2,0,48,"FPS:");
   u8g2_DrawStr(&u8g2,0,32,"TIM:");
   while(1){
-    SetFailState(setError);
+    setSafeMode(setError);
     if(oled.status==oled_idle){
       if((HAL_GetTick()-test.tim_fps)>999){
           test.seconds++;

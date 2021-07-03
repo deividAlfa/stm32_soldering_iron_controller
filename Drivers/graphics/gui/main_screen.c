@@ -525,7 +525,7 @@ void main_screen_draw(screen_t *scr){
         uint8_t Err_ypos = 14;
 
 
-        if(Iron.Error.Flags==0x81){                               // 0x81 = Only "No iron detected". Don't show error just for it
+        if(Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error just for it
           u8g2_SetFont(&u8g2, u8g2_font_mainBig);
           putStrAligned("NO IRON", 26, align_center);
         }
@@ -535,7 +535,7 @@ void main_screen_draw(screen_t *scr){
           u8g2_SetFont(&u8g2, u8g2_font_t0_16_tr);
           putStrAligned(errStr, Err_ypos, align_center);
           Err_ypos+=13;
-          if(Iron.Error.failState){
+          if(Iron.Error.safeMode){
             putStrAligned("Internal failure", Err_ypos, align_center);
             Err_ypos+=13;
           }

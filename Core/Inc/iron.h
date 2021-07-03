@@ -23,13 +23,21 @@ typedef union{
     unsigned  NTC_high:1;                                   // NTC too high
     unsigned  NTC_low:1;                                    // NTC too low
     unsigned  V_low:1;                                      // Voltage too low
-    unsigned  failState:1;                                  // Internal fail-safe state (some undefined variable or data detected)
+    unsigned  safeMode:1;                                   // Undefined profile settings, shut down pwm (Only should happen on first boot)
     unsigned  unused_b5:1;
     unsigned  unused_b6:1;
-    unsigned  globalFlag:1;                                 // Global error flag
+    unsigned  active:1;                                     // Errors active flag
   };
 }IronError_t;
 # define ErrorMask    (uint8_t)0b11111                      // mask for used error bit fields (skipping global flag)
+
+#define _NOERROR      0
+#define _NO_IRON      1
+#define _NTC_HIGH     2
+#define _NTC_LOW      4
+#define _V_LOW        8
+#define _SAFE_MODE    16
+#define _ACTIVE       128
 
 typedef struct {
 
@@ -69,8 +77,8 @@ void checkIronError(void);
 bool GetIronError(void);
 void updatePowerLimit(void);
 void runAwayCheck(void);
-void SetFailState(bool FailState);
-bool GetFailState(void);
+void setSafeMode(bool mode);
+bool getSafeMode(void);
 void setCurrentMode(uint8_t mode);
 void setModefromStand(uint8_t mode);
 void setUserTemperature(uint16_t temperature);

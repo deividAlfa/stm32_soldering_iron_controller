@@ -28,7 +28,7 @@ void checkSettings(void){
   uint32_t CurrentTime = HAL_GetTick();
 
   // Don't check if in: Calibration mode, Setup mode, Save delay==0, failure error active
-  if( (systemSettings.setupMode==setup_On) || (Iron.calibrating==calibration_On) || (systemSettings.settings.saveSettingsDelay==0) || (Iron.Error.failState!=noError) || (CurrentTime-checksumtime<999)){
+  if( (systemSettings.setupMode==setup_On) || (Iron.calibrating==calibration_On) || (systemSettings.settings.saveSettingsDelay==0) || (Iron.Error.safeMode!=noError) || (CurrentTime-checksumtime<999)){
     return;
   }
   checksumtime=CurrentTime;                                                                                     // Store current time

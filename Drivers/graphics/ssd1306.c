@@ -716,7 +716,7 @@ void FatalError(uint8_t type){
   }
   #endif
 
-  SetFailState(setError);
+  setSafeMode(setError);
   buzzer_fatal_beep();
   Diag_init();
   switch(type){
