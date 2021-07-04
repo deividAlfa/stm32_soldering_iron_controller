@@ -532,21 +532,13 @@ void main_screen_draw(screen_t *scr){
           putStrAligned("NO IRON", 26, align_center);
         }
         else{
-          char errStr[16];
-          sprintf(errStr, "ERROR %X",Iron.Error.Flags);
           u8g2_SetFont(&u8g2, u8g2_font_t0_16_tr);
-          putStrAligned(errStr, Err_ypos, align_center);
-          Err_ypos+=13;
-          if(Iron.Error.safeMode){
-            putStrAligned("Internal failure", Err_ypos, align_center);
-            Err_ypos+=13;
-          }
           if(Iron.Error.V_low){
             putStrAligned("Voltage low!", Err_ypos, align_center);
             Err_ypos+=13;
           }
-          if(Iron.Error.noIron){
-            putStrAligned("No iron detected", Err_ypos, align_center);
+          if(Iron.Error.safeMode){
+            putStrAligned("Failsafe mode", Err_ypos, align_center);
             Err_ypos+=13;
           }
           if(Iron.Error.NTC_high){
@@ -555,6 +547,10 @@ void main_screen_draw(screen_t *scr){
           }
           else if(Iron.Error.NTC_low){
             putStrAligned("NTC read low!", Err_ypos, align_center);
+            Err_ypos+=13;
+          }
+          if(Iron.Error.noIron){
+            putStrAligned("No iron detected", Err_ypos, align_center);
             Err_ypos+=13;
           }
         }
