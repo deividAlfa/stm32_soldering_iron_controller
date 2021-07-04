@@ -524,14 +524,20 @@ void main_screen_draw(screen_t *scr){
     if(mainScr.currentMode==main_disabled){
       u8g2_SetFont(&u8g2, u8g2_font_mainBig);
       if(mainScr.ironStatus==status_error){
-        uint8_t Err_ypos = 14;
-
-
         if(Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error just for it
           u8g2_SetFont(&u8g2, u8g2_font_mainBig);
           putStrAligned("NO IRON", 26, align_center);
         }
         else{
+          uint8_t Err_ypos;
+
+          uint8_t err = (uint8_t)Iron.Error.V_low+Iron.Error.safeMode+(Iron.Error.NTC_low|Iron.Error.NTC_high)+Iron.Error.noIron;
+          if(err<4){
+            Err_ypos= 14+ ((50-(err*13))/2);
+          }
+          else{
+            Err_ypos=14;
+          }
           u8g2_SetFont(&u8g2, u8g2_font_t0_16_tr);
           if(Iron.Error.V_low){
             putStrAligned("Voltage low!", Err_ypos, align_center);
