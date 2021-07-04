@@ -17,7 +17,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 static int32_t temp, settingsTimer;
 static uint8_t profile, Selected_Tip;
-static bool copyingTip;
+static bool disableTipCopy;
 typedef enum resStatus_t{ reset_settings, reset_profile, reset_profiles, reset_all }resStatus_t;
 resStatus_t resStatus;
 //static char TipName[5];
@@ -339,7 +339,6 @@ static int IRONTIPS_Delete(widget_t *w) {
                                                                                                                 // Skip tip settings (As tip is now deleted)
   return comboitem_IRONTIPS_Settings_Cancel.action_screen;                                                      // And return to main screen or system menu screen
 }
-
 static int IRONTIPS_Copy(widget_t *w) {
   Selected_Tip = systemSettings.Profile.currentNumberOfTips;                                                    //
   strcpy(tipCfg.name, _BLANK_TIP);
@@ -347,9 +346,11 @@ static int IRONTIPS_Copy(widget_t *w) {
   comboitem_IRONTIPS_Settings_Copy.enabled=0;
   comboitem_IRONTIPS_Settings_Save.enabled=0;
   comboResetIndex(&comboWidget_IRONTIPS_Settings);
-  copyingTip=1;
+  disableTipCopy=1;
   return -1;                                                                                                    // And return to main screen or system menu screen
 }
+
+
 static void * getPWMPeriod() {
   temp=(systemSettings.Profile.pwmPeriod+1)/100;
   return &temp;
@@ -706,7 +707,7 @@ static void iron_tips_screen_onEnter(screen_t *scr) {
 void IRONTIPS_Settings_onEnter(screen_t *scr){
   settingsTimer=HAL_GetTick();
   bool new=0;
-  copyingTip=0;
+  disableTipCopy=0;
   comboResetIndex(&comboWidget_IRONTIPS_Settings);
 
   if(scr==&Screen_main){                                                                                // If coming from main, selected tip is current ti`p
@@ -744,14 +745,21 @@ void IRONTIPS_Settings_onEnter(screen_t *scr){
     Selected_Tip=systemSettings.Profile.currentNumberOfTips;                                              // Selected tip is next position
     comboitem_IRONTIPS_Settings_Delete.enabled=0;                                                         // Cannot delete empty tip
     comboitem_IRONTIPS_Settings_Save.enabled=0;                                                           // Disabled until the name is changed
+    disableTipCopy=1;                                                                                     // Cannot copy a new tip
   }
   else{
-    comboitem_IRONTIPS_Settings_Copy.enabled=enable;                                                      // Existing tip, enable copy button
     if(systemSettings.Profile.currentNumberOfTips>1){                                                     // If more than 1 tip in the system, enable delete
       comboitem_IRONTIPS_Settings_Delete.enabled=1;
     }
     else{
       comboitem_IRONTIPS_Settings_Delete.enabled=0;
+    }
+    if(systemSettings.Profile.currentNumberOfTips<TipSize){                                               // If not full
+      comboitem_IRONTIPS_Settings_Copy.enabled=1;                                                         // Existing tip, enable copy button;
+    }
+    else{
+      disableTipCopy=1;
+      comboitem_IRONTIPS_Settings_Copy.enabled=0;                                                         // No space left
     }
   }
 }
@@ -760,7 +768,7 @@ int IRONTIPS_Settings_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State
   static uint32_t last_update=0;
   uint32_t currentTime=HAL_GetTick();
   bool update=0;
-  if((input==LongClick) || (HAL_GetTick()-settingsTimer)>15000){
+  if((input==LongClick) || (HAL_GetTick()-settingsTimer)>30000){
     return screen_main;
   }
   if(input!=Rotate_Nothing){
@@ -787,8 +795,11 @@ int IRONTIPS_Settings_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State
       }
     }
     comboitem_IRONTIPS_Settings_Save.enabled=enable;
-    if(!copyingTip){
+    if(!disableTipCopy){
       comboitem_IRONTIPS_Settings_Copy.enabled=enable;
+    }
+    else{
+      comboitem_IRONTIPS_Settings_Copy.enabled=0;
     }
   }
   return default_screenProcessInput(scr, input, state);
