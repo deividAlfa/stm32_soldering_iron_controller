@@ -32,6 +32,7 @@ int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
   if(tempUnit==mode_Farenheit){
     temp=TempConversion(temp, mode_Farenheit, 1);
   }
+  temp=350;
   last_NTC = temp;
   return last_NTC;
 #else
