@@ -16,7 +16,7 @@
 // Settings screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
 static int32_t temp, settingsTimer;
-static uint8_t profile, Selected_Tip, Tip_name_return;
+static uint8_t profile, Selected_Tip;
 typedef enum resStatus_t{ reset_settings, reset_profile, reset_profiles, reset_all }resStatus_t;
 resStatus_t resStatus;
 //static char TipName[5];
@@ -30,7 +30,7 @@ screen_t Screen_iron;
 screen_t Screen_system;
 screen_t Screen_reset;
 screen_t Screen_reset_confirmation;
-screen_t Screen_edit_iron_tips;
+screen_t Screen_iron_tips;
 screen_t Screen_edit_tip_settings;
 
 // SETTINGS SCREEM
@@ -626,44 +626,6 @@ int settings_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t 
 }
 
 
-//-------------------------------------------------------------------------------------------------------------------------------
-// Tips screen functions
-//-------------------------------------------------------------------------------------------------------------------------------
-
-void edit_iron_screen_init(screen_t *scr) {
-  comboBox_item_t *i = comboBox_IRONTIPS.first;
-  for(int x = 0; x < TipSize; x++) {
-    if(x < systemSettings.Profile.currentNumberOfTips) {
-      //strcpy(i->text, systemSettings.Profile.tip[x].name);
-      i->text = systemSettings.Profile.tip[x].name;
-      i->enabled = 1;
-    }
-    else
-      i->enabled = 0;
-    i = i->next_item;
-  }
-  comboBox_IRONTIPS.currentItem = comboBox_IRONTIPS.first;
-  comboBox_IRONTIPS.currentScroll = 0;
-  comboitem_IRONTIPS_addNewTip.enabled = (systemSettings.Profile.currentNumberOfTips < TipSize);
-}
-
-void edit_iron_screen_onEnter(screen_t *scr) {
-  if(scr == &Screen_edit_tip_settings){             // Normal edit
-    Tip_name_return = screen_edit_tip_settings;
-  }
-  else if(scr == &Screen_edit_iron_tips){           // Coming from "Add new"
-    Tip_name_return = screen_edit_iron_tips;
-  }
-}
-int edit_iron_screen_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
-  if(input!=Rotate_Nothing){
-    settingsTimer=HAL_GetTick();
-  }
-  if((input==LongClick) || (HAL_GetTick()-settingsTimer)>15000){
-    return screen_main;
-  }
-  return default_screenProcessInput(scr, input, state);
-}
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Reset screen functions
@@ -705,6 +667,33 @@ void Reset_confirmation_onEnter(screen_t *scr){
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
+// Iron tips screen functions
+//-------------------------------------------------------------------------------------------------------------------------------
+
+static void iron_tips_screen_init(screen_t *scr) {
+  comboBox_item_t *i = comboBox_IRONTIPS.first;
+  for(int x = 0; x < TipSize; x++) {
+    if(x < systemSettings.Profile.currentNumberOfTips) {
+      i->text = systemSettings.Profile.tip[x].name;
+      i->enabled = 1;
+    }
+    else
+      i->enabled = 0;
+    i = i->next_item;
+  }
+  comboitem_IRONTIPS_addNewTip.enabled = (systemSettings.Profile.currentNumberOfTips < TipSize);
+}
+
+static void iron_tips_screen_onEnter(screen_t *scr) {
+  /*
+  if(scr!=&Screen_edit_tip_settings){
+    comboResetIndex(&comboWidget_IRONTIPS);
+  }
+  */
+  comboResetIndex(&comboWidget_IRONTIPS);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------
 // IRONTIPS Settings screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 void IRONTIPS_Settings_onEnter(screen_t *scr){
@@ -718,7 +707,7 @@ void IRONTIPS_Settings_onEnter(screen_t *scr){
     Selected_Tip = systemSettings.Profile.currentTip;
   }
 
-  else if(scr==&Screen_edit_iron_tips){                                                                 // If coming from tips menu
+  else if(scr==&Screen_iron_tips){                                                                 // If coming from tips menu
     if(comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {                                // If was Add New tip option
       for(uint8_t x = 0; x < TipSize; x++) {                                                            // Find first valid tip and store it
         if(strcmp(systemSettings.Profile.tip[x].name, _BLANK_TIP)!=0){
@@ -738,7 +727,7 @@ void IRONTIPS_Settings_onEnter(screen_t *scr){
         }
       }
     }
-    comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_edit_iron_tips;
+    comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_iron_tips;
   }
 
   tipCfg = systemSettings.Profile.tip[Selected_Tip];                                                      // Backup selected tip
@@ -759,6 +748,9 @@ void IRONTIPS_Settings_onEnter(screen_t *scr){
 
 int IRONTIPS_Settings_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 
+  if((input==LongClick) || (HAL_GetTick()-settingsTimer)>15000){
+    return screen_main;
+  }
   if(input!=Rotate_Nothing){
     settingsTimer=HAL_GetTick();
     bool enable=1;
@@ -777,9 +769,6 @@ int IRONTIPS_Settings_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State
       }
       comboitem_IRONTIPS_Settings_Save.enabled=enable;
     }
-  }
-  else if((HAL_GetTick()-settingsTimer)>15000){
-    return screen_main;
   }
   return default_screenProcessInput(scr, input, state);
 }
@@ -836,7 +825,7 @@ void settings_screen_setup(screen_t *scr) {
 
   comboAddScreen(&Settings_Combo_IRON, w,         "IRON",         screen_iron);
   comboAddScreen(&Settings_Combo_SYSTEM, w,       "SYSTEM",       screen_system);
-  comboAddScreen(&Settings_Combo_TIPS, w,         "EDIT TIPS",    screen_edit_iron_tips);
+  comboAddScreen(&Settings_Combo_TIPS, w,         "EDIT TIPS",    screen_iron_tips);
   comboAddScreen(&Settings_Combo_CALIBRATION, w,  "CALIBRATION",  screen_edit_calibration);
   #ifdef ENABLE_DEBUG_SCREEN
   comboAddScreen(&Settings_Combo_DEBUG, w,        "DEBUG",        screen_debug);
@@ -1375,11 +1364,12 @@ void settings_screen_setup(screen_t *scr) {
 
   //########################################## IRON TIPS SCREEN ##########################################
   //
-  sc=&Screen_edit_iron_tips;
-  oled_addScreen(sc, screen_edit_iron_tips);
+  sc=&Screen_iron_tips;
+  oled_addScreen(sc, screen_iron_tips);
   screen_setDefaults(sc);
-  sc->init = &edit_iron_screen_init;
-  sc->processInput=&edit_iron_screen_screenProcessInput;
+  sc->init = &iron_tips_screen_init;
+  sc->processInput=&settings_screenProcessInput;
+  sc->onEnter=&iron_tips_screen_onEnter;
 
   //========[ IRON TIPS COMBO ]===========================================================
   //

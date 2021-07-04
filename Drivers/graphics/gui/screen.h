@@ -29,7 +29,7 @@ enum {
           screen_system,
               screen_reset,
                 screen_reset_confirmation,
-          screen_edit_iron_tips,
+          screen_iron_tips,
             screen_edit_tip_settings,
           screen_edit_calibration,
               screen_edit_calibration_start,

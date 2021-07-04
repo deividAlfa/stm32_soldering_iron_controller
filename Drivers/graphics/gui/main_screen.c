@@ -225,10 +225,12 @@ static void setMainScrTempUnit(void) {
 static void main_screen_init(screen_t *scr) {
   default_init(scr);
 
-  mainScr.currentMode = main_irontemp;
-  setMainWidget(&Widget_IronTemp);
-  if(mainScr.displayMode==temp_graph){
-    widgetDisable(&Widget_IronTemp);
+  if(mainScr.currentMode != main_disabled){
+    mainScr.currentMode = main_irontemp;
+    setMainWidget(&Widget_IronTemp);
+    if(mainScr.displayMode==temp_graph){
+      widgetDisable(&Widget_IronTemp);
+    }
   }
 
   editable_TipSelect.numberOfOptions = systemSettings.Profile.currentNumberOfTips;

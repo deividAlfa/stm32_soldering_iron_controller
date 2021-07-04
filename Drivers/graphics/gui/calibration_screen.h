@@ -13,7 +13,6 @@
 extern screen_t Screen_edit_calibration;
 extern screen_t Screen_edit_calibration_start;
 extern screen_t Screen_edit_calibration_adjust;
-extern screen_t Screen_edit_calibration_input;
 
 void calibration_screen_setup(screen_t *scr);
 void cal_screenUpdate(screen_t *scr);
