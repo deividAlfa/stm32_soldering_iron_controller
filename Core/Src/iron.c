@@ -88,6 +88,17 @@ void handleIron(void) {
 
   checkIronError();                                                                           // Error detection.
 
+  // Controls external mode changes (from stand mode changes), this acts as a debouncing timer
+  if(Iron.updateMode==needs_update){                                                          // If pending mode change
+    if(Iron.Error.active){                                                                    // Errors active?
+      Iron.updateMode=no_update;                                                              // Ignore and reset flag
+    }
+    else if((CurrentTime-Iron.LastModeChangeTime)>100){                                       // Wait 100mS with no changes (de-bouncing)
+      Iron.updateMode=no_update;                                                              // reset flag
+      setCurrentMode(Iron.changeMode);                                                        // Apply stand mode
+    }
+  }
+
   // If sleeping or error, stop here
   if(Iron.CurrentMode==mode_sleep || Iron.Error.active) {                                 // For safety, update PWM out everytime
     if(systemSettings.settings.activeDetection && !Iron.Error.safeMode){
@@ -101,13 +112,6 @@ void handleIron(void) {
     return;
   }
   
-  // Controls external mode changes (from stand mode changes), this acts as a debouncing timer
-  if(Iron.updateMode==needs_update){                                                          // If pending mode change
-    if((CurrentTime-Iron.LastModeChangeTime)>100){                                            // Wait 100mS with steady mode (de-bouncing)
-      Iron.updateMode=no_update;                                                              // reset flag
-      setCurrentMode(Iron.changeMode);                                                        // Apply stand mode
-    }
-  }
 
   // Controls inactivity timer and enters low power modes
   uint32_t mode_time = CurrentTime - Iron.CurrentModeTimer;
