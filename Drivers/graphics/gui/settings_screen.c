@@ -17,6 +17,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 static int32_t temp, settingsTimer;
 static uint8_t profile, Selected_Tip;
+static bool copyingTip;
 typedef enum resStatus_t{ reset_settings, reset_profile, reset_profiles, reset_all }resStatus_t;
 resStatus_t resStatus;
 //static char TipName[5];
@@ -154,6 +155,7 @@ static editable_widget_t editable_IRONTIPS_Settings_Cal250;
 static editable_widget_t editable_IRONTIPS_Settings_Cal350;
 static editable_widget_t editable_IRONTIPS_Settings_Cal450;
 static comboBox_item_t comboitem_IRONTIPS_Settings_Save;
+static comboBox_item_t comboitem_IRONTIPS_Settings_Copy;
 static comboBox_item_t comboitem_IRONTIPS_Settings_Delete;
 static comboBox_item_t comboitem_IRONTIPS_Settings_Cancel;
 
@@ -338,6 +340,16 @@ static int IRONTIPS_Delete(widget_t *w) {
   return comboitem_IRONTIPS_Settings_Cancel.action_screen;                                                      // And return to main screen or system menu screen
 }
 
+static int IRONTIPS_Copy(widget_t *w) {
+  Selected_Tip = systemSettings.Profile.currentNumberOfTips;                                                    //
+  strcpy(tipCfg.name, _BLANK_TIP);
+  comboitem_IRONTIPS_Settings_Delete.enabled=0;
+  comboitem_IRONTIPS_Settings_Copy.enabled=0;
+  comboitem_IRONTIPS_Settings_Save.enabled=0;
+  comboResetIndex(&comboWidget_IRONTIPS_Settings);
+  copyingTip=1;
+  return -1;                                                                                                    // And return to main screen or system menu screen
+}
 static void * getPWMPeriod() {
   temp=(systemSettings.Profile.pwmPeriod+1)/100;
   return &temp;
@@ -685,11 +697,6 @@ static void iron_tips_screen_init(screen_t *scr) {
 }
 
 static void iron_tips_screen_onEnter(screen_t *scr) {
-  /*
-  if(scr!=&Screen_edit_tip_settings){
-    comboResetIndex(&comboWidget_IRONTIPS);
-  }
-  */
   comboResetIndex(&comboWidget_IRONTIPS);
 }
 
@@ -699,7 +706,7 @@ static void iron_tips_screen_onEnter(screen_t *scr) {
 void IRONTIPS_Settings_onEnter(screen_t *scr){
   settingsTimer=HAL_GetTick();
   bool new=0;
-
+  copyingTip=0;
   comboResetIndex(&comboWidget_IRONTIPS_Settings);
 
   if(scr==&Screen_main){                                                                                // If coming from main, selected tip is current ti`p
@@ -738,36 +745,50 @@ void IRONTIPS_Settings_onEnter(screen_t *scr){
     comboitem_IRONTIPS_Settings_Delete.enabled=0;                                                         // Cannot delete empty tip
     comboitem_IRONTIPS_Settings_Save.enabled=0;                                                           // Disabled until the name is changed
   }
-  else if(systemSettings.Profile.currentNumberOfTips>1){                                                  // If more than 1 tip in the system, enable delete
-    comboitem_IRONTIPS_Settings_Delete.enabled=1;
-  }
   else{
-    comboitem_IRONTIPS_Settings_Delete.enabled=0;
+    comboitem_IRONTIPS_Settings_Copy.enabled=enable;                                                      // Existing tip, enable copy button
+    if(systemSettings.Profile.currentNumberOfTips>1){                                                     // If more than 1 tip in the system, enable delete
+      comboitem_IRONTIPS_Settings_Delete.enabled=1;
+    }
+    else{
+      comboitem_IRONTIPS_Settings_Delete.enabled=0;
+    }
   }
 }
 
 int IRONTIPS_Settings_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
-
+  static uint32_t last_update=0;
+  uint32_t currentTime=HAL_GetTick();
+  bool update=0;
   if((input==LongClick) || (HAL_GetTick()-settingsTimer)>15000){
     return screen_main;
   }
   if(input!=Rotate_Nothing){
-    settingsTimer=HAL_GetTick();
+    settingsTimer=currentTime;
+    if(editable_IRONTIPS_Settings_TipLabel.selectable.state==widget_edit){                                      // If tip name is being edited and there's encoder activity
+      update=1;
+    }
+  }
+  else if((currentTime-last_update)>99){
+    last_update=currentTime;
+    update=1;
+  }
+ if(update){
     bool enable=1;
-
-    if(editable_IRONTIPS_Settings_TipLabel.selectable.state==widget_edit){                                        // If tip name is being edited and there's encoder activity
-      if(strcmp(tipCfg.name, _BLANK_TIP) == 0){                                                                   // Check that the name is not empty
-        enable=0;                                                                                                // If empty, disable save button
-      }
-      else{
-        for(uint8_t x = 0; x < TipSize; x++) {                                                                    // Compare tip names with current edit
-          if( (strcmp(tipCfg.name, systemSettings.Profile.tip[x].name) == 0) && x!=Selected_Tip ){                // If match is found, and it's not the tip being edited
-            enable=0;                                                                                             // Disable save button
-            break;
-          }
+    if(strcmp(tipCfg.name, _BLANK_TIP) == 0){                                                                   // Check that the name is not empty
+      enable=0;                                                                                                 // If empty, disable save button
+    }
+    else{
+      for(uint8_t x = 0; x < TipSize; x++) {                                                                    // Compare tip names with current edit
+        if( (strcmp(tipCfg.name, systemSettings.Profile.tip[x].name) == 0) && x!=Selected_Tip ){                // If match is found, and it's not the tip being edited
+          enable=0;                                                                                             // Disable save button
+          break;
         }
       }
-      comboitem_IRONTIPS_Settings_Save.enabled=enable;
+    }
+    comboitem_IRONTIPS_Settings_Save.enabled=enable;
+    if(!copyingTip){
+      comboitem_IRONTIPS_Settings_Copy.enabled=enable;
     }
   }
   return default_screenProcessInput(scr, input, state);
@@ -1547,6 +1568,7 @@ void settings_screen_setup(screen_t *scr) {
   comboAddEditable(&comboitem_IRONTIPS_Settings_Cal350,   w,  "Cal350",     &editable_IRONTIPS_Settings_Cal350);
   comboAddEditable(&comboitem_IRONTIPS_Settings_Cal450,   w,  "Cal450",     &editable_IRONTIPS_Settings_Cal450);
   comboAddAction(&comboitem_IRONTIPS_Settings_Save,       w,  "SAVE",       &IRONTIPS_Save);
+  comboAddAction(&comboitem_IRONTIPS_Settings_Copy,       w,  "COPY",       &IRONTIPS_Copy);
   comboAddAction(&comboitem_IRONTIPS_Settings_Delete,     w,  "DELETE",     &IRONTIPS_Delete);
   comboAddScreen(&comboitem_IRONTIPS_Settings_Cancel,     w,  "CANCEL",     -1);                                               // Return value set automatically on enter
 }
