@@ -15,6 +15,7 @@
 #define ProfileSize       3                                         // Number of profiles
 #define TipSize           10                                        // Number of tips for each profile
 #define TipCharSize       5                                         // String size for each tip name (Including null terminator)
+#define _BLANK_TIP        "    "
 
 #ifndef T12_Cal250
 #define T12_Cal250        1100                                      // Default values to be used in the calibration if not adjusted
@@ -31,7 +32,7 @@
 #define C245_Cal450       1100
 
 //#define SWSTRING        "SW: v1.10"                               // For releases
-#define SWSTRING          "SW: 2021-07-03"                          // For git
+#define SWSTRING          "SW: 2021-07-04"                          // For git
 #define SETTINGS_VERSION  4                                         // Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize         2                                         // In KB
 #define FLASH_ADDR     (0x8000000 + ((FLASH_SZ-StoreSize)*1024))    // Last 2KB flash (Minimum erase size, page size=2KB)
@@ -61,17 +62,14 @@ enum{
 
   runaway_triggered       = 1,
 
-  noError                 = 0,
-  setError                = 1,
+  disable                 = 0,
+  enable                  = 1,
 
   debug_Off               = 0,
   debug_On                = 1,
 
   calibration_Off         = 0,
   calibration_On          = 1,
-
-  saveKeepingProfiles     = 0,
-  saveWipingProfiles      = 1,
 
   setup_Off               = 0,
   setup_On                = 1,
@@ -94,7 +92,15 @@ enum{
   profile_T12             = 0,
   profile_C245            = 1,
   profile_C210            = 2,
-  profile_None            = 0xff
+  profile_None            = 0xff,
+
+  save_Settings           = 1,
+  reset_Profile           = 0x80,
+  reset_Profiles          = 0x81,
+  reset_Settings          = 0x82,
+  reset_All               = 0x83,
+  keepProfiles            = 1,
+  wipeProfiles            = 0x80
 };
 
 
@@ -115,12 +121,12 @@ typedef struct{
   uint8_t       currentTip;
   uint8_t       filterFactor;
   int8_t        CalNTC;
+  uint8_t       sleepTimeout;
+  uint8_t       standbyTimeout;
+  uint8_t       standbyTemperature;
   uint16_t      UserSetTemperature;
   uint16_t      MaxSetTemperature;
   uint16_t      MinSetTemperature;
-  uint16_t      sleepTimeout;
-  uint16_t      standbyTimeout;
-  uint16_t      standbyTemperature;
   uint16_t      pwmPeriod;
   uint16_t      pwmDelay;
   uint16_t      noIronValue;
@@ -160,6 +166,8 @@ typedef __attribute__((aligned(4)))  struct{
   profile_t     Profile;
   uint32_t      ProfileChecksum;
   bool          setupMode;
+  uint8_t       save_Flag;
+
 }systemSettings_t;
 
 typedef __attribute__((aligned(4)))  struct{
@@ -174,7 +182,8 @@ extern flashSettings_t* flashSettings;
 
 void Diag_init(void);
 void checkSettings(void);
-void saveSettings(bool wipeAllProfileData);
+void saveSettingsFromMenu(uint8_t mode);
+void saveSettings(uint8_t mode);
 void restoreSettings();
 uint32_t ChecksumSettings(settings_t* settings);
 uint32_t ChecksumProfile(profile_t* profile);

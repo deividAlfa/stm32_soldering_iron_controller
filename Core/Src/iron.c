@@ -470,9 +470,9 @@ void checkIronError(void){
   else if(!Err.Flags && Iron.Error.Flags==1){                                               // If no errors and only no iron flag was active (And no global flag, so it was detected while in sleep mode)
     Iron.Error.Flags=_NOERROR;                                                              // Clear
   }
-  else if (Iron.Error.active && Err.Flags==noError){                                    // If global flag set, but there are no errors anymore
+  else if (Iron.Error.active && Err.Flags==disable){                                    // If global flag set, but there are no errors anymore
     if((CurrentTime-Iron.LastErrorTime)>systemSettings.settings.errorDelay){                // Check enough time has passed
-      Iron.Error.Flags = noError;                                                           // Reset errors
+      Iron.Error.Flags = disable;                                                           // Reset errors
       buzzer_alarm_stop();                                                                  // Stop alarm
       setCurrentMode(mode_run);                                                             // Restore run mode
     }

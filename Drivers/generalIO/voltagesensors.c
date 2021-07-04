@@ -7,9 +7,11 @@
 
 #include "voltagesensors.h"
 #ifdef USE_VIN
+
 uint16_t last_VIN;
+
 uint16_t getSupplyVoltage_v_x10() {
-  uint32_t temp;
+uint32_t temp;
 
   // As we have a R1(10K) / R2(1K) resistor divider, the ratio is 1/(10+1)=0.09090909
   // So we previously divide (2<<16)/0.09090909 = 720896

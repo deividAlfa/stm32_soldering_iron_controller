@@ -27,10 +27,50 @@ void checkSettings(void){
   static uint32_t prevSysChecksum=0, newSysChecksum=0, prevTipChecksum=0, newTipChecksum=0, checksumtime=0;
   uint32_t CurrentTime = HAL_GetTick();
 
-  // Don't check if in: Calibration mode, Setup mode, Save delay==0, failure error active
-  if( (systemSettings.setupMode==setup_On) || (Iron.calibrating==calibration_On) || (systemSettings.settings.saveSettingsDelay==0) || (Iron.Error.safeMode!=noError) || (CurrentTime-checksumtime<999)){
+  if(systemSettings.save_Flag){
+    switch(systemSettings.save_Flag){
+      case save_Settings:
+        saveSettings(keepProfiles);                                               // Save settings preserving tip data
+        break;
+      case reset_Settings:                                               // Reset system settings
+      {
+        uint8_t currentProfile=systemSettings.settings.currentProfile;        // Store current profile
+        resetSystemSettings();                                                // Reset system settings
+        systemSettings.settings.currentProfile=currentProfile;                // Restore profile
+        saveSettings(keepProfiles);                                               // Save settings preserving tip data
+        break;
+      }
+      case reset_Profile:                                                // Reset current profile
+        resetCurrentProfile();                                                // Set current profile to defaults
+        saveSettings(keepProfiles);                                               // Save settings preserving tip data
+        break;
+
+      case reset_Profiles:                                               // Reset all Profiles
+        systemSettings.settings.currentProfile=profile_None;                  // Set factory value
+        saveSettings(wipeProfiles);                                      // Save settings, but wiping all tip data
+        break;
+
+      case reset_All:                                                    // Reset everything
+        resetSystemSettings();                                                // Reset system settings
+        saveSettings(wipeProfiles);                                      // Save settings wiping all tip data
+        break;
+
+      default:
+        Error_Handler();
+    }
+    if(systemSettings.save_Flag>=reset_Profile){
+      NVIC_SystemReset();
+    }
+    systemSettings.save_Flag=0;
     return;
   }
+
+  // Auto save
+  // Don't check if in: Calibration mode, Setup mode, Save delay==0, failsafe mode
+  if( (systemSettings.setupMode==setup_On) || (Iron.calibrating==calibration_On) || (systemSettings.settings.saveSettingsDelay==0) || (Iron.Error.safeMode==enable) || (CurrentTime-checksumtime<999)){
+    return;
+  }
+
   checksumtime=CurrentTime;                                                                                     // Store current time
   newSysChecksum=ChecksumSettings(&systemSettings.settings);                                                    // Calculate system checksum
   newTipChecksum=ChecksumProfile(&systemSettings.Profile);                                                      // Calculate tip profile checksum
@@ -41,13 +81,20 @@ void checkSettings(void){
       Iron.LastSysChangeTime=CurrentTime;                                                                       // Reset timer (we don't save anything until we pass a certain time without changes)
     }
     else if((CurrentTime-Iron.LastSysChangeTime)>((uint32_t)systemSettings.settings.saveSettingsDelay*1000)){   // If different from the previous calculated checksum, and timer expired (No changes for enough time)
-      saveSettings(saveKeepingProfiles);                                                                        // Data was saved (so any pending interrupt knows this)
+      saveSettings(save_Settings);                                                                        // Data was saved (so any pending interrupt knows this)
     }
   }
 }
 
+//This is done to avoid huge stack build up
+void saveSettingsFromMenu(uint8_t mode){
+  systemSettings.save_Flag=mode;
+  if(mode>=reset_Profile){
+    setSafeMode(enable);
+  }
+}
 
-void saveSettings(bool wipeAllProfileData) {
+void saveSettings(uint8_t mode){
   uint32_t error=0;
 
   //Read stored data, as everything will be erased and we don't store data for all iron tips in ram (only the current tip type)
@@ -65,8 +112,8 @@ void saveSettings(bool wipeAllProfileData) {
   flashBuffer.settingsChecksum=systemSettings.settingsChecksum;
   flashBuffer.settings=systemSettings.settings;
 
-  if(!wipeAllProfileData){                                                                              // If wipe all tips is not set
-    if(systemSettings.settings.currentProfile!=profile_None){                                           // If current tip is initialized
+  if(mode==keepProfiles){                                                                               // Don't wipe tip data
+    if(systemSettings.settings.currentProfile<=profile_None){                                           // If current tip is initialized
       if((systemSettings.settings.currentProfile<=profile_C210) &&                                      // Check valid Profile
          (systemSettings.Profile.ID == systemSettings.settings.currentProfile )){                       // Ensure profile ID is correct
 
@@ -138,7 +185,7 @@ void saveSettings(bool wipeAllProfileData) {
   HAL_FLASH_Lock();
   __enable_irq();
 
-  if(!wipeAllProfileData){
+  if(mode==keepProfiles){
     uint32_t ProfileFlash  = ChecksumProfile(&flashSettings->Profile[systemSettings.settings.currentProfile]);
     uint32_t ProfileRam    = ChecksumProfile(&systemSettings.Profile);
 
@@ -165,7 +212,7 @@ void restoreSettings() {
 
   if(flashSettings->settings.NotInitialized!=initialized){                    // If flash not initialized (Erased flash is always read "1")
     resetSystemSettings();
-    saveSettings(saveWipingProfiles);
+    saveSettings(wipeProfiles);
   }
   else{
     Button_reset();                                                           // Check for button reset
@@ -196,6 +243,7 @@ uint32_t ChecksumProfile(profile_t* profile){
 }
 
 void resetSystemSettings(void) {
+  __disable_irq();
   systemSettings.settings.version           = SETTINGS_VERSION;
   systemSettings.settings.contrast          = 255;
   systemSettings.settings.screenDimming     = true;
@@ -216,6 +264,7 @@ void resetSystemSettings(void) {
   systemSettings.settings.StandMode         = mode_sleep;
   systemSettings.settings.EncoderMode       = RE_Mode_One;
   systemSettings.settings.NotInitialized    = initialized;
+  __enable_irq();
 }
 
 
@@ -223,13 +272,8 @@ void resetCurrentProfile(void){
 #ifdef NOSAVESETTINGS
   systemSettings.settings.currentProfile=profile_T12; /// Force T12 when debugging. TODO this is not tested with the profiles update!
 #endif
-  char str[TipCharSize];
-  for(uint8_t x=0;x<TipCharSize;x++){
-    str[x] = ' ';
-  }
-  str[TipCharSize-1] = 0;
-
-  if(systemSettings.settings.currentProfile==profile_T12){
+  __disable_irq();
+    if(systemSettings.settings.currentProfile==profile_T12){
     systemSettings.Profile.ID = profile_T12;
     for(uint8_t x = 0; x < TipSize; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = T12_Cal250;
@@ -241,7 +285,7 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.maxI        = 40;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       systemSettings.Profile.tip[x].PID.tau         = 10;             // val = /100
-      strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
+      strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);         // Empty name
     }
     strcpy(systemSettings.Profile.tip[0].name, "BC3 ");               // Put some generic name
     systemSettings.Profile.currentNumberOfTips      = 1;
@@ -267,7 +311,7 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.maxI        = 10;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       systemSettings.Profile.tip[x].PID.tau         = 10;             // val = /100
-      strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
+      strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);         // Empty name
     }
     strcpy(systemSettings.Profile.tip[0].name, "C245");
     systemSettings.Profile.currentNumberOfTips      = 1;
@@ -292,7 +336,7 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.maxI        = 10;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       systemSettings.Profile.tip[x].PID.tau         = 10;             // val = /100
-      strcpy(systemSettings.Profile.tip[x].name, str);                // Empty name
+      strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);         // Empty name
     }
     strcpy(systemSettings.Profile.tip[0].name, "C210");
     systemSettings.Profile.currentNumberOfTips      = 1;
@@ -319,9 +363,12 @@ void resetCurrentProfile(void){
   systemSettings.Profile.filterFactor             = 2;
   systemSettings.Profile.tempUnit                 = mode_Celsius;
   systemSettings.Profile.NotInitialized           = initialized;
+  __enable_irq();
 }
 
 void loadProfile(uint8_t profile){
+  __disable_irq();
+  HAL_IWDG_Refresh(&hiwdg);
   systemSettings.settings.currentProfile=profile;                                       // Update system profile
   if(profile<=profile_C210){                                                            // If current tip type is valid
     systemSettings.Profile = flashSettings->Profile[profile];                           // Load stored tip data
@@ -341,6 +388,7 @@ void loadProfile(uint8_t profile){
     Iron.updatePwm=needs_update;                                                        // Apply profile PWM settings
   }
   else if(profile==profile_None){
+    __enable_irq();
     return;                                                                             // Profiles not initialized, load nothing
   }
   else{                                                                                 // Unknown profile
@@ -350,6 +398,7 @@ void loadProfile(uint8_t profile){
     setSystemTempUnit(systemSettings.settings.tempUnit);                                // Convert temperatures
     systemSettings.Profile.tempUnit = systemSettings.settings.tempUnit;                 // Store unit in profile
   }
+  __enable_irq();
 }
 
 void Diag_init(void){
@@ -387,16 +436,16 @@ void settingsChkErr(void){
       uint8_t tip = systemSettings.settings.currentProfile;                         // save current tip
       resetSystemSettings();                                                        // reset settings
       systemSettings.settings.currentProfile=tip;                                   // Restore tip type
-      saveSettings(saveKeepingProfiles);                                            // Save settings preserving tip data
+      saveSettings(save_Settings);                                            // Save settings preserving tip data
     }
     else{                                                                           // If checksum wrong
       resetSystemSettings();                                                        // reset settings
-      saveSettings(saveWipingProfiles);                                             // Save settings erasing tip data
+      saveSettings(wipeProfiles);                                             // Save settings erasing tip data
     }
   }
   else{                                                                             // If current tip not valid
     resetSystemSettings();                                                          // Assume something went wrong, reset settings
-    saveSettings(saveKeepingProfiles);                                              // Save keeping tip data
+    saveSettings(save_Settings);                                              // Save keeping tip data
   }
 }
 
@@ -429,7 +478,7 @@ void Button_reset(void){
           HAL_IWDG_Refresh(&hiwdg);
         }
         resetSystemSettings();
-        saveSettings(saveWipingProfiles);
+        saveSettings(wipeProfiles);
       }
     }
   }

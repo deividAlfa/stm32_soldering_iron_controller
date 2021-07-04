@@ -40,10 +40,10 @@ static void setProfile(int32_t *val) {
   profile = *val;
 }
 static int profile_OK(widget_t *w) {
-  loadProfile((uint8_t)profile);                    // Load profile
-  saveSettings(saveKeepingProfiles);                // Save
-  systemSettings.setupMode=setup_Off;               // Reset setup mode
-  setSafeMode(noError);                            // Enable normal operation
+  loadProfile((uint8_t)profile);                // Load profile
+  saveSettingsFromMenu(save_Settings);               // Save
+  systemSettings.setupMode=setup_Off;           // Reset setup mode
+  setSafeMode(disable);                         // Enable normal operation
   return screen_main;
 }
 

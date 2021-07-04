@@ -15,10 +15,11 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 // Settings screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
-static char t[TipSize][TipCharSize];
 static int32_t temp, settingsTimer;
-static uint8_t resStatus, profile, Selected_Tip, Tip_name_return;
-static char str[5];
+static uint8_t profile, Selected_Tip, Tip_name_return;
+typedef enum resStatus_t{ reset_settings, reset_profile, reset_profiles, reset_all }resStatus_t;
+resStatus_t resStatus;
+//static char TipName[5];
 static tipData tipCfg;
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -30,7 +31,6 @@ screen_t Screen_system;
 screen_t Screen_reset;
 screen_t Screen_reset_confirmation;
 screen_t Screen_edit_iron_tips;
-screen_t Screen_edit_tip_name;
 screen_t Screen_edit_tip_settings;
 
 // SETTINGS SCREEM
@@ -58,7 +58,7 @@ static comboBox_item_t comboitem_SYSTEM_EncoderMode;
 static comboBox_item_t comboitem_SYSTEM_TempUnit;
 static comboBox_item_t comboitem_SYSTEM_TempStep;
 static comboBox_item_t comboitem_SYSTEM_GuiUpd;
-static comboBox_item_t comboitem_SYSTEM_SaveInterval;
+static comboBox_item_t comboitem_save_FlagInterval;
 static comboBox_item_t comboitem_SYSTEM_Buzzer;
 static comboBox_item_t comboitem_SYSTEM_LVP;
 static comboBox_item_t comboitem_SYSTEM_InitMode;
@@ -80,7 +80,7 @@ static editable_widget_t editable_SYSTEM_EncoderMode;
 static editable_widget_t editable_SYSTEM_TempUnit;
 static editable_widget_t editable_SYSTEM_TempStep;
 static editable_widget_t editable_SYSTEM_GuiUpd;
-static editable_widget_t editable_SYSTEM_SaveInterval;
+static editable_widget_t editable_save_FlagInterval;
 static editable_widget_t editable_SYSTEM_Buzzer;
 static editable_widget_t editable_SYSTEM_LVP;
 static editable_widget_t editable_SYSTEM_InitMode;
@@ -130,16 +130,6 @@ static comboBox_item_t comboitem_IRONTIPS[TipSize];
 static comboBox_item_t comboitem_IRONTIPS_addNewTip;
 static comboBox_item_t comboitem_IRONTIPS_Back;
 
-// EDIT TIP NAME SCREEN
-static widget_t Widget_IRONTIPS_Name_Back;
-static button_widget_t button_IRONTIPS_Name_Back;
-static widget_t Widget_IRONTIPS_Name_Save;
-static button_widget_t button_IRONTIPS_Name_Save;
-static widget_t Widget_IRONTIPS_Name_Delete;
-static button_widget_t button_IRONTIPS_Name_Delete;
-static widget_t Widget_IRONTIPS_Name_Edit;
-static editable_widget_t editable_IRONTIPS_Name_Edit;
-
 // EDIT TIP SETTINGS SCREEN
 static widget_t comboWidget_IRONTIPS_Settings;
 static comboBox_widget_t comboBox_IRONTIPS_Settings;
@@ -153,6 +143,7 @@ static comboBox_item_t comboitem_IRONTIPS_Settings_PID_tau;
 static comboBox_item_t comboitem_IRONTIPS_Settings_Cal250;
 static comboBox_item_t comboitem_IRONTIPS_Settings_Cal350;
 static comboBox_item_t comboitem_IRONTIPS_Settings_Cal450;
+static editable_widget_t editable_IRONTIPS_Settings_TipLabel;
 static editable_widget_t editable_IRONTIPS_Settings_PID_Kd;
 static editable_widget_t editable_IRONTIPS_Settings_PID_Ki;
 static editable_widget_t editable_IRONTIPS_Settings_PID_Kp;
@@ -163,6 +154,7 @@ static editable_widget_t editable_IRONTIPS_Settings_Cal250;
 static editable_widget_t editable_IRONTIPS_Settings_Cal350;
 static editable_widget_t editable_IRONTIPS_Settings_Cal450;
 static comboBox_item_t comboitem_IRONTIPS_Settings_Save;
+static comboBox_item_t comboitem_IRONTIPS_Settings_Delete;
 static comboBox_item_t comboitem_IRONTIPS_Settings_Cancel;
 
 // RESET SCREEN
@@ -196,53 +188,12 @@ static void setSettingsScrTempUnit() {
   }
 }
 
-static void *getTipStr() {
-  return str;
+static void *getTipName() {
+  return tipCfg.name;
 }
 
-static void setTipStr(char *s) {
-  strcpy(str, s);
-}
-static int saveTip(widget_t *w) {
-  if(comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {                                          // If coming from Add New tip option
-    for(uint8_t x=0;x<TipSize;x++){                                                                             // Find first valid tip
-      if(strcmp(systemSettings.Profile.tip[x].name, "    ")!=0){
-        systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips] = systemSettings.Profile.tip[x]; // Copy Tip data (calibration, PID) to new tip
-        break;
-      }
-    }
-    strcpy(systemSettings.Profile.tip[systemSettings.Profile.currentNumberOfTips++].name, str);                 // Store new tip name and increase system tip count
-  }
-  else {
-    strcpy(tipCfg.name, str);                                                                                   // If existing tip, store the new name
-  }
-  return Tip_name_return;                                                                                       // Return to the screen we came from
-}
-static int cancelTip(widget_t *w) {
-  return Tip_name_return;                                                                                       // Return to the screen we came from
-}
-static int delTip(widget_t *w) {
-  char str[TipCharSize];
-  for(uint8_t x=0;x<TipCharSize;x++){
-    str[x] = ' ';
-  }
-  str[TipCharSize-1] = 0;
-  systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
-
-
-  for(int x = Selected_Tip; x < TipSize-1;x++) {                                                                // Overwrite selected tip and move the rest one position backwards
-    systemSettings.Profile.tip[x] = systemSettings.Profile.tip[x+1];
-  }
-
-  for(int x = systemSettings.Profile.currentNumberOfTips; x < TipSize;x++) {                                    // Fill the unused tips with blank names
-    strcpy(systemSettings.Profile.tip[x].name, str);
-  }
-
-  if(systemSettings.Profile.currentTip >= systemSettings.Profile.currentNumberOfTips){                          // Check the system tip is not pointing to a blank slot
-    systemSettings.Profile.currentTip = systemSettings.Profile.currentNumberOfTips-1;                           // Select the previous tip in the list if so
-  }
-                                                                                                                // Skip tip settings (As tip is now deleted)
-  return comboitem_IRONTIPS_Settings_Cancel.action_screen;                                                      // And return to main screen or system menu screen
+static void setTipName(char *s) {
+  strcpy(tipCfg.name, s);
 }
 
 #ifdef USE_VIN
@@ -361,8 +312,30 @@ static int IRONTIPS_Save(widget_t *w) {
     setupPID(&tipCfg.PID);
     resetPID();
   }
+  else if(Selected_Tip==systemSettings.Profile.currentNumberOfTips){
+    systemSettings.Profile.currentNumberOfTips++;
+  }
   __enable_irq();
   return comboitem_IRONTIPS_Settings_Cancel.action_screen;
+}
+static int IRONTIPS_Delete(widget_t *w) {
+  char name[TipCharSize]=_BLANK_TIP;
+  systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
+
+
+  for(int x = Selected_Tip; x < TipSize-1;x++) {                                                                // Overwrite selected tip and move the rest one position backwards
+    systemSettings.Profile.tip[x] = systemSettings.Profile.tip[x+1];
+  }
+
+  for(int x = systemSettings.Profile.currentNumberOfTips; x < TipSize;x++) {                                    // Fill the unused tips with blank names
+    strcpy(systemSettings.Profile.tip[x].name, name);
+  }
+
+  if(systemSettings.Profile.currentTip >= systemSettings.Profile.currentNumberOfTips){                          // Check the system tip is not pointing to a blank slot
+    systemSettings.Profile.currentTip = systemSettings.Profile.currentNumberOfTips-1;                           // Select the previous tip in the list if so
+  }
+                                                                                                                // Skip tip settings (As tip is now deleted)
+  return comboitem_IRONTIPS_Settings_Cancel.action_screen;                                                      // And return to main screen or system menu screen
 }
 
 static void * getPWMPeriod() {
@@ -524,7 +497,7 @@ static void * geterrorDelay() {
   temp = systemSettings.settings.errorDelay;
   return &temp;
 }
-static void seterrorDelay(uint32_t *val) {
+static void enableDelay(uint32_t *val) {
   systemSettings.settings.errorDelay = *val;
 }
 
@@ -573,52 +546,38 @@ static int cancelReset(widget_t *w) {
 }
 static int doReset(widget_t *w) {
   switch(resStatus){
-    case 0:                                                                 // Reset system settings
-    {
-      uint8_t currentProfile=systemSettings.settings.currentProfile;        // Store current profile
-      resetSystemSettings();                                                // Reset system settings
-      systemSettings.settings.currentProfile=currentProfile;                // Restore profile
-      saveSettings(saveKeepingProfiles);                                    // Save settings preserving tip data
-      NVIC_SystemReset();
+    case reset_settings:                                                // Reset system settings
+      saveSettingsFromMenu(reset_Settings);                        // Save settings preserving tip data
       break;
-    }
-    case 1:                                                                 // Reset current profile
-      resetCurrentProfile();                                                // Set current profile to defaults
-      saveSettings(saveKeepingProfiles);                                    // Save settings preserving tip data
-      NVIC_SystemReset();
+    case reset_profile:                                                 // Reset current profile
+      saveSettingsFromMenu(reset_Profile);                         // Save settings preserving tip data
       break;
-
-    case 2:                                                                 // Reset all Profiles
-      systemSettings.settings.currentProfile=profile_None;                  // Set factory value
-      saveSettings(saveWipingProfiles);                                     // Save settings, but wiping all tip data
-      NVIC_SystemReset();
+    case reset_profiles:                                                // Reset all Profiles
+      saveSettingsFromMenu(reset_Profiles);                        // Save settings wiping all tip data
       break;
-
-    case 3:                                                                 // Reset everything
-      resetSystemSettings();                                                // Reset system settings
-      saveSettings(saveWipingProfiles);                                     // Save settings wiping all tip data
-      NVIC_SystemReset();
+    case reset_all:                                                     // Reset everything
+      saveSettingsFromMenu(reset_All);                             // Save settings wiping all tip data
       break;
-
     default:
       return screen_main;
     }
+    return -1;
 }
 
-static int goSettingsReset(void) {
-  resStatus=0;
+static int doSettingsReset(void) {
+  resStatus=reset_settings;
   return screen_reset_confirmation;
 }
-static int goProfileReset(void) {
-  resStatus=1;
+static int doProfileReset(void) {
+  resStatus=reset_profile;
   return screen_reset_confirmation;
 }
-static int goAllProfileReset(void) {
-  resStatus=2;
+static int doProfilesReset(void) {
+  resStatus=reset_profiles;
   return screen_reset_confirmation;
 }
-static int goFactoryReset(void) {
-  resStatus=3;
+static int doFactoryReset(void) {
+  resStatus=reset_all;
   return screen_reset_confirmation;
 }
 
@@ -644,7 +603,6 @@ static void * getShakeWake() {
 static void settings_screen_init(screen_t *scr) {
   default_init(scr);
   scr->current_widget = &comboWidget_Settings;
-  comboBox_IRONTIPS.selectable.state = widget_selected;
   settingsTimer=HAL_GetTick();
 }
 
@@ -663,84 +621,10 @@ int settings_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t 
   if((input==LongClick) || (HAL_GetTick()-settingsTimer)>15000){
     return screen_main;
   }
+
   return default_screenProcessInput(scr, input, state);
 }
 
-
-//-------------------------------------------------------------------------------------------------------------------------------
-// Edit Tip Name screen functions
-//-------------------------------------------------------------------------------------------------------------------------------
-
-void edit_tip_screen_init(screen_t *scr) {
-  if(Tip_name_return == screen_edit_iron_tips &&  comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {   // If we were in iron tips screen and came from "Add new tip"
-    strcpy(str, "    ");                                                                                              // Copy blank str
-    widgetDisable(&Widget_IRONTIPS_Name_Delete);                                                                      // Disable delete widget
-  }
-  else {                                                                                                              // Already existing tip
-    strcpy(str, systemSettings.Profile.tip[Selected_Tip].name);                                                       // Copy tip name
-    if(systemSettings.Profile.currentNumberOfTips>1){                                                                 // If more than 1 tip in the system, enable delete
-      widgetEnable(&Widget_IRONTIPS_Name_Delete);
-    }
-    else{
-      widgetDisable(&Widget_IRONTIPS_Name_Delete);
-    }
-  }
-  scr->current_widget=&Widget_IRONTIPS_Name_Edit;
-  editable_IRONTIPS_Name_Edit.selectable.previous_state=widget_idle;
-  editable_IRONTIPS_Name_Edit.selectable.state=widget_selected;
-
-  button_IRONTIPS_Name_Save.selectable.previous_state=widget_idle;
-  button_IRONTIPS_Name_Save.selectable.state=widget_idle;
-
-  button_IRONTIPS_Name_Back.selectable.previous_state=widget_idle;
-  button_IRONTIPS_Name_Back.selectable.state=widget_idle;
-
-  button_IRONTIPS_Name_Delete.selectable.previous_state=widget_idle;
-  button_IRONTIPS_Name_Delete.selectable.state=widget_idle;
-
-  u8g2_SetFont(&u8g2,default_font);
-  u8g2_SetDrawColor(&u8g2, WHITE);
-  u8g2_DrawStr(&u8g2,20,19,"NAME:");
-
-  widgetDisable(&Widget_IRONTIPS_Name_Save);
-  default_init(scr);
-}
-
-int edit_tip_screen_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
-
-  int val = default_screenProcessInput(scr, input, state);
-
-  if(input!=Rotate_Nothing){
-    settingsTimer=HAL_GetTick();
-
-    if(editable_IRONTIPS_Name_Edit.selectable.state==widget_edit){                                                // If tip name is being edited and there's encoder activity
-      if(strcmp(str, "    ") == 0){                                                                               // Check that the name is not empty
-        widgetDisable(&Widget_IRONTIPS_Name_Save);                                                                // If empty, disable save widget
-      }
-      else{
-        uint8_t x = 0;
-
-        while(x<TipSize){                                                                                         // Check existing name
-          if(strcmp(str, systemSettings.Profile.tip[x].name) == 0){                                               // If match is found, disable save widget
-            break;
-          }
-          x++;
-        }
-        if(x<TipSize){
-          widgetDisable(&Widget_IRONTIPS_Name_Save);
-        }
-        else{
-          widgetEnable(&Widget_IRONTIPS_Name_Save);                                                               // Else, enable widget
-        }
-      }
-    }
-  }
-  else if((HAL_GetTick()-settingsTimer)>15000){
-    return screen_main;
-  }
-
-  return val;
-}
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Tips screen functions
@@ -750,7 +634,8 @@ void edit_iron_screen_init(screen_t *scr) {
   comboBox_item_t *i = comboBox_IRONTIPS.first;
   for(int x = 0; x < TipSize; x++) {
     if(x < systemSettings.Profile.currentNumberOfTips) {
-      strcpy(i->text, systemSettings.Profile.tip[x].name);
+      //strcpy(i->text, systemSettings.Profile.tip[x].name);
+      i->text = systemSettings.Profile.tip[x].name;
       i->enabled = 1;
     }
     else
@@ -824,26 +709,79 @@ void Reset_confirmation_onEnter(screen_t *scr){
 //-------------------------------------------------------------------------------------------------------------------------------
 void IRONTIPS_Settings_onEnter(screen_t *scr){
   settingsTimer=HAL_GetTick();
-  bool backup=0;
+  bool new=0;
+
   comboResetIndex(&comboWidget_IRONTIPS_Settings);
-  if(scr==&Screen_main){
-    backup=1;
+
+  if(scr==&Screen_main){                                                                                // If coming from main, selected tip is current ti`p
     comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_main;
     Selected_Tip = systemSettings.Profile.currentTip;
   }
-  else if(scr==&Screen_edit_iron_tips){
-    backup=1;
-    for(uint8_t x = 0; x < TipSize; x++) {
-      if(strcmp(comboBox_IRONTIPS.currentItem->text, systemSettings.Profile.tip[x].name)==0){
-        Selected_Tip = x;
+
+  else if(scr==&Screen_edit_iron_tips){                                                                 // If coming from tips menu
+    if(comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {                                // If was Add New tip option
+      for(uint8_t x = 0; x < TipSize; x++) {                                                            // Find first valid tip and store it
+        if(strcmp(systemSettings.Profile.tip[x].name, _BLANK_TIP)!=0){
+          Selected_Tip=x;
+          new=1;
+          break;
+        }
+      }
+      if(!new){
+        Error_Handler();                                                                                // This shouldn't happen
+      }
+    }
+    else{
+      for(uint8_t x = 0; x < TipSize; x++) {                                                            // Else, find the selected tip
+        if(strcmp(comboBox_IRONTIPS.currentItem->text, systemSettings.Profile.tip[x].name)==0){
+          Selected_Tip = x;
+        }
       }
     }
     comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_edit_iron_tips;
   }
-  if(backup){
-    tipCfg = systemSettings.Profile.tip[Selected_Tip];
+
+  tipCfg = systemSettings.Profile.tip[Selected_Tip];                                                      // Backup selected tip
+
+  if(new){                                                                                                // If new tip selected
+    strcpy(tipCfg.name, _BLANK_TIP);                                                                      // Set an empty name
+    Selected_Tip=systemSettings.Profile.currentNumberOfTips;                                              // Selected tip is next position
+    comboitem_IRONTIPS_Settings_Delete.enabled=0;                                                         // Cannot delete empty tip
+    comboitem_IRONTIPS_Settings_Save.enabled=0;                                                           // Disabled until the name is changed
   }
-  comboitem_IRONTIPS_Settings_TipLabel.text = tipCfg.name;
+  else if(systemSettings.Profile.currentNumberOfTips>1){                                                  // If more than 1 tip in the system, enable delete
+    comboitem_IRONTIPS_Settings_Delete.enabled=1;
+  }
+  else{
+    comboitem_IRONTIPS_Settings_Delete.enabled=0;
+  }
+}
+
+int IRONTIPS_Settings_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
+
+  if(input!=Rotate_Nothing){
+    settingsTimer=HAL_GetTick();
+    bool enable=1;
+
+    if(editable_IRONTIPS_Settings_TipLabel.selectable.state==widget_edit){                                        // If tip name is being edited and there's encoder activity
+      if(strcmp(tipCfg.name, _BLANK_TIP) == 0){                                                                   // Check that the name is not empty
+        enable=0;                                                                                                // If empty, disable save button
+      }
+      else{
+        for(uint8_t x = 0; x < TipSize; x++) {                                                                    // Compare tip names with current edit
+          if( (strcmp(tipCfg.name, systemSettings.Profile.tip[x].name) == 0) && x!=Selected_Tip ){                // If match is found, and it's not the tip being edited
+            enable=0;                                                                                             // Disable save button
+            break;
+          }
+        }
+      }
+      comboitem_IRONTIPS_Settings_Save.enabled=enable;
+    }
+  }
+  else if((HAL_GetTick()-settingsTimer)>15000){
+    return screen_main;
+  }
+  return default_screenProcessInput(scr, input, state);
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -864,14 +802,14 @@ void SYSTEM_onEnter(screen_t *scr){
     comboResetIndex(&comboWidget_SYSTEM);
   }
   if(ChecksumProfile(&systemSettings.Profile)!=systemSettings.ProfileChecksum){         // If there's unsaved profile data
-    saveSettings(saveKeepingProfiles);                                                  // Save settings
+    saveSettingsFromMenu(save_Settings);                                                // Save settings
   }
   profile=systemSettings.settings.currentProfile;
 }
 void SYSTEM_onExit(screen_t *scr){
   if(profile!=systemSettings.settings.currentProfile){                                  // If profile changed
     loadProfile(profile);
-    saveSettings(saveKeepingProfiles);                                                  // Save
+    saveSettingsFromMenu(save_Settings);                                                // Save
   }
 }
 
@@ -1014,8 +952,8 @@ void settings_screen_setup(screen_t *scr) {
 
   //********[ Save Delay Widget ]***********************************************************
   //
-  dis=&editable_SYSTEM_SaveInterval.inputData;
-  edit=&editable_SYSTEM_SaveInterval;
+  dis=&editable_save_FlagInterval.inputData;
+  edit=&editable_save_FlagInterval;
   editableDefaultsInit(edit,widget_editable);
   dis->reservedChars=3;
   dis->endString="s";
@@ -1173,7 +1111,7 @@ void settings_screen_setup(screen_t *scr) {
   comboAddEditable(&comboitem_SYSTEM_TempStep, w,           "Step",       &editable_SYSTEM_TempStep);
   comboAddEditable(&comboitem_SYSTEM_LVP, w,                "LVP",        &editable_SYSTEM_LVP);
   comboAddEditable(&comboitem_SYSTEM_GuiUpd, w,             "Gui time",   &editable_SYSTEM_GuiUpd);
-  comboAddEditable(&comboitem_SYSTEM_SaveInterval, w,       "Save time",  &editable_SYSTEM_SaveInterval);
+  comboAddEditable(&comboitem_save_FlagInterval, w,       "Save time",  &editable_save_FlagInterval);
   comboAddScreen(&comboitem_SYSTEM_Reset, w,                "RESET MENU", screen_reset);
   comboAddScreen(&comboitem_SYSTEM_SW, w,                   SWSTRING,     -1);
   comboAddScreen(&comboitem_SYSTEM_HW, w,                   HWSTRING,     -1);
@@ -1192,10 +1130,10 @@ void settings_screen_setup(screen_t *scr) {
   w = &comboWidget_RESET;
   screen_addWidget(w, sc);
   widgetDefaultsInit(w, widget_combo, &comboBox_RESET);
-  comboAddAction(&comboitem_RESET_SETTINGS,w,       "Reset Settings", &goSettingsReset );
-  comboAddAction(&comboitem_RESET_TIP,w,            "Reset Profile",  &goProfileReset );
-  comboAddAction(&comboitem_RESET_ALLTIP,w,         "Reset Profiles", &goAllProfileReset );
-  comboAddAction(&comboitem_RESET_EVERYTHING,w,     "Reset All",      &goFactoryReset);
+  comboAddAction(&comboitem_RESET_SETTINGS,w,       "Reset Settings", &doSettingsReset );
+  comboAddAction(&comboitem_RESET_TIP,w,            "Reset Profile",  &doProfileReset );
+  comboAddAction(&comboitem_RESET_ALLTIP,w,         "Reset Profiles", &doProfilesReset );
+  comboAddAction(&comboitem_RESET_EVERYTHING,w,     "Reset All",      &doFactoryReset);
   comboAddScreen(&comboitem_RESET_Back,w,           "BACK",           screen_system);
   comboitem_RESET_SETTINGS.dispAlign=align_left;
   comboitem_RESET_TIP.dispAlign=align_left;
@@ -1409,7 +1347,7 @@ void settings_screen_setup(screen_t *scr) {
   dis->getData = &geterrorDelay;
   edit->big_step = 100;
   edit->step = 50;
-  edit->setData = (void (*)(void *))&seterrorDelay;
+  edit->setData = (void (*)(void *))&enableDelay;
   edit->max_value = 950;
   edit->min_value = 100;
 
@@ -1450,78 +1388,11 @@ void settings_screen_setup(screen_t *scr) {
   screen_addWidget(w,sc);
   widgetDefaultsInit(w, widget_combo, &comboBox_IRONTIPS);
   for(int x = 0; x < TipSize; x++) {
-    t[x][0] = '\0';
-    comboAddScreen(&comboitem_IRONTIPS[x],w, &t[x][0], screen_edit_tip_settings);
+    comboAddScreen(&comboitem_IRONTIPS[x],w, " ", screen_edit_tip_settings);              // Names filled on menu enter
   }
-  comboAddScreen(&comboitem_IRONTIPS_addNewTip, w,  "ADD NEW",  screen_edit_tip_name);
+  comboAddScreen(&comboitem_IRONTIPS_addNewTip, w,  "ADD NEW",  screen_edit_tip_settings);
   comboAddScreen(&comboitem_IRONTIPS_Back, w,       "BACK",     screen_settingsmenu);
 
-
-
-  //########################################## IRON TIP EDIT NAME SCREEN ##########################################
-  //
-  sc=&Screen_edit_tip_name;
-  oled_addScreen(sc, screen_edit_tip_name);
-  screen_setDefaults(sc);
-  sc->processInput = &edit_tip_screen_screenProcessInput;
-  sc->init = &edit_tip_screen_init;
-  sc->onEnter= &edit_iron_screen_onEnter;
-
-  //********[ Name Edit Widget ]***********************************************************
-  //
-  w = &Widget_IRONTIPS_Name_Edit;
-  screen_addWidget(w,sc);
-  widgetDefaultsInit(w, widget_editable, &editable_IRONTIPS_Name_Edit);
-  dis=extractDisplayPartFromWidget(w);
-  edit=extractEditablePartFromWidget(w);
-  dis->reservedChars=TipCharSize-1;
-  w->posX = 75;
-  w->posY = 17;
-  w->width = 46;
-  dis->getData = &getTipStr;
-  dis->number_of_dec = 0;
-  dis->type = field_string;
-  edit->big_step = 10;
-  edit->step = 1;
-  edit->selectable.tab = 0;
-  edit->setData = (void (*)(void *))&setTipStr;
-
-
-  //********[ Name Save Button Widget ]***********************************************************
-  //
-  w = &Widget_IRONTIPS_Name_Save;
-  screen_addWidget(w,sc);
-  widgetDefaultsInit(w, widget_button, &button_IRONTIPS_Name_Save);
-  button_IRONTIPS_Name_Save.displayString="SAVE";
-  w->posX = 0;
-  w->posY = 48;
-  w->width = 42;
-  ((button_widget_t*)w->content)->selectable.tab = 3;
-  ((button_widget_t*)w->content)->action = &saveTip;
-
-  //********[ Name Back Button Widget ]***********************************************************
-  //
-  w = &Widget_IRONTIPS_Name_Back;
-  screen_addWidget(w,sc);
-  widgetDefaultsInit(w, widget_button, &button_IRONTIPS_Name_Back);
-  button_IRONTIPS_Name_Back.displayString="BACK";
-  w->posX = 86;
-  w->posY = 48;
-  w->width = 42;
-  ((button_widget_t*)w->content)->selectable.tab = 1;
-  ((button_widget_t*)w->content)->action = &cancelTip;
-
-  //********[ Name Delete Button Widget ]***********************************************************
-  //
-  w = &Widget_IRONTIPS_Name_Delete;
-  screen_addWidget(w,sc);
-  widgetDefaultsInit(w, widget_button, &button_IRONTIPS_Name_Delete);
-  button_IRONTIPS_Name_Delete.displayString="DEL.";
-  w->posX = 43 ;
-  w->posY = 48;
-  w->width = 42;
-  ((button_widget_t*)w->content)->selectable.tab = 2;
-  ((button_widget_t*)w->content)->action = &delTip;
 
   //########################################## [ TIP SETTINGS SCREEN ] ##########################################
   //
@@ -1529,11 +1400,22 @@ void settings_screen_setup(screen_t *scr) {
   oled_addScreen(sc,screen_edit_tip_settings);
   screen_setDefaults(sc);
   sc->onEnter = &IRONTIPS_Settings_onEnter;
-  sc->processInput=&settings_screenProcessInput;
+  sc->processInput=&IRONTIPS_Settings_ProcessInput;
 
   //********[ TIP label]***********************************************************
   //
-  comboitem_IRONTIPS_Settings_TipLabel.dispAlign = align_center;
+  //comboitem_IRONTIPS_Settings_TipLabel.dispAlign = align_center;
+  dis = &editable_IRONTIPS_Settings_TipLabel.inputData;
+  edit = &editable_IRONTIPS_Settings_TipLabel;
+  editableDefaultsInit(edit,widget_editable);
+  dis->reservedChars=TipCharSize-1;
+  dis->getData = &getTipName;
+  dis->type = field_string;
+  dis->displayString=tipCfg.name;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->selectable.tab = 0;
+  edit->setData = (void (*)(void *))&setTipName;
 
   //********[ KP Widget]***********************************************************
   //
@@ -1664,7 +1546,7 @@ void settings_screen_setup(screen_t *scr) {
   w = &comboWidget_IRONTIPS_Settings;
   screen_addWidget(w, sc);
   widgetDefaultsInit(w, widget_combo, &comboBox_IRONTIPS_Settings);
-  comboAddScreen(&comboitem_IRONTIPS_Settings_TipLabel,   w,  "",           screen_edit_tip_name);                      // Name set automatically on enter
+  comboAddEditable(&comboitem_IRONTIPS_Settings_TipLabel, w,  "Name",       &editable_IRONTIPS_Settings_TipLabel);        // Name set automatically on enter
   comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KP,   w,  "PID Kp",     &editable_IRONTIPS_Settings_PID_Kp);
   comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KI,   w,  "PID Ki",     &editable_IRONTIPS_Settings_PID_Ki);
   comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KD,   w,  "PID Kd",     &editable_IRONTIPS_Settings_PID_Kd);
@@ -1675,5 +1557,6 @@ void settings_screen_setup(screen_t *scr) {
   comboAddEditable(&comboitem_IRONTIPS_Settings_Cal350,   w,  "Cal350",     &editable_IRONTIPS_Settings_Cal350);
   comboAddEditable(&comboitem_IRONTIPS_Settings_Cal450,   w,  "Cal450",     &editable_IRONTIPS_Settings_Cal450);
   comboAddAction(&comboitem_IRONTIPS_Settings_Save,       w,  "SAVE",       &IRONTIPS_Save);
+  comboAddAction(&comboitem_IRONTIPS_Settings_Delete,     w,  "DELETE",     &IRONTIPS_Delete);
   comboAddScreen(&comboitem_IRONTIPS_Settings_Cancel,     w,  "CANCEL",     -1);                                               // Return value set automatically on enter
 }

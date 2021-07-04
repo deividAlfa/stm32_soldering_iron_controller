@@ -136,8 +136,10 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
   uint16_t max=0, min=0xffff;
   uint8_t shift;
 
+  #ifdef DEBUG_PWM
   InputData->prev_avg=InputData->last_avg;
   InputData->prev_raw=InputData->last_raw;
+  #endif
 
   // Make the average of the ADC buffer
   adc_sum = 0;

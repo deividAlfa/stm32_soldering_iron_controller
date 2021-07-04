@@ -49,7 +49,7 @@ void myTest(void){
   u8g2_DrawStr(&u8g2,0,48,"FPS:");
   u8g2_DrawStr(&u8g2,0,32,"TIM:");
   while(1){
-    setSafeMode(setError);
+    setSafeMode(enable);
     if(oled.status==oled_idle){
       if((HAL_GetTick()-test.tim_fps)>999){
           test.seconds++;

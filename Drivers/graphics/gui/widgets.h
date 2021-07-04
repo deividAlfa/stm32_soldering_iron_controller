@@ -46,7 +46,6 @@ struct displayOnly_widget_t {
   widgetFieldType type;
   AlignType dispAlign;
   AlignType textAlign;
-  int32_t last_value;
   uint8_t number_of_dec;
   uint8_t reservedChars;
   uint8_t stringStart;
@@ -54,6 +53,7 @@ struct displayOnly_widget_t {
   char* displayString;
   char* endString;
   void * (*getData)();
+  int32_t last_value;
 };
 
 struct editable_widget_t {
@@ -73,9 +73,9 @@ struct button_widget_t {
   union{
     struct{
       char* displayString;
+      uint8_t stringStart;
       const uint8_t* font;
       int32_t last_value;
-      uint8_t stringStart;
     };
     struct{
       const uint8_t* xbm;
@@ -92,11 +92,11 @@ struct bmp_widget_t {
 };
 
 struct comboBox_widget_t {
-  const uint8_t* font;
-  selectable_widget_t selectable;
-  comboBox_item_t *first;
   uint8_t currentScroll;
+  const uint8_t* font;
+  comboBox_item_t *first;
   comboBox_item_t *currentItem;
+  selectable_widget_t selectable;
 } ;
 
 struct comboBox_item_t {
@@ -115,7 +115,6 @@ struct comboBox_item_t {
 struct widget_t
 {
   widgetType type;
-  widget_t *next_widget;
   widgetRefreshType refresh;
   widgetFrameType frameType;
   uint8_t posX;
@@ -123,6 +122,7 @@ struct widget_t
   uint8_t width;
   uint8_t enabled;
   int8_t radius;
+  widget_t *next_widget;
 
   struct screen_t *parent;
   void (*draw)(widget_t*);
@@ -144,7 +144,7 @@ void widgetPrintVal(widget_t* w, int32_t val_ui);
 int32_t widgetGetVal(widget_t* w);
 void widgetEnable(widget_t* w);
 void widgetDisable(widget_t* w);
-int default_widgetProcessInput(widget_t* w, RE_Rotation_t, RE_State_t *);
+int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state);
 int comboBoxProcessInput(widget_t* w, RE_Rotation_t, RE_State_t *);
 void comboBoxDraw(widget_t *w);
 void comboAddScreen(comboBox_item_t* item, widget_t *combo, char *label, uint8_t actionScreen);
