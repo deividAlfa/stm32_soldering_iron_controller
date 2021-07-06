@@ -40,7 +40,8 @@ enum {
     };
 
 typedef struct screen_t screen_t;
-typedef enum{ screenRefresh_idle=0, screenRefresh_eraseNow, screenRefresh_alreadyErased} screenRefreshType;
+typedef enum{ screen_Idle=0, screen_Erase, screen_Erased} screenRefreshType;
+
 struct screen_t
 {
   struct screen_t *next_screen;

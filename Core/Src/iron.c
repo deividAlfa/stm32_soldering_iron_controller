@@ -52,62 +52,53 @@ static void modeChanged(uint8_t newMode) {
 
 void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32_t pwmchannel) {
   Iron.Pwm_Timer      = pwmtimer;
-  Iron.Delay_Timer    = delaytimer;
-  Iron.Pwm_Channel     = pwmchannel;
-  Iron.Error.Flags    = _NOERROR;                                                             // Clear all errors
+  Iron.Read_Timer    = delaytimer;
+  Iron.Pwm_Channel    = pwmchannel;
+  Iron.Error.Flags    = _NOERROR;
 
-  if(systemSettings.settings.WakeInputMode==wakeInputmode_shake){                             // If in shake mode, apply init mode
+  if(systemSettings.settings.WakeInputMode == wakeInputmode_shake){
     setCurrentMode(systemSettings.settings.initMode);
   }
-  else{                                                                                       // If in stand mode, read WAKE status
+  else{
     if(WAKE_input()){
-      setCurrentMode(mode_run);                                                               // Set run mode
+      setCurrentMode(mode_run);
     }
     else{
-      setCurrentMode(systemSettings.settings.StandMode);                                      // Set stand idle mode
+      setCurrentMode(systemSettings.settings.StandMode);
     }
   }
-  initTimers();                                                                               // Initialize timers
-                                                                                              // Now the PWM and ADC are working in the background.
+  initTimers();
 }
 
 void handleIron(void) {
   uint32_t CurrentTime = HAL_GetTick();
-  uint16_t tipTemp = readTipTemperatureCompensated(update_reading,read_Avg);                  // Update Tip temperature in human readable format
+  int16_t tipTemp = readTipTemperatureCompensated(update_reading,read_Avg);
 
   if(!Iron.Error.safeMode){
-    if( (systemSettings.setupMode==setup_On) ||                                               // Ensure not being in setup mode,
-      (systemSettings.settings.NotInitialized!=initialized) ||                                // settings and profile are initialized
-      (systemSettings.Profile.NotInitialized!=initialized) ||
-      (systemSettings.Profile.ID != systemSettings.settings.currentProfile) ||                // Profile ID is the same as the system profile
-      (systemSettings.settings.currentProfile>profile_C210)){                                 // And it's a known value
+    if( (systemSettings.setupMode==setup_On) || systemSettings.settings.NotInitialized || systemSettings.Profile.NotInitialized!=initialized ||
+        (systemSettings.Profile.ID != systemSettings.settings.currentProfile) || (systemSettings.settings.currentProfile>profile_C210)){
 
       Iron.Error.safeMode=1;
     }
   }
 
-  checkIronError();                                                                           // Error detection.
+  checkIronError();
 
   // Controls external mode changes (from stand mode changes), this acts as a debouncing timer
-  if(Iron.updateMode==needs_update){                                                          // If pending mode change
-    if(Iron.Error.active){                                                                    // Errors active?
-      Iron.updateMode=no_update;                                                              // Ignore and reset flag
+  if(Iron.updateStandMode==needs_update){
+    if(Iron.Error.active){
+      Iron.updateStandMode=no_update;
     }
-    else if((CurrentTime-Iron.LastModeChangeTime)>100){                                       // Wait 100mS with no changes (de-bouncing)
-      Iron.updateMode=no_update;                                                              // reset flag
-      setCurrentMode(Iron.changeMode);                                                        // Apply stand mode
+    else if((CurrentTime-Iron.LastModeChangeTime)>100){                             // Wait 100mS with no changes (de-bouncing)
+      Iron.updateStandMode=no_update;
+      setCurrentMode(Iron.changeMode);
     }
   }
 
   // If sleeping or error, stop here
-  if(Iron.CurrentMode==mode_sleep || Iron.Error.active) {                                 // For safety, update PWM out everytime
-    if(systemSettings.settings.activeDetection && !Iron.Error.safeMode){
-      Iron.Pwm_Out = PWMminOutput;
-    }
-    else{
-      Iron.Pwm_Out = 0;
-    }
-    __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                    // Load new calculated PWM Duty
+  if(Iron.CurrentMode==mode_sleep || Iron.Error.active) {                           // For safety, force PWM low everytime
+    Iron.Pwm_Out=0;
+    __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, 0);
     Iron.CurrentIronPower=0;
     return;
   }
@@ -134,11 +125,9 @@ void handleIron(void) {
     }
   }
 
-  if(Iron.updatePwm==needs_update){
-    Iron.updatePwm=no_update;
-    __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer,systemSettings.Profile.pwmPeriod);
-    __HAL_TIM_SET_AUTORELOAD(Iron.Delay_Timer,systemSettings.Profile.pwmDelay);
-    Iron.Pwm_Limit = (systemSettings.Profile.pwmPeriod-1) - (systemSettings.Profile.pwmDelay + 1 + (uint16_t)ADC_MEASURE_TIME/10);
+
+  if(Iron.updatePwm){
+    Iron.Pwm_Period = ((systemSettings.Profile.readPeriod+1)/systemSettings.Profile.pwmMul)-1;
   }
 
   #ifdef USE_VIN
@@ -152,18 +141,24 @@ void handleIron(void) {
   }
   else{                                                                                       // Else, use current setpoint value
     PID_temp = human2adc(Iron.CurrentSetTemperature);
-    Iron.Pwm_Out = calculatePID(PID_temp, TIP.last_avg, Iron.Pwm_Max);
+    Iron.Pwm_Out = calculatePID(PID_temp, TIP.last_avg, Iron.Pwm_Period-1);
   }
 
-  if(systemSettings.settings.activeDetection && Iron.Pwm_Out<=PWMminOutput){
+  if(!Iron.Pwm_Out){
     Iron.CurrentIronPower = 0;
-    Iron.Pwm_Out = PWMminOutput;                                                              // Maintain iron detection
   }
   else if(Iron.Pwm_Out == Iron.Pwm_Max){
     Iron.CurrentIronPower = 100;
   }
-  else{
+  else if(Iron.Pwm_Out < Iron.Pwm_Max){
     Iron.CurrentIronPower = ((uint32_t)Iron.Pwm_Out*100)/Iron.Pwm_Max;                        // Compute new %
+  }
+  else{
+    Error_Handler();
+  }
+  if(Iron.updatePwm){
+    Iron.updatePwm=0;
+    __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer, Iron.Pwm_Period);
   }
   __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Load new calculated PWM Duty
 
@@ -204,55 +199,83 @@ void setSystemTempUnit(bool unit){
 // The final PWM settings are applied by LoadProfile
 void initTimers(void){
   // Delay timer config
-  #ifdef DELAY_TIMER_HALFCLOCK
-  Iron.Delay_Timer->Init.Prescaler = (SystemCoreClock/50000)-1;                               // 10uS input clock
+  #ifdef READ_TIMER_HALFCLOCK
+  Iron.Read_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;                               // 5uS input clock
   #else
-  Iron.Delay_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;
+  Iron.Read_Timer->Init.Prescaler = (SystemCoreClock/200000)-1;
   #endif
 
-  Iron.Delay_Timer->Init.Period = 1999;                                                         // 20mS by default
-  if (HAL_TIM_Base_Init(Iron.Delay_Timer) != HAL_OK){
+  Iron.Read_Timer->Init.Period = systemSettings.Profile.readPeriod-(systemSettings.Profile.readDelay+1);
+  if (HAL_TIM_Base_Init(Iron.Read_Timer) != HAL_OK){
     Error_Handler();
   }
-  // PWM timer config
-  #ifdef PWM_TIMER_HALFCLOCK
-  Iron.Pwm_Timer->Init.Prescaler = (SystemCoreClock/50000)-1;                                 // 10uS input clock
-  #else
-  Iron.Pwm_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;
-  #endif
 
-  Iron.Pwm_Timer->Init.Period = 19999;                                                          // 200mS by default
+  #ifdef PWM_TIMER_HALFCLOCK
+  Iron.Pwm_Timer->Init.Prescaler = (SystemCoreClock/100000)-1;                               // 5uS input clock
+  #else
+  Iron.Pwm_Timer->Init.Prescaler = (SystemCoreClock/200000)-1;
+  #endif
+  Iron.Pwm_Period = ((systemSettings.Profile.readPeriod+1)/ systemSettings.Profile.pwmMul)-1;
+  Iron.Pwm_Timer->Init.Period = Iron.Pwm_Period;
   if (HAL_TIM_Base_Init(Iron.Pwm_Timer) != HAL_OK){
     Error_Handler();
   }
 
-  __HAL_TIM_CLEAR_FLAG(Iron.Delay_Timer,TIM_FLAG_UPDATE | TIM_FLAG_COM | TIM_FLAG_CC1 | TIM_FLAG_CC2 | TIM_FLAG_CC3 | TIM_FLAG_CC4 ); // Clear all flags
 
-  __HAL_TIM_ENABLE_IT(Iron.Delay_Timer,TIM_IT_UPDATE);                                        // Enable Delay timer interrupt
+  Iron.Pwm_Out = 0;
 
-  __HAL_TIM_CLEAR_FLAG(Iron.Pwm_Timer,TIM_FLAG_UPDATE | TIM_FLAG_COM | TIM_FLAG_CC1 | TIM_FLAG_CC2 | TIM_FLAG_CC3 | TIM_FLAG_CC4 );   // Clear all flags
+  __HAL_TIM_SET_COUNTER(Iron.Read_Timer,0);
+  __HAL_TIM_SET_COUNTER(Iron.Pwm_Timer,0);
+  __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Set min value into PWM
 
-  #ifdef DEBUG_PWM
-  __HAL_TIM_ENABLE_IT(Iron.Pwm_Timer, TIM_IT_UPDATE);                                         // For debugging PWM (TEST pin)
-  #endif
+  __HAL_TIM_CLEAR_FLAG(Iron.Read_Timer,TIM_FLAG_UPDATE | TIM_FLAG_COM | TIM_FLAG_CC1 | TIM_FLAG_CC2 | TIM_FLAG_CC3 | TIM_FLAG_CC4 );
+  HAL_TIM_Base_Start_IT(Iron.Read_Timer);                                                     // Start Read Timer
 
   #ifdef  PWM_CHx
-  HAL_TIM_PWM_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);                                     // Start PWM, output uses CHx channel
+  HAL_TIM_PWM_Start(Iron.Pwm_Timer, Iron.Pwm_Channel);                                        // Start PWM, output uses CHx channel
   #elif defined PWM_CHxN
-  HAL_TIMEx_PWMN_Start_IT(Iron.Pwm_Timer, Iron.Pwm_Channel);                                  // Start PWM, output uses CHxN channel
+  HAL_TIMEx_PWMN_Start(Iron.Pwm_Timer, Iron.Pwm_Channel);                                     // Start PWM, output uses CHxN channel
   #else
   #error No PWM ouput set (See PWM_CHx / PWM_CHxN in board.h)
   #endif
-  if(systemSettings.settings.activeDetection){
-    Iron.Pwm_Out = PWMminOutput;
-  }
-  else{
-    Iron.Pwm_Out = 0;
-  }
-  Iron.Pwm_Limit = 17999 - (uint16_t)(ADC_MEASURE_TIME/10);
-  __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Set min value into PWM
+
+
 }
 
+void setReadDelay(uint16_t delay){
+ systemSettings.Profile.readDelay=delay;
+}
+
+
+void setReadPeriod(uint16_t period){
+ systemSettings.Profile.readPeriod=period;
+ Iron.updatePwm=1;
+}
+
+void setPwmMul(uint16_t mult){
+  systemSettings.Profile.pwmMul=mult;
+  Iron.updatePwm=1;
+}
+
+void configurePWMpin(uint8_t mode){
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  if(mode==output_PWM){
+    GPIO_InitStruct.Mode =  GPIO_MODE_AF_PP;
+  }
+  else if(mode==output_Low){
+    PWM_GPIO_Port->BSRR = PWM_Pin<<16;
+    GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_PP;
+  }
+  else if(mode==output_High){
+    PWM_GPIO_Port->BSRR = PWM_Pin;
+    GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_PP;
+  }
+
+  GPIO_InitStruct.Pin =   PWM_Pin;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(PWM_GPIO_Port, &GPIO_InitStruct);
+}
 
 // Check iron runaway
 void runAwayCheck(void){
@@ -270,7 +293,7 @@ void runAwayCheck(void){
   power = ((uint16_t)prev_power[0]+prev_power[1]+prev_power[2]+prev_power[3])/4;              // Average of last 4 powers
 
   // If by any means the PWM output is higher than max calculated, generate error
-  if((Iron.Pwm_Out > Iron.Pwm_Limit) || (Iron.Pwm_Out != __HAL_TIM_GET_COMPARE(Iron.Pwm_Timer,Iron.Pwm_Channel))){
+  if((Iron.Pwm_Out >= Iron.Pwm_Period) || (Iron.Pwm_Out != __HAL_TIM_GET_COMPARE(Iron.Pwm_Timer,Iron.Pwm_Channel))){
     Error_Handler();
   }
   if(systemSettings.settings.tempUnit==mode_Celsius){
@@ -352,34 +375,22 @@ void updatePowerLimit(void){
   if(volts==0){
     volts=1;                                                                                // set minimum value to avoid division by 0
   }
-  uint32_t PwmPeriod=systemSettings.Profile.pwmPeriod;                                      // Read complete PWM period
-  uint32_t maxPower = volts/systemSettings.Profile.impedance;                                        // Compute max power with current voltage and impedance(Impedance stored in x10)
+  uint32_t PwmPeriod=Iron.Pwm_Period;                                                       // Read complete PWM period
+  uint32_t maxPower = volts/systemSettings.Profile.impedance;                               // Compute max power with current voltage and impedance(Impedance stored in x10)
   if(systemSettings.Profile.power >= maxPower){                                             // If set power is already higher than the max possible power given the voltage and heater resistance
-    Iron.Pwm_Max = Iron.Pwm_Limit;                                                          // Set max PWM
+    Iron.Pwm_Max = PwmPeriod-1;                                                               // Set max PWM
   }
   else{                                                                                     // Else,
     Iron.Pwm_Max = (PwmPeriod*systemSettings.Profile.power)/maxPower;                       // Compute max PWM output for current power limit
-    if(Iron.Pwm_Max > Iron.Pwm_Limit){                                                      // Ensure it doesn't exceed the limits
-      Iron.Pwm_Max = Iron.Pwm_Limit;
+    if(Iron.Pwm_Period >= PwmPeriod){
+      Iron.Pwm_Max = PwmPeriod-1;
     }
-    else if(Iron.Pwm_Max==0){                                                               // Ensure it doesn't exceed the PWM limits
+    else if(Iron.Pwm_Period==0){
       Iron.Pwm_Max = 1;
     }
   }
 }
 #endif
-
-// Loads the PWM delay
-void setPwmDelay(uint16_t delay){
- systemSettings.Profile.pwmDelay=delay;
- Iron.updatePwm=needs_update;
-}
-
-// Loads the PWM period
-void setPwmPeriod(uint16_t period){
-  systemSettings.Profile.pwmPeriod=period;
-  Iron.updatePwm=needs_update;
-}
 
 // Sets no Iron detection threshold
 void setNoIronValue(uint16_t noiron){
@@ -397,7 +408,7 @@ void setModefromStand(uint8_t mode){
     Iron.changeMode = mode;                                                                 // Update mode
     Iron.LastModeChangeTime = HAL_GetTick();                                                // Reset debounce timer
   }
-  Iron.updateMode = needs_update;                                                           // Set flag
+  Iron.updateStandMode = needs_update;                                                           // Set flag
 }
 
 // Set the iron operating mode
@@ -424,98 +435,95 @@ void setCurrentMode(uint8_t mode){
 void IronWake(bool source){                                                                 // source: handle shake, encoder push button
   if(GetIronError()){ return; }                                                             // Ignore if error present
   if(Iron.CurrentMode!=mode_run){
-    // If in sleep mode, ignore if wake source disabled
-    if( (source==source_wakeButton && (!systemSettings.settings.wakeOnButton || (systemSettings.settings.WakeInputMode==wakeInputmode_stand) )) || (source==source_wakeInput && !systemSettings.settings.wakeOnShake)){
+    if( (source==wakeButton && (!systemSettings.settings.wakeOnButton || (systemSettings.settings.WakeInputMode==wakeInputmode_stand) )) ||
+        (source==wakeInput && !systemSettings.settings.wakeOnShake)){
       return;
     }
   }
-  if(source==source_wakeInput){                                                             // Else, if source wake input
-    Iron.newActivity=1;                                                                     // Enable flag for oled activity icon
-    Iron.lastActivityTime = HAL_GetTick();                                                  // Store time for keeping the image on
+  if(source==wakeInput){
+    Iron.newActivity = 1;
+    Iron.lastActivityTime = HAL_GetTick();
   }
-  setCurrentMode(mode_run);                                                                 // Set run mode. If already in run mode, this will reset the run timer.
+  setCurrentMode(mode_run);
 }
 
 
 // Checks for non critical iron errors (Errors that can be cleared)
 void checkIronError(void){
-  uint32_t CurrentTime = HAL_GetTick();                                                     // Get current time
-  int16_t ambTemp = readColdJunctionSensorTemp_x10(mode_Celsius);                           // Read NTC in Celsius
+  uint32_t CurrentTime = HAL_GetTick();
+  int16_t ambTemp = readColdJunctionSensorTemp_x10(mode_Celsius);
   IronError_t Err = { 0 };
-  Err.safeMode = Iron.Error.safeMode;                                                     // Get failState flag
-  Err.NTC_high = ambTemp > 700 ? 1 : 0;                                                     // Check NTC too high (Wrong NTC wiring or overheating, >70ºC)
-  Err.NTC_low = ambTemp < -500 ? 1 : 0;    
+  Err.safeMode = Iron.Error.safeMode;
+  Err.NTC_high = ambTemp > 800 ? 1 : 0;
+  Err.NTC_low = ambTemp < -200 ? 1 : 0;
   #ifdef USE_VIN
-  Err.V_low = getSupplyVoltage_v_x10() < systemSettings.settings.lvp   ? 1 : 0;             // Check supply voltage (Mosfet will not work ok <10V, it will heat up)
+  Err.V_low = getSupplyVoltage_v_x10() < systemSettings.settings.lvp   ? 1 : 0;
   #endif
-  Err.noIron = TIP.last_raw>systemSettings.Profile.noIronValue ? 1 : 0;                     // Check tip temperature too high (Wrong connection or not connected)
+  Err.noIron = TIP.last_raw>systemSettings.Profile.noIronValue ? 1 : 0;
+
   if(CurrentTime<1000 || systemSettings.setupMode==setup_On){                               // Don't check sensor errors during first second or in setup mode, wait for readings need to get stable
-    Err.Flags &= _SAFE_MODE;                                                                // Only check failure state
+    Err.Flags &= _SAFE_MODE;
   }
-  if(Err.Flags){                                                                            // If there are errors
-    Iron.Error.Flags |= Err.Flags;                                                          // Update flags
-    Iron.LastErrorTime = CurrentTime;                                                       // Save time
-    if(!Iron.Error.active){                                                             // If first detection
-      if(Err.Flags==_NO_IRON && Iron.CurrentMode == mode_sleep){                                   // If in sleep mode and only no iron flag is set
-        return;                                                                             // return
+
+  if(Err.Flags){
+    Iron.Error.Flags |= Err.Flags;
+    Iron.LastErrorTime = CurrentTime;
+    if(!Iron.Error.active){
+      if(Err.Flags==_NO_IRON && Iron.CurrentMode == mode_sleep){                            // If in sleep mode and only no iron flag is set, ignore
+        return;
       }
-      Iron.Error.active = 1;                                                            // Set global flag
-      setCurrentMode(mode_sleep);                                                           // Force sleep mode
-      if(systemSettings.settings.activeDetection && !Err.safeMode){
-        Iron.Pwm_Out = PWMminOutput;
-      }
-      else{
-        Iron.Pwm_Out = 0;
-      }
-      __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                // Load now the value into the PWM hardware
+      Iron.Error.active = 1;
+      setCurrentMode(mode_sleep);
+      Iron.Pwm_Out = 0;
+      __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, 0);
+      configurePWMpin(output_Low);
       buzzer_alarm_start();                                                                 // Start alarm
     }
   }
-  else if(!Err.Flags && Iron.Error.Flags==1){                                               // If no errors and only no iron flag was active (And no global flag, so it was detected while in sleep mode)
-    Iron.Error.Flags=_NOERROR;                                                              // Clear
-  }
-  else if (Iron.Error.active && Err.Flags==disable){                                    // If global flag set, but there are no errors anymore
+  else if (Iron.Error.active && !Err.Flags){                                                // If global flag set, but no errors
     if((CurrentTime-Iron.LastErrorTime)>systemSettings.settings.errorDelay){                // Check enough time has passed
-      Iron.Error.Flags = disable;                                                           // Reset errors
-      buzzer_alarm_stop();                                                                  // Stop alarm
-      setCurrentMode(mode_run);                                                             // Restore run mode
+      Iron.Error.Flags = 0;
+      buzzer_alarm_stop();
+      setCurrentMode(mode_run);
     }
+  }
+  else{
+    Iron.Error.Flags=_NOERROR;
   }
 }
 
-// Returns the actual status of the iron error.
+
 bool GetIronError(void){
   return Iron.Error.active;
 }
 
-// Sets Failure state
 void setSafeMode(bool mode){
-  if(!mode && Iron.Error.Flags==(_ACTIVE |_SAFE_MODE)){                                // If only failsafe was active? (This should only happen because it was on first init screen)
-    Iron.Error.Flags = _NOERROR;                                                            // Reset errors (Ignore timer)
-    setCurrentMode(mode_run);                                                               // Resume run mode
+  if(mode==disable && Iron.Error.Flags==(_ACTIVE |_SAFE_MODE)){                             // If only failsafe was active? (This should only happen because it was on first init screen)
+    Iron.Error.Flags = _NOERROR;
+    setCurrentMode(mode_run);
   }
   else{
+    if(mode==enable){
+      configurePWMpin(output_Low);
+    }
     Iron.Error.safeMode=mode;
-    checkIronError();                                                                       // Update Error
+    checkIronError();
   }
 }
 
-// Gets Failure state
+
 bool GetSafeMode() {
   return(Iron.Error.safeMode && Iron.Error.active);
 }
 
-
-// Sets the debug temperature
 void setDebugTemp(uint16_t value) {
   Iron.Debug_SetTemperature = value;
 }
-// Handles the debug activation/deactivation
+
 void setDebugMode(uint8_t value) {
   Iron.DebugMode = value;
 }
 
-// Sets the user temperature
 void setUserTemperature(uint16_t temperature) {
   Iron.Cal_TemperatureReachedFlag = 0;
   if(systemSettings.Profile.UserSetTemperature != temperature){
@@ -527,22 +535,18 @@ void setUserTemperature(uint16_t temperature) {
   }
 }
 
-// Returns the actual set temperature
 uint16_t getUserTemperature() {
   return systemSettings.Profile.UserSetTemperature;
 }
 
-// Returns the actual working mode of the iron
 uint8_t getCurrentMode() {
   return Iron.CurrentMode;
 }
 
-// Returns the output power
 int8_t getCurrentPower() {
   return Iron.CurrentIronPower;
 }
 
-// Adds a callback to be called when the set temperature is reached
 void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback) {
   setTemperatureReachedCallbackStruct_t *s = malloc(sizeof(setTemperatureReachedCallbackStruct_t));
   if(!s){

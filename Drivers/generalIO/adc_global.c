@@ -110,6 +110,11 @@ void ADC_Start_DMA(){
   if(ADC_Status!=ADC_Waiting){
     Error_Handler();
   }
+  if(systemSettings.isSaving){                                                              // If saving, skip ADC conversion (PWM pin disabled)
+    ADC_Status=ADC_Idle;
+    HAL_IWDG_Refresh(&hiwdg);
+    return;
+  }
   if( PWM_GPIO_Port->IDR & PWM_Pin ){                                                       // Check if PWM is active
     buzzer_long_beep();                                                                     // Generate warning with a beep
   }
@@ -283,8 +288,12 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
 
     handleIron();                                                                           // Handle iron
 
-    runAwayCheck();                                                                         // Check runaway condition
+    runAwayCheck();
 
+    if(!Iron.Error.safeMode && Iron.CurrentMode!=mode_sleep){
+      configurePWMpin(output_PWM);
+    }
+    __HAL_TIM_SET_COUNTER(Iron.Pwm_Timer,0);                                                // Synchronize PWM
     #ifdef DEBUG_PWM
     HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,0);                                    // Toggle TEST
     #endif

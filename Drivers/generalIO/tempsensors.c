@@ -10,8 +10,8 @@
 #define temp_minC  50                 // Minimum calibration temperature in degrees of Celsius
 #define temp_maxC  480                // Maximum calibration temperature in degrees of Celsius
 static tipData *currentTipData;
-uint16_t last_TIP_Raw;
-uint16_t last_TIP;
+int16_t last_TIP_Raw;
+int16_t last_TIP;
 int16_t last_NTC;
 
 #ifdef USE_NTC
@@ -32,7 +32,6 @@ int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
   if(tempUnit==mode_Farenheit){
     temp=TempConversion(temp, mode_Farenheit, 1);
   }
-  temp=350;
   last_NTC = temp;
   return last_NTC;
 #else
@@ -41,8 +40,8 @@ int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
 #endif
 }
 // Read tip temperature
-uint16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
-  uint16_t temp, temp_Raw;
+int16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
+  int16_t temp, temp_Raw;
   if(systemSettings.setupMode==setup_On){
     return 0;
   }

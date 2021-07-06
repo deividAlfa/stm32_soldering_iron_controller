@@ -10,7 +10,7 @@
 #include "pid.h"
 #include "settings.h"
 
-#define PWMminOutput   1                                    // Min pwm level to maintain iron detection
+#define PWM_DETECT_TIME   5                                    // Pulse before reading adc, to detect tip presence. In uS
 
 typedef void (*setTemperatureReachedCallback)(uint16_t);
 
@@ -23,7 +23,7 @@ typedef union{
     unsigned  NTC_high:1;                                   // NTC too high
     unsigned  NTC_low:1;                                    // NTC too low
     unsigned  V_low:1;                                      // Voltage too low
-    unsigned  safeMode:1;                                   // Undefined profile settings, shut down pwm (Only should happen on first boot)
+    unsigned  safeMode:1;                                   // Shut down pwm by some reason. Error condition, first boot...
     unsigned  unused_b5:1;
     unsigned  unused_b6:1;
     unsigned  active:1;                                     // Errors active flag
@@ -43,14 +43,13 @@ typedef struct {
 
   TIM_HandleTypeDef   *Pwm_Timer;                           // Pointer to the PWM timer
   uint8_t             Pwm_Channel;                          // PWM channel
-  uint16_t            Pwm_Limit;                            // Max PWM output value possible
-  uint16_t            Pwm_Max;                              // Max PWM output based on power limit
-  uint16_t            Pwm_Out;                              // Last PWM value calculated
-  TIM_HandleTypeDef   *Delay_Timer;                         // Pointer to the Delay timer
+  uint16_t            Pwm_Period;                           // PWM period
+  uint16_t            Pwm_Max;                              // Max PWM output for power limit
+  uint16_t            Pwm_Out;                              // Last calculated PWM value
+  TIM_HandleTypeDef   *Read_Timer;                          // Pointer to the Read timer
   int8_t              CurrentIronPower;                     // Last output power
   uint16_t            CurrentSetTemperature;                // Actual set temperature (Setpoint)
   uint16_t            Debug_SetTemperature;                 // Debug mode temperature
-  uint32_t            LastSysChangeTime;                    // Last time a system setting was changed
   uint32_t            LastModeChangeTime;                   // Last time the mode was changed (To provide debouncing)
   uint32_t            LastErrorTime;                        // last time iron error was detected
   uint32_t            lastActivityTime;                     // last time iron handle was moved (In shake mode)
@@ -62,12 +61,12 @@ typedef struct {
   uint8_t             RunawayLevel;                         // Runaway actual level
   uint8_t             prevRunawayLevel;                     // Runaway previous level
   bool                RunawayStatus;                        // Runaway triggered flag
-  bool                updatePwm;                            // Set when timer values need to be updated
   bool                calibrating;                          // Flag to indicate calibration state (don't save temperature settings)
-  bool                updateMode;                           // Flag to indicate the mode must be changed
+  bool                updateStandMode;                      // Flag to indicate the stand mode must be changed
   bool                newActivity;                          // Flag to indicate handle movement
   bool                Cal_TemperatureReachedFlag;           // Flag for temperature calibration
   bool                DebugMode;                            // Flag to indicate Debug is enabled
+  bool                updatePwm;                            // Flag to indicate PWM need to be updated
 }iron_t;
 
 
@@ -88,8 +87,9 @@ uint16_t getSetTemperature();
 uint16_t getCurrentTemperature();
 int8_t getCurrentPower();
 void initTimers(void);
-void setPwmPeriod(uint16_t period);
-void setPwmDelay(uint16_t delay);
+void setPwmMul(uint16_t mult);
+void setReadDelay(uint16_t delay);
+void setReadPeriod(uint16_t period);
 void setNoIronValue(uint16_t noiron);
 void setSystemTempUnit(bool unit);
 void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback);
@@ -99,5 +99,6 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 uint8_t getIronOn();
 void setDebugTemp(uint16_t value);
 void setDebugMode(uint8_t value);
+void configurePWMpin(uint8_t mode);
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim);
 #endif /* IRON_H_ */

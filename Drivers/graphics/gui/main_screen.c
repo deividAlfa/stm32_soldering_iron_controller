@@ -126,7 +126,7 @@ static void setTip(uint8_t *val) {
   if(systemSettings.Profile.currentTip != *val){        // Tip temp uses huge font that partially overlaps other widgets
     systemSettings.Profile.currentTip = *val;
     setCurrentTip(*val);
-    Screen_main.refresh=screenRefresh_eraseNow;         // So, we must redraw the screen. Tip temp is drawed first, then the rest go on top.
+    Screen_main.refresh=screen_Erase;         // So, we must redraw the screen. Tip temp is drawed first, then the rest go on top.
   }
 }
 
@@ -182,7 +182,7 @@ static void updateIronPower() {
 static void setMainWidget(widget_t* w){
   selectable_widget_t* sel =extractSelectablePartFromWidget(w);
   mainScr.drawTick=HAL_GetTick();
-  Screen_main.refresh=screenRefresh_eraseNow;
+  Screen_main.refresh=screen_Erase;
   widgetDisable(mainScr.Selected);
   mainScr.Selected=w;
   widgetEnable(w);
@@ -208,14 +208,14 @@ static void setMainScrTempUnit(void) {
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     display_IronTemp.endString="\260F";
     #ifdef USE_NTC
-    display_AmbTemp.endString="F";
+    display_AmbTemp.endString="\260F";
     #endif
     editable_SetPoint.inputData.endString="\260F";
   }
   else{
     display_IronTemp.endString="\260C";                         // \260 = ASCII dec. 176(°) in octal representation
     #ifdef USE_NTC
-    display_AmbTemp.endString="C";
+    display_AmbTemp.endString="\260C";
     #endif
     editable_SetPoint.inputData.endString="\260C";
   }
@@ -286,7 +286,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
   // Check for click input and wake iron. Disable button wake for 500mS after manually entering sleep mode
   if(input==Click && ((mainScr.currentMode==main_irontemp) || (mainScr.currentMode==main_disabled)) && (currentTime - mainScr.enteredSleep) >500 ){
-    IronWake(source_wakeButton);
+    IronWake(wakeButton);
   }
 
   switch(mainScr.currentMode){
@@ -318,12 +318,12 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         mainScr.setMode=main_setpoint;
         mainScr.currentMode=main_setMode;
         if(current_mode!=mode_sleep){
-          IronWake(source_wakeButton);
+          IronWake(wakeButton);
         }
       }
       else if(input==Click){
         mainScr.update=1;
-        scr->refresh=screenRefresh_eraseNow;
+        scr->refresh=screen_Erase;
         if(mainScr.displayMode==temp_numeric){
           mainScr.displayMode=temp_graph;
           widgetDisable(&Widget_IronTemp);
@@ -425,7 +425,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   if(mainScr.currentMode==main_setMode){
     mainScr.update=1;
     mainScr.idleTick=currentTime;
-    scr->refresh=screenRefresh_eraseNow;
+    scr->refresh=screen_Erase;
     mainScr.currentMode=mainScr.setMode;
     switch(mainScr.currentMode){
     case main_disabled:
@@ -457,7 +457,7 @@ void main_screen_draw(screen_t *scr){
   static uint32_t lastState = 0;
   uint32_t currentState = (uint32_t)Iron.Error.Flags<<24 | (uint32_t)mainScr.ironStatus<<16 | mainScr.currentMode;    // Simple method to detect changes
 
-  uint16_t plot_t = (systemSettings.Profile.pwmPeriod+1)/100;                                                         // Update at the same rate as the system pwm
+  uint16_t plot_t = (systemSettings.Profile.readPeriod+1)/200;                                                         // Update at the same rate as the system pwm
   if(plot_t<20){ plot_t = 20; }
   if(mainScr.currentMode!=main_disabled && (HAL_GetTick()-plotTime)>plot_t){                                          // Only store values if running
     plotUpdate=1;
@@ -477,13 +477,13 @@ void main_screen_draw(screen_t *scr){
   }
   if((lastState!=currentState) || Widget_SetPoint.refresh || Widget_IronTemp.refresh || plotUpdate){
     lastState=currentState;
-    scr->refresh=screenRefresh_eraseNow;
+    scr->refresh=screen_Erase;
   }
 
   if(mainScr.ironStatus==status_sleep && mainScr.currentMode==main_disabled){
     if((HAL_GetTick()-sleepTim)>50){
       sleepTim=HAL_GetTick();
-      scr->refresh=screenRefresh_eraseNow;
+      scr->refresh=screen_Erase;
       Slp_xpos += Slp_xadd;
       Slp_ypos += Slp_yadd;
       if((Slp_xpos+sleepWidth)>OledWidth){
@@ -500,10 +500,11 @@ void main_screen_draw(screen_t *scr){
       }
     }
   }
+
 /*
-  if(scr->refresh==screenRefresh_eraseNow){
+  if(scr->refresh==screen_Erase){
     FillBuffer(BLACK,fill_dma);
-    scr->refresh=screenRefresh_alreadyErased;
+    scr->refresh=screen_Erased;
     // Screen is erased now, draw anything here before main screen draws
   }
 */
@@ -522,10 +523,9 @@ void main_screen_draw(screen_t *scr){
     #endif
 
     if(mainScr.currentMode==main_disabled){
-      u8g2_SetFont(&u8g2, u8g2_font_mainBig);
       if(mainScr.ironStatus==status_error){
         if(Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error just for it
-          u8g2_SetFont(&u8g2, u8g2_font_mainBig);
+          u8g2_SetFont(&u8g2, u8g2_font_noIron_Sleep);
           putStrAligned("NO IRON", 26, align_center);
         }
         else{
@@ -538,7 +538,7 @@ void main_screen_draw(screen_t *scr){
           else{
             Err_ypos=14;
           }
-          u8g2_SetFont(&u8g2, u8g2_font_t0_16_tr);
+          u8g2_SetFont(&u8g2, default_font);
           if(Iron.Error.V_low){
             putStrAligned("Voltage low!", Err_ypos, align_center);
             Err_ypos+=13;
@@ -562,6 +562,7 @@ void main_screen_draw(screen_t *scr){
         }
       }
       else if(mainScr.ironStatus==status_sleep){
+        u8g2_SetFont(&u8g2, u8g2_font_noIron_Sleep);
         u8g2_DrawStr(&u8g2, Slp_xpos, Slp_ypos, "SLEEP");
         u8g2_SetFont(&u8g2, u8g2_font_labels);
         if(!Iron.Error.Flags && readTipTemperatureCompensated(0,0)>120){
@@ -572,7 +573,7 @@ void main_screen_draw(screen_t *scr){
     }
     else{
       if(mainScr.currentMode==main_tipselect){
-        u8g2_SetFont(&u8g2, u8g2_font_t0_16_tr);
+        u8g2_SetFont(&u8g2, default_font);
         putStrAligned("TIP SELECTION", 16, align_center);
       }
       if(mainScr.ActivityOn){
@@ -587,7 +588,7 @@ void main_screen_draw(screen_t *scr){
       u8g2_DrawStr(&u8g2, 47, 2, "STBY");
     }
     if( scr_refresh || (HAL_GetTick()-barTime)>9){                    // Update every 10mS or if screen was erased
-      if(scr_refresh<screenRefresh_eraseNow){                         // If screen not erased
+      if(scr_refresh<screen_Erase){                                   // If screen not erased
          u8g2_SetDrawColor(&u8g2,BLACK);                              // Draw a black square to wipe old widget data
         u8g2_DrawBox(&u8g2, 13 , OledHeight-6, 100, 5);
       }
@@ -596,7 +597,7 @@ void main_screen_draw(screen_t *scr){
       u8g2_DrawRFrame(&u8g2, 13, OledHeight-6, 100, 5, 2);
     }
 
-    if((scr_refresh || plotUpdate) && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){  //Update every 100mS or if screen is erased
+    if((scr_refresh || plotUpdate) && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){
       plotUpdate=0;
       uint8_t set;
       int16_t t = Iron.CurrentSetTemperature;
@@ -683,7 +684,7 @@ void main_screen_setup(screen_t *scr) {
   dis->reservedChars=5;
   dis->textAlign=align_center;
   dis->dispAlign=align_center;
-  dis->font=u8g2_font_iron;
+  dis->font=u8g2_font_ironTemp;
   w->posY = 17;
   dis->getData = &main_screen_getIronTemp;
 
@@ -760,7 +761,7 @@ void main_screen_setup(screen_t *scr) {
   w->frameType=frame_disabled;
 
   setMainWidget(&Widget_IronTemp);
-  u8g2_SetFont(&u8g2,u8g2_font_mainBig);
+  u8g2_SetFont(&u8g2,u8g2_font_noIron_Sleep);
   sleepWidth=u8g2_GetStrWidth(&u8g2, "SLEEP")+2;
   sleepHeigh= u8g2_GetMaxCharHeight(&u8g2)+3;
 }

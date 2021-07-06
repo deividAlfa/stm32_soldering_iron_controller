@@ -53,7 +53,7 @@ int default_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *
 void default_screenDraw(screen_t *scr) {
   widget_t *last_widget = NULL;
   if(scr->widgets) {
-    if(scr->refresh==screenRefresh_eraseNow){
+    if(scr->refresh==screen_Erase){
       FillBuffer(BLACK,fill_dma);
     }
     last_widget = scr->widgets;
@@ -63,7 +63,7 @@ void default_screenDraw(screen_t *scr) {
       }
       last_widget = last_widget->next_widget;
     }
-    scr->refresh=screenRefresh_idle;
+    scr->refresh=screen_Idle;
   }
 
 }

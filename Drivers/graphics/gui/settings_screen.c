@@ -103,7 +103,8 @@ static comboBox_item_t comboitem_IRON_Impedance;
 static comboBox_item_t comboitem_IRON_MaxTemp;
 static comboBox_item_t comboitem_IRON_MinTemp;
 static comboBox_item_t comboitem_IRON_PWMPeriod;
-static comboBox_item_t comboitem_IRON_ADCDelay;
+static comboBox_item_t comboitem_IRON_ReadPeriod;
+static comboBox_item_t comboitem_IRON_ReadDelay;
 static comboBox_item_t comboitem_IRON_filterFactor;
 static comboBox_item_t comboitem_IRON_errorDelay;
 static comboBox_item_t comboitem_IRON_ADCLimit;
@@ -120,7 +121,8 @@ static editable_widget_t editable_IRON_MaxTemp;
 static editable_widget_t editable_IRON_MinTemp;
 static editable_widget_t editable_IRON_ADCLimit;
 static editable_widget_t editable_IRON_PWMPeriod;
-static editable_widget_t editable_IRON_ADCDelay;
+static editable_widget_t editable_IRON_ReadPeriod;
+static editable_widget_t editable_IRON_ReadDelay;
 static editable_widget_t editable_IRON_filterFactor;
 static editable_widget_t editable_IRON_errorDelay;
 
@@ -351,33 +353,37 @@ static int IRONTIPS_Copy(widget_t *w) {
 }
 
 
-static void * getPWMPeriod() {
-  temp=(systemSettings.Profile.pwmPeriod+1)/100;
+static void * _getPwmMul() {
+  temp=systemSettings.Profile.pwmMul;
   return &temp;
 }
-static void setPWMPeriod(uint32_t *val) {
-  uint16_t period=(*val*100)-1;
-  if(period>systemSettings.Profile.pwmDelay+(ADC_MEASURE_TIME/10)){
-    setPwmPeriod(period);
-  }
-  else{
-    uint16_t t=(systemSettings.Profile.pwmDelay+((ADC_MEASURE_TIME/10)+2));
-    setPwmPeriod(t);
-  }
+static void _setPwmMul(uint32_t *val) {
+  setPwmMul(*val);
 }
 
-static void * getPWMDelay() {
-  temp=(systemSettings.Profile.pwmDelay+1)/10;
+static void * _getReadDelay() {
+  temp=(systemSettings.Profile.readDelay+1)/20;
   return &temp;
 }
-static void setPWMDelay(uint32_t *val) {
-  uint16_t delay=(*val*10)-1;
-  if(delay<(systemSettings.Profile.pwmPeriod-(ADC_MEASURE_TIME/10))){
-    setPwmDelay(delay);
+static void _setReadDelay(uint32_t *val) {
+  uint16_t delay=(*val*20)-1;
+  if(delay>(systemSettings.Profile.readPeriod-200)){
+    delay = systemSettings.Profile.readPeriod-200;
   }
-  else{
-    setPwmDelay(systemSettings.Profile.pwmPeriod-((ADC_MEASURE_TIME/10)+2));
+  setReadDelay(delay);
+}
+
+static void * _getReadPeriod() {
+  temp=(systemSettings.Profile.readPeriod+1)/200;
+  return &temp;
+}
+static void _setReadPeriod(uint32_t *val) {
+  uint16_t period=(*val*200)-1;
+
+  if(period<(systemSettings.Profile.readDelay+200)){
+      period=systemSettings.Profile.readDelay+200;
   }
+  setReadPeriod(period);
 }
 
 static void * getMaxTemp() {
@@ -678,7 +684,7 @@ void Reset_onEnter(screen_t *scr){
 //-------------------------------------------------------------------------------------------------------------------------------
 void Reset_confirmation_onEnter(screen_t *scr){
   FillBuffer(BLACK, fill_dma);                                            // Manually clear the screen
-  Screen_reset_confirmation.refresh=screenRefresh_alreadyErased;          // Set to already cleared so it doesn't get erased automatically
+  Screen_reset_confirmation.refresh=screen_Erased;          // Set to already cleared so it doesn't get erased automatically
 
   u8g2_SetFont(&u8g2,default_font);
   u8g2_SetDrawColor(&u8g2, WHITE);
@@ -739,9 +745,9 @@ void IRONTIPS_Settings_onEnter(screen_t *scr){
     Selected_Tip = systemSettings.Profile.currentTip;
   }
 
-  else if(scr==&Screen_iron_tips){                                                                 // If coming from tips menu
+  else if(scr==&Screen_iron_tips){                                                                      // If coming from tips menu
     if(comboBox_IRONTIPS.currentItem == &comboitem_IRONTIPS_addNewTip) {                                // If was Add New tip option
-      for(uint8_t x = 0; x < TipSize; x++) {                                                            // Find first valid tip and store it
+      for(uint8_t x = 0; x < TipSize; x++) {                                                            // Find first valid tip and store the position
         if(strcmp(systemSettings.Profile.tip[x].name, _BLANK_TIP)!=0){
           Selected_Tip=x;
           new=1;
@@ -762,13 +768,11 @@ void IRONTIPS_Settings_onEnter(screen_t *scr){
     comboitem_IRONTIPS_Settings_Cancel.action_screen = screen_iron_tips;
   }
 
-  tipCfg = systemSettings.Profile.tip[Selected_Tip];                                                      // Backup selected tip
+  tipCfg = systemSettings.Profile.tip[Selected_Tip];                                                      // Copy selected tip
 
   if(new){                                                                                                // If new tip selected
     strcpy(tipCfg.name, _BLANK_TIP);                                                                      // Set an empty name
     Selected_Tip=systemSettings.Profile.currentNumberOfTips;                                              // Selected tip is next position
-    comboitem_IRONTIPS_Settings_Delete.enabled=0;                                                         // Cannot delete empty tip
-    comboitem_IRONTIPS_Settings_Save.enabled=0;                                                           // Disabled until the name is changed
     disableTipCopy=1;                                                                                     // Cannot copy a new tip
   }
   else{
@@ -826,11 +830,12 @@ int IRONTIPS_Settings_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State
       }
     }
     comboitem_IRONTIPS_Settings_Save.enabled=enable;
-    if(!disableTipCopy){
-      comboitem_IRONTIPS_Settings_Copy.enabled=enable;
+    if(disableTipCopy){
+      comboitem_IRONTIPS_Settings_Delete.enabled=0;
+      comboitem_IRONTIPS_Settings_Copy.enabled=0;
     }
     else{
-      comboitem_IRONTIPS_Settings_Copy.enabled=0;
+      comboitem_IRONTIPS_Settings_Copy.enabled=enable;
     }
   }
   return default_screenProcessInput(scr, input, state);
@@ -1297,9 +1302,9 @@ void settings_screen_setup(screen_t *scr) {
   dis=&editable_IRON_Impedance.inputData;
   edit=&editable_IRON_Impedance;
   editableDefaultsInit(edit,widget_editable);
-  dis->reservedChars=4;
+  dis->reservedChars=5;
   dis->number_of_dec=1;
-  //dis->endString="";
+  dis->endString="\261";
   dis->getData = &getTipImpedance;
   edit->big_step = 10;
   edit->step = 1;
@@ -1352,28 +1357,44 @@ void settings_screen_setup(screen_t *scr) {
   dis=&editable_IRON_PWMPeriod.inputData;
   edit=&editable_IRON_PWMPeriod;
   editableDefaultsInit(edit,widget_editable);
-  dis->endString="mS";
-  dis->reservedChars=5;
-  dis->getData = &getPWMPeriod;
+  dis->endString="x";
+  dis->reservedChars=7;
+  dis->number_of_dec = 0;
+  dis->getData = &_getPwmMul;
   edit->big_step = 10;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setPWMPeriod;
-  edit->max_value = 200;
-  edit->min_value = 20;
+  edit->setData = (void (*)(void *))&_setPwmMul;
+  edit->max_value = 20;
+  edit->min_value = 1;
 
-  //********[ ADC Delay Widget ]***********************************************************
+  //********[ Read Period Widget ]***********************************************************
   //
-  dis=&editable_IRON_ADCDelay.inputData;
-  edit=&editable_IRON_ADCDelay;
+  dis=&editable_IRON_ReadPeriod.inputData;
+  edit=&editable_IRON_ReadPeriod;
+  editableDefaultsInit(edit,widget_editable);
+  dis->endString="mS";
+  dis->reservedChars=7;
+  dis->number_of_dec = 0;
+  dis->getData = &_getReadPeriod;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&_setReadPeriod;
+  edit->max_value = 200;
+  edit->min_value = 10;
+
+  //********[ Read Delay Widget ]***********************************************************
+  //
+  dis=&editable_IRON_ReadDelay.inputData;
+  edit=&editable_IRON_ReadDelay;
   editableDefaultsInit(edit,widget_editable);
   dis->endString="mS";
   dis->reservedChars=7;
   dis->number_of_dec = 1;
-  dis->getData = &getPWMDelay;
+  dis->getData = &_getReadDelay;
   edit->big_step = 10;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setPWMDelay;
-  edit->max_value = 500;
+  edit->setData = (void (*)(void *))&_setReadDelay;
+  edit->max_value = 1000;
   edit->min_value = 1;
 
   //********[ Filter Coefficient Widget ]***********************************************************
@@ -1410,15 +1431,16 @@ void settings_screen_setup(screen_t *scr) {
   widgetDefaultsInit(w, widget_combo, &comboBox_IRON);
   comboAddEditable(&comboitem_IRON_MaxTemp, w,      "Max temp",   &editable_IRON_MaxTemp);
   comboAddEditable(&comboitem_IRON_MinTemp, w,      "Min temp",   &editable_IRON_MinTemp);
-  comboAddEditable(&comboitem_IRON_StandbyTemp, w,  "Stby temp",  &editable_IRON_StandbyTemp);
-  comboAddEditable(&comboitem_IRON_StandbyTime, w,  "Stby time",  &editable_IRON_StandbyTime);
-  comboAddEditable(&comboitem_IRON_SleepTime, w,    "Sleep time", &editable_IRON_SleepTime);
+  comboAddEditable(&comboitem_IRON_StandbyTemp, w,  "Sby temp",   &editable_IRON_StandbyTemp);
+  comboAddEditable(&comboitem_IRON_StandbyTime, w,  "Sby tim",    &editable_IRON_StandbyTime);
+  comboAddEditable(&comboitem_IRON_SleepTime, w,    "Slp tim",    &editable_IRON_SleepTime);
   #ifdef USE_VIN
-  comboAddEditable(&comboitem_IRON_Impedance, w,    "Heater ohm", &editable_IRON_Impedance);
-  comboAddEditable(&comboitem_IRON_Power, w,        "Power",      &editable_IRON_Power);
+  comboAddEditable(&comboitem_IRON_Impedance, w,    "Heater",     &editable_IRON_Impedance);
+  comboAddEditable(&comboitem_IRON_Power, w,        "Pwr lim",    &editable_IRON_Power);
   #endif
-  comboAddEditable(&comboitem_IRON_PWMPeriod,w,     "PWM",        &editable_IRON_PWMPeriod);
-  comboAddEditable(&comboitem_IRON_ADCDelay, w,     "Delay",      &editable_IRON_ADCDelay);
+  comboAddEditable(&comboitem_IRON_ReadPeriod, w,   "ADC tim",    &editable_IRON_ReadPeriod);
+  comboAddEditable(&comboitem_IRON_ReadDelay, w,    "ADC del",    &editable_IRON_ReadDelay);
+  comboAddEditable(&comboitem_IRON_PWMPeriod,w,     "PWM mul",    &editable_IRON_PWMPeriod);
   comboAddEditable(&comboitem_IRON_filterFactor, w, "Filter",     &editable_IRON_filterFactor);
   comboAddEditable(&comboitem_IRON_ADCLimit, w,     "No iron",    &editable_IRON_ADCLimit);
   comboAddEditable(&comboitem_IRON_errorDelay, w,   "Detect",     &editable_IRON_errorDelay);
@@ -1599,7 +1621,7 @@ void settings_screen_setup(screen_t *scr) {
   w = &comboWidget_IRONTIPS_Settings;
   screen_addWidget(w, sc);
   widgetDefaultsInit(w, widget_combo, &comboBox_IRONTIPS_Settings);
-  comboAddEditable(&comboitem_IRONTIPS_Settings_TipLabel, w,  "Name",       &editable_IRONTIPS_Settings_TipLabel);        // Name set automatically on enter
+  comboAddEditable(&comboitem_IRONTIPS_Settings_TipLabel, w,  "Name",       &editable_IRONTIPS_Settings_TipLabel);
   comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KP,   w,  "PID Kp",     &editable_IRONTIPS_Settings_PID_Kp);
   comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KI,   w,  "PID Ki",     &editable_IRONTIPS_Settings_PID_Ki);
   comboAddEditable(&comboitem_IRONTIPS_Settings_PID_KD,   w,  "PID Kd",     &editable_IRONTIPS_Settings_PID_Kd);
@@ -1612,5 +1634,5 @@ void settings_screen_setup(screen_t *scr) {
   comboAddAction(&comboitem_IRONTIPS_Settings_Save,       w,  "SAVE",       &IRONTIPS_Save);
   comboAddAction(&comboitem_IRONTIPS_Settings_Copy,       w,  "COPY",       &IRONTIPS_Copy);
   comboAddAction(&comboitem_IRONTIPS_Settings_Delete,     w,  "DELETE",     &IRONTIPS_Delete);
-  comboAddScreen(&comboitem_IRONTIPS_Settings_Cancel,     w,  "CANCEL",     -1);                                               // Return value set automatically on enter
+  comboAddScreen(&comboitem_IRONTIPS_Settings_Cancel,     w,  "CANCEL",     -1);                                          // Return value set automatically on enter
 }

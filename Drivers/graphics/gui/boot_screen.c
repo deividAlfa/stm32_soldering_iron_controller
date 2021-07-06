@@ -25,9 +25,6 @@ screen_t Screen_boot;
 static widget_t Widget_profile_edit;
 static editable_widget_t editable_Profile_edit;
 
-static widget_t Widget_profile_OK;
-static button_widget_t button_Profile_OK;
-
 static uint8_t boot_step=0;
 //-------------------------------------------------------------------------------------------------------------------------------
 // Boot Screen widget functions
@@ -38,13 +35,6 @@ static void * getProfile() {
 
 static void setProfile(int32_t *val) {
   profile = *val;
-}
-static int profile_OK(widget_t *w) {
-  loadProfile((uint8_t)profile);                // Load profile
-  saveSettingsFromMenu(save_Settings);               // Save
-  systemSettings.setupMode=setup_Off;           // Reset setup mode
-  setSafeMode(disable);                         // Enable normal operation
-  return screen_main;
 }
 
 
@@ -140,18 +130,16 @@ const uint8_t splashXBM[] = {
 
 
 void boot_screen_draw(screen_t *scr){
+  default_screenDraw(scr);
   if(boot_step==1){
-    boot_step=2;
-    default_screenDraw(scr);
-
+    boot_step++;;
     u8g2_SetFont(&u8g2,default_font );
     u8g2_SetDrawColor(&u8g2, WHITE);
     putStrAligned("First boot!", 0, align_center);
-    putStrAligned("Select profile", 16, align_center);
-    u8g2_DrawHLine(&u8g2, 0, 32, OledWidth);
+    u8g2_DrawHLine(&u8g2, 0, 16, OledWidth);
+    u8g2_DrawStr(&u8g2, 8, 32, "Profile:");
     return;
   }
-  default_screenDraw(scr);
 }
 int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 
@@ -161,10 +149,21 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
       return screen_main;
     }
     else if(boot_step==0){
-      boot_step=1;
+      boot_step++;
       widgetEnable(&Widget_profile_edit);
-      widgetEnable(&Widget_profile_OK);
-      scr->refresh = screenRefresh_eraseNow;
+      editable_Profile_edit.selectable.previous_state=widget_selected;
+      editable_Profile_edit.selectable.state=widget_edit;
+      scr->refresh = screen_Erase;
+    }
+    else if((boot_step==2) && (editable_Profile_edit.selectable.state!=widget_edit)){
+      loadProfile((uint8_t)profile);
+      saveSettingsFromMenu(save_Settings);
+      boot_step++;
+    }
+    else if(boot_step==3){
+      systemSettings.setupMode=setup_Off;
+      setSafeMode(disable);
+      HAL_Delay(100);                                     // To let the ADC refresh
     }
   }
   else{
@@ -179,8 +178,9 @@ void boot_screen_init(screen_t * scr){
 
   if( (systemSettings.settings.NotInitialized!=initialized) || (systemSettings.settings.currentProfile>profile_C210) ){
 
-    profile=profile_C210;                       // For safety, set C210 profile by default, has the lowest Output TC
-    systemSettings.setupMode=setup_On;          // (Failure state is set in the iron routine when unknown iron profile is detected)
+    profile=profile_T12;
+    setSafeMode(enable);
+    systemSettings.setupMode=setup_On;
   }
   default_init(scr);
 
@@ -206,9 +206,9 @@ void boot_screen_setup(screen_t *scr) {
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
   dis->reservedChars=4;
-  w->posX = 12;
-  w->posY = 40;
-  w->width = 48;
+  w->posX = 76;
+  w->posY = 30;
+  w->width = 44;
   dis->getData = &getProfile;
   edit->big_step = 1;
   edit->step = 1;
@@ -217,19 +217,6 @@ void boot_screen_setup(screen_t *scr) {
   edit->max_value = ProfileSize-1;
   edit->options = profileStr;
   edit->numberOfOptions = ProfileSize;
-  w->enabled=0;
-
-  // OK Button
-  //
-  w = &Widget_profile_OK;
-  screen_addWidget(w,scr);
-  widgetDefaultsInit(w, widget_button, &button_Profile_OK);
-  button_Profile_OK.displayString="OK";
-  button_Profile_OK.selectable.tab = 1;
-  button_Profile_OK.action = &profile_OK;
-  w->posX = 95;
-  w->posY = 40;
-  w->width = 32;
   w->enabled=0;
 
 }

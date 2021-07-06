@@ -76,7 +76,7 @@ void oled_processInput(void) {
     while(scr) {
       if(scr->index == ret) {
         FillBuffer(BLACK, fill_dma);
-        scr->refresh=screenRefresh_alreadyErased;       // Changed screen, force full display erase using dma
+        scr->refresh=screen_Erased;       // Changed screen, force full display erase using dma
         if(current_screen->onExit)
           current_screen->onExit(scr);
         if(scr->onEnter)
@@ -84,6 +84,9 @@ void oled_processInput(void) {
         scr->init(scr);
         if(scr->update)
           scr->update(scr);
+        RE_Rotation=Rotate_Nothing;                     // Force first pass without activity to update screen
+        scr->processInput(scr, RE_Rotation, RE_State);
+
         current_screen = scr;
         return;
       }

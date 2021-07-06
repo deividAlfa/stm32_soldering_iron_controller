@@ -53,7 +53,7 @@ extern volatile ADCDataTypeDef_t TIP;
 
 
 
-typedef enum { ADC_Idle, ADC_Waiting, ADC_Sampling } ADC_Status_t;
+typedef enum { ADC_Idle, ADC_Waiting, ADC_ProbingTip, ADC_Sampling } ADC_Status_t;
 
 extern volatile ADC_Status_t ADC_Status;
 extern volatile uint16_t Tip_measures[ADC_BFSIZ];

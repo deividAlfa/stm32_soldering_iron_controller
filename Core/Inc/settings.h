@@ -32,10 +32,10 @@
 #define C245_Cal450       1100
 
 //#define SWSTRING        "SW: v1.10"                               // For releases
-#define SWSTRING          "SW: 2021-07-04"                          // For git
-#define SETTINGS_VERSION  4                                         // Change this if you change the struct below to prevent people getting out of sync
+#define SWSTRING          "SW: 2021-07-06"                          // For git
+#define SETTINGS_VERSION  5                                         // Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize         2                                         // In KB
-#define FLASH_ADDR     (0x8000000 + ((FLASH_SZ-StoreSize)*1024))    // Last 2KB flash (Minimum erase size, page size=2KB)
+#define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
 
 enum{
   wakeInputmode_shake     = 0,
@@ -47,8 +47,8 @@ enum{
   wakeShake_Off           = 0,
   wakeShake_On            = 1,
 
-  source_wakeInput        = 0,
-  source_wakeButton       = 1,
+  wakeInput               = 0,
+  wakeButton              = 1,
 
   no_update               = 0,
   needs_update            = 1,
@@ -95,12 +95,17 @@ enum{
   profile_None            = 0xff,
 
   save_Settings           = 1,
-  reset_Profile           = 0x80,
-  reset_Profiles          = 0x81,
+  reset_Profiles          = 0x80,
+  reset_Profile           = 0x81,
   reset_Settings          = 0x82,
   reset_All               = 0x83,
+
   keepProfiles            = 1,
-  wipeProfiles            = 0x80
+  wipeProfiles            = 0x80,
+
+  output_PWM,
+  output_Low,
+  output_High,
 };
 
 
@@ -127,8 +132,9 @@ typedef struct{
   uint16_t      UserSetTemperature;
   uint16_t      MaxSetTemperature;
   uint16_t      MinSetTemperature;
-  uint16_t      pwmPeriod;
-  uint16_t      pwmDelay;
+  uint16_t      pwmMul;
+  uint16_t      readPeriod;
+  uint16_t      readDelay;
   uint16_t      noIronValue;
   uint16_t      power;
   uint16_t      Cal250_default;
@@ -165,9 +171,9 @@ typedef __attribute__((aligned(4)))  struct{
   uint32_t      settingsChecksum;
   profile_t     Profile;
   uint32_t      ProfileChecksum;
-  bool          setupMode;
   uint8_t       save_Flag;
-
+  bool          setupMode;
+  bool          isSaving;
 }systemSettings_t;
 
 typedef __attribute__((aligned(4)))  struct{

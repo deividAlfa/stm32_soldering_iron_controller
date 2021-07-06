@@ -143,7 +143,7 @@ static void Cal_draw(screen_t *scr){
     if(errorTimer==0){
       errorTimer=HAL_GetTick();
       FillBuffer(BLACK,fill_dma);
-      scr->refresh=screenRefresh_alreadyErased;
+      scr->refresh=screen_Erased;
       putStrAligned("ERROR DETECTED!", 10, align_center);
       putStrAligned("Aborting...", 25, align_center);
     }
@@ -268,7 +268,7 @@ static void Cal_Start_draw(screen_t *scr){
     lastUpdateTick=HAL_GetTick();
 
     FillBuffer(BLACK, fill_dma);
-    scr->refresh=screenRefresh_alreadyErased;
+    scr->refresh=screen_Erased;
     u8g2_SetDrawColor(&u8g2, WHITE);
     lastTipTemp = readTipTemperatureCompensated(stored_reading,read_Avg);
     switch((int)current_state){

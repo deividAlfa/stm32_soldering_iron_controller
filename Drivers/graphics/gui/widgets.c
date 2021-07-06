@@ -311,12 +311,12 @@ void widgetClearField(widget_t* w){
   button_widget_t* button;
   bmp_widget_t* bmp;
   uint8_t cHeight = u8g2_GetMaxCharHeight(&u8g2);
-  if(dis && dis->font==u8g2_font_iron){ cHeight+=3; }                       // TODO this font reports lower height, needs to be manually adjusted
+  if(dis && dis->font==u8g2_font_ironTemp){ cHeight+=3; }                       // TODO this font reports lower height, needs to be manually adjusted
   uint8_t r;
 
   if(w->frameType!=frame_combo){
     u8g2_SetDrawColor(&u8g2, BLACK);
-    if(w->parent->refresh < screenRefresh_eraseNow ){
+    if(w->parent->refresh < screen_Erase ){
       switch((uint8_t)w->type){
         case widget_bmp:
           bmp = (bmp_widget_t*)w->content;
@@ -330,7 +330,7 @@ void widgetClearField(widget_t* w){
 
         case widget_button:
           button = (button_widget_t*)w->content;
-          if(button->font==u8g2_font_iron){ cHeight+=3; }                   // TODO this font reports lower height, needs to be manually adjusted
+          if(button->font==u8g2_font_ironTemp){ cHeight+=3; }                   // TODO this font reports lower height, needs to be manually adjusted
           u8g2_DrawBox(&u8g2, w->posX, w->posY, w->width, cHeight+1);
           break;
 
@@ -340,7 +340,7 @@ void widgetClearField(widget_t* w){
 
         case widget_editable:
         case widget_multi_option:
-          if(dis->font==u8g2_font_iron){ cHeight+=3; }                      // TODO this font reports lower height, needs to be manually adjusted
+          if(dis->font==u8g2_font_ironTemp){ cHeight+=3; }                      // TODO this font reports lower height, needs to be manually adjusted
           u8g2_DrawBox(&u8g2, w->posX ,w->posY, w->width, cHeight+1);
           break;
       }
@@ -667,7 +667,7 @@ void default_widgetDraw(widget_t *w) {
   }
 
   if(frameDraw || w->frameType==frame_outline){
-    if(font==u8g2_font_iron){ cHeight+=3; }
+    if(font==u8g2_font_ironTemp){ cHeight+=3; }
     switch(w->type){
       case widget_bmp_button:
         u8g2_SetDrawColor(&u8g2, frameColor);
@@ -703,7 +703,7 @@ void comboBoxDraw(widget_t *w) {
   comboBox_item_t *item = combo->first;
   uint8_t scroll = 0;
   uint8_t r;
-  if(!w || ((w->refresh==refresh_idle) && (w->parent->refresh==screenRefresh_idle))){
+  if(!w || ((w->refresh==refresh_idle) && (w->parent->refresh==screen_Idle))){
     return;
   }
 
@@ -711,15 +711,15 @@ void comboBoxDraw(widget_t *w) {
   if(w->refresh==refresh_triggered){
     w->refresh=refresh_idle;
   }
-  if(w->parent->refresh < screenRefresh_eraseNow){        // If screen not erased already
-    w->parent->refresh = screenRefresh_alreadyErased;
+  if(w->parent->refresh < screen_Erase){        // If screen not erased already
+    w->parent->refresh = screen_Erased;
     FillBuffer(BLACK, fill_dma);                          // Erase fast using dma
   }
 
   if(!item){ return; }                                    // Return if null item
 
   u8g2_SetFont(&u8g2, combo->font);
-  height= u8g2_GetMaxCharHeight(&u8g2)+1;                 // +1 to allow separation between combobox items
+  height= u8g2_GetMaxCharHeight(&u8g2)+2;                 // +2 to allow separation between combobox items
 
   if(w->radius<0){
     r=(height-1)/2;
@@ -878,6 +878,8 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
   }
   if ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){             // If combo editable type
     sel = &combo->currentItem->widget->selectable;                                                            // Get selectable data
+    combo->selectable.state = sel->state;
+    combo->selectable.previous_state = sel->previous_state;
   }
   if((input == Click) || (input == LongClick)){                                                               // If clicked
     if (combo->currentItem->type==combo_Action){                                                              // If combo Action type
@@ -1001,7 +1003,7 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
     }
     return -1;
   }
-  if(((w->type == widget_editable) && (sel->state == widget_edit)) || ((w->type == widget_combo)&&combo->currentItem->type==combo_Editable)) {  // Combo only calls this when incrementing or decrementing
+  if(((w->type == widget_editable) && (sel->state == widget_edit)) || ((w->type == widget_combo)&&combo->currentItem->type==combo_Editable)) {
     int32_t val_ui;
     int32_t inc;
     if(w->refresh==refresh_idle){
