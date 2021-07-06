@@ -28,8 +28,8 @@
  *       PWM Settings        *
  ********************************/
 //#define PWM_TIMER_HALFCLOCK                                 // Timer runs at FCY/2
-//#define READ_TIMER_HALFCLOCK                               // Timer runs at FCY/2
-#define READ_TIMER         htim3                             // Timer for the dead time
+//#define READ_TIMER_HALFCLOCK                                // Timer runs at FCY/2
+#define READ_TIMER          htim3                             // Timer for the dead time
 #define PWM_TIMER           htim4                             // PWM Timer
 #define PWM_CHANNEL         TIM_CHANNEL_3                     // PWM Timer Channel
 //#define PWM_CHxN                                            // Using CHxN Output type
@@ -40,8 +40,7 @@
  *       ADC Settings        *
  ********************************/
 #define ADC_DEVICE          hadc1                             // ADC device
-#define ADC_MEASURE_TIME    350                               // in uS. Time to subtract from the Period where PWM output should be low to let the ADC measure the tip
-#define ADC_BFSIZ           16 + 2                            // ADC DMA buffer size Buffer[ADC_BFSIZ][Adc_Buffer_Elements](+2 to compensate min/max value discard in filtering)
+#define ADC_BFSIZ           (16+2)                            // ADC DMA buffer size Buffer[ADC_BFSIZ][Adc_Buffer_Elements](+2 to compensate min/max value discard in filtering)
 
 // Order for secondary measurements, ADC channels not requiring sampling in the PWM low period. Order as ADC rank order (usually ch0-ch18)
 #define ADC_1st             TIP                               // ADC 1st used channel (CH1)
