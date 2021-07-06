@@ -81,13 +81,13 @@ void RE_Process(RE_State_t* data) {
 
   if(last_button_read != now_button){                   // If different than last reading
     last_button_read = now_button;                      // Update last reading value
-    if(stable_time<20){                                 // If <debounce time
+    if(stable_time<100){                                // If <debounce time
       debounce_time = current_time;                     // Reset debounce timer
     }
   }
 
   if(last_button_stable!=now_button){                   // If button status different than stable status
-    if(stable_time>20){                                 // If >debounce time
+    if(stable_time>100){                                // If >debounce time
       last_button_stable = now_button;                  // Update last stable button value
       debounce_time = current_time;                     // Reset debounce timer
     }
