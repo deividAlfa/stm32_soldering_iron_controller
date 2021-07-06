@@ -180,7 +180,7 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
         Trigger event selection: Reset
         Prescaler: Don't care, it's adjusted within the program. It asumes the timer runs at CPU speed
                     Some timers may take haf the clock speed, depending on the bus!
-                    In that case use #define DELAY_TIMER_HALFCLOCK in board.h!
+                    In that case use #define TIMER_HALFCLOCK in board.h!
                     Check the Clock config in CUBEMX!
         Period: Don't care, it's adjusted within the program
         NVIC settings: General enabled
