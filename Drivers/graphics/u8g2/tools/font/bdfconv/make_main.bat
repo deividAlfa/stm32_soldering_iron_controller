@@ -1,1 +1,0 @@
-bdfconv_2_22.exe -v -f 1 -m "32,69,73,76,78,79,80,82,83" ../bdf/AvantGardeCEBook20.bdf -o .\c\main_menu.c  -n u8g2_font_mainBig

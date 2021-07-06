@@ -1,0 +1,1 @@
+otf2bdf.exe -o "..\bdf\BubblePix_12.bdf" -p 11.5 "..\ttf\BubblePix.ttf"

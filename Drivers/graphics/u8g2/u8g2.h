@@ -1473,9 +1473,10 @@ void u8g2_SetupBuffer_Utf8(u8g2_t *u8g2, const u8g2_cb_t *u8g2_cb);
 /*==========================================*/
 
 /* start font list */
-extern const uint8_t u8g2_font_labels[] U8G2_FONT_SECTION("u8g2_font_labels");
-extern const uint8_t u8g2_font_iron[] U8G2_FONT_SECTION("u8g2_font_iron");
-extern const uint8_t u8g2_font_mainBig[] U8G2_FONT_SECTION("u8g2_font_mainBig");
+const uint8_t u8g2_font_labels[279] U8G2_FONT_SECTION("u8g2_font_labels");
+const uint8_t u8g2_font_menu[1218] U8G2_FONT_SECTION("u8g2_font_menu");
+const uint8_t u8g2_font_noIron_Sleep[243] U8G2_FONT_SECTION("u8g2_font_noIron_Sleep");
+const uint8_t u8g2_font_ironTemp[633] U8G2_FONT_SECTION("u8g2_font_ironTemp");
 
 extern const uint8_t u8g2_font_u8glib_4_tf[] U8G2_FONT_SECTION("u8g2_font_u8glib_4_tf");
 extern const uint8_t u8g2_font_u8glib_4_tr[] U8G2_FONT_SECTION("u8g2_font_u8glib_4_tr");
