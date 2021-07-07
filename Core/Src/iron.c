@@ -141,7 +141,7 @@ void handleIron(void) {
   }
   else{                                                                                       // Else, use current setpoint value
     PID_temp = human2adc(Iron.CurrentSetTemperature);
-    Iron.Pwm_Out = calculatePID(PID_temp, TIP.last_avg, Iron.Pwm_Period-1);
+    Iron.Pwm_Out = calculatePID(PID_temp, TIP.last_avg, Iron.Pwm_Max);
   }
 
   if(!Iron.Pwm_Out){
@@ -293,7 +293,7 @@ void runAwayCheck(void){
   power = ((uint16_t)prev_power[0]+prev_power[1]+prev_power[2]+prev_power[3])/4;              // Average of last 4 powers
 
   // If by any means the PWM output is higher than max calculated, generate error
-  if((Iron.Pwm_Out >= Iron.Pwm_Period) || (Iron.Pwm_Out != __HAL_TIM_GET_COMPARE(Iron.Pwm_Timer,Iron.Pwm_Channel))){
+  if((Iron.Pwm_Out > (Iron.Pwm_Period+1)) || (Iron.Pwm_Out != __HAL_TIM_GET_COMPARE(Iron.Pwm_Timer,Iron.Pwm_Channel))){
     Error_Handler();
   }
   if(systemSettings.settings.tempUnit==mode_Celsius){
@@ -375,15 +375,15 @@ void updatePowerLimit(void){
   if(volts==0){
     volts=1;                                                                                // set minimum value to avoid division by 0
   }
-  uint32_t PwmPeriod=Iron.Pwm_Period;                                                       // Read complete PWM period
+  uint32_t PwmPeriod=Iron.Pwm_Period+1;                                                       // Read complete PWM period
   uint32_t maxPower = volts/systemSettings.Profile.impedance;                               // Compute max power with current voltage and impedance(Impedance stored in x10)
   if(systemSettings.Profile.power >= maxPower){                                             // If set power is already higher than the max possible power given the voltage and heater resistance
-    Iron.Pwm_Max = PwmPeriod-1;                                                               // Set max PWM
+    Iron.Pwm_Max = PwmPeriod;                                                               // Set max PWM
   }
   else{                                                                                     // Else,
     Iron.Pwm_Max = (PwmPeriod*systemSettings.Profile.power)/maxPower;                       // Compute max PWM output for current power limit
-    if(Iron.Pwm_Period >= PwmPeriod){
-      Iron.Pwm_Max = PwmPeriod-1;
+    if(Iron.Pwm_Period > PwmPeriod){
+      Iron.Pwm_Max = PwmPeriod;
     }
     else if(Iron.Pwm_Period==0){
       Iron.Pwm_Max = 1;
