@@ -82,7 +82,7 @@ static struct{
   uint32_t updateTick;
   bool update;
 
-  uint16_t lastTip;
+  int16_t lastTip;
   uint8_t lastPwr;
 
   #ifdef USE_NTC

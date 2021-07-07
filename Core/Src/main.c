@@ -201,7 +201,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
     __HAL_TIM_CLEAR_FLAG(Iron.Read_Timer,TIM_FLAG_UPDATE);                                // Clear Read Timer flag}
     if(ADC_Status==ADC_Idle){                                                           // ADC idle?
       __HAL_TIM_SET_AUTORELOAD(Iron.Read_Timer,systemSettings.Profile.readPeriod-(systemSettings.Profile.readDelay+1)); // load (period-delay) time
-      if(systemSettings.settings.activeDetection && !Iron.Error.safeMode && Iron.CurrentMode!=mode_sleep){                    // Active detection?
+      if(systemSettings.settings.activeDetection && !Iron.Error.safeMode){                    // Active detection?
         configurePWMpin(output_High);                                                   // Force PWM high
         while(__HAL_TIM_GET_COUNTER(Iron.Read_Timer)<(PWM_DETECT_TIME/5));              // wait few uS (typically 5-10uS). Timer clock = 5uS
       }

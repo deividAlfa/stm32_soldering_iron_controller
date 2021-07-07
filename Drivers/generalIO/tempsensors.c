@@ -53,8 +53,8 @@ int16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
     if(temp>999){
       temp=999;
     }
-    else if(temp<0){
-      temp = 0;
+    else if(temp<-99){
+      temp = -99;
     }
     if(temp_Raw>999){
       temp_Raw=999;

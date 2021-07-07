@@ -876,11 +876,6 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
   if(w->refresh==refresh_idle){
     w->refresh=refresh_triggered;                                                                             // Update in combo erases whole screen (to avoid possible leftovers)
   }
-  if ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){             // If combo editable type
-    sel = &combo->currentItem->widget->selectable;                                                            // Get selectable data
-    combo->selectable.state = sel->state;
-    combo->selectable.previous_state = sel->previous_state;
-  }
   if((input == Click) || (input == LongClick)){                                                               // If clicked
     if (combo->currentItem->type==combo_Action){                                                              // If combo Action type
       return combo->currentItem->action();                                                                    // Process action
@@ -891,7 +886,10 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
   }
   if(input != Rotate_Nothing){
     if ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){           // If combo option type
-      if(((input == Click) && (sel->state!=widget_edit)) || sel->state==widget_edit){                    // If widget in edit mode
+      sel = &combo->currentItem->widget->selectable;                                                            // Get selectable data
+      combo->selectable.state = sel->state;
+      combo->selectable.previous_state = sel->previous_state;
+      if(((input == Click) && (sel->state!=widget_edit)) || sel->state==widget_edit){                         // If widget in edit mode
         callFromCombo=1;
         default_widgetProcessInput(w, input, state);                                                          // Process widget
         callFromCombo=0;
