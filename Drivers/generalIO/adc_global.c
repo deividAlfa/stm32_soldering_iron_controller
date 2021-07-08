@@ -115,12 +115,10 @@ void ADC_Start_DMA(){
     HAL_IWDG_Refresh(&hiwdg);
     return;
   }
-  if( PWM_GPIO_Port->IDR & PWM_Pin ){                                                       // Check if PWM is active
-    buzzer_long_beep();                                                                     // Generate warning with a beep
-  }
   #ifdef DEBUG_PWM
-  HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,1);                                      // Toggle TEST
+  PWM_DBG_GPIO_Port->BSRR=PWM_DBG_Pin;                                                    // Set TEST to 1
   #endif
+
   ADC_Status=ADC_Sampling;
   if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)ADC_measures, sizeof(ADC_measures)/ sizeof(uint16_t) )!=HAL_OK){  // Start ADC conversion now
     Error_Handler();
@@ -259,22 +257,21 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     if(ADC_Status!=ADC_Sampling){
       Error_Handler();
     }
-    ADC_Stop_DMA();                                                                         // Reset the ADC
+    ADC_Stop_DMA();
     ADC_Status = ADC_Idle;
 
+    #ifdef DEBUG_PWM
+    PWM_DBG_GPIO_Port->BSRR=PWM_DBG_Pin<<16;                                                // Set TEST to 0
+    #endif
 
-    HAL_IWDG_Refresh(&hiwdg);                                                               // This is the main reset of the watchdog
-                                                                                            // If anything critical stalls (PWM, ADC, hanlleIron) this won't be updated anymore
-                                                                                            // causing a system reset
+    __HAL_TIM_SET_COUNTER(Iron.Pwm_Timer,0);                                                // Synchronize PWM
 
-    if( PWM_GPIO_Port->IDR & PWM_Pin ){                                                     // If PWM is active
-      buzzer_long_beep();                                                                   // Beep to warn the issue, skip adc
-      TIP.last_avg = systemSettings.Profile.noIronValue - 1;                                // Set reading = max temperature to force PID to throttle down
-      TIP.last_raw = systemSettings.Profile.noIronValue - 1;                                // But avoiding no iron error
+    if(!Iron.Error.safeMode && Iron.CurrentMode!=mode_sleep){
+      configurePWMpin(output_PWM);
     }
-    else{
-      handle_ADC_Data();                                                                    // Else, update data normally
-    }
+
+    HAL_IWDG_Refresh(&hiwdg);
+    handle_ADC_Data();
 
 #if defined DEBUG_PWM && defined SWO_PRINT
     if(dbg_t!=dbg_newData){                                                                 // Save values before handleIron() updates them
@@ -286,16 +283,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     }
 #endif
 
-    handleIron();                                                                           // Handle iron
-
+    handleIron();
     runAwayCheck();
-
-    if(!Iron.Error.safeMode && Iron.CurrentMode!=mode_sleep){
-      configurePWMpin(output_PWM);
-    }
-    __HAL_TIM_SET_COUNTER(Iron.Pwm_Timer,0);                                                // Synchronize PWM
-    #ifdef DEBUG_PWM
-    HAL_GPIO_WritePin(PWM_DBG_GPIO_Port, PWM_DBG_Pin,0);                                    // Toggle TEST
-    #endif
   }
 }
