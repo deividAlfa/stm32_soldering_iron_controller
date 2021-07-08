@@ -24,6 +24,7 @@
 #define USE_DC                                                // DC pin is used
 #define USE_CS                                                // CS pin is used
 
+
 /********************************
  *       PWM Settings        *
  ********************************/
@@ -35,6 +36,7 @@
 #define PWM_CHxN                                              // Using CHxN Output type
 //#define PWM_CHx                                             // Using CHx Output type
 //#define DEBUG_PWM                                           // To enable a test signal and some printing through SWO (Create a output GPIO called PWM_DBG)
+
 
 /********************************
  *       ADC Settings    *
@@ -60,6 +62,28 @@
 #define USE_VIN
 #define USE_NTC
 
+
+/********************************
+ *       TIP calibration    *
+ ********************************/
+//#define PROFILE_VALUES                                        // Enable profile values
+
+#ifdef PROFILE_VALUES
+#define T12_Cal250        1100
+#define T12_Cal350        1200
+#define T12_Cal450        1300
+
+#define C210_Cal250       300
+#define C210_Cal350       400
+#define C210_Cal450       500
+
+#define C245_Cal250       900
+#define C245_Cal350       1000
+#define C245_Cal450       1100
+
+#endif
+
+
 /********************************
  *       Buzzer        *
  ********************************/
@@ -67,12 +91,14 @@
 #define BUZZER_OFF          HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET)
 #define BUZZER_TOGGLE       HAL_GPIO_TogglePin(BUZZER_GPIO_Port, BUZZER_Pin)
 
+
 /********************************
  *       Misc    *
  ********************************/
 #define FLASH_SZ            64                                // Flash Size (KB)
 //#define NOSAVESETTINGS                                      // Don't use flash to save or load settings. Always use defaults (for debugging purposes)
 //#define SWO_PRINT                                           // To enable printing through SWO
+
 
 /********************************
  *       NTC TABLE      *

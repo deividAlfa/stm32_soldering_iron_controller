@@ -17,11 +17,11 @@
 #define TipCharSize       5                                         // String size for each tip name (Including null terminator)
 #define _BLANK_TIP        "    "
 
-#ifndef T12_Cal250
+#ifndef PROFILE_VALUES
+
 #define T12_Cal250        1100                                      // Default values to be used in the calibration if not adjusted
 #define T12_Cal350        1200                                      // TODO: Move these values to the board profile, so each board can have a closer default calibration
 #define T12_Cal450        1300                                      // But we don't have calibration data from users!
-#endif
 
 #define C210_Cal250       300
 #define C210_Cal350       400
@@ -30,6 +30,8 @@
 #define C245_Cal250       900
 #define C245_Cal350       1000
 #define C245_Cal450       1100
+
+#endif
 
 //#define SWSTRING        "SW: v1.10"                               // For releases
 #define SWSTRING          "SW: 2021-07-07"                          // For git
