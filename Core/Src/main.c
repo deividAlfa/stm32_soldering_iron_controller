@@ -185,33 +185,32 @@ void Program_Handler(void) {
       IronWake(wakeInput);
     }
   }
-
   handle_buzzer();                                                    // Handle buzzer state
   RE_Process(&RE1_Data);                                              // Handle Encoder
-
 }
 
 
 /*
  *
- *  Timer working in preload mode! The value loaded now is loaded on next event. That's why the values are reversed!
+ *  Timer working in load preload mode! The value loaded now is loaded on next event. That's why the values are reversed!
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
-  if(_htim == Iron.Read_Timer){                                                         // Read Timer?
-    __HAL_TIM_CLEAR_FLAG(Iron.Read_Timer,TIM_FLAG_UPDATE);                                // Clear Read Timer flag}
-    if(ADC_Status==ADC_Idle){                                                           // ADC idle?
+  if(_htim == Iron.Read_Timer){
+    __HAL_TIM_CLEAR_FLAG(Iron.Read_Timer,TIM_FLAG_UPDATE);
+    
+    if(ADC_Status==ADC_Idle){
       __HAL_TIM_SET_AUTORELOAD(Iron.Read_Timer,systemSettings.Profile.readPeriod-(systemSettings.Profile.readDelay+1)); // load (period-delay) time
-      if(systemSettings.settings.activeDetection && !Iron.Error.safeMode){                    // Active detection?
-        configurePWMpin(output_High);                                                   // Force PWM high
-        while(__HAL_TIM_GET_COUNTER(Iron.Read_Timer)<(PWM_DETECT_TIME/5));              // wait few uS (typically 5-10uS). Timer clock = 5uS
+
+      if(systemSettings.settings.activeDetection && !Iron.Error.safeMode){
+        configurePWMpin(output_High);                                                   // Force PWM high for a few uS (typically 5-10uS)
+        while(__HAL_TIM_GET_COUNTER(Iron.Read_Timer)<(PWM_DETECT_TIME/5));
       }
       configurePWMpin(output_Low);                                                      // Force PWM low
-      ADC_Status = ADC_Waiting;                                                         // Update status to waiting
-
+      ADC_Status = ADC_Waiting;
     }
-    else if(ADC_Status==ADC_Waiting){                                                   // ADC waiting?
+    else if(ADC_Status==ADC_Waiting){
       __HAL_TIM_SET_AUTORELOAD(Iron.Read_Timer,systemSettings.Profile.readDelay);       // Load Delay time
-      ADC_Start_DMA();                                                                  // Start ADC conversion
+      ADC_Start_DMA();
     }
   }
 }
