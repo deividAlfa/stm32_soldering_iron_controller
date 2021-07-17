@@ -45,11 +45,11 @@ typedef struct {
   uint8_t             Pwm_Channel;                          // PWM channel
   uint16_t            Pwm_Period;                           // PWM period
   uint16_t            Pwm_Max;                              // Max PWM output for power limit
-  uint16_t            Pwm_Out;                              // Last calculated PWM value
+  uint32_t            Pwm_Out;                              // Last calculated PWM value
   TIM_HandleTypeDef   *Read_Timer;                          // Pointer to the Read timer
   int8_t              CurrentIronPower;                     // Last output power
-  uint16_t            CurrentSetTemperature;                // Actual set temperature (Setpoint)
-  uint16_t            Debug_SetTemperature;                 // Debug mode temperature
+  int16_t             CurrentSetTemperature;                // Actual set temperature (Setpoint)
+  int16_t             Debug_SetTemperature;                 // Debug mode temperature
   uint32_t            LastModeChangeTime;                   // Last time the mode was changed (To provide debouncing)
   uint32_t            LastErrorTime;                        // last time iron error was detected
   uint32_t            lastActivityTime;                     // last time iron handle was moved (In shake mode)
@@ -64,7 +64,7 @@ typedef struct {
   bool                calibrating;                          // Flag to indicate calibration state (don't save temperature settings)
   bool                updateStandMode;                      // Flag to indicate the stand mode must be changed
   bool                newActivity;                          // Flag to indicate handle movement
-  bool                Cal_TemperatureReachedFlag;           // Flag for temperature calibration
+  bool                temperatureReached;           // Flag for temperature calibration
   bool                DebugMode;                            // Flag to indicate Debug is enabled
   bool                updatePwm;                            // Flag to indicate PWM need to be updated
 }iron_t;

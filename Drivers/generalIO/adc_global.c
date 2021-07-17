@@ -135,7 +135,7 @@ void ADC_Stop_DMA(void){
  */
 void DoAverage(volatile ADCDataTypeDef_t* InputData){
   volatile uint16_t *inputBuffer=InputData->adc_buffer;
-  uint32_t adc_sum,avg_data;
+  int32_t adc_sum,avg_data;
   uint16_t max=0, min=0xffff;
   uint8_t shift;
 
@@ -180,7 +180,7 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 #define SMOOTH_START  50       // Start difference to apply partial filtering override
 #define SMOOTH_END    150      // Max difference to completely override filter
 #define SMOOTH_DIFF  (SMOOTH_END-SMOOTH_START)
-#if defined DEBUG_PWM && SWO_PRINT
+#if defined DEBUG_PWM && defined SWO_PRINT
     extern bool dbg_newData;
 #endif
 
@@ -246,7 +246,7 @@ void handle_ADC_Data(void){
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
 
-#if defined DEBUG_PWM && SWO_PRINT
+#if defined DEBUG_PWM && defined SWO_PRINT
     extern bool dbg_newData;
     extern uint16_t dbg_prev_TIP_Raw, dbg_prev_TIP, dbg_prev_VIN, dbg_prev_PWR;
     extern int16_t dbg_prev_NTC;

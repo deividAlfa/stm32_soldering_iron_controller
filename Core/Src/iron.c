@@ -72,7 +72,8 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 
 void handleIron(void) {
   uint32_t CurrentTime = HAL_GetTick();
-  int16_t tipTemp = readTipTemperatureCompensated(update_reading,read_Avg);
+
+  readTipTemperatureCompensated(update_reading,read_Avg);
 
   if(!Iron.Error.safeMode){
     if( (systemSettings.setupMode==setup_On) || systemSettings.settings.NotInitialized || systemSettings.Profile.NotInitialized!=initialized ||
@@ -163,9 +164,9 @@ void handleIron(void) {
   __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Load new calculated PWM Duty
 
   // For calibration process. Add +-2ºC detection margin
-  if(  (tipTemp>=(Iron.CurrentSetTemperature-2)) && (tipTemp<=(Iron.CurrentSetTemperature+2)) && !Iron.Cal_TemperatureReachedFlag) {
+  if( !Iron.temperatureReached && (last_TIP>=(Iron.CurrentSetTemperature-2)) && (last_TIP<=(Iron.CurrentSetTemperature+2))) {
     temperatureReached( Iron.CurrentSetTemperature);
-    Iron.Cal_TemperatureReachedFlag = 1;
+    Iron.temperatureReached = 1;
   }
 }
 
@@ -304,7 +305,7 @@ void runAwayCheck(void){
     TempLimit = 950;
   }
 
-  if(power && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==debug_Off) &&(tipTemp > Iron.CurrentSetTemperature)){
+  if(power>1 && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==debug_Off) &&(tipTemp > Iron.CurrentSetTemperature)){
 
     if(tipTemp>TempLimit){ Iron.RunawayLevel=runaway_500; }
     else{
@@ -426,7 +427,7 @@ void setCurrentMode(uint8_t mode){
     Iron.CurrentMode = mode;
     modeChanged(mode);
     if(Iron.CurrentMode == mode_run){
-      Iron.Cal_TemperatureReachedFlag = 0;
+      Iron.temperatureReached = 0;
     }
   }
 }
@@ -525,7 +526,7 @@ void setDebugMode(uint8_t value) {
 }
 
 void setUserTemperature(uint16_t temperature) {
-  Iron.Cal_TemperatureReachedFlag = 0;
+  Iron.temperatureReached = 0;
   if(systemSettings.Profile.UserSetTemperature != temperature){
     systemSettings.Profile.UserSetTemperature = temperature;
     if(Iron.CurrentMode==mode_run){
