@@ -36,7 +36,7 @@
 #define PWM_CHxN                                              // Using CHxN Output type
 //#define PWM_CHx                                             // Using CHx Output type
 //#define DEBUG_PWM                                           // To enable a test signal and some printing through SWO (Create a output GPIO called PWM_DBG)
-
+#define PWM_ALT_PIN         GPIO_AF2_TIM17
 
 /********************************
  *       ADC Settings    *

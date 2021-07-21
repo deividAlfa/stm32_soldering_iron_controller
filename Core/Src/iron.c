@@ -273,6 +273,10 @@ void configurePWMpin(uint8_t mode){
     GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_PP;
   }
 
+  #ifdef PWM_ALT_PIN
+  GPIO_InitStruct.Alternate = PWM_ALT_PIN;
+  #endif
+
   GPIO_InitStruct.Pin =   PWM_Pin;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(PWM_GPIO_Port, &GPIO_InitStruct);
