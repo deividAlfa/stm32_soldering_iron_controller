@@ -168,25 +168,11 @@ int main(void)
 
 // Called from SysTick IRQ every 1mS
 void Program_Handler(void) {
-  static bool last_wake=0;
-  bool now_wake = WAKE_input();
-
-  if(last_wake!=now_wake){                                            // If wake sensor input changed
-    last_wake=now_wake;
-    if(systemSettings.settings.WakeInputMode==wakeInputmode_stand){   // In stand mode
-      if(now_wake){
-        setModefromStand(mode_run);
-      }
-      else{
-        setModefromStand(systemSettings.settings.StandMode);          // Set sleep or standby mode depending on system setting
-      }
-    }
-    else{
-      IronWake(wakeInput);
-    }
-  }
   handle_buzzer();                                                    // Handle buzzer state
   RE_Process(&RE1_Data);                                              // Handle Encoder
+  if(systemSettings.settings.WakeInputMode!=wakeInputmode_stand){
+    readWake();
+  }
 }
 
 

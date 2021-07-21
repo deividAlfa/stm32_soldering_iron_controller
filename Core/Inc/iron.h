@@ -71,6 +71,7 @@ typedef struct {
 
 
 extern volatile iron_t Iron;
+void readWake(void);
 void IronWake(bool source);
 void checkIronError(void);
 bool GetIronError(void);

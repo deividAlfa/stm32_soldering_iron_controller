@@ -263,7 +263,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     #ifdef DEBUG_PWM
     PWM_DBG_GPIO_Port->BSRR=PWM_DBG_Pin<<16;                                                // Set TEST to 0
     #endif
-
+    if(systemSettings.settings.WakeInputMode==wakeInputmode_stand){
+      readWake();
+    }
     __HAL_TIM_SET_COUNTER(Iron.Pwm_Timer,0);                                                // Synchronize PWM
 
     if(!Iron.Error.safeMode && Iron.CurrentMode!=mode_sleep){

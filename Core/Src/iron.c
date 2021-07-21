@@ -448,6 +448,26 @@ void IronWake(bool source){                                                     
   setCurrentMode(mode_run);
 }
 
+void readWake(void){
+  static bool last_wake=0;
+    bool now_wake = WAKE_input();
+
+    if(last_wake!=now_wake){                                            // If wake sensor input changed
+      last_wake=now_wake;
+      if(systemSettings.settings.WakeInputMode==wakeInputmode_stand){   // In stand mode
+        if(now_wake){
+          setModefromStand(mode_run);
+        }
+        else{
+          setModefromStand(systemSettings.settings.StandMode);          // Set sleep or standby mode depending on system setting
+        }
+      }
+      else{
+        IronWake(wakeInput);
+      }
+    }
+}
+
 
 // Checks for non critical iron errors (Errors that can be cleared)
 void checkIronError(void){
