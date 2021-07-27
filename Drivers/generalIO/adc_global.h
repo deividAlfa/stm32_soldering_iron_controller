@@ -13,22 +13,22 @@
 
 
 typedef struct{
-  volatile uint8_t    filter_normal;
-  volatile uint8_t    filter_partial;
-  volatile uint8_t    filter_reset;
-  volatile uint16_t   *adc_buffer;            // Ptr to ADC buffer data
+  volatile uint8_t   filter_normal;
+  volatile uint8_t   filter_partial;
+  volatile uint8_t   filter_reset;
+  volatile uint8_t   spikes;
+  volatile uint8_t   spike_limit;
   #ifdef DEBUG_PWM
   volatile int16_t   prev_avg;
   volatile int16_t   prev_raw;
   #endif
   volatile int16_t   last_avg;               // Filtered (EMA calculation)
   volatile int16_t   last_raw;               // Unfiltered, for quick Iron detection
-  volatile uint16_t  spikes;
-  volatile uint16_t  spike_limit;
   volatile uint16_t  smooth_start;
   volatile uint16_t  smooth_end;
   volatile uint16_t  reset_limit;
   volatile uint32_t  EMA_of_Input;           // Stored filter data (acumulator for EMA)
+  volatile uint16_t  *adc_buffer;            // Ptr to ADC buffer data
 
 } ADCDataTypeDef_t;
 
