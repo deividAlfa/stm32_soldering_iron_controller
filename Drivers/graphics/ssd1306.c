@@ -634,7 +634,11 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 #endif
 
   if(device == oled.device){
-    HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 10);  //Wait for DMA to finish
+    if(oled.device->hdmatx->State!=HAL_DMA_STATE_READY){
+      if(HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 10)!=HAL_OK){          //Wait for DMA to finish
+        Error_Handler();
+      }
+    }
     if(oled.row>7){
 
       #if defined OLED_SPI && defined USE_CS

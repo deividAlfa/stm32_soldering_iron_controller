@@ -548,6 +548,7 @@ static void * getfilterFactor() {
 }
 static void setfilterFactor(uint32_t *val) {
   systemSettings.Profile.filterFactor = *val;
+  TIP.filter_normal=*val;
 }
 
 static void * getProfile() {
@@ -1408,7 +1409,7 @@ void settings_screen_setup(screen_t *scr) {
   edit->step = 1;
   edit->setData = (void (*)(void *))&setfilterFactor;
   edit->max_value = 8;
-  edit->min_value = 0;
+  edit->min_value = 2;
 
   //********[ No Iron Delay Widget ]***********************************************************
   //

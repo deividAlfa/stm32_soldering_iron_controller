@@ -17,24 +17,49 @@ volatile adc_measures_t ADC_measures[ADC_BFSIZ];
 volatile ADC_Status_t ADC_Status;
 
 volatile ADCDataTypeDef_t TIP = {
-    adc_buffer: &ADC_measures[0].TIP
+    .adc_buffer = &ADC_measures[0].TIP,
+    .smooth_start   = 500,
+    .smooth_end     = 1000,
+    .reset_limit    = 1500,
+    .spike_limit    = 4,
+    .filter_normal  = 0,      // Changes depending on system config.
+    .filter_partial = 2,
+    .filter_reset   = 1,
 };
 
 #ifdef USE_VIN
 volatile ADCDataTypeDef_t VIN = {
-    adc_buffer: &ADC_measures[0].VIN
+    .adc_buffer     = &ADC_measures[0].VIN,
+    .smooth_start   = 20,
+    .smooth_end     = 50,
+    .reset_limit    = 100,
+    .filter_normal  = 2,
+    .filter_partial = 1,
+    .filter_reset   = 0,
 };
 #endif
 
 #ifdef USE_NTC
 volatile ADCDataTypeDef_t NTC = {
-    adc_buffer: &ADC_measures[0].NTC
+    .adc_buffer     = &ADC_measures[0].NTC,
+    .smooth_start   = 20,
+    .smooth_end     = 50,
+    .reset_limit    = 100,
+    .filter_normal  = 2,
+    .filter_partial = 1,
+    .filter_reset   = 0,
 };
 #endif
 
 #ifdef USE_VREF
 volatile ADCDataTypeDef_t VREF = {
-    adc_buffer: &ADC_measures[0].VREF
+    .adc_buffer     = &ADC_measures[0].VREF
+    .smooth_start   = 20,
+    .smooth_end     = 50,
+    .reset_limit    = 100,
+    .filter_normal  = 2,
+    .filter_partial = 1,
+    .filter_reset   = 0,
 };
 #endif
 
@@ -163,12 +188,8 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
   avg_data = adc_sum / (ADC_BFSIZ -2) ;
   InputData->last_raw = avg_data;
 
-  if(systemSettings.Profile.filterFactor > 0) {                                             // Advanced filtering enabled?
-
-    if(systemSettings.Profile.filterFactor>8){                                              // Limit coefficient, more than 8 will cause overflow
-      systemSettings.Profile.filterFactor=8;
-    }
-    shift = systemSettings.Profile.filterFactor;                                            // Set EMA factor setting from system settings
+  if(InputData->filter_normal > 0) {                                             // Advanced filtering enabled?
+    shift = InputData->filter_normal;                                            // Set EMA factor setting from system settings
 
     // Fixed point shift
     uint32_t RawData = avg_data << 12;
@@ -177,30 +198,39 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 #define LIMIT_FILTERING
 
 #ifdef LIMIT_FILTERING
-#define SMOOTH_START  50       // Start difference to apply partial filtering override
-#define SMOOTH_END    150      // Max difference to completely override filter
-#define SMOOTH_DIFF  (SMOOTH_END-SMOOTH_START)
 #if defined DEBUG_PWM && defined SWO_PRINT
     extern bool dbg_newData;
 #endif
-
     int32_t diff = (int32_t)avg_data - (int32_t)(InputData->EMA_of_Input>>12);              // Check difference between stored EMA and last average
     int32_t abs_diff=abs(diff);
+    if(abs_diff>(InputData->smooth_end) ){
+      if(InputData->spikes<InputData->spike_limit){
+        InputData->spikes++;
+      }
+    }
+    else{
+      InputData->spikes=0;
+    }
 
-    if(abs_diff>SMOOTH_END){                                                                // If huge (Filtering will delay too much the response)
-      InputData->EMA_of_Input = RawData;                                                    // Reset filter
+    if((abs_diff>InputData->smooth_end && InputData->spikes>=InputData->spike_limit) || (abs_diff>InputData->reset_limit)){               // If over smooth limit or really huge (Filtering will delay too much the response)
+      shift=InputData->filter_reset;                                                                                                      // Set minimum filter factor
       #if defined DEBUG_PWM && SWO_PRINT
       dbg_newData=1;                                                                        // Enable flag to debug the data
       #endif
     }
-    else if(abs_diff>SMOOTH_START){                                                         // If medium, smoothen the difference
-      InputData->EMA_of_Input += ((diff*(abs_diff-SMOOTH_START))/SMOOTH_DIFF)<<12;
-      #if defined DEBUG_PWM && SWO_PRINT
-      //dbg_newData=1;                                                                      // Meh, just some noise, not important
-      #endif
+    else{
+      if(abs_diff>InputData->smooth_start && abs_diff<InputData->smooth_end){                                       // If medium, smoothen the difference lowering the filter factor to 2
+        shift=InputData->filter_partial;
+        #if defined DEBUG_PWM && SWO_PRINT
+        //dbg_newData=1;                                                                      // Meh, just some noise, not important
+        #endif
+      }
+    }
+    if(shift){
+      InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
     }
     else{
-      InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
+      InputData->EMA_of_Input = avg_data<<12;
     }
 #else
     InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
@@ -274,7 +304,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
 
     HAL_IWDG_Refresh(&hiwdg);
     handle_ADC_Data();
-
 #if defined DEBUG_PWM && defined SWO_PRINT
     if(dbg_t!=dbg_newData){                                                                 // Save values before handleIron() updates them
       dbg_prev_TIP_Raw=last_TIP_Raw;                                                        // If filter was resetted, print values

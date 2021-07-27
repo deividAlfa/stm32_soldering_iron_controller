@@ -479,12 +479,12 @@ void checkIronError(void){
   int16_t ambTemp = readColdJunctionSensorTemp_x10(mode_Celsius);
   IronError_t Err = { 0 };
   Err.safeMode = Iron.Error.safeMode;
-  Err.NTC_high = ambTemp > 800 ? 1 : 0;
-  Err.NTC_low = ambTemp < -200 ? 1 : 0;
+  Err.NTC_high = (ambTemp > 800);
+  Err.NTC_low = (ambTemp < -200);
   #ifdef USE_VIN
-  Err.V_low = getSupplyVoltage_v_x10() < systemSettings.settings.lvp   ? 1 : 0;
+  Err.V_low = (getSupplyVoltage_v_x10() < systemSettings.settings.lvp);
   #endif
-  Err.noIron = TIP.last_raw>systemSettings.Profile.noIronValue ? 1 : 0;
+  Err.noIron = (TIP.last_raw>systemSettings.Profile.noIronValue);
 
   if(CurrentTime<1000 || systemSettings.setupMode==setup_On){                               // Don't check sensor errors during first second or in setup mode, wait for readings need to get stable
     Err.Flags &= _SAFE_MODE;
@@ -507,6 +507,9 @@ void checkIronError(void){
   }
   else if (Iron.Error.active && !Err.Flags){                                                // If global flag set, but no errors
     if((CurrentTime-Iron.LastErrorTime)>systemSettings.settings.errorDelay){                // Check enough time has passed
+      TIP.EMA_of_Input = TIP.last_raw<<12;
+      TIP.last_avg = TIP.last_raw;
+      readTipTemperatureCompensated(update_reading,read_Avg);
       Iron.Error.Flags = 0;
       buzzer_alarm_stop();
       setCurrentMode(mode_run);
