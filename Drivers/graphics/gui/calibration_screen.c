@@ -278,7 +278,7 @@ static void Cal_Start_draw(screen_t *scr){
       case cal_450:
         u8g2_DrawStr(&u8g2, 6, 12, "CAL STEP:");            // Draw current cal state
         u8g2_DrawStr(&u8g2, 83, 12, state_tempstr[(int)current_state]);
-        u8g2_DrawStr(&u8g2, 10, 30, "WAIT...");               // Draw current temp
+        u8g2_DrawStr(&u8g2, 6, 30, "WAIT...");               // Draw current temp
         sprintf(currTemp, "%3u\260C",lastTipTemp);
         u8g2_DrawStr(&u8g2, 82, 30, currTemp);
         break;
@@ -286,7 +286,7 @@ static void Cal_Start_draw(screen_t *scr){
       {
         char str[20];
         for(uint8_t x=0;x<3;x++){
-          sprintf(str, "ADC %s: %u", state_tempstr[x], adcCal[x]);
+          sprintf(str, "Cal %s: %u", state_tempstr[x], adcCal[x]);
           u8g2_DrawStr(&u8g2, 6, (x*14), str);
         }
         u8g2_DrawStr(&u8g2, 0, 50, "SUCCEED!");
