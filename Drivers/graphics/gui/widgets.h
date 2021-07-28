@@ -140,8 +140,6 @@ void default_widgetDraw(widget_t* w);
 void default_widgetUpdate(widget_t *w);
 void widgetDetectChange(widget_t* w, int32_t val);
 void widgetClearField(widget_t* w);
-void widgetPrintVal(widget_t* w, int32_t val_ui);
-int32_t widgetGetVal(widget_t* w);
 void widgetEnable(widget_t* w);
 void widgetDisable(widget_t* w);
 int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state);

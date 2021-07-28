@@ -1480,7 +1480,6 @@ void settings_screen_setup(screen_t *scr) {
 
   //********[ TIP label]***********************************************************
   //
-  //comboitem_IRONTIPS_Settings_TipLabel.dispAlign = align_center;
   dis = &editable_IRONTIPS_Settings_TipLabel.inputData;
   edit = &editable_IRONTIPS_Settings_TipLabel;
   editableDefaultsInit(edit,widget_editable);
@@ -1583,7 +1582,7 @@ void settings_screen_setup(screen_t *scr) {
   editableDefaultsInit(edit,widget_editable);
   dis->reservedChars=4;
   dis->getData = &getCal250;
-  edit->max_value = 4095;
+  edit->max_value = 4090;
   edit->min_value = 0;
   edit->big_step = 50;
   edit->step = 1;
@@ -1597,7 +1596,7 @@ void settings_screen_setup(screen_t *scr) {
   editableDefaultsInit(edit,widget_editable);
   dis->reservedChars=4;
   dis->getData = &getCal350;
-  edit->max_value = 4095;
+  edit->max_value = 4090;
   edit->min_value = 0;
   edit->big_step = 50;
   edit->step = 1;
@@ -1611,7 +1610,7 @@ void settings_screen_setup(screen_t *scr) {
   editableDefaultsInit(edit,widget_editable);
   dis->reservedChars=4;
   dis->getData = &getCal450;
-  edit->max_value = 4095;
+  edit->max_value = 4090;
   edit->min_value = 0;
   edit->big_step = 50;
   edit->step = 1;
