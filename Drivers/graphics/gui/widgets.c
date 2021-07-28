@@ -311,7 +311,7 @@ void widgetClearField(widget_t* w){
   button_widget_t* button;
   bmp_widget_t* bmp;
   uint8_t cHeight = u8g2_GetMaxCharHeight(&u8g2);
-  if(dis && dis->font==u8g2_font_ironTemp){ cHeight+=3; }                       // TODO this font reports lower height, needs to be manually adjusted
+  //if(dis && dis->font==u8g2_font_ironTemp){ cHeight+=3; }                       // TODO this font reports lower height, needs to be manually adjusted
   uint8_t r;
 
   if(w->frameType!=frame_combo){
@@ -330,7 +330,7 @@ void widgetClearField(widget_t* w){
 
         case widget_button:
           button = (button_widget_t*)w->content;
-          if(button->font==u8g2_font_ironTemp){ cHeight+=3; }                   // TODO this font reports lower height, needs to be manually adjusted
+          //if(button->font==u8g2_font_ironTemp){ cHeight+=3; }                   // TODO this font reports lower height, needs to be manually adjusted
           u8g2_DrawBox(&u8g2, w->posX, w->posY, w->width, cHeight+1);
           break;
 
@@ -340,7 +340,7 @@ void widgetClearField(widget_t* w){
 
         case widget_editable:
         case widget_multi_option:
-          if(dis->font==u8g2_font_ironTemp){ cHeight+=3; }                      // TODO this font reports lower height, needs to be manually adjusted
+          //if(dis->font==u8g2_font_ironTemp){ cHeight+=3; }                      // TODO this font reports lower height, needs to be manually adjusted
           u8g2_DrawBox(&u8g2, w->posX ,w->posY, w->width, cHeight+1);
           break;
       }
@@ -719,7 +719,7 @@ void comboBoxDraw(widget_t *w) {
   if(!item){ return; }                                    // Return if null item
 
   u8g2_SetFont(&u8g2, combo->font);
-  height= u8g2_GetMaxCharHeight(&u8g2)+2;                 // +2 to allow separation between combobox items
+  height= u8g2_GetMaxCharHeight(&u8g2)+1;                 // +1 to allow separation between combobox items
 
   if(w->radius<0){
     r=(height-1)/2;

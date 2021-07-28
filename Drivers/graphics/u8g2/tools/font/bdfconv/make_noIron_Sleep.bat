@@ -1,1 +1,1 @@
-bdfconv_2_22.exe -v -f 1 -m "32,78,79,73,82,83,76,69,80" "../bdf/ITC Avant Garde Gothic CE Book_20.bdf" -o c\noIron_Sleep.c  -n u8g2_font_noIron_Sleep
+bdfconv_2_22.exe -v -b0 -f1 -m "32,78,79,73,82,83,76,69,80" "../bdf/ITC Avant Garde Gothic CE Book_20.bdf" -o c\noIron_Sleep.c  -n u8g2_font_noIron_Sleep

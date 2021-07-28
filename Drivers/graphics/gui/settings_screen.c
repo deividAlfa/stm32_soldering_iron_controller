@@ -1169,7 +1169,7 @@ void settings_screen_setup(screen_t *scr) {
   comboAddEditable(&comboitem_SYSTEM_TempStep, w,           "Step",       &editable_SYSTEM_TempStep);
   comboAddEditable(&comboitem_SYSTEM_LVP, w,                "LVP",        &editable_SYSTEM_LVP);
   comboAddEditable(&comboitem_SYSTEM_GuiUpd, w,             "Gui time",   &editable_SYSTEM_GuiUpd);
-  comboAddEditable(&comboitem_save_FlagInterval, w,       "Save time",  &editable_save_FlagInterval);
+  comboAddEditable(&comboitem_save_FlagInterval, w,         "Save time",  &editable_save_FlagInterval);
   comboAddScreen(&comboitem_SYSTEM_Reset, w,                "RESET MENU", screen_reset);
   comboAddScreen(&comboitem_SYSTEM_SW, w,                   SWSTRING,     -1);
   comboAddScreen(&comboitem_SYSTEM_HW, w,                   HWSTRING,     -1);
@@ -1433,15 +1433,15 @@ void settings_screen_setup(screen_t *scr) {
   comboAddEditable(&comboitem_IRON_MaxTemp, w,      "Max temp",   &editable_IRON_MaxTemp);
   comboAddEditable(&comboitem_IRON_MinTemp, w,      "Min temp",   &editable_IRON_MinTemp);
   comboAddEditable(&comboitem_IRON_StandbyTemp, w,  "Sby temp",   &editable_IRON_StandbyTemp);
-  comboAddEditable(&comboitem_IRON_StandbyTime, w,  "Sby tim",    &editable_IRON_StandbyTime);
-  comboAddEditable(&comboitem_IRON_SleepTime, w,    "Slp tim",    &editable_IRON_SleepTime);
+  comboAddEditable(&comboitem_IRON_StandbyTime, w,  "Sby time",   &editable_IRON_StandbyTime);
+  comboAddEditable(&comboitem_IRON_SleepTime, w,    "Slp time",   &editable_IRON_SleepTime);
   #ifdef USE_VIN
   comboAddEditable(&comboitem_IRON_Impedance, w,    "Heater",     &editable_IRON_Impedance);
-  comboAddEditable(&comboitem_IRON_Power, w,        "Pwr lim",    &editable_IRON_Power);
+  comboAddEditable(&comboitem_IRON_Power, w,        "Pwr limit",  &editable_IRON_Power);
   #endif
-  comboAddEditable(&comboitem_IRON_ReadPeriod, w,   "ADC tim",    &editable_IRON_ReadPeriod);
-  comboAddEditable(&comboitem_IRON_ReadDelay, w,    "ADC del",    &editable_IRON_ReadDelay);
-  comboAddEditable(&comboitem_IRON_PWMPeriod,w,     "PWM mul",    &editable_IRON_PWMPeriod);
+  comboAddEditable(&comboitem_IRON_ReadPeriod, w,   "ADC time",   &editable_IRON_ReadPeriod);
+  comboAddEditable(&comboitem_IRON_ReadDelay, w,    "Delay",      &editable_IRON_ReadDelay);
+  comboAddEditable(&comboitem_IRON_PWMPeriod,w,     "PWM mult.",  &editable_IRON_PWMPeriod);
   comboAddEditable(&comboitem_IRON_filterFactor, w, "Filter",     &editable_IRON_filterFactor);
   comboAddEditable(&comboitem_IRON_ADCLimit, w,     "No iron",    &editable_IRON_ADCLimit);
   comboAddEditable(&comboitem_IRON_errorDelay, w,   "Detect",     &editable_IRON_errorDelay);

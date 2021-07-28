@@ -24,7 +24,7 @@ static uint16_t backupCal250;
 static uint16_t backupCal350;
 static uint16_t backupCal450;
 const static uint16_t state_temps[3] = {250, 350, 450};
-static char* state_tempstr[3] = {"250C", "350C", "450C"};
+static char* state_tempstr[3] = {"250\260C", "350\260C", "450\260C"};
 static uint16_t measured_temps[3];
 static uint16_t adcAtTemp[3];
 static bool cal_drawText;
@@ -98,6 +98,7 @@ static int cal_adjust_SaveAction(widget_t* w) {
   systemSettings.Profile.Cal350_default = adcAtTemp[cal_350];
   systemSettings.Profile.Cal450_default = adcAtTemp[cal_450];
   systemSettings.Profile.CalNTC = readColdJunctionSensorTemp_x10(mode_Celsius) / 10;
+  saveSettingsFromMenu(save_Settings);
   return screen_edit_calibration;
 }
 static int cal_adjust_CancelAction(widget_t* w) {
@@ -275,11 +276,11 @@ static void Cal_Start_draw(screen_t *scr){
       case cal_250:
       case cal_350:
       case cal_450:
-        u8g2_DrawStr(&u8g2, 10, 12, "CAL STEP:");            // Draw current cal state
-        u8g2_DrawStr(&u8g2, 90, 12, state_tempstr[(int)current_state]);
+        u8g2_DrawStr(&u8g2, 6, 12, "CAL STEP:");            // Draw current cal state
+        u8g2_DrawStr(&u8g2, 83, 12, state_tempstr[(int)current_state]);
         u8g2_DrawStr(&u8g2, 10, 30, "WAIT...");               // Draw current temp
         sprintf(currTemp, "%3u\260C",lastTipTemp);
-        u8g2_DrawStr(&u8g2, 90, 30, currTemp);
+        u8g2_DrawStr(&u8g2, 82, 30, currTemp);
         break;
       case cal_suceed:
       {
@@ -303,9 +304,9 @@ static void Cal_Start_draw(screen_t *scr){
       case cal_input_250:
       case cal_input_350:
       case cal_input_450:
-          u8g2_DrawStr(&u8g2, 10, 12, "CAL STEP:");                                 // Draw current cal state
-          u8g2_DrawStr(&u8g2, 90, 12, state_tempstr[(int)current_state-10]);
-          u8g2_DrawStr(&u8g2, 10, 30, "MEASURED:");//12
+          u8g2_DrawStr(&u8g2, 6, 12, "CAL STEP:");                                 // Draw current cal state
+          u8g2_DrawStr(&u8g2, 83, 12, state_tempstr[(int)current_state-10]);
+          u8g2_DrawStr(&u8g2, 6, 30, "MEASURED:");//12
         break;
     }
   }
@@ -413,7 +414,7 @@ void calibration_screen_setup(screen_t *scr) {
   dis->getData = &getMeasuredTemp;
   edit->setData =  (void (*)(void *)) &setMeasuredTemp;
   edit->selectable.tab = 1;
-  w->posX = 84;
+  w->posX = 80;
   w->posY = 28;
   w->width = 42;
   w->enabled=0;
