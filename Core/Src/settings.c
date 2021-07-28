@@ -286,9 +286,9 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_350   = T12_Cal350;     // These values are way lower, but better to be safe than sorry
       systemSettings.Profile.tip[x].calADC_At_450   = T12_Cal450;     // User needs to calibrate its station
       systemSettings.Profile.tip[x].PID.Kp          = 10000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 6000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 7000;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Kd          = 1000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 60;             // val = /100
+      systemSettings.Profile.tip[x].PID.maxI        = 50;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       systemSettings.Profile.tip[x].PID.tau         = 10;             // val = /100
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);         // Empty name
