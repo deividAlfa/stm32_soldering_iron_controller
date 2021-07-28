@@ -367,7 +367,7 @@ void resetCurrentProfile(void){
   systemSettings.Profile.pwmMul                   = 1;
   systemSettings.Profile.readPeriod               = (200*200)-1;             // Because we have a 5uS timer clock
   systemSettings.Profile.readDelay                = (20*200)-1;
-  systemSettings.Profile.filterFactor             = 4;
+  systemSettings.Profile.filterFactor             = 3;
   systemSettings.Profile.tempUnit                 = mode_Celsius;
   systemSettings.Profile.NotInitialized           = initialized;
   __enable_irq();
