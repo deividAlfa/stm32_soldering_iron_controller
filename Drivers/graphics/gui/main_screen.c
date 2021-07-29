@@ -246,7 +246,7 @@ static void main_screen_init(screen_t *scr) {
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   updateIronPower();
   uint32_t currentTime = HAL_GetTick();
-  uint8_t error = GetIronError();
+  uint8_t error = Iron.Error.Flags;
 
   if(mainScr.update){                          // This was set on a previous pass. We reset the flag now.
     mainScr.update = 0;
@@ -257,8 +257,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   }
 
   uint8_t current_mode = getCurrentMode();
-  if(error){
-    if(!(mainScr.ironStatus == status_sleep && error==1)){
+  if(error & _ACTIVE){
+    if(mainScr.ironStatus != status_sleep || error!=(_ACTIVE | _NO_IRON)){
       mainScr.ironStatus = status_error;
     }
   }
