@@ -928,48 +928,46 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
       return combo->currentItem->action_screen;                                                               // Return screen index
     }
   }
-  if(input != Rotate_Nothing){
-    if ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){           // If combo option type
-      sel = &combo->currentItem->widget->selectable;                                                            // Get selectable data
-      combo->selectable.state = sel->state;
-      combo->selectable.previous_state = sel->previous_state;
-      if(((input == Click) && (sel->state!=widget_edit)) || sel->state==widget_edit){                         // If widget in edit mode
-        callFromCombo=1;
-        default_widgetProcessInput(w, input, state);                                                          // Process widget
-        callFromCombo=0;
-        return -1;                                                                                            // Return
-      }
+  if ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){           // If combo option type
+    sel = &combo->currentItem->widget->selectable;                                                            // Get selectable data
+    combo->selectable.state = sel->state;
+    combo->selectable.previous_state = sel->previous_state;
+    if(((input == Click) && (sel->state!=widget_edit)) || sel->state==widget_edit){                         // If widget in edit mode
+      callFromCombo=1;
+      sel->processInput(w, input, state);                                                                   // Process widget
+      callFromCombo=0;
+      return -1;                                                                                            // Return
     }
-    if(input == Rotate_Increment) {
-      //Set comboBox item to next comboBox
-      comboBox_item_t *current = combo->currentItem->next_item;
-      // if comboBox is disabled, skip. While comboBox still valid
-      while(current && !current->enabled) {
-        current = current->next_item;
-      }
-      // If comboBox valid(didn't reach end)
-      if(current) {
+  }
+  if(input == Rotate_Increment) {
+    //Set comboBox item to next comboBox
+    comboBox_item_t *current = combo->currentItem->next_item;
+    // if comboBox is disabled, skip. While comboBox still valid
+    while(current && !current->enabled) {
+      current = current->next_item;
+    }
+    // If comboBox valid(didn't reach end)
+    if(current) {
+      combo->currentItem = current;
+      uint8_t index = comboItemToIndex(w, current);
+      if(index > lastIndex)
+        ++combo->currentScroll;
+    }
+  }
+  else if(input == Rotate_Decrement) {
+    comboBox_item_t *current = NULL;
+    // If comboBox is not the first element
+    if(combo->currentItem != combo->first){
+      do {
+        current = combo->first;
+        while(current->next_item != combo->currentItem) {
+          current = current->next_item;
+        }
         combo->currentItem = current;
-        uint8_t index = comboItemToIndex(w, current);
-        if(index > lastIndex)
-          ++combo->currentScroll;
-      }
-    }
-    else if(input == Rotate_Decrement) {
-      comboBox_item_t *current = NULL;
-      // If comboBox is not the first element
-      if(combo->currentItem != combo->first){
-        do {
-          current = combo->first;
-          while(current->next_item != combo->currentItem) {
-            current = current->next_item;
-          }
-          combo->currentItem = current;
-        }while(!current->enabled);
-        uint8_t index = comboItemToIndex(w, current);
-        if(index < firstIndex)
-          --combo->currentScroll;
-      }
+      }while(!current->enabled);
+      uint8_t index = comboItemToIndex(w, current);
+      if(index < firstIndex)
+        --combo->currentScroll;
     }
   }
   return -1;
