@@ -2,7 +2,7 @@
  * widgets.h
  *
  *  Created on: Jan 12, 2021
- *      Author: David    Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
 #ifndef GRAPHICS_GUI_WIDGETS_H_
@@ -26,14 +26,13 @@ typedef enum widgetType {widget_combo, widget_label, widget_display, widget_edit
 typedef enum comboType {combo_Screen, combo_Editable, combo_MultiOption, combo_Action}comboType;
 typedef enum widgetRefreshType {refresh_idle, refresh_triggered, refresh_always}widgetRefreshType;
 typedef struct widget_t widget_t;
-typedef struct comboWidget_t comboWidget_t;
-typedef struct comboBox_item_t comboBox_item_t;
 typedef struct selectable_widget_t selectable_widget_t;
 typedef struct editable_widget_t editable_widget_t;
 typedef struct button_widget_t button_widget_t;
 typedef struct displayOnly_widget_t displayOnly_widget_t;
-typedef struct comboBox_widget_t comboBox_widget_t;
 typedef struct bmp_widget_t bmp_widget_t;
+typedef struct comboBox_widget_t comboBox_widget_t;
+typedef struct comboBox_item_t comboBox_item_t;
 
 struct selectable_widget_t {
   widgetStateType state;
@@ -98,7 +97,7 @@ struct comboBox_widget_t {
   comboBox_item_t *first;
   comboBox_item_t *currentItem;
   selectable_widget_t selectable;
-} ;
+};
 
 struct comboBox_item_t {
   comboBox_item_t *next_item;
@@ -134,8 +133,13 @@ struct widget_t
 displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *w);
 editable_widget_t * extractEditablePartFromWidget(widget_t *);
 selectable_widget_t * extractSelectablePartFromWidget(widget_t *w);
+
+void newWidget(widget_t **new, widgetType type, struct screen_t *scr);
+editable_widget_t *newEditable(widgetType type);
+comboBox_item_t *newComboItem(void);
+
 void widgetAlign(widget_t* w);
-void widgetDefaultsInit(widget_t *w, widgetType t, void* content);
+void widgetDefaultsInit(widget_t *w, widgetType type);
 void editableDefaultsInit(editable_widget_t* editable, widgetType type);
 void default_widgetDraw(widget_t* w);
 void default_widgetUpdate(widget_t *w);
@@ -146,11 +150,10 @@ void widgetDisable(widget_t* w);
 int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state);
 int comboBoxProcessInput(widget_t* w, RE_Rotation_t, RE_State_t *);
 void comboBoxDraw(widget_t *w);
-void comboAddScreen(comboBox_item_t* item, widget_t *combo, char *label, uint8_t actionScreen);
-//void comboAddEditable(comboBox_item_t* item, widget_t *combo, char *label, widget_t* w);
-void comboAddEditable(comboBox_item_t* item, widget_t *combo, char *label, editable_widget_t *editable);
-void comboAddMultiOption(comboBox_item_t* item, widget_t *combo, char *label, editable_widget_t *editable);
-void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, int (*action)());
-void comboResetIndex(widget_t *combo);
+void newComboScreen(widget_t *w, char *label, uint8_t actionScreen, comboBox_item_t **newItem);
+void newComboEditable( widget_t *combo, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem);
+void newComboMultiOption(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem);
+void newComboAction(widget_t *w, char *label, int (*action)(), comboBox_item_t **newItem);
+void comboResetIndex(widget_t *w);
 int32_t strsum(char* str);
 #endif /* GRAPHICS_GUI_WIDGETS_H_ */

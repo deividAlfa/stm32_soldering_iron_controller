@@ -2,7 +2,7 @@
  * widgets.c
  *
  *  Created on: Jan 12, 2021
- *      Author: David    Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
 #include "widgets.h"
@@ -11,6 +11,50 @@
 #include "gui.h"
 static char displayString[32];
 static bool callFromCombo;
+
+
+
+void newWidget(widget_t **new, widgetType type, struct screen_t *scr){
+  widget_t *w=malloc(sizeof(widget_t));
+  if(!w || !scr) Error_Handler();
+  switch(type){
+    case widget_combo:
+      w->content = malloc(sizeof(comboBox_widget_t));
+      break;
+    case widget_display:
+      w->content = malloc(sizeof(displayOnly_widget_t));
+      break;
+    case widget_multi_option:
+    case widget_editable:
+      w->content = malloc(sizeof(editable_widget_t));
+      break;
+    case widget_button:
+    case widget_bmp_button:
+      w->content = malloc(sizeof(button_widget_t));
+      break;
+    default:
+      Error_Handler();
+  }
+  if(!w->content) Error_Handler();
+  screen_addWidget(w,scr);
+  widgetDefaultsInit(w, type);
+  if(new){
+    *new = w;
+  }
+}
+
+editable_widget_t *newEditable(widgetType type){
+  editable_widget_t *edit=malloc(sizeof(editable_widget_t));
+  if(!edit) Error_Handler();
+  editableDefaultsInit(edit,type);
+  return edit;
+}
+
+comboBox_item_t *newComboItem(void){
+  comboBox_item_t *item=malloc(sizeof(comboBox_item_t));
+  if(!item) Error_Handler();
+  return item;
+}
 
 displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *w) {
   if(!w)
@@ -84,9 +128,10 @@ selectable_widget_t * extractSelectablePartFromWidget(widget_t *w) {
   }
   return NULL;
 }
-void widgetDefaultsInit(widget_t *w, widgetType t, void* content){
-  if(!w || !content){ return; }
-  w->type = t;
+void widgetDefaultsInit(widget_t *w, widgetType type){
+  if(!w || !w->content){ return; }
+
+  w->type = type;
   w->draw = &default_widgetDraw;
   w->update = &default_widgetUpdate;
   w->enabled = 1;
@@ -95,8 +140,14 @@ void widgetDefaultsInit(widget_t *w, widgetType t, void* content){
   w->radius=-1;
   w->posX = 0;
   w->posY = 0;
-  w->content = content;
+  w->width = 0;
   w->next_widget = NULL;
+  comboBox_widget_t *combo;
+  if(type==widget_combo){
+    combo = (comboBox_widget_t*)w->content;
+    combo->first = NULL;
+    combo->currentItem = NULL;                    // Needs to be cleared before the extract from widget functions.
+  }
   selectable_widget_t *sel = extractSelectablePartFromWidget(w);
   displayOnly_widget_t *dis = extractDisplayPartFromWidget(w);
   editable_widget_t *edit = extractEditablePartFromWidget(w);
@@ -128,28 +179,23 @@ void widgetDefaultsInit(widget_t *w, widgetType t, void* content){
     edit->min_value=0;
     edit->setData=NULL;
   }
-  switch (t) {
+  switch (type) {
     case widget_multi_option:
       edit->max_value = 255;
       edit->numberOfOptions = 0;
       edit->options = NULL;
       break;
     case widget_combo:
-    {
-      comboBox_widget_t* combo = content;
-      combo->currentItem = NULL;
       w->frameType = frame_combo;
-      combo->first = NULL;
       w->draw = &comboBoxDraw;
-      combo->currentScroll = 0;
-      combo->selectable.processInput = &comboBoxProcessInput;
       w->parent->current_widget = w;
+      combo->selectable.processInput = &comboBoxProcessInput;
       combo->font = default_font;
+      combo->currentScroll = 0;
       break;
-    }
     case widget_button:
     {
-      button_widget_t* button = (button_widget_t*)content;
+      button_widget_t* button = (button_widget_t*)w->content;
       button->action = NULL;
       button->displayString = NULL;
       button->xbm = NULL;
@@ -160,10 +206,12 @@ void widgetDefaultsInit(widget_t *w, widgetType t, void* content){
     default:
       break;
   }
+
 }
 void editableDefaultsInit(editable_widget_t* editable, widgetType type){
   widget_t w;
-  widgetDefaultsInit(&w, type, editable);
+  w.content=editable;
+  widgetDefaultsInit(&w, type);
 }
 
 static void insertDot(char *str, uint8_t dec) {
@@ -207,21 +255,20 @@ void default_widgetUpdate(widget_t *w) {
         return;
       }
       break;
-
-    case widget_bmp:
-      bmp = ((bmp_widget_t*)w->content);
-      if(!bmp->xbm){
-        widgetDisable(w);
-        return;
-      }
-      break;
     case widget_button:
       button = ((button_widget_t*)w->content);
       if(!button->displayString){
         widgetDisable(w);
         return;
       }
-      val_ui=strsum(button->displayString);                     // Get string sum
+      val_ui=strsum(button->displayString);
+      break;
+    case widget_bmp:
+      bmp = ((bmp_widget_t*)w->content);
+      if(!bmp->xbm){
+        widgetDisable(w);
+        return;
+      }
       break;
 
     case widget_multi_option:
@@ -311,7 +358,6 @@ void widgetClearField(widget_t* w){
   button_widget_t* button;
   bmp_widget_t* bmp;
   uint8_t cHeight = u8g2_GetMaxCharHeight(&u8g2);
-  //if(dis && dis->font==u8g2_font_ironTemp){ cHeight+=3; }                       // TODO this font reports lower height, needs to be manually adjusted
   uint8_t r;
 
   if(w->frameType!=frame_combo){
@@ -330,7 +376,6 @@ void widgetClearField(widget_t* w){
 
         case widget_button:
           button = (button_widget_t*)w->content;
-          //if(button->font==u8g2_font_ironTemp){ cHeight+=3; }                   // TODO this font reports lower height, needs to be manually adjusted
           u8g2_DrawBox(&u8g2, w->posX, w->posY, w->width, cHeight+1);
           break;
 
@@ -340,7 +385,6 @@ void widgetClearField(widget_t* w){
 
         case widget_editable:
         case widget_multi_option:
-          //if(dis->font==u8g2_font_ironTemp){ cHeight+=3; }                      // TODO this font reports lower height, needs to be manually adjusted
           u8g2_DrawBox(&u8g2, w->posX ,w->posY, w->width, cHeight+1);
           break;
       }
@@ -846,10 +890,10 @@ void comboBoxDraw(widget_t *w) {
   return;
 }
 
-uint8_t comboItemToIndex(widget_t *combo, comboBox_item_t *item) {
-  if(!combo || !item){ return 0; }
+uint8_t comboItemToIndex(widget_t *w, comboBox_item_t *item) {
+  if(!w || !item){ return 0; }
   uint8_t index = 0;
-  comboBox_item_t *i = ((comboBox_widget_t*)combo->content)->first;
+  comboBox_item_t *i = ((comboBox_widget_t*)w->content)->first;
   while(i && i != item) {
     i = i->next_item;
     if(i->enabled)
@@ -1146,119 +1190,150 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
   return -2;
 }
 
-void comboAddScreen(comboBox_item_t* item,widget_t *combo, char *label, uint8_t actionScreen){
-  if(!item || !combo || !label){ return; }
-  comboBox_widget_t* comboW = (comboBox_widget_t*)combo->content;
-  if(combo->type==widget_combo){
-    item->text = label;
-    item->next_item = NULL;
-    item->action_screen = actionScreen;
-    item->type = combo_Screen;
-    item->enabled = 1;
-    item->dispAlign= align_center;
+void newComboScreen(widget_t *w, char *label, uint8_t actionScreen, comboBox_item_t **newItem){
+  comboBox_item_t *item = malloc(sizeof(comboBox_item_t));
+  if(!item || !w || !label){
+    Error_Handler();
+  }
+  comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
+  item->text = label;
+  item->next_item = NULL;
+  item->action_screen = actionScreen;
+  item->type = combo_Screen;
+  item->enabled = 1;
+  item->dispAlign= align_center;
 
-    comboBox_item_t *next = comboW->first;
+  comboBox_item_t *next = combo->first;
 
-    if(!next) {
-      comboW->first = item;
-      comboW->currentItem = item;
-      return;
-    }
+  if(!next) {
+    combo->first = item;
+    combo->currentItem = item;
+  }
+  else{
     while(next->next_item){
       next = next->next_item;
     }
     next->next_item = item;
   }
+  if(newItem){
+    *newItem = item;
+  }
 }
 
 // Only allows Editable or multioption widgets
-void comboAddEditable(comboBox_item_t* item, widget_t *combo, char *label, editable_widget_t *editable){
-  if(!item || !combo || !label || !editable ){
-    return;
+void newComboEditable( widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem){
+  comboBox_item_t *item = malloc(sizeof(comboBox_item_t));
+  editable_widget_t *edit = malloc(sizeof(editable_widget_t));
+  if(!item || !w || !label || !edit ){
+    Error_Handler();
   }
-  comboBox_widget_t* comboW = (comboBox_widget_t*)combo->content;
-
+  editableDefaultsInit(edit, widget_editable);
+  comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
   item->text = label;
   item->next_item = NULL;
-  item->widget = editable;
+  item->widget = edit;
   item->type = combo_Editable;
   item->enabled = 1;
+  item->dispAlign = 0; // Unused, automatically adjusted
 
-  comboBox_item_t *next = comboW->first;
-  editable->selectable.state=widget_selected;
-  editable->selectable.previous_state=widget_selected;
-
-  if(!next) {
-    comboW->first = item;
-    comboW->currentItem = item;
-    return;
-  }
-  while(next->next_item){
-    next = next->next_item;
-  }
-  next->next_item = item;
-}
-
-// Only allows Editable or multioption widgets
-void comboAddMultiOption(comboBox_item_t* item, widget_t *combo, char *label, editable_widget_t *editable){
-  if(!item || !combo || !label || !editable ){
-    return;
-  }
-  comboBox_widget_t* comboW = (comboBox_widget_t*)combo->content;
-
-  item->text = label;
-  item->next_item = NULL;
-  item->widget = editable;
-  item->type = combo_MultiOption;
-  item->enabled = 1;
-  editable->selectable.state=widget_selected;
-  editable->selectable.previous_state=widget_selected;
-  comboBox_item_t *next = comboW->first;
+  comboBox_item_t *next = combo->first;
+  edit->selectable.state=widget_selected;
+  edit->selectable.previous_state=widget_selected;
 
   if(!next) {
-    comboW->first = item;
-    comboW->currentItem = item;
-    return;
+    combo->first = item;
+    combo->currentItem = item;
   }
-  while(next->next_item){
-    next = next->next_item;
-  }
-  next->next_item = item;
-}
-
-void comboAddAction(comboBox_item_t* item, widget_t *combo, char *label, int (*action)()){
-  if(!item || !combo || !label || !action){ return; }
-  comboBox_widget_t* comboW = (comboBox_widget_t*)combo->content;
-  if(action){                        // If not null
-    item->text = label;
-    item->next_item = NULL;
-    item->action = action;
-    item->type = combo_Action;
-    item->enabled = 1;
-    item->dispAlign= align_center;
-    comboBox_item_t *next = comboW->first;
-
-    if(!next) {
-      comboW->first = item;
-      comboW->currentItem = item;
-      return;
-    }
+  else{
     while(next->next_item){
       next = next->next_item;
     }
     next->next_item = item;
   }
+  if(newItem){
+    *newItem = item;
+  }
+  if(newEdit){
+    *newEdit = edit;
+  }
 }
 
-void comboResetIndex(widget_t *combo){
-  comboBox_widget_t* comboW = (comboBox_widget_t*)combo->content;
-  if((comboW->currentItem->type==combo_Editable)||(comboW->currentItem->type==combo_MultiOption)){
-      selectable_widget_t* sel = &comboW->currentItem->widget->selectable;
+// Only allows Editable or multioption widgets
+void newComboMultiOption(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem){
+  comboBox_item_t *item = malloc(sizeof(comboBox_item_t));
+  editable_widget_t *edit = malloc(sizeof(editable_widget_t));
+  if(!item || !w || !label || !edit ){
+    Error_Handler();
+  }
+  editableDefaultsInit(edit, widget_multi_option);
+  comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
+
+  item->text = label;
+  item->next_item = NULL;
+  item->widget = edit;
+  item->type = combo_MultiOption;
+  item->enabled = 1;
+  item->dispAlign = 0; // Unused, automatically adjusted
+  edit->selectable.state=widget_selected;
+  edit->selectable.previous_state=widget_selected;
+  comboBox_item_t *next = combo->first;
+
+  if(!next) {
+    combo->first = item;
+    combo->currentItem = item;
+  }
+  else{
+    while(next->next_item){
+      next = next->next_item;
+    }
+    next->next_item = item;
+  }
+  if(newItem){
+    *newItem = item;
+  }
+  if(newEdit){
+    *newEdit = edit;
+  }
+}
+
+void newComboAction(widget_t *w, char *label, int (*action)(), comboBox_item_t **newItem){
+  comboBox_item_t *item = malloc(sizeof(comboBox_item_t));
+  if(!item || !w || !label || !action){
+    Error_Handler();
+  }
+  comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
+  item->text = label;
+  item->next_item = NULL;
+  item->action = action;
+  item->type = combo_Action;
+  item->enabled = 1;
+  item->dispAlign= align_center;
+  comboBox_item_t *next = combo->first;
+
+  if(!next) {
+    combo->first = item;
+    combo->currentItem = item;
+  }
+  else{
+    while(next->next_item){
+      next = next->next_item;
+    }
+    next->next_item = item;
+  }
+  if(newItem){
+    *newItem = item;
+  }
+}
+
+void comboResetIndex(widget_t *w){
+  comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
+  if((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption)){
+      selectable_widget_t* sel = &combo->currentItem->widget->selectable;
     if(sel){
       sel->state = widget_selected;
       sel->previous_state = widget_selected;
     }
   }
-  comboW->currentItem = comboW->first;
-  comboW->currentScroll=0;
+  combo->currentItem = combo->first;
+  combo->currentScroll=0;
 }
