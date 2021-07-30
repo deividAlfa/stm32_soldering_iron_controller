@@ -334,16 +334,16 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
           else{
             setCalState(cal_suceed);
           }
-          widgetEnable(Widget_Cal_Back);
-          ((button_widget_t*)Widget_Cal_Back->content)->selectable.previous_state=widget_selected;
-          ((button_widget_t*)Widget_Cal_Back->content)->selectable.state=widget_selected;
-
-          widgetDisable(Widget_Cal_Measured);
-          ((editable_widget_t*)Widget_Cal_Measured->content)->selectable.previous_state=widget_idle;
-          ((editable_widget_t*)Widget_Cal_Measured->content)->selectable.state=widget_idle;
-
-          Screen_calibration_start.current_widget=Widget_Cal_Back;
         }
+        widgetEnable(Widget_Cal_Back);
+        ((button_widget_t*)Widget_Cal_Back->content)->selectable.previous_state=widget_selected;
+        ((button_widget_t*)Widget_Cal_Back->content)->selectable.state=widget_selected;
+
+        widgetDisable(Widget_Cal_Measured);
+        ((editable_widget_t*)Widget_Cal_Measured->content)->selectable.previous_state=widget_idle;
+        ((editable_widget_t*)Widget_Cal_Measured->content)->selectable.state=widget_idle;
+
+        Screen_calibration_start.current_widget=Widget_Cal_Back;
       }
     }
   }
@@ -377,11 +377,12 @@ static void Cal_Start_draw(screen_t *scr){
       case cal_250:
       case cal_350:
       case cal_450:
-        u8g2_DrawStr(&u8g2, 6, 12, "CAL STEP:");            // Draw current cal state
+        u8g2_DrawStr(&u8g2, 0, 12, "CAL STEP:");            // Draw current cal state
         u8g2_DrawStr(&u8g2, 83, 12, state_tempstr[(int)current_state]);
-        u8g2_DrawStr(&u8g2, 6, 30, "WAIT...");               // Draw current temp
+        u8g2_DrawStr(&u8g2, 0, 30, "WAIT...");               // Draw current temp
         sprintf(currTemp, "%3u\260C",lastTipTemp);
         u8g2_DrawStr(&u8g2, 82, 30, currTemp);
+        u8g2_DrawStr(&u8g2, 0, 50, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name);//12
         break;
       case cal_suceed:
       {
@@ -408,9 +409,10 @@ static void Cal_Start_draw(screen_t *scr){
       case cal_input_250:
       case cal_input_350:
       case cal_input_450:
-          u8g2_DrawStr(&u8g2, 6, 12, "CAL STEP:");                                 // Draw current cal state
+          u8g2_DrawStr(&u8g2, 0, 12, "CAL STEP:");                                 // Draw current cal state
           u8g2_DrawStr(&u8g2, 83, 12, state_tempstr[(int)current_state-10]);
-          u8g2_DrawStr(&u8g2, 6, 30, "MEASURED:");//12
+          u8g2_DrawStr(&u8g2, 0, 30, "MEASURED:");//12
+          u8g2_DrawStr(&u8g2, 0, 50, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name);//12
       default:
         break;
     }
@@ -475,6 +477,8 @@ static void Cal_Adjust_create(screen_t *scr){
 
   // Combo Start
   newWidget(&w,widget_combo,scr);
+
+  newComboScreen(w, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name, -1,  NULL);
 
   newComboEditable(w, "Cal 250", &edit, &Cal_Combo_Adjust_C250);
   edit->inputData.reservedChars=4;
