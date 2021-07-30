@@ -15,7 +15,6 @@ static uint32_t screenTimer;
 static uint32_t lastUpdateTick;
 static int16_t lastTipTemp;
 static uint16_t backupTemp;
-static uint16_t current_debug_temp;
 static bool backupTempUnit;
 static uint16_t backupCal250;
 static uint16_t backupCal350;
@@ -116,7 +115,17 @@ static void setCal250(int32_t *val) {
     temp=adcAtTemp[cal_350]-1;
   }
   adcAtTemp[cal_250] = temp;
-  current_debug_temp = temp;
+}
+static int Cal250_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
+  int ret = default_widgetProcessInput(w, input, state);
+  selectable_widget_t *sel =extractSelectablePartFromWidget(w);
+  if(sel->state==widget_edit){
+    setDebugTemp(adcAtTemp[cal_250]);
+  }
+  else{
+    setDebugTemp(0);
+  }
+  return ret;
 }
 //=========================================================
 static void *getCal350() {
@@ -132,7 +141,17 @@ static void setCal350(int32_t *val) {
     temp=adcAtTemp[cal_450]-1;
   }
   adcAtTemp[cal_350] = *val;
-  current_debug_temp = temp;
+}
+static int Cal350_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
+  int ret = default_widgetProcessInput(w, input, state);
+  selectable_widget_t *sel =extractSelectablePartFromWidget(w);
+  if(sel->state==widget_edit){
+    setDebugTemp(adcAtTemp[cal_350]);
+  }
+  else{
+    setDebugTemp(0);
+  }
+  return ret;
 }
 //=========================================================
 static void *getCal450() {
@@ -145,7 +164,17 @@ static void setCal450(int32_t *val) {
     temp=adcAtTemp[cal_350]+1;
   }
   adcAtTemp[cal_450] = temp;
-  current_debug_temp = temp;
+}
+static int Cal450_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
+  int ret = default_widgetProcessInput(w, input, state);
+  selectable_widget_t *sel =extractSelectablePartFromWidget(w);
+  if(sel->state==widget_edit){
+    setDebugTemp(adcAtTemp[cal_450]);
+  }
+  else{
+    setDebugTemp(0);
+  }
+  return ret;
 }
 //=========================================================
 static int cal_adjust_SaveAction(widget_t* w) {
@@ -423,7 +452,6 @@ static void Cal_Adjust_init(screen_t *scr) {
   adcAtTemp[cal_250] = systemSettings.Profile.Cal250_default;
   adcAtTemp[cal_350] = systemSettings.Profile.Cal350_default;
   adcAtTemp[cal_450] = systemSettings.Profile.Cal450_default;
-  current_debug_temp = 0;
   setDebugTemp(0);
   setDebugMode(debug_On);
   setCurrentMode(mode_run);
@@ -438,13 +466,6 @@ static void Cal_Adjust_OnExit(screen_t *scr) {
 static int Cal_Adjust_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
   if(GetIronError()){
     return screen_calibration;
-  }
-  comboBox_item_t *item=((comboBox_widget_t*)Screen_calibration_adjust.widgets->content)->currentItem;
-  if(item->type==combo_Editable && item->widget->selectable.state==widget_edit){
-    setDebugTemp(current_debug_temp);
-  }
-  else{
-    setDebugTemp(0);
   }
   return default_screenProcessInput(scr, input, s);
 }
@@ -463,6 +484,7 @@ static void Cal_Adjust_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setCal250;
   edit->max_value = 4000;
   edit->min_value = 0;
+  edit->selectable.processInput=&Cal250_processInput;
 
   newComboEditable(w, "Cal 350", &edit, &Cal_Combo_Adjust_C350);
   edit->inputData.reservedChars=4;
@@ -472,6 +494,7 @@ static void Cal_Adjust_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setCal350;
   edit->max_value = 4000;
   edit->min_value = 0;
+  edit->selectable.processInput=&Cal350_processInput;
 
   newComboEditable(w, "Cal 450", &edit, &Cal_Combo_Adjust_C450);
   edit->inputData.reservedChars=4;
@@ -481,6 +504,7 @@ static void Cal_Adjust_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setCal450;
   edit->max_value = 4000;
   edit->min_value = 0;
+  edit->selectable.processInput=&Cal450_processInput;
 
   newComboAction(w, "SAVE", &cal_adjust_SaveAction, NULL);
   newComboAction(w, "CANCEL", &cal_adjust_CancelAction, NULL);
