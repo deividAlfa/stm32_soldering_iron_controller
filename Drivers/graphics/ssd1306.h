@@ -2,7 +2,7 @@
  * ssd1306.h
  *
  *  Created on: Jan 12, 2021
- *      Author: David		Original work by Jose (PTDreamer), 2017
+ *      Author: David		Original work by Jose Barros (PTDreamer), 2017
  */
 
 #ifndef GRAPHICS_SSD1306_H_
