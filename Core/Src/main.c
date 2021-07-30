@@ -92,6 +92,17 @@ void Init(void){
     oled_init(&RE_Get,&RE1_Data);
 }
 
+// Allocate max possible ram, then release it. This fill the malloc pool and avoids internal fragmentation due (ST's?) poor malloc implementation.
+void malloc_fragmentation_fix(void){
+  uint32_t *ptr = NULL;
+  uint32_t try=17408;
+  while(!ptr && try){
+    ptr = malloc(try);
+    try-=16;
+  }
+  free(ptr);
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -101,6 +112,10 @@ void Init(void){
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+
+  malloc_fragmentation_fix();
+
+
   #if defined DEBUG && !defined STM32F072xB
     DebugOpts();          // Enable debug options in Debug build
     DWT->CTRL |= 1 ; // enable the counter
