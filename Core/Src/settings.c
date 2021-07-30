@@ -2,7 +2,7 @@
  * settings.c
  *
  *  Created on: Jan 12, 2021
- *      Author: David    Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
 #include "settings.h"
@@ -11,6 +11,7 @@
 #include "gui.h"
 #include "ssd1306.h"
 #include "tempsensors.h"
+#include <malloc.h>
 
 systemSettings_t systemSettings;
 flashSettings_t* flashSettings = (flashSettings_t*)FLASH_ADDR;
@@ -27,11 +28,26 @@ void checkSettings(void){
 
   static uint32_t prevSysChecksum=0, newSysChecksum=0, prevTipChecksum=0, newTipChecksum=0, lastCheckTime=0, lastChangeTime=0;
   uint32_t CurrentTime = HAL_GetTick();
+  uint8_t scr_index=current_screen->index;
+
+  // Disable saving when screens that use a lot of ram are active.
+  // Change detection will be active, but saving will postponed until exiting the screen. This is done to ensure compatibility with 10KB RAM devices
+  uint8_t noSave = (scr_index==screen_iron || scr_index==screen_system || scr_index==screen_tip_settings || scr_index==screen_debug || scr_index==screen_debug2);
+
+
 
   // Save from menu
-  if(systemSettings.save_Flag){
+  if(systemSettings.save_Flag && !noSave){
     switch(systemSettings.save_Flag){
       case save_Settings:
+        saveSettings(keepProfiles);
+        break;
+      case reset_Profiles:
+        systemSettings.settings.currentProfile=profile_None;
+        saveSettings(wipeProfiles);
+        break;
+      case reset_Profile:
+        resetCurrentProfile();
         saveSettings(keepProfiles);
         break;
       case reset_Settings:
@@ -42,15 +58,6 @@ void checkSettings(void){
         saveSettings(keepProfiles);
         break;
       }
-      case reset_Profile:
-        resetCurrentProfile();
-        saveSettings(keepProfiles);
-        break;
-
-      case reset_Profiles:
-        systemSettings.settings.currentProfile=profile_None;
-        saveSettings(wipeProfiles);
-        break;
       case reset_All:
         resetSystemSettings();
         saveSettings(wipeProfiles);
@@ -59,7 +66,7 @@ void checkSettings(void){
       default:
         Error_Handler();
     }
-    if(systemSettings.save_Flag>=reset_Profile){
+    if(systemSettings.save_Flag>=reset_Profiles){
       NVIC_SystemReset();
     }
     systemSettings.save_Flag=0;
@@ -83,7 +90,7 @@ void checkSettings(void){
       lastChangeTime = CurrentTime;                                                                                         // Reset timer (we don't save anything until we pass a certain time without changes)
     }
 
-    else if((CurrentTime-lastChangeTime)>((uint32_t)systemSettings.settings.saveSettingsDelay*1000)){                       // If different from the previous calculated checksum, and timer expired (No changes for enough time)
+    else if( !noSave && (CurrentTime-lastChangeTime)>((uint32_t)systemSettings.settings.saveSettingsDelay*1000)){           // If different from the previous calculated checksum, and timer expired (No changes for enough time)
       saveSettings(save_Settings);                                                                                          // Data was saved (so any pending interrupt knows this)
     }
   }
@@ -93,13 +100,13 @@ void checkSettings(void){
 //This is done to avoid huge stack build up. Trigger a save using checkSettings with a flag instead direct call from menu.
 void saveSettingsFromMenu(uint8_t mode){
   systemSettings.save_Flag=mode;
-  if(mode>=reset_Profile){
+  if(mode>=reset_Profiles){
     setSafeMode(enable);
   }
 }
 
 void saveSettings(uint8_t mode){
-
+  extern struct mallinfo mi;
   #ifdef NOSAVESETTINGS
     return;
   #endif
@@ -107,7 +114,10 @@ void saveSettings(uint8_t mode){
   uint32_t error=0;
   uint8_t profile = systemSettings.settings.currentProfile;
 
-  flashSettings_t flashBuffer=*flashSettings;
+  flashSettings_t *flashBuffer=malloc(sizeof(flashSettings_t));
+  if(!flashBuffer){ Error_Handler(); }
+  memcpy(flashBuffer,flashSettings,sizeof(flashSettings_t));
+  mi = mallinfo();
 
   while(ADC_Status != ADC_Idle);
   __disable_irq();
@@ -120,16 +130,16 @@ void saveSettings(uint8_t mode){
   }
 
   systemSettings.settingsChecksum = ChecksumSettings(&systemSettings.settings);
-  flashBuffer.settingsChecksum = systemSettings.settingsChecksum;
-  flashBuffer.settings = systemSettings.settings;
+  flashBuffer->settingsChecksum = systemSettings.settingsChecksum;
+  flashBuffer->settings = systemSettings.settings;
 
   if(mode==keepProfiles){
     if((systemSettings.settings.currentProfile<=profile_C210) &&
        (systemSettings.Profile.ID == profile )){
 
       systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
-      flashBuffer.ProfileChecksum[profile] = systemSettings.ProfileChecksum;
-      flashBuffer.Profile[profile] = systemSettings.Profile;
+      flashBuffer->ProfileChecksum[profile] = systemSettings.ProfileChecksum;
+      flashBuffer->Profile[profile] = systemSettings.Profile;
     }
     else{
       Error_Handler();
@@ -137,9 +147,9 @@ void saveSettings(uint8_t mode){
   }
   else{
     for(uint8_t x=0;x<ProfileSize;x++){
-      flashBuffer.Profile[x].NotInitialized = 0xFF;
-      flashBuffer.ProfileChecksum[x] = 0xFFFFFFFF;
-      memset(&flashBuffer.Profile[x],0xFF,sizeof(profile_t));
+      flashBuffer->Profile[x].NotInitialized = 0xFF;
+      flashBuffer->ProfileChecksum[x] = 0xFFFFFFFF;
+      memset(&flashBuffer->Profile[x],0xFF,sizeof(profile_t));
     }
   }
   __disable_irq();
@@ -163,12 +173,12 @@ void saveSettings(uint8_t mode){
     }
   }
 
-    __disable_irq();
+  __disable_irq();
   HAL_FLASH_Unlock();
   __enable_irq();
 
   uint32_t dest = (uint32_t)flashSettings;
-  uint16_t *data = (uint16_t*)&flashBuffer;
+  uint16_t *data = (uint16_t*)flashBuffer;
 
   // Store settings
   // written = number of 16-bit values written
@@ -201,7 +211,8 @@ void saveSettings(uint8_t mode){
   if(SettingsFlash != SettingsRam){
     Flash_error();
   }
-
+  free(flashBuffer);
+  mi = mallinfo();
   __disable_irq();
   systemSettings.isSaving = 0;
   __enable_irq();
@@ -253,7 +264,7 @@ void resetSystemSettings(void) {
   systemSettings.settings.version           = SETTINGS_VERSION;
   systemSettings.settings.contrast          = 255;
   systemSettings.settings.screenDimming     = true;
-  systemSettings.settings.OledOffset        = 2;
+  systemSettings.settings.OledOffset        = OLED_OFFSET;
   systemSettings.settings.errorDelay        = 100;
   systemSettings.settings.guiUpdateDelay    = 200;
   systemSettings.settings.tempUnit          = mode_Celsius;
