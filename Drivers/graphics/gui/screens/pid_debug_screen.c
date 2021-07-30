@@ -9,6 +9,9 @@
 #include "pid_debug_screen.h"
 #include "screen_common.h"
 #include "pid.h"
+
+#ifdef ENABLE_PID_DEBUG_SCREEN
+
 screen_t Screen_pid_debug;
 #define PID_SZ  95
 typedef struct {
@@ -66,7 +69,7 @@ static int pid_debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_
     plotUpdate=1;
   }
   if(input==LongClick){
-    return screen_tip_settings;
+    return screen_settings;
   }
   return -1;
 }
@@ -184,3 +187,5 @@ void pid_debug_screen_setup(screen_t *scr){
   scr->draw=&pid_debug_draw;
   scr->onExit=&pid_debug_onExit;
 }
+
+#endif

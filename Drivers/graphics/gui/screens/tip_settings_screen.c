@@ -408,7 +408,6 @@ static void tip_settings_create(screen_t *scr){
   newComboAction(w, "SAVE", &tip_save, &comboitem_tip_settings_save);
   newComboAction(w, "COPY", &tip_copy, &comboitem_tip_settings_copy);
   newComboAction(w, "DELETE", &tip_delete, &comboitem_tip_settings_delete);
-  newComboScreen(w, "DEBUG", screen_pid_debug, NULL);
   newComboScreen(w, "CANCEL", -1, &comboitem_tip_settings_cancel);                                         // Return value set automatically on enter
 }
 

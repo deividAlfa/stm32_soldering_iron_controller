@@ -8,6 +8,7 @@
 #ifndef GRAPHICS_GUI_TIPSETTINGS_SCREEN_H_
 #define GRAPHICS_GUI_TIPSETTINGS_SCREEN_H_
 
+
 #include "screen.h"
 
 extern screen_t Screen_tip_settings;

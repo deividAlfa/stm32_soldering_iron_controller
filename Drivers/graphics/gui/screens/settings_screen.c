@@ -26,6 +26,9 @@ static void SETTINGS_create(screen_t *scr) {
   newComboScreen(w, "SYSTEM", screen_system, NULL);
   newComboScreen(w, "EDIT TIPS", screen_tip_list, NULL);
   newComboScreen(w, "CALIBRATION", screen_calibration, NULL);
+  #ifdef ENABLE_PID_DEBUG_SCREEN
+  newComboScreen(w, "PID DEBUG", screen_pid_debug, NULL);
+  #endif
   #ifdef ENABLE_DEBUG_SCREEN
   newComboScreen(w, "DEBUG", screen_debug, NULL);
   #endif
