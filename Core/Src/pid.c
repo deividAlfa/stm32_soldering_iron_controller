@@ -31,7 +31,9 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
 
   // Proportional term
   pid.proportional = pid.Kp * error;
-
+  //if(pid.proportional<0){
+  //  pid.proportional=0;
+  //}
   // Integral
   pid.integrator = pid.integrator + 0.5f * pid.Ki * dt * (error + pid.prevError);  // New
   //pid.integrator = pid.integrator + (pid.Ki*(error*dt));                            // Old
