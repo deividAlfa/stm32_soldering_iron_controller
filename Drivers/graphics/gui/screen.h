@@ -2,7 +2,7 @@
  * screen.h
  *
  *  Created on: Jan 12, 2021
- *      Author: David    Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
 #ifndef GRAPHICS_GUI_SCREEN_H_
@@ -24,17 +24,18 @@
 enum {
     screen_boot,
     screen_main,
-      screen_settingsmenu,
+      screen_settings,
           screen_iron,
           screen_system,
               screen_reset,
                 screen_reset_confirmation,
-          screen_iron_tips,
-            screen_edit_tip_settings,
-          screen_edit_calibration,
-              screen_edit_calibration_start,
-              screen_edit_calibration_adjust,
-              screen_edit_calibration_input,
+          screen_tip_list,
+            screen_tip_settings,
+              screen_pid_debug,
+          screen_calibration,
+              screen_calibration_start,
+              screen_calibration_adjust,
+              screen_calibration_input,
           screen_debug,
               screen_debug2,
     };
@@ -56,6 +57,9 @@ struct screen_t
   void (*onEnter)(screen_t *scr);
   uint8_t index;
   void (*init)(screen_t *scr);
+  void (*create)(screen_t *scr);
+  uint8_t backup_combo_scroll;
+  uint8_t backup_combo_index;
 };
 
 

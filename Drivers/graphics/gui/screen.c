@@ -2,41 +2,41 @@
  * screen.cpp
  *
  *  Created on: Jan 12, 2021
- *      Author: David    Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
 #include "screen.h"
 #include "oled.h"
 
 void screen_addWidget(widget_t *widget, screen_t *scr) {
-  widget_t *last_widget = NULL;
+  widget_t *current_widget = NULL;
   if(scr->widgets) {
-    last_widget = scr->widgets;
-    while(last_widget->next_widget)
-      last_widget = last_widget->next_widget;
+    current_widget = scr->widgets;
+    while(current_widget->next_widget)
+      current_widget = current_widget->next_widget;
   }
 
   widget->next_widget = NULL;
   widget->parent = scr;
-  if(last_widget)
-    last_widget->next_widget = widget;
+  if(current_widget)
+    current_widget->next_widget = widget;
   else
     scr->widgets = widget;
 }
 
 widget_t * screen_tabToWidget(screen_t * scr, uint8_t tab) {
-  widget_t *last_widget = NULL;
+  widget_t *current_widget = NULL;
   if(scr->widgets) {
-    last_widget = scr->widgets;
-    while(last_widget) {
-      if(last_widget->type == widget_editable) {
-        if(((editable_widget_t*)last_widget->content)->selectable.tab == tab)
-          return last_widget;
+    current_widget = scr->widgets;
+    while(current_widget) {
+      if(current_widget->type == widget_editable) {
+        if(((editable_widget_t*)current_widget->content)->selectable.tab == tab)
+          return current_widget;
       }
-      last_widget = last_widget->next_widget;
+      current_widget = current_widget->next_widget;
     }
   }
-  return last_widget;
+  return current_widget;
 }
 
 int default_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
@@ -51,17 +51,17 @@ int default_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *
 }
 
 void default_screenDraw(screen_t *scr) {
-  widget_t *last_widget = NULL;
+  widget_t *current_widget = NULL;
   if(scr->widgets) {
     if(scr->refresh==screen_Erase){
       FillBuffer(BLACK,fill_dma);
     }
-    last_widget = scr->widgets;
-    while(last_widget) {
-      if(last_widget->draw){
-        last_widget->draw(last_widget);
+    current_widget = scr->widgets;
+    while(current_widget) {
+      if(current_widget->draw){
+        current_widget->draw(current_widget);
       }
-      last_widget = last_widget->next_widget;
+      current_widget = current_widget->next_widget;
     }
     scr->refresh=screen_Idle;
   }
@@ -70,12 +70,12 @@ void default_screenDraw(screen_t *scr) {
 
 void default_screenUpdate(screen_t *scr) {
   if(scr->widgets) {
-    widget_t *last_widget = scr->widgets;
-    while(last_widget) {
-      if(last_widget->update){
-        last_widget->update(last_widget);
+    widget_t *current_widget = scr->widgets;
+    while(current_widget) {
+      if(current_widget->update){
+        current_widget->update(current_widget);
       }
-      last_widget = last_widget->next_widget;
+      current_widget = current_widget->next_widget;
     }
 
   }
@@ -121,4 +121,5 @@ void screen_setDefaults(screen_t *scr) {
   scr->update = &default_screenUpdate;
   scr->onEnter = NULL;
   scr->onExit = NULL;
+  scr->create = NULL;
 }
