@@ -23,7 +23,7 @@
 //#define USE_RST                                             // Reset pin is used
 //#define USE_DC                                              // DC pin is used
 //#define USE_CS                                              // CS pin is used
-
+#define OLED_OFFSET         2                                 // Display offset
 
 /********************************
  *       PWM Settings        *
