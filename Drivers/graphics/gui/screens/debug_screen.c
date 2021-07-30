@@ -2,7 +2,7 @@
  * debug_screen.c
  *
  *  Created on: Jan 12, 2021
- *      Author: David    Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
 
@@ -23,28 +23,6 @@ int32_t debugTemperature = 0;
 
 screen_t Screen_debug;
 screen_t Screen_debug2;
-
-static widget_t widget_Debug_ADC_Val;
-static displayOnly_widget_t display_Debug_ADC_Val;
-
-static widget_t widget_Debug_ADC_ValRaw;
-static displayOnly_widget_t display_Debug_ADC_ValRaw;
-
-static widget_t widget_Debug_SetPoint;
-static editable_widget_t editable_Debug_SetPoint;
-
-static widget_t widget_Debug_Cal250;
-static editable_widget_t editable_Debug_Cal250;
-
-static widget_t widget_Debug_Cal350;
-static editable_widget_t editable_Debug_Cal350;
-
-static widget_t widget_Debug_Cal450;
-static editable_widget_t editable_Debug_Cal450;
-
-static widget_t widget_Debug_Power;
-static displayOnly_widget_t display_Debug_Power;
-
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -130,7 +108,7 @@ void debug_screenDraw(screen_t *scr){
     sprintf(str, "RAW %u", TIP.last_raw);
     u8g2_DrawStr(&u8g2,65,16,str);
 
-    sprintf(str, "PWM %u", Iron.Pwm_Out);
+    sprintf(str, "PWM %lu", Iron.Pwm_Out);
     u8g2_DrawStr(&u8g2,60,50,str);
 
     sprintf(str, "ERR %ld", (int32_t)getPID_Error());
@@ -146,7 +124,10 @@ void debug_screenDraw(screen_t *scr){
     u8g2_DrawStr(&u8g2,0,33,str);
   }
 }
+static void debug_init(screen_t *scr){
 
+  default_init(scr);
+}
 //-------------------------------------------------------------------------------------------------------------------------------
 // Debug2 screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -162,33 +143,15 @@ static void debug2_onEnter(screen_t *scr) {
   u8g2_DrawStr(&u8g2,0,34,"C350");
   u8g2_DrawStr(&u8g2,0,50,"C450");
 }
-//-------------------------------------------------------------------------------------------------------------------------------
-// Debug screen setup
-//-------------------------------------------------------------------------------------------------------------------------------
-void debug_screen_setup(screen_t *scr) {
-  screen_setDefaults(scr);
-  scr->processInput = &debug_screenProcessInput;
-  scr->draw = &debug_screenDraw;
-}
+static void debug2_init(screen_t *scr){
 
-//-------------------------------------------------------------------------------------------------------------------------------
-// Debug2 screen setup
-//-------------------------------------------------------------------------------------------------------------------------------
-void debug2_screen_setup(screen_t *scr) {
-  screen_setDefaults(scr);
-  scr->processInput = &debug2_screenProcessInput;
-  scr->onEnter = &debug2_onEnter;
-  scr->onExit = &debug2_onExit;
   widget_t *w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
 
   //power display
-  w=&widget_Debug_Power;
-  screen_addWidget(w,scr);
-  widgetDefaultsInit(w, widget_display, &display_Debug_Power);
+  newWidget(&w, widget_display, scr);
   dis=extractDisplayPartFromWidget(w);
-  edit=extractEditablePartFromWidget(w);
   dis->endString="%";
   dis->reservedChars=4;
   w->posX = 92;
@@ -198,11 +161,8 @@ void debug2_screen_setup(screen_t *scr) {
   dis->textAlign = align_right;
 
   //ADC1 display, filtered
-  w = &widget_Debug_ADC_Val;
-  screen_addWidget(w, scr);
-  widgetDefaultsInit(w, widget_display, &display_Debug_ADC_Val);
+  newWidget(&w, widget_display, scr);
   dis=extractDisplayPartFromWidget(w);
-  edit=extractEditablePartFromWidget(w);
   dis->reservedChars=4;
   w->posX = 92;
   w->posY = 0;
@@ -211,11 +171,8 @@ void debug2_screen_setup(screen_t *scr) {
   dis->textAlign = align_right;
 
   //ADC1 display, unfiltered
-  w = &widget_Debug_ADC_ValRaw;
-  screen_addWidget(w, scr);
-  widgetDefaultsInit(w, widget_display, &display_Debug_ADC_ValRaw);
+  newWidget(&w, widget_display, scr);
   dis=extractDisplayPartFromWidget(w);
-  edit=extractEditablePartFromWidget(w);
   dis->reservedChars=4;
   w->posX = 92;
   w->posY = 16;
@@ -224,9 +181,7 @@ void debug2_screen_setup(screen_t *scr) {
   dis->textAlign = align_right;
 
   //Debug setpoint
-  w = &widget_Debug_SetPoint;
-  screen_addWidget(w, scr);
-  widgetDefaultsInit(w, widget_editable, &editable_Debug_SetPoint);
+  newWidget(&w, widget_editable, scr);
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
   dis->reservedChars=4;
@@ -242,10 +197,9 @@ void debug2_screen_setup(screen_t *scr) {
 
 
   // Cal at 250
-  w = &widget_Debug_Cal250;
-  screen_addWidget(w, scr);
-  widgetDefaultsInit(w, widget_editable, &editable_Debug_Cal250);
-  dis=extractDisplayPartFromWidget(w);edit=extractEditablePartFromWidget(w);
+  newWidget(&w, widget_editable, scr);
+  dis=extractDisplayPartFromWidget(w);
+  edit=extractEditablePartFromWidget(w);
   dis->reservedChars=4;
   w->posX = 36;
   w->posY = 16;
@@ -259,9 +213,7 @@ void debug2_screen_setup(screen_t *scr) {
 
 
   // Cal at 350
-  w = &widget_Debug_Cal350;
-  screen_addWidget(w, scr);
-  widgetDefaultsInit(w, widget_editable, &editable_Debug_Cal350);
+  newWidget(&w, widget_editable, scr);
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
   dis->reservedChars=4;
@@ -277,9 +229,7 @@ void debug2_screen_setup(screen_t *scr) {
 
 
   // Cal at 450
-  w = &widget_Debug_Cal450;
-  screen_addWidget(w, scr);
-  widgetDefaultsInit(w, widget_editable, &editable_Debug_Cal450);
+  newWidget(&w, widget_editable, scr);
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
   dis->reservedChars=4;
@@ -292,7 +242,27 @@ void debug2_screen_setup(screen_t *scr) {
   edit->max_value = 4095;
   edit->selectable.tab = 3;
   edit->setData = (void (*)(void *))&setCalcAt450;
+  default_init(scr);
+}
+//-------------------------------------------------------------------------------------------------------------------------------
+// Debug screen setup
+//-------------------------------------------------------------------------------------------------------------------------------
+void debug_screen_setup(screen_t *scr) {
+  screen_setDefaults(scr);
+  scr->processInput = &debug_screenProcessInput;
+  scr->draw = &debug_screenDraw;
+  scr->init = &debug_init;
+}
 
+//-------------------------------------------------------------------------------------------------------------------------------
+// Debug2 screen setup
+//-------------------------------------------------------------------------------------------------------------------------------
+void debug2_screen_setup(screen_t *scr) {
+  screen_setDefaults(scr);
+  scr->processInput = &debug2_screenProcessInput;
+  scr->onEnter = &debug2_onEnter;
+  scr->onExit = &debug2_onExit;
+  scr->init = &debug2_init;
 }
 
 #endif

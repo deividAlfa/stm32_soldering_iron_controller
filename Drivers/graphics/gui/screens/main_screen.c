@@ -2,7 +2,7 @@
  * main_screen.c
  *
  *  Created on: Jan 12, 2021
- *      Author: David    Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
 #include "main_screen.h"
@@ -12,8 +12,11 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
+typedef struct{
+  uint16_t p[100];
+}plotData_t;
 
-static uint16_t plotData[100];
+plotData_t *plotData;
 static uint8_t plot_Index;
 static uint32_t plotTime;
 static bool plotUpdate;
@@ -21,7 +24,7 @@ static bool plotUpdate;
 static uint32_t barTime;
 
 static uint8_t sleepWidth;
-static uint8_t sleepHeigh;
+static uint8_t sleepHeight;
 static uint32_t sleepTim=0;
 static uint8_t Slp_xpos=30, Slp_ypos=14;
 static int8_t Slp_xadd=1, Slp_yadd=1;
@@ -62,21 +65,13 @@ const uint8_t warningXBM[] ={
 screen_t Screen_main;
 
 #ifdef USE_NTC
-static widget_t Widget_AmbTemp;
-static displayOnly_widget_t display_AmbTemp;
+static widget_t *Widget_AmbTemp;
 #endif
-#ifdef USE_VIN
-static widget_t Widget_Vsupply;
-static displayOnly_widget_t display_Vsupply;
-#endif
-static widget_t Widget_IronTemp;
-static displayOnly_widget_t display_IronTemp;
+static widget_t *Widget_IronTemp;
 
-static widget_t Widget_TipSelect;
-static editable_widget_t editable_TipSelect;
+static widget_t *Widget_TipSelect;
 
-static widget_t Widget_SetPoint;
-static editable_widget_t editable_SetPoint;
+static widget_t *Widget_SetPoint;
 
 static struct{
   uint32_t updateTick;
@@ -206,47 +201,46 @@ void clearActivityIcon(void){
 //-------------------------------------------------------------------------------------------------------------------------------
 static void setMainScrTempUnit(void) {
   if(systemSettings.settings.tempUnit==mode_Farenheit){
-    display_IronTemp.endString="\260F";
+    ((displayOnly_widget_t*)Widget_IronTemp->content)->endString="\260F";      // \260 = ASCII dec. 176(°) in octal representation
     #ifdef USE_NTC
-    display_AmbTemp.endString="\260F";
+    ((displayOnly_widget_t*)Widget_AmbTemp->content)->endString="\260F";
     #endif
-    editable_SetPoint.inputData.endString="\260F";
+    ((editable_widget_t*)Widget_SetPoint->content)->inputData.endString="\260F";
   }
   else{
-    display_IronTemp.endString="\260C";                         // \260 = ASCII dec. 176(°) in octal representation
+    ((displayOnly_widget_t*)Widget_IronTemp->content)->endString="\260C";
+
     #ifdef USE_NTC
-    display_AmbTemp.endString="\260C";
+    ((displayOnly_widget_t*)Widget_AmbTemp->content)->endString="\260C";
     #endif
-    editable_SetPoint.inputData.endString="\260C";
+    ((editable_widget_t*)Widget_SetPoint->content)->inputData.endString="\260C";
   }
 }
 
-
-static void main_screen_init(screen_t *scr) {
-  default_init(scr);
-
-  if(mainScr.currentMode != main_disabled){
-    mainScr.currentMode = main_irontemp;
-    setMainWidget(&Widget_IronTemp);
-    if(mainScr.displayMode==temp_graph){
-      widgetDisable(&Widget_IronTemp);
-    }
-  }
-
-  editable_TipSelect.numberOfOptions = systemSettings.Profile.currentNumberOfTips;
-  editable_SetPoint.step = systemSettings.settings.tempStep;
-  editable_SetPoint.big_step = systemSettings.settings.tempStep;
-  editable_SetPoint.max_value = systemSettings.Profile.MaxSetTemperature;
-  editable_SetPoint.min_value = systemSettings.Profile.MinSetTemperature;
-  setMainScrTempUnit();
-  mainScr.idleTick=HAL_GetTick();
-
-}
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   updateIronPower();
   uint32_t currentTime = HAL_GetTick();
   uint8_t error = Iron.Error.Flags;
+
+  uint16_t plot_t = (systemSettings.Profile.readPeriod+1)/200;                                                         // Update at the same rate as the system pwm
+  if(plot_t<20){ plot_t = 20; }
+  if(mainScr.currentMode!=main_disabled && (HAL_GetTick()-plotTime)>plot_t){                                          // Only store values if running
+    plotUpdate=1;
+    plotTime=HAL_GetTick();
+    int16_t t = readTipTemperatureCompensated(stored_reading,read_Avg);
+    if(systemSettings.settings.tempUnit==mode_Farenheit){
+      t = TempConversion(t, mode_Celsius, 0);
+    }
+
+    if (t<20) t = 20;
+    if (t>500) t = 500;
+
+    plotData->p[plot_Index] = t;
+    if(++plot_Index>99){
+      plot_Index=0;
+    }
+  }
 
   if(mainScr.update){                          // This was set on a previous pass. We reset the flag now.
     mainScr.update = 0;
@@ -292,14 +286,14 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   switch(mainScr.currentMode){
     case main_irontemp:
       if(mainScr.ironStatus!=status_running){               // When the screen goes to disable state
-        memset(plotData,0,sizeof(plotData));                // Clear plotdata
+        memset(plotData->p,0,sizeof(plotData_t));                // Clear plotdata
         plot_Index=0;                                       // Reset X
         mainScr.setMode=main_disabled;
         mainScr.currentMode=main_setMode;
         break;
       }
       if((input==LongClick)){
-        return screen_settingsmenu;
+        return screen_settings;
       }
       else if((input==Rotate_Increment_while_click)){
         mainScr.setMode=main_tipselect;
@@ -326,11 +320,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         scr->refresh=screen_Erase;
         if(mainScr.displayMode==temp_numeric){
           mainScr.displayMode=temp_graph;
-          widgetDisable(&Widget_IronTemp);
+          widgetDisable(Widget_IronTemp);
         }
         else if(mainScr.displayMode==temp_graph){
           mainScr.displayMode=temp_numeric;
-          widgetEnable(&Widget_IronTemp);
+          widgetEnable(Widget_IronTemp);
         }
       }
       break;
@@ -379,7 +373,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       }
 
       if((input==LongClick)){
-        return screen_settingsmenu;
+        return screen_settings;
       }
       else if((input==Rotate_Increment_while_click)){
         mainScr.setMode=main_tipselect;
@@ -394,7 +388,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     }
     case main_tipselect:
       if(input==LongClick){
-        return screen_edit_tip_settings;
+        return screen_tip_settings;
       }
     case main_setpoint:
       switch((uint8_t)input){
@@ -429,19 +423,19 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     mainScr.currentMode=mainScr.setMode;
     switch(mainScr.currentMode){
     case main_disabled:
-      widgetDisable(&Widget_IronTemp);
+      widgetDisable(Widget_IronTemp);
       break;
     case main_irontemp:
-      setMainWidget(&Widget_IronTemp);
+      setMainWidget(Widget_IronTemp);
       if(mainScr.displayMode==temp_graph){
-        widgetDisable(&Widget_IronTemp);
+        widgetDisable(Widget_IronTemp);
       }
       break;
     case main_setpoint:
-      setMainWidget(&Widget_SetPoint);
+      setMainWidget(Widget_SetPoint);
       break;
     case main_tipselect:
-      setMainWidget(&Widget_TipSelect);
+      setMainWidget(Widget_TipSelect);
       break;
     default:
       break;
@@ -457,25 +451,7 @@ void main_screen_draw(screen_t *scr){
   static uint32_t lastState = 0;
   uint32_t currentState = (uint32_t)Iron.Error.Flags<<24 | (uint32_t)mainScr.ironStatus<<16 | mainScr.currentMode;    // Simple method to detect changes
 
-  uint16_t plot_t = (systemSettings.Profile.readPeriod+1)/200;                                                         // Update at the same rate as the system pwm
-  if(plot_t<20){ plot_t = 20; }
-  if(mainScr.currentMode!=main_disabled && (HAL_GetTick()-plotTime)>plot_t){                                          // Only store values if running
-    plotUpdate=1;
-    plotTime=HAL_GetTick();
-    int16_t t = readTipTemperatureCompensated(stored_reading,read_Avg);
-    if(systemSettings.settings.tempUnit==mode_Farenheit){
-      t = TempConversion(t, mode_Celsius, 0);
-    }
-
-    if (t<20) t = 20;
-    if (t>500) t = 500;
-
-    plotData[plot_Index] = t;
-    if(++plot_Index>99){
-      plot_Index=0;
-    }
-  }
-  if((lastState!=currentState) || Widget_SetPoint.refresh || Widget_IronTemp.refresh || plotUpdate){
+  if((lastState!=currentState) || Widget_SetPoint->refresh || Widget_IronTemp->refresh || plotUpdate){
     lastState=currentState;
     scr->refresh=screen_Erase;
   }
@@ -492,7 +468,7 @@ void main_screen_draw(screen_t *scr){
       else if(Slp_xpos==0){
         Slp_xadd = 1;
       }
-      if(Slp_ypos+sleepHeigh>OledHeight){
+      if(Slp_ypos+sleepHeight>OledHeight){
         Slp_yadd = -1;
       }
       else if(Slp_ypos<16){
@@ -515,11 +491,11 @@ void main_screen_draw(screen_t *scr){
     u8g2_SetDrawColor(&u8g2, WHITE);
 
     #ifdef USE_NTC
-    u8g2_DrawXBMP(&u8g2, Widget_AmbTemp.posX-tempXBM[0]-2, 0, tempXBM[0], tempXBM[1], &tempXBM[2]);
+    //u8g2_DrawXBMP(&u8g2, Widget_AmbTemp->posX-tempXBM[0]-2, Widget_AmbTemp->posY-4, tempXBM[0], tempXBM[1], &tempXBM[2]);
     #endif
 
     #ifdef USE_VIN
-    u8g2_DrawXBMP(&u8g2, 0, 2, voltXBM[0], voltXBM[1], &voltXBM[2]);
+    //u8g2_DrawXBMP(&u8g2, 0, OledHeight-voltXBM[1], voltXBM[0], voltXBM[1], &voltXBM[2]);
     #endif
 
     if(mainScr.currentMode==main_disabled){
@@ -585,9 +561,10 @@ void main_screen_draw(screen_t *scr){
   if(mainScr.ironStatus==status_running){
     if(scr_refresh && getCurrentMode()==mode_standby){
       u8g2_SetFont(&u8g2, u8g2_font_labels);
-      u8g2_DrawStr(&u8g2, 47, 2, "STBY");
+      u8g2_DrawStr(&u8g2, 42, 0, "STBY");
     }
     if( scr_refresh || (HAL_GetTick()-barTime)>9){                    // Update every 10mS or if screen was erased
+      /*
       if(scr_refresh<screen_Erase){                                   // If screen not erased
          u8g2_SetDrawColor(&u8g2,BLACK);                              // Draw a black square to wipe old widget data
         u8g2_DrawBox(&u8g2, 13 , OledHeight-6, 100, 5);
@@ -595,6 +572,18 @@ void main_screen_draw(screen_t *scr){
       u8g2_SetDrawColor(&u8g2,WHITE);
       u8g2_DrawBox(&u8g2, 13, OledHeight-5, mainScr.lastPwr, 3);
       u8g2_DrawRFrame(&u8g2, 13, OledHeight-6, 100, 5, 2);
+      */
+      if(scr_refresh<screen_Erase){                                   // If screen not erased
+        u8g2_SetDrawColor(&u8g2,BLACK);                              // Draw a black square to wipe old widget data
+        u8g2_DrawBox(&u8g2, OledWidth-5, 0, 3, 64);
+      }
+
+      #define F   ((OledHeight*65536)/100)
+
+      uint8_t p = ((uint32_t)mainScr.lastPwr*F + ((F/2)+1))/65536;
+      u8g2_SetDrawColor(&u8g2,WHITE);
+      u8g2_DrawBox(&u8g2, OledWidth-5, 64-p, 3, p);
+      u8g2_DrawRFrame(&u8g2, OledWidth-6, 0, 5, 64, 2);
     }
 
     if((scr_refresh || plotUpdate) && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){
@@ -620,7 +609,7 @@ void main_screen_draw(screen_t *scr){
           uint8_t pos=plot_Index+x;
           if(pos>99){ pos-=100; }                                     // Reset index if > 99
 
-          uint16_t plotV = plotData[pos];
+          uint16_t plotV = plotData->p[pos];
 
           if (plotV < t-20) plotV = 0;
           else if (plotV >= t+20) plotV = 40;
@@ -638,7 +627,7 @@ void main_screen_draw(screen_t *scr){
           uint8_t pos=plot_Index+x;
           if(pos>99) pos-=100;
 
-          uint16_t plotV = plotData[pos];
+          uint16_t plotV = plotData->p[pos];
 
           if (plotV<180) plotV = 0;
           else plotV = (plotV-180) >> 3;                              // divide by 8, (500-180)/8=40
@@ -656,98 +645,113 @@ void main_screen_draw(screen_t *scr){
   }
 }
 
+static void main_screen_init(screen_t *scr) {
+  editable_widget_t *edit;
+  default_init(scr);
 
-//-------------------------------------------------------------------------------------------------------------------------------
-// Main screen setup
-//-------------------------------------------------------------------------------------------------------------------------------
-void main_screen_setup(screen_t *scr) {
-
-  //
-  for(int x = 0; x < TipSize; x++) {
-    tipName[x] = systemSettings.Profile.tip[x].name;
+  if(mainScr.currentMode != main_disabled){
+    mainScr.currentMode = main_irontemp;
+    setMainWidget(Widget_IronTemp);
+    if(mainScr.displayMode==temp_graph){
+      widgetDisable(Widget_IronTemp);
+    }
   }
+  edit = extractEditablePartFromWidget(Widget_TipSelect);
+  edit->numberOfOptions = systemSettings.Profile.currentNumberOfTips;
+  edit = extractEditablePartFromWidget(Widget_SetPoint);
+  edit->step = systemSettings.settings.tempStep;
+  edit->big_step = systemSettings.settings.tempStep;
+  edit->max_value = systemSettings.Profile.MaxSetTemperature;
+  edit->min_value = systemSettings.Profile.MinSetTemperature;
+  setMainScrTempUnit();
+  mainScr.idleTick=HAL_GetTick();
+}
 
-  screen_setDefaults(scr);
-  scr->draw = &main_screen_draw;
-  scr->init = &main_screen_init;
-  scr->processInput = &main_screenProcessInput;
+static void main_screen_onExit(screen_t *scr) {
+  free(plotData);
+}
+
+static void main_screen_create(screen_t *scr){
   widget_t *w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
 
-  //iron tip temperature display
-  w=&Widget_IronTemp;
-  screen_addWidget(w,scr);
-  widgetDefaultsInit(w, widget_display, &display_IronTemp);
+  //  [ Iron Temp Widget ]
+  //
+  newWidget(&w,widget_display,scr);
+  Widget_IronTemp = w;
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
   dis->reservedChars=5;
   dis->textAlign=align_center;
-  dis->dispAlign=align_center;
   dis->font=u8g2_font_ironTemp;
+  w->posX = 2;
   w->posY = 17;
   dis->getData = &main_screen_getIronTemp;
+  w->enabled=0;
 
-  // Tip temperature setpoint
-  w=&Widget_SetPoint;
-  screen_addWidget(w,scr);
-  widgetDefaultsInit(w, widget_editable, &editable_SetPoint);
+  //  [ Iron Setpoint Widget ]
+  //
+  newWidget(&w,widget_editable,scr);
+  Widget_SetPoint=w;
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
   dis->reservedChars=5;
-  w->posY = Widget_IronTemp.posY-2;
+  w->posX = 0;
+  w->posY = Widget_IronTemp->posY-2;
   dis->getData = &getTemp;
-  dis->dispAlign=align_center;
   dis->textAlign=align_center;
-  dis->font=display_IronTemp.font;
+  dis->font=((displayOnly_widget_t*)Widget_IronTemp->content)->font;
   edit->selectable.tab = 1;
   edit->setData = (void (*)(void *))&setTemp;
   w->frameType=frame_solid;
-  w->radius=0;
+  w->radius=4;
   w->enabled=0;
 
   #ifdef USE_VIN
-  //V input display
-  w = &Widget_Vsupply;
-  screen_addWidget(w, scr);
-  widgetDefaultsInit(w, widget_display, &display_Vsupply);
+  //  [ V. Supply Widget ]
+  //
+  newWidget(&w,widget_display,scr);
   dis=extractDisplayPartFromWidget(w);
-  edit=extractEditablePartFromWidget(w);
+  dis->getData = &main_screen_getVin;
   dis->endString="V";
   dis->reservedChars=5;
   dis->textAlign=align_center;
   dis->number_of_dec=1;
   dis->font=u8g2_font_labels;
-  w->posX = voltXBM[0]+2;
-  w->posY= 2;
-  dis->getData = &main_screen_getVin;
+  //w->posY= OledHeight-voltXBM[1];
+  //w->posX = voltXBM[0]+2;
+  edit=extractEditablePartFromWidget(w);
+  w->posY= 0;
+  w->posX = 0;
   //w->width = 40;
   #endif
 
   #ifdef USE_NTC
-  //Ambient temperature display
-  w=&Widget_AmbTemp;
-  screen_addWidget(w,scr);
-  widgetDefaultsInit(w, widget_display, &display_AmbTemp);
+  //  [ Ambient Temp Widget ]
+  //
+  newWidget(&w,widget_display,scr);
+  Widget_AmbTemp=w;
   dis=extractDisplayPartFromWidget(w);
-  edit=extractEditablePartFromWidget(w);
   dis->reservedChars=7;
-  dis->dispAlign=align_right;
+  //dis->dispAlign=align_right;
   dis->textAlign=align_center;
-  w->posY= 2;
   dis->number_of_dec=1;
   dis->font=u8g2_font_labels;
   dis->getData = &main_screen_getAmbTemp;
+  //w->posY = OledHeight-tempXBM[1]+4;
+  //w->posX = 80;
+  w->posY = 0;
+  w->posX = 80;
   #endif
 
-  // Tips
-  w=&Widget_TipSelect;
-  screen_addWidget(w,scr);
-  widgetDefaultsInit(w, widget_multi_option, &editable_TipSelect);
+  //  [ Tip Selection Widget ]
+  //
+  newWidget(&w,widget_multi_option,scr);
+  Widget_TipSelect=w;
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
   dis->reservedChars=TipCharSize-1;
-  w->posY = 32;
   dis->dispAlign=align_center;
   dis->textAlign=align_center;
   edit->inputData.getData = &getTip;
@@ -757,12 +761,27 @@ void main_screen_setup(screen_t *scr) {
   edit->selectable.tab = 2;
   edit->setData = (void (*)(void *))&setTip;
   edit->options = tipName;
+  w->posY = 32;
   w->enabled=0;
   w->frameType=frame_disabled;
 
-  setMainWidget(&Widget_IronTemp);
+  plotData = calloc(1,sizeof(plotData_t));
+}
+
+
+void main_screen_setup(screen_t *scr) {
+  scr->draw = &main_screen_draw;
+  scr->init = &main_screen_init;
+  scr->processInput = &main_screenProcessInput;
+  scr->create = &main_screen_create;
+  scr->onExit = &main_screen_onExit;
+
+  for(int x = 0; x < TipSize; x++) {
+    tipName[x] = systemSettings.Profile.tip[x].name;
+  }
+
   u8g2_SetFont(&u8g2,u8g2_font_noIron_Sleep);
   sleepWidth=u8g2_GetStrWidth(&u8g2, "SLEEP")+2;
-  sleepHeigh= u8g2_GetMaxCharHeight(&u8g2)+3;
+  sleepHeight=u8g2_GetMaxCharHeight(&u8g2)+2;
 }
 

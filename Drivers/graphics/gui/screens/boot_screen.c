@@ -2,41 +2,23 @@
  * boot_screen.c
  *
  *  Created on: Jan 12, 2021
- *      Author: David    Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
 #include "boot_screen.h"
-#include "oled.h"
-#include "gui.h"
+#include "screen_common.h"
 #define SPLASH_TIMEOUT 1000
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Boot Screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
-int32_t profile;
 uint8_t status;
 uint32_t splash_time;
-//-------------------------------------------------------------------------------------------------------------------------------
-// Boot Screen widgets
-//-------------------------------------------------------------------------------------------------------------------------------
+
 screen_t Screen_boot;
-
-static widget_t Widget_profile_edit;
-static editable_widget_t editable_Profile_edit;
-
+static widget_t *Widget_profile_edit;
 static uint8_t boot_step=0;
-//-------------------------------------------------------------------------------------------------------------------------------
-// Boot Screen widget functions
-//-------------------------------------------------------------------------------------------------------------------------------
-static void * getProfile() {
-  return &profile;
-}
-
-static void setProfile(int32_t *val) {
-  profile = *val;
-}
-
 
 // Credits: Jesus Vallejo  https://github.com/jesusvallejo/
 const uint8_t splashXBM[] = {
@@ -129,6 +111,17 @@ const uint8_t splashXBM[] = {
   0x00, 0x00, 0x00, 0x00, };
 
 
+
+//=========================================================
+static void * getProfile() {
+  return &temp;
+}
+static void setProfile(int32_t *val) {
+  temp = *val;
+}
+//=========================================================
+
+
 void boot_screen_draw(screen_t *scr){
   default_screenDraw(scr);
   if(boot_step==1){
@@ -141,6 +134,8 @@ void boot_screen_draw(screen_t *scr){
     return;
   }
 }
+
+
 int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 
   if(HAL_GetTick() - splash_time > SPLASH_TIMEOUT){        // After splash timeout
@@ -150,12 +145,12 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
     }
     else if(boot_step==0){
       boot_step++;
-      widgetEnable(&Widget_profile_edit);
-      editable_Profile_edit.selectable.previous_state=widget_selected;
-      editable_Profile_edit.selectable.state=widget_edit;
+      widgetEnable(Widget_profile_edit);
+      ((editable_widget_t*)Widget_profile_edit->content)->selectable.previous_state = widget_selected;
+      ((editable_widget_t*)Widget_profile_edit->content)->selectable.state = widget_edit;
       scr->refresh = screen_Erase;
     }
-    else if((boot_step==2) && (editable_Profile_edit.selectable.state!=widget_edit)){
+    else if((boot_step==2) && (((editable_widget_t*)Widget_profile_edit->content)->selectable.state!=widget_edit)){
       loadProfile((uint8_t)profile);
       saveSettingsFromMenu(save_Settings);
       boot_step++;
@@ -174,41 +169,30 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 
 
 void boot_screen_init(screen_t * scr){
+  default_init(scr);
+
   profile=systemSettings.settings.currentProfile;
-
   if( (systemSettings.settings.NotInitialized!=initialized) || (systemSettings.settings.currentProfile>profile_C210) ){
-
     profile=profile_T12;
     setSafeMode(enable);
     systemSettings.setupMode=setup_On;
   }
-  default_init(scr);
-
   splash_time = HAL_GetTick();
   u8g2_SetDrawColor(&u8g2,WHITE);
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM[0], splashXBM[1], &splashXBM[2]);
 }
 
-void boot_screen_setup(screen_t *scr) {
-  widget_t* w;
-  displayOnly_widget_t* dis;
-  editable_widget_t* edit;
-  screen_setDefaults(scr);
-  scr->draw = &boot_screen_draw;
-  scr->processInput = &boot_screen_processInput;
-  scr->init = &boot_screen_init;
 
-  // Profile select
+void boot_screen_create(screen_t *scr){
+  widget_t *w;
+
+  //  [ Profile Select Widget ]
   //
-  w = &Widget_profile_edit;
-  screen_addWidget(w,scr);
-  widgetDefaultsInit(w, widget_multi_option, &editable_Profile_edit);
-  dis=extractDisplayPartFromWidget(w);
-  edit=extractEditablePartFromWidget(w);
+  newWidget(&w, widget_multi_option, scr);
+  Widget_profile_edit = w;
+  displayOnly_widget_t *dis=extractDisplayPartFromWidget(w);
+  editable_widget_t *edit=extractEditablePartFromWidget(w);
   dis->reservedChars=4;
-  w->posX = 76;
-  w->posY = 30;
-  w->width = 44;
   dis->getData = &getProfile;
   edit->big_step = 1;
   edit->step = 1;
@@ -217,6 +201,16 @@ void boot_screen_setup(screen_t *scr) {
   edit->max_value = ProfileSize-1;
   edit->options = profileStr;
   edit->numberOfOptions = ProfileSize;
+  w->posX = 76;
+  w->posY = 30;
+  w->width = 44;
   w->enabled=0;
+}
 
+
+void boot_screen_setup(screen_t *scr) {
+  scr->draw = &boot_screen_draw;
+  scr->processInput = &boot_screen_processInput;
+  scr->init = &boot_screen_init;
+  scr->create = &boot_screen_create;
 }
