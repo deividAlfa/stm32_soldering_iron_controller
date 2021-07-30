@@ -2,7 +2,7 @@
  * iron.c
  *
  *  Created on: Jan 12, 2021
- *      Author: David    Original work by Jose (PTDreamer), 2017
+ *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
 #include "iron.h"
@@ -12,7 +12,8 @@
 #include "tempsensors.h"
 #include "voltagesensors.h"
 #include "ssd1306.h"
-
+#include "screen.h"
+#include "oled.h"
 volatile iron_t Iron;
 typedef struct setTemperatureReachedCallbackStruct_t setTemperatureReachedCallbackStruct_t;
 
@@ -438,7 +439,7 @@ void setCurrentMode(uint8_t mode){
 
 // Called from program timer if WAKE change is detected
 void IronWake(bool source){                                                                 // source: handle shake, encoder push button
-  if(GetIronError()){ return; }                                                             // Ignore if error present
+  if(Iron.Error.Flags){ return; }                                                             // Ignore if error present
   if(Iron.CurrentMode!=mode_run){
     if( (source==wakeButton && (!systemSettings.settings.wakeOnButton || (systemSettings.settings.WakeInputMode==wakeInputmode_stand) )) ||
         (source==wakeInput && !systemSettings.settings.wakeOnShake)){
@@ -486,12 +487,12 @@ void checkIronError(void){
   #endif
   Err.noIron = (TIP.last_raw>systemSettings.Profile.noIronValue);
 
-  if(CurrentTime<1000 || systemSettings.setupMode==setup_On){                               // Don't check sensor errors during first second or in setup mode, wait for readings need to get stable
+  if(current_screen==&Screen_boot || CurrentTime<1000){                               // Don't check sensor errors during first second or in boot screen, wait for readings need to get stable
     Err.Flags &= _SAFE_MODE;
   }
 
   if(Err.Flags){
-    Iron.Error.Flags |= Err.Flags;
+    Iron.Error.Flags = Err.Flags | (Iron.Error.Flags & _ACTIVE);
     Iron.LastErrorTime = CurrentTime;
     if(!Iron.Error.active){
       if(Err.Flags==_NO_IRON && Iron.CurrentMode == mode_sleep){                            // If in sleep mode and only no iron flag is set, ignore
@@ -522,7 +523,7 @@ void checkIronError(void){
 
 
 bool GetIronError(void){
-  return Iron.Error.active;
+  return Iron.Error.Flags;
 }
 
 void setSafeMode(bool mode){
