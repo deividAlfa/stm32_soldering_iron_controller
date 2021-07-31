@@ -42,23 +42,25 @@ const uint8_t shakeXBM[] ={
 
 
 const uint8_t tempXBM[] ={
-  10, 13,
-  0x70, 0x00, 0x8B, 0x00, 0x88, 0x00, 0xAB, 0x00, 0xA8, 0x00, 0xAB, 0x00,
-  0xA8, 0x00, 0x24, 0x01, 0x72, 0x02, 0x72, 0x02, 0x72, 0x02, 0x04, 0x01,
-  0xF8, 0x00, };
+  5, 9,
+  0x04, 0x0A, 0x0A, 0x0A, 0x0A, 0x0E, 0x1F, 0x1F, 0x0E, };
 
 #ifdef USE_VIN
 const uint8_t voltXBM[] ={
   6, 9,
-  0x30, 0x18, 0x0C, 0x06, 0x1F, 0x18, 0x0C, 0x06, 0x01, };
+  0x20, 0x18, 0x0C, 0x06, 0x3F, 0x18, 0x0C, 0x06, 0x01, };
 #endif
 
 const uint8_t warningXBM[] ={
-  13, 13,
-  0x40, 0x00, 0xA0, 0x00, 0xA0, 0x00, 0x10, 0x01, 0x10, 0x01, 0x48, 0x02,
-  0x48, 0x02, 0x44, 0x04, 0x44, 0x04, 0x02, 0x08, 0x42, 0x08, 0x01, 0x10,
-  0xFF, 0x1F, };
-
+  9, 8,
+  0x10, 0x00, 0x28, 0x00, 0x54, 0x00, 0x54, 0x00, 0x82, 0x00, 0x92, 0x00,
+  0x01, 0x01, 0xFF, 0x01, };
+/*
+const uint8_t savingXBM[] ={
+    9, 9,
+    0x00, 0x00, 0xFE, 0x00, 0xFE, 0x00, 0xFE, 0x00, 0xFE, 0x00, 0x82, 0x00,
+    0xB2, 0x00, 0xB2, 0x00, 0x01, 0x00, };
+*/
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -170,6 +172,7 @@ static void updateIronPower() {
     tmpPwr = tmpPwr<<12;
     stored = ( ((stored<<3)-stored)+tmpPwr+(1<<11))>>3 ;
     tmpPwr = stored>>12;
+    tmpPwr = (tmpPwr*205)>>8;
     mainScr.lastPwr=tmpPwr;
   }
 }
@@ -491,11 +494,11 @@ void main_screen_draw(screen_t *scr){
     u8g2_SetDrawColor(&u8g2, WHITE);
 
     #ifdef USE_NTC
-    //u8g2_DrawXBMP(&u8g2, Widget_AmbTemp->posX-tempXBM[0]-2, Widget_AmbTemp->posY-4, tempXBM[0], tempXBM[1], &tempXBM[2]);
+    u8g2_DrawXBMP(&u8g2, Widget_AmbTemp->posX-tempXBM[0]-2, 0, tempXBM[0], tempXBM[1], &tempXBM[2]);
     #endif
 
     #ifdef USE_VIN
-    //u8g2_DrawXBMP(&u8g2, 0, OledHeight-voltXBM[1], voltXBM[0], voltXBM[1], &voltXBM[2]);
+    u8g2_DrawXBMP(&u8g2, 0, 0, voltXBM[0], voltXBM[1], &voltXBM[2]);
     #endif
 
     if(mainScr.currentMode==main_disabled){
@@ -542,8 +545,12 @@ void main_screen_draw(screen_t *scr){
         u8g2_DrawStr(&u8g2, Slp_xpos, Slp_ypos, "SLEEP");
         u8g2_SetFont(&u8g2, u8g2_font_labels);
         if(!Iron.Error.Flags && readTipTemperatureCompensated(0,0)>120){
-          u8g2_DrawXBMP(&u8g2, 42,0, warningXBM[0], warningXBM[1], &warningXBM[2]);
-          u8g2_DrawStr(&u8g2, 55, 2, "HOT!");
+          //u8g2_DrawXBMP(&u8g2, 42,1, warningXBM[0], warningXBM[1], &warningXBM[2]);
+          u8g2_SetDrawColor(&u8g2, WHITE);
+          u8g2_DrawRBox(&u8g2, 48, 0, 30, 10, 2);
+          u8g2_SetDrawColor(&u8g2, BLACK);
+          u8g2_DrawStr(&u8g2, 51, 0, "HOT!");
+          //u8g2_DrawStr(&u8g2, 52, 0, "HOT!");
         }
       }
     }
@@ -553,7 +560,7 @@ void main_screen_draw(screen_t *scr){
         putStrAligned("TIP SELECTION", 16, align_center);
       }
       if(mainScr.ActivityOn){
-        u8g2_DrawXBMP(&u8g2, 57, 2, shakeXBM[0], shakeXBM[1], &shakeXBM[2]);
+        u8g2_DrawXBMP(&u8g2, (OledWidth-shakeXBM[1])/2, 0, shakeXBM[0], shakeXBM[1], &shakeXBM[2]);
       }
     }
   }
@@ -561,18 +568,19 @@ void main_screen_draw(screen_t *scr){
   if(mainScr.ironStatus==status_running){
     if(scr_refresh && getCurrentMode()==mode_standby){
       u8g2_SetFont(&u8g2, u8g2_font_labels);
-      u8g2_DrawStr(&u8g2, 42, 0, "STBY");
+      u8g2_DrawStr(&u8g2, 48, 0, "STBY");
     }
     if( scr_refresh || (HAL_GetTick()-barTime)>9){                    // Update every 10mS or if screen was erased
-      /*
+
       if(scr_refresh<screen_Erase){                                   // If screen not erased
          u8g2_SetDrawColor(&u8g2,BLACK);                              // Draw a black square to wipe old widget data
-        u8g2_DrawBox(&u8g2, 13 , OledHeight-6, 100, 5);
+        u8g2_DrawBox(&u8g2, 47 , OledHeight-8, 80, 8);
       }
       u8g2_SetDrawColor(&u8g2,WHITE);
-      u8g2_DrawBox(&u8g2, 13, OledHeight-5, mainScr.lastPwr, 3);
-      u8g2_DrawRFrame(&u8g2, 13, OledHeight-6, 100, 5, 2);
-      */
+      u8g2_DrawBox(&u8g2, 47, OledHeight-7, mainScr.lastPwr, 6);
+      u8g2_DrawRFrame(&u8g2, 47, OledHeight-8, 80, 8, 2);
+
+      /*
       if(scr_refresh<screen_Erase){                                   // If screen not erased
         u8g2_SetDrawColor(&u8g2,BLACK);                              // Draw a black square to wipe old widget data
         u8g2_DrawBox(&u8g2, OledWidth-5, 0, 3, 64);
@@ -584,6 +592,7 @@ void main_screen_draw(screen_t *scr){
       u8g2_SetDrawColor(&u8g2,WHITE);
       u8g2_DrawBox(&u8g2, OledWidth-5, 64-p, 3, p);
       u8g2_DrawRFrame(&u8g2, OledWidth-6, 0, 5, 64, 2);
+      */
     }
 
     if((scr_refresh || plotUpdate) && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){
@@ -598,10 +607,10 @@ void main_screen_draw(screen_t *scr){
       }
 
       // plot is 16-56 V, 14-113 H ?
-      u8g2_DrawVLine(&u8g2, 11, 16, 41);                              // left scale
+      u8g2_DrawVLine(&u8g2, 11, 13, 41);                              // left scale
 
       if (magnify) {                                                  // graphing magnified
-        for(uint8_t y=16; y<57; y+=10){
+        for(uint8_t y=13; y<54; y+=10){
           u8g2_DrawHLine(&u8g2, 7, y, 4);                             // left ticks
         }
 
@@ -614,12 +623,12 @@ void main_screen_draw(screen_t *scr){
           if (plotV < t-20) plotV = 0;
           else if (plotV >= t+20) plotV = 40;
           else plotV = (plotV-t+20) ;                                 // relative to t, +-20C
-          u8g2_DrawVLine(&u8g2, x+13, 56-plotV, plotV);               // data points
+          u8g2_DrawVLine(&u8g2, x+13, 53-plotV, plotV);               // data points
         }
-        set= 36;
+        set= 33;
 
       } else {                                                        // graphing full range
-        for(uint8_t y=16; y<57; y+=13){
+        for(uint8_t y=13; y<53; y+=13){
           u8g2_DrawHLine(&u8g2, 7, y, 4);                             // left ticks
         }
 
@@ -631,16 +640,20 @@ void main_screen_draw(screen_t *scr){
 
           if (plotV<180) plotV = 0;
           else plotV = (plotV-180) >> 3;                              // divide by 8, (500-180)/8=40
-          u8g2_DrawVLine(&u8g2, x+13, 56-plotV, plotV);               // data points
+          u8g2_DrawVLine(&u8g2, x+13, 53-plotV, plotV);               // data points
         }
         if(t<188){ set = 1; }
         else {
           set=(t-180)>>3;
         }
-        set= 56-set;
+        set= 53-set;
       }
 
       u8g2_DrawTriangle(&u8g2, 122, set-4, 122, set+4, 115, set);     // set temp marker
+    }
+    if(scr_refresh){
+      u8g2_SetFont(&u8g2, u8g2_font_labels);
+      u8g2_DrawStr(&u8g2, 0, 55, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name);
     }
   }
 }
@@ -683,10 +696,10 @@ static void main_screen_create(screen_t *scr){
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
   dis->reservedChars=5;
+  dis->dispAlign=align_center;
   dis->textAlign=align_center;
   dis->font=u8g2_font_ironTemp;
-  w->posX = 2;
-  w->posY = 17;
+  w->posY = 15;
   dis->getData = &main_screen_getIronTemp;
   w->enabled=0;
 
@@ -697,9 +710,9 @@ static void main_screen_create(screen_t *scr){
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
   dis->reservedChars=5;
-  w->posX = 0;
   w->posY = Widget_IronTemp->posY-2;
   dis->getData = &getTemp;
+  dis->dispAlign=align_center;
   dis->textAlign=align_center;
   dis->font=((displayOnly_widget_t*)Widget_IronTemp->content)->font;
   edit->selectable.tab = 1;
@@ -719,11 +732,9 @@ static void main_screen_create(screen_t *scr){
   dis->textAlign=align_center;
   dis->number_of_dec=1;
   dis->font=u8g2_font_labels;
-  //w->posY= OledHeight-voltXBM[1];
-  //w->posX = voltXBM[0]+2;
-  edit=extractEditablePartFromWidget(w);
   w->posY= 0;
-  w->posX = 0;
+  w->posX = voltXBM[0]+2;
+  edit=extractEditablePartFromWidget(w);
   //w->width = 40;
   #endif
 
@@ -734,15 +745,13 @@ static void main_screen_create(screen_t *scr){
   Widget_AmbTemp=w;
   dis=extractDisplayPartFromWidget(w);
   dis->reservedChars=7;
-  //dis->dispAlign=align_right;
+  dis->dispAlign=align_right;
   dis->textAlign=align_center;
   dis->number_of_dec=1;
   dis->font=u8g2_font_labels;
   dis->getData = &main_screen_getAmbTemp;
-  //w->posY = OledHeight-tempXBM[1]+4;
-  //w->posX = 80;
   w->posY = 0;
-  w->posX = 80;
+  //w->posX = 90;
   #endif
 
   //  [ Tip Selection Widget ]
