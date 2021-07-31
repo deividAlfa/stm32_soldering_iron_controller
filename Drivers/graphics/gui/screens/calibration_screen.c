@@ -177,7 +177,7 @@ static int Cal450_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
   return ret;
 }
 //=========================================================
-static int Cal_Settings_SaveAction(widget_t* w) {
+static int Cal_Settings_SaveAction() {
   if( systemSettings.Profile.Cal250_default != adcAtTemp[cal_250] ||
       systemSettings.Profile.Cal350_default != adcAtTemp[cal_350] ||
       systemSettings.Profile.Cal450_default != adcAtTemp[cal_450] ){
@@ -191,7 +191,7 @@ static int Cal_Settings_SaveAction(widget_t* w) {
   return screen_calibration;
 }
 //=========================================================
-static int Cal_Settings_CancelAction(widget_t* w) {
+static int Cal_Settings_CancelAction() {
   return screen_calibration;
 }
 //=========================================================
