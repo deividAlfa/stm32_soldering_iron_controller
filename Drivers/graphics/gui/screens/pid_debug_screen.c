@@ -18,7 +18,7 @@ typedef struct {
   uint8_t p[PID_SZ];
   uint8_t i[PID_SZ];
   uint8_t d[PID_SZ];
-  //uint8_t o[100];
+  //uint8_t o[PID_SZ];
 }pid_plot_t;
 
 static uint8_t plot_Index;
