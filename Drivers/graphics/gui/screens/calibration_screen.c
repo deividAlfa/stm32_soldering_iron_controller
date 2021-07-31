@@ -423,7 +423,7 @@ static void Cal_Start_create(screen_t *scr) {
 
   newWidget(&w,widget_button,scr);
   Widget_Cal_Back=w;
-  w->posX = 86;
+  w->posX = 84;
   w->posY = 48;
   w->width = 42;
   ((button_widget_t*)w->content)->displayString="BACK";

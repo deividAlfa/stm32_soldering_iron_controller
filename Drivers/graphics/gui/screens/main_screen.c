@@ -662,7 +662,7 @@ static void main_screen_create(screen_t *scr){
   edit->selectable.tab = 1;
   edit->setData = (void (*)(void *))&setTemp;
   w->frameType=frame_solid;
-  w->radius=4;
+  w->radius=8;
   w->enabled=0;
   w->width=128;
 
