@@ -31,12 +31,10 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
 
   // Proportional term
   pid.proportional = pid.Kp * error;
-  //if(pid.proportional<0){
-  //  pid.proportional=0;
-  //}
+
   // Integral
-  pid.integrator = pid.integrator + 0.5f * pid.Ki * dt * (error + pid.prevError);  // New
-  //pid.integrator = pid.integrator + (pid.Ki*(error*dt));                            // Old
+  //pid.integrator = pid.integrator + 0.5f * pid.Ki * dt * (error + pid.prevError);  // New
+  pid.integrator = pid.integrator + (pid.Ki*(error*dt));                            // Old
 
   // Integrator clamping
   if (pid.integrator > pid.limMaxInt) {
@@ -52,12 +50,12 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
     pid.derivative = 0;
   }
   else{
-                                                                              // New
+  /*                                                                            // New
     pid.derivative = -(2.0f * pid.Kd * (measurement - pid.prevMeasurement)      // Note: derivative on measurement,
                           + (2.0f * pid.tau - dt) * pid.derivative)             // therefore minus sign in front of equation!
                           / (2.0f * pid.tau + dt);
-
-    //pid.derivative = pid.Kd*((error-pid.prevError)/dt);                         // Old
+  */
+    pid.derivative = pid.Kd*((error-pid.prevError)/dt);                         // Old
   }
 
   // Compute output and apply limits
