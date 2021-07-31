@@ -190,15 +190,15 @@ static void setMainWidget(widget_t* w){
     sel->previous_state=widget_selected;
   }
 }
-
-void clearActivityIcon(void){
+/*
+void clearActivityIcon(){
   if(mainScr.ActivityOn){
     u8g2_SetDrawColor(&u8g2, BLACK);
     u8g2_DrawBox(&u8g2, (OledWidth-shakeXBM[1])/2, 0, shakeXBM[0], shakeXBM[1]);
     mainScr.ActivityOn=0;
-    Iron.newActivity=0;
   }
 }
+*/
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -245,36 +245,29 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     }
   }
 
-  if(mainScr.update){                          // This was set on a previous pass. We reset the flag now.
-    mainScr.update = 0;
-  }
-  if((HAL_GetTick()-mainScr.updateTick)>systemSettings.settings.guiUpdateDelay){
+  mainScr.update = 0;
+
+  if((currentTime-mainScr.updateTick)>systemSettings.settings.guiUpdateDelay){
     mainScr.update=1;                          // Update realtime readings slower than the rest of the GUI
     mainScr.updateTick=currentTime;
   }
 
   uint8_t current_mode = getCurrentMode();
   if(error & _ACTIVE){
-    if(mainScr.ironStatus != status_sleep || error!=(_ACTIVE | _NO_IRON)){
-      mainScr.ironStatus = status_error;
-    }
+    mainScr.ironStatus = status_error;
   }
   else if(current_mode==mode_sleep){
     mainScr.ironStatus = status_sleep;
-    clearActivityIcon();
   }
   else{
     mainScr.ironStatus = status_running;
-    if(current_mode==mode_standby){
-      clearActivityIcon();
-    }
-    else if(Iron.newActivity && !mainScr.ActivityOn && mainScr.currentMode==main_irontemp){
+    if(!mainScr.ActivityOn && Iron.newActivity && mainScr.currentMode!=main_disabled){
       mainScr.ActivityOn=1;
     }
   }
-
-  if(mainScr.ActivityOn && (currentTime-Iron.lastActivityTime)>50){
-    clearActivityIcon();
+  if(mainScr.ActivityOn && (current_mode!=mode_run || ((currentTime-Iron.lastActivityTime)>50))){
+    Iron.newActivity=0;
+    mainScr.ActivityOn=0;
   }
 
   if(input!=Rotate_Nothing){
@@ -282,13 +275,13 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   }
 
   // Check for click input and wake iron. Disable button wake for 500mS after manually entering sleep mode
-  if(input==Click && ((mainScr.currentMode==main_irontemp) || (mainScr.currentMode==main_disabled)) && (currentTime - mainScr.enteredSleep) >500 ){
+  if(input==Click && (mainScr.currentMode==main_irontemp || mainScr.currentMode==main_disabled) && (currentTime - mainScr.enteredSleep) >500 ){
     IronWake(wakeButton);
   }
 
   switch(mainScr.currentMode){
     case main_irontemp:
-      if(mainScr.ironStatus!=status_running){               // When the screen goes to disable state
+      if(mainScr.ironStatus!=status_running){               // When the screen goes to disabled state
         memset(plotData->p,0,sizeof(plotData_t));                // Clear plotdata
         plot_Index=0;                                       // Reset X
         mainScr.setMode=main_disabled;
@@ -480,13 +473,6 @@ void main_screen_draw(screen_t *scr){
     }
   }
 
-/*
-  if(scr->refresh==screen_Erase){
-    FillBuffer(BLACK,fill_dma);
-    scr->refresh=screen_Erased;
-    // Screen is erased now, draw anything here before main screen draws
-  }
-*/
   scr_refresh=scr->refresh;
   default_screenDraw(scr);
 
@@ -571,7 +557,6 @@ void main_screen_draw(screen_t *scr){
       u8g2_DrawStr(&u8g2, 48, 0, "STBY");
     }
     if( scr_refresh || (HAL_GetTick()-barTime)>9){                    // Update every 10mS or if screen was erased
-
       if(scr_refresh<screen_Erase){                                   // If screen not erased
          u8g2_SetDrawColor(&u8g2,BLACK);                              // Draw a black square to wipe old widget data
         u8g2_DrawBox(&u8g2, 47 , OledHeight-8, 80, 8);
@@ -579,76 +564,34 @@ void main_screen_draw(screen_t *scr){
       u8g2_SetDrawColor(&u8g2,WHITE);
       u8g2_DrawBox(&u8g2, 47, OledHeight-7, mainScr.lastPwr, 6);
       u8g2_DrawRFrame(&u8g2, 47, OledHeight-8, 80, 8, 2);
-
-      /*
-      if(scr_refresh<screen_Erase){                                   // If screen not erased
-        u8g2_SetDrawColor(&u8g2,BLACK);                              // Draw a black square to wipe old widget data
-        u8g2_DrawBox(&u8g2, OledWidth-5, 0, 3, 64);
-      }
-
-      #define F   ((OledHeight*65536)/100)
-
-      uint8_t p = ((uint32_t)mainScr.lastPwr*F + ((F/2)+1))/65536;
-      u8g2_SetDrawColor(&u8g2,WHITE);
-      u8g2_DrawBox(&u8g2, OledWidth-5, 64-p, 3, p);
-      u8g2_DrawRFrame(&u8g2, OledWidth-6, 0, 5, 64, 2);
-      */
     }
 
     if((scr_refresh || plotUpdate) && mainScr.currentMode==main_irontemp && mainScr.displayMode==temp_graph){
       plotUpdate=0;
-      uint8_t set;
       int16_t t = Iron.CurrentSetTemperature;
-
-      bool magnify = true;                                            // for future, to support both graph types
 
       if(systemSettings.settings.tempUnit==mode_Farenheit){
         t = TempConversion(t, mode_Celsius, 0);
       }
-
       // plot is 16-56 V, 14-113 H ?
       u8g2_DrawVLine(&u8g2, 11, 13, 41);                              // left scale
 
-      if (magnify) {                                                  // graphing magnified
-        for(uint8_t y=13; y<54; y+=10){
-          u8g2_DrawHLine(&u8g2, 7, y, 4);                             // left ticks
-        }
-
-        for(uint8_t x=0; x<100; x++){
-          uint8_t pos=plot_Index+x;
-          if(pos>99){ pos-=100; }                                     // Reset index if > 99
-
-          uint16_t plotV = plotData->p[pos];
-
-          if (plotV < t-20) plotV = 0;
-          else if (plotV >= t+20) plotV = 40;
-          else plotV = (plotV-t+20) ;                                 // relative to t, +-20C
-          u8g2_DrawVLine(&u8g2, x+13, 53-plotV, plotV);               // data points
-        }
-        set= 33;
-
-      } else {                                                        // graphing full range
-        for(uint8_t y=13; y<53; y+=13){
-          u8g2_DrawHLine(&u8g2, 7, y, 4);                             // left ticks
-        }
-
-        for(uint8_t x=0; x<100; x++){
-          uint8_t pos=plot_Index+x;
-          if(pos>99) pos-=100;
-
-          uint16_t plotV = plotData->p[pos];
-
-          if (plotV<180) plotV = 0;
-          else plotV = (plotV-180) >> 3;                              // divide by 8, (500-180)/8=40
-          u8g2_DrawVLine(&u8g2, x+13, 53-plotV, plotV);               // data points
-        }
-        if(t<188){ set = 1; }
-        else {
-          set=(t-180)>>3;
-        }
-        set= 53-set;
+      for(uint8_t y=13; y<54; y+=10){
+        u8g2_DrawHLine(&u8g2, 7, y, 4);                             // left ticks
       }
 
+      for(uint8_t x=0; x<100; x++){
+        uint8_t pos=plot_Index+x;
+        if(pos>99){ pos-=100; }                                     // Reset index if > 99
+
+        uint16_t plotV = plotData->p[pos];
+
+        if (plotV < t-20) plotV = 0;
+        else if (plotV >= t+20) plotV = 40;
+        else plotV = (plotV-t+20) ;                                 // relative to t, +-20C
+        u8g2_DrawVLine(&u8g2, x+13, 53-plotV, plotV);               // data points
+      }
+      #define set 33
       u8g2_DrawTriangle(&u8g2, 122, set-4, 122, set+4, 115, set);     // set temp marker
     }
     if(scr_refresh){
@@ -671,6 +614,7 @@ static void main_screen_init(screen_t *scr) {
   }
   edit = extractEditablePartFromWidget(Widget_TipSelect);
   edit->numberOfOptions = systemSettings.Profile.currentNumberOfTips;
+
   edit = extractEditablePartFromWidget(Widget_SetPoint);
   edit->step = systemSettings.settings.tempStep;
   edit->big_step = systemSettings.settings.tempStep;
@@ -720,6 +664,7 @@ static void main_screen_create(screen_t *scr){
   w->frameType=frame_solid;
   w->radius=4;
   w->enabled=0;
+  w->width=128;
 
   #ifdef USE_VIN
   //  [ V. Supply Widget ]
