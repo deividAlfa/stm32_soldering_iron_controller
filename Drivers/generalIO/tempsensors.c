@@ -114,12 +114,12 @@ uint16_t human2adc(int16_t t) {
      temp = map(t, 250, 350, currentTipData->calADC_At_250, currentTipData->calADC_At_350);
   }
   tH = adc2Human(temp,0,mode_Celsius);
-  if (tH < t) {
+  if (tH < (t-1)) {
     while(tH < t){
       tH = adc2Human(++temp,0,mode_Celsius);
     }
   }
-  else if (tH > t) {
+  else if (tH > (t+1)) {
     while(tH > t){
       tH = adc2Human(--temp,0,mode_Celsius);
     }
