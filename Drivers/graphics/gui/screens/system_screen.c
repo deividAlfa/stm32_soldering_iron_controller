@@ -172,10 +172,6 @@ static void SYSTEM_init(screen_t *scr){
   else{
     editable_SYSTEM_TempStep->inputData.endString="\260C";
   }
-                                                                               // TODO esto no funcionara!
-  if(ChecksumProfile(&systemSettings.Profile)!=systemSettings.ProfileChecksum){         // If there's unsaved profile data
-    saveSettingsFromMenu(save_Settings);                                                // Save settings
-  }
   profile=systemSettings.settings.currentProfile;
 }
 
