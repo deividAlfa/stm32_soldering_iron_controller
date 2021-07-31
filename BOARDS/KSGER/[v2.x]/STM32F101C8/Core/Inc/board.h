@@ -66,12 +66,12 @@
 /********************************
  *       TIP calibration    *
  ********************************/
-//#define PROFILE_VALUES                                        // Enable profile values
+#define PROFILE_VALUES                                        // Enable profile values
 
 #ifdef PROFILE_VALUES
-#define T12_Cal250        1100
-#define T12_Cal350        1200
-#define T12_Cal450        1300
+#define T12_Cal250        1600
+#define T12_Cal350        2300
+#define T12_Cal450        3000
 
 #define C210_Cal250       300
 #define C210_Cal350       400
