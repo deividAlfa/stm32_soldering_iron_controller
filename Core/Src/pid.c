@@ -20,7 +20,7 @@ void setupPID(pid_values_t* p) {
   pid.limMaxInt = (float)p->maxI/100;
   pid.limMin =    (float)0;
   pid.limMax =    (float)1;
-  pid.tau =       (float)p->tau/100;  //TODO adjust this from menu? This is not used currently used (For New PID)
+  pid.tau =       (float)p->tau/100;
 }
 
 // New part from Phil: https://github.com/pms67/PID
