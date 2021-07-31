@@ -170,18 +170,15 @@ void oled_processInput(void) {
 
         if(scr->create){                                // Create entering screen
           scr->create(scr);
-          mi = mallinfo();
           oled_restore_comboStatus(scr);                // Restore combo position
+          mi = mallinfo();
         }
-
         scr->init(scr);
-
-        mi = mallinfo();
-        RE_Rotation=Rotate_Nothing;                     // Force first pass without activity to update screen
-        scr->processInput(scr, RE_Rotation, RE_State);
         if(scr->onEnter){
           scr->onEnter(current_screen);
         }
+        RE_Rotation=Rotate_Nothing;                     // Force first pass without activity to update screen
+        scr->processInput(scr, RE_Rotation, RE_State);
         if(scr->update){
           scr->update(scr);
         }
