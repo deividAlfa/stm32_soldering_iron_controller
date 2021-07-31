@@ -140,7 +140,7 @@ static void setCal350(int32_t *val) {
   else if(temp>=adcAtTemp[cal_450]){
     temp=adcAtTemp[cal_450]-1;
   }
-  adcAtTemp[cal_350] = *val;
+  adcAtTemp[cal_350] = temp;
 }
 static int Cal350_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
   int ret = default_widgetProcessInput(w, input, state);
