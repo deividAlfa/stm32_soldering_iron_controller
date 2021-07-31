@@ -811,7 +811,7 @@ void comboBoxDraw(widget_t *w) {
         drawFrame=0;
         u8g2_SetDrawColor(&u8g2, WHITE);
         u8g2_DrawRBox(&u8g2, 0, frameY, OledWidth, height, r);
-        u8g2_SetDrawColor(&u8g2, XOR);
+        u8g2_SetDrawColor(&u8g2, BLACK);
       }
       else{
         u8g2_SetDrawColor(&u8g2, WHITE);
