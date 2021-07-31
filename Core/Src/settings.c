@@ -142,19 +142,13 @@ void saveSettings(uint8_t mode){
   flashBuffer->settingsChecksum = systemSettings.settingsChecksum;
   flashBuffer->settings = systemSettings.settings;
 
-  if(mode==keepProfiles){
-    if((systemSettings.settings.currentProfile<=profile_C210) &&
-       (systemSettings.Profile.ID == profile )){
-
-      systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
-      flashBuffer->ProfileChecksum[profile] = systemSettings.ProfileChecksum;
-      flashBuffer->Profile[profile] = systemSettings.Profile;
-    }
-    else{
-      Error_Handler();
-    }
+  if((mode==keepProfiles) && (systemSettings.settings.currentProfile<=profile_C210) && (systemSettings.Profile.ID == profile )){
+    systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
+    flashBuffer->ProfileChecksum[profile] = systemSettings.ProfileChecksum;
+    flashBuffer->Profile[profile] = systemSettings.Profile;
   }
   else{
+    mode = wipeProfiles;
     for(uint8_t x=0;x<ProfileSize;x++){
       flashBuffer->Profile[x].NotInitialized = 0xFF;
       flashBuffer->ProfileChecksum[x] = 0xFFFFFFFF;
@@ -244,14 +238,21 @@ void restoreSettings() {
     Button_reset();
   }
 
-  systemSettings.settings = flashSettings->settings;
+  memcpy(&systemSettings.settings,&flashSettings->settings,sizeof(settings_t));
+
+  if(systemSettings.settings.version != SETTINGS_VERSION){
+    resetSystemSettings();
+    saveSettings(wipeProfiles);
+  }
+
   systemSettings.settingsChecksum = flashSettings->settingsChecksum;
-  loadProfile(systemSettings.settings.currentProfile);
 
   // Compare loaded checksum with calculated checksum
-  if( (systemSettings.settings.version != SETTINGS_VERSION) || (ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum) ){
+  if( ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum ){
     settingsChkErr();
   }
+
+  loadProfile(systemSettings.settings.currentProfile);
 
   setContrast(systemSettings.settings.contrast);
 }
@@ -398,8 +399,8 @@ void loadProfile(uint8_t profile){
   __disable_irq();
   HAL_IWDG_Refresh(&hiwdg);
   systemSettings.settings.currentProfile=profile;
-  if(profile==profile_None){                                                    // If profile nos initialized yet, use C245 values until the system is configured
-    systemSettings.settings.currentProfile=profile_C245;                        // Force C245 profile
+  if(profile==profile_None){                                                    // If profile not initialized yet, use T12 values until the system is configured
+    systemSettings.settings.currentProfile=profile_T12;                         // Force T12 profile
     resetCurrentProfile();                                                      // Load data
     systemSettings.settings.currentProfile=profile_None;                        // Revert to none
   }
@@ -461,22 +462,8 @@ void settingsChkErr(void){
   update_display();
   ErrCountDown(3,117,50);
 
-  if(systemSettings.settings.currentProfile<=profile_C210){
-    if(systemSettings.ProfileChecksum==ChecksumProfile(&systemSettings.Profile)){   // If current profile checksum is correct
-      uint8_t tip = systemSettings.settings.currentProfile;                         // save current tip
-      resetSystemSettings();                                                        // reset settings
-      systemSettings.settings.currentProfile=tip;                                   // Restore tip type
-      saveSettings(save_Settings);                                                  // Save settings preserving tip data
-    }
-    else{                                                                           // If checksum wrong
-      resetSystemSettings();                                                        // reset settings
-      saveSettings(wipeProfiles);                                                   // Save settings erasing tip data
-    }
-  }
-  else{                                                                             // If current profile not valid
-    resetSystemSettings();                                                          // Assume something went wrong, reset settings
-    saveSettings(save_Settings);                                                    // Save keeping tip data, if it's corrupted it will be detected when loading the profile data.
-  }
+  resetSystemSettings();
+  saveSettings(keepProfiles);
 }
 
 void ProfileChkErr(void){
@@ -486,7 +473,9 @@ void ProfileChkErr(void){
   putStrAligned("DEFAULTS...", 42, align_center);
   update_display();
   ErrCountDown(3,117,50);
+
   resetCurrentProfile();
+  saveSettings(keepProfiles);
 }
 
 void Button_reset(void){
