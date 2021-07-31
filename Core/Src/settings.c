@@ -31,6 +31,10 @@ void ErrCountDown(uint8_t Start,uint8_t xpos, uint8_t ypos);
 
 void checkSettings(void){
 
+  #ifdef NOSAVESETTINGS
+  return;
+  #endif
+
   static uint32_t prevSysChecksum=0, newSysChecksum=0, prevTipChecksum=0, newTipChecksum=0, lastCheckTime=0, lastChangeTime=0;
   uint32_t CurrentTime = HAL_GetTick();
   uint8_t scr_index=current_screen->index;
