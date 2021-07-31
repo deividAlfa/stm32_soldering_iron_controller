@@ -37,19 +37,19 @@ static int doReset(widget_t *w) {
     }
     return -1;
 }
-static int doSettingsReset(void) {
+static int doSettingsReset() {
   resStatus=reset_settings;
   return screen_reset_confirmation;
 }
-static int doProfileReset(void) {
+static int doProfileReset() {
   resStatus=reset_profile;
   return screen_reset_confirmation;
 }
-static int doProfilesReset(void) {
+static int doProfilesReset() {
   resStatus=reset_profiles;
   return screen_reset_confirmation;
 }
-static int doFactoryReset(void) {
+static int doFactoryReset() {
   resStatus=reset_all;
   return screen_reset_confirmation;
 }
