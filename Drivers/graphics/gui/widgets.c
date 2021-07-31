@@ -234,7 +234,7 @@ void widgetEnable(widget_t* w){
 void widgetDisable(widget_t* w){
   if(w && w->enabled){
     w->enabled = 0;
-    widgetClearField(w);
+    w->parent->refresh=screen_Erase;
   }
 }
 
