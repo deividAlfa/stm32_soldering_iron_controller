@@ -282,7 +282,6 @@ static void Cal_create(screen_t *scr) {
 
 
 static void Cal_Start_init(screen_t *scr) {
-  uint8_t curr_NTC=readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius) / 10;
   default_init(scr);
   Currtip = getCurrentTip();
   Iron.calibrating=1;
