@@ -316,18 +316,15 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
   }
 
   if(tempReady){
-    if(current_state<=cal_450){
+    if(current_state<cal_input_250){
       setCalState(current_state+10);
       widgetDisable(Widget_Cal_Back);
-      ((button_widget_t*)Widget_Cal_Back->content)->selectable.previous_state=widget_idle;
-      ((button_widget_t*)Widget_Cal_Back->content)->selectable.state=widget_selected;
-
       widgetEnable(Widget_Cal_Measured);
       ((editable_widget_t*)Widget_Cal_Measured->content)->selectable.previous_state=widget_selected;
       ((editable_widget_t*)Widget_Cal_Measured->content)->selectable.state=widget_edit;
       Screen_calibration_start.current_widget=Widget_Cal_Measured;
     }
-    else if(current_state<=cal_input_450){
+    else if(current_state<cal_suceed){
       if(((editable_widget_t*)Widget_Cal_Measured->content)->selectable.state!=widget_edit){
         if( measuredTemp > (state_temps[current_state-10]+50)){      // Abort if the measured temp is >50ºC than requested
           setCalState(cal_needsAdjust);
@@ -369,7 +366,7 @@ static void Cal_Start_OnExit(screen_t *scr) {
 }
 
 static void Cal_Start_draw(screen_t *scr){
-  char currTemp[6];
+  char str[20];
 
   if(cal_drawText || (HAL_GetTick()-lastUpdateTick)>199){
     cal_drawText=0;
@@ -378,53 +375,47 @@ static void Cal_Start_draw(screen_t *scr){
     FillBuffer(BLACK, fill_dma);
     scr->refresh=screen_Erased;
     u8g2_SetDrawColor(&u8g2, WHITE);
-    lastTipTemp = readTipTemperatureCompensated(stored_reading,read_Avg);
-    switch((int)current_state){
-      case cal_250:
-      case cal_350:
-      case cal_450:
-        u8g2_DrawStr(&u8g2, 0, 12, "CAL STEP:");            // Draw current cal state
-        u8g2_DrawStr(&u8g2, 83, 12, state_tempstr[(int)current_state]);
-        u8g2_DrawStr(&u8g2, 0, 30, "WAIT...");               // Draw current temp
-        sprintf(currTemp, "%3u\260C",lastTipTemp);
-        u8g2_DrawStr(&u8g2, 82, 30, currTemp);
-        u8g2_DrawStr(&u8g2, 0, 50, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name);//12
-        break;
-      case cal_suceed:
-      {
-        char str[20];
-        for(uint8_t x=0;x<3;x++){
-          sprintf(str, "Cal %s: %u", state_tempstr[x], adcCal[x]);
-          u8g2_DrawStr(&u8g2, 6, (x*14), str);
-        }
-        u8g2_DrawStr(&u8g2, 0, 50, "SUCCEED!");
-        setUserTemperature(0);
-        break;
-      }
-      case cal_failed:
-          putStrAligned("FAILED!", 15, align_center);
-          setUserTemperature(0);
-        break;
-      case cal_needsAdjust:
-          putStrAligned("DELTA TOO HIGH!", 0, align_center);
-          putStrAligned("Adjust manually", 15, align_center);
-          putStrAligned("and try again", 30, align_center);
-          setUserTemperature(0);
-        break;
+    u8g2_SetFont(&u8g2, default_font);
+    lastTipTemp = readTipTemperatureCompensated(stored_reading, read_Avg);
 
-      case cal_input_250:
-      case cal_input_350:
-      case cal_input_450:
-          u8g2_DrawStr(&u8g2, 0, 12, "CAL STEP:");                                 // Draw current cal state
-          u8g2_DrawStr(&u8g2, 83, 12, state_tempstr[(int)current_state-10]);
-          u8g2_DrawStr(&u8g2, 0, 30, "MEASURED:");//12
-          u8g2_DrawStr(&u8g2, 0, 50, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name);//12
-      default:
-        break;
+    if(current_state<cal_suceed){
+      uint8_t s = current_state;
+      u8g2_DrawStr(&u8g2, 8, 6, "CAL STEP:");            // Draw current cal state
+
+      if(current_state<cal_input_250){
+        u8g2_DrawStr(&u8g2, 8, 24, "WAIT...");               // Draw current temp
+        sprintf(str, "%3u\260C",lastTipTemp);
+        u8g2_DrawStr(&u8g2, 85, 24, str);
+      }
+      else{
+        u8g2_DrawStr(&u8g2, 8, 24, "MEASURED:");
+        s-=10;
+      }
+      u8g2_DrawStr(&u8g2, 85, 6, state_tempstr[s]);
+      u8g2_DrawStr(&u8g2, 8, 49, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name);//12
+    }
+    else if(current_state==cal_suceed){
+      for(uint8_t x=0;x<3;x++){
+        sprintf(str, "Cal %s: %u", state_tempstr[x], adcCal[x]);
+        u8g2_DrawStr(&u8g2, 6, (x*14), str);
+      }
+      u8g2_DrawStr(&u8g2, 0, 49, "SUCCEED!");
+      setUserTemperature(0);
+    }
+    else if(current_state==cal_failed){
+      putStrAligned("FAILED!", 15, align_center);
+      setUserTemperature(0);
+    }
+    else if(current_state==cal_needsAdjust){
+      putStrAligned("DELTA TOO HIGH!", 0, align_center);
+      putStrAligned("Adjust manually", 15, align_center);
+      putStrAligned("and try again", 30, align_center);
+      setUserTemperature(0);
     }
   }
   default_screenDraw(scr);
 }
+
 static void Cal_Start_create(screen_t *scr) {
   widget_t* w;
   displayOnly_widget_t *dis;
@@ -448,8 +439,8 @@ static void Cal_Start_create(screen_t *scr) {
   dis->getData = &getMeasuredTemp;
   edit->setData =  (void (*)(void *)) &setMeasuredTemp;
   edit->selectable.tab = 1;
-  w->posX = 80;
-  w->posY = 28;
+  w->posX = 82;
+  w->posY = 22;
   w->width = 42;
   w->enabled=0;
 }
