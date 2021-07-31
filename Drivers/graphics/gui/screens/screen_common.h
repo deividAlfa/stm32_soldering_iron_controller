@@ -19,6 +19,7 @@ extern uint32_t settingsTimer;
 extern int32_t temp;
 extern uint8_t profile, Selected_Tip;
 extern bool disableTipCopy;
+extern char *tipName;
 extern bool newTip;
 
 int longClickReturn(widget_t *w);

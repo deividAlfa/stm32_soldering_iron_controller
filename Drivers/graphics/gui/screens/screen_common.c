@@ -9,6 +9,7 @@
 uint32_t settingsTimer;
 int32_t temp;
 uint8_t profile, Selected_Tip;
+char *tipName;
 bool disableTipCopy;
 bool newTip;
 
