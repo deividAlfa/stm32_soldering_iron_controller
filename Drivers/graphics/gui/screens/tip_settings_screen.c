@@ -106,7 +106,7 @@ static void setCal450(int32_t *val) {
   tipCfg.calADC_At_450 = *val;
 }
 //=========================================================
-static int tip_save(widget_t *w) {
+static int tip_save() {
   __disable_irq();
   systemSettings.Profile.tip[Selected_Tip] = tipCfg;
   if(Selected_Tip==systemSettings.Profile.currentTip){
@@ -120,7 +120,7 @@ static int tip_save(widget_t *w) {
   return comboitem_tip_settings_cancel->action_screen;
 }
 //=========================================================
-static int tip_delete(widget_t *w) {
+static int tip_delete() {
   char name[TipCharSize]=_BLANK_TIP;
   systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
 
@@ -140,7 +140,7 @@ static int tip_delete(widget_t *w) {
   return comboitem_tip_settings_cancel->action_screen;                                                      // And return to main screen or system menu screen
 }
 //=========================================================
-static int tip_copy(widget_t *w) {
+static int tip_copy() {
   Selected_Tip = systemSettings.Profile.currentNumberOfTips;                                                    //
   strcpy(tipCfg.name, _BLANK_TIP);
   comboitem_tip_settings_delete->enabled=0;
@@ -204,16 +204,9 @@ static void tip_settings_onEnter(screen_t *scr){
   settingsTimer=HAL_GetTick();
   bool new=0;
   disableTipCopy=0;
-  if(scr!=&Screen_pid_debug){
-    comboResetIndex(Screen_tip_settings.widgets);
-  }
+  comboResetIndex(Screen_tip_settings.widgets);
 
-  if(scr==&Screen_main){                                                                                // If coming from main, selected tip is current ti`p
-    return_screen = screen_main;
-    Selected_Tip = systemSettings.Profile.currentTip;
-  }
-
-  else if(scr==&Screen_tip_list){                                                                      // If coming from tips menu
+  if(scr==&Screen_tip_list){                                                                      // If coming from tips menu
     if(newTip) {                                                                                      // If was Add New tip option
       newTip=0;
       for(uint8_t x = 0; x < TipSize; x++) {                                                            // Find first valid tip and store the position
@@ -229,14 +222,18 @@ static void tip_settings_onEnter(screen_t *scr){
     }
     else{
       for(uint8_t x = 0; x < TipSize; x++) {                                                            // Else, find the selected tip
-        if(strcmp(((comboBox_widget_t*)Screen_tip_settings.widgets->content)->currentItem->text, systemSettings.Profile.tip[x].name)==0){
+        if(strcmp(tipName, systemSettings.Profile.tip[x].name)==0){
           Selected_Tip = x;
+          break;
         }
       }
     }
     return_screen= screen_tip_list;
   }
-
+  else{
+    return_screen = screen_main;
+    Selected_Tip = systemSettings.Profile.currentTip;
+  }
   comboitem_tip_settings_cancel->action_screen = return_screen;
 
   tipCfg = systemSettings.Profile.tip[Selected_Tip];                                                      // Copy selected tip

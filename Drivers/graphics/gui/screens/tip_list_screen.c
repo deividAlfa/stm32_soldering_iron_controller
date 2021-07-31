@@ -12,15 +12,19 @@ screen_t Screen_tip_list;
 static comboBox_item_t *comboitem_tip_list_addNewTip;
 
 
-static int AddNewTip(widget_t *w) {
+static int addNewTip() {
   newTip=1;
-  return screen_tip_settings;                                                                                                    // And return to main screen or system menu screen
+  return screen_tip_settings;
 }
 
+static int editTip(widget_t *w) {
+  tipName=((comboBox_widget_t*)w->content)->currentItem->text;
+  return screen_tip_settings;
+}
 
 static void tip_list_init(screen_t *scr) {
   default_init(scr);
-
+  newTip=0;
   comboResetIndex(Screen_tip_list.widgets);
   comboBox_item_t *i = ((comboBox_widget_t*)Screen_tip_list.widgets->content)->first;
   for(int x = 0; x < TipSize; x++) {
@@ -42,9 +46,9 @@ static void tip_list_create(screen_t *scr){
   //
   newWidget(&w,widget_combo,scr);
   for(int x = 0; x < TipSize; x++) {
-    newComboScreen(w, " ", screen_tip_settings, NULL);              // Names filled when entering the menu
+    newComboAction(w, " ", &editTip, NULL);              // Names filled when entering the menu
   }
-  newComboAction(w, "ADD NEW", &AddNewTip, &comboitem_tip_list_addNewTip);
+  newComboAction(w, "ADD NEW", &addNewTip, &comboitem_tip_list_addNewTip);
   newComboScreen(w, "BACK", screen_settings, NULL);
 }
 
