@@ -194,7 +194,7 @@ static void setMainWidget(widget_t* w){
 void clearActivityIcon(void){
   if(mainScr.ActivityOn){
     u8g2_SetDrawColor(&u8g2, BLACK);
-    u8g2_DrawBox(&u8g2, 0,OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1]);
+    u8g2_DrawBox(&u8g2, (OledWidth-shakeXBM[1])/2, 0, shakeXBM[0], shakeXBM[1]);
     mainScr.ActivityOn=0;
     Iron.newActivity=0;
   }
