@@ -181,14 +181,6 @@ static void SYSTEM_onEnter(screen_t *scr){
   }
 }
 
-static void SYSTEM_onExit(screen_t *scr){
-  if(profile!=systemSettings.settings.currentProfile){                                  // If profile changed
-    loadProfile(profile);
-    saveSettingsFromMenu(save_Settings);                                                // Save
-  }
-}
-
-
 static void SYSTEM_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
@@ -417,7 +409,6 @@ static void SYSTEM_create(screen_t *scr){
 void system_screen_setup(screen_t *scr){
   scr->init = &SYSTEM_init;
   scr->onEnter = &SYSTEM_onEnter;
-  scr->onExit = &SYSTEM_onExit;
   scr->processInput=&autoReturn_ProcessInput;
   scr->create = &SYSTEM_create;
 }
