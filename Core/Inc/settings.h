@@ -13,7 +13,7 @@
 #include "board.h"
 
 #define ProfileSize       3                                         // Number of profiles
-#define TipSize           10                                        // Number of tips for each profile
+#define TipSize           20                                        // Number of tips for each profile
 #define TipCharSize       5                                         // String size for each tip name (Including null terminator)
 #define _BLANK_TIP        "    "
 
@@ -34,8 +34,8 @@
 #endif
 
 //#define SWSTRING        "SW: v1.10"                               // For releases
-#define SWSTRING          "SW: 2021-07-31"                          // For git
-#define SETTINGS_VERSION  5                                         // Change this if you change the struct below to prevent people getting out of sync
+#define SWSTRING          "SW: 2021-08-01"                          // For git
+#define SETTINGS_VERSION  6                                         // Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize         2                                         // In KB
 #define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
 
