@@ -349,19 +349,19 @@ void runAwayCheck(void){
             }
             break;
           case runaway_75:                                                                  // Temp >75°C over setpoint
-            if((CurrentTime-Iron.RunawayTimer)>3000){                                       // 3 second limit
+            if((CurrentTime-Iron.RunawayTimer)>5000){                                       // 5 second limit
               Iron.RunawayStatus=runaway_triggered;
               FatalError(error_RUNAWAY75);
             }
             break;
           case runaway_100:                                                                 // Temp >100°C over setpoint
-            if((CurrentTime-Iron.RunawayTimer)>1000){                                       // 1 second limit
+            if((CurrentTime-Iron.RunawayTimer)>2000){                                       // 2 second limit
               Iron.RunawayStatus=runaway_triggered;
               FatalError(error_RUNAWAY100);
             }
             break;
           case runaway_500:                                                                 // Exceed 500ºC!
-            if((CurrentTime-Iron.RunawayTimer)>1000){                                       // 1 second limit
+            if((CurrentTime-Iron.RunawayTimer)>2000){                                       // 2 second limit
               Iron.RunawayStatus=runaway_triggered;
               FatalError(error_RUNAWAY500);
             }
