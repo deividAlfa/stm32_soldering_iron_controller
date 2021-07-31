@@ -925,7 +925,7 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
   }
   if((input == Click) || (input == LongClick)){                                                               // If clicked
     if (combo->currentItem->type==combo_Action){                                                              // If combo Action type
-      return combo->currentItem->action();                                                                    // Process action
+      return combo->currentItem->action(w);                                                                   // Process action
     }
     else if (combo->currentItem->type==combo_Screen){                                                         // If combo screen type
       return combo->currentItem->action_screen;                                                               // Return screen index

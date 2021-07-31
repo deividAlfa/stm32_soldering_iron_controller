@@ -106,7 +106,7 @@ struct comboBox_item_t {
   AlignType dispAlign;
   union{
     uint8_t action_screen;
-    int (*action)();
+    int (*action)(widget_t*);
     editable_widget_t *widget;
   };
   char *text;
