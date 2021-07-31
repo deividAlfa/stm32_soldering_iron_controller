@@ -501,15 +501,14 @@ void checkIronError(void){
     Iron.Error.Flags = Err.Flags | (Iron.Error.Flags & _ACTIVE);
     Iron.LastErrorTime = CurrentTime;
     if(!Iron.Error.active){
-      if(Err.Flags==_NO_IRON && Iron.CurrentMode == mode_sleep){                            // If in sleep mode and only no iron flag is set, ignore
-        return;
+      if(Err.Flags!=_NO_IRON){                                                        // Avoid alarm if only the tip is removed
+        buzzer_alarm_start();
       }
       Iron.Error.active = 1;
       setCurrentMode(mode_sleep);
       Iron.Pwm_Out = 0;
       __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, 0);
       configurePWMpin(output_Low);
-      buzzer_alarm_start();                                                                 // Start alarm
     }
   }
   else if (Iron.Error.active && !Err.Flags){                                                // If global flag set, but no errors
