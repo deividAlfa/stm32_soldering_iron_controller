@@ -80,7 +80,8 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 void handleIron(void) {
   uint32_t CurrentTime = HAL_GetTick();
 
-  readTipTemperatureCompensated(update_reading,read_Avg);
+  readTipTemperatureCompensated(update_reading, read_Avg);     // Update readings
+  readColdJunctionSensorTemp_x10(update_reading, mode_Celsius);
 
   if(!Iron.Error.safeMode){
     if( (systemSettings.setupMode==setup_On) || systemSettings.settings.NotInitialized || systemSettings.Profile.NotInitialized!=initialized ||
@@ -483,7 +484,7 @@ void readWake(void){
 // Checks for non critical iron errors (Errors that can be cleared)
 void checkIronError(void){
   uint32_t CurrentTime = HAL_GetTick();
-  int16_t ambTemp = readColdJunctionSensorTemp_x10(mode_Celsius);
+  int16_t ambTemp = readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius);
   IronError_t Err = { 0 };
   Err.safeMode = Iron.Error.safeMode;
   Err.NTC_high = (ambTemp > 800);

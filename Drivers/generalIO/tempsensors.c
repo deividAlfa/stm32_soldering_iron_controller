@@ -12,28 +12,37 @@
 static tipData *currentTipData;
 int16_t last_TIP_Raw;
 int16_t last_TIP;
-int16_t last_NTC;
+int16_t last_NTC_F;
+int16_t last_NTC_C;
 
 #ifdef USE_NTC
 const int NTC_TABLE;                  // Defined in board.h
 #endif
 
-int16_t readColdJunctionSensorTemp_x10(bool tempUnit) {
+int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
 #ifdef USE_NTC
-  int16_t temp;
-  int16_t p1, p2;
-  int16_t lastavg=NTC.last_avg;
-  /* Estimate the interpolating point before and after the ADC value. */
-  p1 = NTC_Table[(lastavg >> 4)];
-  p2 = NTC_Table[(lastavg >> 4) + 1];
+  if(update){
+    int16_t temp;
+    int16_t p1, p2;
+    int16_t lastavg=NTC.last_avg;
+    /* Estimate the interpolating point before and after the ADC value. */
+    p1 = NTC_Table[(lastavg >> 4)];
+    p2 = NTC_Table[(lastavg >> 4) + 1];
 
-  /* Interpolate between both points. */
-  temp = p1 - ((p1 - p2) * (lastavg & 0x000F)) / 16;
-  if(tempUnit==mode_Farenheit){
-    temp=TempConversion(temp, mode_Farenheit, 1);
+    /* Interpolate between both points. */
+    temp = p1 - ((p1 - p2) * (lastavg & 0x000F)) / 16;
+    if(tempUnit==mode_Farenheit){
+      temp=TempConversion(temp, mode_Farenheit, 1);
+    }
+    last_NTC_C = temp;
+    last_NTC_F = TempConversion(temp, mode_Farenheit, 1);
   }
-  last_NTC = temp;
-  return last_NTC;
+  if(tempUnit==mode_Farenheit){
+    return last_NTC_F;
+  }
+  else{
+    return last_NTC_C;
+  }
 #else
   last_NTC=350;        // If no NTC is used, assume 35ºC
   return last_NTC;
@@ -86,7 +95,7 @@ tipData* getCurrentTip() {
 uint16_t human2adc(int16_t t) {
   volatile int16_t temp = t;
   volatile int16_t tH;
-  volatile int16_t ambTemp = readColdJunctionSensorTemp_x10(mode_Celsius) / 10;
+  volatile int16_t ambTemp = readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius) / 10;
 
   // If using Farenheit, convert to Celsius
   if(systemSettings.settings.tempUnit==mode_Farenheit){
@@ -121,8 +130,7 @@ uint16_t human2adc(int16_t t) {
 // Translate temperature from internal units to the human readable value
 int16_t adc2Human(uint16_t adc_value,bool correction, bool tempUnit) {
   int16_t tempH = 0;
-  int16_t ambTemp;
-  ambTemp = readColdJunctionSensorTemp_x10(mode_Celsius) / 10;
+  int16_t ambTemp = readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius) / 10;
   if (adc_value >= currentTipData->calADC_At_350) {
     tempH = map(adc_value, currentTipData->calADC_At_350, currentTipData->calADC_At_450, 350, 450);
   }

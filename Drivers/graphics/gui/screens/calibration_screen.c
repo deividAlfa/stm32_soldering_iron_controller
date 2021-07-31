@@ -46,7 +46,7 @@ static comboBox_item_t *Cal_Combo_Adjust_C450;
 //=========================================================
 static uint8_t processCalibration() {
   uint16_t delta = (state_temps[cal_350] - state_temps[cal_250])/2;
-  uint16_t ambient = readColdJunctionSensorTemp_x10(mode_Celsius) / 10;
+  uint16_t ambient = readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius) / 10;
 
   //  Ensure measured temps are valid (250<350<450)
   if (  (measured_temps[cal_250] >= measured_temps[cal_350]) ||  (measured_temps[cal_350] >= measured_temps[cal_450]) ){
@@ -185,7 +185,7 @@ static int cal_adjust_SaveAction(widget_t* w) {
     systemSettings.Profile.Cal250_default = adcAtTemp[cal_250];
     systemSettings.Profile.Cal350_default = adcAtTemp[cal_350];
     systemSettings.Profile.Cal450_default = adcAtTemp[cal_450];
-    systemSettings.Profile.CalNTC = readColdJunctionSensorTemp_x10(mode_Celsius) / 10;
+    systemSettings.Profile.CalNTC = readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius) / 10;
     saveSettingsFromMenu(save_Settings);
   }
   return screen_calibration;
@@ -282,6 +282,7 @@ static void Cal_create(screen_t *scr) {
 
 
 static void Cal_Start_init(screen_t *scr) {
+  uint8_t curr_NTC=readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius) / 10;
   default_init(scr);
   Currtip = getCurrentTip();
   Iron.calibrating=1;
@@ -295,9 +296,17 @@ static void Cal_Start_init(screen_t *scr) {
   backupCal350 = Currtip->calADC_At_350;
   backupCal450 = Currtip->calADC_At_450;
 
-  Currtip->calADC_At_250 = systemSettings.Profile.Cal250_default;
-  Currtip->calADC_At_350 =  systemSettings.Profile.Cal350_default;
-  Currtip->calADC_At_450 =  systemSettings.Profile.Cal450_default;
+  temp = systemSettings.Profile.Cal250_default;
+  temp = (temp*250)/(250-systemSettings.Profile.CalNTC);
+  Currtip->calADC_At_250 = temp;
+
+  temp = systemSettings.Profile.Cal350_default;
+  temp = (temp*350)/(350-systemSettings.Profile.CalNTC);
+  Currtip->calADC_At_350 = temp;
+
+  temp = systemSettings.Profile.Cal450_default;
+  temp = (temp*450)/(450-systemSettings.Profile.CalNTC);
+  Currtip->calADC_At_450 = temp;
 
   setCalState(cal_250);
 }
@@ -325,7 +334,7 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
           setCalState(cal_needsAdjust);
         }
         else{
-          measured_temps[current_state-10] = measuredTemp - (readColdJunctionSensorTemp_x10(mode_Celsius) / 10);
+          measured_temps[current_state-10] = measuredTemp - (readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius) / 10);
           adcAtTemp[(int)current_state-10] = TIP.last_avg;
           if(current_state<cal_input_450){
             tempReady = 0;

@@ -153,7 +153,7 @@ static void * main_screen_getVin() {
 #ifdef USE_NTC
 static void * main_screen_getAmbTemp() {
   if(mainScr.update){
-    mainScr.lastAmb = readColdJunctionSensorTemp_x10(systemSettings.settings.tempUnit);
+    mainScr.lastAmb = readColdJunctionSensorTemp_x10(stored_reading, systemSettings.settings.tempUnit);
   }
   temp=mainScr.lastAmb;
   return &temp;

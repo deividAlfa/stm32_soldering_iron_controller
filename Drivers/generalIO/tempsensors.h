@@ -21,7 +21,6 @@
 
 extern int16_t    last_TIP_Raw;
 extern int16_t    last_TIP;
-extern int16_t    last_NTC;
 
 
 
@@ -29,7 +28,7 @@ int16_t   readColdJunctionSensorTemp_C_x10(void);
 uint16_t  coldJunctionTemp_mC_To_uV(int tempX10);
 uint16_t  readIntTemp_mC(void);
 uint16_t  readTipSensorADC_Avg(void);
-int16_t   readColdJunctionSensorTemp_x10(bool tempUnit);
+int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit);
 int16_t  readTipTemperatureCompensated(bool update, bool ReadRaw);
 uint16_t  realTempToADC(int16_t real);
 void      setCurrentTip(uint8_t tip);
