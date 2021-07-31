@@ -12,6 +12,10 @@
 #include "voltagesensors.h"
 #include "board.h"
 
+#ifdef __BASE_FILE__
+#undef __BASE_FILE__
+#define __BASE_FILE__ "adc_global.c"
+#endif
 
 volatile adc_measures_t ADC_measures[ADC_BFSIZ];
 volatile ADC_Status_t ADC_Status;

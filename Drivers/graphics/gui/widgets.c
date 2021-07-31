@@ -12,7 +12,10 @@
 static char displayString[32];
 static bool callFromCombo;
 
-
+#ifdef __BASE_FILE__
+#undef __BASE_FILE__
+#define __BASE_FILE__ "widgets.c"
+#endif
 
 void newWidget(widget_t **new, widgetType type, struct screen_t *scr){
   widget_t *w=malloc(sizeof(widget_t));

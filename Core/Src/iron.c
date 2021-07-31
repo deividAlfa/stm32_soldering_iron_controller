@@ -14,6 +14,12 @@
 #include "ssd1306.h"
 #include "screens.h"
 #include "oled.h"
+
+#ifdef __BASE_FILE__
+#undef __BASE_FILE__
+#define __BASE_FILE__ "iron.c"
+#endif
+
 volatile iron_t Iron;
 typedef struct setTemperatureReachedCallbackStruct_t setTemperatureReachedCallbackStruct_t;
 

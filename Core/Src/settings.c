@@ -13,6 +13,11 @@
 #include "tempsensors.h"
 #include <malloc.h>
 
+#ifdef __BASE_FILE__
+#undef __BASE_FILE__
+#define __BASE_FILE__ "settings.c"
+#endif
+
 systemSettings_t systemSettings;
 flashSettings_t* flashSettings = (flashSettings_t*)FLASH_ADDR;
 void settingsChkErr(void);

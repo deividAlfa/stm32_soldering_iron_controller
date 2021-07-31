@@ -4,6 +4,12 @@
 #include "iron.h"
 #include "gui.h"
 
+
+#ifdef __BASE_FILE__
+#undef __BASE_FILE__
+#define __BASE_FILE__ "ssd1306.c"
+#endif
+
 oled_t oled = {
     .ptr =  &oled.buffer[0]
 };
@@ -675,6 +681,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
         display_abort();
         oled.status=oled_busy;
         try--;
+        Error_Handler();
       }
     }
     if(try==0){
