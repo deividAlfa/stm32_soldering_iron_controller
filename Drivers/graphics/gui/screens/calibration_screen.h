@@ -12,7 +12,7 @@
 
 extern screen_t Screen_calibration;
 extern screen_t Screen_calibration_start;
-extern screen_t Screen_calibration_adjust;
+extern screen_t Screen_calibration_settings;
 
 void calibration_screen_setup(screen_t *scr);
 void cal_screenUpdate(screen_t *scr);

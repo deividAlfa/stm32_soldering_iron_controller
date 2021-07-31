@@ -34,7 +34,7 @@ enum {
               screen_pid_debug,
           screen_calibration,
               screen_calibration_start,
-              screen_calibration_adjust,
+              screen_calibration_settings,
               screen_calibration_input,
           screen_debug,
               screen_debug2,

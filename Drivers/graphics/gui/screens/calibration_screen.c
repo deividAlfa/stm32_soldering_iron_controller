@@ -33,7 +33,7 @@ static tipData * Currtip;
 
 screen_t Screen_calibration;
 screen_t Screen_calibration_start;
-screen_t Screen_calibration_adjust;
+screen_t Screen_calibration_settings;
 
 static widget_t *Widget_Cal_Back;
 static widget_t *Widget_Cal_Measured;
@@ -177,7 +177,7 @@ static int Cal450_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
   return ret;
 }
 //=========================================================
-static int cal_adjust_SaveAction(widget_t* w) {
+static int Cal_Settings_SaveAction(widget_t* w) {
   if( systemSettings.Profile.Cal250_default != adcAtTemp[cal_250] ||
       systemSettings.Profile.Cal350_default != adcAtTemp[cal_350] ||
       systemSettings.Profile.Cal450_default != adcAtTemp[cal_450] ){
@@ -191,7 +191,7 @@ static int cal_adjust_SaveAction(widget_t* w) {
   return screen_calibration;
 }
 //=========================================================
-static int cal_adjust_CancelAction(widget_t* w) {
+static int Cal_Settings_CancelAction(widget_t* w) {
   return screen_calibration;
 }
 //=========================================================
@@ -275,7 +275,7 @@ static void Cal_create(screen_t *scr) {
   widget_t* w;
   newWidget(&w,widget_combo,scr);
   newComboScreen(w, "START", screen_calibration_start, NULL);
-  newComboScreen(w, "ADJUST", screen_calibration_adjust, NULL);
+  newComboScreen(w, "SETTINGS", screen_calibration_settings, NULL);
   newComboScreen(w, "BACK", screen_settings, NULL);
   w->posY=10;
 }
@@ -346,12 +346,10 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
         widgetEnable(Widget_Cal_Back);
         ((button_widget_t*)Widget_Cal_Back->content)->selectable.previous_state=widget_selected;
         ((button_widget_t*)Widget_Cal_Back->content)->selectable.state=widget_selected;
+        Screen_calibration_start.current_widget=Widget_Cal_Back;
 
         widgetDisable(Widget_Cal_Measured);
-        ((editable_widget_t*)Widget_Cal_Measured->content)->selectable.previous_state=widget_idle;
-        ((editable_widget_t*)Widget_Cal_Measured->content)->selectable.state=widget_idle;
 
-        Screen_calibration_start.current_widget=Widget_Cal_Back;
       }
     }
   }
@@ -457,7 +455,7 @@ static void Cal_Start_create(screen_t *scr) {
 }
 
 
-static void Cal_Adjust_init(screen_t *scr) {
+static void Cal_Settings_init(screen_t *scr) {
   default_init(scr);
   adcAtTemp[cal_250] = systemSettings.Profile.Cal250_default;
   adcAtTemp[cal_350] = systemSettings.Profile.Cal350_default;
@@ -465,28 +463,26 @@ static void Cal_Adjust_init(screen_t *scr) {
   setDebugTemp(0);
   setDebugMode(debug_On);
   setCurrentMode(mode_run);
-  comboResetIndex(Screen_calibration_adjust.widgets);
+  comboResetIndex(Screen_calibration_settings.widgets);
 }
 
-static void Cal_Adjust_OnExit(screen_t *scr) {
+static void Cal_Settings_OnExit(screen_t *scr) {
   setDebugMode(debug_Off);
   setCurrentMode(mode_run);
 }
 
-static int Cal_Adjust_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
+static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
   if(GetIronError()){
     return screen_calibration;
   }
   return default_screenProcessInput(scr, input, s);
 }
-static void Cal_Adjust_create(screen_t *scr){
+static void Cal_Settings_create(screen_t *scr){
   widget_t* w;
   editable_widget_t* edit;
 
   // Combo Start
   newWidget(&w,widget_combo,scr);
-
-  newComboScreen(w, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name, -1,  NULL);
 
   newComboEditable(w, "Cal 250", &edit, &Cal_Combo_Adjust_C250);
   edit->inputData.reservedChars=4;
@@ -518,8 +514,8 @@ static void Cal_Adjust_create(screen_t *scr){
   edit->min_value = 0;
   edit->selectable.processInput=&Cal450_processInput;
 
-  newComboAction(w, "SAVE", &cal_adjust_SaveAction, NULL);
-  newComboAction(w, "CANCEL", &cal_adjust_CancelAction, NULL);
+  newComboAction(w, "SAVE", &Cal_Settings_SaveAction, NULL);
+  newComboAction(w, "CANCEL", &Cal_Settings_CancelAction, NULL);
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -542,12 +538,12 @@ void calibration_screen_setup(screen_t *scr) {
   sc->init = &Cal_Start_init;
   sc->create = &Cal_Start_create;
 
-  sc = &Screen_calibration_adjust;
-  oled_addScreen(sc, screen_calibration_adjust);
-  sc->init = &Cal_Adjust_init;
-  sc->processInput = &Cal_Adjust_ProcessInput;
-  sc->onExit = &Cal_Adjust_OnExit;
-  sc->create = &Cal_Adjust_create;
+  sc = &Screen_calibration_settings;
+  oled_addScreen(sc, screen_calibration_settings);
+  sc->init = &Cal_Settings_init;
+  sc->processInput = &Cal_Settings_ProcessInput;
+  sc->onExit = &Cal_Settings_OnExit;
+  sc->create = &Cal_Settings_create;
 
   addSetTemperatureReachedCallback(tempReachedCallback);
 }
