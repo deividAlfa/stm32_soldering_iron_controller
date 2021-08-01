@@ -101,14 +101,14 @@ Once you set the firmware, go to calibration and set there the real temperature 
 ### Calibration issues<br>
 Ensure to read [Calibration menu](Readme_files/Operation.md#calibration) first!.<br>
 To calibrate, go into Calibration / Start.<br>
-If the difference between measured and real is more than 50ºC, the calibration will be aborted, telling you to go into Calibration / Adjust.<br>
-The calibration adjustment menu has two fields: Calibration step (250, 350, 450ºC), and the internal value associated to each step.<br>
-Once you enter this menu, the value will be applied in real time, so be careful!<br>
-Attach a temperature probe to the tip before adjusting anything!<br>
-If you got higher temperatures, it's recommended to lower the value quicky to prevent tip overheating. <br>
-Then, slowly rise the values until it gets close to the calibration target.  Repeat for each step and save.<br>
-This values are only used by the calibration process, to prevent burning the tip if your board reads too lower than real.<br>
-After adjusting, repeat calibration, this time it should work right away.<br>
+Attach the temperature probe before proceeding!<br>
+If the difference between measured and real is higher than 50ºC, the calibration will be aborted, telling you to go into Calibration / Settings and manually adjust the values.<br>
+The calibration settings menu has 3 calibration steps: 250, 350 and 450ºC.<br>
+When you edit the value, the it will be applied in real time, so be careful!<br>
+The iron will be turned off if no setting is being edited.<br>
+Adjust each value until is close to the target temperature.Repeat for each step and save.<br>
+This values are only used by the calibration process, to prevent burning the tip if your board reads too low.<br>
+After adjusting, repeat calibration, this time it should work correctly.<br>
 The calibration results for the current tip can be seen in the tip settings menu.<br>
 In the case you lose, wipe or reset the data, you can go back into that menu and adjust the values based on previous calibration results.<br>
 Otherwise, they aren't meant to be another calibration menu! Only for viewing (Ex. reporting calibration results) and making backup/restore of the values.<br>
@@ -147,7 +147,8 @@ Ensure these are present:<br>
       /Core/Src
       /Drivers/generalIO
       /Drivers/graphics
-      /Drivers/graphics/gui    
+      /Drivers/graphics/gui
+      /Drivers/graphics/gui/screens    
       /Drivers/graphics/u8g2
       /Drivers/STM32Fxxx_HAL_Driver/Inc
       /Drivers/STM32Fxxx_HAL_Driver/Inc/Legacy
