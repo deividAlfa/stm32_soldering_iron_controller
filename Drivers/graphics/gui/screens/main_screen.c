@@ -18,22 +18,15 @@ typedef struct{
 
 plotData_t *plotData;
 static uint8_t plot_Index;
-static uint32_t plotTime;
+static uint32_t plotTimer;
 static bool plotUpdate;
 
 static uint32_t barTime;
 
-static uint8_t sleepWidth;
-static uint8_t sleepHeight;
-static uint32_t sleepTim=0;
-static uint8_t Slp_xpos=30, Slp_ypos=14;
-static int8_t Slp_xadd=1, Slp_yadd=1;
-
-
 static int32_t temp;
 static char *tipName[TipSize];
 enum mode{  main_irontemp=0, main_disabled, main_ironstatus, main_setpoint, main_tipselect, main_setMode};
-enum{ status_running=0x20, status_standby, status_sleep, status_error };
+enum{ status_ok=0x20, status_error };
 enum { temp_numeric, temp_graph };
 const uint8_t shakeXBM[] ={
   9, 9,
@@ -76,32 +69,30 @@ static widget_t *Widget_TipSelect;
 static widget_t *Widget_SetPoint;
 
 static struct{
-  uint32_t updateTick;
-  bool update;
-
-  int16_t lastTip;
+  uint8_t update;
   uint8_t lastPwr;
-
-  #ifdef USE_NTC
-  int16_t lastAmb;
-  #endif
-
-  #ifdef USE_VIN
-  uint16_t lastVin;
-  #endif
-  uint32_t drawTick;
-  uint32_t idleTick;
-  uint32_t inputBlockTime;
-  bool idle;
-  bool ActivityOn;
-
+  uint8_t idle;
+  uint8_t ActivityOn;
+  int8_t dimDisplay;
   uint8_t ironStatus;
   uint8_t prevIronStatus;
   uint8_t setMode;
   uint8_t currentMode;
-  bool displayMode;
+  uint8_t displayMode;
   uint8_t menuPos;
+  int16_t lastTip;
+  #ifdef USE_NTC
+  int16_t lastAmb;
+  #endif
+  #ifdef USE_VIN
+  uint16_t lastVin;
+  #endif
   widget_t* Selected;
+  uint32_t dimTimer;
+  uint32_t drawTick;
+  uint32_t idleTick;
+  uint32_t inputBlockTime;
+  uint32_t updateTick;
 }mainScr;
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -190,15 +181,7 @@ static void setMainWidget(widget_t* w){
     sel->previous_state=widget_selected;
   }
 }
-/*
-void clearActivityIcon(){
-  if(mainScr.ActivityOn){
-    u8g2_SetDrawColor(&u8g2, BLACK);
-    u8g2_DrawBox(&u8g2, (OledWidth-shakeXBM[1])/2, 0, shakeXBM[0], shakeXBM[1]);
-    mainScr.ActivityOn=0;
-  }
-}
-*/
+
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -224,16 +207,26 @@ static void setMainScrTempUnit(void) {
 void blockInput(uint32_t time){
   mainScr.inputBlockTime = HAL_GetTick()+time;
 }
+
+void restore_contrast(void){
+  if(getContrast() != systemSettings.settings.contrast){
+    setContrast(systemSettings.settings.contrast);
+  }
+}
+
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
-  updateIronPower();
+  int16_t contrast = getContrast();
   uint32_t currentTime = HAL_GetTick();
   uint8_t error = Iron.Error.Flags;
+  uint8_t current_mode = getCurrentMode();
+  uint16_t plot_time = (systemSettings.Profile.readPeriod+1)/200;                                                         // Update at the same rate as the system pwm
 
-  uint16_t plot_t = (systemSettings.Profile.readPeriod+1)/200;                                                         // Update at the same rate as the system pwm
-  if(plot_t<20){ plot_t = 20; }
-  if(mainScr.currentMode!=main_disabled && (HAL_GetTick()-plotTime)>plot_t){                                          // Only store values if running
+  updateIronPower();
+
+  if(plot_time<20){ plot_time = 20; }
+  if(mainScr.currentMode!=main_disabled && (currentTime-plotTimer)>plot_time){                                          // Only store values if running
     plotUpdate=1;
-    plotTime=HAL_GetTick();
+    plotTimer=currentTime;
     int16_t t = readTipTemperatureCompensated(stored_reading,read_Avg);
     if(systemSettings.settings.tempUnit==mode_Farenheit){
       t = TempConversion(t, mode_Celsius, 0);
@@ -255,150 +248,141 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     mainScr.updateTick=currentTime;
   }
 
-  uint8_t current_mode = getCurrentMode();
   if(error & _ACTIVE){
     mainScr.ironStatus = status_error;
   }
-  else if(current_mode==mode_sleep){
-    mainScr.ironStatus = status_sleep;
-  }
   else{
-    mainScr.ironStatus = status_running;
-    if(!mainScr.ActivityOn && Iron.newActivity && mainScr.currentMode!=main_disabled){
-      mainScr.ActivityOn=1;
-    }
+    mainScr.ironStatus = status_ok;
   }
-  if(mainScr.ActivityOn && (current_mode!=mode_run || ((currentTime-Iron.lastActivityTime)>50))){
+  if(!mainScr.ActivityOn && mainScr.ironStatus == status_ok && Iron.newActivity && mainScr.currentMode!=main_disabled){
+    mainScr.ActivityOn=1;
+  }
+  else if(mainScr.ActivityOn && (mainScr.ironStatus == status_error || ((currentTime-Iron.lastActivityTime)>50))){
     Iron.newActivity=0;
     mainScr.ActivityOn=0;
   }
 
   if(input!=Rotate_Nothing){
     mainScr.idleTick=currentTime;
+    if(currentTime < mainScr.inputBlockTime){
+      input=Rotate_Nothing;
+    }
+    if(input==Click && current_mode<mode_run && mainScr.currentMode==main_irontemp){
+      IronWake(wakeButton);
+      current_mode = getCurrentMode();
+      if(current_mode==mode_run){
+        input=Rotate_Nothing;
+      }
+    }
   }
 
-  if(currentTime < mainScr.inputBlockTime){
-    input=Rotate_Nothing;
+  if(current_mode==mode_sleep){
+    if(input==Rotate_Nothing){
+      if(contrast>5 && (currentTime-mainScr.idleTick)>5000){ // TODO timer
+        mainScr.dimDisplay=-5;
+      }
+    }
   }
-/*
-  if(input==Click && (mainScr.currentMode==main_irontemp || mainScr.currentMode==main_disabled)){
-    IronWake(wakeButton);
+  else if(contrast<systemSettings.settings.contrast){
+    mainScr.dimDisplay=5;
   }
-*/
+
+  if(mainScr.dimDisplay!=0){
+    if(systemSettings.settings.screenDimming && currentTime-mainScr.dimTimer>9){
+      mainScr.dimTimer = currentTime;
+      mainScr.idleTick = currentTime;
+      contrast+=mainScr.dimDisplay;
+      if(contrast>4 && (contrast<systemSettings.settings.contrast)){
+        mainScr.dimTimer=currentTime;
+        setContrast(contrast);
+      }
+      else{
+        if(mainScr.dimDisplay>0){
+          restore_contrast();
+        }
+        mainScr.dimDisplay=0;
+      }
+    }
+  }
+
   switch(mainScr.currentMode){
     case main_irontemp:
-      if(mainScr.ironStatus!=status_running){               // When the screen goes to disabled state
-        memset(plotData->p,0,sizeof(plotData_t));                // Clear plotdata
+      if(mainScr.ironStatus!=status_ok){               // When the screen goes to disabled state
+        memset(plotData->p,0,sizeof(plotData_t));           // Clear plotdata
         plot_Index=0;                                       // Reset X
         mainScr.setMode=main_disabled;
         mainScr.currentMode=main_setMode;
         break;
       }
-      if((input==LongClick)){
-        return screen_settings;
-      }
-      else if((input==Rotate_Increment_while_click)){
-        blockInput(200);
-        mainScr.setMode=main_tipselect;
-        mainScr.currentMode=main_setMode;
-      }
-      else if((input==Rotate_Decrement_while_click)){
-        blockInput(100);
-        if(Iron.CurrentMode>mode_standby){
-          setCurrentMode(mode_standby);
-        }
-        else{
-          setCurrentMode(mode_sleep);
-        }
-      }
-      else if((input==Rotate_Increment)||(input==Rotate_Decrement)){
-        mainScr.setMode=main_setpoint;
-        mainScr.currentMode=main_setMode;
-        if(Iron.CurrentMode==mode_boost){
-          setCurrentMode(mode_run);
-        }
-        else if(current_mode!=mode_sleep){
-          IronWake(wakeButton);
-        }
-      }
-      else if(input==Click){
-        blockInput(100);
-        if((Iron.CurrentMode==mode_boost) || (Iron.CurrentMode!=mode_run && systemSettings.settings.wakeOnButton && systemSettings.settings.WakeInputMode!=wakeInputmode_stand)){
-          setCurrentMode(mode_run);
+      switch((uint8_t)input){
+        case LongClick:
+          return screen_settings;
+        case Rotate_Increment_while_click:
+          blockInput(200);
+          mainScr.setMode=main_tipselect;
+          mainScr.currentMode=main_setMode;
           break;
-        }
-        mainScr.update=1;
-        scr->refresh=screen_Erase;
-        if(mainScr.displayMode==temp_numeric){
-          mainScr.displayMode=temp_graph;
-          widgetDisable(Widget_IronTemp);
-        }
-        else if(mainScr.displayMode==temp_graph){
-          mainScr.displayMode=temp_numeric;
-          widgetEnable(Widget_IronTemp);
-        }
+        case Rotate_Decrement_while_click:
+          blockInput(100);
+          if(Iron.CurrentMode>mode_standby){
+            setCurrentMode(mode_standby);
+          }
+          else{
+            setCurrentMode(mode_sleep);
+          }
+          break;
+        case Rotate_Increment:
+        case Rotate_Decrement:
+          mainScr.setMode=main_setpoint;
+          mainScr.currentMode=main_setMode;
+          if(Iron.CurrentMode==mode_boost){
+            setCurrentMode(mode_run);
+          }
+          else if(current_mode!=mode_run){
+            IronWake(wakeButton);
+          }
+          break;
+        case Click:
+          blockInput(100);
+          if(Iron.CurrentMode==mode_boost){
+            setCurrentMode(mode_run);
+            break;
+          }
+          else{
+            IronWake(wakeButton);
+            break;
+          }
+          mainScr.update=1;
+          scr->refresh=screen_Erase;
+          if(mainScr.displayMode==temp_numeric){
+            mainScr.displayMode=temp_graph;
+            widgetDisable(Widget_IronTemp);
+          }
+          else if(mainScr.displayMode==temp_graph){
+            mainScr.displayMode=temp_numeric;
+            widgetEnable(Widget_IronTemp);
+          }
+          break;
+        default:
+          break;
       }
       break;
 
     case main_disabled:
-    {
-      enum{ dim_idle, dim_down, dim_up };
-      static uint8_t dimDisplay=dim_idle;
-      static uint32_t dimTimer=0;
-      uint8_t contrast = getContrast();
-
-      if((currentTime-mainScr.idleTick)>15000 && contrast>5){
-        dimDisplay=dim_down;
-      }
-      if((input==Rotate_Decrement) || (input==Rotate_Increment)){
-        dimDisplay=dim_up;
-      }
-      else if(input!=Rotate_Nothing){
-        dimDisplay = dim_idle;
-        setContrast(systemSettings.settings.contrast);
-      }
-
-      if(dimDisplay!=dim_idle){
-        if(systemSettings.settings.screenDimming && currentTime-dimTimer>9){
-          dimTimer = currentTime;
-          mainScr.idleTick = currentTime;
-          if(dimDisplay==dim_down){
-            if(contrast>5){
-              dimTimer=currentTime;
-              setContrast(contrast-5);
-            }
-            else{
-              dimDisplay=dim_idle;
-            }
-          }
-          else{
-            if(systemSettings.settings.contrast>(contrast+5)){
-              setContrast(contrast+5);
-            }
-            else{
-              setContrast(systemSettings.settings.contrast);
-              dimDisplay=dim_idle;
-            }
-          }
-        }
-      }
-      if(input==Click){
-        IronWake(wakeButton);
-      }
-      else if((input==LongClick)){
+      switch((uint8_t)input){
+        case LongClick:
         return screen_settings;
+        case Rotate_Increment_while_click:
+          mainScr.setMode=main_tipselect;
+          mainScr.currentMode=main_setMode;
+        default:
+          break;
       }
-      else if((input==Rotate_Increment_while_click)){
-        mainScr.setMode=main_tipselect;
-        mainScr.currentMode=main_setMode;
-      }
-      if(mainScr.ironStatus==status_running){
-        setContrast(systemSettings.settings.contrast);
+      if(mainScr.ironStatus==status_ok){
         mainScr.setMode=main_irontemp;
         mainScr.currentMode=main_setMode;
       }
       break;
-    }
     case main_tipselect:
       if(input==LongClick){
         return screen_tip_settings;
@@ -418,17 +402,22 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         case Rotate_Nothing:
           if( (mainScr.currentMode==main_setpoint && currentTime-mainScr.idleTick > 1000) || (mainScr.currentMode!=main_setpoint && currentTime-mainScr.idleTick > 5000)){
             mainScr.currentMode=main_setMode;
-            mainScr.setMode=main_irontemp;
+            if(mainScr.ironStatus!=status_error){
+              mainScr.setMode=main_irontemp;
+            }
+            else{
+              mainScr.setMode=main_disabled;
+            }
             return -1;
           }
           break;
+        case Rotate_Increment_while_click:
+          input=Rotate_Increment;
+          break;
+        case Rotate_Decrement_while_click:
+          input=Rotate_Decrement;
+          break;
         default:
-          if(input==Rotate_Increment_while_click){
-            input=Rotate_Increment;
-          }
-          if(input==Rotate_Decrement_while_click){
-            input=Rotate_Decrement;
-          }
           break;
       }
 
@@ -469,34 +458,13 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 void main_screen_draw(screen_t *scr){
   uint8_t scr_refresh;
   static uint32_t lastState = 0;
+  uint32_t currentTime = HAL_GetTick();
   uint32_t currentState = (uint32_t)Iron.Error.Flags<<24 | (uint32_t)mainScr.ironStatus<<16 | mainScr.currentMode;    // Simple method to detect changes
 
   if((lastState!=currentState) || Widget_SetPoint->refresh || Widget_IronTemp->refresh || plotUpdate){
     lastState=currentState;
     scr->refresh=screen_Erase;
   }
-
-  if(mainScr.ironStatus==status_sleep && mainScr.currentMode==main_disabled){
-    if((HAL_GetTick()-sleepTim)>50){
-      sleepTim=HAL_GetTick();
-      scr->refresh=screen_Erase;
-      Slp_xpos += Slp_xadd;
-      Slp_ypos += Slp_yadd;
-      if((Slp_xpos+sleepWidth)>OledWidth){
-        Slp_xadd = -1;
-      }
-      else if(Slp_xpos==0){
-        Slp_xadd = 1;
-      }
-      if(Slp_ypos+sleepHeight>OledHeight){
-        Slp_yadd = -1;
-      }
-      else if(Slp_ypos<16){
-        Slp_yadd = 1;
-      }
-    }
-  }
-
   scr_refresh=scr->refresh;
   default_screenDraw(scr);
 
@@ -550,19 +518,6 @@ void main_screen_draw(screen_t *scr){
           }
         }
       }
-      else if(mainScr.ironStatus==status_sleep){
-        u8g2_SetFont(&u8g2, u8g2_font_noIron_Sleep);
-        u8g2_DrawStr(&u8g2, Slp_xpos, Slp_ypos, "SLEEP");
-        u8g2_SetFont(&u8g2, u8g2_font_labels);
-        if(!Iron.Error.Flags && readTipTemperatureCompensated(0,0)>120){
-          //u8g2_DrawXBMP(&u8g2, 42,1, warningXBM[0], warningXBM[1], &warningXBM[2]);
-          u8g2_SetDrawColor(&u8g2, WHITE);
-          u8g2_DrawRBox(&u8g2, 48, 0, 30, 10, 2);
-          u8g2_SetDrawColor(&u8g2, BLACK);
-          u8g2_DrawStr(&u8g2, 51, 0, "HOT!");
-          //u8g2_DrawStr(&u8g2, 52, 0, "HOT!");
-        }
-      }
     }
     else{
       if(mainScr.currentMode==main_tipselect){
@@ -575,8 +530,9 @@ void main_screen_draw(screen_t *scr){
     }
   }
 
-  if(mainScr.ironStatus==status_running){
-    if( scr_refresh || (HAL_GetTick()-barTime)>9){                    // Update every 10mS or if screen was erased
+  if(mainScr.ironStatus==status_ok){
+    if( scr_refresh || (currentTime-barTime)>9){                    // Update every 10mS or if screen was erased
+      barTime = currentTime;
       if(scr_refresh<screen_Erase){                                   // If screen not erased
          u8g2_SetDrawColor(&u8g2,BLACK);                              // Draw a black square to wipe old widget data
         u8g2_DrawBox(&u8g2, 47 , OledHeight-8, 80, 8);
@@ -616,6 +572,9 @@ void main_screen_draw(screen_t *scr){
     }
     if(scr_refresh){
       u8g2_SetFont(&u8g2, u8g2_font_labels);
+      if(getCurrentMode()==mode_sleep){
+        u8g2_DrawStr(&u8g2, 42, 0, "SLEEP");
+      }
       if(getCurrentMode()==mode_standby){
         u8g2_DrawStr(&u8g2, 48, 0, "STBY");
       }
@@ -630,7 +589,7 @@ void main_screen_draw(screen_t *scr){
 static void main_screen_init(screen_t *scr) {
   editable_widget_t *edit;
   default_init(scr);
-
+  mainScr.dimDisplay=0;
   if(mainScr.currentMode != main_disabled){
     mainScr.currentMode = main_irontemp;
     setMainWidget(Widget_IronTemp);
@@ -652,6 +611,7 @@ static void main_screen_init(screen_t *scr) {
 
 static void main_screen_onExit(screen_t *scr) {
   free(plotData);
+  restore_contrast();
 }
 
 static void main_screen_create(screen_t *scr){
@@ -759,9 +719,5 @@ void main_screen_setup(screen_t *scr) {
   for(int x = 0; x < TipSize; x++) {
     tipName[x] = systemSettings.Profile.tip[x].name;
   }
-
-  u8g2_SetFont(&u8g2,u8g2_font_noIron_Sleep);
-  sleepWidth=u8g2_GetStrWidth(&u8g2, "SLEEP")+2;
-  sleepHeight=u8g2_GetMaxCharHeight(&u8g2)+2;
 }
 
