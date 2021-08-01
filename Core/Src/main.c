@@ -243,9 +243,11 @@ void Error_Handler(void)
   char strOut[16];
   uint8_t outPos=0;
   uint8_t inPos=0;
-  uint8_t ypos=12;
-  sprintf(strOut,"ERR!! LINE:%u",line);
+  uint8_t ypos=16;
+
+  sprintf(strOut,"Line %u",line);
   u8g2_DrawStr(&u8g2, 0, 0, strOut);
+
   while(1){                                                  // Divide string in chuncks that fit teh screen width
     strOut[outPos] = file[inPos];                            // Copy char
     strOut[outPos+1] = 0;                                    // Set out string null terminator
