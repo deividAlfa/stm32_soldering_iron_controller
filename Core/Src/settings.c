@@ -306,9 +306,9 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = T12_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = T12_Cal350;     // These values are way lower, but better to be safe than sorry
       systemSettings.Profile.tip[x].calADC_At_450   = T12_Cal450;     // User needs to calibrate its station
-      systemSettings.Profile.tip[x].PID.Kp          = 11000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 8000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 2500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kp          = 6000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 6000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 1000;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.maxI        = 50;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       systemSettings.Profile.tip[x].PID.tau         = 10;             // val = /100
@@ -390,7 +390,7 @@ void resetCurrentProfile(void){
   systemSettings.Profile.pwmMul                   = 1;
   systemSettings.Profile.readPeriod               = (200*200)-1;             // Because we have a 5uS timer clock
   systemSettings.Profile.readDelay                = (20*200)-1;
-  systemSettings.Profile.filterFactor             = 3;
+  systemSettings.Profile.filterFactor             = 2;
   systemSettings.Profile.tempUnit                 = mode_Celsius;
   systemSettings.Profile.NotInitialized           = initialized;
   __enable_irq();
