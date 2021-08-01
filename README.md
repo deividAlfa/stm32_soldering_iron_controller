@@ -35,8 +35,10 @@ If you want to support the project, check my Paypal donation page. Thanks!<br>
 * Developed on STM32Cube IDE. Basic configuration is easily done in CubeMx (Included in STM32Cube IDE).
 * Unified codebase, different hardware support based on profiles, very few files need to be changed.
 * Supports all display modes: I2C, SPI, software and hardware+DMA (When connected to hardware pins).
-* Extremely customizable, lots of options.
-* Code highly optimized to avoid unnecesary processing waste, so slow devicers still run great.    
+* Uses u8g2 graphics library. 
+* Dynamic screen loading to save RAM resources.
+* Extremely customizable, lots of options available.
+* Code highly optimized to avoid wasting cpu power, slow devices still run great.    
 
 ---
 
@@ -45,15 +47,18 @@ If you want to support the project, check my Paypal donation page. Thanks!<br>
 
 The actual requirements are 10KB RAM and 64KB flash. Don't even try if your MCU has less than that.<br>
 The BOARDS folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.<br>
-Actually all the KSGER boards are supported. Some have not been tested yet and need feedback from users.<br>
-These board profiles are being tested:
+Current working controller:<br>
 * Quicko T12 [STABLE]: Profiles compatible with any STM32F072xx and STM32F103xx.
 * JCD T12    [STABLE]: Different board layout, but it's 100% the same as the KSGER v2.1. Use that firmware.
-* KSGER v1.5 [TESTING]: Recently added. Not tested yet.
-* KSGER v2.0 [TESTING]: Seems to use the as the 2.1. Use that firmware, not tested yet.
+* KSGER v1.5 [STABLE]: Recently added. Not tested yet.
+* KSGER v2.0 [STABLE]: Seems to use the as the 2.1. Use that firmware, not tested yet.
 * KSGER v2.1 [STABLE]: Profile compatible with all STM32F101/2/3xx. Use 101C8 profile.
-* KSGER v3.0 [TESTING]: Seems to use the same as the 3.1. Use that firmware, not tested yet.
+* KSGER v3.0 [STABLE]: Seems to use the same as the 3.1. Use that firmware, not tested yet.
 * KSGER v3.1 [STABLE]: Profile compatible with all STM32F101/2/3xx. Use 101C8 profile.
+
+Keep in mind that you can't trust the version shown in the original firmware to identify your board.<br>
+Go to BOARDS/... schematics folder and compare the pictures.<br>
+There are several compatible/cloned boards in the market that will work fine with Ksger profiles.<br>
 
 ---
 
