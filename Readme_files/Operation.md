@@ -43,7 +43,8 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
 ## Main screen<br>
 
   - **Temperature display modes**<br>
-  While in run mode, a single click will switch between numeric and graph (10 second history).<br>
+  While in run mode, a single click will switch between numeric and graph.<br>
+  The graph updates at the same rate as the ADC.<br>
   - **Temperature setpoint adjustment**<br>
   Rotate the encoder, the setpoint will be shown, continue rotating to adjust it.<br>
   After 1 second of inactivity it will return to normal mode.<br>
