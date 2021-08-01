@@ -44,7 +44,9 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
 
   - **Temperature display modes**<br>
   While in run mode, a single click will switch between numeric and graph.<br>
-  The graph updates at the same rate as the ADC.<br>
+  If the current mode is sleep/standby/boost, clicking will set run mode instead (If button wake is enabled).<br>
+  Boost mode always exits on clicking, no matter the button configuration.<br>
+  The graph update rate is the same as the ADC reading frequency.<br>
   - **Temperature setpoint adjustment**<br>
   Rotate the encoder, the setpoint will be shown, continue rotating to adjust it.<br>
   After 1 second of inactivity it will return to normal mode.<br>
@@ -83,11 +85,13 @@ If there is no soldering activity for this period, the controller will reduce th
   - **Standby temp**<br>
 Temperature applied in standby mode.<br>
   - **Sleep time**<br>
-If there is no soldering activity for this period, the controller will "sleep" and stop providing power to the tip, allowing it to cool. This helps increase tip lifetime. Activity (e.g. shaking the handle for a T12) will wake it up and heating will resume.<br>
+If there is no soldering activity for this period, the controller will "sleep" and stop providing power to the tip.<br>
+This helps increase tip lifetime reduce power waste. Activity (e.g. shaking the handle for a T12) will wake it up and heating will resume.<br>
   - **Power**<br>
-The maximum power which will be delivered to the tip. This sets a maximum for the PWM duty cycle, based on the power supply voltage and the heater resistance.<br>
-  - **Heater**<br>
-The resistance of the tip's heating element. There is normally no need to change this from the default.<br>
+The maximum power which will be delivered to the tip.<br>
+The limit is done by adjusting the maximum PWM duty cycle based on the power supply voltage and the heater resistance.<br>
+  - **Heater (resistance)**<br>
+The resistance of the tip's heating element in ohms. There is normally no need to change this from the default.<br>
   - **ADC Time**<br>
 Sets the ADC reading period. The controller stops disables the PWM and runs the ADC. Default 200 ms.<br>
 It also sets the base PWM frequency. The PWM multiplier uses this base.<br>
@@ -96,12 +100,13 @@ When the temperature going to be measured, the PWM is disabled.<br>
 This delay is needed to have a clean reading of the thermocouple. If the delay is too low, it will read switching noise and be very unstable.<br>
 If you get random spikes in the temperature reading, try increasing this value. 20mS is usually more than enough.<br>
 There are other factors that could cause unstability, like poor circuit design, power supply noise or bad quality parts.<br>
-Default 20 ms.<br><pre>
+Default 20 ms.<br>
+<pre>
     |<-------------- ADC TIME --------------->|
      ___     ___     ___|<-  DELAY  ->[ READ ] ___     ___    
-**PWM**     |___|   |___|   |_____________________|   |___|   |___
+PWM     |___|   |___|   |_____________________|   |___|   |___ 
 </pre>
-- **PWM multiplier**<br>
+  - **PWM multiplier**<br>
 Sets the PWM period, using the formula ADC Time/multiplier.<br>
 Default: x1.<br>
   - **Filter**<br>
@@ -133,27 +138,29 @@ Fade the display after 10s in sleep or error modes to prevent display burning.<b
 Screen offset. This can accomodate the different screens which the controllers have come with. Use it to center the display on the screen.<br>
   - **Wake mode**<br>
 How to detect activity. SHAKE or STAND.<br>
-SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip up to wake.
-STAND can use the same handle shake wire, but must be disconnected from the handle and connected so when the tip is in the stand, this wire is shorted to GND. Shorted = sleep, open = wake.<br>
+SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip up to wake.<br>
+STAND uses the same input, but disconnected from the handle. Must be shorted to gnd when the handle is in the stand.<br>
+(Stand mode operation operation: Shorted to gnd = sleep/standby, open = run ).<br>
   - **Stand mode**<br>
-Sets the mode that will be applied when the handle is put in the stand (sleep / standby).<br>  
+Sets the mode that will be applied when the handle is put in the stand (sleep / standby).<br>
 This option is disabled in shake mode.<br>
   - **Btn. Wake**<br>
 Allow waking the controller by pressing the encoder button.<br>
 This option is disabled in stand mode.<br>
   - **Boot**<br>
 Operation mode when powered on. __RUN__ or __SLEEP__.<br>
+This option is disabled in stand mode.<br>
   - **Shake Wake**<br>
 Allow waking the controller by the shake sensor.<br>
 This option is disabled in stand mode.<br>
   - **Encoder**<br>
 Invert the encoder direction.<br>
-- **Buzzer**<br>
+  - **Buzzer**<br>
 	Buzz/beep when notable conditions occur.<br>
-   	- Changing operating mode (sleep, run)<br>
+   	- Changing operating mode (sleep, standby, run, boost)<br>
    	- Temperature reached after the setpoint was changed<br>
    	- Alarm when no iron is detected or system error happens<br>
-  - **Active det.**<br>
+  - **Active detection**<br>
 Use iron active detection by leaving the PWM slightly on all the time. If your amp has a pullup resistor it can be disabled.<br>
   - **Unit**<br>
 Temperature scale. Celsius or Fahrenheit<br>
@@ -162,12 +169,12 @@ Temperature step when adjusting tip temperature.<br>
   - **LVP**<br>
 Adjust Low voltage protection.<br>
   - **GUI Time**<br>
-To offer maximum responsiveness, the screen is updated between fastest as possible when the cpu is free.<br>
+To offer maximum responsiveness, the screen is updated as fastest as possible when the cpu is idling.<br>
 It depends on the MCU used and display interface, it can reach more than 100 fps in DMA SPI mode.<br>
-If the display reading were updated at the same speed, it would be impossible to read anything.<br>
+If the display readings were updated at the same speed, it would be impossible to read anything.<br>
 This setting defines the time in mS where the main screen readings are updated (voltage, temperatures).<br>
-The real update rate will be limited by the PWM frequency (ADC is read at every PWM cycle end).<br> 
-Use a higher setting for less "flicker" in the display (more steady values).<br>
+The effective update rate will be limited by the ADC read frequency.<br> 
+Use a higher setting for less "flickery" display (more steady values).<br>
   - **RESET MENU**<br>
 Reset various configuration sections:<br>
     - **Settings**<br>
@@ -179,9 +186,9 @@ Reset all profiles to default.<br>
     - **All**<br>
 Reset everything.<br>
   - **SW:**<br>
-Displays the current software version. The version number is from a hash - higher is not necessarily newer.<br>
+Displays the current software version. Actually, it's the build date.<br>
   - **HW:**<br>
-Displays the hardware type.<br>
+Displays the controller model.<br>
   - **Back**<br>
 Return to system menu.<br>
 
@@ -237,10 +244,11 @@ Wait for tip temperature to settle (When the thermomether reading stops moving),
 Then enter temperature as measured by the thermometer for each step.<br>
 If the entered temperature is higher than 50ºC than the target calibration value, the process will be aborted and you will have to adjust it manually.<br>
   - **SETTINGS**<br>
-Here you can manually adjust the default calibration values. These values are applied in real time!<br>
+Here you can manually adjust the default calibration values.<br>
 For every step (250,350,450ºC), adjust the value until the tip temperature it's close to the target temperature.<br>
-This is a coarse adjustment, made to avoid burning the tip in the calibration process if your controllers reads too low values.<br> 
-This values have nothing to do with the Tip Settings calibration values (Those are temperature-compensated).<br>
+The power is removed in this menu. When editing a value, the power is resumed and the value applied in real time.<br>
+This is an adjustment made to avoid burning the tip in the calibration process if your controller reading are too low from real.<br> 
+This values have nothing to do with the Tip Settings calibration values! (Those are temperature-compensated).<br>
 Click on save to apply and store the changes, or cancel to discard.<br> 
   - **BACK**<br>
 Return to system menu.<br>
