@@ -68,7 +68,7 @@ static int pid_debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_
     }
     plotUpdate=1;
   }
-  if(input==LongClick){
+  if(input==LongClick || input==Click){
     return screen_settings;
   }
   return -1;
@@ -96,38 +96,11 @@ static void pid_debug_draw(screen_t * scr){
     else{
       prev=pos-1;
     }
-
     u8g2_SetDrawColor(&u8g2, WHITE);
     u8g2_DrawLine(&u8g2, x+(OledWidth-PID_SZ), 21-PIDplotData->p[prev], x+(OledWidth-PID_SZ+1), 21-PIDplotData->p[pos]);
     u8g2_DrawLine(&u8g2, x+(OledWidth-PID_SZ), 42-PIDplotData->i[prev], x+(OledWidth-PID_SZ+1), 42-PIDplotData->i[pos]);
     u8g2_DrawLine(&u8g2, x+(OledWidth-PID_SZ), 63-PIDplotData->d[prev], x+(OledWidth-PID_SZ+1), 63-PIDplotData->d[pos]);
-
-    //u8g2_DrawLine(&u8g2, x-1, 63-plotData->o[prev], x, 63-plotData->o[pos]);
-    /*
-    u8g2_DrawPixel(&u8g2, 13+x, 56-plotData->p[pos]);
-    u8g2_DrawPixel(&u8g2, 13+x, 56-plotData->i[pos]);
-    u8g2_DrawPixel(&u8g2, 13+x, 56-plotData->d[pos]);
-    u8g2_DrawPixel(&u8g2, 13+x, 56-plotData->o[pos]);
-    */
   }
-  /*
-  u8g2_SetFont(&u8g2, default_font);
-  uint8_t h=u8g2_GetMaxCharHeight(&u8g2);
-  u8g2_DrawStr(&u8g2, 0, 21-h, "P");
-  u8g2_DrawStr(&u8g2, 0, 42-h, "I");
-  u8g2_DrawStr(&u8g2, 0, 63-h, "D");
-  u8g2_SetFont(&u8g2, u8g2_font_labels);
-  h=u8g2_GetMaxCharHeight(&u8g2);
-  char str[16];
-  sprintf(str,"%-6.3f",getPID_P());
-  u8g2_DrawStr(&u8g2, 9, 21-h, str);
-
-  sprintf(str,"%-6.3f",getPID_I());
-  u8g2_DrawStr(&u8g2, 9, 42-h, str);
-
-  sprintf(str,"-%-6.3f",getPID_D());
-  u8g2_DrawStr(&u8g2, 9, 63-h, str);
-  */
 }
 
 
