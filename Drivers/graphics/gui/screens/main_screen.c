@@ -267,13 +267,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     if(currentTime < mainScr.inputBlockTime){
       input=Rotate_Nothing;
     }
-    if(input==Click && current_mode<mode_run && mainScr.currentMode==main_irontemp){
-      IronWake(wakeButton);
-      current_mode = getCurrentMode();
-      if(current_mode==mode_run){
-        input=Rotate_Nothing;
-      }
-    }
   }
   if((current_mode==mode_sleep)&&(input==Rotate_Nothing)){
     if(contrast>5 && (currentTime-mainScr.idleTick)>10000){
@@ -345,9 +338,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             setCurrentMode(mode_run);
             break;
           }
-          else{
+          if(Iron.CurrentMode!=mode_run){
             IronWake(wakeButton);
-            break;
+            if(getCurrentMode()==mode_run){
+              break;
+            }
           }
           mainScr.update=1;
           scr->refresh=screen_Erase;
