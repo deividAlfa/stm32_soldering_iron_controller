@@ -278,7 +278,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
   if(current_mode==mode_sleep){
     if(input==Rotate_Nothing){
-      if(contrast>5 && (currentTime-mainScr.idleTick)>5000){ // TODO timer
+      if(contrast>5 && (currentTime-mainScr.idleTick)>10000){
         mainScr.dimDisplay=-5;
       }
     }
