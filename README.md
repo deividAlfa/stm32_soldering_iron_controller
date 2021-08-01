@@ -49,10 +49,10 @@ The actual requirements are 10KB RAM and 64KB flash. Don't even try if your MCU 
 The BOARDS folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.<br>
 Current working controller:<br>
 * Quicko T12 [STABLE]: Profiles for STM32F072 and STM32F103.
-* JCD T12    [STABLE]: Different board layout, but it's 100% the same as the KSGER v2.1. Use that firmware.
+* JCD T12    [STABLE]: Different board layout, but it's 100% the same as the KSGER v2. Use that firmware.
 * KSGER v1.5 [STABLE]: Profile for STM32F103 (There are no other known CPUs used in this board).
 * KSGER v2.x [STABLE]: Profile compatible with all STM32F101/2/3xx. Use 101C8 profile.
-* KSGER v3.1 [STABLE]: Profile compatible with all STM32F101/2/3xx. Use 101C8 profile.
+* KSGER v3.x [STABLE]: Profile compatible with all STM32F101/2/3xx. Use 101C8 profile.
 
 Keep in mind that you can't trust the version shown in the original firmware to identify your board.<br>
 Go to BOARDS/... schematics folder and compare the pictures.<br>
