@@ -115,20 +115,26 @@ void handleIron(void) {
 
   // Controls inactivity timer and enters low power modes
   uint32_t mode_time = CurrentTime - Iron.CurrentModeTimer;
+  uint32_t boost_time = (uint32_t)systemSettings.Profile.boostTimeout*1000;
   uint32_t sleep_time = (uint32_t)systemSettings.Profile.sleepTimeout*60000;
   uint32_t standby_time = (uint32_t)systemSettings.Profile.standbyTimeout*60000;
 
-  if(Iron.calibrating==calibration_Off){                                                      // Don't enter low power states while calibrating
-    if(Iron.CurrentMode==mode_run) {                                                          // If running
-      if(systemSettings.Profile.standbyTimeout>0 && mode_time>standby_time) {                 // If standbyTimeout not zero, check time
-        setCurrentMode(mode_standby);
-      }
-      else if(systemSettings.Profile.standbyTimeout==0 && mode_time>sleep_time) {             // If standbyTimeout zero, check sleep time
-        setCurrentMode(mode_sleep);
-      }
+  if(Iron.calibrating==calibration_Off){                                                      // Don't enter low power states while calibrating. Calibration always forces run mode
+    if((Iron.CurrentMode==mode_boost) && (mode_time>boost_time)){                             // If boost mode and time expired
+      setCurrentMode(mode_run);
+    }
+    else if(Iron.CurrentMode==mode_run){                                                      // If running
+      if(mode_time>standby_time){
+        if(systemSettings.Profile.standbyTimeout){                                            // If standbyTimeout not zero, enter standby
+          setCurrentMode(mode_standby);
+        }
+        else if(systemSettings.Profile.sleepTimeout){                                         // Else if sleepTimeout not zero, enter sleep
+          setCurrentMode(mode_sleep);
+        }
+      }                                                                                       // Else, run forever!
     }
     else if(Iron.CurrentMode==mode_standby){                                                  // If in standby
-      if(systemSettings.Profile.standbyTimeout>0 && mode_time>sleep_time) {                   // Check sleep time
+      if(systemSettings.Profile.sleepTimeout && mode_time>sleep_time) {                       // Check sleep time
         setCurrentMode(mode_sleep);                                                           // Only enter sleep if not zero
       }
     }
@@ -414,7 +420,8 @@ void setNoIronValue(uint16_t noiron){
 void setModefromStand(uint8_t mode){
   if( GetIronError() ||
       ((Iron.changeMode==mode) && (Iron.CurrentMode==mode)) ||
-      ((Iron.CurrentMode==mode_sleep) && (mode==mode_standby))){                            // Ignore if error present, same mode, or setting standby when already in sleep mode
+      ((Iron.CurrentMode==mode_sleep) && (mode==mode_standby)) ||
+      ((Iron.CurrentMode==mode_boost) && (mode==mode_run)) ){
     return;
   }
   if(Iron.changeMode!=mode){
@@ -429,6 +436,12 @@ void setCurrentMode(uint8_t mode){
   Iron.CurrentModeTimer = HAL_GetTick();                                                    // Refresh current mode timer
   if(mode==mode_standby){
     Iron.CurrentSetTemperature = systemSettings.Profile.standbyTemperature;                 // Set standby temp
+  }
+  if(mode==mode_boost){
+    Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature+systemSettings.Profile.boostTemperature;
+    if(Iron.CurrentSetTemperature>systemSettings.Profile.MaxSetTemperature){
+      Iron.CurrentSetTemperature=systemSettings.Profile.MaxSetTemperature;
+    }
   }
   else{
     Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature;                 // Set user temp (sleep mode ignores this)
@@ -447,7 +460,7 @@ void setCurrentMode(uint8_t mode){
 // Called from program timer if WAKE change is detected
 void IronWake(bool source){                                                                 // source: handle shake, encoder push button
   if(Iron.Error.Flags){ return; }                                                             // Ignore if error present
-  if(Iron.CurrentMode!=mode_run){
+  if(Iron.CurrentMode<mode_run){
     if( (source==wakeButton && (!systemSettings.settings.wakeOnButton || (systemSettings.settings.WakeInputMode==wakeInputmode_stand) )) ||
         (source==wakeInput && !systemSettings.settings.wakeOnShake)){
       return;
@@ -457,7 +470,9 @@ void IronWake(bool source){                                                     
     Iron.newActivity = 1;
     Iron.lastActivityTime = HAL_GetTick();
   }
-  setCurrentMode(mode_run);
+  if(Iron.CurrentMode<mode_boost){
+    setCurrentMode(mode_run);
+  }
 }
 
 void readWake(void){

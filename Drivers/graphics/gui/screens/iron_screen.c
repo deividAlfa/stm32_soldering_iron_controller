@@ -12,6 +12,7 @@
 screen_t Screen_iron;
 
 static editable_widget_t *editable_IRON_StandbyTemp;
+static editable_widget_t *editable_IRON_BoostTemp;
 static editable_widget_t *editable_IRON_MaxTemp;
 static editable_widget_t *editable_IRON_MinTemp;
 
@@ -136,6 +137,22 @@ static void setNoIronADC(uint32_t *val) {
   systemSettings.Profile.noIronValue = *val;
 }
 //=========================================================
+static void setBoostTime(uint32_t *val) {
+  systemSettings.Profile.boostTimeout= *val;
+}
+static void * getBoostTime() {
+  temp = systemSettings.Profile.boostTimeout;
+  return &temp;
+}
+//=========================================================
+static void setBoostTemp(uint32_t *val) {
+  systemSettings.Profile.boostTemperature= *val;
+}
+static void * getBoostTemp() {
+  temp = systemSettings.Profile.boostTemperature;
+  return &temp;
+}
+//=========================================================
 
 static void iron_init(screen_t *scr){
   default_init(scr);
@@ -143,11 +160,13 @@ static void iron_init(screen_t *scr){
     editable_IRON_MaxTemp->inputData.endString="\260F";
     editable_IRON_MinTemp->inputData.endString="\260F";
     editable_IRON_StandbyTemp->inputData.endString="\260F";
+    editable_IRON_BoostTemp->inputData.endString="\260F";
   }
   else{
     editable_IRON_MaxTemp->inputData.endString="\260C";
     editable_IRON_MinTemp->inputData.endString="\260C";
     editable_IRON_StandbyTemp->inputData.endString="\260C";
+    editable_IRON_BoostTemp->inputData.endString="\260C";
   }
   comboResetIndex(Screen_iron.widgets);
 }
@@ -165,7 +184,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Max Temp Widget ]
   //
-  newComboEditable(w, "Max temp", &edit, NULL);
+  newComboEditable(w, "Max", &edit, NULL);
   editable_IRON_MaxTemp=edit;
   dis=&edit->inputData;
   dis->reservedChars=5;
@@ -178,7 +197,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Min Temp Widget ]
   //
-  newComboEditable(w, "Min temp", &edit, NULL);
+  newComboEditable(w, "Min", &edit, NULL);
   editable_IRON_MinTemp=edit;
   dis=&edit->inputData;
   dis->reservedChars=5;
@@ -189,23 +208,35 @@ static void iron_create(screen_t *scr){
   edit->min_value = 50;
   edit->setData = (void (*)(void *))&setMinTemp;
 
-  //  [ Stby Temp Widget ]
+  //  [ Boost Time Widget ]
   //
-  newComboEditable(w, "Sby temp", &edit, NULL);
-  editable_IRON_StandbyTemp = edit;
+  newComboEditable(w, "Boost time", &edit, NULL);
   dis=&edit->inputData;
-  dis->endString="C";
+  dis->endString="s";
   dis->reservedChars=5;
-  dis->getData = &getStandbyTemp;
-  edit->big_step = 10;
+  dis->getData = &getBoostTime;
+  edit->big_step = 20;
   edit->step = 5;
-  edit->max_value = 350;
-  edit->min_value = 50;
-  edit->setData = (void (*)(void *))&setStandbyTemp;
+  edit->max_value = 120;
+  edit->min_value = 10;
+  edit->setData = (void (*)(void *))&setBoostTime;
+
+  //  [ Boost Temp Widget ]
+  //
+  newComboEditable(w, "Boost temp", &edit, NULL);
+  editable_IRON_BoostTemp = edit;
+  dis=&edit->inputData;
+  dis->reservedChars=5;
+  dis->getData = &getBoostTemp;
+  edit->big_step = 50;
+  edit->step = 10;
+  edit->max_value = 200;
+  edit->min_value = 10;
+  edit->setData = (void (*)(void *))&setBoostTemp;
 
   //  [ Stby Time Widget ]
   //
-  newComboEditable(w, "Sby time", &edit, NULL);
+  newComboEditable(w, "Stby time", &edit, NULL);
   dis=&edit->inputData;
   dis->endString="min";
   dis->reservedChars=5;
@@ -214,6 +245,19 @@ static void iron_create(screen_t *scr){
   edit->step = 1;
   edit->setData = (void (*)(void *))&setStandbyTime;
   edit->max_value = 60;
+
+  //  [ Stby Temp Widget ]
+  //
+  newComboEditable(w, "Stby temp", &edit, NULL);
+  editable_IRON_StandbyTemp = edit;
+  dis=&edit->inputData;
+  dis->reservedChars=5;
+  dis->getData = &getStandbyTemp;
+  edit->big_step = 10;
+  edit->step = 5;
+  edit->max_value = 350;
+  edit->min_value = 50;
+  edit->setData = (void (*)(void *))&setStandbyTemp;
 
   //  [ Sleep Time Widget ]
   //
@@ -232,7 +276,7 @@ static void iron_create(screen_t *scr){
   #ifdef USE_VIN
   //  [ Power Widget ]
   //
-  newComboEditable(w, "Pwr limit", &edit, NULL);
+  newComboEditable(w, "Power", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->endString="W";

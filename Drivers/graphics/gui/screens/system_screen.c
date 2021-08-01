@@ -270,7 +270,7 @@ static void SYSTEM_create(screen_t *scr){
 
   //  [ Encoder wake Widget ]
   //
-  newComboMultiOption(w, "Btn. wake", &edit,&comboitem_SYSTEM_ButtonWake);
+  newComboMultiOption(w, "Btn wake", &edit,&comboitem_SYSTEM_ButtonWake);
   dis=&edit->inputData;
   dis->getData = &getButtonWake;
   edit->big_step = 1;

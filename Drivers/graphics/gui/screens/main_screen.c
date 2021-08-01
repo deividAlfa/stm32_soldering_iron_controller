@@ -91,7 +91,7 @@ static struct{
   #endif
   uint32_t drawTick;
   uint32_t idleTick;
-  uint32_t enteredSleep;
+  uint32_t inputBlockTime;
   bool idle;
   bool ActivityOn;
 
@@ -220,7 +220,10 @@ static void setMainScrTempUnit(void) {
   }
 }
 
-
+// Ignore future input for specified amount of time
+void blockInput(uint32_t time){
+  mainScr.inputBlockTime = HAL_GetTick()+time;
+}
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   updateIronPower();
   uint32_t currentTime = HAL_GetTick();
@@ -274,11 +277,14 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     mainScr.idleTick=currentTime;
   }
 
-  // Check for click input and wake iron. Disable button wake for 500mS after manually entering sleep mode
-  if(input==Click && (mainScr.currentMode==main_irontemp || mainScr.currentMode==main_disabled) && (currentTime - mainScr.enteredSleep) >500 ){
+  if(currentTime < mainScr.inputBlockTime){
+    input=Rotate_Nothing;
+  }
+/*
+  if(input==Click && (mainScr.currentMode==main_irontemp || mainScr.currentMode==main_disabled)){
     IronWake(wakeButton);
   }
-
+*/
   switch(mainScr.currentMode){
     case main_irontemp:
       if(mainScr.ironStatus!=status_running){               // When the screen goes to disabled state
@@ -292,19 +298,21 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         return screen_settings;
       }
       else if((input==Rotate_Increment_while_click)){
+        blockInput(200);
         mainScr.setMode=main_tipselect;
         mainScr.currentMode=main_setMode;
       }
       else if((input==Rotate_Decrement_while_click)){
-        mainScr.enteredSleep = currentTime;
-        if(Iron.CurrentMode==mode_run){
+        blockInput(100);
+        if(Iron.CurrentMode>mode_standby){
           setCurrentMode(mode_standby);
         }
-        else if(Iron.CurrentMode==mode_standby){
+        else{
           setCurrentMode(mode_sleep);
         }
       }
       else if((input==Rotate_Increment)||(input==Rotate_Decrement)){
+        blockInput(200);
         mainScr.setMode=main_setpoint;
         mainScr.currentMode=main_setMode;
         if(current_mode!=mode_sleep){
@@ -312,6 +320,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         }
       }
       else if(input==Click){
+        blockInput(100);
+        if(Iron.CurrentMode<=mode_run){
+          setCurrentMode(mode_run);
+          break;
+        }
         mainScr.update=1;
         scr->refresh=screen_Erase;
         if(mainScr.displayMode==temp_numeric){
@@ -367,8 +380,10 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           }
         }
       }
-
-      if((input==LongClick)){
+      if(input==Click){
+        IronWake(wakeButton);
+      }
+      else if((input==LongClick)){
         return screen_settings;
       }
       else if((input==Rotate_Increment_while_click)){
@@ -390,9 +405,16 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       switch((uint8_t)input){
         case LongClick:
           return -1;
+        case Click:
+          blockInput(200);
+          if(mainScr.currentMode==main_setpoint){
+            setCurrentMode(mode_boost);
+          }
+          mainScr.currentMode=main_setMode;
+          mainScr.setMode=main_irontemp;
+          break;
         case Rotate_Nothing:
           if( (mainScr.currentMode==main_setpoint && currentTime-mainScr.idleTick > 1000) || (mainScr.currentMode!=main_setpoint && currentTime-mainScr.idleTick > 5000)){
-        case Click:
             mainScr.currentMode=main_setMode;
             mainScr.setMode=main_irontemp;
             return -1;
@@ -552,10 +574,6 @@ void main_screen_draw(screen_t *scr){
   }
 
   if(mainScr.ironStatus==status_running){
-    if(scr_refresh && getCurrentMode()==mode_standby){
-      u8g2_SetFont(&u8g2, u8g2_font_labels);
-      u8g2_DrawStr(&u8g2, 48, 0, "STBY");
-    }
     if( scr_refresh || (HAL_GetTick()-barTime)>9){                    // Update every 10mS or if screen was erased
       if(scr_refresh<screen_Erase){                                   // If screen not erased
          u8g2_SetDrawColor(&u8g2,BLACK);                              // Draw a black square to wipe old widget data
@@ -596,6 +614,12 @@ void main_screen_draw(screen_t *scr){
     }
     if(scr_refresh){
       u8g2_SetFont(&u8g2, u8g2_font_labels);
+      if(getCurrentMode()==mode_standby){
+        u8g2_DrawStr(&u8g2, 48, 0, "STBY");
+      }
+      else if(getCurrentMode()==mode_boost){
+        u8g2_DrawStr(&u8g2, 42, 0, "BOOST");
+      }
       u8g2_DrawStr(&u8g2, 0, 55, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name);
     }
   }

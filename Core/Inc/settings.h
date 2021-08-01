@@ -85,6 +85,7 @@ enum{
   mode_sleep              = 0,
   mode_standby            = 1,
   mode_run                = 2,
+  mode_boost              = 3,
 
   initialized             = 0,
 
@@ -135,6 +136,8 @@ typedef struct{
   uint16_t      UserSetTemperature;
   uint16_t      MaxSetTemperature;
   uint16_t      MinSetTemperature;
+  uint16_t      boostTimeout;
+  uint16_t      boostTemperature;
   uint16_t      readPeriod;
   uint16_t      readDelay;
   uint16_t      noIronValue;

@@ -385,6 +385,8 @@ void resetCurrentProfile(void){
   systemSettings.Profile.UserSetTemperature       = 180;
   systemSettings.Profile.MaxSetTemperature        = 450;
   systemSettings.Profile.MinSetTemperature        = 180;
+  systemSettings.Profile.boostTimeout             = 30;
+  systemSettings.Profile.boostTemperature         = 50;
   systemSettings.Profile.pwmMul                   = 1;
   systemSettings.Profile.readPeriod               = (200*200)-1;             // Because we have a 5uS timer clock
   systemSettings.Profile.readDelay                = (20*200)-1;
