@@ -312,7 +312,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         }
       }
       else if((input==Rotate_Increment)||(input==Rotate_Decrement)){
-        blockInput(200);
         mainScr.setMode=main_setpoint;
         mainScr.currentMode=main_setMode;
         if(current_mode!=mode_sleep){
