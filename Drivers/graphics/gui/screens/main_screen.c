@@ -314,13 +314,16 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       else if((input==Rotate_Increment)||(input==Rotate_Decrement)){
         mainScr.setMode=main_setpoint;
         mainScr.currentMode=main_setMode;
-        if(current_mode!=mode_sleep){
+        if(Iron.CurrentMode==mode_boost){
+          setCurrentMode(mode_run);
+        }
+        else if(current_mode!=mode_sleep){
           IronWake(wakeButton);
         }
       }
       else if(input==Click){
         blockInput(100);
-        if(Iron.CurrentMode<=mode_run){
+        if((Iron.CurrentMode==mode_boost) || (Iron.CurrentMode!=mode_run && systemSettings.settings.wakeOnButton && systemSettings.settings.WakeInputMode!=wakeInputmode_stand)){
           setCurrentMode(mode_run);
           break;
         }
