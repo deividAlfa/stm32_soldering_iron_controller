@@ -17,15 +17,18 @@
 #define __BASE_FILE__ "adc_global.c"
 #endif
 
+
+#define LIMIT_FILTERING
+
 volatile adc_measures_t ADC_measures[ADC_BFSIZ];
 volatile ADC_Status_t ADC_Status;
 
 volatile ADCDataTypeDef_t TIP = {
     .adc_buffer = &ADC_measures[0].TIP,
-    .smooth_start   = 500,
-    .smooth_end     = 1000,
-    .reset_limit    = 1500,
-    .spike_limit    = 4,
+    .smooth_start   = 300,
+    .smooth_end     = 600,
+    .reset_limit    = 1000,
+    .spike_limit    = 3,
     .filter_normal  = 0,      // Changes depending on system config.
     .filter_partial = 2,
     .filter_reset   = 1,
@@ -199,7 +202,6 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
     uint32_t RawData = avg_data << 12;
 
     // Compute EMA of input
-#define LIMIT_FILTERING
 
 #ifdef LIMIT_FILTERING
 #if defined DEBUG_PWM && defined SWO_PRINT
