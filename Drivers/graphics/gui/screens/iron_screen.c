@@ -270,8 +270,7 @@ static void iron_create(screen_t *scr){
   edit->step = 1;
   edit->setData = (void (*)(void *))&setSleepTime;
   edit->max_value = 60;
-  edit->min_value = 0;
-  edit->min_value = 0;
+  edit->min_value = 1;
 
   #ifdef USE_VIN
   //  [ Power Widget ]
