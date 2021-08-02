@@ -10,6 +10,8 @@
 
 #include "screen.h"
 extern screen_t *current_screen;
+extern uint32_t current_time;
+
 void oled_addScreen(screen_t *screen, uint8_t index);
 void oled_draw(void);
 void oled_init(RE_Rotation_t (*Rotation)(RE_State_t*), RE_State_t *State);
