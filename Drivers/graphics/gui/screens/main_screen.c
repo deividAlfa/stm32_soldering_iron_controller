@@ -399,8 +399,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     case main_irontemp:
 
       if(mainScr.ironStatus!=status_ok){                // When the screen goes to error state
-        memset(plot.d,0,sizeof(plotData_t));            // Clear plotdata
-        plot.index=0;                                  // Reset index
+        memset(&plot,0,sizeof(plotData_t));            // Clear plotdata
         mainScr.setMode=main_error;
         break;
       }
