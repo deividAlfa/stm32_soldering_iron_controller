@@ -68,6 +68,12 @@ static void * getOledDimming() {
 static void setOledDimming(uint32_t *val) {
   systemSettings.settings.screenDimming = * val;
 }
+int OledDimming_ProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
+  if(input==LongClick){
+    troll_enabled=1;
+  }
+  return default_widgetProcessInput(w, input, state);
+}
 //=========================================================
 static void * getActiveDetection() {
   temp = systemSettings.settings.activeDetection;
@@ -246,10 +252,10 @@ static void SYSTEM_create(screen_t *scr){
   edit->min_value = 0;
   edit->options = OffOn;
   edit->numberOfOptions = 2;
+  edit->selectable.processInput=&OledDimming_ProcessInput;
 
   //  [ Oled Offset Widget ]
   //
-
   newComboEditable(w, "Offset", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=2;

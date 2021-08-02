@@ -7,8 +7,7 @@
 
 
 #include "debug_screen.h"
-#include "oled.h"
-#include "gui.h"
+#include "screen_common.h"
 
 
 #ifdef ENABLE_DEBUG_SCREEN

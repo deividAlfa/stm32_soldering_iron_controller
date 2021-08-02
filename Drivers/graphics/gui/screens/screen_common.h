@@ -21,7 +21,7 @@ extern uint8_t profile, Selected_Tip;
 extern bool disableTipCopy;
 extern char *tipName;
 extern bool newTip;
-
+extern bool troll_enabled;
 int longClickReturn(widget_t *w);
 int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state);
 

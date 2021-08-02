@@ -12,6 +12,7 @@ uint8_t profile, Selected_Tip;
 char *tipName;
 bool disableTipCopy;
 bool newTip;
+bool troll_enabled;
 
 int longClickReturn(widget_t *w){
   selectable_widget_t *sel=NULL;
@@ -44,6 +45,5 @@ int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   if((HAL_GetTick()-settingsTimer)>15000){
     return screen_main;
   }
-
   return default_screenProcessInput(scr, input, state);
 }
