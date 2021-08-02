@@ -201,18 +201,18 @@ static void * get_NTC_beta() {
 }
 //=========================================================
 static void set_NTC_res(uint32_t *val) {
-  backup_NTC_res = *val;
+  backup_NTC_res = *val*100;
 }
 static void * get_NTC_res() {
-  temp = backup_NTC_res;
+  temp = backup_NTC_res/100;
   return &temp;
 }
 //=========================================================
 static void set_Pull_res(uint32_t *val) {
-  backup_Pull_res = *val;
+  backup_Pull_res = *val*100;
 }
 static void * get_Pull_res() {
-  temp = backup_Pull_res;
+  temp = backup_Pull_res/100;
   return &temp;
 }
 //=========================================================
@@ -507,7 +507,7 @@ static void system_create(screen_t *scr){
 
 static void system_ntc_init(screen_t *scr){
   default_init(scr);
-
+  comboResetIndex(Screen_system_ntc.widgets);
   backup_Pullup=systemSettings.settings.Pullup;
   backup_Pull_res=systemSettings.settings.Pull_res;
   backup_NTC_res=systemSettings.settings.NTC_res;
@@ -540,29 +540,31 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ Pull res Widget ]
   //
-  newComboEditable(w, "Pull res", &edit, NULL);
+  newComboEditable(w, "Pull", &edit, NULL);
   dis=&edit->inputData;
+  dis->number_of_dec=1;
   dis->reservedChars=7;
-  dis->endString="\261";
+  dis->endString="K\261";
   dis->getData = &get_Pull_res;
-  edit->big_step = 500;
-  edit->step = 100;
+  edit->big_step = 50;
+  edit->step = 1;
   edit->setData = (void (*)(void *))&set_Pull_res;
-  edit->max_value = 500000;
-  edit->min_value = 100;
+  edit->max_value = 5000;
+  edit->min_value = 1;
 
   //  [ NTC res Widget ]
   //
-  newComboEditable(w, "NTC res", &edit, NULL);
+  newComboEditable(w, "NTC", &edit, NULL);
   dis=&edit->inputData;
+  dis->number_of_dec=1;
   dis->reservedChars=7;
-  dis->endString="\261";
+  dis->endString="K\261";
   dis->getData = &get_NTC_res;
-  edit->big_step = 500;
-  edit->step = 100;
+  edit->big_step = 50;
+  edit->step = 1;
   edit->setData = (void (*)(void *))&set_NTC_res;
-  edit->max_value = 500000;
-  edit->min_value = 100;
+  edit->max_value = 5000;
+  edit->min_value = 1;
 
   //  [ NTC Beta Widget ]
   //
@@ -574,10 +576,10 @@ static void system_ntc_create(screen_t *scr){
   edit->step = 50;
   edit->setData = (void (*)(void *))&set_NTC_beta;
   edit->max_value = 50000;
-  edit->min_value = 100;
+  edit->min_value = 500;
 
   newComboAction(w, "SAVE", &saveNTC, NULL);
-  newComboScreen(w, "BACK", screen_settings, NULL);
+  newComboScreen(w, "BACK", screen_system , NULL);
 }
 
 
