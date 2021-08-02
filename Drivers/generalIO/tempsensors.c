@@ -18,18 +18,18 @@ int16_t last_NTC_C;
 #ifdef USE_NTC
 const int NTC_TABLE;                  // Defined in board.h
 #endif
-
+/*
 int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
 #ifdef USE_NTC
   if(update){
     int16_t temp;
     int16_t p1, p2;
     int16_t lastavg=NTC.last_avg;
-    /* Estimate the interpolating point before and after the ADC value. */
+    // Estimate the interpolating point before and after the ADC value.
     p1 = NTC_Table[(lastavg >> 4)];
     p2 = NTC_Table[(lastavg >> 4) + 1];
 
-    /* Interpolate between both points. */
+    // Interpolate between both points.
     temp = p1 - ((p1 - p2) * (lastavg & 0x000F)) / 16;
     last_NTC_C = temp;
     last_NTC_F = TempConversion(temp, mode_Farenheit, 1);
@@ -44,8 +44,25 @@ int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
   else{
     return last_NTC_F;
   }
-
 }
+*/
+int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
+  float pull_res=systemSettings.settings.Pull_res;
+  float NTC_res=systemSettings.settings.NTC_res;
+  float NTC_Beta=systemSettings.settings.NTC_Beta;
+  float adcValue=NTC.last_avg;
+  float result;
+  if(systemSettings.settings.Pullup){
+    if(adcValue == 4095) return 999;
+    result = (1/((log(((pull_res * adcValue) / (4095.0 - adcValue))/NTC_res)/NTC_Beta) + (1 / (273.15 + 25.000)))) - 273.15;
+  }
+  else{
+    if(adcValue == 0) return -999;
+    result = (1/((log(((pull_res * (4095.0 - adcValue)) / adcValue)/NTC_res)/NTC_Beta) + (1 / (273.15 + 25.000)))) - 273.15;
+  }
+  return (int16_t)(result*10);
+}
+
 // Read tip temperature
 int16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
   int16_t temp, temp_Raw;
