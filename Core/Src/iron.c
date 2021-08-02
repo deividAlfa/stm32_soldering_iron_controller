@@ -124,18 +124,19 @@ void handleIron(void) {
       setCurrentMode(mode_run);
     }
     else if(Iron.CurrentMode==mode_run){                                                      // If running
-      if(mode_time>standby_time){
-        if(systemSettings.Profile.standbyTimeout){                                            // If standbyTimeout not zero, enter standby
+      if(standby_time){                                                                       // If standby timer enabled
+        if(mode_time>standby_time){                                                           // Check timeout
           setCurrentMode(mode_standby);
         }
-        else if(systemSettings.Profile.sleepTimeout){                                         // Else if sleepTimeout not zero, enter sleep
+      else{                                                                                   // Otherwise, check sleep timeout
+        if(mode_time>sleep_time){                                                             //
           setCurrentMode(mode_sleep);
         }
-      }                                                                                       // Else, run forever!
+      }
     }
     else if(Iron.CurrentMode==mode_standby){                                                  // If in standby
-      if(systemSettings.Profile.sleepTimeout && mode_time>sleep_time) {                       // Check sleep time
-        setCurrentMode(mode_sleep);                                                           // Only enter sleep if not zero
+      if(mode_time>sleep_time){                                                               // Check sleep timeout
+        setCurrentMode(mode_sleep);
       }
     }
   }
