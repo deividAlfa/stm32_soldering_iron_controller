@@ -324,7 +324,7 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_450   = T12_Cal450;     // User needs to calibrate its station
       systemSettings.Profile.tip[x].PID.Kp          = 6000;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Ki          = 6000;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 1000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 2000;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.maxI        = 50;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       systemSettings.Profile.tip[x].PID.tau         = 10;             // val = /100
