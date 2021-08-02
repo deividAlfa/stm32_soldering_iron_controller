@@ -132,7 +132,7 @@ typedef struct{
   uint8_t       pwmMul;
   uint8_t       sleepTimeout;
   uint8_t       standbyTimeout;
-  uint8_t       standbyTemperature;
+  uint16_t      standbyTemperature;
   uint16_t      UserSetTemperature;
   uint16_t      MaxSetTemperature;
   uint16_t      MinSetTemperature;
