@@ -41,32 +41,35 @@ typedef union{
 
 typedef struct {
 
-  TIM_HandleTypeDef   *Pwm_Timer;                           // Pointer to the PWM timer
   uint8_t             Pwm_Channel;                          // PWM channel
-  uint16_t            Pwm_Period;                           // PWM period
-  uint16_t            Pwm_Max;                              // Max PWM output for power limit
-  uint32_t            Pwm_Out;                              // Last calculated PWM value
-  TIM_HandleTypeDef   *Read_Timer;                          // Pointer to the Read timer
-  int8_t              CurrentIronPower;                     // Last output power
-  int16_t             CurrentSetTemperature;                // Actual set temperature (Setpoint)
-  int16_t             Debug_SetTemperature;                 // Debug mode temperature
-  uint32_t            LastModeChangeTime;                   // Last time the mode was changed (To provide debouncing)
-  uint32_t            LastErrorTime;                        // last time iron error was detected
-  uint32_t            lastActivityTime;                     // last time iron handle was moved (In shake mode)
+  uint8_t             CurrentIronPower;                     // Last output power
   uint8_t             CurrentMode;                          // Actual working mode (Standby, Sleep, Normal, Boost)
   uint8_t             changeMode;                           // change working mode to (Standby, Sleep, Normal, Boost)
-  uint32_t            CurrentModeTimer;                     // Time since actual mode was set
-  IronError_t         Error;                                // Error flags
-  uint32_t            RunawayTimer;                         // Runaway timer
   uint8_t             RunawayLevel;                         // Runaway actual level
   uint8_t             prevRunawayLevel;                     // Runaway previous level
-  bool                RunawayStatus;                        // Runaway triggered flag
-  bool                calibrating;                          // Flag to indicate calibration state (don't save temperature settings)
-  bool                updateStandMode;                      // Flag to indicate the stand mode must be changed
-  bool                newActivity;                          // Flag to indicate handle movement
-  bool                temperatureReached;           // Flag for temperature calibration
-  bool                DebugMode;                            // Flag to indicate Debug is enabled
-  bool                updatePwm;                            // Flag to indicate PWM need to be updated
+  uint8_t             RunawayStatus;                        // Runaway triggered flag
+  uint8_t             calibrating;                          // Flag to indicate calibration state (don't save temperature settings)
+  uint8_t             updateStandMode;                      // Flag to indicate the stand mode must be changed
+  uint8_t             shakeActive;                          // Flag to indicate handle movement
+  uint8_t             temperatureReached;                   // Flag for temperature calibration
+  uint8_t             DebugMode;                            // Flag to indicate Debug is enabled
+  uint8_t             updatePwm;                            // Flag to indicate PWM need to be updated
+  IronError_t         Error;                                // Error flags
+
+  uint16_t            Pwm_Period;                           // PWM period
+  uint16_t            Pwm_Max;                              // Max PWM output for power limit
+  int16_t             CurrentSetTemperature;                // Actual set temperature (Setpoint)
+  int16_t             Debug_SetTemperature;                 // Debug mode temperature
+
+  uint32_t            Pwm_Out;                              // Last calculated PWM value
+  uint32_t            LastModeChangeTime;                   // Last time the mode was changed (To provide debouncing)
+  uint32_t            LastErrorTime;                        // last time iron error was detected
+  uint32_t            lastShakeTime;                        // last time iron handle was moved (In shake mode)
+  uint32_t            CurrentModeTimer;                     // Time since actual mode was set
+  uint32_t            RunawayTimer;                         // Runaway timer
+
+  TIM_HandleTypeDef   *Read_Timer;                          // Pointer to the Read timer
+  TIM_HandleTypeDef   *Pwm_Timer;                           // Pointer to the PWM timer
 }iron_t;
 
 

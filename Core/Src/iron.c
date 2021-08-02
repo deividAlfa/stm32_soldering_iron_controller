@@ -466,8 +466,8 @@ void IronWake(bool source){                                                     
   }
 
   if(source==wakeInput){
-    Iron.newActivity = 1;
-    Iron.lastActivityTime = HAL_GetTick();
+    Iron.shakeActive = 1;
+    Iron.lastShakeTime = HAL_GetTick();
   }
 
   if(Iron.CurrentMode==mode_standby){
