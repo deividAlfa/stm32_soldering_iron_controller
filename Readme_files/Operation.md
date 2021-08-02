@@ -82,11 +82,13 @@ Boost mode run time before resuming normal mode.<br>
 Temperature offset applied in boost mode. It's added to the current temperature and limited to system maximum temperature.<br>
   - **Standby time**<br>
 If there is no soldering activity for this period, the controller will reduce the temperature to extend the tip life and reduce power waste.<br>
+Setting this option to 0 will disable standby mode, the station will switch to sleep state.<br>
   - **Standby temp**<br>
 Temperature applied in standby mode.<br>
   - **Sleep time**<br>
 If there is no soldering activity for this period, the controller will "sleep" and stop providing power to the tip.<br>
 This helps increase tip lifetime reduce power waste. Activity (e.g. shaking the handle for a T12) will wake it up and heating will resume.<br>
+This timer cannot be disabled.<br>
   - **Power**<br>
 The maximum power which will be delivered to the tip.<br>
 The limit is done by adjusting the maximum PWM duty cycle based on the power supply voltage and the heater resistance.<br>
