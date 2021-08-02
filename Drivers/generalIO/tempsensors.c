@@ -31,22 +31,20 @@ int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
 
     /* Interpolate between both points. */
     temp = p1 - ((p1 - p2) * (lastavg & 0x000F)) / 16;
-    if(tempUnit==mode_Farenheit){
-      temp=TempConversion(temp, mode_Farenheit, 1);
-    }
     last_NTC_C = temp;
     last_NTC_F = TempConversion(temp, mode_Farenheit, 1);
   }
-  if(tempUnit==mode_Farenheit){
-    return last_NTC_F;
-  }
-  else{
+#else
+  last_NTC_F = 950;
+  last_NTC_C = 350;
+#endif
+  if(tempUnit==mode_Celsius){
     return last_NTC_C;
   }
-#else
-  last_NTC=350;        // If no NTC is used, assume 35ºC
-  return last_NTC;
-#endif
+  else{
+    return last_NTC_F;
+  }
+
 }
 // Read tip temperature
 int16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
