@@ -293,6 +293,20 @@ void resetSystemSettings(void) {
   systemSettings.settings.StandMode         = mode_sleep;
   systemSettings.settings.EncoderMode       = RE_Mode_One;
   systemSettings.settings.NotInitialized    = initialized;
+
+#ifdef USE_NTC
+  #ifdef PULLUP
+  systemSettings.settings.Pullup            = 1;
+  #elif defined PULLDOWN
+  systemSettings.settings.Pullup            = 0;
+  #else
+  #error NO PULL MODE DEFINED
+  #endif
+  systemSettings.settings.Pull_res          = PULL_RES;
+  systemSettings.settings.NTC_res           = NTC_RES;
+  systemSettings.settings.NTC_Beta          = NTC_BETA;
+#endif
+
   __enable_irq();
 }
 

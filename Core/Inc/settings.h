@@ -166,10 +166,14 @@ typedef struct{
   uint8_t       wakeStbyShake;
   uint8_t       WakeInputMode;
   uint8_t       StandMode;
+  uint8_t       Pullup;
   uint8_t       EncoderMode;
   uint16_t      errorDelay;
   uint16_t      guiUpdateDelay;
   uint16_t      lvp;
+  uint16_t      NTC_Beta;
+  uint32_t      Pull_res;
+  uint32_t      NTC_res;
   uint32_t      version;                                            // Used to track if a reset is needed on firmware upgrade
 }settings_t;
 

@@ -12,7 +12,6 @@
 
 
 extern screen_t Screen_settings;
-
 void settings_screen_setup(screen_t *scr);
 
 #endif /* SETTINGS_GUI_DEBUG_SCREEN_H_ */

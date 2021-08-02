@@ -10,6 +10,7 @@
 
 extern char* profileStr[];
 extern char *OffOn[];
+extern char *DownUp[];
 extern char *tempUnit[];
 extern char *wakeMode[];
 extern char *encMode[];

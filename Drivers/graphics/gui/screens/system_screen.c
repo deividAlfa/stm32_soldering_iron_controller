@@ -9,16 +9,20 @@
 #include "screen_common.h"
 
 screen_t Screen_system;
-static widget_t *comboWidget_SYSTEM;
-static comboBox_item_t *comboitem_SYSTEM_ButtonSleepWake;
-static comboBox_item_t *comboitem_SYSTEM_ButtonStandbyWake;
-static comboBox_item_t *comboitem_SYSTEM_ShakeSleepWake;
-static comboBox_item_t *comboitem_SYSTEM_ShakeStandbyWake;
-static comboBox_item_t *comboitem_SYSTEM_InitMode;
-static comboBox_item_t *comboitem_SYSTEM_StandMode;
-static comboBox_item_t *comboitem_SYSTEM_BootMode;
-static editable_widget_t *editable_SYSTEM_TempStep;
+screen_t Screen_system_ntc;
 
+static comboBox_item_t *comboitem_system_ButtonSleepWake;
+static comboBox_item_t *comboitem_system_ButtonStandbyWake;
+static comboBox_item_t *comboitem_system_ShakeSleepWake;
+static comboBox_item_t *comboitem_system_ShakeStandbyWake;
+static comboBox_item_t *comboitem_system_InitMode;
+static comboBox_item_t *comboitem_system_StandMode;
+static comboBox_item_t *comboitem_system_BootMode;
+static editable_widget_t *editable_system_TempStep;
+
+uint8_t backup_Pullup;
+uint16_t backup_NTC_Beta;
+uint32_t backup_Pull_res, backup_NTC_res;
 
 
 //=========================================================
@@ -29,10 +33,10 @@ static void * getTmpUnit() {
 static void setTmpUnit(uint32_t *val) {
   setSystemTempUnit(*val);
   if(systemSettings.settings.tempUnit==mode_Farenheit){
-    editable_SYSTEM_TempStep->inputData.endString="\260F";
+    editable_system_TempStep->inputData.endString="\260F";
   }
   else{
-    editable_SYSTEM_TempStep->inputData.endString="\260C";
+    editable_system_TempStep->inputData.endString="\260C";
   }
 }
 //=========================================================
@@ -85,13 +89,13 @@ static void setActiveDetection(uint32_t *val) {
 //=========================================================
 static void * getWakeMode() {
   temp = systemSettings.settings.WakeInputMode;
-  comboitem_SYSTEM_ButtonSleepWake->enabled = !systemSettings.settings.WakeInputMode;   // 0=shake, 1=stand
-  comboitem_SYSTEM_ButtonStandbyWake->enabled = !systemSettings.settings.WakeInputMode;
-  comboitem_SYSTEM_ShakeSleepWake->enabled = !systemSettings.settings.WakeInputMode;
-  comboitem_SYSTEM_ShakeStandbyWake->enabled = !systemSettings.settings.WakeInputMode;
-  comboitem_SYSTEM_InitMode->enabled = !systemSettings.settings.WakeInputMode;
-  comboitem_SYSTEM_StandMode->enabled = systemSettings.settings.WakeInputMode;
-  comboitem_SYSTEM_BootMode->enabled  = !systemSettings.settings.WakeInputMode;
+  comboitem_system_ButtonSleepWake->enabled = !systemSettings.settings.WakeInputMode;   // 0=shake, 1=stand
+  comboitem_system_ButtonStandbyWake->enabled = !systemSettings.settings.WakeInputMode;
+  comboitem_system_ShakeSleepWake->enabled = !systemSettings.settings.WakeInputMode;
+  comboitem_system_ShakeStandbyWake->enabled = !systemSettings.settings.WakeInputMode;
+  comboitem_system_InitMode->enabled = !systemSettings.settings.WakeInputMode;
+  comboitem_system_StandMode->enabled = systemSettings.settings.WakeInputMode;
+  comboitem_system_BootMode->enabled  = !systemSettings.settings.WakeInputMode;
   return &temp;
 }
 static void setWakeMode(uint32_t *val) {
@@ -188,25 +192,68 @@ static void * getShakeStandbyWake() {
   return &temp;
 }
 //=========================================================
+static void set_NTC_beta(uint32_t *val) {
+  backup_NTC_Beta = *val;
+}
+static void * get_NTC_beta() {
+  temp = backup_NTC_Beta;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_res(uint32_t *val) {
+  backup_NTC_res = *val;
+}
+static void * get_NTC_res() {
+  temp = backup_NTC_res;
+  return &temp;
+}
+//=========================================================
+static void set_Pull_res(uint32_t *val) {
+  backup_Pull_res = *val;
+}
+static void * get_Pull_res() {
+  temp = backup_Pull_res;
+  return &temp;
+}
+//=========================================================
+static void set_Pull_mode(uint32_t *val) {
+  backup_Pullup = *val;
+}
+static void * get_Pull_mode() {
+  temp = backup_Pullup;
+  return &temp;
+}
+//=========================================================
+static int saveNTC() {
+  __disable_irq();
+  systemSettings.settings.Pullup=backup_Pullup;
+  systemSettings.settings.Pull_res=backup_Pull_res;
+  systemSettings.settings.NTC_res=backup_NTC_res;
+  systemSettings.settings.NTC_Beta=backup_NTC_Beta;
+  __enable_irq();
+  return screen_system;
+}
+//=========================================================
 
-static void SYSTEM_init(screen_t *scr){
+
+static void system_init(screen_t *scr){
   default_init(scr);
   if(systemSettings.settings.tempUnit==mode_Farenheit){
-    editable_SYSTEM_TempStep->inputData.endString="\260F";
+    editable_system_TempStep->inputData.endString="\260F";
   }
   else{
-    editable_SYSTEM_TempStep->inputData.endString="\260C";
+    editable_system_TempStep->inputData.endString="\260C";
   }
   profile=systemSettings.settings.currentProfile;
 }
 
-static void SYSTEM_onEnter(screen_t *scr){
-  if(scr!=&Screen_reset){
-    comboResetIndex(comboWidget_SYSTEM);
+static void system_onEnter(screen_t *scr){
+  if(scr==&Screen_settings){
+    comboResetIndex(Screen_system.widgets);
   }
 }
 
-static void SYSTEM_create(screen_t *scr){
+static void system_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
@@ -214,7 +261,6 @@ static void SYSTEM_create(screen_t *scr){
   //  [ SYSTEM COMBO ]
   //
   newWidget(&w,widget_combo,scr);
-  comboWidget_SYSTEM = w;
 
   //  [ Profile Widget ]
   //
@@ -282,7 +328,7 @@ static void SYSTEM_create(screen_t *scr){
 
   //  [ Stand mode Widget ]
   //
-  newComboMultiOption(w, "Stand mode", &edit, &comboitem_SYSTEM_StandMode);
+  newComboMultiOption(w, "Stand mode", &edit, &comboitem_system_StandMode);
   dis=&edit->inputData;
   dis->getData = &getStandMode;
   edit->big_step = 1;
@@ -295,7 +341,7 @@ static void SYSTEM_create(screen_t *scr){
 
   //  [ Boot mode Widget ]
   //
-  newComboMultiOption(w, "Boot", &edit, &comboitem_SYSTEM_BootMode);
+  newComboMultiOption(w, "Boot", &edit, &comboitem_system_BootMode);
   dis=&edit->inputData;
   dis->getData = &getInitMode;
   edit->big_step = 1;
@@ -308,7 +354,7 @@ static void SYSTEM_create(screen_t *scr){
 
   //  [ Encoder wake from sleep  Widget ]
   //
-  newComboMultiOption(w, "Btn Slp", &edit,&comboitem_SYSTEM_ButtonSleepWake);
+  newComboMultiOption(w, "Btn Slp", &edit,&comboitem_system_ButtonSleepWake);
   dis=&edit->inputData;
   dis->getData = &getButtonSleepWake;
   edit->big_step = 1;
@@ -321,7 +367,7 @@ static void SYSTEM_create(screen_t *scr){
 
   //  [ Encoder wake from standby Widget ]
   //
-  newComboMultiOption(w, "Btn Stby", &edit,&comboitem_SYSTEM_ButtonStandbyWake);
+  newComboMultiOption(w, "Btn Stby", &edit,&comboitem_system_ButtonStandbyWake);
   dis=&edit->inputData;
   dis->getData = &getButtonStandbyWake;
   edit->big_step = 1;
@@ -334,7 +380,7 @@ static void SYSTEM_create(screen_t *scr){
 
   //  [ Shake wake from sleep  Widget ]
   //
-  newComboMultiOption(w, "Shake Slp", &edit,&comboitem_SYSTEM_ShakeSleepWake);
+  newComboMultiOption(w, "Shake Slp", &edit,&comboitem_system_ShakeSleepWake);
   dis=&edit->inputData;
   dis->getData = &getShakeSleepWake;
   edit->big_step = 1;
@@ -347,7 +393,7 @@ static void SYSTEM_create(screen_t *scr){
 
   //  [ Shake wake from standby Widget ]
   //
-  newComboMultiOption(w, "Shake Stby", &edit,&comboitem_SYSTEM_ShakeStandbyWake);
+  newComboMultiOption(w, "Shake Stby", &edit,&comboitem_system_ShakeStandbyWake);
   dis=&edit->inputData;
   dis->getData = &getShakeStandbyWake;
   edit->big_step = 1;
@@ -401,7 +447,7 @@ static void SYSTEM_create(screen_t *scr){
   //  [ Temp step Widget ]
   //
   newComboEditable(w, "Step", &edit, NULL);
-  editable_SYSTEM_TempStep=edit;
+  editable_system_TempStep=edit;
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &getTmpStep;
@@ -413,7 +459,7 @@ static void SYSTEM_create(screen_t *scr){
 
   //  [ Active detection Widget ]
   //
-  newComboMultiOption(w, "Active det.",&edit,&comboitem_SYSTEM_InitMode);
+  newComboMultiOption(w, "Active det.",&edit,&comboitem_system_InitMode);
   dis=&edit->inputData;
   dis->getData = &getActiveDetection;
   edit->big_step = 1;
@@ -451,15 +497,101 @@ static void SYSTEM_create(screen_t *scr){
   edit->max_value = 500;
   edit->min_value = 20;
 
+  newComboScreen(w, "NTC MENU", screen_ntc, NULL);
   newComboScreen(w, "RESET MENU", screen_reset, NULL);
   newComboScreen(w, SWSTRING, -1, NULL);
   newComboScreen(w, HWSTRING, -1, NULL);
   newComboScreen(w, "BACK", screen_settings, NULL);
 }
 
+
+static void system_ntc_init(screen_t *scr){
+  default_init(scr);
+
+  backup_Pullup=systemSettings.settings.Pullup;
+  backup_Pull_res=systemSettings.settings.Pull_res;
+  backup_NTC_res=systemSettings.settings.NTC_res;
+  backup_NTC_Beta=systemSettings.settings.NTC_Beta;
+}
+
+
+static void system_ntc_create(screen_t *scr){
+  widget_t* w;
+  displayOnly_widget_t* dis;
+  editable_widget_t* edit;
+
+  //  [ SYSTEM COMBO ]
+  //
+  newWidget(&w,widget_combo,scr);
+
+  //  [ Pullup mode Widget ]
+  //
+  newComboMultiOption(w, "Pull mode",&edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &get_Pull_mode;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_Pull_mode;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options = DownUp;
+  edit->numberOfOptions = 2;
+
+  //  [ Pull res Widget ]
+  //
+  newComboEditable(w, "Pull res", &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=7;
+  dis->endString="\261";
+  dis->getData = &get_Pull_res;
+  edit->big_step = 500;
+  edit->step = 100;
+  edit->setData = (void (*)(void *))&set_Pull_res;
+  edit->max_value = 500000;
+  edit->min_value = 100;
+
+  //  [ NTC res Widget ]
+  //
+  newComboEditable(w, "NTC res", &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=7;
+  dis->endString="\261";
+  dis->getData = &get_NTC_res;
+  edit->big_step = 500;
+  edit->step = 100;
+  edit->setData = (void (*)(void *))&set_NTC_res;
+  edit->max_value = 500000;
+  edit->min_value = 100;
+
+  //  [ NTC Beta Widget ]
+  //
+  newComboEditable(w, "NTC beta", &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=6;
+  dis->getData = &get_NTC_beta;
+  edit->big_step = 500;
+  edit->step = 50;
+  edit->setData = (void (*)(void *))&set_NTC_beta;
+  edit->max_value = 50000;
+  edit->min_value = 100;
+
+  newComboAction(w, "SAVE", &saveNTC, NULL);
+  newComboScreen(w, "BACK", screen_settings, NULL);
+}
+
+
 void system_screen_setup(screen_t *scr){
-  scr->init = &SYSTEM_init;
-  scr->onEnter = &SYSTEM_onEnter;
+  screen_t *sc;
+
+  scr->init = &system_init;
+  scr->onEnter = &system_onEnter;
   scr->processInput=&autoReturn_ProcessInput;
-  scr->create = &SYSTEM_create;
+  scr->create = &system_create;
+
+  sc=&Screen_system_ntc;
+  oled_addScreen(sc, screen_ntc);
+  sc->init = &system_ntc_init;
+  sc->processInput=&autoReturn_ProcessInput;
+  sc->create = &system_ntc_create;
 }
