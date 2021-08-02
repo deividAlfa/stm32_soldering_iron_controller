@@ -144,14 +144,20 @@ STAND uses the same input, but disconnected from the handle. Must be shorted to 
   - **Stand mode**<br>
 Sets the mode that will be applied when the handle is put in the stand (sleep / standby).<br>
 This option is disabled in shake mode.<br>
-  - **Btn. Wake**<br>
-Allow waking the controller by pressing the encoder button.<br>
-This option is disabled in stand mode.<br>
   - **Boot**<br>
 Operation mode when powered on. __RUN__ or __SLEEP__.<br>
 This option is disabled in stand mode.<br>
-  - **Shake Wake**<br>
-Allow waking the controller by the shake sensor.<br>
+  - **Btn Slp**<br>
+Allow waking the controller from sleep state by pressing the encoder button.<br>
+This option is disabled in stand mode.<br>
+  - **Btn Stby**<br>
+Allow waking the controller from standby state by pressing the encoder button.<br>
+This option is disabled in stand mode.<br>
+  - **Shake Slp**<br>
+Allow waking the controller from sleep state by the shake sensor.<br>
+This option is disabled in stand mode.<br>
+  - **Shake Stby**<br>
+Allow waking the controller from standby state by the shake sensor.<br>
 This option is disabled in stand mode.<br>
   - **Encoder**<br>
 Invert the encoder direction.<br>
