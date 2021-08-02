@@ -223,6 +223,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
   updateIronPower();
 
+  // Plot graph data update and drawing timer
   if(plot_time<20){ plot_time = 20; }
   if(mainScr.currentMode!=main_disabled && (currentTime-plotTimer)>plot_time){                                          // Only store values if running
     plotUpdate=1;
@@ -243,8 +244,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
   mainScr.update = 0;
 
+  // Display values update timer
   if((currentTime-mainScr.updateTick)>systemSettings.settings.guiUpdateDelay){
-    mainScr.update=1;                          // Update realtime readings slower than the rest of the GUI
+    mainScr.update=1;
     mainScr.updateTick=currentTime;
   }
 
@@ -254,29 +256,28 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   else{
     mainScr.ironStatus = status_ok;
   }
-  if(!mainScr.ActivityOn && mainScr.ironStatus == status_ok && Iron.newActivity && mainScr.currentMode!=main_disabled){
-    mainScr.ActivityOn=1;
-  }
-  else if(mainScr.ActivityOn && (mainScr.ironStatus == status_error || ((currentTime-Iron.lastActivityTime)>50))){
-    Iron.newActivity=0;
-    mainScr.ActivityOn=0;
-  }
 
-  if(input!=Rotate_Nothing){
+  // Timer for ignoring user input
+  // Also ignores activity if screen is dimmed (first action only wakes up the screen)
+  if(input!=Rotate_Nothing || Iron.newActivity){
     mainScr.idleTick=currentTime;
+    if(contrast<systemSettings.settings.contrast){
+      mainScr.dimDisplay=5;
+      input=Rotate_Nothing;
+    }
     if(currentTime < mainScr.inputBlockTime){
       input=Rotate_Nothing;
     }
   }
+
+  // Screen dimming timer
   if((current_mode==mode_sleep)&&(input==Rotate_Nothing)){
     if(contrast>5 && (currentTime-mainScr.idleTick)>10000){
       mainScr.dimDisplay=-5;
     }
   }
-  else if(contrast<systemSettings.settings.contrast){
-    mainScr.dimDisplay=5;
-  }
 
+  // Smooth screen brightness dimming
   if(mainScr.dimDisplay!=0){
     if(systemSettings.settings.screenDimming && currentTime-mainScr.dimTimer>9){
       mainScr.dimTimer = currentTime;
@@ -295,6 +296,18 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     }
   }
 
+  // Handle shake wake icon drawing and timeout
+  if(Iron.newActivity && !mainScr.ActivityOn && current_mode == mode_run){
+    mainScr.ActivityOn=1;
+  }
+  else{
+    Iron.newActivity=0;
+    if(mainScr.ActivityOn && (mainScr.ironStatus == status_error || ((currentTime-Iron.lastActivityTime)>50))){
+      mainScr.ActivityOn=0;
+    }
+  }
+
+  // Handle main screen
   switch(mainScr.currentMode){
     case main_irontemp:
       if(mainScr.ironStatus!=status_ok){               // When the screen goes to disabled state
@@ -308,7 +321,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         case LongClick:
           return screen_settings;
         case Rotate_Increment_while_click:
-          blockInput(200);
+          blockInput(100);
           mainScr.setMode=main_tipselect;
           mainScr.currentMode=main_setMode;
           break;
@@ -384,7 +397,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         case LongClick:
           return -1;
         case Click:
-          blockInput(200);
+          blockInput(100);
           if(mainScr.currentMode==main_setpoint){
             setCurrentMode(mode_boost);
           }
@@ -417,6 +430,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       break;
   }
 
+  // Switch main screen modes
   if(mainScr.currentMode==main_setMode){
     mainScr.update=1;
     mainScr.idleTick=currentTime;
