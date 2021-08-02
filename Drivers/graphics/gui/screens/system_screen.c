@@ -298,6 +298,7 @@ static void SYSTEM_create(screen_t *scr){
   edit->max_value = mode_run;
   edit->min_value = mode_sleep;
   edit->options = InitMode;
+  edit->numberOfOptions = 3;
 
   //  [ Encoder wake from sleep  Widget ]
   //
@@ -324,7 +325,6 @@ static void SYSTEM_create(screen_t *scr){
   edit->min_value = 0;
   edit->options =OffOn;
   edit->numberOfOptions = 2;
-  edit->numberOfOptions = 3;
 
   //  [ Shake wake from sleep  Widget ]
   //
