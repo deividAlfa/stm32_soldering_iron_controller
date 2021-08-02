@@ -96,6 +96,13 @@ static void * getMaxTemp() {
   temp=systemSettings.Profile.MaxSetTemperature;
   editable_IRON_MinTemp->max_value = temp-1;
   editable_IRON_MaxTemp->min_value = systemSettings.Profile.MinSetTemperature+1;
+  if(systemSettings.Profile.standbyTemperature>temp){
+    systemSettings.Profile.standbyTemperature = temp;
+  }
+  if(systemSettings.Profile.UserSetTemperature>temp){
+    systemSettings.Profile.UserSetTemperature = temp;
+    Iron.CurrentSetTemperature=temp;
+  }
   return &temp;
 }
 static void setMaxTemp(uint32_t *val) {
@@ -106,6 +113,15 @@ static void * getMinTemp() {
   temp=systemSettings.Profile.MinSetTemperature;
   editable_IRON_MaxTemp->min_value = temp+1;
   editable_IRON_MinTemp->max_value = systemSettings.Profile.MaxSetTemperature-1;
+  /*
+  if(systemSettings.Profile.standbyTemperature<temp){
+    systemSettings.Profile.standbyTemperature = temp;
+  }
+  */
+  if(systemSettings.Profile.UserSetTemperature<temp){
+    systemSettings.Profile.UserSetTemperature = temp;
+    Iron.CurrentSetTemperature=temp;
+  }
   return &temp;
 }
 static void setMinTemp(uint32_t *val) {
