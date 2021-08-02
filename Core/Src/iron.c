@@ -128,6 +128,7 @@ void handleIron(void) {
         if(mode_time>standby_time){                                                           // Check timeout
           setCurrentMode(mode_standby);
         }
+      }
       else{                                                                                   // Otherwise, check sleep timeout
         if(mode_time>sleep_time){                                                             //
           setCurrentMode(mode_sleep);
