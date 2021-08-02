@@ -278,8 +278,8 @@ int8_t switchScreenMode(void){
     Screen_main.refresh=screen_Erase;
     switch(mainScr.setMode){
       case main_irontemp:
+        setMainWidget(Widget_IronTemp);
         if(mainScr.ironStatus!=status_error){
-          setMainWidget(Widget_IronTemp);
           if(mainScr.displayMode==temp_graph){
             widgetDisable(Widget_IronTemp);
             plot.enabled=1;
@@ -526,7 +526,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         case Click:
           blockInput(100);
-          setCurrentMode(mode_boost);
+          if(mainScr.ironStatus != status_error){
+            setCurrentMode(mode_boost);
+          }
           mainScr.setMode=main_irontemp;
           break;
 
@@ -568,7 +570,7 @@ static void drawIcons(uint8_t refresh){
     #endif
   }
 
-  if(mainScr.shakeActive==1 || (mainScr.shakeActive==2 && refresh) ){ //1 = new draw, 2 = already drawed
+  if(mainScr.shakeActive==1 || (mainScr.shakeActive==2 && refresh) ){ //1 = new draw, 2 = already drawn
     mainScr.shakeActive=2;
     u8g2_DrawXBMP(&u8g2, (OledWidth-shakeXBM[1])/2, 0, shakeXBM[0], shakeXBM[1], &shakeXBM[2]);
   }
@@ -656,13 +658,6 @@ static void drawMode(void){
     default:
       break;
   }
-  // Tip name label
-  u8g2_DrawStr(&u8g2, 0, 55, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name);
-
-  if(mainScr.currentMode==main_tipselect){
-    u8g2_SetFont(&u8g2, default_font);
-    putStrAligned("TIP SELECTION", 16, align_center);
-  }
 }
 
 static void drawPowerBar(uint8_t refresh){
@@ -726,7 +721,7 @@ static void drawPlot(uint8_t refresh){
 void main_screen_draw(screen_t *scr){
   uint8_t scr_refresh;
   static uint32_t lastState = 0;
-  uint32_t currentState = (uint32_t)Iron.Error.Flags<<24 | (uint32_t)mainScr.ironStatus<<16 | mainScr.currentMode;    // Simple method to detect changes
+  uint32_t currentState = (uint32_t)Iron.Error.Flags<<24 | (uint32_t)Iron.CurrentMode<<16 | mainScr.currentMode;    // Simple method to detect changes
 
   if((lastState!=currentState) || Widget_SetPoint->refresh || Widget_IronTemp->refresh || plot.update || screenSaver.update){
     lastState=currentState;
@@ -742,12 +737,29 @@ void main_screen_draw(screen_t *scr){
     drawPlot(0);
     return;
   }
+
+  drawMode();
   drawIcons(1);
-  if(mainScr.currentMode==main_error){
-    drawError();
+
+  switch(mainScr.currentMode){
+    case main_error:
+      drawError();
+      break;
+
+    case main_setpoint:
+      if(mainScr.ironStatus == status_error){ break; }
+    case main_irontemp:
+      // Tip name label
+      u8g2_SetFont(&u8g2, u8g2_font_labels);
+      u8g2_DrawStr(&u8g2, 0, 55, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name);
+      break;
+
+    case main_tipselect:
+        u8g2_SetFont(&u8g2, default_font);
+        putStrAligned("TIP SELECTION", 16, align_center);
   }
-  else{
-    drawMode();
+
+  if(mainScr.ironStatus != status_error){
     drawPowerBar(1);
     drawPlot(1);
     drawScreenSaver();
