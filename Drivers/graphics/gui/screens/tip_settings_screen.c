@@ -69,7 +69,6 @@ static void setImin(int32_t *val) {
   tipCfg.PID.minI= *val;
 }
 //=========================================================
-/*
 static void * getTau() {
   temp = tipCfg.PID.tau;
   return &temp;
@@ -77,7 +76,6 @@ static void * getTau() {
 static void setTau(int32_t *val) {
   tipCfg.PID.tau= *val;
 }
-*/
 //=========================================================
 static void * getCal250() {
   temp = tipCfg.calADC_At_250;
@@ -351,7 +349,6 @@ static void tip_settings_create(screen_t *scr){
 
   //[ Tau Widget ]
   //
-  /*
   newComboEditable(w, "PID tau", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=6;
@@ -362,10 +359,9 @@ static void tip_settings_create(screen_t *scr){
   edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setTau;
-  */
+
   //[ Cal250 Widget ]
   //
-
   newComboEditable(w, "Cal250", &edit, NULL);
   editable_tip_settings_cal250=edit;
   dis=&edit->inputData;
