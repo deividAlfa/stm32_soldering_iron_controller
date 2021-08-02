@@ -461,13 +461,8 @@ void setCurrentMode(uint8_t mode){
 
 // Called from program timer if WAKE change is detected
 void IronWake(bool source){                                                                 // source: handle shake, encoder push button
-  if((Iron.Error.Flags) || (systemSettings.settings.WakeInputMode==wakeInputmode_stand)){
+  if(Iron.Error.Flags){
     return;
-  }
-
-  if(source==wakeInput){
-    Iron.shakeActive = 1;
-    Iron.lastShakeTime = HAL_GetTick();
   }
 
   if(Iron.CurrentMode==mode_standby){
@@ -505,6 +500,8 @@ void readWake(void){
       }
       else{
         IronWake(wakeInput);
+        Iron.shakeActive = 1;
+        Iron.lastShakeTime = HAL_GetTick();
       }
     }
 }

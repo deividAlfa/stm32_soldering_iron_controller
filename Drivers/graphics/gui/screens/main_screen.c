@@ -341,31 +341,33 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   updateScreenSaver();
 
 
+
   // Timer for ignoring user input
-  // Also ignores activity if screen is dimmed (first action only wakes up the screen)
-  if(input!=Rotate_Nothing || Iron.shakeActive){
-    if(input!=Rotate_Nothing){
-      mainScr.idleTimer=current_time;
-      if(current_time < mainScr.inputBlockTime){
-        input=Rotate_Nothing;
-      }
-    }
-    if(contrast<systemSettings.settings.contrast && mainScr.dimStep!=5){
-      mainScr.dimStep=5;
-      input=Rotate_Nothing;
-    }
+  if(current_time < mainScr.inputBlockTime){
+    input=Rotate_Nothing;
   }
+
+  if(input!=Rotate_Nothing){
+    mainScr.idleTimer = current_time;
+  }
+
   if(systemSettings.settings.screenDimming){
-    // Screen dimming timer
-    if((current_mode==mode_sleep)&&(input==Rotate_Nothing)){
-      if(current_temp<100){
-        if(contrast>5 && (current_time-mainScr.idleTimer)>10000){
-          mainScr.dimStep=-5;
+    if(mainScr.dimStep==0){
+      // Wake up screen. If source was the encoder, block it the first time
+      if(contrast<systemSettings.settings.contrast){
+        if(Iron.shakeActive || current_mode!=mode_sleep || input!=Rotate_Nothing){
+          mainScr.dimStep=5;
+          input=Rotate_Nothing;
+          mainScr.dimTimer = current_time;
         }
+      }
+      // Screen dimming timer
+      if(contrast>5 && current_mode==mode_sleep && current_temp<100 && ((current_time-mainScr.idleTimer)>10000)){
+        mainScr.dimStep=-5;
       }
     }
     // Smooth screen brightness dimming
-    if((mainScr.dimStep!=0) && (current_time-mainScr.dimTimer>9)){
+    else if(current_time-mainScr.dimTimer>9){
       mainScr.dimTimer = current_time;
       contrast+=mainScr.dimStep;
       if(contrast>4 && (contrast<systemSettings.settings.contrast)){
@@ -377,19 +379,20 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           restore_contrast();
         }
         mainScr.dimStep=0;
+        mainScr.idleTimer = current_time;
       }
     }
   }
 
   // Handle shake wake icon drawing and timeout
-  if( !mainScr.shakeActive){
-    if(Iron.shakeActive && current_mode == mode_run){
+  if( !mainScr.shakeActive && Iron.shakeActive){
+    Iron.shakeActive=0;
+    if(current_mode == mode_run){
       mainScr.shakeActive=1;
     }
   }
-  else if((current_time-Iron.lastShakeTime)>50){
+  else if(mainScr.shakeActive==2 && (current_time-Iron.lastShakeTime)>50){
     mainScr.shakeActive=3; // Clear
-    Iron.shakeActive=0;
   }
 
   // Handle main screen
