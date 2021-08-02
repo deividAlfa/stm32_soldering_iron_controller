@@ -464,6 +464,12 @@ void IronWake(bool source){                                                     
   if((Iron.Error.Flags) || (systemSettings.settings.WakeInputMode==wakeInputmode_stand)){
     return;
   }
+
+  if(source==wakeInput){
+    Iron.newActivity = 1;
+    Iron.lastActivityTime = HAL_GetTick();
+  }
+
   if(Iron.CurrentMode==mode_standby){
     if( (source==wakeButton && !systemSettings.settings.wakeStbyButton) ||
         (source==wakeInput && !systemSettings.settings.wakeStbyShake)){
@@ -477,10 +483,6 @@ void IronWake(bool source){                                                     
 
       return;
     }
-  }
-  if(source==wakeInput){
-    Iron.newActivity = 1;
-    Iron.lastActivityTime = HAL_GetTick();
   }
   if(Iron.CurrentMode<mode_boost){
     setCurrentMode(mode_run);
