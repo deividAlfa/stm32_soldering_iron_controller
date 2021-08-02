@@ -11,7 +11,6 @@
 typedef enum { cal_250=0, cal_350=1, cal_450=2, cal_input_250=10, cal_input_350=11, cal_input_450=12, cal_suceed=20, cal_failed=21, cal_needsAdjust=22 }state_t;
 static bool error;
 static uint32_t errorTimer;
-static uint32_t screenTimer;
 static uint32_t lastUpdateTick;
 static int16_t lastTipTemp;
 static uint16_t backupTemp;
@@ -223,7 +222,7 @@ static int cancelAction(widget_t* w) {
 
 static void Cal_init(screen_t *scr) {
   default_init(scr);
-  screenTimer = HAL_GetTick();
+  screenTimer = current_time;
   errorTimer=0;
   error=0;
 }
@@ -237,7 +236,7 @@ static void Cal_onEnter(screen_t *scr) {
 static void Cal_draw(screen_t *scr){
   if(error){
     if(errorTimer==0){
-      errorTimer=HAL_GetTick();
+      errorTimer=current_time;
       FillBuffer(BLACK,fill_dma);
       scr->refresh=screen_Erased;
       putStrAligned("ERROR DETECTED!", 10, align_center);
@@ -250,11 +249,12 @@ static void Cal_draw(screen_t *scr){
 }
 
 static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
+  updatePlot();
   if(GetIronError()){
     error=1;
   }
   if(error){
-    if((errorTimer==0) || ((HAL_GetTick()-errorTimer)<2000) ){
+    if((errorTimer==0) || ((current_time-errorTimer)<2000) ){
       return -1;
     }
     else{
@@ -263,9 +263,9 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
   }
   else{
     if(input!=Rotate_Nothing){
-      screenTimer=HAL_GetTick();
+      screenTimer=current_time;
     }
-    if(input==LongClick || (HAL_GetTick()-screenTimer)>15000){
+    if(input==LongClick || (current_time-screenTimer)>15000){
       return screen_main;
     }
   }
@@ -368,9 +368,9 @@ static void Cal_Start_OnExit(screen_t *scr) {
 static void Cal_Start_draw(screen_t *scr){
   char str[20];
 
-  if(cal_drawText || (HAL_GetTick()-lastUpdateTick)>199){
+  if(cal_drawText || (current_time-lastUpdateTick)>199){
     cal_drawText=0;
-    lastUpdateTick=HAL_GetTick();
+    lastUpdateTick=current_time;
 
     FillBuffer(BLACK, fill_dma);
     scr->refresh=screen_Erased;

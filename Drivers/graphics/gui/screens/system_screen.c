@@ -70,7 +70,7 @@ static void setOledDimming(uint32_t *val) {
 }
 int OledDimming_ProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
   if(input==LongClick){
-    troll_enabled=1;
+    screenSaver.enabled=1;
   }
   return default_widgetProcessInput(w, input, state);
 }

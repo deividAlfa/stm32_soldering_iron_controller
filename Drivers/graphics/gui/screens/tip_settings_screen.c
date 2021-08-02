@@ -154,23 +154,25 @@ static int tip_copy() {
 
 static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   static uint32_t last_update=0;
-  uint32_t currentTime=HAL_GetTick();
   bool update=0;
+
+  updatePlot();
+
   if(input==LongClick){
     int x = longClickReturn(scr->current_widget);
     if (x!=-1){
       return x;
     }
   }
-  else if((currentTime-settingsTimer)>30000){
+  else if((current_time-screenTimer)>30000){
     return screen_main;
   }
 
   if(input!=Rotate_Nothing){
-    settingsTimer=currentTime;
+    screenTimer=current_time;
   }
-  else if((currentTime-last_update)>99){
-    last_update=currentTime;
+  else if((current_time-last_update)>99){
+    last_update=current_time;
     update=1;
   }
  if(update){
@@ -200,8 +202,6 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
 
 
 static void tip_settings_onEnter(screen_t *scr){
-
-  settingsTimer=HAL_GetTick();
   bool new=0;
   disableTipCopy=0;
   comboResetIndex(Screen_tip_settings.widgets);

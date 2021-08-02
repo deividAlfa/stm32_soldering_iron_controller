@@ -6,13 +6,36 @@
  */
 #include "screen_common.h"
 
-uint32_t settingsTimer;
+uint32_t screenTimer;
 int32_t temp;
 uint8_t profile, Selected_Tip;
 char *tipName;
 bool disableTipCopy;
 bool newTip;
-bool troll_enabled;
+
+plotData_t plot;
+
+// Plot graph data update and drawing timer
+void updatePlot(void){
+  if(Iron.Error.Flags & _ACTIVE){
+    return;
+  }
+
+  int16_t current_temp = readTipTemperatureCompensated(stored_reading,read_Avg);
+
+  if(systemSettings.settings.tempUnit==mode_Farenheit){
+    current_temp = TempConversion(current_temp, mode_Celsius, 0);
+  }
+  if(plot.timeStep<20){ plot.timeStep = 20; }
+  if((current_time-plot.timer)>=plot.timeStep){                                          // Only store values if running
+    plot.update=plot.enabled;
+    plot.timer=current_time;
+    plot.d[plot.index] = current_temp;
+    if(++plot.index>99){
+      plot.index=0;
+    }
+  }
+}
 
 int longClickReturn(widget_t *w){
   selectable_widget_t *sel=NULL;
@@ -32,8 +55,9 @@ int longClickReturn(widget_t *w){
 }
 
 int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
+  updatePlot();
   if(input!=Rotate_Nothing){
-    settingsTimer=HAL_GetTick();
+    screenTimer=current_time;
   }
   if(input==LongClick){
     int x = longClickReturn(scr->current_widget);
@@ -42,7 +66,7 @@ int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     }
   }
 
-  if((HAL_GetTick()-settingsTimer)>15000){
+  if((current_time-screenTimer)>15000){
     return screen_main;
   }
   return default_screenProcessInput(scr, input, state);

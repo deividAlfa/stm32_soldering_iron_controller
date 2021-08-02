@@ -55,10 +55,9 @@ static uint8_t scalePlot(int32_t val){
 
 static int pid_debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
   static uint32_t plotTime=0;
-  uint32_t currentTime=HAL_GetTick();
-
-  if((currentTime-plotTime)>=((systemSettings.Profile.readPeriod+1)/200)){
-    plotTime=currentTime;
+  updatePlot();
+  if((current_time-plotTime)>=((systemSettings.Profile.readPeriod+1)/200)){
+    plotTime=current_time;
     PIDplotData->p[plot_Index] = scalePlot(getPID_P()* 11);
     PIDplotData->i[plot_Index] = getPID_I()* _i;
     PIDplotData->d[plot_Index] = scalePlot(getPID_D()* 11);

@@ -13,7 +13,7 @@ screen_t Screen_settings;
 
 static void SETTINGS_init(screen_t *scr) {
   default_init(scr);
-  settingsTimer=HAL_GetTick();
+  screenTimer=current_time;
 }
 
 
