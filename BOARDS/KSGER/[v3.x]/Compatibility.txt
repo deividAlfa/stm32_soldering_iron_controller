@@ -1,2 +1,0 @@
-Only the STM32F101 build is provided.
-It will work perfectly with 102 and 103 devices.
