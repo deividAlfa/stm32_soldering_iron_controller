@@ -459,10 +459,20 @@ void setCurrentMode(uint8_t mode){
 
 // Called from program timer if WAKE change is detected
 void IronWake(bool source){                                                                 // source: handle shake, encoder push button
-  if(Iron.Error.Flags){ return; }                                                             // Ignore if error present
-  if(Iron.CurrentMode<mode_run){
-    if( (source==wakeButton && (!systemSettings.settings.wakeOnButton || (systemSettings.settings.WakeInputMode==wakeInputmode_stand) )) ||
-        (source==wakeInput && !systemSettings.settings.wakeOnShake)){
+  if((Iron.Error.Flags) || (systemSettings.settings.WakeInputMode==wakeInputmode_stand)){
+    return;
+  }
+  if(Iron.CurrentMode==mode_standby){
+    if( (source==wakeButton && !systemSettings.settings.wakeStbyButton) ||
+        (source==wakeInput && !systemSettings.settings.wakeStbyShake)){
+
+      return;
+    }
+  }
+  else if(Iron.CurrentMode==mode_sleep){
+    if( (source==wakeButton && !systemSettings.settings.wakeSlpButton) ||
+        (source==wakeInput && !systemSettings.settings.wakeSlpShake)){
+
       return;
     }
   }

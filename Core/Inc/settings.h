@@ -35,7 +35,7 @@
 
 //#define SWSTRING        "SW: v1.10"                               // For releases
 #define SWSTRING          "SW: 2021-08-02"                          // For git
-#define SETTINGS_VERSION  6                                         // Change this if you change the struct below to prevent people getting out of sync
+#define SETTINGS_VERSION  7                                         // Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize         2                                         // In KB
 #define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
 
@@ -160,8 +160,10 @@ typedef struct{
   uint8_t       tempUnit;
   uint8_t       activeDetection;
   uint8_t       buzzerMode;
-  uint8_t       wakeOnButton;
-  uint8_t       wakeOnShake;
+  uint8_t       wakeSlpButton;
+  uint8_t       wakeStbyButton;
+  uint8_t       wakeSlpShake;
+  uint8_t       wakeStbyShake;
   uint8_t       WakeInputMode;
   uint8_t       StandMode;
   uint8_t       EncoderMode;
@@ -177,8 +179,8 @@ typedef __attribute__((aligned(4)))  struct{
   profile_t     Profile;
   uint32_t      ProfileChecksum;
   uint8_t       save_Flag;
-  bool          setupMode;
-  bool          isSaving;
+  uint8_t       setupMode;
+  uint8_t       isSaving;
 }systemSettings_t;
 
 typedef __attribute__((aligned(4)))  struct{

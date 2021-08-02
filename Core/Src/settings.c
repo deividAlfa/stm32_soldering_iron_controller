@@ -285,8 +285,10 @@ void resetSystemSettings(void) {
   systemSettings.settings.currentProfile    = profile_None;
   systemSettings.settings.initMode          = mode_run;
   systemSettings.settings.buzzerMode        = buzzer_Off;
-  systemSettings.settings.wakeOnButton      = wakeButton_On;
-  systemSettings.settings.wakeOnShake       = wakeShake_On;
+  systemSettings.settings.wakeSlpButton     = wakeButton_On;
+  systemSettings.settings.wakeStbyButton    = wakeButton_On;
+  systemSettings.settings.wakeSlpShake      = wakeShake_On;
+  systemSettings.settings.wakeStbyShake     = wakeShake_On;
   systemSettings.settings.WakeInputMode     = wakeInputmode_shake;
   systemSettings.settings.StandMode         = mode_sleep;
   systemSettings.settings.EncoderMode       = RE_Mode_One;

@@ -10,8 +10,10 @@
 
 screen_t Screen_system;
 static widget_t *comboWidget_SYSTEM;
-static comboBox_item_t *comboitem_SYSTEM_ButtonWake;
-static comboBox_item_t *comboitem_SYSTEM_ShakeWake;
+static comboBox_item_t *comboitem_SYSTEM_ButtonSleepWake;
+static comboBox_item_t *comboitem_SYSTEM_ButtonStandbyWake;
+static comboBox_item_t *comboitem_SYSTEM_ShakeSleepWake;
+static comboBox_item_t *comboitem_SYSTEM_ShakeStandbyWake;
 static comboBox_item_t *comboitem_SYSTEM_InitMode;
 static comboBox_item_t *comboitem_SYSTEM_StandMode;
 static comboBox_item_t *comboitem_SYSTEM_BootMode;
@@ -77,8 +79,10 @@ static void setActiveDetection(uint32_t *val) {
 //=========================================================
 static void * getWakeMode() {
   temp = systemSettings.settings.WakeInputMode;
-  comboitem_SYSTEM_ButtonWake->enabled = !systemSettings.settings.WakeInputMode;   // 0=shake, 1=stand
-  comboitem_SYSTEM_ShakeWake->enabled = !systemSettings.settings.WakeInputMode;
+  comboitem_SYSTEM_ButtonSleepWake->enabled = !systemSettings.settings.WakeInputMode;   // 0=shake, 1=stand
+  comboitem_SYSTEM_ButtonStandbyWake->enabled = !systemSettings.settings.WakeInputMode;
+  comboitem_SYSTEM_ShakeSleepWake->enabled = !systemSettings.settings.WakeInputMode;
+  comboitem_SYSTEM_ShakeStandbyWake->enabled = !systemSettings.settings.WakeInputMode;
   comboitem_SYSTEM_InitMode->enabled = !systemSettings.settings.WakeInputMode;
   comboitem_SYSTEM_StandMode->enabled = systemSettings.settings.WakeInputMode;
   comboitem_SYSTEM_BootMode->enabled  = !systemSettings.settings.WakeInputMode;
@@ -146,23 +150,38 @@ static void setProfile(uint32_t *val) {
   profile=*val;
 }
 //=========================================================
-
-static void setButtonWake(uint32_t *val) {
-  systemSettings.settings.wakeOnButton = *val;
+static void setButtonSleepWake(uint32_t *val) {
+  systemSettings.settings.wakeSlpButton = *val;
 }
-static void * getButtonWake() {
-  temp = systemSettings.settings.wakeOnButton;
+static void * getButtonSleepWake() {
+  temp = systemSettings.settings.wakeSlpButton;
   return &temp;
 }
-
-static void setShakeWake(uint32_t *val) {
-  systemSettings.settings.wakeOnShake = *val;
+//=========================================================
+static void setButtonStandbyWake(uint32_t *val) {
+  systemSettings.settings.wakeStbyButton = *val;
 }
-static void * getShakeWake() {
-  temp = systemSettings.settings.wakeOnShake;
+static void * getButtonStandbyWake() {
+  temp = systemSettings.settings.wakeStbyButton;
   return &temp;
 }
-
+//=========================================================
+static void setShakeSleepWake(uint32_t *val) {
+  systemSettings.settings.wakeSlpShake = *val;
+}
+static void * getShakeSleepWake() {
+  temp = systemSettings.settings.wakeSlpShake;
+  return &temp;
+}
+//=========================================================
+static void setShakeStandbyWake(uint32_t *val) {
+  systemSettings.settings.wakeStbyShake = *val;
+}
+static void * getShakeStandbyWake() {
+  temp = systemSettings.settings.wakeStbyShake;
+  return &temp;
+}
+//=========================================================
 
 static void SYSTEM_init(screen_t *scr){
   default_init(scr);
@@ -268,19 +287,6 @@ static void SYSTEM_create(screen_t *scr){
   edit->options = InitMode;
   edit->numberOfOptions = 2;
 
-  //  [ Encoder wake Widget ]
-  //
-  newComboMultiOption(w, "Btn wake", &edit,&comboitem_SYSTEM_ButtonWake);
-  dis=&edit->inputData;
-  dis->getData = &getButtonWake;
-  edit->big_step = 1;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&setButtonWake;
-  edit->max_value = 1;
-  edit->min_value = 0;
-  edit->options =OffOn;
-  edit->numberOfOptions = 2;
-
   //  [ Boot mode Widget ]
   //
   newComboMultiOption(w, "Boot", &edit, &comboitem_SYSTEM_BootMode);
@@ -292,19 +298,58 @@ static void SYSTEM_create(screen_t *scr){
   edit->max_value = mode_run;
   edit->min_value = mode_sleep;
   edit->options = InitMode;
-  edit->numberOfOptions = 3;
 
-  //  [ Shake wake Widget ]
+  //  [ Encoder wake from sleep  Widget ]
   //
-  newComboMultiOption(w, "Shake wake", &edit,&comboitem_SYSTEM_ShakeWake);
+  newComboMultiOption(w, "Btn Slp", &edit,&comboitem_SYSTEM_ButtonSleepWake);
   dis=&edit->inputData;
-  dis->getData = &getShakeWake;
+  dis->getData = &getButtonSleepWake;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setShakeWake;
+  edit->setData = (void (*)(void *))&setButtonSleepWake;
   edit->max_value = 1;
   edit->min_value = 0;
-  edit->options = OffOn;
+  edit->options =OffOn;
+  edit->numberOfOptions = 2;
+
+  //  [ Encoder wake from standby Widget ]
+  //
+  newComboMultiOption(w, "Btn Stby", &edit,&comboitem_SYSTEM_ButtonStandbyWake);
+  dis=&edit->inputData;
+  dis->getData = &getButtonStandbyWake;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setButtonStandbyWake;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options =OffOn;
+  edit->numberOfOptions = 2;
+  edit->numberOfOptions = 3;
+
+  //  [ Shake wake from sleep  Widget ]
+  //
+  newComboMultiOption(w, "Shake Slp", &edit,&comboitem_SYSTEM_ShakeSleepWake);
+  dis=&edit->inputData;
+  dis->getData = &getShakeSleepWake;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setShakeSleepWake;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options =OffOn;
+  edit->numberOfOptions = 2;
+
+  //  [ Shake wake from standby Widget ]
+  //
+  newComboMultiOption(w, "Shake Stby", &edit,&comboitem_SYSTEM_ShakeStandbyWake);
+  dis=&edit->inputData;
+  dis->getData = &getShakeStandbyWake;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setShakeStandbyWake;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options =OffOn;
   edit->numberOfOptions = 2;
 
   //  [ Encoder inversion Widget ]
