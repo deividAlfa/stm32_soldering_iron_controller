@@ -732,9 +732,11 @@ void main_screen_draw(screen_t *scr){
   u8g2_SetDrawColor(&u8g2, WHITE);
 
   if(!scr_refresh){
-    drawPowerBar(0);
+    if(mainScr.ironStatus != status_error){
+      drawPowerBar(0);
+      drawPlot(0);
+    }
     drawIcons(0);
-    drawPlot(0);
     return;
   }
 
