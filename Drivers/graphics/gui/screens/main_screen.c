@@ -285,6 +285,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
   if(error & _ACTIVE){
     mainScr.ironStatus = status_error;
+    current_temp=0;
   }
   else{
     mainScr.ironStatus = status_ok;
@@ -294,7 +295,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   // Also ignores activity if screen is dimmed (first action only wakes up the screen)
   if(input!=Rotate_Nothing || Iron.newActivity){
     mainScr.idleTick=currentTime;
-    if(contrast<systemSettings.settings.contrast){
+    if(contrast<systemSettings.settings.contrast && mainScr.dimDisplay<5){
       mainScr.dimDisplay=5;
       input=Rotate_Nothing;
     }
