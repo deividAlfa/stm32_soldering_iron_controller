@@ -9,7 +9,7 @@
 #include "screen_common.h"
 
 #define SCREENSAVER
-
+#define PWR_BAR_WIDTH 64
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -198,7 +198,7 @@ static void updateIronPower() {
     tmpPwr = tmpPwr<<12;
     stored = ( ((stored<<3)-stored)+tmpPwr+(1<<11))>>3 ;
     tmpPwr = stored>>12;
-    tmpPwr = (tmpPwr*205)>>8;
+    tmpPwr = (tmpPwr*(256*PWR_BAR_WIDTH/100))>>8;
     mainScr.lastPwr=tmpPwr;
   }
 }
@@ -331,7 +331,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   if(Iron.Error.Flags & _ACTIVE){
     mainScr.ironStatus = status_error;
     current_temp=0;
-    mainScr.shakeActive=0;
+    if(mainScr.shakeActive){
+      mainScr.shakeActive=3;
+    }
   }
   else{
     mainScr.ironStatus = status_ok;
@@ -387,9 +389,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   // Handle shake wake icon drawing and timeout
   if( !mainScr.shakeActive && Iron.shakeActive){
     Iron.shakeActive=0;
-    if(current_mode == mode_run){
-      mainScr.shakeActive=1;
-    }
+    mainScr.shakeActive=1;
   }
   else if(mainScr.shakeActive==2 && (current_time-Iron.lastShakeTime)>50){
     mainScr.shakeActive=3; // Clear
@@ -575,12 +575,12 @@ static void drawIcons(uint8_t refresh){
 
   if(mainScr.shakeActive==1 || (mainScr.shakeActive==2 && refresh) ){ //1 = new draw, 2 = already drawn
     mainScr.shakeActive=2;
-    u8g2_DrawXBMP(&u8g2, (OledWidth-shakeXBM[1])/2, 0, shakeXBM[0], shakeXBM[1], &shakeXBM[2]);
+    u8g2_DrawXBMP(&u8g2, 47, OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1], &shakeXBM[2]);
   }
   else if(mainScr.shakeActive==3){  // 3 = clear
     mainScr.shakeActive=0;
     u8g2_SetDrawColor(&u8g2,BLACK);
-    u8g2_DrawBox(&u8g2, (OledWidth-shakeXBM[1])/2, 0, shakeXBM[0], shakeXBM[1]);
+    u8g2_DrawBox(&u8g2, 47, OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1]);
     u8g2_SetDrawColor(&u8g2,WHITE);
   }
 }
@@ -647,12 +647,20 @@ static void drawMode(void){
 
   switch(getCurrentMode()){
 
+    case mode_run:
+    {
+      char SetTemp[6];
+      sprintf(SetTemp,"%u\260C", Iron.CurrentSetTemperature);
+      u8g2_DrawStr(&u8g2, 44, 0, SetTemp);
+      break;
+    }
+
     case mode_sleep:
-      u8g2_DrawStr(&u8g2, 42, 0, "SLEEP");
-    break;
+      u8g2_DrawStr(&u8g2, 41, 0, "SLEEP");
+      break;
 
     case mode_standby:
-      u8g2_DrawStr(&u8g2, 48, 0, "STBY");
+      u8g2_DrawStr(&u8g2, 46, 0, "STBY");
       break;
 
     case mode_boost:
@@ -675,11 +683,11 @@ static void drawPowerBar(uint8_t refresh){
   if(refresh){                          // Update every 10mS or if screen was erased
     if(Screen_main.refresh<screen_Erase){                           // If screen not erased
       u8g2_SetDrawColor(&u8g2,BLACK);                               // Draw a black square to wipe old widget data
-      u8g2_DrawBox(&u8g2, 47 , OledHeight-8, 80, 8);
+      u8g2_DrawBox(&u8g2, OledWidth-PWR_BAR_WIDTH , OledHeight-8, PWR_BAR_WIDTH, 8);
       u8g2_SetDrawColor(&u8g2,WHITE);
     }
-    u8g2_DrawBox(&u8g2, 47, OledHeight-7, mainScr.lastPwr, 6);
-    u8g2_DrawRFrame(&u8g2, 47, OledHeight-8, 80, 8, 2);
+    u8g2_DrawBox(&u8g2, OledWidth-PWR_BAR_WIDTH, OledHeight-7, mainScr.lastPwr, 6);
+    u8g2_DrawRFrame(&u8g2, OledWidth-PWR_BAR_WIDTH, OledHeight-8, PWR_BAR_WIDTH, 8, 2);
   }
 }
 
