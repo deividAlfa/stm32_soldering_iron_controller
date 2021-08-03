@@ -193,6 +193,13 @@ Reset the current profile (iron/tips) to default.<br>
 Reset all profiles to default.<br>
     - **All**<br>
 Reset everything.<br>
+  - **NTC MENU**<br>
+Adjust NTC settings:<br>
+    - **Pull mode**<br>
+Adjust as your circuit: Pull up or pull down.<br>
+    - **Pull resistance**<br>
+    - **NTC resistance**<br>
+    - **NTC beta**<br>
   - **SW:**<br>
 Displays the current software version. Actually, it's the build date.<br>
   - **HW:**<br>
