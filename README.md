@@ -4,7 +4,7 @@
 
 * [Project details](#Details)
 * [Compatibility](#Compatibility)
-* [Operations guide](Readme_files/Operation.md)
+* [Operation manual](Readme_files/Operation.md)
 * [Frequently asked questions](#faq)
 * [Building](#build)
 * [Creating a .ioc file from scratch](Readme_files/Creating_ioc.md)
