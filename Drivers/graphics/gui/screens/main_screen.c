@@ -350,11 +350,10 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
   if(systemSettings.settings.screenDimming){
     if(mainScr.dimStep==0){
-      // Wake up screen. If source was the encoder, block it the first time
+      // Wake up screen.
       if(contrast<systemSettings.settings.contrast){
         if(Iron.shakeActive || current_mode!=mode_sleep || input!=Rotate_Nothing){
           mainScr.dimStep=5;
-          input=Rotate_Nothing;
           mainScr.dimTimer = current_time;
         }
       }
