@@ -232,6 +232,12 @@ static void system_onEnter(screen_t *scr){
   profile=systemSettings.settings.currentProfile;
 }
 
+static void system_onExit(screen_t *scr){
+  if(profile!=systemSettings.settings.currentProfile){
+    loadProfile(profile);
+  }
+}
+
 static void system_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
@@ -539,6 +545,7 @@ void system_screen_setup(screen_t *scr){
   screen_t *sc;
 
   scr->onEnter = &system_onEnter;
+  scr->onExit = &system_onExit;
   scr->processInput=&autoReturn_ProcessInput;
   scr->create = &system_create;
 
