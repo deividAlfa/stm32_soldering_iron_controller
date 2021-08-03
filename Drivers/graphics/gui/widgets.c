@@ -993,7 +993,7 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
   selectable_widget_t* sel = extractSelectablePartFromWidget(w);
   editable_widget_t* edit = extractEditablePartFromWidget(w);
   comboBox_widget_t* combo = NULL;
-  if(!w || (input == Rotate_Nothing)){ return -1;  }
+  if(!w || !w->enabled || (input == Rotate_Nothing)){ return -1;  }
   if(!sel) {  return -2;  }
 
   if(w->type==widget_combo){
