@@ -11,6 +11,7 @@
 #include "screen.h"
 extern screen_t *current_screen;
 extern uint32_t current_time;
+extern uint32_t screen_timer;
 
 void oled_addScreen(screen_t *screen, uint8_t index);
 void oled_draw(void);

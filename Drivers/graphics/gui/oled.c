@@ -15,6 +15,7 @@ struct mallinfo mi;
 static screen_t *screens = NULL;
 screen_t *current_screen;
 uint32_t current_time;
+uint32_t screen_timer;
 static RE_State_t* RE_State;
 
 RE_Rotation_t (*RE_GetData)(RE_State_t*);
@@ -47,7 +48,6 @@ void oled_addScreen(screen_t *screen, uint8_t index) {
 void oled_draw() {
 
   if(oled.status!=oled_idle) { return; }                // If Oled busy, skip update
-  current_time = HAL_GetTick();
   current_screen->draw(current_screen);
   update_display();
 }
@@ -57,6 +57,7 @@ void oled_update() {
     current_time = HAL_GetTick();
     current_screen->update(current_screen);
   }
+  current_time = HAL_GetTick();
   oled_draw();
 }
 
@@ -154,15 +155,13 @@ void oled_processInput(void) {
   int ret = current_screen->processInput(current_screen, RE_Rotation, RE_State);
   if(ret > 0) {   // -1 do nothing, -2 nothing processed
     screen_t *scr = screens;
-
-
+    current_time = HAL_GetTick();
     while(scr) {
       if(scr->index == ret) {
         FillBuffer(BLACK, fill_dma);
         scr->refresh=screen_Erased;
 
         if(current_screen->onExit){
-          current_time = HAL_GetTick();
           current_screen->onExit(scr);
         }
 
@@ -178,17 +177,17 @@ void oled_processInput(void) {
           oled_restore_comboStatus(scr);                // Restore combo position
           mi = mallinfo();
         }
+
         current_time = HAL_GetTick();
+        screen_timer = current_time;
+
         scr->init(scr);
         if(scr->onEnter){
-          current_time = HAL_GetTick();
           scr->onEnter(current_screen);
         }
         RE_Rotation=Rotate_Nothing;                     // Force first pass without activity to update screen
-        current_time = HAL_GetTick();
         scr->processInput(scr, RE_Rotation, RE_State);
         if(scr->update){
-          current_time = HAL_GetTick();
           scr->update(scr);
         }
         current_screen = scr;
