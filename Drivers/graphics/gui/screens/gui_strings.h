@@ -16,6 +16,6 @@ extern char *tempUnit[];
 extern char *wakeMode[];
 extern char *encMode[];
 extern char *InitMode[];
-extern char *filterMode[];
-extern char *menuLabels[];
+//extern char *filterMode[];
+
 #endif /* GRAPHICS_GUI_STRINGS_H_ */
