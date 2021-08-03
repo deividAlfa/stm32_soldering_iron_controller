@@ -279,7 +279,7 @@ void resetSystemSettings(void) {
   systemSettings.settings.buzzerMode        = buzzer_Off;
   systemSettings.settings.buttonWakeMode    = wake_all;
   systemSettings.settings.shakeWakeMode     = wake_all;
-  systemSettings.settings.WakeInputMode     = wakeInputmode_shake;
+  systemSettings.settings.WakeInputMode     = mode_shake;
   systemSettings.settings.StandMode         = mode_sleep;
   systemSettings.settings.EncoderMode       = RE_Mode_One;
   systemSettings.settings.NotInitialized    = initialized;

@@ -40,8 +40,8 @@
 #define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
 
 enum{
-  wakeInputmode_shake     = 0,
-  wakeInputmode_stand     = 1,
+  mode_shake              = 0,
+  mode_stand              = 1,
 
   wake_off                = 0,
   wake_standby            = 1,

@@ -63,7 +63,7 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
   Iron.Pwm_Channel    = pwmchannel;
   Iron.Error.Flags    = _NOERROR;
 
-  if(systemSettings.settings.WakeInputMode == wakeInputmode_shake){
+  if(systemSettings.settings.WakeInputMode == mode_shake){
     setCurrentMode(systemSettings.settings.initMode);
   }
   else{
@@ -490,7 +490,7 @@ void readWake(void){
 
     if(last_wake!=now_wake){                                            // If wake sensor input changed
       last_wake=now_wake;
-      if(systemSettings.settings.WakeInputMode==wakeInputmode_stand){   // In stand mode
+      if(systemSettings.settings.WakeInputMode==mode_stand){   // In stand mode
         if(now_wake){
           setModefromStand(mode_run);
         }

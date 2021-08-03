@@ -189,7 +189,7 @@ int main(void)
 void Program_Handler(void) {
   handle_buzzer();                                                    // Handle buzzer state
   RE_Process(&RE1_Data);                                              // Handle Encoder
-  if(systemSettings.settings.WakeInputMode!=wakeInputmode_stand){
+  if(systemSettings.settings.WakeInputMode!=mode_stand){
     readWake();
   }
 }
