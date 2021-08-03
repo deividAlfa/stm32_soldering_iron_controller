@@ -10,13 +10,6 @@
 
 screen_t Screen_settings;
 
-
-static void SETTINGS_init(screen_t *scr) {
-  default_init(scr);
-  screenTimer=current_time;
-}
-
-
 static void SETTINGS_create(screen_t *scr) {
   widget_t* w;
   //  [ SETTINGS MAIN SCREEN ]
@@ -47,7 +40,6 @@ static void SETTINGS_OnEnter(screen_t *scr) {
 
 
 void settings_screen_setup(screen_t *scr) {
-  scr->init = &SETTINGS_init;
   scr->create = &SETTINGS_create;
   scr->onEnter = &SETTINGS_OnEnter;
   scr->processInput=&autoReturn_ProcessInput;

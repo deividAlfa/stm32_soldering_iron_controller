@@ -14,7 +14,6 @@
 // Boot Screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
 uint8_t status;
-uint32_t splash_time;
 
 screen_t Screen_boot;
 static widget_t *Widget_profile_edit;
@@ -138,7 +137,7 @@ void boot_screen_draw(screen_t *scr){
 
 int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 
-  if(current_time - splash_time > SPLASH_TIMEOUT){        // After splash timeout
+  if(current_time - screen_timer > SPLASH_TIMEOUT){        // After splash timeout
 
     if(!systemSettings.setupMode){
       return screen_main;
@@ -177,7 +176,6 @@ void boot_screen_init(screen_t * scr){
     setSafeMode(enable);
     systemSettings.setupMode=setup_On;
   }
-  splash_time = current_time;
   u8g2_SetDrawColor(&u8g2,WHITE);
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM[0], splashXBM[1], &splashXBM[2]);
 }

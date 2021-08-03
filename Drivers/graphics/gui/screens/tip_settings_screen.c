@@ -162,12 +162,12 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
       return x;
     }
   }
-  else if((current_time-screenTimer)>30000){
+  else if((current_time-screen_timer)>30000){
     return screen_main;
   }
 
   if(input!=Rotate_Nothing){
-    screenTimer=current_time;
+    screen_timer=current_time;
   }
   else if((current_time-last_update)>99){
     last_update=current_time;

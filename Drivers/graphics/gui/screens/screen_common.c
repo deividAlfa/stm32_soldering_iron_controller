@@ -6,7 +6,6 @@
  */
 #include "screen_common.h"
 
-uint32_t screenTimer;
 int32_t temp;
 uint8_t profile, Selected_Tip;
 char *tipName;
@@ -57,7 +56,7 @@ int longClickReturn(widget_t *w){
 int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
   updatePlot();
   if(input!=Rotate_Nothing){
-    screenTimer=current_time;
+    screen_timer=current_time;
   }
   if(input==LongClick){
     int x = longClickReturn(scr->current_widget);
@@ -66,7 +65,7 @@ int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     }
   }
 
-  if((current_time-screenTimer)>15000){
+  if((current_time-screen_timer)>15000){
     return screen_main;
   }
   return default_screenProcessInput(scr, input, state);

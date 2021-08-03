@@ -222,7 +222,6 @@ static int cancelAction(widget_t* w) {
 
 static void Cal_init(screen_t *scr) {
   default_init(scr);
-  screenTimer = current_time;
   errorTimer=0;
   error=0;
 }
@@ -263,9 +262,9 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
   }
   else{
     if(input!=Rotate_Nothing){
-      screenTimer=current_time;
+      screen_timer=current_time;
     }
-    if(input==LongClick || (current_time-screenTimer)>15000){
+    if(input==LongClick || (current_time-screen_timer)>15000){
       return screen_main;
     }
   }
