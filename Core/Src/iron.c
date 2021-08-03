@@ -466,15 +466,15 @@ void IronWake(bool source){                                                     
   }
 
   if(Iron.CurrentMode==mode_standby){
-    if( (source==wakeButton && !systemSettings.settings.wakeStbyButton) ||
-        (source==wakeInput && !systemSettings.settings.wakeStbyShake)){
+    if( (source==wakeButton && !(systemSettings.settings.buttonWakeMode & wake_standby)) ||
+        (source==wakeInput && !(systemSettings.settings.shakeWakeMode & wake_standby))){
 
       return;
     }
   }
   else if(Iron.CurrentMode==mode_sleep){
-    if( (source==wakeButton && !systemSettings.settings.wakeSlpButton) ||
-        (source==wakeInput && !systemSettings.settings.wakeSlpShake)){
+    if( (source==wakeButton && !(systemSettings.settings.buttonWakeMode & wake_sleep)) ||
+        (source==wakeInput && !(systemSettings.settings.shakeWakeMode & wake_sleep))){
 
       return;
     }
@@ -539,7 +539,7 @@ void checkIronError(void){
     }
   }
   else if (Iron.Error.active && !Err.Flags){                                                // If global flag set, but no errors
-    if((CurrentTime-Iron.LastErrorTime)>systemSettings.settings.errorDelay){                // Check enough time has passed
+    if((CurrentTime-Iron.LastErrorTime)>(systemSettings.settings.errorDelay*100)){                // Check enough time has passed
       TIP.EMA_of_Input = TIP.last_raw<<12;
       TIP.last_avg = TIP.last_raw;
       readTipTemperatureCompensated(update_reading,read_Avg);

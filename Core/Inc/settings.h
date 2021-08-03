@@ -34,7 +34,7 @@
 #endif
 
 //#define SWSTRING        "SW: v1.10"                               // For releases
-#define SWSTRING          "SW: 2021-08-03a"                          // For git
+#define SWSTRING          "SW: 2021-08-03b"                          // For git
 #define SETTINGS_VERSION  7                                         // Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize         2                                         // In KB
 #define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
@@ -43,11 +43,10 @@ enum{
   wakeInputmode_shake     = 0,
   wakeInputmode_stand     = 1,
 
-  wakeButton_Off          = 0,
-  wakeButton_On           = 1,
-
-  wakeShake_Off           = 0,
-  wakeShake_On            = 1,
+  wake_off                = 0,
+  wake_standby            = 1,
+  wake_sleep              = 2,
+  wake_all                = 3,
 
   wakeInput               = 0,
   wakeButton              = 1,
@@ -160,21 +159,19 @@ typedef struct{
   uint8_t       tempUnit;
   uint8_t       activeDetection;
   uint8_t       buzzerMode;
-  uint8_t       wakeSlpButton;
-  uint8_t       wakeStbyButton;
-  uint8_t       wakeSlpShake;
-  uint8_t       wakeStbyShake;
+  uint8_t       buttonWakeMode;                                     // 0=Nothing, 1= standby, 2= sleep,  3= both
+  uint8_t       shakeWakeMode;
   uint8_t       WakeInputMode;
   uint8_t       StandMode;
   uint8_t       Pullup;
   uint8_t       EncoderMode;
-  uint16_t      errorDelay;
-  uint16_t      guiUpdateDelay;
-  uint16_t      lvp;
+  uint8_t       lvp;
+  uint8_t       errorDelay;
+  uint8_t       guiUpdateDelay;
   uint16_t      NTC_Beta;
-  uint32_t      Pull_res;
-  uint32_t      NTC_res;
-  uint32_t      version;                                            // Used to track if a reset is needed on firmware upgrade
+  uint16_t      Pull_res;
+  uint16_t      NTC_res;
+  uint16_t      version;                                            // Used to track if a reset is needed on firmware upgrade
 }settings_t;
 
 typedef __attribute__((aligned(4)))  struct{

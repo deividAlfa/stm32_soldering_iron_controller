@@ -267,8 +267,8 @@ void resetSystemSettings(void) {
   systemSettings.settings.contrast          = 255;
   systemSettings.settings.screenDimming     = true;
   systemSettings.settings.OledOffset        = OLED_OFFSET;
-  systemSettings.settings.errorDelay        = 100;
-  systemSettings.settings.guiUpdateDelay    = 200;
+  systemSettings.settings.errorDelay        = 1;                    // *100mS
+  systemSettings.settings.guiUpdateDelay    = 2;                    // *100mS
   systemSettings.settings.tempUnit          = mode_Celsius;
   systemSettings.settings.tempStep          = 10;                   // 10º steps
   systemSettings.settings.activeDetection   = true;
@@ -277,10 +277,8 @@ void resetSystemSettings(void) {
   systemSettings.settings.currentProfile    = profile_None;
   systemSettings.settings.initMode          = mode_run;
   systemSettings.settings.buzzerMode        = buzzer_Off;
-  systemSettings.settings.wakeSlpButton     = wakeButton_On;
-  systemSettings.settings.wakeStbyButton    = wakeButton_On;
-  systemSettings.settings.wakeSlpShake      = wakeShake_On;
-  systemSettings.settings.wakeStbyShake     = wakeShake_On;
+  systemSettings.settings.buttonWakeMode    = wake_all;
+  systemSettings.settings.shakeWakeMode     = wake_all;
   systemSettings.settings.WakeInputMode     = wakeInputmode_shake;
   systemSettings.settings.StandMode         = mode_sleep;
   systemSettings.settings.EncoderMode       = RE_Mode_One;
@@ -294,8 +292,8 @@ void resetSystemSettings(void) {
   #else
   #error NO PULL MODE DEFINED
   #endif
-  systemSettings.settings.Pull_res          = PULL_RES;
-  systemSettings.settings.NTC_res           = NTC_RES;
+  systemSettings.settings.Pull_res          = PULL_RES/100;
+  systemSettings.settings.NTC_res           = NTC_RES/100;
   systemSettings.settings.NTC_Beta          = NTC_BETA;
 #endif
 

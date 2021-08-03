@@ -138,11 +138,11 @@ static void setfilterFactor(uint32_t *val) {
 }
 //=========================================================
 static void * geterrorDelay() {
-  temp = systemSettings.settings.errorDelay;
+  temp = systemSettings.settings.errorDelay*100;
   return &temp;
 }
 static void seterrorDelay(uint32_t *val) {
-  systemSettings.settings.errorDelay = *val;
+  systemSettings.settings.errorDelay = *val/100;
 }
 //=========================================================
 static void * getNoIronADC() {

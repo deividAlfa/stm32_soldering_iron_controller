@@ -323,7 +323,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   mainScr.updateReadings = 0;
 
   // Display values update timer
-  if((current_time-mainScr.updateTimer)>systemSettings.settings.guiUpdateDelay){
+  if((current_time-mainScr.updateTimer)>(systemSettings.settings.guiUpdateDelay*100)){
     mainScr.updateReadings=1;
     mainScr.updateTimer=current_time;
   }

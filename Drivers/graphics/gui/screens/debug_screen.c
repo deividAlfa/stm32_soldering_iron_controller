@@ -94,7 +94,7 @@ int debug2_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *s
 //-------------------------------------------------------------------------------------------------------------------------------
 void debug_screenDraw(screen_t *scr){
   static uint32_t time=0;
-  if(current_time-time > systemSettings.settings.guiUpdateDelay){
+  if(current_time-time > (systemSettings.settings.guiUpdateDelay*100)){
     char str[16];
     time = current_time;
     u8g2_SetFont(&u8g2,default_font  );
