@@ -415,12 +415,12 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           return screen_settings;
 
         case Rotate_Increment_while_click:
-          blockInput(100);
+          //blockInput(100);
           mainScr.setMode=main_tipselect;
           break;
 
         case Rotate_Decrement_while_click:
-          blockInput(100);
+          //blockInput(100);
           if(Iron.CurrentMode>mode_standby){
             setCurrentMode(mode_standby);
           }
@@ -441,7 +441,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;
 
         case Click:
-          blockInput(100);
+          //blockInput(100);
           if(Iron.CurrentMode==mode_boost){
             setCurrentMode(mode_run);
             break;
@@ -502,7 +502,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           return screen_tip_settings;
 
         case Click:
-          blockInput(100);
+          //blockInput(100);
           mainScr.setMode=main_irontemp;
           break;
 
@@ -531,7 +531,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;;
 
         case Click:
-          blockInput(100);
+          //blockInput(100);
           if(mainScr.ironStatus != status_error){
             setCurrentMode(mode_boost);
           }

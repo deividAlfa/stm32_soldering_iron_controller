@@ -224,32 +224,6 @@ static void iron_create(screen_t *scr){
   edit->min_value = 50;
   edit->setData = (void (*)(void *))&setMinTemp;
 
-  //  [ Boost Time Widget ]
-  //
-  newComboEditable(w, "Boost time", &edit, NULL);
-  dis=&edit->inputData;
-  dis->endString="s";
-  dis->reservedChars=5;
-  dis->getData = &getBoostTime;
-  edit->big_step = 20;
-  edit->step = 5;
-  edit->max_value = 120;
-  edit->min_value = 10;
-  edit->setData = (void (*)(void *))&setBoostTime;
-
-  //  [ Boost Temp Widget ]
-  //
-  newComboEditable(w, "Boost temp", &edit, NULL);
-  editable_IRON_BoostTemp = edit;
-  dis=&edit->inputData;
-  dis->reservedChars=5;
-  dis->getData = &getBoostTemp;
-  edit->big_step = 50;
-  edit->step = 10;
-  edit->max_value = 200;
-  edit->min_value = 10;
-  edit->setData = (void (*)(void *))&setBoostTemp;
-
   //  [ Stby Time Widget ]
   //
   newComboEditable(w, "Stby time", &edit, NULL);
@@ -287,6 +261,32 @@ static void iron_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setSleepTime;
   edit->max_value = 60;
   edit->min_value = 1;
+
+  //  [ Boost Time Widget ]
+  //
+  newComboEditable(w, "Boost time", &edit, NULL);
+  dis=&edit->inputData;
+  dis->endString="s";
+  dis->reservedChars=5;
+  dis->getData = &getBoostTime;
+  edit->big_step = 20;
+  edit->step = 5;
+  edit->max_value = 120;
+  edit->min_value = 10;
+  edit->setData = (void (*)(void *))&setBoostTime;
+
+  //  [ Boost Temp Widget ]
+  //
+  newComboEditable(w, "Boost add", &edit, NULL);
+  editable_IRON_BoostTemp = edit;
+  dis=&edit->inputData;
+  dis->reservedChars=5;
+  dis->getData = &getBoostTemp;
+  edit->big_step = 50;
+  edit->step = 10;
+  edit->max_value = 200;
+  edit->min_value = 10;
+  edit->setData = (void (*)(void *))&setBoostTemp;
 
   #ifdef USE_VIN
   //  [ Power Widget ]

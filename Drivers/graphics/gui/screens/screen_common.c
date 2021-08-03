@@ -6,8 +6,8 @@
  */
 #include "screen_common.h"
 
-int32_t temp;
-uint8_t profile, Selected_Tip;
+int32_t temp, temp2, temp3;
+uint8_t status, profile, Selected_Tip;
 char *tipName;
 bool disableTipCopy;
 bool newTip;

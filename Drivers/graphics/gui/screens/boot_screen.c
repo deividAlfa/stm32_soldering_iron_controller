@@ -13,8 +13,6 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 // Boot Screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
-uint8_t status;
-
 screen_t Screen_boot;
 static widget_t *Widget_profile_edit;
 static uint8_t boot_step=0;
@@ -113,10 +111,11 @@ const uint8_t splashXBM[] = {
 
 //=========================================================
 static void * getProfile() {
+  temp = profile;
   return &temp;
 }
 static void setProfile(int32_t *val) {
-  temp = *val;
+  profile=*val;
 }
 //=========================================================
 
@@ -139,8 +138,8 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 
   uint16_t contrast = getContrast();
   if(contrast<systemSettings.settings.contrast){
-    if(current_time-temp>9){
-      temp=current_time;
+    if(current_time-temp2>9){
+      temp2=current_time;
       if((contrast+5)<systemSettings.settings.contrast){
         contrast+=5;
       }
@@ -164,7 +163,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
       scr->refresh = screen_Erase;
     }
     else if((boot_step==2) && (((editable_widget_t*)Widget_profile_edit->content)->selectable.state!=widget_edit)){
-      loadProfile((uint8_t)profile);
+      loadProfile(profile);
       saveSettingsFromMenu(save_Settings);
       boot_step++;
     }
@@ -185,7 +184,7 @@ void boot_screen_init(screen_t * scr){
   default_init(scr);
 
   profile=systemSettings.settings.currentProfile;
-  if( (systemSettings.settings.NotInitialized!=initialized) || (systemSettings.settings.currentProfile>profile_C210) ){
+  if( (systemSettings.settings.NotInitialized!=initialized) || (profile>profile_C210) ){
     profile=profile_T12;
     setSafeMode(enable);
     systemSettings.setupMode=setup_On;
@@ -193,7 +192,7 @@ void boot_screen_init(screen_t * scr){
   u8g2_SetDrawColor(&u8g2,WHITE);
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM[0], splashXBM[1], &splashXBM[2]);
   setContrast(0);
-  temp=current_time;
+  temp2=current_time;
 }
 
 
