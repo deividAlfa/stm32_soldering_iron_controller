@@ -200,7 +200,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Max Temp Widget ]
   //
-  newComboEditable(w, "Max", &edit, NULL);
+  newComboEditable(w, "Max temp", &edit, NULL);
   editable_IRON_MaxTemp=edit;
   dis=&edit->inputData;
   dis->reservedChars=5;
@@ -213,7 +213,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Min Temp Widget ]
   //
-  newComboEditable(w, "Min", &edit, NULL);
+  newComboEditable(w, "Min temp", &edit, NULL);
   editable_IRON_MinTemp=edit;
   dis=&edit->inputData;
   dis->reservedChars=5;
