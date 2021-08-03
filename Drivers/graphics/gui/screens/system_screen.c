@@ -11,10 +11,8 @@
 screen_t Screen_system;
 screen_t Screen_system_ntc;
 
-static comboBox_item_t *comboitem_system_ButtonSleepWake;
-static comboBox_item_t *comboitem_system_ButtonStandbyWake;
-static comboBox_item_t *comboitem_system_ShakeSleepWake;
-static comboBox_item_t *comboitem_system_ShakeStandbyWake;
+static comboBox_item_t *comboitem_system_ButtonWakeMode;
+static comboBox_item_t *comboitem_system_ShakeWakeMode;
 static comboBox_item_t *comboitem_system_InitMode;
 static comboBox_item_t *comboitem_system_StandMode;
 static comboBox_item_t *comboitem_system_BootMode;
@@ -89,13 +87,15 @@ static void setActiveDetection(uint32_t *val) {
 //=========================================================
 static void * getWakeMode() {
   temp = systemSettings.settings.WakeInputMode;
-  comboitem_system_ButtonSleepWake->enabled = !systemSettings.settings.WakeInputMode;   // 0=shake, 1=stand
-  comboitem_system_ButtonStandbyWake->enabled = !systemSettings.settings.WakeInputMode;
-  comboitem_system_ShakeSleepWake->enabled = !systemSettings.settings.WakeInputMode;
-  comboitem_system_ShakeStandbyWake->enabled = !systemSettings.settings.WakeInputMode;
-  comboitem_system_InitMode->enabled = !systemSettings.settings.WakeInputMode;
-  comboitem_system_StandMode->enabled = systemSettings.settings.WakeInputMode;
-  comboitem_system_BootMode->enabled  = !systemSettings.settings.WakeInputMode;
+
+  bool mode = (systemSettings.settings.WakeInputMode==mode_shake);   // 0=shake, 1=stand
+
+  comboitem_system_StandMode->enabled       = !mode;
+  comboitem_system_BootMode->enabled        = mode;
+  comboitem_system_InitMode->enabled        = mode;
+  comboitem_system_ShakeWakeMode->enabled   = mode;
+  comboitem_system_ButtonWakeMode->enabled  = mode;
+
   return &temp;
 }
 static void setWakeMode(uint32_t *val) {
@@ -185,18 +185,18 @@ static void * get_NTC_beta() {
 }
 //=========================================================
 static void set_NTC_res(uint32_t *val) {
-  backup_NTC_res = *val*100;
+  backup_NTC_res = *val;
 }
 static void * get_NTC_res() {
-  temp = backup_NTC_res/100;
+  temp = backup_NTC_res;
   return &temp;
 }
 //=========================================================
 static void set_Pull_res(uint32_t *val) {
-  backup_Pull_res = *val*100;
+  backup_Pull_res = *val;
 }
 static void * get_Pull_res() {
-  temp = backup_Pull_res/100;
+  temp = backup_Pull_res;
   return &temp;
 }
 //=========================================================
@@ -219,9 +219,10 @@ static int saveNTC() {
 }
 //=========================================================
 
-
-static void system_init(screen_t *scr){
-  default_init(scr);
+static void system_onEnter(screen_t *scr){
+  if(scr==&Screen_settings){
+    comboResetIndex(Screen_system.widgets);
+  }
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     editable_system_TempStep->inputData.endString="\260F";
   }
@@ -229,12 +230,6 @@ static void system_init(screen_t *scr){
     editable_system_TempStep->inputData.endString="\260C";
   }
   profile=systemSettings.settings.currentProfile;
-}
-
-static void system_onEnter(screen_t *scr){
-  if(scr==&Screen_settings){
-    comboResetIndex(Screen_system.widgets);
-  }
 }
 
 static void system_create(screen_t *scr){
@@ -304,8 +299,8 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setWakeMode;
-  edit->max_value = wakeInputmode_stand;
-  edit->min_value = wakeInputmode_shake;
+  edit->max_value = mode_stand;
+  edit->min_value = mode_shake;
   edit->options = wakeMode;
   edit->numberOfOptions = 2;
 
@@ -338,7 +333,7 @@ static void system_create(screen_t *scr){
 
   //  [ Encoder wake mode  Widget ]
   //
-  newComboMultiOption(w, "Btn wake", &edit,&comboitem_system_ButtonSleepWake);
+  newComboMultiOption(w, "Btn wake", &edit,&comboitem_system_ButtonWakeMode);
   dis=&edit->inputData;
   dis->getData = &getButtonWakeMode;
   edit->big_step = 1;
@@ -351,7 +346,7 @@ static void system_create(screen_t *scr){
 
   //  [ Shake wake mode Widget ]
   //
-  newComboMultiOption(w, "Shake wake", &edit,&comboitem_system_ShakeStandbyWake);
+  newComboMultiOption(w, "Shake wake", &edit,&comboitem_system_ShakeWakeMode);
   dis=&edit->inputData;
   dis->getData = &getShakeWakeMode;
   edit->big_step = 1;
@@ -463,8 +458,7 @@ static void system_create(screen_t *scr){
 }
 
 
-static void system_ntc_init(screen_t *scr){
-  default_init(scr);
+static void system_ntc_onEnter(screen_t *scr){
   comboResetIndex(Screen_system_ntc.widgets);
   backup_Pullup=systemSettings.settings.Pullup;
   backup_Pull_res=systemSettings.settings.Pull_res;
@@ -544,14 +538,13 @@ static void system_ntc_create(screen_t *scr){
 void system_screen_setup(screen_t *scr){
   screen_t *sc;
 
-  scr->init = &system_init;
   scr->onEnter = &system_onEnter;
   scr->processInput=&autoReturn_ProcessInput;
   scr->create = &system_create;
 
   sc=&Screen_system_ntc;
   oled_addScreen(sc, screen_ntc);
-  sc->init = &system_ntc_init;
+  sc->onEnter = &system_ntc_onEnter;
   sc->processInput=&autoReturn_ProcessInput;
   sc->create = &system_ntc_create;
 }
