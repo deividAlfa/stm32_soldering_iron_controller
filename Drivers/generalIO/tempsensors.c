@@ -17,12 +17,14 @@ int16_t last_NTC_C;
 
 int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
 #ifdef USE_NTC
-  float pull_res=systemSettings.settings.Pull_res;
-  float NTC_res=systemSettings.settings.NTC_res;
-  float NTC_Beta=systemSettings.settings.NTC_Beta;
-  float adcValue=NTC.last_avg;
-  float result;
   if(update){
+
+    float pull_res=systemSettings.settings.Pull_res*100;
+    float NTC_res=systemSettings.settings.NTC_res*100;
+    float NTC_Beta=systemSettings.settings.NTC_Beta;
+    float adcValue=NTC.last_avg;
+    float result;
+
     if(systemSettings.settings.Pullup){
       if(adcValue == 4095) return 999;
       result = (1/((log(((pull_res * adcValue) / (4095.0 - adcValue))/NTC_res)/NTC_Beta) + (1 / (273.15 + 25.000)))) - 273.15;
