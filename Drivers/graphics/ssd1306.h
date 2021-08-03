@@ -30,7 +30,8 @@ typedef enum{
 	error_RUNAWAY75,
 	error_RUNAWAY100,
 	error_RUNAWAY500,
-	error_RUNAWAY_UNKNOWN,
+  error_RUNAWAY_UNKNOWN,
+  error_FLASH,
 }FatalErrors;
 
 #define OledWidth	128

@@ -20,8 +20,7 @@
 
 systemSettings_t systemSettings;
 flashSettings_t* flashSettings = (flashSettings_t*)FLASH_ADDR;
-void settingsChkErr(void);
-void ProfileChkErr(void);
+void checksumError(uint8_t mode);
 void Flash_error(void);
 void Button_reset(void);
 void Diag_init(void);
@@ -239,17 +238,10 @@ void restoreSettings() {
   }
 
   memcpy(&systemSettings.settings,&flashSettings->settings,sizeof(settings_t));
-
-  if(systemSettings.settings.version != SETTINGS_VERSION){
-    resetSystemSettings();
-    saveSettings(wipeProfiles);
-  }
-
   systemSettings.settingsChecksum = flashSettings->settingsChecksum;
 
-  // Compare loaded checksum with calculated checksum
-  if( ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum ){
-    settingsChkErr();
+  if(systemSettings.settings.version!=SETTINGS_VERSION || ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum){
+    checksumError(reset_All);
   }
 
   loadProfile(systemSettings.settings.currentProfile);
@@ -425,15 +417,17 @@ void loadProfile(uint8_t profile){
   else if(profile<=profile_C210){
     systemSettings.Profile = flashSettings->Profile[profile];
     systemSettings.ProfileChecksum = flashSettings->ProfileChecksum[profile];
+
     if(systemSettings.Profile.NotInitialized!=initialized){
       resetCurrentProfile();
       systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
     }
 
     // Calculate data checksum and compare with stored checksum, also ensure the stored ID is the same as the requested profile
-
     if( (profile!=systemSettings.Profile.ID) || (systemSettings.ProfileChecksum != ChecksumProfile(&systemSettings.Profile)) ){
-      ProfileChkErr();
+      __enable_irq();
+      checksumError(reset_Profile);
+      __disable_irq();
     }
     setUserTemperature(systemSettings.Profile.UserSetTemperature);
     setCurrentTip(systemSettings.Profile.currentTip);
@@ -455,45 +449,30 @@ void Diag_init(void){
   FillBuffer(BLACK,fill_soft);
   u8g2_SetFont(&u8g2,default_font );
   u8g2_SetDrawColor(&u8g2, WHITE);
+  systemSettings.settings.OledOffset = OLED_OFFSET;
 }
 
 void Flash_error(void){
-
   __disable_irq();
   HAL_FLASH_Lock();
   __enable_irq();
+  FatalError(error_FLASH);
+}
 
+void checksumError(uint8_t mode){
   Diag_init();
-  putStrAligned("FLASH ERROR!", 16, align_center);
-  putStrAligned("HALTING SYSTEM", 32, align_center);
+  putStrAligned("BAD CHECKSUM!", 0, align_center);
+  putStrAligned("RESTORING...", 30, align_center);
   update_display();
-  while(1){
-    HAL_IWDG_Refresh(&hiwdg);
+  ErrCountDown(3,117,50);
+  if(mode==reset_Profile){
+    resetCurrentProfile();
+    saveSettings(keepProfiles);
   }
-}
-void settingsChkErr(void){
-  Diag_init();
-  systemSettings.settings.OledOffset = 2;
-  putStrAligned("SETTING ERR!", 10, align_center);
-  putStrAligned("RESTORING", 26, align_center);
-  putStrAligned("DEFAULTS...", 42, align_center);
-  update_display();
-  ErrCountDown(3,117,50);
-
-  resetSystemSettings();
-  saveSettings(keepProfiles);
-}
-
-void ProfileChkErr(void){
-  Diag_init();
-  putStrAligned("PROFILE ERR!", 10, align_center);
-  putStrAligned("RESTORING", 26, align_center);
-  putStrAligned("DEFAULTS...", 42, align_center);
-  update_display();
-  ErrCountDown(3,117,50);
-
-  resetCurrentProfile();
-  saveSettings(keepProfiles);
+  else{
+    resetSystemSettings();
+    saveSettings(wipeProfiles);
+  }
 }
 
 void Button_reset(void){
@@ -533,19 +512,21 @@ void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
   else{
     length=1;
   }
-  HAL_IWDG_Refresh(&hiwdg);
-  while(oled.status!=oled_idle);
+  do{
+    HAL_IWDG_Refresh(&hiwdg);
+  }while(oled.status!=oled_idle);
 
   while(Start){
     timErr=HAL_GetTick();
     u8g2_SetDrawColor(&u8g2, BLACK);
     u8g2_DrawBox(&u8g2,xpos,ypos,u8g2_GetStrWidth(&u8g2,str),u8g2_GetMaxCharHeight(&u8g2));
     u8g2_SetDrawColor(&u8g2, WHITE);
-    sprintf(&str[0],"%*u",length-1,Start--);
+    sprintf(&str[0],"%*u",length-1,Start);
     u8g2_DrawStr(&u8g2,xpos,ypos,str);
     update_display();
     while( (HAL_GetTick()-timErr)<999 ){
       HAL_IWDG_Refresh(&hiwdg);
     }
+    Start--;
   }
 }
