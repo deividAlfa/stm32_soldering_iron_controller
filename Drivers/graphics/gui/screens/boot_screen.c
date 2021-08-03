@@ -137,6 +137,20 @@ void boot_screen_draw(screen_t *scr){
 
 int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 
+  uint16_t contrast = getContrast();
+  if(contrast<systemSettings.settings.contrast){
+    if(current_time-temp>9){
+      temp=current_time;
+      if((contrast+5)<systemSettings.settings.contrast){
+        contrast+=5;
+      }
+      else{
+        contrast=systemSettings.settings.contrast;
+      }
+      setContrast(contrast++);
+    }
+  }
+
   if(current_time - screen_timer > SPLASH_TIMEOUT){        // After splash timeout
 
     if(!systemSettings.setupMode){
@@ -178,6 +192,8 @@ void boot_screen_init(screen_t * scr){
   }
   u8g2_SetDrawColor(&u8g2,WHITE);
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM[0], splashXBM[1], &splashXBM[2]);
+  setContrast(0);
+  temp=current_time;
 }
 
 
