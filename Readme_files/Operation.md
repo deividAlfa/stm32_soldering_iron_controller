@@ -149,17 +149,13 @@ This option is disabled in shake mode.<br>
   - **Boot**<br>
 Operation mode when powered on. __RUN__ or __SLEEP__.<br>
 This option is disabled in stand mode.<br>
-  - **Btn Slp**<br>
-Allow waking the controller from sleep state by pressing the encoder button.<br>
+  - **Button Wake**<br>
+Selects what modes can be waken with encoder activity.<br>
+[None] [Standby only] [Sleep only] [All]<br>
 This option is disabled in stand mode.<br>
-  - **Btn Stby**<br>
-Allow waking the controller from standby state by pressing the encoder button.<br>
-This option is disabled in stand mode.<br>
-  - **Shake Slp**<br>
-Allow waking the controller from sleep state by the shake sensor.<br>
-This option is disabled in stand mode.<br>
-  - **Shake Stby**<br>
-Allow waking the controller from standby state by the shake sensor.<br>
+  - **Shake Wake**<br>
+Selects what modes can be waken with shake activity.<br>
+[None] [Standby only] [Sleep only] [All]<br>
 This option is disabled in stand mode.<br>
   - **Encoder**<br>
 Invert the encoder direction.<br>
