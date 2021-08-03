@@ -106,13 +106,12 @@ static void setCal450(int32_t *val) {
 //=========================================================
 static int tip_save() {
   __disable_irq();
-  systemSettings.Profile.tip[Selected_Tip] = tipCfg;
-  if(Selected_Tip==systemSettings.Profile.currentTip){
-    setupPID(&tipCfg.PID);
-    resetPID();
+  systemSettings.Profile.tip[Selected_Tip] = tipCfg;                                                            // Store tip data
+  if(Selected_Tip==systemSettings.Profile.currentTip){                                                          // If current used tip, update PID
+    setCurrentTip(Selected_Tip);                                                                                // Reload tip settings
   }
-  else if(Selected_Tip==systemSettings.Profile.currentNumberOfTips){
-    systemSettings.Profile.currentNumberOfTips++;
+  else if(Selected_Tip==systemSettings.Profile.currentNumberOfTips){                                            // If new tip
+    systemSettings.Profile.currentNumberOfTips++;                                                               // Increase number of tips in the system
   }
   __enable_irq();
   return comboitem_tip_settings_cancel->action_screen;
@@ -130,21 +129,23 @@ static int tip_delete() {
   for(int x = systemSettings.Profile.currentNumberOfTips; x < TipSize;x++) {                                    // Fill the unused tips with blank names
     strcpy(systemSettings.Profile.tip[x].name, name);
   }
-
-  if(systemSettings.Profile.currentTip >= systemSettings.Profile.currentNumberOfTips){                          // Check the system tip is not pointing to a blank slot
-    systemSettings.Profile.currentTip = systemSettings.Profile.currentNumberOfTips-1;                           // Select the previous tip in the list if so
+  if(Selected_Tip==systemSettings.Profile.currentTip){                                                          // If deleted tip was the current being used
+    if(systemSettings.Profile.currentTip){                                                                      // If not zero
+      systemSettings.Profile.currentTip--;                                                                      // Select previous tip
+      setCurrentTip(systemSettings.Profile.currentTip);                                                         // Reload tip settings
+    }
   }
                                                                                                                 // Skip tip settings (As tip is now deleted)
-  return comboitem_tip_settings_cancel->action_screen;                                                      // And return to main screen or system menu screen
+  return comboitem_tip_settings_cancel->action_screen;                                                          // And return to main screen or system menu screen
 }
 //=========================================================
 static int tip_copy() {
-  Selected_Tip = systemSettings.Profile.currentNumberOfTips;                                                    //
-  strcpy(tipCfg.name, _BLANK_TIP);
-  comboitem_tip_settings_delete->enabled=0;
+  Selected_Tip = systemSettings.Profile.currentNumberOfTips;                                                    // Select first empty slot
+  strcpy(tipCfg.name, _BLANK_TIP);                                                                              // Copy empty name
+  comboitem_tip_settings_delete->enabled=0;                                                                     // Disable copying, deleting and saving(Until name is written)
   comboitem_tip_settings_copy->enabled=0;
   comboitem_tip_settings_save->enabled=0;
-  comboResetIndex(Screen_tip_settings.widgets);
+  comboResetIndex(Screen_tip_settings.widgets);                                                                 // Reset menu to 1st option
   disableTipCopy=1;
   return -1;                                                                                                    // And return to main screen or system menu screen
 }
@@ -162,14 +163,14 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
       return x;
     }
   }
-  else if((current_time-screen_timer)>30000){
+  else if((current_time-screen_timer)>30000){                                                                   // 30s timeout if no activity is detected
     return screen_main;
   }
 
   if(input!=Rotate_Nothing){
     screen_timer=current_time;
   }
-  else if((current_time-last_update)>99){
+  else if((current_time-last_update)>99){                                                                       // Update on user activity but also every 100mS
     last_update=current_time;
     update=1;
   }
