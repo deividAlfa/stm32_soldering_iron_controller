@@ -120,11 +120,11 @@ static void setEncoderMode(uint32_t *val) {
 }
 //=========================================================
 static void * getGuiUpd_ms() {
-  temp = systemSettings.settings.guiUpdateDelay;
+  temp = systemSettings.settings.guiUpdateDelay*100;
   return &temp;
 }
 static void setGuiUpd_ms(uint32_t *val) {
-  systemSettings.settings.guiUpdateDelay = *val;
+  systemSettings.settings.guiUpdateDelay = *val/100;
 }
 //=========================================================
 static void * getLVP() {
@@ -160,35 +160,19 @@ static void setProfile(uint32_t *val) {
   profile=*val;
 }
 //=========================================================
-static void setButtonSleepWake(uint32_t *val) {
-  systemSettings.settings.wakeSlpButton = *val;
+static void setButtonWakeMode(uint32_t *val) {
+  systemSettings.settings.buttonWakeMode = *val;
 }
-static void * getButtonSleepWake() {
-  temp = systemSettings.settings.wakeSlpButton;
+static void * getButtonWakeMode() {
+  temp = systemSettings.settings.buttonWakeMode;
   return &temp;
 }
 //=========================================================
-static void setButtonStandbyWake(uint32_t *val) {
-  systemSettings.settings.wakeStbyButton = *val;
+static void setShakeWakeMode(uint32_t *val) {
+  systemSettings.settings.shakeWakeMode = *val;
 }
-static void * getButtonStandbyWake() {
-  temp = systemSettings.settings.wakeStbyButton;
-  return &temp;
-}
-//=========================================================
-static void setShakeSleepWake(uint32_t *val) {
-  systemSettings.settings.wakeSlpShake = *val;
-}
-static void * getShakeSleepWake() {
-  temp = systemSettings.settings.wakeSlpShake;
-  return &temp;
-}
-//=========================================================
-static void setShakeStandbyWake(uint32_t *val) {
-  systemSettings.settings.wakeStbyShake = *val;
-}
-static void * getShakeStandbyWake() {
-  temp = systemSettings.settings.wakeStbyShake;
+static void * getShakeWakeMode() {
+  temp = systemSettings.settings.shakeWakeMode;
   return &temp;
 }
 //=========================================================
@@ -352,57 +336,31 @@ static void system_create(screen_t *scr){
   edit->options = InitMode;
   edit->numberOfOptions = 3;
 
-  //  [ Encoder wake from sleep  Widget ]
+  //  [ Encoder wake mode  Widget ]
   //
-  newComboMultiOption(w, "Btn Slp", &edit,&comboitem_system_ButtonSleepWake);
+  newComboMultiOption(w, "Btn wake", &edit,&comboitem_system_ButtonSleepWake);
   dis=&edit->inputData;
-  dis->getData = &getButtonSleepWake;
+  dis->getData = &getButtonWakeMode;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setButtonSleepWake;
-  edit->max_value = 1;
+  edit->setData = (void (*)(void *))&setButtonWakeMode;
+  edit->max_value = 3;
   edit->min_value = 0;
-  edit->options =OffOn;
-  edit->numberOfOptions = 2;
+  edit->options =WakeModes;
+  edit->numberOfOptions = 4;
 
-  //  [ Encoder wake from standby Widget ]
+  //  [ Shake wake mode Widget ]
   //
-  newComboMultiOption(w, "Btn Stby", &edit,&comboitem_system_ButtonStandbyWake);
+  newComboMultiOption(w, "Shake wake", &edit,&comboitem_system_ShakeStandbyWake);
   dis=&edit->inputData;
-  dis->getData = &getButtonStandbyWake;
+  dis->getData = &getShakeWakeMode;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setButtonStandbyWake;
-  edit->max_value = 1;
+  edit->setData = (void (*)(void *))&setShakeWakeMode;
+  edit->max_value = 3;
   edit->min_value = 0;
-  edit->options =OffOn;
-  edit->numberOfOptions = 2;
-
-  //  [ Shake wake from sleep  Widget ]
-  //
-  newComboMultiOption(w, "Shake Slp", &edit,&comboitem_system_ShakeSleepWake);
-  dis=&edit->inputData;
-  dis->getData = &getShakeSleepWake;
-  edit->big_step = 1;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&setShakeSleepWake;
-  edit->max_value = 1;
-  edit->min_value = 0;
-  edit->options =OffOn;
-  edit->numberOfOptions = 2;
-
-  //  [ Shake wake from standby Widget ]
-  //
-  newComboMultiOption(w, "Shake Stby", &edit,&comboitem_system_ShakeStandbyWake);
-  dis=&edit->inputData;
-  dis->getData = &getShakeStandbyWake;
-  edit->big_step = 1;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&setShakeStandbyWake;
-  edit->max_value = 1;
-  edit->min_value = 0;
-  edit->options =OffOn;
-  edit->numberOfOptions = 2;
+  edit->options =WakeModes;
+  edit->numberOfOptions = 4;
 
   //  [ Encoder inversion Widget ]
   //
@@ -481,7 +439,7 @@ static void system_create(screen_t *scr){
   edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setLVP;
-  edit->max_value = 240;
+  edit->max_value = 250;
   edit->min_value = 90;
 
   //  [ Gui refresh rate Widget ]
