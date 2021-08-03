@@ -329,7 +329,10 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   }
 
   if(Iron.Error.Flags & _ACTIVE){
-    mainScr.ironStatus = status_error;
+    if(mainScr.ironStatus != status_error){
+      mainScr.ironStatus = status_error;
+      mainScr.idleTimer = current_time;
+    }
     current_temp=0;
     if(mainScr.shakeActive){
       mainScr.shakeActive=3;
