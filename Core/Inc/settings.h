@@ -109,6 +109,16 @@ enum{
   output_Low,
   output_High,
 };
+typedef struct{
+  uint8_t       filter_normal;
+  uint8_t       filter_partial;
+  uint8_t       filter_spikes;
+  uint8_t       filter_reset;
+  uint8_t       spike_limit;
+  uint16_t      partial_start;
+  uint16_t      partial_end;
+  uint16_t      reset_limit;
+}filter_t;
 
 typedef struct{
   uint16_t      calADC_At_250;
@@ -125,11 +135,11 @@ typedef struct{
   uint8_t       tempUnit;
   uint8_t       currentNumberOfTips;
   uint8_t       currentTip;
-  uint8_t       filterFactor;
   int8_t        CalNTC;
   uint8_t       pwmMul;
   uint8_t       sleepTimeout;
   uint8_t       standbyTimeout;
+  filter_t      tipFilter;
   uint16_t      standbyTemperature;
   uint16_t      UserSetTemperature;
   uint16_t      MaxSetTemperature;
@@ -143,7 +153,7 @@ typedef struct{
   uint16_t      Cal250_default;
   uint16_t      Cal350_default;
   uint16_t      Cal450_default;
-  tipData       tip[TipSize];
+  tipData_t     tip[TipSize];
 }profile_t;
 
 typedef struct{

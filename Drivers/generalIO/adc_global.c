@@ -18,51 +18,46 @@
 #endif
 
 
-#define LIMIT_FILTERING
+#define SELECTIVE_FILTERING
 
 volatile adc_measures_t ADC_measures[ADC_BFSIZ];
 volatile ADC_Status_t ADC_Status;
 
 volatile ADCDataTypeDef_t TIP = {
     .adc_buffer = &ADC_measures[0].TIP,
-    .smooth_start   = 300,
-    .smooth_end     = 600,
-    .reset_limit    = 1000,
-    .spike_limit    = 3,
-    .filter_normal  = 0,      // Changes depending on system config.
-    .filter_partial = 2,
-    .filter_reset   = 1,
 };
 
 #ifdef USE_VIN
 volatile ADCDataTypeDef_t VIN = {
     .adc_buffer     = &ADC_measures[0].VIN,
-    .smooth_start   = 20,
-    .smooth_end     = 50,
-    .reset_limit    = 100,
-    .filter_normal  = 2,
-    .filter_partial = 1,
-    .filter_reset   = 0,
+    .filter.partial_start  = 20,
+    .filter.partial_end    = 50,
+    .filter.reset_limit    = 100,
+    .filter.filter_normal  = 2,
+    .filter.filter_partial = 1,
+    .filter.filter_reset   = 0,
+    .filter.filter_spikes  = 2,
 };
 #endif
 
 #ifdef USE_NTC
 volatile ADCDataTypeDef_t NTC = {
     .adc_buffer     = &ADC_measures[0].NTC,
-    .smooth_start   = 20,
-    .smooth_end     = 50,
-    .reset_limit    = 100,
-    .filter_normal  = 2,
-    .filter_partial = 1,
-    .filter_reset   = 0,
+    .filter.partial_start  = 20,
+    .filter.partial_end    = 50,
+    .filter.reset_limit    = 100,
+    .filter.filter_normal  = 2,
+    .filter.filter_partial = 1,
+    .filter.filter_reset   = 0,
+    .filter.filter_spikes  = 2,
 };
 #endif
 
 #ifdef USE_VREF
 volatile ADCDataTypeDef_t VREF = {
     .adc_buffer     = &ADC_measures[0].VREF
-    .smooth_start   = 20,
-    .smooth_end     = 50,
+    .partial_start  = 20,
+    .partial_end    = 50,
     .reset_limit    = 100,
     .filter_normal  = 2,
     .filter_partial = 1,
@@ -169,7 +164,8 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
   volatile uint16_t *inputBuffer=InputData->adc_buffer;
   int32_t adc_sum,avg_data;
   uint16_t max=0, min=0xffff;
-  uint8_t shift;
+  volatile filter_t *f = &InputData->filter;
+  uint8_t shift = f->filter_normal;
 
   #ifdef DEBUG_PWM
   InputData->prev_avg=InputData->last_avg;
@@ -195,57 +191,58 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
   avg_data = adc_sum / (ADC_BFSIZ -2) ;
   InputData->last_raw = avg_data;
 
-  if(InputData->filter_normal > 0) {                                             // Advanced filtering enabled?
-    shift = InputData->filter_normal;                                            // Set EMA factor setting from system settings
+  if(!shift) {                                                                      // Advanced filtering enabled?
+    InputData->last_avg=avg_data;                                                   // No, use simple average
+    return;
+  }
 
-    // Fixed point shift
-    uint32_t RawData = avg_data << 12;
+  // Fixed point shift
+  uint32_t RawData = avg_data << 12;
 
-    // Compute EMA of input
+  // Compute EMA of input
 
-#ifdef LIMIT_FILTERING
+#ifdef SELECTIVE_FILTERING
 #if defined DEBUG_PWM && defined SWO_PRINT
-    extern bool dbg_newData;
+  extern bool dbg_newData;
 #endif
-    int32_t diff = (int32_t)avg_data - (int32_t)(InputData->EMA_of_Input>>12);              // Check difference between stored EMA and last average
-    int32_t abs_diff=abs(diff);
-    if(abs_diff>(InputData->smooth_end) ){
-      if(InputData->spikes<InputData->spike_limit){
-        InputData->spikes++;
-      }
+  int32_t diff = (int32_t)avg_data - (int32_t)(InputData->EMA_of_Input>>12);              // Check difference between stored EMA and last average
+  int32_t abs_diff=abs(diff);
+  if(abs_diff>(f->partial_end) ){
+    if(InputData->spike_count<f->spike_limit){
+      InputData->spike_count++;
     }
-    else{
-      InputData->spikes=0;
-    }
+  }
+  else{
+    InputData->spike_count=0;
+  }
 
-    if((abs_diff>InputData->smooth_end && InputData->spikes>=InputData->spike_limit) || (abs_diff>InputData->reset_limit)){               // If over smooth limit or really huge (Filtering will delay too much the response)
-      shift=InputData->filter_reset;                                                                                                      // Set minimum filter factor
+  if((abs_diff>f->partial_end && InputData->spike_count>=f->spike_limit) || (abs_diff>f->reset_limit)){                // If over smooth limit or really huge (Filtering will delay too much the response)
+    shift=f->filter_reset;                                                                                                        // Set filter reset factor
+    #if defined DEBUG_PWM && SWO_PRINT
+    dbg_newData=1;                                                                                                                        // Enable flag to debug the data
+    #endif
+  }
+  else{
+    if(abs_diff>f->partial_start && abs_diff<f->partial_end){                                                             // If between partial limits, use partial filter factor
+      shift=f->filter_partial;
       #if defined DEBUG_PWM && SWO_PRINT
-      dbg_newData=1;                                                                        // Enable flag to debug the data
+      //dbg_newData=1;                                                                      // Meh, just some noise, not important ?
       #endif
     }
-    else{
-      if(abs_diff>InputData->smooth_start && abs_diff<InputData->smooth_end){                                       // If medium, smoothen the difference lowering the filter factor to 2
-        shift=InputData->filter_partial;
-        #if defined DEBUG_PWM && SWO_PRINT
-        //dbg_newData=1;                                                                      // Meh, just some noise, not important
-        #endif
-      }
+    else if(abs_diff>f->partial_end){                                                                                             // If spike detected but not exceeding spike counter limit, use spike filter factor
+      shift=f->filter_spikes;
     }
-    if(shift){
-      InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
-    }
-    else{
-      InputData->EMA_of_Input = avg_data<<12;
-    }
+  }
+  if(shift){                                                                                                                              // If factor >0
+    InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;         // Us EMA filtering
+  }
+  else{
+    InputData->EMA_of_Input = avg_data<<12;                                                                                               // Else, simple average
+  }
 #else
     InputData->EMA_of_Input = ( ((InputData->EMA_of_Input << shift) - InputData->EMA_of_Input) + RawData +(1<<(shift-1)))>>shift;
 #endif
-    InputData->last_avg = InputData->EMA_of_Input>>12;
-  }
-  else {
-    InputData->last_avg=avg_data;
-  }
+  InputData->last_avg = InputData->EMA_of_Input>>12;
 }
 
 uint16_t ADC_to_mV (uint16_t adc){

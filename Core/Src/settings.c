@@ -384,6 +384,15 @@ void resetCurrentProfile(void){
   else{
     Error_Handler();  // We shouldn't get here!
   }
+
+  systemSettings.Profile.tipFilter.filter_normal            = 2;
+  systemSettings.Profile.tipFilter.filter_partial           = 1;
+  systemSettings.Profile.tipFilter.filter_reset             = 0;
+  systemSettings.Profile.tipFilter.filter_spikes            = 2;
+  systemSettings.Profile.tipFilter.partial_start            = 300;
+  systemSettings.Profile.tipFilter.partial_end              = 500;
+  systemSettings.Profile.tipFilter.reset_limit              = 700;
+  systemSettings.Profile.tipFilter.spike_limit              = 2;
   systemSettings.Profile.CalNTC                   = 25;
   systemSettings.Profile.sleepTimeout             = 5;
   systemSettings.Profile.standbyTimeout           = 5;
@@ -396,7 +405,6 @@ void resetCurrentProfile(void){
   systemSettings.Profile.pwmMul                   = 1;
   systemSettings.Profile.readPeriod               = (200*200)-1;             // Because we have a 5uS timer clock
   systemSettings.Profile.readDelay                = (20*200)-1;
-  systemSettings.Profile.filterFactor             = 2;
   systemSettings.Profile.tempUnit                 = mode_Celsius;
   systemSettings.Profile.NotInitialized           = initialized;
   __enable_irq();
@@ -429,7 +437,7 @@ void loadProfile(uint8_t profile){
     }
     setUserTemperature(systemSettings.Profile.UserSetTemperature);
     setCurrentTip(systemSettings.Profile.currentTip);
-    TIP.filter_normal=systemSettings.Profile.filterFactor;
+    TIP.filter=systemSettings.Profile.tipFilter;
     Iron.updatePwm=1;
   }
   else{
