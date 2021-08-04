@@ -26,6 +26,7 @@ enum {
     screen_main,
       screen_settings,
           screen_iron,
+            screen_advFilter,
           screen_system,
               screen_ntc,
               screen_reset,
