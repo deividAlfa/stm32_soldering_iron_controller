@@ -10,20 +10,48 @@
 #define temp_minC  0                 // Minimum system temperature in degrees of Celsius
 #define temp_maxC  480                // Maximum calibration temperature in degrees of Celsius
 static tipData_t *currentTipData;
+static uint32_t detect_error_timer=1000;
+static uint8_t detected=0;
 int16_t last_TIP_Raw;
 int16_t last_TIP;
 int16_t last_NTC_F;
 int16_t last_NTC_C;
 
+void detectNTC(void){
+  detected=0;
+  detect_error_timer = HAL_GetTick();
+}
+
 int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
+  static uint32_t error_timer=0;
+  static uint8_t detected=0;
 #ifdef USE_NTC
   if(update){
-
+    uint8_t error = (Iron.Error.Flags & _ACTIVE);
+    uint32_t current_time = HAL_GetTick();
+    float NTC_res;
     float pull_res=systemSettings.settings.Pull_res*100;
-    float NTC_res=systemSettings.settings.NTC_res*100;
     float NTC_Beta=systemSettings.settings.NTC_Beta;
     float adcValue=NTC.last_avg;
     float result;
+
+    if(systemSettings.settings.NTC_detect){                         // NTC Autodetect enabled?
+      NTC_res = systemSettings.settings.NTC_detect_low_res*100;     // Set lower by default
+      if(!error && (current_time-error_timer>1000)){                // If no errors for 1000mS (Stable reading), check value
+        if(!detected){                                              // If not done detection yet (Only detect once after error is gone)
+          detected=1;                                               // Set detected flag
+          if(last_NTC_C<0){                                         // If temp negative, set higher res
+            NTC_res = systemSettings.settings.NTC_detect_high_res*100;
+          }
+        }
+      }
+      else{
+        error_timer = current_time;                                 // If error, refresh timer
+      }
+    }
+    else{
+      NTC_res = systemSettings.settings.NTC_res*100;
+    }
 
     if(systemSettings.settings.Pullup){
       if(adcValue == 4095) return 999;
@@ -43,6 +71,7 @@ int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
     last_NTC_F = 950;
   }
 #endif
+
   if(tempUnit==mode_Celsius){
     return last_NTC_C;
   }

@@ -173,6 +173,7 @@ typedef struct{
   uint8_t       WakeInputMode;
   uint8_t       StandMode;
   uint8_t       Pullup;
+  uint8_t       NTC_detect;
   uint8_t       EncoderMode;
   uint8_t       lvp;
   uint8_t       errorDelay;
@@ -180,6 +181,8 @@ typedef struct{
   uint16_t      NTC_Beta;
   uint16_t      Pull_res;
   uint16_t      NTC_res;
+  uint16_t      NTC_detect_high_res;
+  uint16_t      NTC_detect_low_res;
   uint16_t      version;                                            // Used to track if a reset is needed on firmware upgrade
 }settings_t;
 

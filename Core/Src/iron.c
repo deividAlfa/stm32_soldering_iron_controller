@@ -75,6 +75,7 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
     }
   }
   initTimers();
+  detectNTC();
 }
 
 void handleIron(void) {
