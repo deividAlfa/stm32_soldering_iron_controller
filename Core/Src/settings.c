@@ -272,7 +272,7 @@ void resetSystemSettings(void) {
   systemSettings.settings.screenDimming     = true;
   systemSettings.settings.OledOffset        = OLED_OFFSET;
   systemSettings.settings.errorDelay        = 1;                    // *100mS
-  systemSettings.settings.guiUpdateDelay    = 2;                    // *100mS
+  systemSettings.settings.guiUpdateDelay    = 200;
   systemSettings.settings.tempUnit          = mode_Celsius;
   systemSettings.settings.tempStep          = 10;                   // 10º steps
   systemSettings.settings.activeDetection   = true;

@@ -126,11 +126,11 @@ static void setEncoderMode(uint32_t *val) {
 }
 //=========================================================
 static void * getGuiUpd_ms() {
-  temp = systemSettings.settings.guiUpdateDelay*100;
+  temp = systemSettings.settings.guiUpdateDelay;
   return &temp;
 }
 static void setGuiUpd_ms(uint32_t *val) {
-  systemSettings.settings.guiUpdateDelay = *val/100;
+  systemSettings.settings.guiUpdateDelay = *val;
 }
 //=========================================================
 static void * getLVP() {
@@ -512,7 +512,7 @@ static void system_create(screen_t *scr){
   edit->big_step = 50;
   edit->step = 10;
   edit->setData = (void (*)(void *))&setGuiUpd_ms;
-  edit->max_value = 500;
+  edit->max_value = 250;
   edit->min_value = 20;
 
   newComboScreen(w, "NTC MENU", screen_ntc, NULL);
