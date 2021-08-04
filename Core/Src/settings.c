@@ -240,7 +240,11 @@ void restoreSettings() {
   memcpy(&systemSettings.settings,&flashSettings->settings,sizeof(settings_t));
   systemSettings.settingsChecksum = flashSettings->settingsChecksum;
 
-  if(systemSettings.settings.version!=SETTINGS_VERSION || ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum){
+  if(systemSettings.settings.version!=SETTINGS_VERSION){    // Silent reset
+    resetSystemSettings();
+    saveSettings(wipeProfiles);
+  }
+  else if(ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum){   // Show error msg
     checksumError(reset_All);
   }
 
@@ -479,6 +483,7 @@ void checksumError(uint8_t mode){
     resetSystemSettings();
     saveSettings(wipeProfiles);
   }
+  NVIC_SystemReset();
 }
 
 void Button_reset(void){
@@ -501,6 +506,7 @@ void Button_reset(void){
         }
         resetSystemSettings();
         saveSettings(wipeProfiles);
+        NVIC_SystemReset();
       }
     }
   }
