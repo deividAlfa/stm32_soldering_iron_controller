@@ -9,7 +9,7 @@
 
 screen_t Screen_tip_settings;
 static uint8_t return_screen;
-static tipData tipCfg;
+static tipData_t tipCfg;
 
 static comboBox_item_t *comboitem_tip_settings_save;
 static comboBox_item_t *comboitem_tip_settings_copy;

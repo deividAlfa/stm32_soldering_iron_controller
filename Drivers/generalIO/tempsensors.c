@@ -9,7 +9,7 @@
 #include "math.h"
 #define temp_minC  0                 // Minimum system temperature in degrees of Celsius
 #define temp_maxC  480                // Maximum calibration temperature in degrees of Celsius
-static tipData *currentTipData;
+static tipData_t *currentTipData;
 int16_t last_TIP_Raw;
 int16_t last_TIP;
 int16_t last_NTC_F;
@@ -90,7 +90,7 @@ void setCurrentTip(uint8_t tip) {
   setupPID(&currentTipData->PID);
 }
 
-tipData* getCurrentTip() {
+tipData_t *getCurrentTip() {
   return currentTipData;
 }
 

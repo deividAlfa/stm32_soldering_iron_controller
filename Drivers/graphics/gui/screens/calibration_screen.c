@@ -28,7 +28,7 @@ static uint8_t tempReady;
 static int32_t measuredTemp;
 static uint16_t adcCal[3];
 static uint8_t processCalibration();
-static tipData * Currtip;
+static tipData_t *Currtip;
 
 screen_t Screen_calibration;
 screen_t Screen_calibration_start;

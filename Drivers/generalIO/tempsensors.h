@@ -27,7 +27,7 @@ extern int16_t    last_TIP;
 int16_t   readColdJunctionSensorTemp_x10(bool update, bool tempUnit);
 int16_t   readTipTemperatureCompensated(bool update, bool ReadRaw);
 void      setCurrentTip(uint8_t tip);
-tipData*  getCurrentTip();
+tipData_t *getCurrentTip();
 
 long      map(long x, long in_min, long in_max, long out_min, long out_max);
 int16_t   adc2Human(uint16_t adc_value,bool correction, bool tempUnit);

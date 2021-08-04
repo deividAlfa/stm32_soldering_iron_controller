@@ -110,14 +110,13 @@ enum{
   output_High,
 };
 
-
-typedef struct tipData {
+typedef struct{
   uint16_t      calADC_At_250;
   uint16_t      calADC_At_350;
   uint16_t      calADC_At_450;
   char          name[TipCharSize];
   pid_values_t  PID;
-}tipData;
+}tipData_t;
 
 typedef struct{
   uint8_t       NotInitialized;
