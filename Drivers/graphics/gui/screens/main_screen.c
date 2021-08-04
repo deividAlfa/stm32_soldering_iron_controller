@@ -549,8 +549,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
       switch((uint8_t)input){
         case LongClick:
-          break;;
-
         case Click:
           //blockInput(100);
           if(mainScr.ironStatus != status_error && (current_time-mainScr.modeTimer < 1000)){
