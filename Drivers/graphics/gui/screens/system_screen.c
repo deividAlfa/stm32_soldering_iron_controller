@@ -606,15 +606,13 @@ static void system_ntc_create(screen_t *scr){
   //
   newComboEditable(w, "  Beta", &edit, &comboitem_Detect_high_res_beta);
   dis=&edit->inputData;
-  dis->number_of_dec=1;
-  dis->reservedChars=7;
-  dis->endString="K\261";
+  dis->reservedChars=5;
   dis->getData = &get_NTC_detect_high_res_beta;
-  edit->big_step = 50;
-  edit->step = 1;
+  edit->big_step = 500;
+  edit->step = 20;
   edit->setData = (void (*)(void *))&set_NTC_detect_high_res_beta;
-  edit->max_value = 5000;
-  edit->min_value = 1;
+  edit->max_value = 50000;
+  edit->min_value = 500;
 
   //  [ NTC auto lower Widget ]
   //
@@ -634,15 +632,13 @@ static void system_ntc_create(screen_t *scr){
   //
   newComboEditable(w, "  Beta", &edit, &comboitem_Detect_low_res_beta);
   dis=&edit->inputData;
-  dis->number_of_dec=1;
-  dis->reservedChars=7;
-  dis->endString="K\261";
+  dis->reservedChars=5;
   dis->getData = &get_NTC_detect_low_res_beta;
-  edit->big_step = 50;
-  edit->step = 1;
+  edit->big_step = 500;
+  edit->step = 20;
   edit->setData = (void (*)(void *))&set_NTC_detect_low_res_beta;
-  edit->max_value = 5000;
-  edit->min_value = 1;
+  edit->max_value = 50000;
+  edit->min_value = 500;
 
   //  [ NTC res Widget ]
   //
@@ -662,10 +658,10 @@ static void system_ntc_create(screen_t *scr){
   //
   newComboEditable(w, " Beta", &edit, &comboitem_NTC_res_beta);
   dis=&edit->inputData;
-  dis->reservedChars=6;
+  dis->reservedChars=5;
   dis->getData = &get_NTC_beta;
   edit->big_step = 500;
-  edit->step = 50;
+  edit->step = 20;
   edit->setData = (void (*)(void *))&set_NTC_beta;
   edit->max_value = 50000;
   edit->min_value = 500;
