@@ -18,13 +18,15 @@ static comboBox_item_t *comboitem_system_InitMode;
 static comboBox_item_t *comboitem_system_StandMode;
 static comboBox_item_t *comboitem_system_BootMode;
 static comboBox_item_t *comboitem_NTC_res;
+static comboBox_item_t *comboitem_NTC_res_beta;
 static comboBox_item_t *comboitem_Detect_high_res;
 static comboBox_item_t *comboitem_Detect_low_res;
+static comboBox_item_t *comboitem_Detect_high_res_beta;
+static comboBox_item_t *comboitem_Detect_low_res_beta;
 static editable_widget_t *editable_system_TempStep;
 
 uint8_t backup_Pullup, backup_NTC_detect;
-uint16_t backup_NTC_Beta;
-uint32_t backup_Pull_res, backup_NTC_res, backup_NTC_detect_high_res, backup_NTC_detect_low_res;
+uint16_t backup_Pull_res, backup_NTC_res, backup_NTC_Beta, backup_NTC_detect_high_res, backup_NTC_detect_low_res, backup_NTC_detect_high_res_beta, backup_NTC_detect_low_res_beta;
 
 
 //=========================================================
@@ -218,8 +220,11 @@ static void set_NTC_detect(uint32_t *val) {
 static void * get_NTC_detect() {
   temp = backup_NTC_detect;
   comboitem_NTC_res->enabled = (backup_NTC_detect==0);
+  comboitem_NTC_res_beta->enabled = (backup_NTC_detect==0);
   comboitem_Detect_high_res->enabled = (backup_NTC_detect>0);
   comboitem_Detect_low_res->enabled = (backup_NTC_detect>0);
+  comboitem_Detect_high_res_beta->enabled = (backup_NTC_detect>0);
+  comboitem_Detect_low_res_beta->enabled = (backup_NTC_detect>0);
   return &temp;
 }
 //=========================================================
@@ -239,11 +244,29 @@ static void * get_NTC_detect_low_res() {
   return &temp;
 }
 //=========================================================
+static void set_NTC_detect_high_res_beta(uint32_t *val) {
+  backup_NTC_detect_high_res_beta = *val;
+}
+static void * get_NTC_detect_high_res_beta() {
+  temp = backup_NTC_detect_high_res_beta;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_detect_low_res_beta(uint32_t *val) {
+  backup_NTC_detect_low_res_beta = *val;
+}
+static void * get_NTC_detect_low_res_beta() {
+  temp = backup_NTC_detect_low_res_beta;
+  return &temp;
+}
+//=========================================================
 static int saveNTC() {
   __disable_irq();
   systemSettings.settings.NTC_detect=backup_NTC_detect;
   systemSettings.settings.NTC_detect_high_res = backup_NTC_detect_high_res;
   systemSettings.settings.NTC_detect_low_res = backup_NTC_detect_low_res;
+  systemSettings.settings.NTC_detect_high_res_beta = backup_NTC_detect_high_res_beta;
+  systemSettings.settings.NTC_detect_low_res_beta = backup_NTC_detect_low_res_beta;
   systemSettings.settings.Pullup=backup_Pullup;
   systemSettings.settings.Pull_res=backup_Pull_res;
   systemSettings.settings.NTC_res=backup_NTC_res;
@@ -427,7 +450,7 @@ static void system_create(screen_t *scr){
 
   //  [ Temp display unit Widget ]
   //
-  newComboMultiOption(w, "Unit", &edit, NULL);
+  newComboMultiOption(w, "Temperature", &edit, NULL);
   dis=&edit->inputData;
   dis->getData = &getTmpUnit;
   edit->big_step = 1;
@@ -441,7 +464,7 @@ static void system_create(screen_t *scr){
 
   //  [ Temp step Widget ]
   //
-  newComboEditable(w, "Step", &edit, NULL);
+  newComboEditable(w, " Step", &edit, NULL);
   editable_system_TempStep=edit;
   dis=&edit->inputData;
   dis->reservedChars=4;
@@ -505,6 +528,8 @@ static void system_ntc_onEnter(screen_t *scr){
   backup_NTC_detect=systemSettings.settings.NTC_detect;
   backup_NTC_detect_high_res=systemSettings.settings.NTC_detect_high_res;
   backup_NTC_detect_low_res=systemSettings.settings.NTC_detect_low_res;
+  backup_NTC_detect_high_res_beta=systemSettings.settings.NTC_detect_high_res_beta;
+  backup_NTC_detect_low_res_beta=systemSettings.settings.NTC_detect_low_res_beta;
   backup_Pullup=systemSettings.settings.Pullup;
   backup_Pull_res=systemSettings.settings.Pull_res;
   backup_NTC_res=systemSettings.settings.NTC_res;
@@ -523,7 +548,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ Pullup mode Widget ]
   //
-  newComboMultiOption(w, "Pull mode",&edit, NULL);
+  newComboMultiOption(w, "Pull",&edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &get_Pull_mode;
@@ -537,7 +562,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ Pull res Widget ]
   //
-  newComboEditable(w, "Pull", &edit, NULL);
+  newComboEditable(w, " Res", &edit, NULL);
   dis=&edit->inputData;
   dis->number_of_dec=1;
   dis->reservedChars=7;
@@ -551,7 +576,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ Auto detect Widget ]
   //
-  newComboMultiOption(w, "Auto",&edit, NULL);
+  newComboMultiOption(w, "NTC Detect",&edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=3;
   dis->getData = &get_NTC_detect;
@@ -565,7 +590,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ NTC auto higher Widget ]
   //
-  newComboEditable(w, "High", &edit, &comboitem_Detect_high_res);
+  newComboEditable(w, " High", &edit, &comboitem_Detect_high_res);
   dis=&edit->inputData;
   dis->number_of_dec=1;
   dis->reservedChars=7;
@@ -577,9 +602,23 @@ static void system_ntc_create(screen_t *scr){
   edit->max_value = 5000;
   edit->min_value = 1;
 
+  //  [ NTC auto higher beta Widget ]
+  //
+  newComboEditable(w, "  Beta", &edit, &comboitem_Detect_high_res_beta);
+  dis=&edit->inputData;
+  dis->number_of_dec=1;
+  dis->reservedChars=7;
+  dis->endString="K\261";
+  dis->getData = &get_NTC_detect_high_res_beta;
+  edit->big_step = 50;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_NTC_detect_high_res_beta;
+  edit->max_value = 5000;
+  edit->min_value = 1;
+
   //  [ NTC auto lower Widget ]
   //
-  newComboEditable(w, "Low", &edit, &comboitem_Detect_low_res);
+  newComboEditable(w, " Low", &edit, &comboitem_Detect_low_res);
   dis=&edit->inputData;
   dis->number_of_dec=1;
   dis->reservedChars=7;
@@ -590,9 +629,24 @@ static void system_ntc_create(screen_t *scr){
   edit->setData = (void (*)(void *))&set_NTC_detect_low_res;
   edit->max_value = 5000;
   edit->min_value = 1;
+
+  //  [ NTC auto lower beta Widget ]
+  //
+  newComboEditable(w, "  Beta", &edit, &comboitem_Detect_low_res_beta);
+  dis=&edit->inputData;
+  dis->number_of_dec=1;
+  dis->reservedChars=7;
+  dis->endString="K\261";
+  dis->getData = &get_NTC_detect_low_res_beta;
+  edit->big_step = 50;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_NTC_detect_low_res_beta;
+  edit->max_value = 5000;
+  edit->min_value = 1;
+
   //  [ NTC res Widget ]
   //
-  newComboEditable(w, "NTC", &edit, &comboitem_NTC_res);
+  newComboEditable(w, " Res", &edit, &comboitem_NTC_res);
   dis=&edit->inputData;
   dis->number_of_dec=1;
   dis->reservedChars=7;
@@ -606,7 +660,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ NTC Beta Widget ]
   //
-  newComboEditable(w, "NTC beta", &edit, NULL);
+  newComboEditable(w, " Beta", &edit, &comboitem_NTC_res_beta);
   dis=&edit->inputData;
   dis->reservedChars=6;
   dis->getData = &get_NTC_beta;

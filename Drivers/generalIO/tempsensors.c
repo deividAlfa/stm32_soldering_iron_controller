@@ -31,17 +31,19 @@ int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
     uint32_t current_time = HAL_GetTick();
     float NTC_res;
     float pull_res=systemSettings.settings.Pull_res*100;
-    float NTC_Beta=systemSettings.settings.NTC_Beta;
+    float NTC_Beta;
     float adcValue=NTC.last_avg;
     float result;
 
     if(systemSettings.settings.NTC_detect){                         // NTC Autodetect enabled?
       NTC_res = systemSettings.settings.NTC_detect_low_res*100;     // Set lower by default
+      NTC_Beta = systemSettings.settings.NTC_detect_low_res_beta;
       if(!error && (current_time-error_timer>1000)){                // If no errors for 1000mS (Stable reading), check value
         if(!detected){                                              // If not done detection yet (Only detect once after error is gone)
           detected=1;                                               // Set detected flag
           if(last_NTC_C<0){                                         // If temp negative, set higher res
             NTC_res = systemSettings.settings.NTC_detect_high_res*100;
+            NTC_Beta = systemSettings.settings.NTC_detect_high_res_beta;
           }
         }
       }
@@ -51,6 +53,7 @@ int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
     }
     else{
       NTC_res = systemSettings.settings.NTC_res*100;
+      NTC_Beta = systemSettings.settings.NTC_Beta;
     }
 
     if(systemSettings.settings.Pullup){

@@ -292,7 +292,9 @@ void resetSystemSettings(void) {
   #ifdef PULLUP
   systemSettings.settings.NTC_detect        = 0;
   systemSettings.settings.NTC_detect_high_res = 1000;   // 100.0K
+  systemSettings.settings.NTC_detect_high_res_beta = NTC_BETA;
   systemSettings.settings.NTC_detect_low_res = 100;     // 10.0K
+  systemSettings.settings.NTC_detect_low_res_beta = NTC_BETA;     // 10.0K
   systemSettings.settings.Pullup            = 1;
   #elif defined PULLDOWN
   systemSettings.settings.Pullup            = 0;

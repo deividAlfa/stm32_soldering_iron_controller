@@ -183,6 +183,8 @@ typedef struct{
   uint16_t      NTC_res;
   uint16_t      NTC_detect_high_res;
   uint16_t      NTC_detect_low_res;
+  uint16_t      NTC_detect_high_res_beta;
+  uint16_t      NTC_detect_low_res_beta;
   uint16_t      version;                                            // Used to track if a reset is needed on firmware upgrade
 }settings_t;
 

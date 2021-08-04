@@ -308,7 +308,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Stby Time Widget ]
   //
-  newComboEditable(w, "Stby time", &edit, NULL);
+  newComboEditable(w, "Standby", &edit, NULL);
   dis=&edit->inputData;
   dis->endString="min";
   dis->reservedChars=5;
@@ -320,7 +320,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Stby Temp Widget ]
   //
-  newComboEditable(w, "Stby temp", &edit, NULL);
+  newComboEditable(w, " Temp", &edit, NULL);
   editable_IRON_StandbyTemp = edit;
   dis=&edit->inputData;
   dis->reservedChars=5;
@@ -333,7 +333,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Sleep Time Widget ]
   //
-  newComboEditable(w, "Slp time", &edit, NULL);
+  newComboEditable(w, "Sleep", &edit, NULL);
   dis=&edit->inputData;
   dis->endString="min";
   dis->reservedChars=5;
@@ -346,7 +346,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Boost Time Widget ]
   //
-  newComboEditable(w, "Boost time", &edit, NULL);
+  newComboEditable(w, "Boost", &edit, NULL);
   dis=&edit->inputData;
   dis->endString="s";
   dis->reservedChars=5;
@@ -359,7 +359,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Boost Temp Widget ]
   //
-  newComboEditable(w, "Boost add", &edit, NULL);
+  newComboEditable(w, " Add", &edit, NULL);
   editable_IRON_BoostTemp = edit;
   dis=&edit->inputData;
   dis->reservedChars=5;
@@ -415,7 +415,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Read Delay Widget ]
   //
-  newComboEditable(w, "Delay", &edit, NULL);
+  newComboEditable(w, " Delay", &edit, NULL);
   dis=&edit->inputData;
   dis->endString="mS";
   dis->reservedChars=7;
@@ -455,7 +455,7 @@ static void iron_create(screen_t *scr){
 
   //  [ No Iron Delay Widget ]
   //
-  newComboEditable(w, "Delay", &edit, NULL);
+  newComboEditable(w, " Delay", &edit, NULL);
   dis=&edit->inputData;
   dis->endString="mS";
   dis->reservedChars=5;
@@ -499,7 +499,7 @@ static void iron_advFilter_create(screen_t *scr){
 
   //  [ Partial start Widget ]
   //
-  newComboEditable(w, "Part start", &edit, NULL);
+  newComboEditable(w, "Threshold", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &get_partial_start;
@@ -511,7 +511,7 @@ static void iron_advFilter_create(screen_t *scr){
 
   //  [ Partial end Widget ]
   //
-  newComboEditable(w, "Part end", &edit, NULL);
+  newComboEditable(w, " End", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &get_partial_end;
@@ -523,7 +523,7 @@ static void iron_advFilter_create(screen_t *scr){
 
   //  [ Partial filter ]
   //
-  newComboEditable(w, "Part flt", &edit, NULL);
+  newComboEditable(w, " Filter", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=1;
   dis->getData = &get_partial_filter;
@@ -535,7 +535,7 @@ static void iron_advFilter_create(screen_t *scr){
 
   //  [ Spike limit ]
   //
-  newComboEditable(w, "Spike lim", &edit, NULL);
+  newComboEditable(w, "Spikes", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &get_spike_limit;
@@ -547,7 +547,7 @@ static void iron_advFilter_create(screen_t *scr){
 
   //  [ Spike filter ]
   //
-  newComboEditable(w, "Spike flt", &edit, NULL);
+  newComboEditable(w, " Filter", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &get_spike_filter;
@@ -559,7 +559,7 @@ static void iron_advFilter_create(screen_t *scr){
 
   //  [ Reset limit Widget ]
   //
-  newComboEditable(w, "Reset lim", &edit, NULL);
+  newComboEditable(w, "Reset", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &get_reset_limit;
@@ -571,7 +571,7 @@ static void iron_advFilter_create(screen_t *scr){
 
   //  [ Filter res. ]
   //
-  newComboEditable(w, "Reset flt", &edit, NULL);
+  newComboEditable(w, " Filter", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=1;
   dis->getData = &get_reset_filter;
