@@ -623,7 +623,7 @@ static void drawError(void){
     else{
       Err_ypos=12;
     }
-    u8g2_SetFont(&u8g2, u8g2_font_labels);
+    u8g2_SetFont(&u8g2, u8g2_font_small);
     if(Iron.Error.V_low){
       putStrAligned("VOLTAGE LOW", Err_ypos, align_center);
       Err_ypos+=12;
@@ -665,7 +665,7 @@ static void drawScreenSaver(uint8_t *refresh){
 static void drawMode(uint8_t *refresh){
   if(!*refresh) return;
 
-  u8g2_SetFont(&u8g2, u8g2_font_labels);
+  u8g2_SetFont(&u8g2, u8g2_font_small);
 
   switch(getCurrentMode()){
 
@@ -780,7 +780,7 @@ void drawAux(uint8_t *refresh){
       break;
   }
   if(error) drawError();
-  u8g2_SetFont(&u8g2, u8g2_font_labels);
+  u8g2_SetFont(&u8g2, u8g2_font_small);
   if(frame){
     uint8_t len = u8g2_GetStrWidth(&u8g2, tipNames[systemSettings.Profile.currentTip])+4;   // Draw edit frame
     u8g2_SetDrawColor(&u8g2, WHITE);
@@ -900,7 +900,7 @@ static void main_screen_create(screen_t *scr){
   dis->reservedChars=5;
   dis->textAlign=align_center;
   dis->number_of_dec=1;
-  dis->font=u8g2_font_labels;
+  dis->font=u8g2_font_small;
   w->posY= 0;
   w->posX = voltXBM[0]+2;
   edit=extractEditablePartFromWidget(w);
@@ -917,7 +917,7 @@ static void main_screen_create(screen_t *scr){
   dis->dispAlign=align_right;
   dis->textAlign=align_center;
   dis->number_of_dec=1;
-  dis->font=u8g2_font_labels;
+  dis->font=u8g2_font_small;
   dis->getData = &main_screen_getAmbTemp;
   w->posY = 0;
   //w->posX = 90;

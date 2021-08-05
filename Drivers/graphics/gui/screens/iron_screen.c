@@ -539,10 +539,10 @@ static void iron_advFilter_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &get_spike_limit;
-  edit->big_step = 1;
+  edit->big_step = 20;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_spike_limit;
-  edit->max_value = 20;
+  edit->max_value = 250;
   edit->min_value = 0;
 
   //  [ Spike filter ]
