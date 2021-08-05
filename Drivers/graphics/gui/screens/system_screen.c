@@ -325,7 +325,7 @@ static void system_create(screen_t *scr){
   dis->reservedChars=3;
   dis->getData = &getContrast_;
   edit->big_step = 25;
-  edit->step = 1;
+  edit->step = 25;
   edit->setData = (void (*)(void *))&setContrast_;
   edit->max_value = 255;
   edit->min_value = 5;
