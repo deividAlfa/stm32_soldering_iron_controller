@@ -18,7 +18,6 @@ typedef struct {
   uint8_t p[PID_SZ];
   uint8_t i[PID_SZ];
   uint8_t d[PID_SZ];
-  //uint8_t o[PID_SZ];
 }pid_plot_t;
 
 static uint8_t plot_Index;
@@ -53,6 +52,7 @@ static uint8_t scalePlot(int32_t val){
   return (uint8_t)val;
 }
 
+
 static int pid_debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
   static uint32_t plotTime=0;
   updatePlot();
@@ -61,7 +61,6 @@ static int pid_debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_
     PIDplotData->p[plot_Index] = scalePlot(getPID_P()* 11);
     PIDplotData->i[plot_Index] = getPID_I()* _i;
     PIDplotData->d[plot_Index] = scalePlot(getPID_D()* 11);
-    //PIDplotData->o[plot_Index] = getPID_Output()* 10;// 0...1
     if(++plot_Index>(PID_SZ-1)){
       plot_Index=0;
     }
@@ -83,7 +82,7 @@ static void pid_debug_draw(screen_t * scr){
   FillBuffer(BLACK, fill_dma);
   scr->refresh=screen_Erased;
   default_screenDraw(scr);
-  for(uint8_t x=1; x<(PID_SZ-1); x++){
+   for(uint8_t x=1; x<(PID_SZ-1); x++){
     uint8_t pos=plot_Index+x;
     uint8_t prev;
     if(pos>(PID_SZ-1)){
@@ -111,8 +110,13 @@ static void pid_debug_init(screen_t *scr) {
   else{
     _i = (float)21/pid.limMaxInt;
   }
-}
 
+  PIDplotData=malloc(sizeof(pid_plot_t));
+  memset(PIDplotData->p, scalePlot(getPID_P()* 11), sizeof(PIDplotData->p));
+  memset(PIDplotData->i, getPID_I()* _i, sizeof(PIDplotData->p));
+  memset(PIDplotData->d, scalePlot(getPID_D()* 11), sizeof(PIDplotData->p));
+
+}
 
 static void pid_debug_create(screen_t *scr){
   widget_t *w;
@@ -120,35 +124,37 @@ static void pid_debug_create(screen_t *scr){
 
   newWidget(&w, widget_display,scr);
   dis=extractDisplayPartFromWidget(w);
+  dis->textAlign=align_right;
   dis->getData = &get_PID_P;
   dis->reservedChars=6;
   dis->number_of_dec=3;
-  dis->font=u8g2_font_labels;
-  w->posY= 9;
+  dis->font=u8g2_font_small;
+  w->posY= 7;
   w->width=30;
 
   newWidget(&w, widget_display,scr);
   dis=extractDisplayPartFromWidget(w);
+  dis->textAlign=align_right;
   dis->getData = &get_PID_I;
   dis->reservedChars=6;
   dis->number_of_dec=3;
-  dis->font=u8g2_font_labels;
+  dis->font=u8g2_font_small;
   w->posY= 30;
   w->width=30;
 
   newWidget(&w, widget_display,scr);
   dis=extractDisplayPartFromWidget(w);
+  dis->textAlign=align_right;
   dis->getData = &get_PID_D;
   dis->reservedChars=6;
   dis->number_of_dec=3;
-  dis->font=u8g2_font_labels;
+  dis->font=u8g2_font_small;
   w->posY= 51;
   w->width=30;
-
-  PIDplotData=calloc(1,sizeof(pid_plot_t));
 }
 
-static void pid_debug_onExit(screen_t *scr){
+
+static void pid_enabledExit(screen_t *scr){
   free(PIDplotData);
 }
 
@@ -157,7 +163,7 @@ void pid_debug_screen_setup(screen_t *scr){
   scr->processInput=&pid_debug_ProcessInput;
   scr->create=&pid_debug_create;
   scr->draw=&pid_debug_draw;
-  scr->onExit=&pid_debug_onExit;
+  scr->onExit=&pid_enabledExit;
 }
 
 #endif
