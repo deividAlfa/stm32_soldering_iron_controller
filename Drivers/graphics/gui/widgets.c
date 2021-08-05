@@ -217,7 +217,7 @@ void editableDefaultsInit(editable_widget_t* editable, widgetType type){
   widgetDefaultsInit(&w, type);
 }
 
-static void insertDot(char *str, uint8_t dec) {
+void insertDot(char *str, uint8_t dec){
   for(int x = strlen(str); x > (int)strlen(str) - (int)dec - 2; --x) {
     str[x + 1] = str[x];
   }
