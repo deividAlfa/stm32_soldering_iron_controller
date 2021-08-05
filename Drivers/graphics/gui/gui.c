@@ -56,7 +56,5 @@ void guiInit(void) {
   oled_addScreen(&Screen_debug,screen_debug);
   debug_screen_setup(&Screen_debug);
 
-  oled_addScreen(&Screen_debug2,screen_debug2);
-  debug2_screen_setup(&Screen_debug2);
 #endif
 }
