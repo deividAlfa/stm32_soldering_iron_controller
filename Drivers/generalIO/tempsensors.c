@@ -86,7 +86,7 @@ int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
 // Read tip temperature
 int16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
   int16_t temp, temp_Raw;
-  if(systemSettings.setupMode==setup_On){
+  if(systemSettings.setupMode==enable){
     return 0;
   }
   if(update){

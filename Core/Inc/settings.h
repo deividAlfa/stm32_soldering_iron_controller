@@ -66,15 +66,6 @@ enum{
   disable                 = 0,
   enable                  = 1,
 
-  debug_Off               = 0,
-  debug_On                = 1,
-
-  calibration_Off         = 0,
-  calibration_On          = 1,
-
-  setup_Off               = 0,
-  setup_On                = 1,
-
   encoder_normal          = 0,
   encoder_reverse         = 1,
 
@@ -87,9 +78,6 @@ enum{
   mode_boost              = 3,
 
   initialized             = 0,
-
-  buzzer_Off              = 0,
-  buzzer_On               = 1,
 
   profile_T12             = 0,
   profile_C245            = 1,

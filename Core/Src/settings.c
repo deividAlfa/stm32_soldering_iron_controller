@@ -40,7 +40,7 @@ void checkSettings(void){
 
   // Disable saving when screens that use a lot of ram are active.
   // Change detection will be active, but saving will postponed until exiting the screen. This is done to ensure compatibility with 10KB RAM devices
-  uint8_t noSave = (scr_index==screen_iron || scr_index==screen_system || scr_index==screen_tip_settings || scr_index==screen_debug || scr_index==screen_debug2);
+  uint8_t noSave = (scr_index==screen_iron || scr_index==screen_system || scr_index==screen_tip_settings || scr_index==screen_debug );
 
 
 
@@ -82,7 +82,7 @@ void checkSettings(void){
   }
 
   // Auto save on content change
-  if( (systemSettings.setupMode==setup_On) || (Iron.calibrating==calibration_On) || (systemSettings.settings.saveSettingsDelay==0) || (Iron.Error.safeMode==enable) || (CurrentTime-lastCheckTime<999)){
+  if( (systemSettings.setupMode==enable) || (Iron.calibrating==enable) || (systemSettings.settings.saveSettingsDelay==0) || (Iron.Error.safeMode==enable) || (CurrentTime-lastCheckTime<999)){
     return;
   }
 
@@ -280,7 +280,7 @@ void resetSystemSettings(void) {
   systemSettings.settings.lvp               = 110;                  // 11.0V Low voltage
   systemSettings.settings.currentProfile    = profile_None;
   systemSettings.settings.initMode          = mode_run;
-  systemSettings.settings.buzzerMode        = buzzer_Off;
+  systemSettings.settings.buzzerMode        = disable;
   systemSettings.settings.buttonWakeMode    = wake_all;
   systemSettings.settings.shakeWakeMode     = wake_all;
   systemSettings.settings.WakeInputMode     = mode_shake;

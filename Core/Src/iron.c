@@ -85,7 +85,7 @@ void handleIron(void) {
   readColdJunctionSensorTemp_x10(update_reading, mode_Celsius);
 
   if(!Iron.Error.safeMode){
-    if( (systemSettings.setupMode==setup_On) || systemSettings.settings.NotInitialized || systemSettings.Profile.NotInitialized!=initialized ||
+    if( (systemSettings.setupMode==enable) || systemSettings.settings.NotInitialized || systemSettings.Profile.NotInitialized!=initialized ||
         (systemSettings.Profile.ID != systemSettings.settings.currentProfile) || (systemSettings.settings.currentProfile>profile_C210)){
 
       Iron.Error.safeMode=1;
@@ -120,7 +120,7 @@ void handleIron(void) {
   uint32_t sleep_time = (uint32_t)systemSettings.Profile.sleepTimeout*60000;
   uint32_t standby_time = (uint32_t)systemSettings.Profile.standbyTimeout*60000;
 
-  if(Iron.calibrating==calibration_Off){                                                      // Don't enter low power states while calibrating. Calibration always forces run mode
+  if(Iron.calibrating==disable){                                                      // Don't enter low power states while calibrating. Calibration always forces run mode
     if((Iron.CurrentMode==mode_boost) && (mode_time>boost_time)){                             // If boost mode and time expired
       setCurrentMode(mode_run);
     }
@@ -154,7 +154,7 @@ void handleIron(void) {
 
   // Update PID
   volatile uint16_t PID_temp;
-  if(Iron.DebugMode==debug_On){                                                               // If in debug mode, use debug setpoint value
+  if(Iron.DebugMode==enable){                                                               // If in debug mode, use debug setpoint value
     Iron.Pwm_Out = calculatePID(Iron.Debug_SetTemperature, TIP.last_avg, Iron.Pwm_Max);
   }
   else{                                                                                       // Else, use current setpoint value
@@ -307,7 +307,7 @@ void runAwayCheck(void){
   static uint8_t pos,prev_power[4];
   uint8_t power;
 
-  if(systemSettings.setupMode==setup_On || (Iron.Error.safeMode && Iron.Error.active)){
+  if(systemSettings.setupMode==enable || (Iron.Error.safeMode && Iron.Error.active)){
     return;
   }
   prev_power[pos]=Iron.CurrentIronPower;                                                      // Circular buffer
@@ -326,7 +326,7 @@ void runAwayCheck(void){
     TempLimit = 950;
   }
 
-  if(power>1 && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==debug_Off) &&(tipTemp > Iron.CurrentSetTemperature)){
+  if(power>1 && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==disable) &&(tipTemp > Iron.CurrentSetTemperature)){
 
     if(tipTemp>TempLimit){ Iron.RunawayLevel=runaway_500; }
     else{

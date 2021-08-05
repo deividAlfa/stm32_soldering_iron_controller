@@ -168,7 +168,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
       boot_step++;
     }
     else if(boot_step==3){
-      systemSettings.setupMode=setup_Off;
+      systemSettings.setupMode=disable;
       setSafeMode(disable);
       HAL_Delay(100);                                     // To let the ADC refresh
     }
@@ -187,7 +187,7 @@ void boot_screen_init(screen_t * scr){
   if( (systemSettings.settings.NotInitialized!=initialized) || (profile>profile_C210) ){
     profile=profile_T12;
     setSafeMode(enable);
-    systemSettings.setupMode=setup_On;
+    systemSettings.setupMode=enable;
   }
   u8g2_SetDrawColor(&u8g2,WHITE);
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM[0], splashXBM[1], &splashXBM[2]);

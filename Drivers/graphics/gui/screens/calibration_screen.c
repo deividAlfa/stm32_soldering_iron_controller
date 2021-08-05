@@ -451,13 +451,13 @@ static void Cal_Settings_init(screen_t *scr) {
   adcAtTemp[cal_350] = systemSettings.Profile.Cal350_default;
   adcAtTemp[cal_450] = systemSettings.Profile.Cal450_default;
   setDebugTemp(0);
-  setDebugMode(debug_On);
+  setDebugMode(enable);
   setCurrentMode(mode_run);
   comboResetIndex(Screen_calibration_settings.widgets);
 }
 
 static void Cal_Settings_OnExit(screen_t *scr) {
-  setDebugMode(debug_Off);
+  setDebugMode(disable);
   setCurrentMode(mode_run);
 }
 
