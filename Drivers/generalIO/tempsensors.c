@@ -22,11 +22,11 @@ void detectNTC(void){
   detect_error_timer = HAL_GetTick();
 }
 
-int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
+int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
+#ifdef USE_NTC
   static uint32_t error_timer=0;
   static uint8_t detected=0;
-#ifdef USE_NTC
-  if(update){
+  if(new){
     uint8_t error = (Iron.Error.Flags & _ACTIVE);
     uint32_t current_time = HAL_GetTick();
     float NTC_res;
@@ -69,7 +69,7 @@ int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
     last_NTC_F = TempConversion(result, mode_Farenheit, 1);
   }
 #else
-  if(update){
+  if(new){
     last_NTC_C = 350;
     last_NTC_F = 950;
   }
@@ -84,12 +84,12 @@ int16_t readColdJunctionSensorTemp_x10(bool update, bool tempUnit){
 }
 
 // Read tip temperature
-int16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
+int16_t readTipTemperatureCompensated(bool new, bool mode){
   int16_t temp, temp_Raw;
   if(systemSettings.setupMode==enable){
     return 0;
   }
-  if(update){
+  if(new){
     temp = adc2Human(TIP.last_avg,1,systemSettings.settings.tempUnit);
     temp_Raw = adc2Human(TIP.last_raw,1,systemSettings.settings.tempUnit);
 
@@ -109,7 +109,7 @@ int16_t readTipTemperatureCompensated(bool update, bool ReadRaw){
     last_TIP = temp;
     last_TIP_Raw = temp_Raw;
   }
-  if(ReadRaw){
+  if(mode==read_unfiltered){
     return last_TIP_Raw;
   }
   else{
@@ -130,7 +130,7 @@ tipData_t *getCurrentTip() {
 uint16_t human2adc(int16_t t) {
   volatile int16_t temp = t;
   volatile int16_t tH;
-  volatile int16_t ambTemp = readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius) / 10;
+  volatile int16_t ambTemp = readColdJunctionSensorTemp_x10(old_reading, mode_Celsius) / 10;
 
   // If using Farenheit, convert to Celsius
   if(systemSettings.settings.tempUnit==mode_Farenheit){
@@ -165,7 +165,7 @@ uint16_t human2adc(int16_t t) {
 // Translate temperature from internal units to the human readable value
 int16_t adc2Human(uint16_t adc_value,bool correction, bool tempUnit) {
   int16_t tempH = 0;
-  int16_t ambTemp = readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius) / 10;
+  int16_t ambTemp = readColdJunctionSensorTemp_x10(old_reading, mode_Celsius) / 10;
   if (adc_value >= currentTipData->calADC_At_350) {
     tempH = map(adc_value, currentTipData->calADC_At_350, currentTipData->calADC_At_450, 350, 450);
   }

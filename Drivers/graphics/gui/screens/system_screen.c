@@ -17,12 +17,16 @@ static comboBox_item_t *comboitem_system_ShakeWakeMode;
 static comboBox_item_t *comboitem_system_InitMode;
 static comboBox_item_t *comboitem_system_StandMode;
 static comboBox_item_t *comboitem_system_BootMode;
+
+#ifdef USE_NTC
 static comboBox_item_t *comboitem_NTC_res;
 static comboBox_item_t *comboitem_NTC_res_beta;
 static comboBox_item_t *comboitem_Detect_high_res;
 static comboBox_item_t *comboitem_Detect_low_res;
 static comboBox_item_t *comboitem_Detect_high_res_beta;
 static comboBox_item_t *comboitem_Detect_low_res_beta;
+#endif
+
 static editable_widget_t *editable_system_TempStep;
 
 uint8_t backup_Pullup, backup_NTC_detect;
@@ -182,102 +186,6 @@ static void * getShakeWakeMode() {
   return &temp;
 }
 //=========================================================
-static void set_NTC_beta(uint32_t *val) {
-  backup_NTC_Beta = *val;
-}
-static void * get_NTC_beta() {
-  temp = backup_NTC_Beta;
-  return &temp;
-}
-//=========================================================
-static void set_NTC_res(uint32_t *val) {
-  backup_NTC_res = *val;
-}
-static void * get_NTC_res() {
-  temp = backup_NTC_res;
-  return &temp;
-}
-//=========================================================
-static void set_Pull_res(uint32_t *val) {
-  backup_Pull_res = *val;
-}
-static void * get_Pull_res() {
-  temp = backup_Pull_res;
-  return &temp;
-}
-//=========================================================
-static void set_Pull_mode(uint32_t *val) {
-  backup_Pullup = *val;
-}
-static void * get_Pull_mode() {
-  temp = backup_Pullup;
-  return &temp;
-}
-//=========================================================
-static void set_NTC_detect(uint32_t *val) {
-  backup_NTC_detect = *val;
-}
-static void * get_NTC_detect() {
-  temp = backup_NTC_detect;
-  comboitem_NTC_res->enabled = (backup_NTC_detect==0);
-  comboitem_NTC_res_beta->enabled = (backup_NTC_detect==0);
-  comboitem_Detect_high_res->enabled = (backup_NTC_detect>0);
-  comboitem_Detect_low_res->enabled = (backup_NTC_detect>0);
-  comboitem_Detect_high_res_beta->enabled = (backup_NTC_detect>0);
-  comboitem_Detect_low_res_beta->enabled = (backup_NTC_detect>0);
-  return &temp;
-}
-//=========================================================
-static void set_NTC_detect_high_res(uint32_t *val) {
-  backup_NTC_detect_high_res = *val;
-}
-static void * get_NTC_detect_high_res() {
-  temp = backup_NTC_detect_high_res;
-  return &temp;
-}
-//=========================================================
-static void set_NTC_detect_low_res(uint32_t *val) {
-  backup_NTC_detect_low_res = *val;
-}
-static void * get_NTC_detect_low_res() {
-  temp = backup_NTC_detect_low_res;
-  return &temp;
-}
-//=========================================================
-static void set_NTC_detect_high_res_beta(uint32_t *val) {
-  backup_NTC_detect_high_res_beta = *val;
-}
-static void * get_NTC_detect_high_res_beta() {
-  temp = backup_NTC_detect_high_res_beta;
-  return &temp;
-}
-//=========================================================
-static void set_NTC_detect_low_res_beta(uint32_t *val) {
-  backup_NTC_detect_low_res_beta = *val;
-}
-static void * get_NTC_detect_low_res_beta() {
-  temp = backup_NTC_detect_low_res_beta;
-  return &temp;
-}
-//=========================================================
-static int saveNTC() {
-  __disable_irq();
-  systemSettings.settings.NTC_detect=backup_NTC_detect;
-  systemSettings.settings.NTC_detect_high_res = backup_NTC_detect_high_res;
-  systemSettings.settings.NTC_detect_low_res = backup_NTC_detect_low_res;
-  systemSettings.settings.NTC_detect_high_res_beta = backup_NTC_detect_high_res_beta;
-  systemSettings.settings.NTC_detect_low_res_beta = backup_NTC_detect_low_res_beta;
-  systemSettings.settings.Pullup=backup_Pullup;
-  systemSettings.settings.Pull_res=backup_Pull_res;
-  systemSettings.settings.NTC_res=backup_NTC_res;
-  systemSettings.settings.NTC_Beta=backup_NTC_Beta;
-  detectNTC();
-
-  __enable_irq();
-  return screen_system;
-}
-//=========================================================
-
 static void system_onEnter(screen_t *scr){
   if(scr==&Screen_settings){
     comboResetIndex(Screen_system.widgets);
@@ -523,6 +431,106 @@ static void system_create(screen_t *scr){
 }
 
 
+
+#ifdef USE_NTC
+
+
+static void set_NTC_beta(uint32_t *val) {
+  backup_NTC_Beta = *val;
+}
+static void * get_NTC_beta() {
+  temp = backup_NTC_Beta;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_res(uint32_t *val) {
+  backup_NTC_res = *val;
+}
+static void * get_NTC_res() {
+  temp = backup_NTC_res;
+  return &temp;
+}
+//=========================================================
+static void set_Pull_res(uint32_t *val) {
+  backup_Pull_res = *val;
+}
+static void * get_Pull_res() {
+  temp = backup_Pull_res;
+  return &temp;
+}
+//=========================================================
+static void set_Pull_mode(uint32_t *val) {
+  backup_Pullup = *val;
+}
+static void * get_Pull_mode() {
+  temp = backup_Pullup;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_detect(uint32_t *val) {
+  backup_NTC_detect = *val;
+}
+static void * get_NTC_detect() {
+  temp = backup_NTC_detect;
+  comboitem_NTC_res->enabled = (backup_NTC_detect==0);
+  comboitem_NTC_res_beta->enabled = (backup_NTC_detect==0);
+  comboitem_Detect_high_res->enabled = (backup_NTC_detect>0);
+  comboitem_Detect_low_res->enabled = (backup_NTC_detect>0);
+  comboitem_Detect_high_res_beta->enabled = (backup_NTC_detect>0);
+  comboitem_Detect_low_res_beta->enabled = (backup_NTC_detect>0);
+  return &temp;
+}
+//=========================================================
+static void set_NTC_detect_high_res(uint32_t *val) {
+  backup_NTC_detect_high_res = *val;
+}
+static void * get_NTC_detect_high_res() {
+  temp = backup_NTC_detect_high_res;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_detect_low_res(uint32_t *val) {
+  backup_NTC_detect_low_res = *val;
+}
+static void * get_NTC_detect_low_res() {
+  temp = backup_NTC_detect_low_res;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_detect_high_res_beta(uint32_t *val) {
+  backup_NTC_detect_high_res_beta = *val;
+}
+static void * get_NTC_detect_high_res_beta() {
+  temp = backup_NTC_detect_high_res_beta;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_detect_low_res_beta(uint32_t *val) {
+  backup_NTC_detect_low_res_beta = *val;
+}
+static void * get_NTC_detect_low_res_beta() {
+  temp = backup_NTC_detect_low_res_beta;
+  return &temp;
+}
+//=========================================================
+static int saveNTC() {
+  __disable_irq();
+  systemSettings.settings.NTC_detect=backup_NTC_detect;
+  systemSettings.settings.NTC_detect_high_res = backup_NTC_detect_high_res;
+  systemSettings.settings.NTC_detect_low_res = backup_NTC_detect_low_res;
+  systemSettings.settings.NTC_detect_high_res_beta = backup_NTC_detect_high_res_beta;
+  systemSettings.settings.NTC_detect_low_res_beta = backup_NTC_detect_low_res_beta;
+  systemSettings.settings.Pullup=backup_Pullup;
+  systemSettings.settings.Pull_res=backup_Pull_res;
+  systemSettings.settings.NTC_res=backup_NTC_res;
+  systemSettings.settings.NTC_Beta=backup_NTC_Beta;
+  detectNTC();
+
+  __enable_irq();
+  return screen_system;
+}
+//=========================================================
+
 static void system_ntc_onEnter(screen_t *scr){
   comboResetIndex(Screen_system_ntc.widgets);
   backup_NTC_detect=systemSettings.settings.NTC_detect;
@@ -670,6 +678,7 @@ static void system_ntc_create(screen_t *scr){
   newComboScreen(w, "BACK", screen_system , NULL);
 }
 
+#endif
 
 void system_screen_setup(screen_t *scr){
   screen_t *sc;
@@ -679,9 +688,11 @@ void system_screen_setup(screen_t *scr){
   scr->processInput=&autoReturn_ProcessInput;
   scr->create = &system_create;
 
+  #ifdef USE_NTC
   sc=&Screen_system_ntc;
   oled_addScreen(sc, screen_ntc);
   sc->onEnter = &system_ntc_onEnter;
   sc->processInput=&autoReturn_ProcessInput;
   sc->create = &system_ntc_create;
+  #endif
 }

@@ -66,6 +66,12 @@ enum{
   disable                 = 0,
   enable                  = 1,
 
+  old_reading             = 0,
+  new_reading             = 1,
+
+  read_average            = 0,
+  read_unfiltered         = 1,
+
   encoder_normal          = 0,
   encoder_reverse         = 1,
 
@@ -97,6 +103,8 @@ enum{
   output_Low,
   output_High,
 };
+
+
 typedef struct{
   uint8_t       filter_normal;
   uint8_t       filter_partial;

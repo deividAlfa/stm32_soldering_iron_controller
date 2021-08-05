@@ -13,19 +13,13 @@
 #include "settings.h"
 #include "iron.h"
 
-
-#define   update_reading  1
-#define   stored_reading  0
-#define   read_Avg        0
-#define   read_Raw        1
-
 extern int16_t    last_TIP_Raw;
 extern int16_t    last_TIP;
 
 
 void detectNTC(void);
-int16_t   readColdJunctionSensorTemp_x10(bool update, bool tempUnit);
-int16_t   readTipTemperatureCompensated(bool update, bool ReadRaw);
+int16_t   readColdJunctionSensorTemp_x10(bool new, bool tempUnit);
+int16_t   readTipTemperatureCompensated(bool new, bool mode);
 void      setCurrentTip(uint8_t tip);
 tipData_t *getCurrentTip();
 
