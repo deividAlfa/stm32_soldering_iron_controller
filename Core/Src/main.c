@@ -34,6 +34,8 @@
 #include "gui.h"
 #include "screen.h"
 #include "myTest.h"
+
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,6 +63,8 @@ volatile uint16_t dbg_prev_TIP_Raw, dbg_prev_TIP, dbg_prev_VIN, dbg_prev_PWR;
 volatile int16_t dbg_prev_NTC;
 volatile bool dbg_newData;
 #endif
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -80,6 +84,27 @@ int _write(int32_t file, uint8_t *ptr, int32_t len)
 }
 #endif
 
+
+#ifdef DEBUG_ALLOC
+struct mallinfo mi;
+uint32_t max_allocated;
+#endif
+// Allocate max possible ram, then release it. This fill the malloc pool and avoids internal fragmentation due (ST's?) poor malloc implementation.
+void malloc_fragmentation_fix(void){
+  uint32_t *ptr = NULL;
+  uint32_t try=17408;
+  while(!ptr && try){
+    ptr = _malloc(try);
+    try-=16;
+  }
+  _free(ptr);
+  #ifdef DEBUG_ALLOC
+  max_allocated=0; //Clear max allocated result
+  #endif
+}
+
+
+
 void Init(void){
 #if (defined OLED_SPI || defined OLED_I2C) && defined OLED_DEVICE
   ssd1306_init(&OLED_DEVICE, &FILL_DMA);
@@ -96,16 +121,7 @@ void Init(void){
     oled_init(&RE_Get,&RE1_Data);
 }
 
-// Allocate max possible ram, then release it. This fill the malloc pool and avoids internal fragmentation due (ST's?) poor malloc implementation.
-void malloc_fragmentation_fix(void){
-  uint32_t *ptr = NULL;
-  uint32_t try=17408;
-  while(!ptr && try){
-    ptr = malloc(try);
-    try-=16;
-  }
-  free(ptr);
-}
+
 
 /* USER CODE END 0 */
 

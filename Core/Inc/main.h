@@ -37,7 +37,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <malloc.h>
 
 /* USER CODE END Includes */
 
@@ -45,6 +45,7 @@ extern "C" {
 /* USER CODE BEGIN ET */
 extern IWDG_HandleTypeDef hiwdg;
 extern CRC_HandleTypeDef hcrc;
+extern struct mallinfo mi;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -55,7 +56,7 @@ extern CRC_HandleTypeDef hcrc;
 //               __attribute__((optimize("O0")))
 
 #define DEBUG_ERROR
-
+#define DEBUG_ALLOC
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -79,9 +80,34 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void Program_Handler(void);
+
+
+
+/*
+ * Macro to enable debugging of the allocated memory
+ * max_allocated will hold the max used memory at any time
+ *
+ */
+#ifdef DEBUG_ALLOC
+extern uint32_t max_allocated;
+#define dbg_mem() mi=mallinfo();                  \
+                  if(mi.uordblks>max_allocated){  \
+                    max_allocated=mi.uordblks;     \
+                  }                               \
+
+#define _malloc(x)    malloc(x); dbg_mem()
+#define _calloc(x,y)  calloc(x,y); dbg_mem()
+#define _free(x)      free(x); dbg_mem()
+
+#else
+#define _malloc     malloc
+#define _calloc     calloc
+#define _free       free
+#endif
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+
 /* USER CODE BEGIN Private defines */
 #define WAKE_input()		HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin)
 #define BUTTON_input()		HAL_GPIO_ReadPin(ENC_SW_GPIO_Port, ENC_SW_Pin)
