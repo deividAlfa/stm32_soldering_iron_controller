@@ -18,22 +18,22 @@ static bool callFromCombo;
 #endif
 
 void newWidget(widget_t **new, widgetType type, struct screen_t *scr){
-  widget_t *w=malloc(sizeof(widget_t));
+  widget_t *w=_malloc(sizeof(widget_t));
   if(!w || !scr) Error_Handler();
   switch(type){
     case widget_combo:
-      w->content = malloc(sizeof(comboBox_widget_t));
+      w->content = _malloc(sizeof(comboBox_widget_t));
       break;
     case widget_display:
-      w->content = malloc(sizeof(displayOnly_widget_t));
+      w->content = _malloc(sizeof(displayOnly_widget_t));
       break;
     case widget_multi_option:
     case widget_editable:
-      w->content = malloc(sizeof(editable_widget_t));
+      w->content = _malloc(sizeof(editable_widget_t));
       break;
     case widget_button:
     case widget_bmp_button:
-      w->content = malloc(sizeof(button_widget_t));
+      w->content = _malloc(sizeof(button_widget_t));
       break;
     default:
       Error_Handler();
@@ -47,14 +47,14 @@ void newWidget(widget_t **new, widgetType type, struct screen_t *scr){
 }
 
 editable_widget_t *newEditable(widgetType type){
-  editable_widget_t *edit=malloc(sizeof(editable_widget_t));
+  editable_widget_t *edit=_malloc(sizeof(editable_widget_t));
   if(!edit) Error_Handler();
   editableDefaultsInit(edit,type);
   return edit;
 }
 
 comboBox_item_t *newComboItem(void){
-  comboBox_item_t *item=malloc(sizeof(comboBox_item_t));
+  comboBox_item_t *item=_malloc(sizeof(comboBox_item_t));
   if(!item) Error_Handler();
   return item;
 }
@@ -1194,7 +1194,7 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 }
 
 void newComboScreen(widget_t *w, char *label, uint8_t actionScreen, comboBox_item_t **newItem){
-  comboBox_item_t *item = malloc(sizeof(comboBox_item_t));
+  comboBox_item_t *item = _malloc(sizeof(comboBox_item_t));
   if(!item || !w || !label){
     Error_Handler();
   }
@@ -1225,8 +1225,8 @@ void newComboScreen(widget_t *w, char *label, uint8_t actionScreen, comboBox_ite
 
 // Only allows Editable or multioption widgets
 void newComboEditable( widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem){
-  comboBox_item_t *item = malloc(sizeof(comboBox_item_t));
-  editable_widget_t *edit = malloc(sizeof(editable_widget_t));
+  comboBox_item_t *item = _malloc(sizeof(comboBox_item_t));
+  editable_widget_t *edit = _malloc(sizeof(editable_widget_t));
   if(!item || !w || !label || !edit ){
     Error_Handler();
   }
@@ -1263,8 +1263,8 @@ void newComboEditable( widget_t *w, char *label, editable_widget_t **newEdit, co
 
 // Only allows Editable or multioption widgets
 void newComboMultiOption(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem){
-  comboBox_item_t *item = malloc(sizeof(comboBox_item_t));
-  editable_widget_t *edit = malloc(sizeof(editable_widget_t));
+  comboBox_item_t *item = _malloc(sizeof(comboBox_item_t));
+  editable_widget_t *edit = _malloc(sizeof(editable_widget_t));
   if(!item || !w || !label || !edit ){
     Error_Handler();
   }
@@ -1300,7 +1300,7 @@ void newComboMultiOption(widget_t *w, char *label, editable_widget_t **newEdit, 
 }
 
 void newComboAction(widget_t *w, char *label, int (*action)(), comboBox_item_t **newItem){
-  comboBox_item_t *item = malloc(sizeof(comboBox_item_t));
+  comboBox_item_t *item = _malloc(sizeof(comboBox_item_t));
   if(!item || !w || !label || !action){
     Error_Handler();
   }

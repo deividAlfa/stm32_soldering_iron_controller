@@ -11,6 +11,9 @@ uint8_t status, profile, Selected_Tip;
 char *tipName;
 bool disableTipCopy;
 bool newTip;
+#ifdef ENABLE_DEBUG_SCREEN
+bool dbg_scr_en;
+#endif
 
 plotData_t plot;
 
@@ -20,7 +23,7 @@ void updatePlot(void){
     return;
   }
 
-  int16_t current_temp = readTipTemperatureCompensated(stored_reading,read_Avg);
+  int16_t current_temp = readTipTemperatureCompensated(old_reading,read_average);
 
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     current_temp = TempConversion(current_temp, mode_Celsius, 0);
@@ -51,6 +54,15 @@ int longClickReturn(widget_t *w){
       return screen_main;
   }
   return -1;
+}
+
+uint8_t update_GUI_Timer(void){
+  static uint32_t guiTimer=0;
+  if((current_time-guiTimer)>=systemSettings.settings.guiUpdateDelay){
+    guiTimer=current_time;
+    return 1;
+  }
+  return 0;
 }
 
 int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){

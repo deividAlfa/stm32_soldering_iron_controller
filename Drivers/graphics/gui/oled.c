@@ -8,9 +8,6 @@
 
 #include <stdlib.h>
 #include "oled.h"
-#include <malloc.h>
-
-struct mallinfo mi;
 
 static screen_t *screens = NULL;
 screen_t *current_screen;
@@ -22,7 +19,7 @@ RE_Rotation_t (*RE_GetData)(RE_State_t*);
 RE_Rotation_t RE_Rotation;
 
 
-void oled_addScreen(screen_t *screen, uint8_t index) {
+void oled_addScreen(screen_t *screen, uint8_t index){
   screen->processInput = &default_screenProcessInput;
   screen->init = &default_init;
   screen->draw = &default_screenDraw;
@@ -68,9 +65,7 @@ void oled_init(RE_Rotation_t (*GetData)(RE_State_t*), RE_State_t *State) {
   while(scr) {
     if(scr->index == 0) {
       if(scr->create){                                // Create entering screen
-        mi = mallinfo();
         scr->create(scr);
-        mi = mallinfo();
       }
       scr->init(scr);
       current_screen = scr;
@@ -95,16 +90,16 @@ void oled_destroy_screen(screen_t *scr){
           do{
             Next=Item->next_item;
             if( (Item->type==combo_Editable) || (Item->type==combo_MultiOption)){
-              free(Item->widget);
+              _free(Item->widget);
             }
-            free(Item);
+            _free(Item);
             Item=Next;
           }while(Next);
         }
       }
-      free(w->content);
+      _free(w->content);
     }
-    free(w);
+    _free(w);
     w = next;
   }while(next);
   scr->current_widget=NULL;
@@ -167,15 +162,12 @@ void oled_processInput(void) {
 
         if(current_screen->create){                     // If "create" exists,it means it's a dynamic screen
           oled_backup_comboStatus(current_screen);      // Save combo position
-          mi = mallinfo();
           oled_destroy_screen(current_screen);          // Destroy exiting screen
-          mi = mallinfo();
         }
 
         if(scr->create){                                // Create entering screen
           scr->create(scr);
           oled_restore_comboStatus(scr);                // Restore combo position
-          mi = mallinfo();
         }
 
         current_time = HAL_GetTick();

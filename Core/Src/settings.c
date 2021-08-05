@@ -11,7 +11,7 @@
 #include "gui.h"
 #include "ssd1306.h"
 #include "tempsensors.h"
-#include <malloc.h>
+#include "main.h"
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
@@ -114,7 +114,6 @@ void saveSettingsFromMenu(uint8_t mode){
 }
 
 void saveSettings(uint8_t mode){
-  extern struct mallinfo mi;
   #ifdef NOSAVESETTINGS
     return;
   #endif
@@ -122,10 +121,9 @@ void saveSettings(uint8_t mode){
   uint32_t error=0;
   uint8_t profile = systemSettings.settings.currentProfile;
 
-  flashSettings_t *flashBuffer=malloc(sizeof(flashSettings_t));
+  flashSettings_t *flashBuffer=_malloc(sizeof(flashSettings_t));
   if(!flashBuffer){ Error_Handler(); }
   memcpy(flashBuffer,flashSettings,sizeof(flashSettings_t));
-  mi = mallinfo();
 
   while(ADC_Status != ADC_Idle);
   __disable_irq();
@@ -213,8 +211,7 @@ void saveSettings(uint8_t mode){
   if(SettingsFlash != SettingsRam){
     Flash_error();
   }
-  free(flashBuffer);
-  mi = mallinfo();
+  _free(flashBuffer);
   __disable_irq();
   systemSettings.isSaving = 0;
   __enable_irq();
@@ -286,21 +283,22 @@ void resetSystemSettings(void) {
   systemSettings.settings.WakeInputMode     = mode_shake;
   systemSettings.settings.StandMode         = mode_sleep;
   systemSettings.settings.EncoderMode       = RE_Mode_One;
+  systemSettings.settings.debugEnabled      = disable;
   systemSettings.settings.NotInitialized    = initialized;
 
 #ifdef USE_NTC
   #ifdef PULLUP
-  systemSettings.settings.NTC_detect        = 0;
-  systemSettings.settings.NTC_detect_high_res = 1000;   // 100.0K
-  systemSettings.settings.NTC_detect_high_res_beta = NTC_BETA;
-  systemSettings.settings.NTC_detect_low_res = 100;     // 10.0K
-  systemSettings.settings.NTC_detect_low_res_beta = NTC_BETA;     // 10.0K
   systemSettings.settings.Pullup            = 1;
   #elif defined PULLDOWN
   systemSettings.settings.Pullup            = 0;
   #else
   #error NO PULL MODE DEFINED
   #endif
+  systemSettings.settings.NTC_detect        = 0;
+  systemSettings.settings.NTC_detect_high_res = 1000;   // 100.0K
+  systemSettings.settings.NTC_detect_high_res_beta = NTC_BETA;
+  systemSettings.settings.NTC_detect_low_res = 100;     // 10.0K
+  systemSettings.settings.NTC_detect_low_res_beta = NTC_BETA;     // 10.0K
   systemSettings.settings.Pull_res          = PULL_RES/100;
   systemSettings.settings.NTC_res           = NTC_RES/100;
   systemSettings.settings.NTC_Beta          = NTC_BETA;

@@ -174,6 +174,7 @@ typedef struct{
   uint8_t       lvp;
   uint8_t       errorDelay;
   uint8_t       guiUpdateDelay;
+  uint8_t       debugEnabled;
   uint16_t      NTC_Beta;
   uint16_t      Pull_res;
   uint16_t      NTC_res;

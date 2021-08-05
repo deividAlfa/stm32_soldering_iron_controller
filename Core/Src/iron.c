@@ -81,8 +81,8 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 void handleIron(void) {
   uint32_t CurrentTime = HAL_GetTick();
 
-  readTipTemperatureCompensated(update_reading, read_Avg);     // Update readings
-  readColdJunctionSensorTemp_x10(update_reading, mode_Celsius);
+  readTipTemperatureCompensated(new_reading, read_average);     // Update readings
+  readColdJunctionSensorTemp_x10(new_reading, mode_Celsius);
 
   if(!Iron.Error.safeMode){
     if( (systemSettings.setupMode==enable) || systemSettings.settings.NotInitialized || systemSettings.Profile.NotInitialized!=initialized ||
@@ -303,7 +303,7 @@ void configurePWMpin(uint8_t mode){
 void runAwayCheck(void){
   uint16_t TempStep,TempLimit;
   uint32_t CurrentTime = HAL_GetTick();
-  uint16_t tipTemp = readTipTemperatureCompensated(stored_reading, read_Avg);
+  uint16_t tipTemp = readTipTemperatureCompensated(old_reading, read_average);
   static uint8_t pos,prev_power[4];
   uint8_t power;
 
@@ -323,7 +323,7 @@ void runAwayCheck(void){
     TempLimit = 500;
   }else{
     TempStep = 45;
-    TempLimit = 950;
+    TempLimit = 930;
   }
 
   if(power>1 && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==disable) &&(tipTemp > Iron.CurrentSetTemperature)){
@@ -511,7 +511,7 @@ void readWake(void){
 // Checks for non critical iron errors (Errors that can be cleared)
 void checkIronError(void){
   uint32_t CurrentTime = HAL_GetTick();
-  int16_t ambTemp = readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius);
+  int16_t ambTemp = readColdJunctionSensorTemp_x10(old_reading, mode_Celsius);
   IronError_t Err = { 0 };
   Err.safeMode = Iron.Error.safeMode;
   Err.NTC_high = (ambTemp > 800);
@@ -543,7 +543,7 @@ void checkIronError(void){
     if((CurrentTime-Iron.LastErrorTime)>(systemSettings.settings.errorDelay*100)){                // Check enough time has passed
       TIP.EMA_of_Input = TIP.last_raw<<12;
       TIP.last_avg = TIP.last_raw;
-      readTipTemperatureCompensated(update_reading,read_Avg);
+      readTipTemperatureCompensated(new_reading,read_average);
       Iron.Error.Flags = 0;
       buzzer_alarm_stop();
       setCurrentMode(mode_run);
@@ -582,8 +582,15 @@ void setDebugTemp(uint16_t value) {
   Iron.Debug_SetTemperature = value;
 }
 
+uint16_t getDebugTemp(void){
+  return Iron.Debug_SetTemperature;
+}
+
 void setDebugMode(uint8_t value) {
   Iron.DebugMode = value;
+}
+uint8_t getDebugMode(void){
+  return Iron.DebugMode;
 }
 
 void setUserTemperature(uint16_t temperature) {
@@ -609,8 +616,12 @@ int8_t getCurrentPower() {
   return Iron.CurrentIronPower;
 }
 
+uint16_t getSetTemperature(){
+  return Iron.CurrentSetTemperature;
+}
+
 void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback) {
-  setTemperatureReachedCallbackStruct_t *s = malloc(sizeof(setTemperatureReachedCallbackStruct_t));
+  setTemperatureReachedCallbackStruct_t *s = _malloc(sizeof(setTemperatureReachedCallbackStruct_t));
   if(!s){
     Error_Handler();
   }
@@ -629,7 +640,7 @@ void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback) {
 
 // Adds a callback to be called when the iron working mode is changed
 void addModeChangedCallback(currentModeChanged callback) {
-  currentModeChangedCallbackStruct_t *s = malloc(sizeof(currentModeChangedCallbackStruct_t));
+  currentModeChangedCallbackStruct_t *s = _malloc(sizeof(currentModeChangedCallbackStruct_t));
   if(!s){
     Error_Handler();
   }

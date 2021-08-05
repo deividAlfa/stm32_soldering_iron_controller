@@ -8,9 +8,11 @@
 #ifndef GRAPHICS_GUI_SCREENS_SCREENS_H_
 #define GRAPHICS_GUI_SCREENS_SCREENS_H_
 
+
+#define ENABLE_DEBUG_SCREEN
+
 #include "tip_list_screen.h"
 #include "tip_settings_screen.h"
-#include "pid_debug_screen.h"
 #include "boot_screen.h"
 #include "main_screen.h"
 #include "settings_screen.h"

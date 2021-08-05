@@ -102,7 +102,9 @@ void handleIron(void);
 void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32_t pwmchannel);
 uint8_t getIronOn();
 void setDebugTemp(uint16_t value);
+uint16_t getDebugTemp(void);
 void setDebugMode(uint8_t value);
+uint8_t getDebugMode(void);
 void configurePWMpin(uint8_t mode);
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim);
 #endif /* IRON_H_ */

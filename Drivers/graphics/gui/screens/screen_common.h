@@ -42,7 +42,12 @@ extern bool disableTipCopy;
 extern char *tipName;
 extern bool newTip;
 
+#ifdef ENABLE_DEBUG_SCREEN
+extern bool dbg_scr_en;
+#endif
+
 int longClickReturn(widget_t *w);
 int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state);
 void updatePlot(void);
+uint8_t update_GUI_Timer(void);
 #endif /* GRAPHICS_GUI_SCREENS_SCREEN_COMMON_H_ */

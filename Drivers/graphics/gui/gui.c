@@ -45,9 +45,6 @@ void guiInit(void) {
   oled_addScreen(&Screen_tip_settings, screen_tip_settings);
   tip_settings_screen_setup(&Screen_tip_settings);
 
-  oled_addScreen(&Screen_pid_debug, screen_pid_debug);
-  pid_debug_screen_setup(&Screen_pid_debug);
-
   oled_addScreen(&Screen_calibration,screen_calibration);
   calibration_screen_setup(&Screen_calibration);
 

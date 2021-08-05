@@ -112,7 +112,6 @@ static widget_t *Widget_IronTemp;
 static widget_t *Widget_SetPoint;
 
 static struct{
-  uint8_t updateReadings;
   uint8_t lastPwr;
   uint8_t idle;
   uint8_t shakeActive;
@@ -123,6 +122,7 @@ static struct{
   uint8_t currentMode;
   uint8_t displayMode;
   uint8_t menuPos;
+  uint8_t updateReadings;
   int16_t lastTip;
   #ifdef USE_NTC
   int16_t lastAmb;
@@ -135,7 +135,6 @@ static struct{
   uint32_t idleTimer;
   uint32_t inputBlockTimer;
   uint32_t modeTimer;
-  uint32_t updateTimer;
 }mainScr;
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -154,7 +153,7 @@ static void * getTemp() {
 
 static void * main_screen_getIronTemp() {
   if(mainScr.updateReadings){
-    mainScr.lastTip=readTipTemperatureCompensated(stored_reading,read_Avg);
+    mainScr.lastTip=readTipTemperatureCompensated(old_reading,read_average);
   }
   temp=mainScr.lastTip;
   return &temp;
@@ -173,7 +172,7 @@ static void * main_screen_getVin() {
 #ifdef USE_NTC
 static void * main_screen_getAmbTemp() {
   if(mainScr.updateReadings){
-    mainScr.lastAmb = readColdJunctionSensorTemp_x10(stored_reading, systemSettings.settings.tempUnit);
+    mainScr.lastAmb = readColdJunctionSensorTemp_x10(old_reading, systemSettings.settings.tempUnit);
   }
   temp=mainScr.lastAmb;
   return &temp;
@@ -306,19 +305,15 @@ int8_t switchScreenMode(void){
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   int16_t contrast = getContrast();
   uint8_t current_mode = getCurrentMode();
-  int16_t current_temp = readTipTemperatureCompensated(stored_reading,read_Avg);
+  int16_t current_temp = readTipTemperatureCompensated(old_reading,read_average);
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     current_temp = TempConversion(current_temp, mode_Celsius, 0);
   }
+  mainScr.updateReadings=update_GUI_Timer();
   updateIronPower();
+  updatePlot();
+  updateScreenSaver();
 
-  mainScr.updateReadings = 0;
-
-  // Display values update timer
-  if((current_time-mainScr.updateTimer) >= systemSettings.settings.guiUpdateDelay){
-    mainScr.updateReadings=1;
-    mainScr.updateTimer=current_time;
-  }
 
   if(Iron.Error.Flags & _ACTIVE){
     if(mainScr.ironStatus != status_error){
@@ -334,8 +329,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     mainScr.ironStatus = status_ok;
   }
 
-  updatePlot();
-  updateScreenSaver();
 
 
 

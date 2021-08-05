@@ -34,6 +34,16 @@ uint16_t backup_Pull_res, backup_NTC_res, backup_NTC_Beta, backup_NTC_detect_hig
 
 
 //=========================================================
+#ifdef ENABLE_DEBUG_SCREEN
+static void * getDbgScr() {
+  temp = systemSettings.settings.debugEnabled;
+  return &temp;
+}
+static void setDbgScr(uint32_t *val) {
+  systemSettings.settings.debugEnabled = *val;
+}
+#endif
+
 static void * getTmpUnit() {
   temp = systemSettings.settings.tempUnit;
   return &temp;
@@ -423,7 +433,24 @@ static void system_create(screen_t *scr){
   edit->max_value = 250;
   edit->min_value = 20;
 
+#ifdef ENABLE_DEBUG_SCREEN
+  //  [ Debug enable Widget ]
+  //
+  newComboMultiOption(w, "DEBUG", &edit, NULL);
+  dis=&edit->inputData;
+  dis->getData = &getDbgScr;
+  dis->reservedChars=3;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setDbgScr;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options = OffOn;
+  edit->numberOfOptions = 2;
+#endif
+#ifdef USE_NTC
   newComboScreen(w, "NTC MENU", screen_ntc, NULL);
+#endif
   newComboScreen(w, "RESET MENU", screen_reset, NULL);
   newComboScreen(w, SWSTRING, -1, NULL);
   newComboScreen(w, HWSTRING, -1, NULL);

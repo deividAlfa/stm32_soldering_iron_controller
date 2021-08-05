@@ -9,6 +9,9 @@
 #include "screen_common.h"
 
 screen_t Screen_settings;
+#ifdef ENABLE_DEBUG_SCREEN
+static comboBox_item_t *comboitem_system_debug;
+#endif
 
 static void SETTINGS_create(screen_t *scr) {
   widget_t* w;
@@ -17,14 +20,11 @@ static void SETTINGS_create(screen_t *scr) {
   newWidget(&w,widget_combo,scr);
   newComboScreen(w, "IRON", screen_iron, NULL);
   newComboScreen(w, "SYSTEM", screen_system, NULL);
+  #ifdef ENABLE_DEBUG_SCREEN
+  newComboScreen(w, "DEBUG", screen_debug, &comboitem_system_debug);
+  #endif
   newComboScreen(w, "EDIT TIPS", screen_tip_list, NULL);
   newComboScreen(w, "CALIBRATION", screen_calibration, NULL);
-  #ifdef ENABLE_PID_DEBUG_SCREEN
-  newComboScreen(w, "PID DEBUG", screen_pid_debug, NULL);
-  #endif
-  #ifdef ENABLE_DEBUG_SCREEN
-  newComboScreen(w, "DEBUG", screen_debug, NULL);
-  #endif
   newComboScreen(w, "EXIT", screen_main, NULL);
 }
 
@@ -36,6 +36,11 @@ static void SETTINGS_OnEnter(screen_t *scr) {
   if(ChecksumProfile(&systemSettings.Profile)!=systemSettings.ProfileChecksum){         // If there's unsaved profile data
     saveSettingsFromMenu(save_Settings);                                                // Save settings
   }
+
+#ifdef ENABLE_DEBUG_SCREEN
+  comboitem_system_debug->enabled = (systemSettings.settings.debugEnabled);
+#endif
+
 }
 
 

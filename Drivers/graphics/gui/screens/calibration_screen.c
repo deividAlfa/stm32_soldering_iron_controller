@@ -11,7 +11,6 @@
 typedef enum { cal_250=0, cal_350=1, cal_450=2, cal_input_250=10, cal_input_350=11, cal_input_450=12, cal_suceed=20, cal_failed=21, cal_needsAdjust=22 }state_t;
 static bool error;
 static uint32_t errorTimer;
-static uint32_t lastUpdateTick;
 static int16_t lastTipTemp;
 static uint16_t backupTemp;
 static bool backupTempUnit;
@@ -29,7 +28,7 @@ static int32_t measuredTemp;
 static uint16_t adcCal[3];
 static uint8_t processCalibration();
 static tipData_t *Currtip;
-
+static uint8_t update, update_draw;
 screen_t Screen_calibration;
 screen_t Screen_calibration_start;
 screen_t Screen_calibration_settings;
@@ -45,7 +44,7 @@ static comboBox_item_t *Cal_Combo_Adjust_C450;
 //=========================================================
 static uint8_t processCalibration() {
   uint16_t delta = (state_temps[cal_350] - state_temps[cal_250])/2;
-  uint16_t ambient = readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius) / 10;
+  uint16_t ambient = readColdJunctionSensorTemp_x10(old_reading, mode_Celsius) / 10;
 
   //  Ensure measured temps are valid (250<350<450)
   if (  (measured_temps[cal_250] >= measured_temps[cal_350]) ||  (measured_temps[cal_350] >= measured_temps[cal_450]) ){
@@ -184,7 +183,7 @@ static int Cal_Settings_SaveAction() {
     systemSettings.Profile.Cal250_default = adcAtTemp[cal_250];
     systemSettings.Profile.Cal350_default = adcAtTemp[cal_350];
     systemSettings.Profile.Cal450_default = adcAtTemp[cal_450];
-    systemSettings.Profile.CalNTC = readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius) / 10;
+    systemSettings.Profile.CalNTC = readColdJunctionSensorTemp_x10(old_reading, mode_Celsius) / 10;
     saveSettingsFromMenu(save_Settings);
   }
   return screen_calibration;
@@ -310,6 +309,8 @@ static void Cal_Start_init(screen_t *scr) {
 }
 
 static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
+  update = update_GUI_Timer();
+  update_draw |= update;
   if(GetIronError()){
     return screen_calibration;
   }
@@ -329,7 +330,7 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
           setCalState(cal_needsAdjust);
         }
         else{
-          measured_temps[current_state-10] = measuredTemp - (readColdJunctionSensorTemp_x10(stored_reading, mode_Celsius) / 10);
+          measured_temps[current_state-10] = measuredTemp - (readColdJunctionSensorTemp_x10(old_reading, mode_Celsius) / 10);
           adcAtTemp[(int)current_state-10] = TIP.last_avg;
           if(current_state<cal_input_450){
             tempReady = 0;
@@ -367,15 +368,15 @@ static void Cal_Start_OnExit(screen_t *scr) {
 static void Cal_Start_draw(screen_t *scr){
   char str[20];
 
-  if(cal_drawText || (current_time-lastUpdateTick)>199){
+  if(cal_drawText || update_draw){
     cal_drawText=0;
-    lastUpdateTick=current_time;
+    update_draw=0;
 
     FillBuffer(BLACK, fill_dma);
     scr->refresh=screen_Erased;
     u8g2_SetDrawColor(&u8g2, WHITE);
     u8g2_SetFont(&u8g2, default_font);
-    lastTipTemp = readTipTemperatureCompensated(stored_reading, read_Avg);
+    lastTipTemp = readTipTemperatureCompensated(old_reading, read_average);
 
     if(current_state<cal_suceed){
       uint8_t s = current_state;
