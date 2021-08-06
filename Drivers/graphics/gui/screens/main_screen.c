@@ -421,8 +421,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           }
           else if(current_mode!=mode_run){
             IronWake(wakeButton);
+            if(getCurrentMode()==mode_run){   // If mode changed, don't process the click
+              break;
+            }
           }
-          else if(mainScr.displayMode==temp_graph){
+          if(mainScr.displayMode==temp_graph){
             Widget_SetPoint->enabled=1;
             default_widgetProcessInput(Widget_SetPoint, input, state);
           }
@@ -544,7 +547,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         case LongClick:
         case Click:
           //blockInput(100);
-          if(mainScr.ironStatus != status_error && (current_time-mainScr.modeTimer < 1000)){
+          if(mainScr.ironStatus != status_error && current_mode==mode_run && (current_time-mainScr.modeTimer < 1000)){
             setCurrentMode(mode_boost);
           }
           mainScr.setMode=main_irontemp;
