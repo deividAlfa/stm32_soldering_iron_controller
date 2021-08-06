@@ -462,7 +462,7 @@ void setCurrentMode(uint8_t mode){
 
 // Called from program timer if WAKE change is detected
 void IronWake(bool source){                                                                 // source: handle shake, encoder push button
-  if(Iron.Error.Flags){
+  if(Iron.Error.Flags || systemSettings.settings.WakeInputMode==mode_stand){
     return;
   }
 
