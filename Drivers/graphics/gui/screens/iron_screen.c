@@ -460,8 +460,8 @@ static void iron_create(screen_t *scr){
   dis->endString="mS";
   dis->reservedChars=5;
   dis->getData = &geterrorDelay;
-  edit->big_step = 100;
-  edit->step = 50;
+  edit->big_step = 1;
+  edit->step = 1;
   edit->setData = (void (*)(void *))&seterrorDelay;
   edit->max_value = 1000;
   edit->min_value = 100;
