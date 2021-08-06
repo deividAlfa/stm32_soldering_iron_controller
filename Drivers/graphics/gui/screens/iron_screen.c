@@ -458,12 +458,12 @@ static void iron_create(screen_t *scr){
   newComboEditable(w, " Delay", &edit, NULL);
   dis=&edit->inputData;
   dis->endString="mS";
-  dis->reservedChars=5;
+  dis->reservedChars=6;
   dis->getData = &geterrorDelay;
-  edit->big_step = 1;
-  edit->step = 1;
+  edit->big_step = 100;
+  edit->step = 100;
   edit->setData = (void (*)(void *))&seterrorDelay;
-  edit->max_value = 1000;
+  edit->max_value = 2000;
   edit->min_value = 100;
 
   //  [ Filter Coefficient Widget ]
