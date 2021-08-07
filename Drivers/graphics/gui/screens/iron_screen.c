@@ -500,7 +500,7 @@ static void iron_advFilter_create(screen_t *scr){
 
   //  [ Partial start Widget ]
   //
-  newComboEditable(w, "Threshold", &edit, NULL);
+  newComboEditable(w, "Threshold ", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &get_partial_start;
@@ -537,7 +537,7 @@ static void iron_advFilter_create(screen_t *scr){
 
   //  [ Spike limit ]
   //
-  newComboEditable(w, "Spikes", &edit, NULL);
+  newComboEditable(w, "Spike limit", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &get_spike_limit;
@@ -562,7 +562,7 @@ static void iron_advFilter_create(screen_t *scr){
 
   //  [ Reset limit Widget ]
   //
-  newComboEditable(w, "Reset", &edit, NULL);
+  newComboEditable(w, "Reset limit", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &get_reset_limit;
