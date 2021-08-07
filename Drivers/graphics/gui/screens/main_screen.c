@@ -230,12 +230,6 @@ void blockInput(uint32_t time){
   mainScr.inputBlockTimer = current_time+time;
 }
 
-void restore_contrast(void){
-  if(getContrast() != systemSettings.settings.contrast){
-    setContrast(systemSettings.settings.contrast);
-  }
-}
-
 void updateScreenSaver(void){
 #ifdef SCREENSAVER
   if(!screenSaver.enabled || Iron.CurrentMode!=mode_sleep || (Iron.Error.Flags & _ACTIVE)){
@@ -339,39 +333,13 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
   if(input!=Rotate_Nothing){
     mainScr.idleTimer = current_time;
+    refreshOledDim();
+  }
+  if(current_mode!=mode_sleep || current_temp>99 || Iron.shakeActive){
+    refreshOledDim();
   }
 
-  if(systemSettings.settings.screenDimming){
-    if(mainScr.dimStep==0){
-      // Wake up screen.
-      if(contrast<systemSettings.settings.contrast){
-        if(Iron.shakeActive || current_mode!=mode_sleep || input!=Rotate_Nothing){
-          mainScr.dimStep=5;
-          mainScr.dimTimer = current_time;
-        }
-      }
-      // Screen dimming timer
-      if(contrast>5 && current_mode==mode_sleep && current_temp<100 && ((current_time-mainScr.idleTimer)>10000)){
-        mainScr.dimStep=-5;
-      }
-    }
-    // Smooth screen brightness dimming
-    else if(current_time-mainScr.dimTimer>9){
-      mainScr.dimTimer = current_time;
-      contrast+=mainScr.dimStep;
-      if(contrast>4 && (contrast<systemSettings.settings.contrast)){
-        mainScr.dimTimer=current_time;
-        setContrast(contrast);
-      }
-      else{
-        if(mainScr.dimStep>0){
-          restore_contrast();
-        }
-        mainScr.dimStep=0;
-        mainScr.idleTimer = current_time;
-      }
-    }
-  }
+  handleOledDim();
 
   // Handle shake wake icon drawing and timeout
   if( !mainScr.shakeActive && Iron.shakeActive){
@@ -842,10 +810,6 @@ static void main_screen_init(screen_t *scr) {
   mainScr.idleTimer=current_time;
 }
 
-static void main_screen_onExit(screen_t *scr) {
-  restore_contrast();
-}
-
 static void main_screen_create(screen_t *scr){
   widget_t *w;
   displayOnly_widget_t* dis;
@@ -911,7 +875,7 @@ static void main_screen_create(screen_t *scr){
   dis=extractDisplayPartFromWidget(w);
   dis->reservedChars=7;
   dis->dispAlign=align_right;
-  dis->textAlign=align_center;
+  dis->textAlign=align_right;
   dis->number_of_dec=1;
   dis->font=u8g2_font_small;
   dis->getData = &main_screen_getAmbTemp;
@@ -926,7 +890,6 @@ void main_screen_setup(screen_t *scr) {
   scr->init = &main_screen_init;
   scr->processInput = &main_screenProcessInput;
   scr->create = &main_screen_create;
-  scr->onExit = &main_screen_onExit;
 
   for(int x = 0; x < TipSize; x++) {
     tipNames[x] = systemSettings.Profile.tip[x].name;
