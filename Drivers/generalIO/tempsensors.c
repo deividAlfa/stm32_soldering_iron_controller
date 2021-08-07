@@ -33,7 +33,7 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
     float pull_res=systemSettings.settings.Pull_res*100;
     float NTC_Beta;
     float adcValue=NTC.last_avg;
-    float result;
+    volatile float result;
 
     if(systemSettings.settings.NTC_detect){                         // NTC Autodetect enabled?
       NTC_res = systemSettings.settings.NTC_detect_low_res*100;     // Set lower by default
@@ -57,16 +57,36 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
     }
 
     if(systemSettings.settings.Pullup){
-      if(adcValue == 4095) return 999;
-      result = (1/((log(((pull_res * adcValue) / (4095.0 - adcValue))/NTC_res)/NTC_Beta) + (1 / (273.15 + 25.000)))) - 273.15;
+      if(adcValue >= 4095){
+        result = (float)-99.9;
+      }
+      else if(adcValue == 0){
+        result = (float)99.9;
+      }
+      else{
+        result = (1/((log(((pull_res * adcValue) / (4095.0 - adcValue))/NTC_res)/NTC_Beta) + (1 / (273.15 + 25.000)))) - 273.15;
+      }
     }
     else{
-      if(adcValue == 0) return -999;
-      result = (1/((log(((pull_res * (4095.0 - adcValue)) / adcValue)/NTC_res)/NTC_Beta) + (1 / (273.15 + 25.000)))) - 273.15;
+      if(adcValue >= 4095){
+        result = (float)99.9;
+      }
+      else if(adcValue == 0){
+        result = (float)-99.9;
+      }
+      else{
+        result = (1/((log(((pull_res * (4095.0 - adcValue)) / adcValue)/NTC_res)/NTC_Beta) + (1 / (273.15 + 25.000)))) - 273.15;
+      }
     }
     result*=10;
     last_NTC_C = result;
-    last_NTC_F = TempConversion(result, mode_Farenheit, 1);
+    if(last_NTC_C < -200){
+      last_NTC_C = -999;
+      last_NTC_F = -999;
+    }
+    else{
+      last_NTC_F = TempConversion(result, mode_Farenheit, 1);
+    }
   }
 #else
   if(new){
