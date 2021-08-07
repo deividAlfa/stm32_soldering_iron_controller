@@ -395,7 +395,7 @@ void resetCurrentProfile(void){
   systemSettings.Profile.tipFilter.filter_normal            = 55;   // % of old data (more %, more filtering)
   systemSettings.Profile.tipFilter.filter_partial           = 45;
   systemSettings.Profile.tipFilter.filter_spikes            = 70;
-  systemSettings.Profile.tipFilter.filter_reset             = 20;
+  systemSettings.Profile.tipFilter.filter_reset             = 0;
   systemSettings.Profile.tipFilter.partial_start            = 400;
   systemSettings.Profile.tipFilter.partial_end              = 600;
   systemSettings.Profile.tipFilter.reset_limit              = 750;
