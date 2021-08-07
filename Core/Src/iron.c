@@ -541,9 +541,6 @@ void checkIronError(void){
   }
   else if (Iron.Error.active && !Err.Flags){                                                // If global flag set, but no errors
     if((CurrentTime-Iron.LastErrorTime)>(systemSettings.settings.errorDelay*100)){                // Check enough time has passed
-      TIP.EMA_of_Input = TIP.last_raw<<12;
-      TIP.last_avg = TIP.last_raw;
-      readTipTemperatureCompensated(new_reading,read_average);
       Iron.Error.Flags = 0;
       buzzer_alarm_stop();
       setCurrentMode(mode_run);
