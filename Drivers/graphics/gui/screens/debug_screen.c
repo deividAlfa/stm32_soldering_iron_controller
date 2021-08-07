@@ -25,6 +25,10 @@
 
 #ifdef ENABLE_DEBUG_SCREEN
 
+#ifdef __BASE_FILE__
+#undef __BASE_FILE__
+#define __BASE_FILE__ "debug_screen.c"
+#endif
 
 screen_t Screen_debug;
 screen_t Screen_pid_debug;

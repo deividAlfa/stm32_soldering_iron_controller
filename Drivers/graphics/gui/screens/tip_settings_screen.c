@@ -7,6 +7,11 @@
 #include "tip_settings_screen.h"
 #include "screen_common.h"
 
+#ifdef __BASE_FILE__
+#undef __BASE_FILE__
+#define __BASE_FILE__ "tip_settings_screen.c"
+#endif
+
 screen_t Screen_tip_settings;
 static uint8_t return_screen;
 static tipData_t tipCfg;
