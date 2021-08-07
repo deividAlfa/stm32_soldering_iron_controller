@@ -248,6 +248,9 @@ static void Cal_draw(screen_t *scr){
 
 static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
   updatePlot();
+  refreshOledDim();
+  handleOledDim();
+
   if(GetIronError()){
     error=1;
   }
@@ -263,7 +266,7 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
     if(input!=Rotate_Nothing){
       screen_timer=current_time;
     }
-    if(input==LongClick || (current_time-screen_timer)>15000){
+    if(input==LongClick || ((current_time-screen_timer)>15000)){
       return screen_main;
     }
   }
@@ -311,8 +314,16 @@ static void Cal_Start_init(screen_t *scr) {
 static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
   update = update_GUI_Timer();
   update_draw |= update;
-  if(GetIronError()){
-    return screen_calibration;
+
+  refreshOledDim();
+  handleOledDim();
+
+  if(input!=Rotate_Nothing){
+    screen_timer=current_time;
+  }
+  if((current_time-screen_timer)>60000){
+    setCurrentMode(mode_sleep);
+    return screen_main;
   }
 
   if(tempReady){
@@ -426,7 +437,7 @@ static void Cal_Start_create(screen_t *scr) {
   w->posX = 84;
   w->posY = 48;
   w->width = 42;
-  ((button_widget_t*)w->content)->displayString="BACK";
+  ((button_widget_t*)w->content)->displayString="STOP";
   ((button_widget_t*)w->content)->selectable.tab=0;
   ((button_widget_t*)w->content)->action = &cancelAction;
 
@@ -458,16 +469,35 @@ static void Cal_Settings_init(screen_t *scr) {
 }
 
 static void Cal_Settings_OnExit(screen_t *scr) {
+  if(getCurrentMode()!=mode_sleep){
+    setCurrentMode(mode_run);
+  }
   setDebugMode(disable);
-  setCurrentMode(mode_run);
 }
 
 static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
+  comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
   if(GetIronError()){
     return screen_calibration;
   }
+  refreshOledDim();
+  handleOledDim();
+
+  if(input!=Rotate_Nothing){
+    screen_timer=current_time;
+  }
+  if(item->type==combo_Editable && item->widget->selectable.state==widget_edit){
+    if((current_time-screen_timer)>60000){
+      setCurrentMode(mode_sleep);
+      return screen_main;
+    }
+  }
+  else if((current_time-screen_timer)>15000){
+    return screen_main;
+  }
   return default_screenProcessInput(scr, input, s);
 }
+
 static void Cal_Settings_create(screen_t *scr){
   widget_t* w;
   editable_widget_t* edit;
