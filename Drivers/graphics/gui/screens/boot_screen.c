@@ -160,7 +160,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
     else if(boot_step==3){
       systemSettings.setupMode=disable;
       setSafeMode(disable);
-      HAL_Delay(100);                                     // To let the ADC refresh
+      HAL_Delay(200);                                     // To let the ADC refresh
     }
   }
   else{
