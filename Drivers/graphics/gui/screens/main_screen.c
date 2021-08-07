@@ -297,7 +297,6 @@ int8_t switchScreenMode(void){
 }
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
-  int16_t contrast = getContrast();
   uint8_t current_mode = getCurrentMode();
   int16_t current_temp = readTipTemperatureCompensated(old_reading,read_average);
   if(systemSettings.settings.tempUnit==mode_Farenheit){
