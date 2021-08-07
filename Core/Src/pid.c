@@ -33,7 +33,12 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
   pid.proportional = pid.Kp * error;
 
   // Integral
-  pid.integrator = pid.integrator + 0.5f * pid.Ki * dt * (error + pid.prevError);  // New
+  if(pid.proportional<1.0){                                                           // If proportional is already doing all the work, clear integral to avoid excessive build up
+    pid.integrator = pid.integrator + 0.5f * pid.Ki * dt * (error + pid.prevError);  // New
+  }
+  else{
+    pid.integrator = 0;
+  }
   //pid.integrator = pid.integrator + (pid.Ki*(error*dt));                            // Old
 
   // Integrator clamping
