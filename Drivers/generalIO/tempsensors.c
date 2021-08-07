@@ -57,7 +57,7 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
     }
 
     if(systemSettings.settings.Pullup){
-      if(adcValue >= 4095){
+      if(adcValue > 4094){
         result = (float)-99.9;
       }
       else if(adcValue == 0){
@@ -68,7 +68,7 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
       }
     }
     else{
-      if(adcValue >= 4095){
+      if(adcValue > 4094){
         result = (float)99.9;
       }
       else if(adcValue == 0){
