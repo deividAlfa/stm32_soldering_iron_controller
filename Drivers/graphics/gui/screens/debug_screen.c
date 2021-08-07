@@ -186,10 +186,15 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 
   update=update_GUI_Timer();
   update_draw |= update;
-
   updatePIDplot();
+  refreshOledDim();
+  handleOledDim();
 
-  if(input==LongClick){
+  if(input!=Rotate_Nothing){
+    screen_timer=current_time;
+  }
+
+  if(input==LongClick || ((current_time-screen_timer)>60000)){
     return screen_settings;
   }
   else if(input==Click){
