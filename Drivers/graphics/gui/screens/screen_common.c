@@ -6,8 +6,10 @@
  */
 #include "screen_common.h"
 
-int32_t temp, temp2, temp3;
+int32_t temp, temp2, temp3, dimTimer;
 uint8_t status, profile, Selected_Tip;
+int8_t dimStep;
+
 char *tipName;
 bool disableTipCopy;
 bool newTip;
@@ -67,6 +69,8 @@ uint8_t update_GUI_Timer(void){
 
 int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
   updatePlot();
+  refreshOledDim();
+  handleOledDim();
   if(input!=Rotate_Nothing){
     screen_timer=current_time;
   }
@@ -81,4 +85,44 @@ int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     return screen_main;
   }
   return default_screenProcessInput(scr, input, state);
+}
+
+void restore_contrast(void){
+  if(getContrast() != systemSettings.settings.contrast){
+    setContrast(systemSettings.settings.contrast);
+  }
+}
+
+void refreshOledDim(void){
+  dimTimer = current_time;
+  if(dimStep<5 && getContrast()<systemSettings.settings.contrast ){
+    dimStep=5;
+  }
+}
+
+void handleOledDim(void){
+  static uint32_t stepTimer;
+  uint8_t contrast=getContrast();
+  if(dimStep==0){
+    // Wake up screen.
+    if(systemSettings.settings.screenDimming &&  ((current_time-dimTimer)>=((uint32_t)systemSettings.settings.screenDimming*1000))){
+      dimStep=-5;
+    }
+  }
+  // Smooth screen brightness dimming
+  else if(current_time-stepTimer>9){
+    stepTimer = current_time;
+    contrast+=dimStep;
+    if(contrast>4 && (contrast<systemSettings.settings.contrast)){
+      dimTimer=current_time;
+      setContrast(contrast);
+    }
+    else{
+      if(dimStep>0){
+        restore_contrast();
+      }
+      dimTimer = current_time;
+      dimStep=0;
+    }
+  }
 }

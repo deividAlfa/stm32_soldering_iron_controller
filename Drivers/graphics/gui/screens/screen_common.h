@@ -46,6 +46,8 @@ extern bool newTip;
 extern bool dbg_scr_en;
 #endif
 
+void handleOledDim(void);
+void refreshOledDim(void);
 int longClickReturn(widget_t *w);
 int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state);
 void updatePlot(void);
