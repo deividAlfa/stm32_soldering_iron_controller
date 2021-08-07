@@ -470,12 +470,13 @@ static void iron_create(screen_t *scr){
   //
   newComboEditable(w, "Filter", &edit, NULL);
   dis=&edit->inputData;
-  dis->reservedChars=1;
+  dis->endString="%";
+  dis->reservedChars=4;
   dis->getData = &get_filter_normal;
-  edit->big_step = 1;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_filter_normal;
-  edit->max_value = 8;
+  edit->max_value = 99;
   edit->min_value = 0;
 
   //  [ BACK button ]
@@ -525,12 +526,13 @@ static void iron_advFilter_create(screen_t *scr){
   //
   newComboEditable(w, " Filter", &edit, NULL);
   dis=&edit->inputData;
-  dis->reservedChars=1;
+  dis->reservedChars=4;
   dis->getData = &get_partial_filter;
-  edit->big_step = 1;
+  dis->endString="%";
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_partial_filter;
-  edit->max_value = 8;
+  edit->max_value = 99;
   edit->min_value = 0;
 
   //  [ Spike limit ]
@@ -549,12 +551,13 @@ static void iron_advFilter_create(screen_t *scr){
   //
   newComboEditable(w, " Filter", &edit, NULL);
   dis=&edit->inputData;
+  dis->endString="%";
   dis->reservedChars=4;
   dis->getData = &get_spike_filter;
-  edit->big_step = 1;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_spike_filter;
-  edit->max_value = 8;
+  edit->max_value = 99;
   edit->min_value = 0;
 
   //  [ Reset limit Widget ]
@@ -573,12 +576,13 @@ static void iron_advFilter_create(screen_t *scr){
   //
   newComboEditable(w, " Filter", &edit, NULL);
   dis=&edit->inputData;
-  dis->reservedChars=1;
+  dis->reservedChars=4;
+  dis->endString="%";
   dis->getData = &get_reset_filter;
-  edit->big_step = 1;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_reset_filter;
-  edit->max_value = 8;
+  edit->max_value = 99;
   edit->min_value = 0;
 
   newComboScreen(w, "BACK", screen_iron, NULL);
