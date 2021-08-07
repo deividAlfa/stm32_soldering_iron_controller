@@ -250,16 +250,16 @@ static void system_create(screen_t *scr){
 
   //  [ Oled dimming Widget ]
   //
-  newComboMultiOption(w, "Auto dim", &edit, NULL);
+  newComboEditable(w, "Auto dim", &edit, NULL);
   dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->endString="s";
   dis->getData = &getOledDimming;
-  edit->big_step = 1;
-  edit->step = 1;
+  edit->big_step = 20;
+  edit->step = 5;
   edit->setData = (void (*)(void *))&setOledDimming;
-  edit->max_value = 1;
+  edit->max_value = 240;
   edit->min_value = 0;
-  edit->options = OffOn;
-  edit->numberOfOptions = 2;
   edit->selectable.processInput=&OledDimming_ProcessInput;
 
   //  [ Oled Offset Widget ]

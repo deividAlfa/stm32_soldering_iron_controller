@@ -266,7 +266,7 @@ void resetSystemSettings(void) {
   __disable_irq();
   systemSettings.settings.version           = SETTINGS_VERSION;
   systemSettings.settings.contrast          = 255;
-  systemSettings.settings.screenDimming     = true;
+  systemSettings.settings.screenDimming     = 10;
   systemSettings.settings.OledOffset        = OLED_OFFSET;
   systemSettings.settings.errorDelay        = 1;                    // *100mS
   systemSettings.settings.guiUpdateDelay    = 200;
@@ -392,10 +392,10 @@ void resetCurrentProfile(void){
     Error_Handler();  // We shouldn't get here!
   }
 
-  systemSettings.Profile.tipFilter.filter_normal            = 2;
-  systemSettings.Profile.tipFilter.filter_partial           = 1;
+  systemSettings.Profile.tipFilter.filter_normal            = 75;   // % of old data (more %, more filtering)
+  systemSettings.Profile.tipFilter.filter_partial           = 50;
   systemSettings.Profile.tipFilter.filter_reset             = 0;
-  systemSettings.Profile.tipFilter.filter_spikes            = 2;
+  systemSettings.Profile.tipFilter.filter_spikes            = 50;
   systemSettings.Profile.tipFilter.partial_start            = 300;
   systemSettings.Profile.tipFilter.partial_end              = 500;
   systemSettings.Profile.tipFilter.reset_limit              = 700;
