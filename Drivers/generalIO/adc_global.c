@@ -30,38 +30,24 @@ volatile ADCDataTypeDef_t TIP = {
 #ifdef USE_VIN
 volatile ADCDataTypeDef_t VIN = {
     .adc_buffer     = &ADC_measures[0].VIN,
-    .filter.partial_start  = 20,
-    .filter.partial_end    = 50,
-    .filter.reset_limit    = 2,
     .filter.filter_normal  = 75,
-    .filter.filter_partial = 50,
-    .filter.filter_reset   = 0,
-    .filter.filter_spikes  = 60,
+    .filter.reset_limit  = 50,
 };
 #endif
 
 #ifdef USE_NTC
 volatile ADCDataTypeDef_t NTC = {
     .adc_buffer     = &ADC_measures[0].NTC,
-    .filter.partial_start  = 20,
-    .filter.partial_end    = 50,
-    .filter.reset_limit    = 2,
     .filter.filter_normal  = 75,
-    .filter.filter_partial = 50,
-    .filter.filter_reset   = 0,
-    .filter.filter_spikes  = 60,
+    .filter.reset_limit  = 50,
 };
 #endif
 
 #ifdef USE_VREF
 volatile ADCDataTypeDef_t VREF = {
     .adc_buffer     = &ADC_measures[0].VREF
-    .partial_start  = 20,
-    .partial_end    = 50,
-    .reset_limit    = 100,
-    .filter_normal  = 2,
-    .filter_partial = 1,
-    .filter_reset   = 0,
+    .filter.filter_normal  = 75,
+    .filter.reset_limit  = 50,
 };
 #endif
 
@@ -192,56 +178,45 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
   // Calculate average
   avg_data = adc_sum  / (ADC_BFSIZ-2);
   InputData->last_raw = avg_data;
-
-  // Can't use factor 100, it would use 0% of new data and 100% of old data
-  if(factor==0 || factor>99){
-    InputData->EMA_of_Input = avg_data;
-    InputData->last_avg=avg_data;
-    return;
-  }
-
 #ifdef SELECTIVE_FILTERING
+/*
 #if defined DEBUG_PWM && defined SWO_PRINT
   extern bool dbg_newData;
 #endif
   int32_t diff = (int32_t)avg_data - (int32_t)InputData->last_avg;
   int32_t abs_diff=abs(diff);
-  if(abs_diff>(f->partial_end) ){
-    if(InputData->spike_count<f->spike_limit){
-      InputData->spike_count++;
-    }
-  }
-  else{
-    InputData->spike_count=0;
-  }
 
-  if((abs_diff>f->partial_end && InputData->spike_count>=f->spike_limit) || (abs_diff>f->reset_limit)){
-    factor=f->filter_reset;
-    #if defined DEBUG_PWM && SWO_PRINT
-    dbg_newData=1;                                                                                                                        // Enable flag to debug the data
-    #endif
+  if((abs_diff > f->partial_start) && (abs_diff < (f->partial_end - f->partial_start))){                                 // If within partial limits, smoothen difference
+    float range = f->partial_start - f->partial_end;
+    InputData->EMA_of_Input += ((float)abs_diff * (float)diff) / range;
   }
   else{
-    if(abs_diff>f->partial_start && abs_diff<f->partial_end){
-      factor=f->filter_partial;
-      #if defined DEBUG_PWM && SWO_PRINT
-      //dbg_newData=1;
-      #endif
+    if(abs_diff > f->partial_end){
+      if(InputData->spike_count < f->spike_limit){
+        InputData->spike_count++;
+        dbg_newData=1;
+      }
+      else{
+        dbg_newData=1;
+        factor=0;
+        InputData->spike_count = 0;
+      }
     }
-    else if(abs_diff>f->partial_end){
-      factor=f->filter_spikes;
+*/
+    if(abs( (int32_t)avg_data - (int32_t)InputData->last_avg) > f->reset_limit){
+      factor=0;
     }
-  }
+
+    if(factor>0 && factor<100){                                                                  // If applicable factor
+        k=((float)factor/100);
+        InputData->EMA_of_Input = (InputData->EMA_of_Input*k) + ((float)avg_data*(1.0-k));
+    }
+    else{                                                                                             // Else, apply last average
+      InputData->EMA_of_Input = avg_data;
+    }
+ // }
 #endif
-  if(factor>0 && factor<100){
-    k=((float)factor/100);
-    InputData->EMA_of_Input = (InputData->EMA_of_Input*k) + ((float)avg_data*(1.0-k));
-  }
-  else{
-    InputData->EMA_of_Input = avg_data;
-  }
-
-  InputData->last_avg = (InputData->EMA_of_Input+0.5);
+  InputData->last_avg = InputData->EMA_of_Input;
 }
 
 uint16_t ADC_to_mV (uint16_t adc){
@@ -311,7 +286,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
       dbg_prev_TIP_Raw=last_TIP_Raw;                                                        // If filter was resetted, print values
       dbg_prev_TIP=last_TIP;
       dbg_prev_VIN=last_VIN;
-      dbg_prev_NTC=last_NTC;
+      dbg_prev_NTC=last_NTC_C;
       dbg_prev_PWR=Iron.CurrentIronPower;
     }
 #endif

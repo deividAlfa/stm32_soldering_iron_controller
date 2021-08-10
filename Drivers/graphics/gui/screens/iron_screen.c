@@ -28,6 +28,7 @@ static void * get_filter_normal() {
 static void set_filter_normal(uint32_t *val) {
   bak_f.filter_normal = *val;
 }
+/*
 //=========================================================
 static void set_partial_start(uint32_t *val) {
   if(*val>=bak_f.partial_end){
@@ -46,7 +47,6 @@ static void set_partial_end(uint32_t *val) {
   }
   else if(*val>=bak_f.reset_limit){
     *val=bak_f.reset_limit-10;
-  }
   bak_f.partial_end= *val;
 }
 static void * get_partial_end() {
@@ -61,17 +61,9 @@ static void * get_partial_filter() {
   temp = bak_f.filter_partial;
   return &temp;
 }
-//=========================================================
-static void set_reset_limit(uint32_t *val) {
-  if(*val<=bak_f.partial_end){
-    *val=bak_f.partial_end+10;
-  }
-  bak_f.reset_limit= *val;
-}
-static void * get_reset_limit() {
-  temp = bak_f.reset_limit;
-  return &temp;
-}
+
+
+
 //=========================================================
 static void set_reset_filter(uint32_t *val) {
   bak_f.filter_reset= *val;
@@ -94,6 +86,19 @@ static void set_spike_filter(uint32_t *val) {
 }
 static void * get_spike_filter() {
   temp = bak_f.filter_spikes;
+  return &temp;
+}
+*///=========================================================
+static void set_reset_limit(uint32_t *val) {
+  /*
+  if(*val<=bak_f.partial_end){
+    *val=bak_f.partial_end+10;
+  }
+  */
+  bak_f.reset_limit= *val;
+}
+static void * get_reset_limit() {
+  temp = bak_f.reset_limit;
   return &temp;
 }
 //=========================================================
@@ -466,25 +471,11 @@ static void iron_create(screen_t *scr){
   edit->max_value = 2000;
   edit->min_value = 100;
 
-  //  [ Filter Coefficient Widget ]
-  //
-  newComboEditable(w, "Filter", &edit, NULL);
-  dis=&edit->inputData;
-  dis->endString="%";
-  dis->reservedChars=4;
-  dis->getData = &get_filter_normal;
-  edit->big_step = 10;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&set_filter_normal;
-  edit->max_value = 99;
-  edit->min_value = 0;
-
   //  [ BACK button ]
   //
-  newComboScreen(w, "ADV FILTER", screen_advFilter, &comboItem_advFilter);
+  newComboScreen(w, "FILTER", screen_advFilter, &comboItem_advFilter);
   newComboScreen(w, "BACK", screen_settings, NULL);
 }
-
 
 static void iron_advFilter_onEnter(screen_t *scr){
   comboResetIndex(Screen_advFilter.widgets);
@@ -497,7 +488,7 @@ static void iron_advFilter_create(screen_t *scr){
   //  [ IRON COMBO ]
   //
   newWidget(&w,widget_combo, scr);
-
+  /*
   //  [ Partial start Widget ]
   //
   newComboEditable(w, "Threshold ", &edit, NULL);
@@ -559,19 +550,6 @@ static void iron_advFilter_create(screen_t *scr){
   edit->setData = (void (*)(void *))&set_spike_filter;
   edit->max_value = 99;
   edit->min_value = 0;
-
-  //  [ Reset limit Widget ]
-  //
-  newComboEditable(w, "Reset limit", &edit, NULL);
-  dis=&edit->inputData;
-  dis->reservedChars=4;
-  dis->getData = &get_reset_limit;
-  edit->big_step = 100;
-  edit->step = 10;
-  edit->setData = (void (*)(void *))&set_reset_limit;
-  edit->max_value = 2000;
-  edit->min_value = 10;
-
   //  [ Filter res. ]
   //
   newComboEditable(w, " Filter", &edit, NULL);
@@ -584,6 +562,30 @@ static void iron_advFilter_create(screen_t *scr){
   edit->setData = (void (*)(void *))&set_reset_filter;
   edit->max_value = 99;
   edit->min_value = 0;
+  */
+  //  [ Filter Coefficient Widget ]
+  //
+  newComboEditable(w, "Filter", &edit, NULL);
+  dis=&edit->inputData;
+  dis->endString="%";
+  dis->reservedChars=4;
+  dis->getData = &get_filter_normal;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_filter_normal;
+  edit->max_value = 99;
+  edit->min_value = 0;
+  //  [ Reset limit Widget ]
+  //
+  newComboEditable(w, "Reset limit", &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &get_reset_limit;
+  edit->big_step = 100;
+  edit->step = 10;
+  edit->setData = (void (*)(void *))&set_reset_limit;
+  edit->max_value = 2000;
+  edit->min_value = 10;
 
   newComboScreen(w, "BACK", screen_iron, NULL);
 
@@ -601,5 +603,6 @@ void iron_screen_setup(screen_t *scr){
   sc->onEnter = &iron_advFilter_onEnter;
   sc->processInput = &autoReturn_ProcessInput;
   sc->create = &iron_advFilter_create;
+
 }
 

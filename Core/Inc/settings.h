@@ -34,7 +34,7 @@
 #endif
 
 //#define SWSTRING        "SW: v1.10"                               // For releases
-#define SWSTRING          "SW: 2021-08-07"                          // For git
+#define SWSTRING          "SW: 2021-08-10"                          // For git
 #define SETTINGS_VERSION  9                                         // Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize         2                                         // In KB
 #define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
@@ -107,13 +107,15 @@ enum{
 
 typedef struct{
   uint8_t       filter_normal;
+  uint16_t      reset_limit;
+  /*
   uint8_t       filter_partial;
   uint8_t       filter_spikes;
   uint8_t       filter_reset;
-  uint8_t       spike_limit;
   uint16_t      partial_start;
   uint16_t      partial_end;
-  uint16_t      reset_limit;
+  uint8_t       spike_limit;
+  */
 }filter_t;
 
 typedef struct{

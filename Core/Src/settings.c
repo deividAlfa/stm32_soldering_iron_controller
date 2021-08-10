@@ -392,14 +392,16 @@ void resetCurrentProfile(void){
     Error_Handler();  // We shouldn't get here!
   }
 
-  systemSettings.Profile.tipFilter.filter_normal            = 65;   // % of old data (more %, more filtering)
+  systemSettings.Profile.tipFilter.filter_normal            = 70;   // % of old data (more %, more filtering)
+  systemSettings.Profile.tipFilter.reset_limit              = 600;
+  /*
+  systemSettings.Profile.tipFilter.partial_start            = 50;
+  systemSettings.Profile.tipFilter.partial_end              = 400;
+  systemSettings.Profile.tipFilter.spike_limit              = 2;
   systemSettings.Profile.tipFilter.filter_partial           = 50;
   systemSettings.Profile.tipFilter.filter_spikes            = 60;
   systemSettings.Profile.tipFilter.filter_reset             = 0;
-  systemSettings.Profile.tipFilter.partial_start            = 400;
-  systemSettings.Profile.tipFilter.partial_end              = 600;
-  systemSettings.Profile.tipFilter.reset_limit              = 750;
-  systemSettings.Profile.tipFilter.spike_limit              = 2;
+  */
   systemSettings.Profile.CalNTC                   = 25;
   systemSettings.Profile.sleepTimeout             = 5;
   systemSettings.Profile.standbyTimeout           = 5;
