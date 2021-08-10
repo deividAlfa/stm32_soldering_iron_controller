@@ -424,7 +424,7 @@ static void system_create(screen_t *scr){
   //
   newComboEditable(w, "Gui time", &edit, NULL);
   dis=&edit->inputData;
-  dis->endString="mS";
+  dis->endString="ms";
   dis->reservedChars=5;
   dis->getData = &getGuiUpd_ms;
   edit->big_step = 50;

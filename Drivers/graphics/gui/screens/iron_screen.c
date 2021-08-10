@@ -408,7 +408,7 @@ static void iron_create(screen_t *scr){
   //
   newComboEditable(w, "ADC time", &edit, NULL);
   dis=&edit->inputData;
-  dis->endString="mS";
+  dis->endString="ms";
   dis->reservedChars=7;
   dis->number_of_dec = 0;
   dis->getData = &_getReadPeriod;
@@ -422,7 +422,7 @@ static void iron_create(screen_t *scr){
   //
   newComboEditable(w, " Delay", &edit, NULL);
   dis=&edit->inputData;
-  dis->endString="mS";
+  dis->endString="ms";
   dis->reservedChars=7;
   dis->number_of_dec = 1;
   dis->getData = &_getReadDelay;
@@ -462,7 +462,7 @@ static void iron_create(screen_t *scr){
   //
   newComboEditable(w, " Delay", &edit, NULL);
   dis=&edit->inputData;
-  dis->endString="mS";
+  dis->endString="ms";
   dis->reservedChars=6;
   dis->getData = &geterrorDelay;
   edit->big_step = 100;
