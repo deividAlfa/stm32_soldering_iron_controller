@@ -20,7 +20,6 @@ void setupPID(pid_values_t* p) {
   pid.limMaxInt = (float)p->maxI/100;
   pid.limMin =    (float)0;
   pid.limMax =    (float)1;
-  pid.tau =       (float)p->tau/100;
 }
 
 // New part from Phil: https://github.com/pms67/PID
@@ -33,13 +32,7 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
   pid.proportional = pid.Kp * error;
 
   // Integral
-  if(pid.proportional<1.0){                                                           // If proportional is already doing all the work, clear integral to avoid excessive build up
-    pid.integrator = pid.integrator + 0.5f * pid.Ki * dt * (error + pid.prevError);  // New
-  }
-  else{
-    pid.integrator = 0;
-  }
-  //pid.integrator = pid.integrator + (pid.Ki*(error*dt));                            // Old
+  pid.integrator = pid.integrator + (pid.Ki*(error*dt));
 
   // Integrator clamping
   if (pid.integrator > pid.limMaxInt) {
@@ -55,12 +48,7 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
     pid.derivative = 0;
   }
   else{
-                                                                              // New
-    pid.derivative = -(2.0f * pid.Kd * (measurement - pid.prevMeasurement)      // Note: derivative on measurement,
-                          + (2.0f * pid.tau - dt) * pid.derivative)             // therefore minus sign in front of equation!
-                          / (2.0f * pid.tau + dt);
-
-    ///pid.derivative = pid.Kd*((error-pid.prevError)/dt);                         // Old
+    pid.derivative = pid.Kd*((error-pid.prevError)/dt);
   }
 
   // Compute output and apply limits

@@ -28,73 +28,8 @@ static void * get_filter_normal() {
 static void set_filter_normal(uint32_t *val) {
   bak_f.filter_normal = *val;
 }
-/*
 //=========================================================
-static void set_partial_start(uint32_t *val) {
-  if(*val>=bak_f.partial_end){
-    *val=bak_f.partial_end-10;
-  }
-  bak_f.partial_start= *val;
-}
-static void * get_partial_start() {
-  temp = bak_f.partial_start;
-  return &temp;
-}
-//=========================================================
-static void set_partial_end(uint32_t *val) {
-  if(*val<=bak_f.partial_start){
-    *val=bak_f.partial_start+10;
-  }
-  else if(*val>=bak_f.reset_limit){
-    *val=bak_f.reset_limit-10;
-  bak_f.partial_end= *val;
-}
-static void * get_partial_end() {
-  temp = bak_f.partial_end;
-  return &temp;
-}
-//=========================================================
-static void set_partial_filter(uint32_t *val) {
-  bak_f.filter_partial= *val;
-}
-static void * get_partial_filter() {
-  temp = bak_f.filter_partial;
-  return &temp;
-}
-
-
-
-//=========================================================
-static void set_reset_filter(uint32_t *val) {
-  bak_f.filter_reset= *val;
-}
-static void * get_reset_filter() {
-  temp = bak_f.filter_reset;
-  return &temp;
-}
-//=========================================================
-static void set_spike_limit(uint32_t *val) {
-  bak_f.spike_limit= *val;
-}
-static void * get_spike_limit() {
-  temp = bak_f.spike_limit;
-  return &temp;
-}
-//=========================================================
-static void set_spike_filter(uint32_t *val) {
-  bak_f.filter_spikes= *val;
-}
-static void * get_spike_filter() {
-  temp = bak_f.filter_spikes;
-  return &temp;
-}
-*///=========================================================
 static void set_reset_limit(uint32_t *val) {
-  /*
-  if(*val<=bak_f.partial_end){
-    *val=bak_f.partial_end+10;
-  }
-  */
   bak_f.reset_limit= *val;
 }
 static void * get_reset_limit() {
@@ -202,11 +137,6 @@ static void * getMinTemp() {
   temp=systemSettings.Profile.MinSetTemperature;
   editable_IRON_MaxTemp->min_value = temp+1;
   editable_IRON_MinTemp->max_value = systemSettings.Profile.MaxSetTemperature-1;
-  /*
-  if(systemSettings.Profile.standbyTemperature<temp){
-    systemSettings.Profile.standbyTemperature = temp;
-  }
-  */
   if(systemSettings.Profile.UserSetTemperature<temp){
     systemSettings.Profile.UserSetTemperature = temp;
     Iron.CurrentSetTemperature=temp;
@@ -488,81 +418,7 @@ static void iron_advFilter_create(screen_t *scr){
   //  [ IRON COMBO ]
   //
   newWidget(&w,widget_combo, scr);
-  /*
-  //  [ Partial start Widget ]
-  //
-  newComboEditable(w, "Threshold ", &edit, NULL);
-  dis=&edit->inputData;
-  dis->reservedChars=4;
-  dis->getData = &get_partial_start;
-  edit->big_step = 100;
-  edit->step = 10;
-  edit->setData = (void (*)(void *))&set_partial_start;
-  edit->max_value = 1000;
-  edit->min_value = 10;
 
-  //  [ Partial end Widget ]
-  //
-  newComboEditable(w, " End", &edit, NULL);
-  dis=&edit->inputData;
-  dis->reservedChars=4;
-  dis->getData = &get_partial_end;
-  edit->big_step = 100;
-  edit->step = 10;
-  edit->setData = (void (*)(void *))&set_partial_end;
-  edit->max_value = 1000;
-  edit->min_value = 10;
-
-  //  [ Partial filter ]
-  //
-  newComboEditable(w, " Filter", &edit, NULL);
-  dis=&edit->inputData;
-  dis->reservedChars=4;
-  dis->getData = &get_partial_filter;
-  dis->endString="%";
-  edit->big_step = 10;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&set_partial_filter;
-  edit->max_value = 99;
-  edit->min_value = 0;
-
-  //  [ Spike limit ]
-  //
-  newComboEditable(w, "Spike limit", &edit, NULL);
-  dis=&edit->inputData;
-  dis->reservedChars=4;
-  dis->getData = &get_spike_limit;
-  edit->big_step = 20;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&set_spike_limit;
-  edit->max_value = 250;
-  edit->min_value = 0;
-
-  //  [ Spike filter ]
-  //
-  newComboEditable(w, " Filter", &edit, NULL);
-  dis=&edit->inputData;
-  dis->endString="%";
-  dis->reservedChars=4;
-  dis->getData = &get_spike_filter;
-  edit->big_step = 10;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&set_spike_filter;
-  edit->max_value = 99;
-  edit->min_value = 0;
-  //  [ Filter res. ]
-  //
-  newComboEditable(w, " Filter", &edit, NULL);
-  dis=&edit->inputData;
-  dis->reservedChars=4;
-  dis->endString="%";
-  dis->getData = &get_reset_filter;
-  edit->big_step = 10;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&set_reset_filter;
-  edit->max_value = 99;
-  edit->min_value = 0;
-  */
   //  [ Filter Coefficient Widget ]
   //
   newComboEditable(w, "Filter", &edit, NULL);

@@ -14,7 +14,6 @@ typedef struct pid_values {
   uint16_t  Kp;
   uint16_t  Ki;
   uint16_t  Kd;
-  uint16_t  tau;
   int16_t   maxI;
   int16_t   minI;
 } pid_values_t;
