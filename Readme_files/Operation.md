@@ -170,6 +170,8 @@ Use iron active detection by leaving the PWM slightly on all the time. If your a
 Temperature scale. Celsius or Fahrenheit<br>
   - **Step**<br>
 Temperature step when adjusting tip temperature.<br>
+ - **Big Step**<br>
+Temperature Big step when adjusting tip temperature, click and rotate to activate big step in temperature screen<br>
   - **LVP**<br>
 Adjust Low voltage protection.<br>
   - **GUI Time**<br>
