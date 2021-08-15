@@ -407,7 +407,7 @@ static void system_create(screen_t *scr){
   
   // [ Temp big step Widget ]
   //
-  newComboEditable(w, "Big step", &edit, NULL);
+  newComboEditable(w, " Big step", &edit, NULL);
   editable_system_TempStep=edit;
   dis=&edit->inputData;
   dis->reservedChars=4;
