@@ -808,7 +808,7 @@ static void main_screen_init(screen_t *scr) {
 
   edit = extractEditablePartFromWidget(Widget_SetPoint);
   edit->step = systemSettings.settings.tempStep;
-  edit->big_step = systemSettings.settings.tempStep;
+  edit->big_step = systemSettings.settings.tempBigStep;
   edit->max_value = systemSettings.Profile.MaxSetTemperature;
   edit->min_value = systemSettings.Profile.MinSetTemperature;
   setMainScrTempUnit();
