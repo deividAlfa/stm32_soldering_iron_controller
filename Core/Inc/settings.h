@@ -162,6 +162,7 @@ typedef struct{
   uint8_t       saveSettingsDelay;
   uint8_t       initMode;
   uint8_t       tempStep;
+  uint8_t       tempBigStep;
   uint8_t       screenDimming;
   uint8_t       tempUnit;
   uint8_t       activeDetection;
