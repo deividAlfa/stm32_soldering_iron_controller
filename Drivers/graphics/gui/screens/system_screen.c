@@ -65,6 +65,10 @@ static void * getTmpStep() {
 static void setTmpStep(uint32_t *val) {
   systemSettings.settings.tempStep = *val;
 }
+
+static void setBigTmpStep(uint32_t *val) {
+  systemSettings.settings.tempBigStep = *val;
+}
 //=========================================================
 static void * getContrast_() {
   temp = systemSettings.settings.contrast;
@@ -393,6 +397,20 @@ static void system_create(screen_t *scr){
   edit->max_value = 50;
   edit->min_value = 1;
 
+  
+  // [ Temp big step Widget ]
+  //
+  newComboEditable(w, "Big step", &edit, NULL);
+  editable_system_TempStep=edit;
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &getTmpStep;
+  edit->big_step = 5;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setBigTmpStep;
+  edit->max_value = 50;
+  edit->min_value = 1;
+  
   //  [ Active detection Widget ]
   //
   newComboMultiOption(w, "Active det.",&edit,&comboitem_system_InitMode);
