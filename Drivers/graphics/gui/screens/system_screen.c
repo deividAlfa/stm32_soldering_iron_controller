@@ -66,6 +66,13 @@ static void setTmpStep(uint32_t *val) {
   systemSettings.settings.tempStep = *val;
 }
 
+//=========================================================
+
+static void * getBigTmpStep() {
+  temp = systemSettings.settings.tempBigStep;
+  return &temp;
+}
+
 static void setBigTmpStep(uint32_t *val) {
   systemSettings.settings.tempBigStep = *val;
 }
@@ -404,7 +411,7 @@ static void system_create(screen_t *scr){
   editable_system_TempStep=edit;
   dis=&edit->inputData;
   dis->reservedChars=4;
-  dis->getData = &getTmpStep;
+  dis->getData = &getBigTmpStep;
   edit->big_step = 5;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setBigTmpStep;
