@@ -28,6 +28,7 @@ static comboBox_item_t *comboitem_Detect_low_res_beta;
 #endif
 
 static editable_widget_t *editable_system_TempStep;
+static editable_widget_t *editable_system_bigTempStep;
 
 uint8_t backup_Pullup, backup_NTC_detect;
 uint16_t backup_Pull_res, backup_NTC_res, backup_NTC_Beta, backup_NTC_detect_high_res, backup_NTC_detect_low_res, backup_NTC_detect_high_res_beta, backup_NTC_detect_low_res_beta;
@@ -52,9 +53,11 @@ static void setTmpUnit(uint32_t *val) {
   setSystemTempUnit(*val);
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     editable_system_TempStep->inputData.endString="\260F";
+    editable_system_bigTempStep->inputData.endString="\260F";
   }
   else{
     editable_system_TempStep->inputData.endString="\260C";
+    editable_system_bigTempStep->inputData.endString="\260C";
   }
 }
 //=========================================================
@@ -64,6 +67,17 @@ static void * getTmpStep() {
 }
 static void setTmpStep(uint32_t *val) {
   systemSettings.settings.tempStep = *val;
+}
+
+//=========================================================
+
+static void * getBigTmpStep() {
+  temp = systemSettings.settings.tempBigStep;
+  return &temp;
+}
+
+static void setBigTmpStep(uint32_t *val) {
+  systemSettings.settings.tempBigStep = *val;
 }
 //=========================================================
 static void * getContrast_() {
@@ -202,9 +216,12 @@ static void system_onEnter(screen_t *scr){
   }
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     editable_system_TempStep->inputData.endString="\260F";
+    editable_system_bigTempStep->inputData.endString="\260F";
   }
   else{
     editable_system_TempStep->inputData.endString="\260C";
+    editable_system_bigTempStep->inputData.endString="\260C";
+
   }
   profile=systemSettings.settings.currentProfile;
 }
@@ -393,6 +410,20 @@ static void system_create(screen_t *scr){
   edit->max_value = 50;
   edit->min_value = 1;
 
+  
+  // [ Temp big step Widget ]
+  //
+  newComboEditable(w, " Big step", &edit, NULL);
+  editable_system_bigTempStep=edit;
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &getBigTmpStep;
+  edit->big_step = 5;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setBigTmpStep;
+  edit->max_value = 50;
+  edit->min_value = 1;
+  
   //  [ Active detection Widget ]
   //
   newComboMultiOption(w, "Active det.",&edit,&comboitem_system_InitMode);

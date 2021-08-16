@@ -530,11 +530,12 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;
 
         case Rotate_Increment_while_click:
-          input=Rotate_Increment;
-          break;
+           //Left blank intentionally
+        	break;
 
         case Rotate_Decrement_while_click:
-          input=Rotate_Decrement;
+          //Left blank intentionally
+        	break;
 
         default:
           break;
@@ -808,7 +809,7 @@ static void main_screen_init(screen_t *scr) {
 
   edit = extractEditablePartFromWidget(Widget_SetPoint);
   edit->step = systemSettings.settings.tempStep;
-  edit->big_step = systemSettings.settings.tempStep;
+  edit->big_step = systemSettings.settings.tempBigStep;
   edit->max_value = systemSettings.Profile.MaxSetTemperature;
   edit->min_value = systemSettings.Profile.MinSetTemperature;
   setMainScrTempUnit();
