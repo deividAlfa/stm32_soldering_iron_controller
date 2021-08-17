@@ -11,7 +11,7 @@
 #define SCREENSAVER
 #define PWR_BAR_WIDTH   60
 #define SCALE_FACTOR    (int)((65536*PWR_BAR_WIDTH*1.005)/100)
-#define TIME_DIFF 		45
+#define TIME_DIFF 		57
 #define NUM_ROT			1
 
 //-------------------------------------------------------------------------------------------------------------------------------
