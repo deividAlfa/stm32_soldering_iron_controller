@@ -11,6 +11,8 @@
 #define SCREENSAVER
 #define PWR_BAR_WIDTH   60
 #define SCALE_FACTOR    (int)((65536*PWR_BAR_WIDTH*1.005)/100)
+#define TIME_DIFF 		45
+#define NUM_ROT			1
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen variables
@@ -23,6 +25,8 @@ slide_t screenSaver = {
     .xAdd = 1,
     .yAdd = 1,
 };
+
+static uint16_t incrCount,decrCount;
 
 static char *tipNames[TipSize];
 enum mode{  main_none=0, main_irontemp, main_error, main_ironstatus, main_setpoint, main_tipselect };
@@ -297,6 +301,7 @@ int8_t switchScreenMode(void){
 }
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
+
   uint8_t current_mode = getCurrentMode();
   int16_t current_temp = readTipTemperatureCompensated(old_reading,read_average);
   if(systemSettings.settings.tempUnit==mode_Farenheit){
@@ -513,6 +518,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
     case main_setpoint:
 
+
+
       switch((uint8_t)input){
         case LongClick:
         case Click:
@@ -528,6 +535,32 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             mainScr.setMode=main_irontemp;
           }
           break;
+        case Rotate_Increment:
+        	incrCount++;
+        	if(incrCount>NUM_ROT && current_time-mainScr.modeTimer < TIME_DIFF){
+                incrCount=0;
+        		input=Rotate_Increment_while_click;
+
+        	}
+    		if(current_time-mainScr.modeTimer >= TIME_DIFF){
+    			mainScr.modeTimer=current_time;
+                incrCount=0;
+    		}
+
+        	break;
+
+        case Rotate_Decrement:
+        	decrCount++;
+			if(decrCount>NUM_ROT && current_time-mainScr.modeTimer < TIME_DIFF){
+				decrCount=0;
+				input=Rotate_Decrement_while_click;
+
+			}
+			if(current_time-mainScr.modeTimer >= TIME_DIFF){
+				mainScr.modeTimer=current_time;
+				decrCount=0;
+			}
+        	break;
 
         case Rotate_Increment_while_click:
            //Left blank intentionally
