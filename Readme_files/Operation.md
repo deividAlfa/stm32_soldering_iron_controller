@@ -172,6 +172,7 @@ Temperature scale. Celsius or Fahrenheit<br>
 Temperature step when adjusting tip temperature.<br>
  - **Big Step**<br>
 Temperature Big step when adjusting tip temperature, click and rotate to activate big step in temperature screen<br>
+Temperature Big step is also enabled when rotating the encoder fast.
   - **LVP**<br>
 Adjust Low voltage protection.<br>
   - **GUI Time**<br>
