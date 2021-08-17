@@ -538,25 +538,28 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         case Rotate_Increment:
         	incrCount++;
         	if(incrCount>NUM_ROT && current_time-mainScr.modeTimer < TIME_DIFF){
-                	incrCount=0;
+                incrCount=0;
         		input=Rotate_Increment_while_click;
+
         	}
     		if(current_time-mainScr.modeTimer >= TIME_DIFF){
     			mainScr.modeTimer=current_time;
-                	incrCount=0;
+                incrCount=0;
     		}
+
         	break;
 
         case Rotate_Decrement:
         	decrCount++;
-		if(decrCount>NUM_ROT && current_time-mainScr.modeTimer < TIME_DIFF){
-			decrCount=0;
-			input=Rotate_Decrement_while_click;
-		}
-		if(current_time-mainScr.modeTimer >= TIME_DIFF){
-			mainScr.modeTimer=current_time;
-			decrCount=0;
-		}
+			if(decrCount>NUM_ROT && current_time-mainScr.modeTimer < TIME_DIFF){
+				decrCount=0;
+				input=Rotate_Decrement_while_click;
+
+			}
+			if(current_time-mainScr.modeTimer >= TIME_DIFF){
+				mainScr.modeTimer=current_time;
+				decrCount=0;
+			}
         	break;
 
         case Rotate_Increment_while_click:
