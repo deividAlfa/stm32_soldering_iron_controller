@@ -16,6 +16,7 @@ typedef struct pid_values {
   uint16_t  Kd;
   int16_t   maxI;
   int16_t   minI;
+  uint16_t  tau;
 } pid_values_t;
 
 typedef struct {
@@ -55,7 +56,7 @@ extern PIDController_t pid;
 
 
 void setupPID(pid_values_t* p);
-int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc);
+int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t base);
 void resetPID();
 float getPID_P();
 float getPID_I();

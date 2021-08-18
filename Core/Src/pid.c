@@ -20,19 +20,23 @@ void setupPID(pid_values_t* p) {
   pid.limMaxInt = (float)p->maxI/100;
   pid.limMin =    (float)0;
   pid.limMax =    (float)1;
+  pid.tau =       (float)p->tau/100;
 }
 
 // New part from Phil: https://github.com/pms67/PID
-int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
-
+int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t base) {
   float dt = (float)(HAL_GetTick() - pid.lastTime)/1000;
   float error = setpoint - measurement;
-
   // Proportional term
   pid.proportional = pid.Kp * error;
 
   // Integral
-  pid.integrator = pid.integrator + (pid.Ki*(error*dt));
+  //pid.integrator = pid.integrator + 0.5f * pid.Ki * dt * (error + pid.prevError);  // New
+  //if(pid.proportional<0.9){
+    pid.integrator = pid.integrator + (pid.Ki*(error*dt));                         // Old
+  //}else{
+  //  pid.integrator = 0.1;
+  //}
 
   // Integrator clamping
   if (pid.integrator > pid.limMaxInt) {
@@ -41,34 +45,27 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t baseCalc) {
   else if (pid.integrator < pid.limMinInt) {
     pid.integrator = pid.limMinInt;
   }
+/*
+  pid.derivative = -(2.0f * pid.Kd * (measurement - pid.prevMeasurement)      // Note: derivative on measurement,
+                          + (2.0f * pid.tau - dt) * pid.derivative)             // therefore minus sign in front of equation!
+                          / (2.0f * pid.tau + dt);
+  */
+  pid.derivative = pid.Kd*((error-pid.prevError)/dt);                         // Old
 
-
-  // Derivative term
-  if(error==pid.prevError) {
-    pid.derivative = 0;
-  }
-  else{
-    pid.derivative = pid.Kd*((error-pid.prevError)/dt);
-  }
 
   // Compute output and apply limits
   pid.out = pid.proportional + pid.integrator + pid.derivative;
-
   if(pid.out > pid.limMax){
       pid.out = pid.limMax;
-
   } else if (pid.out < pid.limMin) {
       pid.out = pid.limMin;
   }
-
   // Store error and measurement for later use
   pid.prevMeasurement = measurement;
   pid.lastTime = HAL_GetTick();
   pid.prevError  = error;
-
-  return (pid.out*baseCalc);
+  return (pid.out*base);
 }
-
 
 void resetPID(void){
   pid.integrator = 0;
