@@ -314,7 +314,7 @@ Also, the flash storage is checked carefully before and after writes, any issue 
 If for any reason the station is unable to boot, you can't access the reset menu or you want to wipe everything up quickly, there's a hard reset method.<br>
 Power the station off, push and hold the encoder button, and turn on the power.<br>
 A message will appear in the screen. "Hold button to restore defaults".<br>
-Keep pressing the button for another 5 seconds, until the next message appears, "Release button now".
+Keep pressing the button for another 5 seconds, until the next message appears, "Release button now".<br>
 Release the button, the station will wipe everything and reboot.<br>
 
 If you accidentally pushed the button, just release it before the 5 second timeout to resume the boot process. 
