@@ -530,13 +530,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;
 
         case Rotate_Increment_while_click:
-           //Left blank intentionally
-        	break;
-
         case Rotate_Decrement_while_click:
-          //Left blank intentionally
-        	break;
-
         default:
           break;
       }
