@@ -20,26 +20,106 @@ static editable_widget_t *editable_IRON_MinTemp;
 filter_t bak_f;
 
 //=========================================================
-static void * get_filter_normal() {
-  temp = bak_f.filter_normal;
-  comboItem_advFilter->enabled = (temp>0);
+static void set_mid_threshold(uint32_t *val) {
+  /*
+  if(*val>=bak_f.high_threshold){
+    *val=bak_f.high_threshold-10;
+  }
+  */
+  if(*val>=(bak_f.reset_threshold-100)){
+    *val=bak_f.reset_threshold-100;
+  }
+  bak_f.mid_threshold= *val;
+}
+static void * get_mid_threshold() {
+  temp = bak_f.mid_threshold;
   return &temp;
 }
-static void set_filter_normal(uint32_t *val) {
-  bak_f.filter_normal = *val;
-}
 //=========================================================
-static void set_reset_limit(uint32_t *val) {
-  bak_f.reset_limit= *val;
+/*
+static void set_high_threshold(uint32_t *val) {
+  if(*val<=bak_f.mid_threshold){
+    *val=bak_f.mid_threshold+10;
+  }
+  else if(*val>=bak_f.reset_threshold){
+    *val=bak_f.reset_threshold-10;
+  }
+  bak_f.high_threshold= *val;
 }
-static void * get_reset_limit() {
-  temp = bak_f.reset_limit;
+static void * get_high_threshold() {
+  temp = bak_f.high_threshold;
+  return &temp;
+}
+*/
+//=========================================================
+static void set_reset_threshold(uint32_t *val) {
+  /*
+  if(*val<=bak_f.high_threshold){
+    *val=bak_f.high_threshold+10;
+  }
+  */
+  if(*val<=(bak_f.mid_threshold-100)){
+    *val=bak_f.mid_threshold+100;
+  }
+  bak_f.reset_threshold= *val;
+}
+static void * get_reset_threshold() {
+  temp = bak_f.reset_threshold;
   return &temp;
 }
 //=========================================================
-
-
-
+static void set_low_filter(uint32_t *val) {
+  bak_f.low_filter = *val;
+}
+static void * get_low_filter() {
+  temp = bak_f.low_filter;
+  //comboItem_advFilter->enabled = (temp>0);
+  return &temp;
+}
+//=========================================================
+static void set_mid_filter(uint32_t *val) {
+  bak_f.mid_filter= *val;
+}
+static void * get_mid_filter() {
+  temp = bak_f.mid_filter;
+  return &temp;
+}
+//=========================================================
+/*
+static void set_high_filter(uint32_t *val) {
+  bak_f.high_filter= *val;
+}
+static void * get_high_filter() {
+  temp = bak_f.high_filter;
+  return &temp;
+}
+*/
+//=========================================================
+static void set_reset_filter(uint32_t *val) {
+  bak_f.reset_filter= *val;
+}
+static void * get_reset_filter() {
+  temp = bak_f.reset_filter;
+  return &temp;
+}
+//=========================================================
+static void set_mid_limit(uint32_t *val) {
+  bak_f.mid_limit= *val;
+}
+static void * get_mid_limit() {
+  temp = bak_f.mid_limit;
+  return &temp;
+}
+//=========================================================
+/*
+static void set_high_limit(uint32_t *val) {
+  bak_f.high_limit= *val;
+}
+static void * get_high_limit() {
+  temp = bak_f.high_limit;
+  return &temp;
+}
+*/
 //=========================================================
 #ifdef USE_VIN
 static void * getMaxPower() {
@@ -403,7 +483,7 @@ static void iron_create(screen_t *scr){
 
   //  [ BACK button ]
   //
-  newComboScreen(w, "FILTER", screen_advFilter, &comboItem_advFilter);
+  newComboScreen(w, "FILTER SETTINGS", screen_advFilter, &comboItem_advFilter);
   newComboScreen(w, "BACK", screen_settings, NULL);
 }
 
@@ -419,29 +499,119 @@ static void iron_advFilter_create(screen_t *scr){
   //
   newWidget(&w,widget_combo, scr);
 
-  //  [ Filter Coefficient Widget ]
+  //  [ Low noise filter Widget ]
   //
-  newComboEditable(w, "Filter", &edit, NULL);
+  newComboEditable(w, "Filtering ", &edit, NULL);
   dis=&edit->inputData;
-  dis->endString="%";
   dis->reservedChars=4;
-  dis->getData = &get_filter_normal;
-  edit->big_step = 10;
+  dis->getData = &get_low_filter;
+  dis->endString = "%";
+  edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_filter_normal;
+  edit->setData = (void (*)(void *))&set_low_filter;
   edit->max_value = 99;
   edit->min_value = 0;
-  //  [ Reset limit Widget ]
+
+  //  [ Mid threshold Widget ]
+  //
+  newComboEditable(w, "Mid limit", &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &get_mid_threshold;
+  edit->big_step = 20;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_mid_threshold;
+  edit->max_value = 1000;
+  edit->min_value = 10;
+
+  //  [ Mid counter widget]
+  //
+  newComboEditable(w, " Count", &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=3;
+  dis->getData = &get_mid_limit;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_mid_limit;
+  edit->max_value = 50;
+  edit->min_value = 0;
+
+  //  [ Mid filter Widget ]
+  //
+  newComboEditable(w, " Filter", &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &get_mid_filter;
+  dis->endString="%";
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_mid_filter;
+  edit->max_value = 99;
+  edit->min_value = 0;
+/*
+  //  [ High threshold Widget ]
+  //
+  newComboEditable(w, "High limit", &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &get_high_threshold;
+  edit->big_step = 20;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_high_threshold;
+  edit->max_value = 1000;
+  edit->min_value = 10;
+
+  //  [ High counter widget]
+  //
+  newComboEditable(w, " Count", &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=3;
+  dis->getData = &get_high_limit;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_high_limit;
+  edit->max_value = 50;
+  edit->min_value = 0;
+
+  //  [ High filter Widget ]
+  //
+  newComboEditable(w, " Filter", &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &get_high_filter;
+  dis->endString="%";
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_high_filter;
+  edit->max_value = 99;
+  edit->min_value = 0;
+*/
+  //  [ Reset threshold Widget ]
   //
   newComboEditable(w, "Reset limit", &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=4;
-  dis->getData = &get_reset_limit;
-  edit->big_step = 100;
-  edit->step = 10;
-  edit->setData = (void (*)(void *))&set_reset_limit;
-  edit->max_value = 2000;
+  dis->getData = &get_reset_threshold;
+  edit->big_step = 20;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_reset_threshold;
+  edit->max_value = 1000;
   edit->min_value = 10;
+
+  //  [ High filter Widget ]
+  //
+  newComboEditable(w, " Filter", &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &get_reset_filter;
+  dis->endString="%";
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_reset_filter;
+  edit->max_value = 99;
+  edit->min_value = 0;
+
+
 
   newComboScreen(w, "BACK", screen_iron, NULL);
 
