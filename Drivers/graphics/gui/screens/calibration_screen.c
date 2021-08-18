@@ -321,7 +321,7 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
   if(input!=Rotate_Nothing){
     screen_timer=current_time;
   }
-  if((current_time-screen_timer)>60000){
+  if((current_time-screen_timer)>180000){   // 3min inactivity
     setCurrentMode(mode_sleep);
     return screen_main;
   }
@@ -476,7 +476,6 @@ static void Cal_Settings_OnExit(screen_t *scr) {
 }
 
 static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
-  comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
   if(GetIronError()){
     return screen_calibration;
   }
@@ -486,13 +485,8 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
   if(input!=Rotate_Nothing){
     screen_timer=current_time;
   }
-  if(item->type==combo_Editable && item->widget->selectable.state==widget_edit){
-    if((current_time-screen_timer)>60000){
-      setCurrentMode(mode_sleep);
-      return screen_main;
-    }
-  }
-  else if((current_time-screen_timer)>15000){
+  if((current_time-screen_timer)>180000){     // 3 min inactivity
+    setCurrentMode(mode_sleep);
     return screen_main;
   }
   return default_screenProcessInput(scr, input, s);
