@@ -68,7 +68,7 @@ void RE_SetMode(RE_State_t* data, RE_Mode_t mode) {
 }
 
 void RE_Process(RE_State_t* data) {
-  static uint32_t push_time=0, halfPointReachedTime=0, debounce_time=0;
+  static uint32_t push_time=0, halfPointReachedTime=0, debounce_time=0, lastStep=0;
   static bool last_button_read=1, last_button_stable=1;
   uint32_t current_time = HAL_GetTick();
   uint32_t pressed_time = current_time - push_time;
@@ -98,20 +98,28 @@ void RE_Process(RE_State_t* data) {
 
   if (now_a && now_b) {
     if(data->halfPointReached) {
+
+      int8_t add = 1;
       data->halfPointReached = 0;
+
+      if((current_time-lastStep)<20){                 // If last step was less than xxx time ago, increase twice to trigger big step
+        add = 2;
+      }
+      lastStep=current_time;
+
       /* Check mode */
       if (data->Mode == RE_Mode_Zero) {
         if (data->direction) {
-          data->RE_Count--;
+          data->RE_Count += -add;
         } else {
-          data->RE_Count++;
+          data->RE_Count += add;
         }
       }
       else {
         if (data->direction) {
-          data->RE_Count++;
+          data->RE_Count += add;
         } else {
-          data->RE_Count--;
+          data->RE_Count += -add;
         }
       }
     }
@@ -158,6 +166,3 @@ void RE_Process(RE_State_t* data) {
     }
   }
 }
-
-
-
