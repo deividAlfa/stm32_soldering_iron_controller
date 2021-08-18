@@ -158,7 +158,7 @@ void handleIron(void) {
     Iron.Pwm_Out = calculatePID(Iron.Debug_SetTemperature, TIP.last_avg, Iron.Pwm_Max);
   }
   else{                                                                                       // Else, use current setpoint value
-    PID_temp = human2adc(Iron.CurrentSetTemperature);
+    PID_temp = (human2adc(Iron.CurrentSetTemperature) + human2adc(Iron.CurrentSetTemperature+1))/2;   // +0.5C for better display stability
     Iron.Pwm_Out = calculatePID(PID_temp, TIP.last_avg, Iron.Pwm_Max);
   }
 
