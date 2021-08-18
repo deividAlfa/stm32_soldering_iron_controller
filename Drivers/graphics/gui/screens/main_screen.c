@@ -11,8 +11,7 @@
 #define SCREENSAVER
 #define PWR_BAR_WIDTH   60
 #define SCALE_FACTOR    (int)((65536*PWR_BAR_WIDTH*1.005)/100)
-#define TIME_DIFF 		80
-#define NUM_ROT			1
+#define TIME_DIFF 		55
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen variables
@@ -26,7 +25,6 @@ slide_t screenSaver = {
     .yAdd = 1,
 };
 
-static uint16_t incrCount,decrCount;
 
 static char *tipNames[TipSize];
 enum mode{  main_none=0, main_irontemp, main_error, main_ironstatus, main_setpoint, main_tipselect };
@@ -536,29 +534,28 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           }
           break;
         case Rotate_Increment:
-        	incrCount++;
-        	if(incrCount>NUM_ROT && current_time-mainScr.modeTimer < TIME_DIFF){
-                incrCount=0;
-        		input=Rotate_Increment_while_click;
 
-        	}
-    		if(current_time-mainScr.modeTimer >= TIME_DIFF){
-    			mainScr.modeTimer=current_time;
-                incrCount=0;
-    		}
+            if( current_time-mainScr.modeTimer <= TIME_DIFF){
+				input=Rotate_Increment_while_click;
+				mainScr.modeTimer=current_time;
+			}else{
+				input=Rotate_Increment;
+				mainScr.modeTimer=current_time;
+			}
+
+
+
 
         	break;
 
         case Rotate_Decrement:
-        	decrCount++;
-			if(decrCount>NUM_ROT && current_time-mainScr.modeTimer < TIME_DIFF){
-				decrCount=0;
-				input=Rotate_Decrement_while_click;
 
-			}
-			if(current_time-mainScr.modeTimer >= TIME_DIFF){
+        	 if( current_time-mainScr.modeTimer <= TIME_DIFF){
+				input=Rotate_Decrement_while_click;
 				mainScr.modeTimer=current_time;
-				decrCount=0;
+			}else{
+				input=Rotate_Decrement;
+				mainScr.modeTimer=current_time;
 			}
         	break;
 
