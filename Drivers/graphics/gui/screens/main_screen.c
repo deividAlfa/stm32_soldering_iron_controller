@@ -500,7 +500,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           }
           if(tip!=systemSettings.Profile.currentTip){
             systemSettings.Profile.currentTip = tip;
+            __disable_irq();
             setCurrentTip(tip);
+            __enable_irq();
             Screen_main.refresh=screen_Erase;
           }
           break;
