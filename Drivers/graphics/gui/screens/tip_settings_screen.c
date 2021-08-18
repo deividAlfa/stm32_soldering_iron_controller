@@ -112,15 +112,15 @@ static void setCal450(int32_t *val) {
 }
 //=========================================================
 static int tip_save() {
-  __disable_irq();
   systemSettings.Profile.tip[Selected_Tip] = tipCfg;                                                            // Store tip data
   if(Selected_Tip==systemSettings.Profile.currentTip){                                                          // If current used tip, update PID
+    __disable_irq();
     setCurrentTip(Selected_Tip);                                                                                // Reload tip settings
+    __enable_irq();
   }
   else if(Selected_Tip==systemSettings.Profile.currentNumberOfTips){                                            // If new tip
     systemSettings.Profile.currentNumberOfTips++;                                                               // Increase number of tips in the system
   }
-  __enable_irq();
   return comboitem_tip_settings_cancel->action_screen;
 }
 //=========================================================
@@ -128,6 +128,14 @@ static int tip_delete() {
   char name[TipCharSize]=_BLANK_TIP;
   systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
 
+  if(Selected_Tip==systemSettings.Profile.currentTip){                                                          // If deleted tip was the current being used
+    if(systemSettings.Profile.currentTip){                                                                      // If not zero
+      systemSettings.Profile.currentTip--;                                                                      // Select previous tip
+    }
+    __disable_irq();
+    setCurrentTip(systemSettings.Profile.currentTip);                                                           // Reload tip settings
+    __enable_irq();
+  }
 
   for(int x = Selected_Tip; x < TipSize-1;x++) {                                                                // Overwrite selected tip and move the rest one position backwards
     systemSettings.Profile.tip[x] = systemSettings.Profile.tip[x+1];
@@ -135,12 +143,6 @@ static int tip_delete() {
 
   for(int x = systemSettings.Profile.currentNumberOfTips; x < TipSize;x++) {                                    // Fill the unused tips with blank names
     strcpy(systemSettings.Profile.tip[x].name, name);
-  }
-  if(Selected_Tip==systemSettings.Profile.currentTip){                                                          // If deleted tip was the current being used
-    if(systemSettings.Profile.currentTip){                                                                      // If not zero
-      systemSettings.Profile.currentTip--;                                                                      // Select previous tip
-      setCurrentTip(systemSettings.Profile.currentTip);                                                         // Reload tip settings
-    }
   }
                                                                                                                 // Skip tip settings (As tip is now deleted)
   return comboitem_tip_settings_cancel->action_screen;                                                          // And return to main screen or system menu screen
