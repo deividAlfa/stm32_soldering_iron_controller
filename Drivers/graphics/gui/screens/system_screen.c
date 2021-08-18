@@ -14,7 +14,6 @@ screen_t Screen_system_ntc;
 
 static comboBox_item_t *comboitem_system_ButtonWakeMode;
 static comboBox_item_t *comboitem_system_ShakeWakeMode;
-static comboBox_item_t *comboitem_system_InitMode;
 static comboBox_item_t *comboitem_system_StandMode;
 static comboBox_item_t *comboitem_system_BootMode;
 
@@ -126,7 +125,6 @@ static void * getWakeMode() {
 
   comboitem_system_StandMode->enabled       = !mode;
   comboitem_system_BootMode->enabled        = mode;
-  comboitem_system_InitMode->enabled        = mode;
   comboitem_system_ShakeWakeMode->enabled   = mode;
   comboitem_system_ButtonWakeMode->enabled  = mode;
 
@@ -426,7 +424,7 @@ static void system_create(screen_t *scr){
   
   //  [ Active detection Widget ]
   //
-  newComboMultiOption(w, "Active det.",&edit,&comboitem_system_InitMode);
+  newComboMultiOption(w, "Active det.",&edit, NULL);
   dis=&edit->inputData;
   dis->getData = &getActiveDetection;
   edit->big_step = 1;
