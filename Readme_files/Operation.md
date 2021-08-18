@@ -297,7 +297,7 @@ For non critical errors, a warning will be shown: iron not detected, supply volt
   - **Iron runaway**<br>
 If by any means the iron temperature is higher than requested and the system is still powering the tip, it will trigger a timer depending on the temperature diference.<br>
 The condition must dissapear within the specified time, otherwise it will trigger a critical runaway error, shutting down the power stage.<br>
-This is very useful to protect the tip from wrong PID adjustemnts (Ex. excessive Imax values).<br>
+This is very useful to protect the tip from wrong PID adjustemnts (Ex. excessive Integral values).<br>
   - **Internal function errors**<br>
 If any internal function detects an undefined or not expected state, it will lock the station and show a message trying to show where the error happened (File, line).<br>
   - **Hardware exceptions**<br>
