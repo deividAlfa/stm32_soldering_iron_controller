@@ -18,7 +18,7 @@ Otherwise, the current mode will be shown (sleep, standby, boost).<br>
 To operate the menus, rotate to scroll to the desired selection, quick press to select it, rotate to change.<br>
 Quick press again to stop editing the setting.<br>
 Widgets have fine and coarse adjustment.<br>
-While editing the widget, normal rotation will make fine adjustement. Click and rotate will do coarse adjustment.<br>
+While editing the widget, normal rotation will make fine adjustement, fast rotation will do coarse adjustment (big steps).<br>
 
 ---
 
@@ -111,10 +111,6 @@ PWM     |___|   |___|   |_____________________|   |___|   |___
   - **PWM multiplier**<br>
 Sets the PWM period, using the formula ADC Time/multiplier.<br>
 Default: x1.<br>
-  - **Filter**<br>
-Adjust the filtering factor applied to the temperature measurements before they are passed to the PID.<br>
-The value adjust the EMA (Exponential Moving Average) coefficient.<br>
-This helps remove noise and provides more stability, but too high values will slow down the filter response and cause oscillation.<br>
   - **No iron**<br>
 Sets the ADC reading threshold that detects when no iron is present.<br>
 Usually when no iron is plugged in, the measured temperature will read at or close to maximum ADC range(4095).<br>
@@ -123,6 +119,9 @@ Default 4000, max 4100.<br>
   - **No iron delay**<br>
 Time in miliSeconds that an iron must be plugged in before it is considered present.<br>
 If the screen bounces between run mode and no iron, increase this value.<br>
+  - **FILTER SETTINGS**<br>
+  TODO: UPDATE THIS ENTRY  
+Adjusts the different the filtering settings. Heavily affects the PID performance.
   - **Back**<br>
 Return to system menu.<br>
 
@@ -196,8 +195,15 @@ Adjust NTC settings:<br>
     - **Pull mode**<br>
 Adjust as your circuit: Pull up or pull down.<br>
     - **Pull resistance**<br>
-    - **NTC resistance**<br>
-    - **NTC beta**<br>
+    - **NTC Detect** : Enables or disables automatic switching between 2 NTC values (typically 10K and 100K).<br>    
+OFF: Fixed NTC values:<br>
+        - **NTC resistance**<br>
+      	- **NTC beta coefficient**<br>      	
+ON: Two NTC values:<br>
+      	- **Higher NTC value**<br>
+      	- **Higher NTC Beta**<br>
+      	- **Lower NTC value**<br>
+      	- **Lower NTC Beta**<br>
   - **SW:**<br>
 Displays the current software version. Actually, it's the build date.<br>
   - **HW:**<br>
