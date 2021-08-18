@@ -74,6 +74,16 @@ static void setImin(int32_t *val) {
   tipCfg.PID.minI= *val;
 }
 //=========================================================
+/*
+static void * getTau() {
+  temp = tipCfg.PID.tau;
+  return &temp;
+}
+static void setTau(int32_t *val) {
+  tipCfg.PID.tau= *val;
+}
+*/
+//=========================================================
 static void * getCal250() {
   temp = tipCfg.calADC_At_250;
   return &temp;
@@ -152,6 +162,8 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
   static uint32_t last_update=0;
   bool update=0;
 
+  refreshOledDim();
+  handleOledDim();
   updatePlot();
 
   if(input==LongClick){
@@ -344,7 +356,20 @@ static void tip_settings_create(screen_t *scr){
   edit->big_step = -20;
   edit->step = -1;
   edit->setData = (void (*)(void *))&setImin;
-
+/*
+  //[ Tau Widget ]
+  //
+  newComboEditable(w, "PID tau", &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=6;
+  dis->getData = &getTau;
+  dis->number_of_dec = 2;
+  edit->max_value = 200;
+  edit->min_value = 0;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setTau;
+*/
   //[ Cal250 Widget ]
   //
   newComboEditable(w, "Cal250", &edit, NULL);
