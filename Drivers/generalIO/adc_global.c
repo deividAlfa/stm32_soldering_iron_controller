@@ -29,25 +29,37 @@ volatile ADCDataTypeDef_t TIP = {
 
 #ifdef USE_VIN
 volatile ADCDataTypeDef_t VIN = {
-    .adc_buffer     = &ADC_measures[0].VIN,
-    .filter.filter_normal  = 75,
-    .filter.reset_limit  = 50,
+    .adc_buffer             = &ADC_measures[0].VIN,
+    .filter.low_filter      = 75,
+    .filter.mid_filter      = 75,
+    .filter.reset_filter    = 0,
+    .filter.mid_threshold   = 20,
+    .filter.reset_threshold = 60,
+    .filter.mid_limit       = 1,
 };
 #endif
 
 #ifdef USE_NTC
 volatile ADCDataTypeDef_t NTC = {
-    .adc_buffer     = &ADC_measures[0].NTC,
-    .filter.filter_normal  = 75,
-    .filter.reset_limit  = 50,
+    .adc_buffer             = &ADC_measures[0].NTC,
+    .filter.low_filter      = 75,
+    .filter.mid_filter      = 75,
+    .filter.reset_filter    = 0,
+    .filter.mid_threshold   = 20,
+    .filter.reset_threshold = 60,
+    .filter.mid_limit       = 1,
 };
 #endif
 
 #ifdef USE_VREF
 volatile ADCDataTypeDef_t VREF = {
-    .adc_buffer     = &ADC_measures[0].VREF
-    .filter.filter_normal  = 75,
-    .filter.reset_limit  = 50,
+    .adc_buffer             = &ADC_measures[0].VREF
+    .filter.low_filter      = 75,
+    .filter.mid_filter      = 75,
+    .filter.reset_filter    = 0,
+    .filter.mid_threshold   = 20,
+    .filter.reset_threshold = 60,
+    .filter.mid_limit       = 1,
 };
 #endif
 
@@ -152,7 +164,7 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
   int32_t adc_sum,avg_data;
   uint16_t max=0, min=0xffff;
   volatile filter_t *f = &InputData->filter;
-  uint8_t factor = f->filter_normal;
+  int8_t factor = f->low_filter;
   float k;
 
   #ifdef DEBUG_PWM
@@ -179,42 +191,76 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
   avg_data = adc_sum  / (ADC_BFSIZ-2);
   InputData->last_raw = avg_data;
 #ifdef SELECTIVE_FILTERING
-/*
+
 #if defined DEBUG_PWM && defined SWO_PRINT
   extern bool dbg_newData;
 #endif
-  int32_t diff = (int32_t)avg_data - (int32_t)InputData->last_avg;
+  int32_t diff = avg_data - (int32_t)InputData->last_avg;
   int32_t abs_diff=abs(diff);
 
-  if((abs_diff > f->partial_start) && (abs_diff < (f->partial_end - f->partial_start))){                                 // If within partial limits, smoothen difference
-    float range = f->partial_start - f->partial_end;
-    InputData->EMA_of_Input += ((float)abs_diff * (float)diff) / range;
+  if(abs_diff > f->reset_threshold){                                            // Huge difference, > reset_theshold, use reset filter
+    factor= f->reset_filter;
+    f->mid_counter = 0;
+    //f->high_counter = 0;
   }
-  else{
-    if(abs_diff > f->partial_end){
-      if(InputData->spike_count < f->spike_limit){
-        InputData->spike_count++;
-        dbg_newData=1;
+  /*
+  else if(abs_diff < f->reset_threshold && abs_diff > f->high_threshold){       // Between high and reset threshold
+    f->mid_counter = 0;
+    if(f->high_counter < (f->high_limit+10)){                                   // Keep increasing the counter until +10 over limit
+      f->high_counter++;
+    }
+    uint8_t t = (f->high_counter-f->high_limit)*5;                              // Decrease the filtering value by 5 if the counter exceeds the limit
+    if((t+10) < f->high_filter){
+      factor = f->high_filter-t;
+    }
+    else{
+      factor = 10;
+    }
+  }
+  else if(abs_diff < f->high_threshold && abs_diff > f->mid_threshold){         // Between mid and high threshold
+    f->high_counter = 0;
+    if(f->mid_counter < (f->mid_limit+10)){
+      f->mid_counter++;
+    }
+    uint8_t t = (f->mid_counter-f->mid_limit)*5;
+    if((t+10) < f->mid_filter){
+      factor = f->mid_filter-t;
+    }
+    else{
+      factor = 10;
+    }
+  }
+  */
+
+  else if(abs_diff < f->reset_threshold && abs_diff > f->mid_threshold){         // Between mid and high threshold
+    if(f->mid_counter < (f->mid_limit+10)){
+      f->mid_counter++;
+    }
+    if(f->mid_counter > f->mid_limit){
+      int8_t t = f->mid_filter - ((f->mid_counter-f->mid_limit)*5);
+      if(t>40){
+        factor = t;
       }
       else{
-        dbg_newData=1;
-        factor=0;
-        InputData->spike_count = 0;
+        factor = 40;
       }
     }
-*/
-    if(abs( (int32_t)avg_data - (int32_t)InputData->last_avg) > f->reset_limit){
-      factor=0;
+    else{
+      factor = f->mid_filter;
     }
+  }
+  else{
+    f->mid_counter = 0;
+    //f->high_counter = 0;
+  }
 
-    if(factor>0 && factor<100){                                                                  // If applicable factor
-        k=((float)factor/100);
-        InputData->EMA_of_Input = (InputData->EMA_of_Input*k) + ((float)avg_data*(1.0-k));
-    }
-    else{                                                                                             // Else, apply last average
-      InputData->EMA_of_Input = avg_data;
-    }
- // }
+  if(factor==0 || factor==100){
+    InputData->EMA_of_Input = avg_data;
+  }
+  else{
+    k=((float)factor/100);
+    InputData->EMA_of_Input = (InputData->EMA_of_Input*k) + ((float)avg_data*(1.0-k));
+ }
 #endif
   InputData->last_avg = InputData->EMA_of_Input;
 }
