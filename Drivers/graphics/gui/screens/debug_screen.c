@@ -287,7 +287,7 @@ static void debug_onEnter(screen_t *scr){
 }
 
 static void debug_onExit(screen_t *scr){
-  if(scr==&Screen_settings){
+  if(scr!=&Screen_debug && scr!=&Screen_pid_debug){
     setDebugMode(disable);
     _free(pidPlot);
   }
