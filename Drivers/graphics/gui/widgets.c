@@ -1054,12 +1054,7 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
     if(w->refresh==refresh_idle){
       w->refresh=refresh_triggered;
     }
-    if(input == Rotate_Increment_while_click){
-      input = Rotate_Increment;
-      inc = edit->big_step;
-    }
-    else if(input == Rotate_Decrement_while_click){
-      input = Rotate_Decrement;
+    if(abs(state->Diff) > 1){
       inc = edit->big_step;
     }
     else{
