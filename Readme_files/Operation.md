@@ -195,12 +195,13 @@ Adjust NTC settings:<br>
     - **Pull mode**<br>
 Adjust as your circuit: Pull up or pull down.<br>
     - **Pull resistance**<br>
-    - **NTC Detect** : Enables or disables automatic switching between 2 NTC values (typically 10K and 100K).<br>    
-OFF: Fixed NTC values:<br>
+    - **NTC Detect** : Enables or disables automatic switching between 2 NTC values (typically 10K and 100K).<br>
+        
+    OFF: Fixed NTC values:<br>
         - **NTC resistance**<br>
       	- **NTC beta coefficient**<br>
       	
-ON: Two NTC values:<br>
+    ON: Two NTC values:<br>
       	- **Higher NTC value**<br>
       	- **Higher NTC Beta**<br>
       	- **Lower NTC value**<br>
