@@ -198,8 +198,9 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
     screen_timer=current_time;
   }
 
-  if(input==LongClick || ((current_time-screen_timer)>60000)){
-    return screen_settings;
+  if(input==LongClick || ((current_time-screen_timer)>300000)){   // 5 min timeout
+    setCurrentMode(mode_sleep);
+    return screen_main;
   }
   else if(input==Click){
     if(scr==&Screen_debug){
