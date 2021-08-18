@@ -102,7 +102,7 @@ void RE_Process(RE_State_t* data) {
       int8_t add = 1;
       data->halfPointReached = 0;
 
-      if((current_time-lastStep)<20){                 // If last step was less than xxx time ago, increase twice to trigger big step
+      if((current_time-lastStep)<12){                 // If last step was less than xxx time ago, increase twice to trigger big step
         add = 2;
       }
       lastStep=current_time;
