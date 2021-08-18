@@ -106,16 +106,13 @@ enum{
 
 
 typedef struct{
-  uint8_t       filter_normal;
-  uint16_t      reset_limit;
-  /*
-  uint8_t       filter_partial;
-  uint8_t       filter_spikes;
-  uint8_t       filter_reset;
-  uint16_t      partial_start;
-  uint16_t      partial_end;
-  uint8_t       spike_limit;
-  */
+  int8_t        low_filter;               // Filter applied in low noise
+  int8_t        mid_filter;               // Filter applied in medium noise
+  int8_t        reset_filter;             // Filter applied when resetting the filter
+  int8_t        mid_limit;                // After how many consecutive times it will start decreasing the filtering
+  int8_t        mid_counter;              // Consecutive detections
+  uint16_t      mid_threshold;            // threshold between average and new read to detect medium noise
+  uint16_t      reset_threshold;          // Threshold for resetting the filter
 }filter_t;
 
 typedef struct{
