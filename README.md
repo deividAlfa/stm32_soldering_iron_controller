@@ -21,14 +21,6 @@ Video of operation here: (Project in active development, the features will chang
 
 ---
 
-Developing not only takes time, but also costs money.<br>
-When something goes wrong, the results are usually destructive: Tips / handle burning down, sometimes causing damage to the controller.<br>
-
-If you want to support the project, check my Paypal donation page. Thanks!<br>
-[![IMAGE ALT TEXT](/Readme_files/button-donate-paypal.png)](https://www.paypal.com/pools/c/8AHGirfrx2 "Paypal donation page")
-
----
-
 <a id="Details"></a>
 ## Project details
 * This project started by forking [PTDreamer's firmware](https://github.com/PTDreamer/stm32_soldering_iron_controller). Since then it became a separate project.
