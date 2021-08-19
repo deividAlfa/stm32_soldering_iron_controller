@@ -32,11 +32,7 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t base) {
 
   // Integral
   //pid.integrator = pid.integrator + 0.5f * pid.Ki * dt * (error + pid.prevError);  // New
-  //if(pid.proportional<0.9){
-    pid.integrator = pid.integrator + (pid.Ki*(error*dt));                         // Old
-  //}else{
-  //  pid.integrator = 0.1;
-  //}
+  pid.integrator = pid.integrator + (pid.Ki*(error*dt));                         // Old
 
   // Integrator clamping
   if (pid.integrator > pid.limMaxInt) {
@@ -69,9 +65,6 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t base) {
 
 void resetPID(void){
   pid.integrator = 0;
-  pid.derivative = 0;
-  pid.prevError = 0;
-  pid.lastTime = HAL_GetTick();
 }
 
 float getPID_D() {
