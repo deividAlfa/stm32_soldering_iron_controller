@@ -320,10 +320,10 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].calADC_At_250   = T12_Cal250;
       systemSettings.Profile.tip[x].calADC_At_350   = T12_Cal350;     // These values are way lower, but better to be safe than sorry
       systemSettings.Profile.tip[x].calADC_At_450   = T12_Cal450;     // User needs to calibrate its station
-      systemSettings.Profile.tip[x].PID.Kp          = 4500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 7500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 800;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 60;             // val = /100
+      systemSettings.Profile.tip[x].PID.Kp          = 7500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 4800;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 1200;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       systemSettings.Profile.tip[x].PID.tau         = 20;             // val = /100
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);         // Empty name
@@ -393,14 +393,12 @@ void resetCurrentProfile(void){
     Error_Handler();  // We shouldn't get here!
   }
 
-  systemSettings.Profile.tipFilter.low_filter       = 80;   // % of old data (more %, more filtering)
-
-  systemSettings.Profile.tipFilter.mid_threshold    = 100;
-  systemSettings.Profile.tipFilter.mid_limit        = 3;
-  systemSettings.Profile.tipFilter.mid_filter       = 75;
-
-  systemSettings.Profile.tipFilter.reset_threshold  = 500;
-  systemSettings.Profile.tipFilter.reset_filter     = 0;
+  systemSettings.Profile.tipFilter.coefficient      = 95;   // % of old data (more %, more filtering)
+  systemSettings.Profile.tipFilter.threshold        = 40;
+  systemSettings.Profile.tipFilter.min              = 60;   // Don't go below xxx % when decreasing after exceeding threshold limits
+  systemSettings.Profile.tipFilter.count_limit      = 0;
+  systemSettings.Profile.tipFilter.step             = -3;   // -5% less everytime the reading diff exceeds threshold_limit and the counter is greater than count_limit
+  systemSettings.Profile.tipFilter.reset_threshold  = 800;  // Any diff over 500 reset the filter (Tip removed or connected)
 
 
   systemSettings.Profile.CalNTC                   = 25;

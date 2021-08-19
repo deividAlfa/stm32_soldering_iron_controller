@@ -34,7 +34,7 @@
 #endif
 
 //#define SWSTRING        "SW: v1.10"                               // For releases
-#define SWSTRING          "SW: 2021-08-18"                          // For git
+#define SWSTRING          "SW: 2021-08-19"                          // For git
 #define SETTINGS_VERSION  10                                         // Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize         2                                         // In KB
 #define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
@@ -106,13 +106,13 @@ enum{
 
 
 typedef struct{
-  int8_t        low_filter;               // Filter applied in low noise
-  int8_t        mid_filter;               // Filter applied in medium noise
-  int8_t        reset_filter;             // Filter applied when resetting the filter
-  int8_t        mid_limit;                // After how many consecutive times it will start decreasing the filtering
-  int8_t        mid_counter;              // Consecutive detections
-  uint16_t      mid_threshold;            // threshold between average and new read to detect medium noise
-  uint16_t      reset_threshold;          // Threshold for resetting the filter
+  int8_t        coefficient;          // Filter normally applied
+  int8_t        counter;              // Counter for threshold limit
+  int8_t        min;                  // Minimum filtering when decreasing
+  int8_t        step;                 // Start decreasing the filter coefficient, assume it's a fast temperature change, so provide faster response
+  int8_t        count_limit;          // Count the spikes, if exceeding this limit, start reducing the filter coefficient.
+  uint16_t      threshold;            // Base noise limit, if diff exceeds this limit, trigger threshold limit and start decreasing filtering
+  uint16_t      reset_threshold;      // Threshold for completely resetting the filter
 }filter_t;
 
 typedef struct{

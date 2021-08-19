@@ -30,36 +30,36 @@ volatile ADCDataTypeDef_t TIP = {
 #ifdef USE_VIN
 volatile ADCDataTypeDef_t VIN = {
     .adc_buffer             = &ADC_measures[0].VIN,
-    .filter.low_filter      = 75,
-    .filter.mid_filter      = 75,
-    .filter.reset_filter    = 0,
-    .filter.mid_threshold   = 20,
+    .filter.coefficient     = 75,
+    .filter.threshold       = 20,
     .filter.reset_threshold = 60,
-    .filter.mid_limit       = 1,
+    .filter.count_limit     = 1,
+    .filter.min             = 50,
+    .filter.step            = 10,
 };
 #endif
 
 #ifdef USE_NTC
 volatile ADCDataTypeDef_t NTC = {
     .adc_buffer             = &ADC_measures[0].NTC,
-    .filter.low_filter      = 75,
-    .filter.mid_filter      = 75,
-    .filter.reset_filter    = 0,
-    .filter.mid_threshold   = 20,
+    .filter.coefficient     = 75,
+    .filter.threshold       = 20,
     .filter.reset_threshold = 60,
-    .filter.mid_limit       = 1,
+    .filter.count_limit     = 1,
+    .filter.min             = 50,
+    .filter.step            = 10,
 };
 #endif
 
 #ifdef USE_VREF
 volatile ADCDataTypeDef_t VREF = {
     .adc_buffer             = &ADC_measures[0].VREF
-    .filter.low_filter      = 75,
-    .filter.mid_filter      = 75,
-    .filter.reset_filter    = 0,
-    .filter.mid_threshold   = 20,
+    .filter.coefficient     = 75,
+    .filter.threshold       = 20,
     .filter.reset_threshold = 60,
-    .filter.mid_limit       = 1,
+    .filter.count_limit     = 1,
+    .filter.min             = 50,
+    .filter.step            = 10,
 };
 #endif
 
@@ -164,7 +164,7 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
   int32_t adc_sum,avg_data;
   uint16_t max=0, min=0xffff;
   volatile filter_t *f = &InputData->filter;
-  int8_t factor = f->low_filter;
+  int8_t factor = f->coefficient;
   float k;
 
   #ifdef DEBUG_PWM
@@ -195,67 +195,36 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
 #if defined DEBUG_PWM && defined SWO_PRINT
   extern bool dbg_newData;
 #endif
-  int32_t diff = avg_data - (int32_t)InputData->last_avg;
-  int32_t abs_diff=abs(diff);
 
-  if(abs_diff > f->reset_threshold){                                            // Huge difference, > reset_theshold, use reset filter
-    factor= f->reset_filter;
-    f->mid_counter = 0;
-    //f->high_counter = 0;
-  }
-  /*
-  else if(abs_diff < f->reset_threshold && abs_diff > f->high_threshold){       // Between high and reset threshold
-    f->mid_counter = 0;
-    if(f->high_counter < (f->high_limit+10)){                                   // Keep increasing the counter until +10 over limit
-      f->high_counter++;
-    }
-    uint8_t t = (f->high_counter-f->high_limit)*5;                              // Decrease the filtering value by 5 if the counter exceeds the limit
-    if((t+10) < f->high_filter){
-      factor = f->high_filter-t;
-    }
-    else{
-      factor = 10;
-    }
-  }
-  else if(abs_diff < f->high_threshold && abs_diff > f->mid_threshold){         // Between mid and high threshold
-    f->high_counter = 0;
-    if(f->mid_counter < (f->mid_limit+10)){
-      f->mid_counter++;
-    }
-    uint8_t t = (f->mid_counter-f->mid_limit)*5;
-    if((t+10) < f->mid_filter){
-      factor = f->mid_filter-t;
-    }
-    else{
-      factor = 10;
-    }
-  }
-  */
+  if(factor>0 && factor<100){
+    int32_t diff = avg_data - (int32_t)InputData->last_avg;
+    int32_t abs_diff=abs(diff);
 
-  else if(abs_diff < f->reset_threshold && abs_diff > f->mid_threshold){         // Between mid and high threshold
-    if(f->mid_counter < (f->mid_limit+10)){
-      f->mid_counter++;
+    if(abs_diff > f->reset_threshold){                                         // If diff greater reset_threshold, reset the filter
+      factor = 0;
+      f->counter = 0;
     }
-    if(f->mid_counter > f->mid_limit){
-      int8_t t = f->mid_filter - ((f->mid_counter-f->mid_limit)*5);
-      if(t>40){
-        factor = t;
+    else if(abs_diff > f->threshold){                                         // diff greater than threshold
+      if(f->counter < f->count_limit){                                        // If counter below limit, just increase it, use normal filter coefficient
+        f->counter++;
       }
-      else{
-        factor = 40;
+      else{                                                                   // Else,
+        factor = factor + ((f->counter - f->count_limit)*f->step);            // compute new coefficient (Note adding because step is negative)
+        if(factor > f->min){                                                  // if factor greater than limit
+          f->counter++;                                                       // Keep decreasing
+        }
+        else{
+          factor = f->min;                                                    // Else, use min
+        }
       }
     }
-    else{
-      factor = f->mid_filter;
+    else{                                                                     // Below threshold limit, use normal coefficient
+      f->counter = 0;
     }
   }
-  else{
-    f->mid_counter = 0;
-    //f->high_counter = 0;
-  }
 
-  if(factor==0 || factor==100){
-    InputData->EMA_of_Input = avg_data;
+  if(factor==0 || factor==100){                                             // Factor 100 would use 100% of old value, never updating, so we force 0% if that happens (shouldn't)
+    InputData->EMA_of_Input = avg_data;                                     // Use last average (No filtering)
   }
   else{
     k=((float)factor/100);
@@ -319,11 +288,12 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     if(systemSettings.settings.WakeInputMode==mode_stand){
       readWake();
     }
+
     __HAL_TIM_SET_COUNTER(Iron.Pwm_Timer,0);                                                // Synchronize PWM
     if(!Iron.Error.safeMode && Iron.CurrentMode!=mode_sleep){
       configurePWMpin(output_PWM);
     }
-    HAL_IWDG_Refresh(&hiwdg);
+
     handle_ADC_Data();
 
 
@@ -339,5 +309,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
 
     handleIron();
     runAwayCheck();
+
+    HAL_IWDG_Refresh(&hiwdg);
   }
 }
