@@ -147,7 +147,7 @@ tipData_t *getCurrentTip() {
 }
 
 // Translate the human readable t into internal value
-uint16_t human2adc(int16_t t) {
+int16_t human2adc(int16_t t) {
   volatile int16_t temp = t;
   volatile int16_t tH;
   volatile int16_t ambTemp = readColdJunctionSensorTemp_x10(old_reading, mode_Celsius) / 10;

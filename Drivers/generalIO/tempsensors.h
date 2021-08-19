@@ -26,7 +26,7 @@ tipData_t *getCurrentTip();
 
 long      map(long x, long in_min, long in_max, long out_min, long out_max);
 int16_t   adc2Human(uint16_t adc_value,bool correction, bool tempUnit);
-uint16_t  human2adc(int16_t t);
+int16_t   human2adc(int16_t t);
 int16_t   TempConversion(int16_t temperature, bool conversion, bool x10mode);
 
 
