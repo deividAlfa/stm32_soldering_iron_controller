@@ -36,7 +36,7 @@ screen_t Screen_pid_debug;
 widget_t *widget_setPoint;
 widget_t *widget_Temp;
 
-static int32_t debug_temp = 0;
+static int32_t debug_temp;
 static uint8_t update, update_draw;
 #define PID_SZ  95
 typedef struct {
@@ -74,7 +74,6 @@ static void * getTemp() {
 //=========================================================
 static void setSetpoint(uint32_t *val) {
   debug_temp=*val;
-  setDebugTemp(human2adc(debug_temp));
 }
 static void * getSetpoint() {
   return &debug_temp;
@@ -193,6 +192,9 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   updatePIDplot();
   refreshOledDim();
   handleOledDim();
+  if(update){
+    setDebugTemp(human2adc(debug_temp));        // Needs to be updated, as the value depends on the NTC temp
+  }
 
   if(input!=Rotate_Nothing){
     screen_timer=current_time;
