@@ -201,6 +201,7 @@ uint16_t round_10(uint16_t input){
 // Changes the system temperature unit
 void setSystemTempUnit(bool unit){
 
+  __disable_irq();
   if(systemSettings.Profile.tempUnit != unit){
     systemSettings.Profile.tempUnit = unit;
     systemSettings.Profile.UserSetTemperature = round_10(TempConversion(systemSettings.Profile.UserSetTemperature,unit,0));
@@ -211,6 +212,7 @@ void setSystemTempUnit(bool unit){
 
   systemSettings.settings.tempUnit = unit;
   setCurrentMode(Iron.CurrentMode);     // Reload temps
+  __enable_irq();
 }
 
 // This function inits the timers and sets the prescaler settings depending on the system core clock
@@ -261,18 +263,24 @@ void initTimers(void){
 }
 
 void setReadDelay(uint16_t delay){
+  __disable_irq();
  systemSettings.Profile.readDelay=delay;
+  __enable_irq();
 }
 
 
 void setReadPeriod(uint16_t period){
+  __disable_irq();
  systemSettings.Profile.readPeriod=period;
  Iron.updatePwm=1;
+  __enable_irq();
 }
 
 void setPwmMul(uint16_t mult){
+  __disable_irq();
   systemSettings.Profile.pwmMul=mult;
   Iron.updatePwm=1;
+  __enable_irq();
 }
 
 void configurePWMpin(uint8_t mode){
@@ -416,7 +424,9 @@ void updatePowerLimit(void){
 
 // Sets no Iron detection threshold
 void setNoIronValue(uint16_t noiron){
+  __disable_irq();
   systemSettings.Profile.noIronValue=noiron;
+  __enable_irq();
 }
 
 // Change the iron operating mode in stand mode
@@ -427,15 +437,18 @@ void setModefromStand(uint8_t mode){
       ((Iron.CurrentMode==mode_boost) && (mode==mode_run)) ){
     return;
   }
+  __disable_irq();
   if(Iron.changeMode!=mode){
     Iron.changeMode = mode;                                                                 // Update mode
     Iron.LastModeChangeTime = HAL_GetTick();                                                // Reset debounce timer
   }
-  Iron.updateStandMode = needs_update;                                                           // Set flag
+  Iron.updateStandMode = needs_update;                                                      // Set flag
+  __enable_irq();
 }
 
 // Set the iron operating mode
 void setCurrentMode(uint8_t mode){
+  __disable_irq();
   Iron.CurrentModeTimer = HAL_GetTick();                                                    // Refresh current mode timer
   if(mode==mode_standby){
     Iron.CurrentSetTemperature = systemSettings.Profile.standbyTemperature;                 // Set standby temp
@@ -458,6 +471,7 @@ void setCurrentMode(uint8_t mode){
       Iron.temperatureReached = 0;
     }
   }
+  __enable_irq();
 }
 
 // Called from program timer if WAKE change is detected
@@ -481,7 +495,9 @@ void IronWake(bool source){                                                     
     }
   }
   if(Iron.CurrentMode<mode_boost){
+    __disable_irq();
     setCurrentMode(mode_run);
+    __enable_irq();
   }
 }
 
@@ -557,6 +573,7 @@ bool GetIronError(void){
 }
 
 void setSafeMode(bool mode){
+  __disable_irq();
   if(mode==disable && Iron.Error.Flags==(_ACTIVE |_SAFE_MODE)){                             // If only failsafe was active? (This should only happen because it was on first init screen)
     Iron.Error.Flags = _NOERROR;
     setCurrentMode(mode_run);
@@ -568,6 +585,7 @@ void setSafeMode(bool mode){
     Iron.Error.safeMode=mode;
     checkIronError();
   }
+  __enable_irq();
 }
 
 
@@ -576,7 +594,9 @@ bool GetSafeMode() {
 }
 
 void setDebugTemp(uint16_t value) {
+  __disable_irq();
   Iron.Debug_SetTemperature = value;
+  __enable_irq();
 }
 
 uint16_t getDebugTemp(void){
@@ -584,13 +604,16 @@ uint16_t getDebugTemp(void){
 }
 
 void setDebugMode(uint8_t value) {
+  __disable_irq();
   Iron.DebugMode = value;
+  __enable_irq();
 }
 uint8_t getDebugMode(void){
   return Iron.DebugMode;
 }
 
 void setUserTemperature(uint16_t temperature) {
+  __disable_irq();
   Iron.temperatureReached = 0;
   if(systemSettings.Profile.UserSetTemperature != temperature){
     systemSettings.Profile.UserSetTemperature = temperature;
@@ -599,6 +622,7 @@ void setUserTemperature(uint16_t temperature) {
       resetPID();
     }
   }
+  __enable_irq();
 }
 
 uint16_t getUserTemperature() {
