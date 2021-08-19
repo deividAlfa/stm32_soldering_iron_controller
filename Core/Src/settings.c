@@ -271,8 +271,8 @@ void resetSystemSettings(void) {
   systemSettings.settings.errorDelay        = 1;                    // *100mS
   systemSettings.settings.guiUpdateDelay    = 200;
   systemSettings.settings.tempUnit          = mode_Celsius;
-  systemSettings.settings.tempStep          = 1;                    // 1º steps
-  systemSettings.settings.tempBigStep       = 10;                   // 10º big steps
+  systemSettings.settings.tempStep          = 5;                    // 5º steps
+  systemSettings.settings.tempBigStep       = 20;                   // 20º big steps
   systemSettings.settings.activeDetection   = true;
   systemSettings.settings.saveSettingsDelay = 5;                    // 5s
   systemSettings.settings.lvp               = 110;                  // 11.0V Low voltage
