@@ -749,13 +749,11 @@ void drawAux(uint8_t *refresh){
   u8g2_SetFont(&u8g2, u8g2_font_small);
   if(frame){
     uint8_t len = u8g2_GetStrWidth(&u8g2, tipNames[systemSettings.Profile.currentTip])+4;   // Draw edit frame
-    u8g2_SetDrawColor(&u8g2, WHITE);
     u8g2_DrawRBox(&u8g2, 0, 54, len, 10, 2);
+    u8g2_SetDrawColor(&u8g2, BLACK);
   }
-  u8g2_SetDrawColor(&u8g2, XOR);
   u8g2_DrawStr(&u8g2, 2, 54, tipNames[systemSettings.Profile.currentTip]);                  // Draw tip name
   u8g2_SetDrawColor(&u8g2, WHITE);
-
 }
 
 void main_screen_draw(screen_t *scr){
