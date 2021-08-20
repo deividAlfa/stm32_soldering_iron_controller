@@ -65,6 +65,7 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t base) {
 
 void resetPID(void){
   pid.integrator = 0;
+  pid.lastTime = HAL_GetTick();
 }
 
 float getPID_D() {
