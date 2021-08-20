@@ -266,6 +266,7 @@ static void debug_onEnter(screen_t *scr){
     }
 
     setDebugTemp(human2adc(debug_temp));
+    setCurrentMode(mode_run);
     setDebugMode(enable);
 
     pidPlot=_malloc(sizeof(pid_plot_t));
