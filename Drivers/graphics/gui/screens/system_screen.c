@@ -80,12 +80,20 @@ static void setBigTmpStep(uint32_t *val) {
 }
 //=========================================================
 static void * getContrast_() {
-  temp = systemSettings.settings.contrast;
+  temp = systemSettings.settings.contrast/25;
   return &temp;
 }
 static void setContrast_(uint32_t *val) {
-  systemSettings.settings.contrast=*val;
-  setContrast(*val);
+  if(*val==0){
+    systemSettings.settings.contrast=5;
+  }
+  else if(*val==10){
+    systemSettings.settings.contrast=255;
+  }
+  else{
+    systemSettings.settings.contrast=*val*25;
+  }
+  setContrast(systemSettings.settings.contrast);
 }
 //=========================================================
 static void * getOledOffset() {
@@ -257,11 +265,11 @@ static void system_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=3;
   dis->getData = &getContrast_;
-  edit->big_step = 25;
-  edit->step = 25;
+  edit->big_step = 1;
+  edit->step = 1;
   edit->setData = (void (*)(void *))&setContrast_;
-  edit->max_value = 255;
-  edit->min_value = 5;
+  edit->max_value = 10;
+  edit->min_value = 0;
 
   //  [ Oled dimming Widget ]
   //
