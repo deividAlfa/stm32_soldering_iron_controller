@@ -53,7 +53,9 @@ extern volatile ADCDataTypeDef_t TIP;
 #ifdef USE_VREF
         extern volatile ADCDataTypeDef_t VREF;
 #endif
-
+#ifdef ENABLE_INT_TEMP
+        extern volatile ADCDataTypeDef_t INT_TMP;
+#endif
 
 
 typedef enum { ADC_Idle, ADC_Waiting, ADC_ProbingTip, ADC_Sampling } ADC_Status_t;

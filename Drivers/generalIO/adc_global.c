@@ -30,39 +30,51 @@ volatile ADCDataTypeDef_t TIP = {
 #ifdef USE_VIN
 volatile ADCDataTypeDef_t VIN = {
     .adc_buffer             = &ADC_measures[0].VIN,
-    .filter.coefficient     = 75,
+    .filter.coefficient     = 95,
     .filter.threshold       = 20,
     .filter.reset_threshold = 60,
-    .filter.count_limit     = 1,
+    .filter.count_limit     = 0,
     .filter.min             = 50,
-    .filter.step            = 10,
+    .filter.step            = 5,
 };
 #endif
 
 #ifdef USE_NTC
 volatile ADCDataTypeDef_t NTC = {
     .adc_buffer             = &ADC_measures[0].NTC,
-    .filter.coefficient     = 75,
+    .filter.coefficient     = 95,
     .filter.threshold       = 20,
     .filter.reset_threshold = 60,
-    .filter.count_limit     = 1,
+    .filter.count_limit     = 0,
     .filter.min             = 50,
-    .filter.step            = 10,
+    .filter.step            = 5,
 };
 #endif
 
 #ifdef USE_VREF
 volatile ADCDataTypeDef_t VREF = {
-    .adc_buffer             = &ADC_measures[0].VREF
-    .filter.coefficient     = 75,
+    .adc_buffer             = &ADC_measures[0].VREF,
+    .filter.coefficient     = 95,
     .filter.threshold       = 20,
     .filter.reset_threshold = 60,
-    .filter.count_limit     = 1,
+    .filter.count_limit     = 0,
     .filter.min             = 50,
-    .filter.step            = 10,
+    .filter.step            = 5,
 };
 #endif
 
+
+#ifdef ENABLE_INT_TEMP
+volatile ADCDataTypeDef_t INT_TMP = {
+    .adc_buffer             = &ADC_measures[0].INT_TMP,
+    .filter.coefficient     = 95,
+    .filter.threshold       = 10,
+    .filter.reset_threshold = 30,
+    .filter.count_limit     = 0,
+    .filter.min             = 50,
+    .filter.step            = 5,
+};
+#endif
 static ADC_HandleTypeDef *adc_device;
 
 
@@ -88,7 +100,7 @@ void ADC_Init(ADC_HandleTypeDef *adc){
   adc_device->Init.ExternalTrigConv = ADC_SOFTWARE_START;                                   // Set software trigger
   if (HAL_ADC_Init(adc_device) != HAL_OK) { Error_Handler(); }
 
-  sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;                                         // More sampling time to compensate high input impedances
+  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;                                         // More sampling time to compensate high input impedances
 
   #ifdef ADC_CH_1ST
     #if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
@@ -111,6 +123,11 @@ void ADC_Init(ADC_HandleTypeDef *adc){
       sConfig.Rank = ADC_REGULAR_RANK_3;
     #endif
     sConfig.Channel = ADC_CH_3RD;
+
+    #if defined ENABLE_INT_TEMP && !defined ADC_CH_4TH
+    sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;                                      // Last channel is internal temperature, requires min. 10uS sampling time
+    #endif
+
     if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
   #endif
 
@@ -119,6 +136,24 @@ void ADC_Init(ADC_HandleTypeDef *adc){
     sConfig.Rank = ADC_REGULAR_RANK_4;
   #endif
   sConfig.Channel = ADC_CH_4TH;
+
+  #if defined ENABLE_INT_TEMP && !defined ADC_CH_5TH
+  sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
+  #endif
+
+  if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
+  #endif
+
+  #ifdef ADC_CH_5TH
+  #if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
+    sConfig.Rank = ADC_REGULAR_RANK_5;
+  #endif
+  sConfig.Channel = ADC_CH_5TH;
+
+  #if defined ENABLE_INT_TEMP && !defined ADC_CH_6TH
+  sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
+  #endif
+
   if (HAL_ADC_ConfigChannel(adc_device, &sConfig) != HAL_OK){Error_Handler();}
   #endif
 
@@ -145,6 +180,26 @@ void ADC_Start_DMA(){
   #endif
 
   ADC_Status=ADC_Sampling;
+/*
+ // TEST CODE, DOESN'T WORK!
+#ifdef ENABLE_INT_TEMP
+  static uint8_t sampling_temp=0;
+  static uint32_t last_temp_time=0;
+  uint32_t tmp_sqr1 = 0U;
+
+  if(sampling_temp){                                                                      // If last conversion sampled temperature
+    sampling_temp=0;                                                                      // Disable In Temp channel
+    tmp_sqr1 = ADC_SQR1_L_SHIFT(ADC_Num-1);                                               // Assume Int. temp is last channel, thus matching ADC_Num
+    MODIFY_REG(adc_device->Instance->SQR1, ADC_SQR1_L, tmp_sqr1 );
+  }
+  else if(!last_temp_time || (HAL_GetTick()-last_temp_time)>999){                        // If never sampled or every 10 seconds (It's pretty slow)
+    sampling_temp=1;                                                                      // Enable temp channel
+    last_temp_time=HAL_GetTick();
+    tmp_sqr1 = ADC_SQR1_L_SHIFT(ADC_Num);
+    MODIFY_REG(adc_device->Instance->SQR1, ADC_SQR1_L, tmp_sqr1 );
+  }
+#endif
+*/
   if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)ADC_measures, sizeof(ADC_measures)/ sizeof(uint16_t) )!=HAL_OK){  // Start ADC conversion now
     Error_Handler();
   }
@@ -262,6 +317,9 @@ void handle_ADC_Data(void){
   #endif
   #ifdef USE_VIN
   DoAverage(&VIN);
+  #endif
+  #ifdef ENABLE_INT_TEMP
+  DoAverage(&INT_TMP);
   #endif
 }
 
