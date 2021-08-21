@@ -48,19 +48,22 @@
 #define ADC_1st             NTC                               // ADC 1st used channel (CH2)
 #define ADC_2nd             VIN                               // ADC 2nd used channel (CH3)
 #define ADC_3rd             TIP                               // ADC 3nd used channel (CH5)
-//#define ADC_4th           ---                               // ADC 4th used channel
-#define ADC_Num             3                                 // Number of channels
+#define ADC_4th             INT_TMP                           // ADC 4th used channel (CH16)
+//#define ADC_5th           VREF                              // ADC 5th used channel
+#define ADC_Num             4                                 // Number of channels
 
 // Channel assignment
 #define ADC_CH_1ST          ADC_CHANNEL_2                     // CH2 = NTC
 #define ADC_CH_2ND          ADC_CHANNEL_3                     // CH3 = VIN
 #define ADC_CH_3RD          ADC_CHANNEL_5                     // CH5 = IRON TIP
-//#define ADC_CH_4TH        ADC_CHANNEL__                     //
+#define ADC_CH_4TH          ADC_CHANNEL_TEMPSENSOR            // CH16 = INT TEMP
+//#define ADC_CH_5TH        ADC_CHANNEL__                     // CH? = ?
 
 // To enable specific functions in code
 //#define USE_VREF
 #define USE_VIN
 #define USE_NTC
+#define ENABLE_INT_TEMP                                       // Enable internal temperature if NTC fails or disabled in options (Depends on USE_NTC)
 
 
 
