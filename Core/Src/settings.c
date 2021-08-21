@@ -287,7 +287,8 @@ void resetSystemSettings(void) {
   systemSettings.settings.debugEnabled      = disable;
   systemSettings.settings.NotInitialized    = initialized;
 
-#ifdef USE_NTC
+  #ifdef USE_NTC
+  systemSettings.settings.enableNTC         = 1;
   #ifdef PULLUP
   systemSettings.settings.Pullup            = 1;
   #elif defined PULLDOWN
@@ -303,7 +304,9 @@ void resetSystemSettings(void) {
   systemSettings.settings.Pull_res          = PULL_RES/100;
   systemSettings.settings.NTC_res           = NTC_RES/100;
   systemSettings.settings.NTC_Beta          = NTC_BETA;
-#endif
+  #else
+  systemSettings.settings.enableNTC         = 0;
+  #endif
 
   __enable_irq();
 }

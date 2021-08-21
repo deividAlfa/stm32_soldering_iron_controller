@@ -177,6 +177,7 @@ typedef struct{
   uint8_t       debugEnabled;
   uint16_t      NTC_Beta;
   uint16_t      Pull_res;
+  uint16_t      enableNTC;
   uint16_t      NTC_res;
   uint16_t      NTC_detect_high_res;
   uint16_t      NTC_detect_low_res;
