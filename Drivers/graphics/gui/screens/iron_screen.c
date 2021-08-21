@@ -326,7 +326,7 @@ static void iron_create(screen_t *scr){
   dis->endString="s";
   dis->reservedChars=5;
   dis->getData = &getBoostTime;
-  edit->big_step = 20;
+  edit->big_step = 10;
   edit->step = 5;
   edit->max_value = 120;
   edit->min_value = 10;
@@ -339,8 +339,8 @@ static void iron_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=5;
   dis->getData = &getBoostTemp;
-  edit->big_step = 50;
-  edit->step = 10;
+  edit->big_step = 10;
+  edit->step = 5;
   edit->max_value = 200;
   edit->min_value = 10;
   edit->setData = (void (*)(void *))&setBoostTemp;
@@ -410,7 +410,7 @@ static void iron_create(screen_t *scr){
   dis->reservedChars=7;
   dis->number_of_dec = 0;
   dis->getData = &_getPwmMul;
-  edit->big_step = 10;
+  edit->big_step = 5;
   edit->step = 1;
   edit->setData = (void (*)(void *))&_setPwmMul;
   edit->max_value = 20;
@@ -422,7 +422,7 @@ static void iron_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &getNoIronADC;
-  edit->big_step = 200;
+  edit->big_step = 50;
   edit->step = 10;
   edit->setData = (void (*)(void *))&setNoIronADC;
   edit->max_value = 4100;
@@ -435,7 +435,7 @@ static void iron_create(screen_t *scr){
   dis->endString="ms";
   dis->reservedChars=6;
   dis->getData = &geterrorDelay;
-  edit->big_step = 100;
+  edit->big_step = 200;
   edit->step = 100;
   edit->setData = (void (*)(void *))&seterrorDelay;
   edit->max_value = 2000;

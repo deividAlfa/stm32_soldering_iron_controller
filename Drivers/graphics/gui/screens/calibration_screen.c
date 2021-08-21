@@ -450,6 +450,8 @@ static void Cal_Start_create(screen_t *scr) {
   dis->getData = &getMeasuredTemp;
   edit->setData =  (void (*)(void *)) &setMeasuredTemp;
   edit->selectable.tab = 1;
+  edit->big_step=5;
+  edit->step=1;
   w->posX = 82;
   w->posY = 22;
   w->width = 42;
@@ -503,7 +505,7 @@ static void Cal_Settings_create(screen_t *scr){
   edit->inputData.reservedChars=4;
   edit->inputData.getData = &getCal250;
   edit->big_step = 100;
-  edit->step = 50;
+  edit->step = 20;
   edit->setData = (void (*)(void *))&setCal250;
   edit->max_value = 4000;
   edit->min_value = 0;
@@ -513,7 +515,7 @@ static void Cal_Settings_create(screen_t *scr){
   edit->inputData.reservedChars=4;
   edit->inputData.getData = &getCal350;
   edit->big_step = 100;
-  edit->step = 50;
+  edit->step = 20;
   edit->setData = (void (*)(void *))&setCal350;
   edit->max_value = 4000;
   edit->min_value = 0;
@@ -523,7 +525,7 @@ static void Cal_Settings_create(screen_t *scr){
   edit->inputData.reservedChars=4;
   edit->inputData.getData = &getCal450;
   edit->big_step = 100;
-  edit->step = 50;
+  edit->step = 20;
   edit->setData = (void (*)(void *))&setCal450;
   edit->max_value = 4000;
   edit->min_value = 0;

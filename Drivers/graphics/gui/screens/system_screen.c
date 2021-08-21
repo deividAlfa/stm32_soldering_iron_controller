@@ -296,7 +296,7 @@ static void system_create(screen_t *scr){
   dis->reservedChars=4;
   dis->endString="s";
   dis->getData = &getOledDimming;
-  edit->big_step = 20;
+  edit->big_step = 10;
   edit->step = 5;
   edit->setData = (void (*)(void *))&setOledDimming;
   edit->max_value = 240;
@@ -309,7 +309,7 @@ static void system_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=2;
   dis->getData = &getOledOffset;
-  edit->big_step = 10;
+  edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setOledOffset;
   edit->max_value = 15;
@@ -469,7 +469,7 @@ static void system_create(screen_t *scr){
   dis->reservedChars=5;
   dis->getData = &getLVP;
   dis->number_of_dec = 1;
-  edit->big_step = 10;
+  edit->big_step = 5;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setLVP;
   edit->max_value = 250;
@@ -482,7 +482,7 @@ static void system_create(screen_t *scr){
   dis->endString="ms";
   dis->reservedChars=5;
   dis->getData = &getGuiUpd_ms;
-  edit->big_step = 50;
+  edit->big_step = 20;
   edit->step = 10;
   edit->setData = (void (*)(void *))&setGuiUpd_ms;
   edit->max_value = 250;
@@ -679,7 +679,7 @@ static void system_ntc_create(screen_t *scr){
   dis->reservedChars=7;
   dis->endString="K\261";
   dis->getData = &get_Pull_res;
-  edit->big_step = 50;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_Pull_res;
   edit->max_value = 5000;
@@ -707,7 +707,7 @@ static void system_ntc_create(screen_t *scr){
   dis->reservedChars=7;
   dis->endString="K\261";
   dis->getData = &get_NTC_detect_high_res;
-  edit->big_step = 50;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_NTC_detect_high_res;
   edit->max_value = 5000;
@@ -719,8 +719,8 @@ static void system_ntc_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=5;
   dis->getData = &get_NTC_detect_high_res_beta;
-  edit->big_step = 500;
-  edit->step = 20;
+  edit->big_step = 100;
+  edit->step = 10;
   edit->setData = (void (*)(void *))&set_NTC_detect_high_res_beta;
   edit->max_value = 50000;
   edit->min_value = 500;
@@ -733,7 +733,7 @@ static void system_ntc_create(screen_t *scr){
   dis->reservedChars=7;
   dis->endString="K\261";
   dis->getData = &get_NTC_detect_low_res;
-  edit->big_step = 50;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_NTC_detect_low_res;
   edit->max_value = 5000;
@@ -745,8 +745,8 @@ static void system_ntc_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=5;
   dis->getData = &get_NTC_detect_low_res_beta;
-  edit->big_step = 500;
-  edit->step = 20;
+  edit->big_step = 100;
+  edit->step = 10;
   edit->setData = (void (*)(void *))&set_NTC_detect_low_res_beta;
   edit->max_value = 50000;
   edit->min_value = 500;
@@ -759,7 +759,7 @@ static void system_ntc_create(screen_t *scr){
   dis->reservedChars=7;
   dis->endString="K\261";
   dis->getData = &get_NTC_res;
-  edit->big_step = 50;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_NTC_res;
   edit->max_value = 5000;
@@ -771,8 +771,8 @@ static void system_ntc_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=5;
   dis->getData = &get_NTC_beta;
-  edit->big_step = 500;
-  edit->step = 20;
+  edit->big_step = 100;
+  edit->step = 10;
   edit->setData = (void (*)(void *))&set_NTC_beta;
   edit->max_value = 50000;
   edit->min_value = 500;

@@ -303,7 +303,7 @@ static void tip_settings_create(screen_t *scr){
   dis->getData = &getKp;
   dis->number_of_dec = 2;
   edit->max_value=65000;
-  edit->big_step = 500;
+  edit->big_step = 200;
   edit->step = 50;
   edit->setData =  (void (*)(void *))&setKp;
 
@@ -316,7 +316,7 @@ static void tip_settings_create(screen_t *scr){
   dis->getData = &getKi;
   dis->number_of_dec = 2;
   edit->max_value=65000;
-  edit->big_step = 500;
+  edit->big_step = 200;
   edit->step = 50;
   edit->setData = (void (*)(void *))&setKi;
 
@@ -329,7 +329,7 @@ static void tip_settings_create(screen_t *scr){
   dis->getData = &getKd;
   dis->number_of_dec = 2;
   edit->max_value=65000;
-  edit->big_step = 500;
+  edit->big_step = 200;
   edit->step = 50;
   edit->setData = (void (*)(void *))&setKd;
 
@@ -342,7 +342,7 @@ static void tip_settings_create(screen_t *scr){
   dis->getData = &getImax;
   dis->number_of_dec = 2;
   edit->max_value=1000;
-  edit->big_step = 20;
+  edit->big_step = 5;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setImax;
 
@@ -355,7 +355,7 @@ static void tip_settings_create(screen_t *scr){
   dis->number_of_dec = 2;
   edit->max_value = 0;
   edit->min_value = -1000;
-  edit->big_step = -20;
+  edit->big_step = -5;
   edit->step = -1;
   edit->setData = (void (*)(void *))&setImin;
 /*
@@ -381,7 +381,7 @@ static void tip_settings_create(screen_t *scr){
   dis->getData = &getCal250;
   edit->max_value = 4090;
   edit->min_value = 0;
-  edit->big_step = 50;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setCal250;
 
@@ -395,7 +395,7 @@ static void tip_settings_create(screen_t *scr){
   dis->getData = &getCal350;
   edit->max_value = 4090;
   edit->min_value = 0;
-  edit->big_step = 50;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setCal350;
 
@@ -409,7 +409,7 @@ static void tip_settings_create(screen_t *scr){
   dis->getData = &getCal450;
   edit->max_value = 4090;
   edit->min_value = 0;
-  edit->big_step = 50;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setCal450;
 
