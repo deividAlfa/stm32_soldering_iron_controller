@@ -880,7 +880,7 @@ static void main_screen_create(screen_t *scr){
   dis->font=u8g2_font_small;
   dis->getData = &main_screen_getAmbTemp;
   w->posY = 0;
-  //w->posX = 90;
+  w->width = 38;
   #endif
 }
 
