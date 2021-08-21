@@ -20,6 +20,7 @@
 #define __BASE_FILE__ "iron.c"
 #endif
 
+static volatile uint32_t CurrentTime;
 volatile iron_t Iron;
 typedef struct setTemperatureReachedCallbackStruct_t setTemperatureReachedCallbackStruct_t;
 
@@ -75,11 +76,13 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
     }
   }
   initTimers();
+  #ifdef USE_NTC
   detectNTC();
+  #endif
 }
 
 void handleIron(void) {
-  uint32_t CurrentTime = HAL_GetTick();
+  CurrentTime = HAL_GetTick();
 
   readTipTemperatureCompensated(new_reading, read_average);     // Update readings
   readColdJunctionSensorTemp_x10(new_reading, mode_Celsius);
@@ -93,7 +96,6 @@ void handleIron(void) {
   }
 
   checkIronError();
-
   // Controls external mode changes (from stand mode changes), this acts as a debouncing timer
   if(Iron.updateStandMode==needs_update){
     if(Iron.Error.active){
@@ -449,7 +451,8 @@ void setModefromStand(uint8_t mode){
 // Set the iron operating mode
 void setCurrentMode(uint8_t mode){
   __disable_irq();
-  Iron.CurrentModeTimer = HAL_GetTick();                                                    // Refresh current mode timer
+  CurrentTime=HAL_GetTick();                                                              // Update local time value just in case it's called by handleIron, to avoid drift
+  Iron.CurrentModeTimer = CurrentTime;                                                    // Refresh current mode timer
   if(mode==mode_standby){
     Iron.CurrentSetTemperature = systemSettings.Profile.standbyTemperature;                 // Set standby temp
   }
@@ -526,7 +529,7 @@ void readWake(void){
 
 // Checks for non critical iron errors (Errors that can be cleared)
 void checkIronError(void){
-  uint32_t CurrentTime = HAL_GetTick();
+  CurrentTime = HAL_GetTick();
   int16_t ambTemp = readColdJunctionSensorTemp_x10(old_reading, mode_Celsius);
   IronError_t Err = { 0 };
   Err.safeMode = Iron.Error.safeMode;
@@ -556,7 +559,7 @@ void checkIronError(void){
     }
   }
   else if (Iron.Error.active && !Err.Flags){                                                // If global flag set, but no errors
-    if((CurrentTime-Iron.LastErrorTime)>(systemSettings.settings.errorDelay*100)){                // Check enough time has passed
+    if((CurrentTime-Iron.LastErrorTime)>(systemSettings.settings.errorDelay*100)){          // Check enough time has passed
       Iron.Error.Flags = 0;
       buzzer_alarm_stop();
       setCurrentMode(mode_run);
