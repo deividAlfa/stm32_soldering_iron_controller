@@ -74,6 +74,22 @@ int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   if(input!=Rotate_Nothing){
     screen_timer=current_time;
   }
+  if(input==Rotate_Decrement_while_click){
+    if(scr==&Screen_settings){
+      return screen_main;
+    }
+    else if(scr->current_widget->type==widget_combo){
+      comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
+      if(item->type==combo_Editable || item->type==combo_MultiOption){
+        if(item->widget->selectable.state!=widget_edit){
+          return screen_settings;
+        }
+      }
+      else{
+        return screen_settings;
+      }
+    }
+  }
   if(input==LongClick){
     int x = longClickReturn(scr->current_widget);
     if (x!=-1){

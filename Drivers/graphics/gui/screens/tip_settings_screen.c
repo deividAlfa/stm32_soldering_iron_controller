@@ -185,7 +185,19 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
     last_update=current_time;
     update=1;
   }
- if(update){
+
+  if(input==Rotate_Decrement_while_click){
+   comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
+    if(item->type==combo_Editable || item->type==combo_MultiOption){
+      if(item->widget->selectable.state!=widget_edit){
+        return return_screen;
+      }
+    }
+    else{
+      return return_screen;
+    }
+  }
+  if(update){
     bool enable=1;
     if(strcmp(tipCfg.name, _BLANK_TIP) == 0){                                                                   // Check that the name is not empty
       enable=0;                                                                                                 // If empty, disable save button

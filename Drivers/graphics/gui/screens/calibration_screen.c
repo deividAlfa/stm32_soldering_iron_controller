@@ -269,6 +269,9 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
     if(input==LongClick || ((current_time-screen_timer)>15000)){
       return screen_main;
     }
+    else if(input==Rotate_Decrement_while_click){
+      return screen_settings;
+    }
   }
   return default_screenProcessInput(scr, input, s);
 }
@@ -324,6 +327,11 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
   if((current_time-screen_timer)>180000){   // 3min inactivity
     setCurrentMode(mode_sleep);
     return screen_main;
+  }
+  if(current_state<cal_input_250){
+    if(input==Rotate_Decrement_while_click){
+      return screen_calibration;
+    }
   }
 
   if(tempReady){
@@ -490,6 +498,18 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
   if((current_time-screen_timer)>180000){     // 3 min inactivity
     setCurrentMode(mode_sleep);
     return screen_main;
+  }
+
+  if(input==Rotate_Decrement_while_click){
+   comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
+    if(item->type==combo_Editable || item->type==combo_MultiOption){
+      if(item->widget->selectable.state!=widget_edit){
+        return screen_calibration;
+      }
+    }
+    else{
+      return screen_calibration;
+    }
   }
   return default_screenProcessInput(scr, input, s);
 }

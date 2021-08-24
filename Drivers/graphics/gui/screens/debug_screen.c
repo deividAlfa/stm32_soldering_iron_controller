@@ -213,6 +213,9 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
     }
     return -1;
   }
+  else if(input==Rotate_Decrement_while_click){
+    return screen_settings;
+  }
   return (default_screenProcessInput(scr, input, state));
 }
 
