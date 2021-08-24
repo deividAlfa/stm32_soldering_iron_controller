@@ -289,7 +289,7 @@ static void tip_settings_create(screen_t *scr){
   dis->getData = &getTipName;
   dis->type = field_string;
   dis->displayString=tipCfg.name;
-  edit->big_step = 10;
+  edit->big_step = 1;
   edit->step = 1;
   edit->selectable.tab = 0;
   edit->setData = (void (*)(void *))&setTipName;
