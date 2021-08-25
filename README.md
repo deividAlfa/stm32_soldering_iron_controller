@@ -37,11 +37,11 @@ Video of operation here: (Project in active development, the features will chang
 <a id="Compatibility"></a>
 ## Compatibility
 
-The actual requirements are 10KB RAM and 64KB(*) flash.<br>
-(*) Currently the firmware has surpassed the 64KB limit, and uses the additional non-documented 64KB flash block.<br>
-(*) All 64KB devices have 128KB, with the 2nd 64KB block not tested at the factory, so not guaranteed to work.<br>
-(*) To date, I have found zero issues. Original KSGER firmware also does this.
-(*) ST-Link checks the written data, and the firmare checksums and verify the settings, so any error will be detected instantly.<br>
+The actual requirements are 10KB RAM and 64KB **(\*)** flash.<br>
+**(\*)** Currently the firmware has surpassed the 64KB limit, and uses the additional undocumented 64KB flash block.<br>
+**(\*)** All 64KB devices have 128KB, with the 2nd 64KB block untested from the factory, so not guaranteed to work.<br>
+**(\*)** To date, I have found zero issues. Original KSGER firmware also does this.<br>
+**(\*)** ST-Link checks the written data and the firmare checksums the settings, any error will be detected.<br>
 
 The BOARDS folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.<br>
 Current working controller:<br>
@@ -195,8 +195,8 @@ And then copy the board profile files overwriting any existing files.<br>
            
 <a id="pending"></a>
 ### Non working features
-* I2C eeprom. Some boards have it, some doesn't. So internal flash storage is used for all.
-Also, the current settings don't fit in the commonly used 24C08 memory.
+* I2C eeprom. Some boards have it, some doesn't. So internal flash storage is used for all.<br>
+Also, the current settings don't fit in the commonly used 24C08 memory.<br>
 * RTC clock. There's very little space in the screen. Use it for what matters, instead for showing a clock!
 
 ---
