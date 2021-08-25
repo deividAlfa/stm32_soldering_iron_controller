@@ -43,7 +43,6 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
 ---
 
 ## Main screen<br>
-
   - **Temperature display modes**<br>
   While in run mode, a single click will switch between numeric and graph.<br>
   If the current mode is sleep/standby/boost, clicking will set run mode instead (If button wake is enabled).<br>
@@ -76,7 +75,6 @@ Long-clicking will have the same effect.<br>
 In most menus, rotate anti-clockwise while pushing the button to quickly return to previous screen.<br>
 
 ### IRON
-
 Iron settings control the operation of the handle/tips. <br>
   - **Max temperature**<br>
 Upper adjustable temperature limit.<br>
@@ -132,26 +130,25 @@ Keep in mind that wrong settings will cause a lot of trouble, PID is heavily aff
     - **Filter**<br>
 Coefficient normally applied. The filtering will be heavier as the value increases.<br>
      - **Threshold**<br>
-Defines the limit in the amplitude of the changes from the last average, over this the threshols limit will be triggered and the counter increased.<br>
+Defines the limit in the amplitude of the changes from the last average. Exceeding this will increase the threshold counter, while resetting it if under the limit.<br>
      - **Count limit**<br>
-If the readings keep exceeding the threshold limit and the counter becomes greater than this limit, the coefficient will start to be throttled down to improve response.<br>  
+If the threshold detection counter becomes greater than this limit, the coefficient will start to be throttled down to improve response.<br>  
      - **Step down**<br>
-This is the value that will be subtracted to the coefficient after the threshold counter was exceeded.<br>
-Every new reading exceeding the threshold will subtract this value, until reaching the min value if the condition doesn't stabilize.<br>
+This is the value that will be subtracted to the coefficient each time after the threshold counter was exceeded.<br>
+Every new reading exceeding the threshold will subtract this value in an acumulative way, until reaching the min value if the condition doesn't stabilize.<br>
      - **Min**<br>
 This is the minimum filtering coefficient that the system will be allowed to use.
     - **Reset limit**<br>
-If the difference is huge, exceeding this limit will instantly reset the filter and use the current reading.<br>
-This is used when the tip is removed or plugged in, to allow instant response from the system.<br>
+Exceeding this limit will instantly reset the filter and use the current reading.<br>
+This is used for huge differences, usually when the tip is removed or plugged in, to allow instant response from the system.<br>
     - **Back**<br>
-Return to iron menu.<b>
+Return to iron menu.<br>
   - **Back**<br>
 Return to system menu.<br>
 
 ---
 
 ### SYSTEM
-
 General settings for the controller.<br>
   - **Profile**<br>
 Sets which iron profile (__T12__, __C210__, __C245__) to use.<br>
@@ -168,10 +165,10 @@ SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip 
 STAND uses the same input, but disconnected from the handle. Must be shorted to gnd when the handle is in the stand.<br>
 (Stand mode operation operation: Shorted to gnd = sleep/standby, open = run ).<br>
   - **Stand mode**<br>
-Sets the mode that will be applied when the handle is put in the stand (sleep / standby).<br>
+Sets the mode that will be applied when the handle is put in the stand (__STANDBY__ or __SLEEP__).<br>
 This option is disabled in shake mode.<br>
   - **Boot**<br>
-Operation mode when powered on. __RUN__ or __SLEEP__.<br>
+Operation mode when powered on (__RUN__, __STANDBY__ or __SLEEP__).<br>
 This option is disabled in stand mode.<br>
   - **Button Wake**<br>
 Selects what modes can be waken with encoder activity.<br>
@@ -249,9 +246,9 @@ The new tip will be created by copying the PID/calibration settings from the fir
 
 ### EDIT TIP SETTINGS
 This menu allows Tip name editing, copying, deleting, PID tuning and adjustment of stored tip calibration values.<br>
-PID tuning is an advanced topic, _**incorrect settings here can result in instability and damage to tips and possibly the controller**_.<br>
-Most users should not change these settings, but here are the basics. Kp, Ki, Kd, Imax, Imin are the coefficients which control the PID's behavior.<br>
-Calibration values are not meant for manual adjustment. Only to restore a previous calibration result.<br>
+PID tuning is an advanced topic, _**incorrect settings here can result in instability and erratic response**_.<br>
+Kp, Ki, Kd, Imax, Imin are the coefficients which control the PID's behavior.<br>
+Calibration values are not meant for doing manual calibrations, only to restore a previous calibration result.<br>
 Use calibration for optimal results.<br>
   - **TIP NAME**<br>
 Shows the tip name, click on it to edit the name.<br>
