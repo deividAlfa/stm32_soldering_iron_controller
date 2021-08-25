@@ -151,6 +151,7 @@ Return to system menu.<br>
 ---
 
 ### SYSTEM
+
 General settings for the controller.<br>
   - **Profile**<br>
 Sets which iron profile (__T12__, __C210__, __C245__) to use.<br>
