@@ -12,13 +12,15 @@ Select the one appropriate for your iron. (JBC cartidges usually require electri
 
 ## Basic Controls<br>
 Changes are made using the rotary encoder and its push button.<br>
-The power supply voltage is shown upper left, internal temperature in the upper right, bar graph of relative power going to the tip on the bottom.<br>
-While in normal operation, shake sensor activity will be shown briefly in the top center.<br>
-Otherwise, the current mode will be shown (sleep, standby, boost).<br>
+The power supply voltage is shown upper left.<br>
+The internal temperature is on the upper right.<br>
+The current selected tip appears on the bottom left.<br>
+A bar graph of relative power going to the tip is shown on the bottom.<br>
+While in normal operation, shake sensor activity will be shown briefly in the bottom center.<br>
+In normal mode, the setpoint is shown in the upper center, otherwise, the current mode will be shown (sleep, standby, boost).<br>
 To operate the menus, rotate to scroll to the desired selection, quick press to select it, rotate to change.<br>
 Quick press again to stop editing the setting.<br>
-Widgets have fine and coarse adjustment.<br>
-While editing the widget, normal rotation will make fine adjustement, fast rotation will do coarse adjustment (big steps).<br>
+While editing the widget, moderate rotation speed will make fine adjustement, a fast rotation will do coarse adjustment (big steps).<br>
 
 ---
 
@@ -71,7 +73,7 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
 ## System menu<br>
 Most screens will return to main screen after 15 seconds of inactivity.<br>
 Long-clicking will have the same effect.<br>
-In most menus, make click while rotating anticlockwise to quickly return to previous screen.<br>
+In most menus, make rotate anti-clockwise while pushing the button to quickly return to previous screen.<br>
 
 ### IRON
 
