@@ -425,7 +425,7 @@ static void iron_create(screen_t *scr){
   edit->big_step = 50;
   edit->step = 10;
   edit->setData = (void (*)(void *))&setNoIronADC;
-  edit->max_value = 4100;
+  edit->max_value = 4096;
   edit->min_value = 200;
 
   //  [ No Iron Delay Widget ]
