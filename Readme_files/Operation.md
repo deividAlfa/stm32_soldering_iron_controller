@@ -243,6 +243,7 @@ Return to system menu.<br>
 Different tips may have different characteristics. Tips may be added or edited here.<br>
 Select a tip to enter tip settings edit screen, or select Add New to create a new tip.<br>
 The new tip will be created by copying the PID/calibration settings from the first in the system.<br>
+Each profile (T12, C245, C210) can store up to 20 tips.<br>
 
 ### EDIT TIP SETTINGS
 This menu allows Tip name editing, copying, deleting, PID tuning and adjustment of stored tip calibration values.<br>
