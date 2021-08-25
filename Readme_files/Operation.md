@@ -73,7 +73,7 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
 ## System menu<br>
 Most screens will return to main screen after 15 seconds of inactivity.<br>
 Long-clicking will have the same effect.<br>
-In most menus, make rotate anti-clockwise while pushing the button to quickly return to previous screen.<br>
+In most menus, rotate anti-clockwise while pushing the button to quickly return to previous screen.<br>
 
 ### IRON
 
