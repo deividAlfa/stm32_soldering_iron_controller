@@ -20,6 +20,7 @@ typedef struct pid_values {
 } pid_values_t;
 
 typedef struct {
+  uint8_t   reset;
   uint32_t  lastTime;
   int32_t   lastMeasurement;
   int32_t   lastSetpoint;
