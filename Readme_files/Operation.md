@@ -119,7 +119,7 @@ Default: x1.<br>
 Sets the ADC reading threshold that detects when no iron is present.<br>
 Usually when no iron is plugged in, the measured temperature will read at or close to maximum ADC range(4095).<br>
 Values >4095 will disable "no iron" detection.<br>
-Default 4000, max 4100.<br>
+Default 4000, max 4096.<br>
   - **No iron delay**<br>
 Time in milliseconds that an iron must be plugged in before it is considered present.<br>
 If the screen bounces between run mode and no iron, increase this value.<br>
