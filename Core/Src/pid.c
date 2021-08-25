@@ -23,44 +23,40 @@ void setupPID(pid_values_t* p) {
   pid.tau =       (float)p->tau/100;
 }
 
-// New part from Phil: https://github.com/pms67/PID
 int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t base) {
   float dt = (float)(HAL_GetTick() - pid.lastTime)/1000;
   float error = setpoint - measurement;
 
-  // Proportional term
-  pid.proportional = pid.Kp * error;
+  pid.proportional = pid.Kp * error;                                            // Proportional term
 
   if(pid.reset){
-    pid.reset = 0;
+    if(++pid.reset>3){                                                          // If pid resetted, only use proportional for few cycles to avoid spikes
+      pid.reset = 0;
+    }
     pid.integrator = 0;
-    pid.out = pid.proportional;                                               // If pid resetted, only use proportional for 1 cycle to avoid spikes
+    pid.out = pid.proportional;
   }
-  else{
-    // Integral
-    pid.integrator = pid.integrator + (pid.Ki*(error*dt));                         // Old
+  else{                                                                         // Else, normal PID calculation
+    pid.integrator = pid.integrator + (pid.Ki*(error*dt));                      // Integral
 
-    // Integrator clamping
-    if (pid.integrator > pid.limMaxInt) {
+    if (pid.integrator > pid.limMaxInt) {                                       // Integrator clamping
       pid.integrator = pid.limMaxInt;
     }
     else if (pid.integrator < pid.limMinInt) {
       pid.integrator = pid.limMinInt;
     }
-    pid.derivative = pid.Kd*((error-pid.prevError)/dt);                         // Old
+    pid.derivative = pid.Kd*((error-pid.prevError)/dt);
 
-
-    // Compute output and apply limits
-
-      pid.out = pid.proportional + pid.integrator + pid.derivative;
+    pid.out = pid.proportional + pid.integrator + pid.derivative;               // Compute output
   }
-  if(pid.out > pid.limMax){
+
+  if(pid.out > pid.limMax){                                                     // Apply limits
       pid.out = pid.limMax;
   } else if (pid.out < pid.limMin) {
       pid.out = pid.limMin;
   }
-  // Store error and measurement for later use
-  pid.prevMeasurement = measurement;
+
+  pid.prevMeasurement = measurement;                                            // Store data for later use
   pid.lastTime = HAL_GetTick();
   pid.prevError = error;
   return (pid.out*base);
