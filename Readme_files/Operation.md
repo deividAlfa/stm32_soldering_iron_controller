@@ -309,8 +309,8 @@ General debugging screen shows the following:
  - P, I, D (Current PID output)
  - Current temperature reading
  - Current setpoint (adjustable)
- - AVG (TIP reading, filtered)
- - RAW (TIP reading, unfiltered)
+ - AVG (Iron temperature, filtered)
+ - RAW (Iron temperature, unfiltered)
  - SET (Setpoint, converted to ADC value)
  - ERR (PID Error, difference between setpoint and average)
  - PWM (PWM duty value)
