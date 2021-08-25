@@ -6,7 +6,7 @@
 * [Compatibility](#Compatibility)
 * [Operating instructions](Readme_files/Operation.md)
 * [Frequently asked questions](#faq)
-* [Building](#build)
+* [Building the firmware](#build)
 * [Creating a .ioc file from scratch](Readme_files/Creating_ioc.md)
 * [Additional Documentation](#docs)
 * [Pending or non working features](#pending)
@@ -128,7 +128,7 @@ https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t
 ---
 
 <a id="build"></a>     
-## Building
+## Building the firmware
 
 Video of building steps:<br>
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/8oeGVSSxudk/0.jpg)](https://www.youtube.com/watch?v=8oeGVSSxudk "Firmware build")
