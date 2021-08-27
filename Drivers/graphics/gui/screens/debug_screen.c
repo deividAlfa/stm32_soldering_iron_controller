@@ -316,7 +316,7 @@ static void debug_create(screen_t *scr){
   dis->font=u8g2_font_small;
   w->posX= 12;
   w->posY= 0;
-  w->width=30;
+  w->width=34;
 
   //  [ PID I Widget ]
   //
@@ -329,7 +329,7 @@ static void debug_create(screen_t *scr){
   dis->font=u8g2_font_small;
   w->posX= 12;
   w->posY= 11;
-  w->width=30;
+  w->width=34;
 
   //  [ PID D Widget ]
   //
@@ -342,7 +342,7 @@ static void debug_create(screen_t *scr){
   dis->font=u8g2_font_small;
   w->posX= 12;
   w->posY= 22;
-  w->width=30;
+  w->width=34;
 
   //  [ Current temp Widget ]
   //
@@ -354,7 +354,7 @@ static void debug_create(screen_t *scr){
   dis->reservedChars=5;
   dis->font=u8g2_font_small;
   w->posX= 10;
-  w->posY= 36;
+  w->posY= 35;
   w->width=30;
 
   //  [ Setpoint adjust Widget ]
