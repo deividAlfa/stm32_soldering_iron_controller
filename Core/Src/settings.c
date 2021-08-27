@@ -328,7 +328,6 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.Kd          = 1200;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
-      systemSettings.Profile.tip[x].PID.tau         = 20;             // val = /100
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);         // Empty name
     }
     strcpy(systemSettings.Profile.tip[0].name, "BC3 ");               // Put some generic name
@@ -354,7 +353,6 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.Kd          = 200;
       systemSettings.Profile.tip[x].PID.maxI        = 10;
       systemSettings.Profile.tip[x].PID.minI        = 0;
-      systemSettings.Profile.tip[x].PID.tau         = 20;             // val = /100
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
     }
     strcpy(systemSettings.Profile.tip[0].name, "C245");
@@ -379,7 +377,6 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.Kd          = 200;
       systemSettings.Profile.tip[x].PID.maxI        = 10;
       systemSettings.Profile.tip[x].PID.minI        = 0;
-      systemSettings.Profile.tip[x].PID.tau         = 20;             // val = /100
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
     }
     strcpy(systemSettings.Profile.tip[0].name, "C210");

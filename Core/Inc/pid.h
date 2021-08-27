@@ -16,7 +16,6 @@ typedef struct pid_values {
   uint16_t  Kd;
   int16_t   maxI;
   int16_t   minI;
-  uint16_t  tau;
 } pid_values_t;
 
 typedef struct {
@@ -29,9 +28,6 @@ typedef struct {
   float   Kp;
   float   Ki;
   float   Kd;
-
-  /* Derivative low-pass filter time constant */
-  float   tau;
 
   /* Output limits */
   float   limMin;

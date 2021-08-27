@@ -20,7 +20,6 @@ void setupPID(pid_values_t* p) {
   pid.limMaxInt = (float)p->maxI/100;
   pid.limMin =    (float)0;
   pid.limMax =    (float)1;
-  pid.tau =       (float)p->tau/100;
 }
 
 int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t base) {
