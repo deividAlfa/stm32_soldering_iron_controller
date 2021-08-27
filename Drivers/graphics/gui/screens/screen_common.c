@@ -121,7 +121,7 @@ void handleOledDim(void){
   uint8_t contrast=getContrast();
   if(dimStep==0){
     // Wake up screen.
-    if(systemSettings.settings.screenDimming &&  ((current_time-dimTimer)>=((uint32_t)systemSettings.settings.screenDimming*1000))){
+    if(systemSettings.settings.screenDimming && contrast>5 && ((current_time-dimTimer)>=((uint32_t)systemSettings.settings.screenDimming*1000))){
       dimStep=-5;
     }
   }
@@ -136,6 +136,9 @@ void handleOledDim(void){
     else{
       if(dimStep>0){
         restore_contrast();
+      }
+      else{
+        setContrast(1);
       }
       dimTimer = current_time;
       dimStep=0;
