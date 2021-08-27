@@ -243,19 +243,23 @@ static void debug_onEnter(screen_t *scr){
   displayOnly_widget_t *dis = extractDisplayPartFromWidget(widget_Temp);
 
   if(systemSettings.settings.tempUnit==mode_Celsius){
-    edit->max_value = 450;
-    edit->min_value = 50;
-    edit->big_step = 20;
-    edit->step = 5;
-    edit->inputData.endString="\260C";
+    if(scr==&Screen_pid_debug){
+      edit->max_value = 450;
+      edit->min_value = 50;
+      edit->big_step = 20;
+      edit->step = 5;
+      edit->inputData.endString="\260C";
+    }
     dis->endString="\260C";
   }
   else{
-    edit->max_value = 850;
-    edit->min_value = 120;
-    edit->big_step = 50;
-    edit->step = 10;
-    edit->inputData.endString="\260F";
+    if(scr==&Screen_pid_debug){
+      edit->max_value = 850;
+      edit->min_value = 120;
+      edit->big_step = 50;
+      edit->step = 10;
+      edit->inputData.endString="\260F";
+    }
     dis->endString="\260F";
   }
 
@@ -455,6 +459,19 @@ static void pid_debug_create(screen_t *scr){
   widget_t *w;
   displayOnly_widget_t* dis;
 
+  //  [ Current temp Widget ]
+  //
+  newWidget(&w, widget_display,scr);
+  widget_Temp = w;
+  dis=extractDisplayPartFromWidget(w);
+  dis->textAlign=align_right;
+  dis->getData = &getTemp;
+  dis->reservedChars=5;
+  dis->font=u8g2_font_small;
+  w->posX= 0;
+  w->posY= 0;
+  w->width=32;
+
   //  [ PID P Widget ]
   //
   newWidget(&w, widget_display,scr);
@@ -464,8 +481,8 @@ static void pid_debug_create(screen_t *scr){
   dis->reservedChars=6;
   dis->number_of_dec=3;
   dis->font=u8g2_font_small;
-  w->posY= 7;
-  w->width=30;
+  w->posY= 13;
+  w->width=32;
 
   //  [ PID I Widget ]
   //
@@ -476,8 +493,8 @@ static void pid_debug_create(screen_t *scr){
   dis->reservedChars=6;
   dis->number_of_dec=3;
   dis->font=u8g2_font_small;
-  w->posY= 30;
-  w->width=30;
+  w->posY= 28;
+  w->width=32;
 
   //  [ PID D Widget ]
   //
@@ -488,8 +505,8 @@ static void pid_debug_create(screen_t *scr){
   dis->reservedChars=6;
   dis->number_of_dec=3;
   dis->font=u8g2_font_small;
-  w->posY= 51;
-  w->width=30;
+  w->posY= 48;
+  w->width=32;
 }
 
 static void pid_debug_Draw(screen_t * scr){
@@ -535,6 +552,7 @@ void debug_screen_setup(screen_t *scr) {
   sc=&Screen_pid_debug;
   oled_addScreen(sc, screen_pid_debug);
   sc->processInput=&debug_ProcessInput;
+  sc->onEnter = &debug_onEnter;
   sc->create=&pid_debug_create;
   sc->draw=&pid_debug_Draw;
   sc->onExit = &debug_onExit;
