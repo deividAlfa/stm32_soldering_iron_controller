@@ -326,7 +326,7 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.Kp          = 7500;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Ki          = 4800;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Kd          = 1200;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
+      systemSettings.Profile.tip[x].PID.maxI        = 85;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);         // Empty name
     }
@@ -351,7 +351,7 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.Kp          = 1800;
       systemSettings.Profile.tip[x].PID.Ki          = 500;
       systemSettings.Profile.tip[x].PID.Kd          = 200;
-      systemSettings.Profile.tip[x].PID.maxI        = 10;
+      systemSettings.Profile.tip[x].PID.maxI        = 85;
       systemSettings.Profile.tip[x].PID.minI        = 0;
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
     }
@@ -375,7 +375,7 @@ void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.Kp          = 1800;
       systemSettings.Profile.tip[x].PID.Ki          = 500;
       systemSettings.Profile.tip[x].PID.Kd          = 200;
-      systemSettings.Profile.tip[x].PID.maxI        = 10;
+      systemSettings.Profile.tip[x].PID.maxI        = 85;
       systemSettings.Profile.tip[x].PID.minI        = 0;
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
     }
