@@ -633,7 +633,6 @@ static void drawMode(uint8_t *refresh){
 
   u8g2_SetFont(&u8g2, font_small);
 
-  //u8g2_SetFont(&u8g2, u8g2_font_small);
   switch(getCurrentMode()){
 
     case mode_run:
