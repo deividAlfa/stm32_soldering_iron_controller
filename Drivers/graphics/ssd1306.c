@@ -720,7 +720,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 
 void FatalError(uint8_t type){
  uint8_t lang =systemSettings.settings.language;
- if(lang>lang_russian){                                             // TODO define limit and number of languages in the system
+ if(lang>(LANGUAGE_COUNT-1)){
    lang=lang_english;
  }
 

@@ -286,10 +286,10 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setLanguage;
-  edit->max_value = 1;
+  edit->max_value = LANGUAGE_COUNT-1;
   edit->min_value = 0;
   edit->options = Langs;
-  edit->numberOfOptions = 2;
+  edit->numberOfOptions = LANGUAGE_COUNT;
 
   //  [ Profile Widget ]
   //
