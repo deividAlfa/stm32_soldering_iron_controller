@@ -575,7 +575,7 @@ static void drawIcons(uint8_t *refresh){
 
 
 static void drawError(void){
-  if(Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
+  if(lang!=lang_russian && Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
     u8g2_SetFont(&u8g2, u8g2_font_noIron_Sleep);
     putStrAligned(strings[lang].main_error_noIron, 20, align_center);
   }
@@ -589,8 +589,7 @@ static void drawError(void){
     else{
       Err_ypos=12;
     }
-    u8g2_SetFont(&u8g2, u8g2_font_6x13_t_cyrillic);
-    //u8g2_SetFont(&u8g2, u8g2_font_small);
+    u8g2_SetFont(&u8g2, font_small);
     if(Iron.Error.V_low){
       putStrAligned(strings[lang].main_error_VoltageLow, Err_ypos, align_center);
       Err_ypos+=12;
