@@ -285,6 +285,7 @@ void resetSystemSettings(void) {
   systemSettings.settings.StandMode         = mode_sleep;
   systemSettings.settings.EncoderMode       = RE_Mode_One;
   systemSettings.settings.debugEnabled      = disable;
+  systemSettings.settings.language          = lang_english;
   systemSettings.settings.NotInitialized    = initialized;
 
   #ifdef USE_NTC
@@ -535,10 +536,10 @@ void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
   while(Start){
     timErr=HAL_GetTick();
     u8g2_SetDrawColor(&u8g2, BLACK);
-    u8g2_DrawBox(&u8g2,xpos,ypos,u8g2_GetStrWidth(&u8g2,str),u8g2_GetMaxCharHeight(&u8g2));
+    u8g2_DrawBox(&u8g2,xpos,ypos,u8g2_GetUTF8Width(&u8g2,str),u8g2_GetMaxCharHeight(&u8g2));
     u8g2_SetDrawColor(&u8g2, WHITE);
     sprintf(&str[0],"%*u",length-1,Start);
-    u8g2_DrawStr(&u8g2,xpos,ypos,str);
+    u8g2_DrawUTF8(&u8g2,xpos,ypos,str);
     update_display();
     while( (HAL_GetTick()-timErr)<999 ){
       HAL_IWDG_Refresh(&hiwdg);

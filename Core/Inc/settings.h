@@ -102,6 +102,9 @@ enum{
   output_PWM,
   output_Low,
   output_High,
+
+  lang_english             = 0,
+  lang_russian             = 1,
 };
 
 
@@ -153,6 +156,7 @@ typedef struct{
 
 typedef struct{
   uint8_t       NotInitialized;                                     // Always 1 if flash is erased
+  uint8_t       language;
   uint8_t       contrast;
   uint8_t       OledOffset;
   uint8_t       currentProfile;
