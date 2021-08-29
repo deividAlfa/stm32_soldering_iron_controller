@@ -434,21 +434,21 @@ void widgetAlign(widget_t* w){
   switch(w->type){
     case widget_button:
       button = (button_widget_t *)w->content;
-      strWidth=u8g2_GetStrWidth(&u8g2, button->displayString);
+      strWidth=u8g2_GetUTF8Width(&u8g2, button->displayString);
       break;
 
     case widget_display:
     case widget_editable:
       if(dis->type == field_string){
-        strWidth=u8g2_GetStrWidth(&u8g2, (char *)dis->getData());
+        strWidth=u8g2_GetUTF8Width(&u8g2, (char *)dis->getData());
       }
       else{
-        strWidth=u8g2_GetStrWidth(&u8g2, displayString);
+        strWidth=u8g2_GetUTF8Width(&u8g2, displayString);
       }
       break;
 
     case widget_multi_option:
-      strWidth=u8g2_GetStrWidth(&u8g2,  (char *)edit->options[*(uint8_t*)dis->getData()]);
+      strWidth=u8g2_GetUTF8Width(&u8g2,  (char *)edit->options[*(uint8_t*)dis->getData()]);
       break;
     default:
       return;
@@ -658,30 +658,30 @@ void default_widgetDraw(widget_t *w) {
         break;
 
       case widget_button:
-        u8g2_DrawStr(&u8g2, button->stringStart, w->posY+2,  button->displayString);
+        u8g2_DrawUTF8(&u8g2, button->stringStart, w->posY+2,  button->displayString);
         break;
 
       case widget_display:
         if(dis->type == field_string){
-          u8g2_DrawStr(&u8g2, dis->stringStart, w->posY,  dis->getData());
+          u8g2_DrawUTF8(&u8g2, dis->stringStart, w->posY,  dis->getData());
         }
         else{
-          u8g2_DrawStr(&u8g2, dis->stringStart, w->posY,  dis->displayString);
+          u8g2_DrawUTF8(&u8g2, dis->stringStart, w->posY,  dis->displayString);
         }
         break;
 
       case widget_editable:
         if(dis->type == field_string){
-          u8g2_DrawStr(&u8g2,  dis->stringStart, w->posY+2,  dis->getData());
+          u8g2_DrawUTF8(&u8g2,  dis->stringStart, w->posY+2,  dis->getData());
           if(sel->state == widget_edit){
             char t[20];
             strcpy(t,dis->getData());
 
             t[edit->current_edit+1]=0;
-            uint8_t x2=u8g2_GetStrWidth(&u8g2, t);
+            uint8_t x2=u8g2_GetUTF8Width(&u8g2, t);
 
             t[edit->current_edit]=0;
-            uint8_t x1=u8g2_GetStrWidth(&u8g2, t);
+            uint8_t x1=u8g2_GetUTF8Width(&u8g2, t);
 
             u8g2_SetDrawColor(&u8g2, BLACK);
             u8g2_DrawBox(&u8g2, dis->stringStart, w->posY+ cHeight, w->width, 2);
@@ -696,12 +696,12 @@ void default_widgetDraw(widget_t *w) {
           }
         }
         else{
-          u8g2_DrawStr(&u8g2,dis->stringStart, w->posY+2,  dis->displayString);
+          u8g2_DrawUTF8(&u8g2,dis->stringStart, w->posY+2,  dis->displayString);
         }
         break;
 
       case widget_multi_option:
-        u8g2_DrawStr(&u8g2, dis->stringStart, w->posY+2, edit->options[*(uint8_t*)dis->getData()]);// Draw string
+        u8g2_DrawUTF8(&u8g2, dis->stringStart, w->posY+2, edit->options[*(uint8_t*)dis->getData()]);// Draw string
         break;
 
       default:
@@ -792,15 +792,15 @@ void comboBoxDraw(widget_t *w) {
     if ((item->type==combo_Screen)||(item->type==combo_Action)){      // If screen or action item, just draw the label
       u8g2_SetDrawColor(&u8g2, WHITE);
       if(item->dispAlign==align_left){
-        u8g2_DrawStr(&u8g2, 4, y * height + w->posY +2, item->text);
+        u8g2_DrawUTF8(&u8g2, 4, y * height + w->posY +2, item->text);
       }
       else{
-        uint8_t len = u8g2_GetStrWidth(&u8g2, item->text);
+        uint8_t len = u8g2_GetUTF8Width(&u8g2, item->text);
         if(item->dispAlign==align_right){
-          u8g2_DrawStr(&u8g2, OledWidth-3-len, y * height + w->posY +2, item->text);
+          u8g2_DrawUTF8(&u8g2, OledWidth-3-len, y * height + w->posY +2, item->text);
         }
         else{
-          u8g2_DrawStr(&u8g2, (OledWidth-1-len)/2, y * height + w->posY +2, item->text);
+          u8g2_DrawUTF8(&u8g2, (OledWidth-1-len)/2, y * height + w->posY +2, item->text);
         }
       }
     }
@@ -821,7 +821,7 @@ void comboBoxDraw(widget_t *w) {
       }
 
       if(item->type==combo_MultiOption){
-        len = u8g2_GetStrWidth(&u8g2,edit->options[*(uint8_t*)dis->getData()]);
+        len = u8g2_GetUTF8Width(&u8g2,edit->options[*(uint8_t*)dis->getData()]);
       }
       else if(item->type==combo_Editable){
         if(dis->type==field_int32){
@@ -843,11 +843,11 @@ void comboBoxDraw(widget_t *w) {
             strcat(dis->displayString, dis->endString);                       // Append endString
           }
           dis->displayString[dis->reservedChars]=0;                           // Ensure last string char is 0
-          len=u8g2_GetStrWidth(&u8g2,dis->displayString);
+          len=u8g2_GetUTF8Width(&u8g2,dis->displayString);
         }
         else if(dis->type==field_string){
           strncpy(displayString,dis->getData(),dis->reservedChars+1);
-          len=u8g2_GetStrWidth(&u8g2,displayString);
+          len=u8g2_GetUTF8Width(&u8g2,displayString);
         }
       }
 
@@ -859,24 +859,24 @@ void comboBoxDraw(widget_t *w) {
           uint8_t start,width;
           strcpy(str,displayString);
           str[edit->current_edit+1]=0;
-          width=u8g2_GetStrWidth(&u8g2, str);
+          width=u8g2_GetUTF8Width(&u8g2, str);
           str[edit->current_edit]=0;
-          start=u8g2_GetStrWidth(&u8g2, str);
+          start=u8g2_GetUTF8Width(&u8g2, str);
           width-=start;
 
           u8g2_SetDrawColor(&u8g2, BLACK);
           u8g2_DrawBox(&u8g2, dis->stringStart+start, posY+1, width+1, height-2);
           u8g2_SetDrawColor(&u8g2, XOR);
-          u8g2_DrawStr(&u8g2,dis->stringStart, posY+2, displayString);
+          u8g2_DrawUTF8(&u8g2,dis->stringStart, posY+2, displayString);
         }
         else{
-          u8g2_DrawStr(&u8g2,dis->stringStart, posY+2, dis->displayString);
+          u8g2_DrawUTF8(&u8g2,dis->stringStart, posY+2, dis->displayString);
         }
       }
       else if(item->type==combo_MultiOption){
-        u8g2_DrawStr(&u8g2,dis->stringStart, posY+2,  edit->options[*(uint8_t*)dis->getData()]);
+        u8g2_DrawUTF8(&u8g2,dis->stringStart, posY+2,  edit->options[*(uint8_t*)dis->getData()]);
       }
-      u8g2_DrawStr(&u8g2, 4, y * height + w->posY +2, item->text);          // Draw the combo item label
+      u8g2_DrawUTF8(&u8g2, 4, y * height + w->posY +2, item->text);          // Draw the combo item label
     }
     do {
       item = item->next_item;
