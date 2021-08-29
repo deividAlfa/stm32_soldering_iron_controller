@@ -9,6 +9,8 @@
 #define GRAPHICS_GUI_STRINGS_H_
 
 
+#include "settings.h"
+
 typedef struct{
   char * boot_firstBoot;
   char * boot_Profile;
@@ -128,7 +130,6 @@ typedef struct{
   char * _SETTINGS;
   char * _ADD_NEW;
 
-
   char * ERROR_RUNAWAY;
   char * ERROR_EXCEEDED;
   char * ERROR_UNKNOWN;
@@ -137,7 +138,7 @@ typedef struct{
 
 }strings_t;
 
-extern const strings_t strings[2];
+extern const strings_t strings[LANGUAGE_COUNT];
 
 
 extern char* profileStr[];

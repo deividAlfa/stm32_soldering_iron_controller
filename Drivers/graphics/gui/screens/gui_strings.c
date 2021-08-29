@@ -5,11 +5,12 @@
  *      Author: David
  */
 #include "gui_strings.h"
-#include "settings.h"
 
-const strings_t strings[2] = {
+// See settings.h for language index
 
-    {                                             // English
+const strings_t strings[LANGUAGE_COUNT] = {
+
+    {                                                             // 0 = English
      .boot_firstBoot = "First Boot!",
      .boot_Profile = "Profile",
 
@@ -134,7 +135,7 @@ const strings_t strings[2] = {
      .ERROR_BTN_RESET = "Use btn to reset",
     },
 
-    {                                             // Russian
+    {                                                             // 1 = Russian
       .boot_firstBoot = "Выберите",
       .boot_Profile = "Тип",
 
@@ -226,7 +227,6 @@ const strings_t strings[2] = {
       .TIP_SETTINGS_PID_Imin = "ПИД Имин",
       .TIP_SETTINGS_COPY = "ДУБЛИРОВАТЬ",
       .TIP_SETTINGS_DELETE = "УДАЛИТЬ",
-
 
       .CAL_Step = "ШАГ:",
       .CAL_Wait = "ЖДИТЕ...",
