@@ -396,7 +396,7 @@ void resetCurrentProfile(void){
 
   systemSettings.Profile.tipFilter.coefficient      = 90;   // % of old data (more %, more filtering)
   systemSettings.Profile.tipFilter.threshold        = 50;
-  systemSettings.Profile.tipFilter.min              = 65;   // Don't go below xxx % when decreasing after exceeding threshold limits
+  systemSettings.Profile.tipFilter.min              = 65;   // Don't go below x% when decreasing after exceeding threshold limits
   systemSettings.Profile.tipFilter.count_limit      = 0;
   systemSettings.Profile.tipFilter.step             = -3;   // -5% less everytime the reading diff exceeds threshold_limit and the counter is greater than count_limit
   systemSettings.Profile.tipFilter.reset_threshold  = 600;  // Any diff over 500 reset the filter (Tip removed or connected)
