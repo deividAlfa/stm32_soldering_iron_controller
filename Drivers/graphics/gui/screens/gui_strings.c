@@ -134,6 +134,16 @@ const strings_t strings[LANGUAGE_COUNT] = {
      .ERROR_UNKNOWN = "UNKNOWN ERROR",
      .ERROR_SYSTEM_HALTED = "SYSTEM HALTED",
      .ERROR_BTN_RESET = "Use btn to reset",
+
+     .profileStr =  { "T12", "C245", "C210" },
+     .OffOn =       { "OFF", "ON" },
+     .DownUp =      { "DOWN", "UP" },
+     .WakeModes =   { "OFF", "STBY", "SLP", "ALL" },
+     .tempUnit =    { "\260C", "\260F" },
+     .wakeMode =    { "SHAKE", "STAND" },
+     .encMode =     { "REVERSE", "NORMAL" },
+     .InitMode =    { "SLP", "STBY", "RUN"},
+     .Langs =       { "EN", "RU" },
     },
 
     {                                                             // 1 = Russian
@@ -260,23 +270,16 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .ERROR_UNKNOWN = "ОШИБКА 404",
       .ERROR_SYSTEM_HALTED = "БЫЛИННЫЙ ОТКАЗ",
       .ERROR_BTN_RESET = "наж.для рестарта",
+
+      .profileStr =  { "T12", "C245", "C210" },
+      .OffOn =       { "OFF", "ON" },
+      .DownUp =      { "DOWN", "UP" },
+      .WakeModes =   { "OFF", "STBY", "SLP", "ALL" },
+      .tempUnit =    { "\260C", "\260F" },
+      .wakeMode =    { "SHAKE", "STAND" },
+      .encMode =     { "REVERSE", "NORMAL" },
+      .InitMode =    { "SLP", "STBY", "RUN"},
+      .Langs =       { "EN", "RU" },
      },
 };
 
-
-
-
-
-
-
-
-char *profileStr[] =  { "T12", "C245", "C210" };
-char *OffOn[] =       { "OFF", "ON" };
-char *DownUp[] =      { "DOWN", "UP" };
-char *WakeModes[] =   { "OFF", "STBY", "SLP", "ALL" };
-char *tempUnit[] =    { "\260C", "\260F" };
-char *wakeMode[] =    { "SHAKE", "STAND" };
-char *encMode[] =     { "REVERSE", "NORMAL" };
-char *InitMode[] =    { "SLP", "STBY", "RUN"};
-char *Langs[] =       { "EN", "RU" };
-//char *filterMode[] =  { "AVG", "EMA"};

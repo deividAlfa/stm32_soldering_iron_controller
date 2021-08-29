@@ -137,19 +137,18 @@ typedef struct{
   char * ERROR_SYSTEM_HALTED;
   char * ERROR_BTN_RESET;
 
+  char *OffOn[2];
+  char *DownUp[2];
+  char *tempUnit[2];
+  char *wakeMode[2];
+  char *encMode[2];
+  char *InitMode[3];
+  char *WakeModes[4];
+  char *profileStr[ProfileSize];
+  char *Langs[LANGUAGE_COUNT];
+
 }strings_t;
 
 extern const strings_t strings[LANGUAGE_COUNT];
-
-
-extern char* profileStr[];
-extern char *OffOn[];
-extern char *DownUp[];
-extern char *WakeModes[];
-extern char *tempUnit[];
-extern char *wakeMode[];
-extern char *encMode[];
-extern char *InitMode[];
-extern char *Langs[];
 
 #endif /* GRAPHICS_GUI_STRINGS_H_ */

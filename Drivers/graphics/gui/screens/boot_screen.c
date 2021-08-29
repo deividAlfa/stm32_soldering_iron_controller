@@ -240,7 +240,7 @@ void boot_screen_create(screen_t *scr){
   edit->selectable.tab = 0;
   edit->setData = (void (*)(void *))&setProfile;
   edit->max_value = ProfileSize-1;
-  edit->options = profileStr;
+  edit->options = strings[lang].profileStr;
   edit->numberOfOptions = ProfileSize;
   w->posX = 76;
   w->posY = 16;
@@ -261,7 +261,7 @@ void boot_screen_create(screen_t *scr){
   edit->selectable.tab = 1;
   edit->setData = (void (*)(void *))&setLanguage;
   edit->max_value = 1;
-  edit->options = Langs;
+  edit->options = strings[lang].Langs;
   edit->numberOfOptions = 2;
   w->posX = 76;
   w->posY = 32;

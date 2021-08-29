@@ -288,7 +288,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setLanguage;
   edit->max_value = LANGUAGE_COUNT-1;
   edit->min_value = 0;
-  edit->options = Langs;
+  edit->options = strings[lang].Langs;
   edit->numberOfOptions = LANGUAGE_COUNT;
 
   //  [ Profile Widget ]
@@ -300,7 +300,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setProfile;
   edit->max_value = ProfileSize-1;
   edit->min_value = 0;
-  edit->options = profileStr;
+  edit->options = strings[lang].profileStr;
   edit->numberOfOptions = ProfileSize;
 
   //  [ Contrast Widget ]
@@ -351,7 +351,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setWakeMode;
   edit->max_value = mode_stand;
   edit->min_value = mode_shake;
-  edit->options = wakeMode;
+  edit->options = strings[lang].wakeMode;
   edit->numberOfOptions = 2;
 
 
@@ -365,7 +365,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setStandMode;
   edit->max_value = mode_standby;
   edit->min_value = mode_sleep;
-  edit->options = InitMode;
+  edit->options = strings[lang].InitMode;
   edit->numberOfOptions = 2;
 
   //  [ Boot mode Widget ]
@@ -378,7 +378,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setInitMode;
   edit->max_value = mode_run;
   edit->min_value = mode_sleep;
-  edit->options = InitMode;
+  edit->options = strings[lang].InitMode;
   edit->numberOfOptions = 3;
 
   //  [ Encoder wake mode  Widget ]
@@ -391,7 +391,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setButtonWakeMode;
   edit->max_value = 3;
   edit->min_value = 0;
-  edit->options =WakeModes;
+  edit->options = strings[lang].WakeModes;
   edit->numberOfOptions = 4;
 
   //  [ Shake wake mode Widget ]
@@ -404,7 +404,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setShakeWakeMode;
   edit->max_value = 3;
   edit->min_value = 0;
-  edit->options =WakeModes;
+  edit->options = strings[lang].WakeModes;
   edit->numberOfOptions = 4;
 
   //  [ Encoder inversion Widget ]
@@ -417,7 +417,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setEncoderMode;
   edit->max_value = encoder_reverse;
   edit->min_value = encoder_normal;
-  edit->options = encMode;
+  edit->options = strings[lang].encMode;
   edit->numberOfOptions = 2;
 
   //  [ Buzzer Widget ]
@@ -430,7 +430,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setbuzzerMode;
   edit->max_value = 1;
   edit->min_value = 0;
-  edit->options = OffOn;
+  edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
   //  [ Temp display unit Widget ]
@@ -443,7 +443,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setTmpUnit;
   edit->max_value = mode_Farenheit;
   edit->min_value = mode_Celsius;
-  edit->options = tempUnit;
+  edit->options = strings[lang].tempUnit;
   edit->numberOfOptions = 2;
 
 
@@ -484,7 +484,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setActiveDetection;
   edit->max_value = 1;
   edit->min_value = 0;
-  edit->options = OffOn;
+  edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
   //  [ Low voltage protection Widget ]
@@ -526,7 +526,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setDbgScr;
   edit->max_value = 1;
   edit->min_value = 0;
-  edit->options = OffOn;
+  edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 #endif
 #ifdef USE_NTC
@@ -694,7 +694,7 @@ static void system_ntc_create(screen_t *scr){
   edit->setData = (void (*)(void *))&set_enable_NTC;
   edit->max_value = 1;
   edit->min_value = 0;
-  edit->options = OffOn;
+  edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
   //  [ Pullup mode Widget ]
@@ -708,7 +708,7 @@ static void system_ntc_create(screen_t *scr){
   edit->setData = (void (*)(void *))&set_Pull_mode;
   edit->max_value = 1;
   edit->min_value = 0;
-  edit->options = DownUp;
+  edit->options = strings[lang].DownUp;
   edit->numberOfOptions = 2;
 
   //  [ Pull res Widget ]
@@ -736,7 +736,7 @@ static void system_ntc_create(screen_t *scr){
   edit->setData = (void (*)(void *))&set_NTC_detect;
   edit->max_value = 1;
   edit->min_value = 0;
-  edit->options = OffOn;
+  edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
   //  [ NTC auto higher Widget ]
