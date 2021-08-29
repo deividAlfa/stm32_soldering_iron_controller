@@ -6,7 +6,7 @@
  */
 #include "gui_strings.h"
 
-// See settings.h for language index
+// language indexes and LANGUAGE_COUNT defined in settings.h
 
 const strings_t strings[LANGUAGE_COUNT] = {
 
@@ -142,8 +142,11 @@ const strings_t strings[LANGUAGE_COUNT] = {
      .tempUnit =    { "\260C", "\260F" },
      .wakeMode =    { "SHAKE", "STAND" },
      .encMode =     { "REVERSE", "NORMAL" },
-     .InitMode =    { "SLP", "STBY", "RUN"},
-     .Langs =       { "EN", "RU" },
+     .InitMode =    { "SLP", "STBY", "RUN" },
+     .Langs =       {
+                      [lang_english] = "EN",
+                      [lang_russian] = "RU",
+                    },
     },
 
     [lang_russian] = {
@@ -278,8 +281,11 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .tempUnit =    { "\260C", "\260F" },
       .wakeMode =    { "SHAKE", "STAND" },
       .encMode =     { "REVERSE", "NORMAL" },
-      .InitMode =    { "SLP", "STBY", "RUN"},
-      .Langs =       { "EN", "RU" },
+      .InitMode =    { "SLP", "STBY", "RUN" },
+      .Langs =       {
+                       [lang_english] = "EN",
+                       [lang_russian] = "RU",
+                     },
      },
 };
 
