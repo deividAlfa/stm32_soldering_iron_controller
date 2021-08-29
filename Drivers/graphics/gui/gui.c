@@ -20,7 +20,6 @@ void guiInit(void) {
   u8g2_SetFontMode(&u8g2,1);                                  // Set font transparent
   u8g2_SetFontDirection(&u8g2, 0);                            // No rotation
   u8g2_SetFontPosTop(&u8g2);                                  // Take upper font ref. as start drawing position
-
   oled_addScreen(&Screen_boot, screen_boot);
   boot_screen_setup(&Screen_boot);
 

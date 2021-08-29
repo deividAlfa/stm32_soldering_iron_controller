@@ -387,8 +387,7 @@ void runAwayCheck(void){
             }
             break;
           default:                                                                          // Unknown overrun state
-            Iron.RunawayStatus=runaway_triggered;
-            FatalError(error_RUNAWAY_UNKNOWN);
+            Error_Handler();
             break;
         }
       }
