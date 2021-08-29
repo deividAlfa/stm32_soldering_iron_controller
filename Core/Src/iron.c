@@ -453,7 +453,7 @@ void setCurrentMode(uint8_t mode){
   CurrentTime=HAL_GetTick();                                                              // Update local time value just in case it's called by handleIron, to avoid drift
   Iron.CurrentModeTimer = CurrentTime;                                                    // Refresh current mode timer
   if(mode==mode_standby){
-    Iron.CurrentSetTemperature = systemSettings.Profile.standbyTemperature;                 // Set standby temp
+    Iron.CurrentSetTemperature = systemSettings.Profile.standbyTemperature;               // Set standby temp
   }
   else if(mode==mode_boost){
     Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature+systemSettings.Profile.boostTemperature;
@@ -462,9 +462,9 @@ void setCurrentMode(uint8_t mode){
     }
   }
   else{
-    Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature;                 // Set user temp (sleep mode ignores this)
+    Iron.CurrentSetTemperature = Iron.UserSetTemperature;                                 // Set user temp (sleep mode ignores this)
   }
-  if(Iron.CurrentMode != mode){                                                             // If current mode is different
+  if(Iron.CurrentMode != mode){                                                           // If current mode is different
     resetPID();
     buzzer_long_beep();
     Iron.CurrentMode = mode;
@@ -616,19 +616,16 @@ uint8_t getDebugMode(void){
 
 void setUserTemperature(uint16_t temperature) {
   __disable_irq();
-  Iron.temperatureReached = 0;
-  if(systemSettings.Profile.UserSetTemperature != temperature){
-    systemSettings.Profile.UserSetTemperature = temperature;
-    if(Iron.CurrentMode==mode_run){
-      Iron.CurrentSetTemperature=temperature;
-      resetPID();
-    }
+  Iron.UserSetTemperature = temperature;
+  if(Iron.CurrentMode==mode_run){
+    Iron.temperatureReached = 0;
+    Iron.CurrentSetTemperature = temperature;
   }
   __enable_irq();
 }
 
 uint16_t getUserTemperature() {
-  return systemSettings.Profile.UserSetTemperature;
+ return Iron.UserSetTemperature;
 }
 
 uint8_t getCurrentMode() {
@@ -637,10 +634,6 @@ uint8_t getCurrentMode() {
 
 int8_t getCurrentPower() {
   return Iron.CurrentIronPower;
-}
-
-uint16_t getSetTemperature(){
-  return Iron.CurrentSetTemperature;
 }
 
 void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback) {

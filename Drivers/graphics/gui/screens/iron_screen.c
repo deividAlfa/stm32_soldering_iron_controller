@@ -16,6 +16,7 @@ static editable_widget_t *editable_IRON_StandbyTemp;
 static editable_widget_t *editable_IRON_BoostTemp;
 static editable_widget_t *editable_IRON_MaxTemp;
 static editable_widget_t *editable_IRON_MinTemp;
+static editable_widget_t *editable_IRON_UserTemp;
 
 filter_t bak_f;
 
@@ -123,6 +124,20 @@ static void * getStandbyTemp() {
   return &temp;
 }
 //=========================================================
+static void setUserTemp(uint32_t *val) {
+  if(*val > systemSettings.Profile.MaxSetTemperature){
+    *val = systemSettings.Profile.MaxSetTemperature;
+  }
+  else if(*val < systemSettings.Profile.MinSetTemperature){
+    *val = systemSettings.Profile.MinSetTemperature;
+  }
+  systemSettings.Profile.UserSetTemperature = *val;
+}
+static void * getUserTemp() {
+  temp = systemSettings.Profile.UserSetTemperature;
+  return &temp;
+}
+//=========================================================
 static void * _getPwmMul() {
   temp=systemSettings.Profile.pwmMul;
   return &temp;
@@ -226,12 +241,14 @@ static void iron_onEnter(screen_t *scr){
     editable_IRON_MinTemp->inputData.endString="\260F";
     editable_IRON_StandbyTemp->inputData.endString="\260F";
     editable_IRON_BoostTemp->inputData.endString="\260F";
+    editable_IRON_UserTemp->inputData.endString="\260F";
   }
   else{
     editable_IRON_MaxTemp->inputData.endString="\260C";
     editable_IRON_MinTemp->inputData.endString="\260C";
     editable_IRON_StandbyTemp->inputData.endString="\260C";
     editable_IRON_BoostTemp->inputData.endString="\260C";
+    editable_IRON_UserTemp->inputData.endString="\260C";
   }
   if(scr==&Screen_settings){
     bak_f = systemSettings.Profile.tipFilter;
@@ -270,7 +287,6 @@ static void iron_create(screen_t *scr){
   edit->max_value = 480;
   edit->setData = (void (*)(void *))&setMaxTemp;
 
-
   //  [ Min Temp Widget ]
   //
   newComboEditable(w, strings[lang].IRON_Min_Temp, &edit, NULL);
@@ -283,6 +299,17 @@ static void iron_create(screen_t *scr){
   edit->max_value = 480;
   edit->min_value = 50;
   edit->setData = (void (*)(void *))&setMinTemp;
+
+  //  [ user Temp Widget ]
+  //
+  newComboEditable(w, strings[lang].IRON_User_Temp, &edit, NULL);
+  editable_IRON_UserTemp=edit;
+  dis=&edit->inputData;
+  dis->reservedChars=5;
+  dis->getData = &getUserTemp;
+  edit->big_step = 10;
+  edit->step = 5;
+  edit->setData = (void (*)(void *))&setUserTemp;
 
   //  [ Stby Time Widget ]
   //

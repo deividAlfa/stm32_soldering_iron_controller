@@ -58,6 +58,7 @@ typedef struct {
 
   uint16_t            Pwm_Period;                           // PWM period
   uint16_t            Pwm_Max;                              // Max PWM output for power limit
+  int16_t             UserSetTemperature;                   // Run mode user setpoint
   int16_t             CurrentSetTemperature;                // Actual set temperature (Setpoint)
   int16_t             Debug_SetTemperature;                 // Debug mode temperature
 
