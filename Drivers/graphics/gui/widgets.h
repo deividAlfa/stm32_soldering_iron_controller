@@ -63,7 +63,7 @@ struct editable_widget_t {
   int16_t big_step;
   int32_t min_value;
   int32_t max_value;
-  char **options;
+  char * const * options;
   void (*setData)(void *);
   selectable_widget_t selectable;
   displayOnly_widget_t inputData;
