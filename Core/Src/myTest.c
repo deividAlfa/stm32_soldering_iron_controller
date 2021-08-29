@@ -41,13 +41,13 @@ void myTest(void){
   u8g2_SetFont(&u8g2,default_font );
   u8g2_SetDrawColor(&u8g2, WHITE);
   if(oled.use_sw){
-    u8g2_DrawStr(&u8g2,0,0,"SW Mode");
+    u8g2_DrawUTF8(&u8g2,0,0,"SW Mode");
   }
   else{
-    u8g2_DrawStr(&u8g2,0,0,"HW Mode");
+    u8g2_DrawUTF8(&u8g2,0,0,"HW Mode");
   }
-  u8g2_DrawStr(&u8g2,0,48,"FPS:");
-  u8g2_DrawStr(&u8g2,0,32,"TIM:");
+  u8g2_DrawUTF8(&u8g2,0,48,"FPS:");
+  u8g2_DrawUTF8(&u8g2,0,32,"TIM:");
   while(1){
     setSafeMode(enable);
     if(oled.status==oled_idle){
@@ -58,9 +58,9 @@ void myTest(void){
           u8g2_DrawBox(&u8g2, 30, 16, 34, 48);
           u8g2_SetDrawColor(&u8g2, WHITE);
           sprintf(str,"%u", test.fps);
-          u8g2_DrawStr(&u8g2,30,48,str);
+          u8g2_DrawUTF8(&u8g2,30,48,str);
           sprintf(str,"%u", test.seconds);
-          u8g2_DrawStr(&u8g2,30,32,str);
+          u8g2_DrawUTF8(&u8g2,30,32,str);
           test.last_fps = test.fps;
           test.fps=0;
       }
