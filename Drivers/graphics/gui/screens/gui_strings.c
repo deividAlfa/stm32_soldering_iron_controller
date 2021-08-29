@@ -10,7 +10,7 @@
 
 const strings_t strings[LANGUAGE_COUNT] = {
 
-    {                                                             // 0 = English
+    [lang_english] = {
      .boot_firstBoot = "First Boot!",
      .boot_Profile = "Profile",
 
@@ -146,7 +146,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
      .Langs =       { "EN", "RU" },
     },
 
-    {                                                             // 1 = Russian
+    [lang_russian] = {
       .boot_firstBoot = "Выберите",
       .boot_Profile = "Тип",
 
