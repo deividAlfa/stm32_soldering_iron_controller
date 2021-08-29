@@ -719,6 +719,10 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 #endif
 
 void FatalError(uint8_t type){
+ uint8_t lang =systemSettings.settings.language;
+ if(lang>lang_russian){                                             // TODO define limit and number of languages in the system
+   lang=lang_english;
+ }
 
   #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
   if(!oled.use_sw){
@@ -756,24 +760,21 @@ void FatalError(uint8_t type){
       uint8_t level = 25 * ((type - error_RUNAWAY25)+1);
       char strRunawayLevel[8];
       sprintf(strRunawayLevel,">%u\260C\n",level);
-      putStrAligned("TEMP RUNAWAY", 0, align_center);
+      putStrAligned(strings[lang].ERROR_RUNAWAY, 0, align_center);
       putStrAligned(strRunawayLevel, 15, align_center);
       break;
     }
     case error_RUNAWAY500:
-      putStrAligned("EXCEEDED", 0, align_center);
+      putStrAligned(strings[lang].ERROR_EXCEEDED, 0, align_center);
       putStrAligned("500\260C!", 15, align_center);
       break;
-    case error_RUNAWAY_UNKNOWN:
-      putStrAligned("TEMP RUNAWAY", 0, align_center);
-      putStrAligned("UNDEFINED!", 15, align_center);
-      break;
+
     default:
-      putStrAligned("UNKNOWN ERROR", 0, align_center);
+      putStrAligned(strings[lang].ERROR_UNKNOWN, 0, align_center);
       break;
   }
-  putStrAligned("SYSTEM HALTED", 35, align_center);
-  putStrAligned("Use btn to reset", 50, align_center);
+  putStrAligned(strings[lang].ERROR_SYSTEM_HALTED, 35, align_center);
+  putStrAligned(strings[lang].ERROR_BTN_RESET, 50, align_center);
 
   #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
   if(!oled.use_sw){
@@ -795,15 +796,15 @@ void FatalError(uint8_t type){
 void putStrAligned(char* str, uint8_t y, AlignType align){
 
   if(align==align_left){
-    u8g2_DrawStr(&u8g2, 0, y, str);
+    u8g2_DrawUTF8(&u8g2, 0, y, str);
   }
   else{
-    uint8_t len = u8g2_GetStrWidth(&u8g2, str);
+    uint8_t len = u8g2_GetUTF8Width(&u8g2, str);
     if(align==align_center){
-      u8g2_DrawStr(&u8g2, ((OledWidth-1)-len)/2, y, str);
+      u8g2_DrawUTF8(&u8g2, ((OledWidth-1)-len)/2, y, str);
     }
     else if(align==align_right){
-      u8g2_DrawStr(&u8g2, (OledWidth-1)-len, y, str);
+      u8g2_DrawUTF8(&u8g2, (OledWidth-1)-len, y, str);
     }
   }
 }
