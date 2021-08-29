@@ -135,7 +135,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
      .ERROR_SYSTEM_HALTED = "SYSTEM HALTED",
      .ERROR_BTN_RESET = "Use btn to reset",
 
-     .profileStr =  { "T12", "C245", "C210" },
      .OffOn =       { "OFF", "ON" },
      .DownUp =      { "DOWN", "UP" },
      .WakeModes =   { "OFF", "STBY", "SLP", "ALL" },
@@ -143,10 +142,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
      .wakeMode =    { "SHAKE", "STAND" },
      .encMode =     { "REVERSE", "NORMAL" },
      .InitMode =    { "SLP", "STBY", "RUN" },
-     .Langs =       {
-                      [lang_english] = "EN",
-                      [lang_russian] = "RU",
-                    },
     },
 
     [lang_russian] = {
@@ -274,7 +269,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .ERROR_SYSTEM_HALTED = "БЫЛИННЫЙ ОТКАЗ",
       .ERROR_BTN_RESET = "наж.для рестарта",
 
-      .profileStr =  { "T12", "C245", "C210" },
       .OffOn =       { "OFF", "ON" },
       .DownUp =      { "DOWN", "UP" },
       .WakeModes =   { "OFF", "STBY", "SLP", "ALL" },
@@ -282,10 +276,13 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .wakeMode =    { "SHAKE", "STAND" },
       .encMode =     { "REVERSE", "NORMAL" },
       .InitMode =    { "SLP", "STBY", "RUN" },
-      .Langs =       {
-                       [lang_english] = "EN",
-                       [lang_russian] = "RU",
-                     },
+
      },
 };
 
+
+char * profileStr[ProfileSize] = { "T12", "C245", "C210" };
+char * Langs[LANGUAGE_COUNT] = {
+                                   [lang_english] = "EN",
+                                   [lang_russian] = "RU",
+                               };

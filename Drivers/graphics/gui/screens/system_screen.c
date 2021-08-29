@@ -288,7 +288,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setLanguage;
   edit->max_value = LANGUAGE_COUNT-1;
   edit->min_value = 0;
-  edit->options = strings[lang].Langs;
+  edit->options = Langs;
   edit->numberOfOptions = LANGUAGE_COUNT;
 
   //  [ Profile Widget ]
@@ -300,7 +300,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setProfile;
   edit->max_value = ProfileSize-1;
   edit->min_value = 0;
-  edit->options = strings[lang].profileStr;
+  edit->options = profileStr;
   edit->numberOfOptions = ProfileSize;
 
   //  [ Contrast Widget ]

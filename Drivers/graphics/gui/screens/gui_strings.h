@@ -144,11 +144,11 @@ typedef struct{
   char *encMode[2];
   char *InitMode[3];
   char *WakeModes[4];
-  char *profileStr[ProfileSize];
-  char *Langs[LANGUAGE_COUNT];
 
 }strings_t;
 
 extern const strings_t strings[LANGUAGE_COUNT];
+extern char *profileStr[ProfileSize];
+extern char *Langs[LANGUAGE_COUNT];
 
 #endif /* GRAPHICS_GUI_STRINGS_H_ */
