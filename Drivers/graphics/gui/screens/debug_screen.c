@@ -223,15 +223,15 @@ void debug_Draw(screen_t *scr){
   if(scr->refresh==screen_Erased){
     u8g2_SetFont(&u8g2, u8g2_font_small);
     u8g2_SetDrawColor(&u8g2, WHITE);
-    u8g2_DrawStr(&u8g2, 0, 0, "P");
-    u8g2_DrawStr(&u8g2, 0, 11, "I");
-    u8g2_DrawStr(&u8g2, 0, 22, "D");
-    u8g2_DrawStr(&u8g2, 64, 0, "AVG");
-    u8g2_DrawStr(&u8g2, 64, 11, "RAW");
-    u8g2_DrawStr(&u8g2, 64, 22, "SET");
-    u8g2_DrawStr(&u8g2, 64, 33, "ERR");
-    u8g2_DrawStr(&u8g2, 64, 44, "PWM");
-    u8g2_DrawStr(&u8g2, 64, 55, "PWR");
+    u8g2_DrawUTF8(&u8g2, 0, 0, "P");
+    u8g2_DrawUTF8(&u8g2, 0, 11, "I");
+    u8g2_DrawUTF8(&u8g2, 0, 22, "D");
+    u8g2_DrawUTF8(&u8g2, 64, 0, "AVG");
+    u8g2_DrawUTF8(&u8g2, 64, 11, "RAW");
+    u8g2_DrawUTF8(&u8g2, 64, 22, "SET");
+    u8g2_DrawUTF8(&u8g2, 64, 33, "ERR");
+    u8g2_DrawUTF8(&u8g2, 64, 44, "PWM");
+    u8g2_DrawUTF8(&u8g2, 64, 55, "PWR");
   }
 
   default_screenDraw(scr);

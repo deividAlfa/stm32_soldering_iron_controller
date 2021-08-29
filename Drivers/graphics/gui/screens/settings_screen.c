@@ -15,17 +15,22 @@ static comboBox_item_t *comboitem_system_debug;
 
 static void SETTINGS_create(screen_t *scr) {
   widget_t* w;
+
+  update_language();
+
   //  [ SETTINGS MAIN SCREEN ]
   //
   newWidget(&w,widget_combo,scr);
-  newComboScreen(w, "IRON", screen_iron, NULL);
-  newComboScreen(w, "SYSTEM", screen_system, NULL);
+  ((comboBox_widget_t*)w->content)->font = font_menu;
+
+  newComboScreen(w, strings[lang].settings_IRON, screen_iron, NULL);
+  newComboScreen(w, strings[lang].settings_SYSTEM, screen_system, NULL);
   #ifdef ENABLE_DEBUG_SCREEN
-  newComboScreen(w, "DEBUG", screen_debug, &comboitem_system_debug);
+  newComboScreen(w, strings[lang].settings_DEBUG, screen_debug, &comboitem_system_debug);
   #endif
-  newComboScreen(w, "EDIT TIPS", screen_tip_list, NULL);
-  newComboScreen(w, "CALIBRATION", screen_calibration, NULL);
-  newComboScreen(w, "EXIT", screen_main, NULL);
+  newComboScreen(w, strings[lang].settings_EDIT_TIPS, screen_tip_list, NULL);
+  newComboScreen(w, strings[lang].settings_CALIBRATION, screen_calibration, NULL);
+  newComboScreen(w, strings[lang].settings_EXIT, screen_main, NULL);
 }
 
 

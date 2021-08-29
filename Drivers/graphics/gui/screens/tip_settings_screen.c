@@ -276,16 +276,17 @@ static void tip_settings_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
-  //########################################## [ TIP SETTINGS SCREEN ] ##########################################
-  //
 
-  //========[ PID COMBO ]===========================================================
+  update_language();
+
+  //  [ PID COMBO ]
   //
   newWidget(&w,widget_combo,scr);
+  ((comboBox_widget_t*)w->content)->font = font_menu;
 
   //[ TIP label]
   //
-  newComboEditable(w, "Name", &edit, NULL);
+  newComboEditable(w, strings[lang].TIP_SETTINGS_Name, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=TipCharSize-1;
   dis->getData = &getTipName;
@@ -299,7 +300,7 @@ static void tip_settings_create(screen_t *scr){
 
   //[ KP Widget]
   //
-  newComboEditable(w, "PID Kp", &edit, NULL);
+  newComboEditable(w, strings[lang].TIP_SETTINGS_PID_kp, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=6;
   dis->getData = &getKp;
@@ -312,7 +313,7 @@ static void tip_settings_create(screen_t *scr){
 
   //[ KI Widget ]
   //
-  newComboEditable(w, "PID Ki", &edit, NULL);
+  newComboEditable(w, strings[lang].TIP_SETTINGS_PID_ki, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=6;
   dis->getData = &getKi;
@@ -325,7 +326,7 @@ static void tip_settings_create(screen_t *scr){
 
   //[ KD Widget ]
   //
-  newComboEditable(w, "PID Kd", &edit, NULL);
+  newComboEditable(w, strings[lang].TIP_SETTINGS_PID_kd, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=6;
   dis->getData = &getKd;
@@ -338,7 +339,7 @@ static void tip_settings_create(screen_t *scr){
 
   //[ Imax Widget ]
   //
-  newComboEditable(w, "PID Imax", &edit, NULL);
+  newComboEditable(w, strings[lang].TIP_SETTINGS_PID_Imax, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=6;
   dis->getData = &getImax;
@@ -350,7 +351,7 @@ static void tip_settings_create(screen_t *scr){
 
   //[ Imin Widget ]
   //
-  newComboEditable(w, "PID Imin", &edit, NULL);
+  newComboEditable(w, strings[lang].TIP_SETTINGS_PID_Imin, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=6;
   dis->getData = &getImin;
@@ -363,7 +364,7 @@ static void tip_settings_create(screen_t *scr){
 
   //[ Cal250 Widget ]
   //
-  newComboEditable(w, "Cal250", &edit, NULL);
+  newComboEditable(w, strings[lang]._Cal_250, &edit, NULL);
   editable_tip_settings_cal250=edit;
   dis=&edit->inputData;
   dis->reservedChars=4;
@@ -377,7 +378,7 @@ static void tip_settings_create(screen_t *scr){
 
   //[ Cal350 Widget ]
   //
-  newComboEditable(w, "Cal350", &edit, NULL);
+  newComboEditable(w, strings[lang]._Cal_350, &edit, NULL);
   editable_tip_settings_cal350=edit;
   dis=&edit->inputData;
   dis->reservedChars=4;
@@ -391,7 +392,7 @@ static void tip_settings_create(screen_t *scr){
 
   //[ Cal450 Widget ]
   //
-  newComboEditable(w, "Cal450", &edit, NULL);
+  newComboEditable(w, strings[lang]._Cal_450, &edit, NULL);
   editable_tip_settings_cal450=edit;
   dis=&edit->inputData;
   dis->reservedChars=4;
@@ -402,10 +403,10 @@ static void tip_settings_create(screen_t *scr){
   edit->step = 1;
   edit->setData = (void (*)(void *))&setCal450;
 
-  newComboAction(w, "SAVE", &tip_save, &comboitem_tip_settings_save);
-  newComboAction(w, "COPY", &tip_copy, &comboitem_tip_settings_copy);
-  newComboAction(w, "DELETE", &tip_delete, &comboitem_tip_settings_delete);
-  newComboScreen(w, "CANCEL", -1, &comboitem_tip_settings_cancel);                                         // Return value set automatically on enter
+  newComboAction(w, strings[lang]._SAVE, &tip_save, &comboitem_tip_settings_save);
+  newComboAction(w, strings[lang].TIP_SETTINGS_COPY, &tip_copy, &comboitem_tip_settings_copy);
+  newComboAction(w, strings[lang].TIP_SETTINGS_DELETE, &tip_delete, &comboitem_tip_settings_delete);
+  newComboScreen(w, strings[lang]._CANCEL, -1, &comboitem_tip_settings_cancel);                                         // Return value set automatically on enter
 }
 
 

@@ -36,6 +36,7 @@ static editable_widget_t *editable_system_bigTempStep;
 #ifdef USE_NTC
 uint8_t backup_Pullup, backup_NTC_detect, backup_enableNTC;
 uint16_t backup_Pull_res, backup_NTC_res, backup_NTC_Beta, backup_NTC_detect_high_res, backup_NTC_detect_low_res, backup_NTC_detect_high_res_beta, backup_NTC_detect_low_res_beta;
+static uint8_t current_lang = lang_english;
 
 void update_NTC_menu(void){
   uint8_t NTC_auto = (backup_NTC_detect && backup_enableNTC);
@@ -218,6 +219,16 @@ static void setProfile(uint32_t *val) {
   profile=*val;
 }
 //=========================================================
+static void * getLanguage() {
+  temp = systemSettings.settings.language;
+  return &temp;
+}
+
+static void setLanguage(uint32_t *val) {
+  lang = *val;
+  systemSettings.settings.language=*val;
+}
+//=========================================================
 static void setButtonWakeMode(uint32_t *val) {
   systemSettings.settings.buttonWakeMode = *val;
 }
@@ -260,14 +271,29 @@ static void system_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
+  update_language();
+  current_lang = lang;
 
   //  [ SYSTEM COMBO ]
   //
   newWidget(&w,widget_combo,scr);
+  ((comboBox_widget_t*)w->content)->font = font_menu;
+
+  //  [ Language Widget ]
+  //
+  newComboMultiOption(w, strings[lang]._Language, &edit, NULL);
+  edit->inputData.getData = &getLanguage;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setLanguage;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options = Langs;
+  edit->numberOfOptions = 2;
 
   //  [ Profile Widget ]
   //
-  newComboMultiOption(w, "Profile", &edit, NULL);
+  newComboMultiOption(w, strings[lang].SYSTEM_Profile, &edit, NULL);
   edit->inputData.getData = &getProfile;
   edit->big_step = 1;
   edit->step = 1;
@@ -279,7 +305,7 @@ static void system_create(screen_t *scr){
 
   //  [ Contrast Widget ]
   //
-  newComboEditable(w, "Contrast", &edit, NULL);
+  newComboEditable(w, strings[lang].SYSTEM_Contrast, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=3;
   dis->getData = &getContrast_;
@@ -291,7 +317,7 @@ static void system_create(screen_t *scr){
 
   //  [ Oled dimming Widget ]
   //
-  newComboEditable(w, "Auto dim", &edit, NULL);
+  newComboEditable(w, strings[lang].SYSTEM_Auto_Dim, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->endString="s";
@@ -305,7 +331,7 @@ static void system_create(screen_t *scr){
 
   //  [ Oled Offset Widget ]
   //
-  newComboEditable(w, "Offset", &edit, NULL);
+  newComboEditable(w, strings[lang].SYSTEM_Offset, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=2;
   dis->getData = &getOledOffset;
@@ -317,7 +343,7 @@ static void system_create(screen_t *scr){
 
   //  [ Wake mode Widget ]
   //
-  newComboMultiOption(w, "Wake Mode", &edit, NULL);
+  newComboMultiOption(w, strings[lang].SYSTEM_Wake_Mode, &edit, NULL);
   dis=&edit->inputData;
   dis->getData = &getWakeMode;
   edit->big_step = 1;
@@ -331,7 +357,7 @@ static void system_create(screen_t *scr){
 
   //  [ Stand mode Widget ]
   //
-  newComboMultiOption(w, "Stand mode", &edit, &comboitem_system_StandMode);
+  newComboMultiOption(w, strings[lang].SYSTEM_Stand_Mode, &edit, &comboitem_system_StandMode);
   dis=&edit->inputData;
   dis->getData = &getStandMode;
   edit->big_step = 1;
@@ -344,7 +370,7 @@ static void system_create(screen_t *scr){
 
   //  [ Boot mode Widget ]
   //
-  newComboMultiOption(w, "Boot", &edit, &comboitem_system_BootMode);
+  newComboMultiOption(w, strings[lang].SYSTEM_Boot, &edit, &comboitem_system_BootMode);
   dis=&edit->inputData;
   dis->getData = &getInitMode;
   edit->big_step = 1;
@@ -357,7 +383,7 @@ static void system_create(screen_t *scr){
 
   //  [ Encoder wake mode  Widget ]
   //
-  newComboMultiOption(w, "Btn wake", &edit,&comboitem_system_ButtonWakeMode);
+  newComboMultiOption(w, strings[lang].SYSTEM_Button_Wake, &edit,&comboitem_system_ButtonWakeMode);
   dis=&edit->inputData;
   dis->getData = &getButtonWakeMode;
   edit->big_step = 1;
@@ -370,7 +396,7 @@ static void system_create(screen_t *scr){
 
   //  [ Shake wake mode Widget ]
   //
-  newComboMultiOption(w, "Shake wake", &edit,&comboitem_system_ShakeWakeMode);
+  newComboMultiOption(w, strings[lang].SYSTEM_Shake_Wake, &edit,&comboitem_system_ShakeWakeMode);
   dis=&edit->inputData;
   dis->getData = &getShakeWakeMode;
   edit->big_step = 1;
@@ -383,7 +409,7 @@ static void system_create(screen_t *scr){
 
   //  [ Encoder inversion Widget ]
   //
-  newComboMultiOption(w, "Encoder", &edit, NULL);
+  newComboMultiOption(w, strings[lang].SYSTEM_Encoder, &edit, NULL);
   dis=&edit->inputData;
   dis->getData = &getEncoderMode;
   edit->big_step = 1;
@@ -396,7 +422,7 @@ static void system_create(screen_t *scr){
 
   //  [ Buzzer Widget ]
   //
-  newComboMultiOption(w, "Buzzer", &edit, NULL);
+  newComboMultiOption(w, strings[lang].SYSTEM_Buzzer, &edit, NULL);
   dis=&edit->inputData;
   dis->getData = &getbuzzerMode;
   edit->big_step = 1;
@@ -409,7 +435,7 @@ static void system_create(screen_t *scr){
 
   //  [ Temp display unit Widget ]
   //
-  newComboMultiOption(w, "Temperature", &edit, NULL);
+  newComboMultiOption(w, strings[lang].SYSTEM_Temperature, &edit, NULL);
   dis=&edit->inputData;
   dis->getData = &getTmpUnit;
   edit->big_step = 1;
@@ -423,7 +449,7 @@ static void system_create(screen_t *scr){
 
   //  [ Temp step Widget ]
   //
-  newComboEditable(w, " Step", &edit, NULL);
+  newComboEditable(w, strings[lang].SYSTEM__Step, &edit, NULL);
   editable_system_TempStep=edit;
   dis=&edit->inputData;
   dis->reservedChars=4;
@@ -437,7 +463,7 @@ static void system_create(screen_t *scr){
   
   // [ Temp big step Widget ]
   //
-  newComboEditable(w, " Big step", &edit, NULL);
+  newComboEditable(w, strings[lang].SYSTEM__Big_Step, &edit, NULL);
   editable_system_bigTempStep=edit;
   dis=&edit->inputData;
   dis->reservedChars=4;
@@ -450,7 +476,7 @@ static void system_create(screen_t *scr){
   
   //  [ Active detection Widget ]
   //
-  newComboMultiOption(w, "Active det.",&edit, NULL);
+  newComboMultiOption(w, strings[lang].SYSTEM_Active_Detection,&edit, NULL);
   dis=&edit->inputData;
   dis->getData = &getActiveDetection;
   edit->big_step = 1;
@@ -463,7 +489,7 @@ static void system_create(screen_t *scr){
 
   //  [ Low voltage protection Widget ]
   //
-  newComboEditable(w, "LVP", &edit, NULL);
+  newComboEditable(w, strings[lang].SYSTEM_LVP, &edit, NULL);
   dis=&edit->inputData;
   dis->endString="V";
   dis->reservedChars=5;
@@ -477,7 +503,7 @@ static void system_create(screen_t *scr){
 
   //  [ Gui refresh rate Widget ]
   //
-  newComboEditable(w, "Gui time", &edit, NULL);
+  newComboEditable(w, strings[lang].SYSTEM_Gui_Time, &edit, NULL);
   dis=&edit->inputData;
   dis->endString="ms";
   dis->reservedChars=5;
@@ -491,7 +517,7 @@ static void system_create(screen_t *scr){
 #ifdef ENABLE_DEBUG_SCREEN
   //  [ Debug enable Widget ]
   //
-  newComboMultiOption(w, "DEBUG", &edit, NULL);
+  newComboMultiOption(w, strings[lang].SYSTEM_DEBUG, &edit, NULL);
   dis=&edit->inputData;
   dis->getData = &getDbgScr;
   dis->reservedChars=3;
@@ -504,15 +530,27 @@ static void system_create(screen_t *scr){
   edit->numberOfOptions = 2;
 #endif
 #ifdef USE_NTC
-  newComboScreen(w, "NTC MENU", screen_ntc, NULL);
+  newComboScreen(w, strings[lang].SYSTEM_NTC_MENU, screen_ntc, NULL);
 #endif
-  newComboScreen(w, "RESET MENU", screen_reset, NULL);
+  newComboScreen(w, strings[lang].SYSTEM_RESET_MENU, screen_reset, NULL);
   newComboScreen(w, SWSTRING, -1, NULL);
   newComboScreen(w, HWSTRING, -1, NULL);
-  newComboScreen(w, "BACK", screen_settings, NULL);
+  newComboScreen(w, strings[lang]._BACK, screen_settings, NULL);
 }
 
+int system_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
 
+  if(lang!=current_lang){                                                       // If language changed
+    oled_backup_comboStatus(scr);
+    oled_destroy_screen(scr);                                                   // Destroy and create the screen
+    system_create(scr);
+    oled_restore_comboStatus(scr);
+    ((comboBox_widget_t*)scr->widgets->content)->currentItem->widget->selectable.state=widget_edit;
+    ((comboBox_widget_t*)scr->widgets->content)->currentItem->widget->selectable.previous_state=widget_edit;
+    scr->refresh = refresh_triggered;
+  }
+  return autoReturn_ProcessInput(scr, input, state);
+}
 
 #ifdef USE_NTC
 
@@ -633,19 +671,21 @@ static void system_ntc_onEnter(screen_t *scr){
   update_NTC_menu();
 }
 
-
 static void system_ntc_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
+  update_language();
+  current_lang=lang;
 
   //  [ SYSTEM COMBO ]
   //
   newWidget(&w,widget_combo,scr);
+  ((comboBox_widget_t*)w->content)->font = font_menu;
 
   //  [ NTC enabled Widget ]
   //
-  newComboMultiOption(w, "Enable NTC",&edit, NULL);
+  newComboMultiOption(w, strings[lang].NTC_Enable_NTC,&edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=3;
   dis->getData = &get_enable_NTC;
@@ -659,7 +699,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ Pullup mode Widget ]
   //
-  newComboMultiOption(w, "Pull",&edit, &comboitem_PullMode);
+  newComboMultiOption(w, strings[lang].NTC_Pull,&edit, &comboitem_PullMode);
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &get_Pull_mode;
@@ -673,7 +713,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ Pull res Widget ]
   //
-  newComboEditable(w, " Res", &edit, &comboitem_PullRes);
+  newComboEditable(w, strings[lang].NTC__Res, &edit, &comboitem_PullRes);
   dis=&edit->inputData;
   dis->number_of_dec=1;
   dis->reservedChars=7;
@@ -687,7 +727,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ Auto detect Widget ]
   //
-  newComboMultiOption(w, "NTC Detect",&edit, &comboitem_AutoDetect);
+  newComboMultiOption(w, strings[lang].NTC_NTC_Detect,&edit, &comboitem_AutoDetect);
   dis=&edit->inputData;
   dis->reservedChars=3;
   dis->getData = &get_NTC_detect;
@@ -701,7 +741,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ NTC auto higher Widget ]
   //
-  newComboEditable(w, " High", &edit, &comboitem_Detect_high_res);
+  newComboEditable(w, strings[lang].NTC__High, &edit, &comboitem_Detect_high_res);
   dis=&edit->inputData;
   dis->number_of_dec=1;
   dis->reservedChars=7;
@@ -715,7 +755,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ NTC auto higher beta Widget ]
   //
-  newComboEditable(w, "  Beta", &edit, &comboitem_Detect_high_res_beta);
+  newComboEditable(w, strings[lang].NTC__Beta, &edit, &comboitem_Detect_high_res_beta);
   dis=&edit->inputData;
   dis->reservedChars=5;
   dis->getData = &get_NTC_detect_high_res_beta;
@@ -727,7 +767,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ NTC auto lower Widget ]
   //
-  newComboEditable(w, " Low", &edit, &comboitem_Detect_low_res);
+  newComboEditable(w, strings[lang].NTC__Low, &edit, &comboitem_Detect_low_res);
   dis=&edit->inputData;
   dis->number_of_dec=1;
   dis->reservedChars=7;
@@ -741,7 +781,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ NTC auto lower beta Widget ]
   //
-  newComboEditable(w, "  Beta", &edit, &comboitem_Detect_low_res_beta);
+  newComboEditable(w, strings[lang].NTC__Beta, &edit, &comboitem_Detect_low_res_beta);
   dis=&edit->inputData;
   dis->reservedChars=5;
   dis->getData = &get_NTC_detect_low_res_beta;
@@ -753,7 +793,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ NTC res Widget ]
   //
-  newComboEditable(w, " Res", &edit, &comboitem_NTC_res);
+  newComboEditable(w, strings[lang].NTC__Res, &edit, &comboitem_NTC_res);
   dis=&edit->inputData;
   dis->number_of_dec=1;
   dis->reservedChars=7;
@@ -767,7 +807,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ NTC Beta Widget ]
   //
-  newComboEditable(w, " Beta", &edit, &comboitem_NTC_res_beta);
+  newComboEditable(w, strings[lang].NTC__Beta, &edit, &comboitem_NTC_res_beta);
   dis=&edit->inputData;
   dis->reservedChars=5;
   dis->getData = &get_NTC_beta;
@@ -777,17 +817,21 @@ static void system_ntc_create(screen_t *scr){
   edit->max_value = 50000;
   edit->min_value = 500;
 
-  newComboAction(w, "SAVE", &saveNTC, NULL);
-  newComboScreen(w, "BACK", screen_system , NULL);
+  newComboAction(w, strings[lang]._SAVE, &saveNTC, NULL);
+  newComboScreen(w, strings[lang]._BACK, screen_system , NULL);
 }
 
 #endif
+
+
+
+
 
 void system_screen_setup(screen_t *scr){
 
   scr->onEnter = &system_onEnter;
   scr->onExit = &system_onExit;
-  scr->processInput=&autoReturn_ProcessInput;
+  scr->processInput=&system_ProcessInput;
   scr->create = &system_create;
 
   #ifdef USE_NTC

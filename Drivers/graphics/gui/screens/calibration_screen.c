@@ -189,10 +189,6 @@ static int Cal_Settings_SaveAction() {
   return screen_calibration;
 }
 //=========================================================
-static int Cal_Settings_CancelAction() {
-  return screen_calibration;
-}
-//=========================================================
 static void setCalState(state_t s) {
   current_state = s;
   cal_drawText = 1;
@@ -237,8 +233,8 @@ static void Cal_draw(screen_t *scr){
       errorTimer=current_time;
       FillBuffer(BLACK,fill_dma);
       scr->refresh=screen_Erased;
-      putStrAligned("ERROR DETECTED!", 10, align_center);
-      putStrAligned("Aborting...", 25, align_center);
+      putStrAligned(strings[lang].CAL_Error, 10, align_center);
+      putStrAligned(strings[lang].CAL_Aborting, 25, align_center);
     }
   }
   else{
@@ -277,10 +273,15 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
 }
 static void Cal_create(screen_t *scr) {
   widget_t* w;
+
+  update_language();
+
   newWidget(&w,widget_combo,scr);
-  newComboScreen(w, "START", screen_calibration_start, NULL);
-  newComboScreen(w, "SETTINGS", screen_calibration_settings, NULL);
-  newComboScreen(w, "BACK", screen_settings, NULL);
+  ((comboBox_widget_t*)w->content)->font = font_menu;
+
+  newComboScreen(w, strings[lang]._START, screen_calibration_start, NULL);
+  newComboScreen(w, strings[lang]._SETTINGS, screen_calibration_settings, NULL);
+  newComboScreen(w, strings[lang]._BACK, screen_settings, NULL);
   w->posY=10;
 }
 
@@ -394,41 +395,41 @@ static void Cal_Start_draw(screen_t *scr){
     FillBuffer(BLACK, fill_dma);
     scr->refresh=screen_Erased;
     u8g2_SetDrawColor(&u8g2, WHITE);
-    u8g2_SetFont(&u8g2, default_font);
+    u8g2_SetFont(&u8g2, font_menu);
     lastTipTemp = readTipTemperatureCompensated(old_reading, read_average);
 
     if(current_state<cal_suceed){
       uint8_t s = current_state;
-      u8g2_DrawStr(&u8g2, 8, 6, "CAL STEP:");            // Draw current cal state
+      u8g2_DrawUTF8(&u8g2, 8, 6, strings[lang].CAL_Step);            // Draw current cal state
 
       if(current_state<cal_input_250){
-        u8g2_DrawStr(&u8g2, 8, 24, "WAIT...");               // Draw current temp
+        u8g2_DrawUTF8(&u8g2, 8, 24, strings[lang].CAL_Wait);               // Draw current temp
         sprintf(str, "%3u\260C",lastTipTemp);
-        u8g2_DrawStr(&u8g2, 85, 24, str);
+        u8g2_DrawUTF8(&u8g2, 85, 24, str);
       }
       else{
-        u8g2_DrawStr(&u8g2, 8, 24, "MEASURED:");
+        u8g2_DrawUTF8(&u8g2, 8, 24, strings[lang].CAL_Measured);
         s-=10;
       }
-      u8g2_DrawStr(&u8g2, 85, 6, state_tempstr[s]);
-      u8g2_DrawStr(&u8g2, 8, 49, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name);//12
+      u8g2_DrawUTF8(&u8g2, 85, 6, state_tempstr[s]);
+      u8g2_DrawUTF8(&u8g2, 8, 49, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name);//12
     }
     else if(current_state==cal_suceed){
       for(uint8_t x=0;x<3;x++){
         sprintf(str, "Cal %s: %u", state_tempstr[x], adcCal[x]);
-        u8g2_DrawStr(&u8g2, 6, (x*14), str);
+        u8g2_DrawUTF8(&u8g2, 6, (x*14), str);
       }
-      u8g2_DrawStr(&u8g2, 0, 49, "SUCCEED!");
+      u8g2_DrawUTF8(&u8g2, 0, 49, strings[lang].CAL_Succeed);
       setUserTemperature(0);
     }
     else if(current_state==cal_failed){
-      putStrAligned("FAILED!", 15, align_center);
+      putStrAligned(strings[lang].CAL_Failed, 15, align_center);
       setUserTemperature(0);
     }
     else if(current_state==cal_needsAdjust){
-      putStrAligned("DELTA TOO HIGH!", 0, align_center);
-      putStrAligned("Adjust manually", 15, align_center);
-      putStrAligned("and try again", 30, align_center);
+      putStrAligned(strings[lang].CAL_DELTA_HIGH_1, 0, align_center);
+      putStrAligned(strings[lang].CAL_DELTA_HIGH_2, 15, align_center);
+      putStrAligned(strings[lang].CAL_DELTA_HIGH_3, 30, align_center);
       setUserTemperature(0);
     }
   }
@@ -440,19 +441,23 @@ static void Cal_Start_create(screen_t *scr) {
   displayOnly_widget_t *dis;
   editable_widget_t* edit;
 
+  update_language();
+
   newWidget(&w,widget_button,scr);
   Widget_Cal_Back=w;
   w->posX = 84;
   w->posY = 48;
   w->width = 42;
-  ((button_widget_t*)w->content)->displayString="STOP";
+  ((button_widget_t*)w->content)->displayString=strings[lang]._STOP;
   ((button_widget_t*)w->content)->selectable.tab=0;
   ((button_widget_t*)w->content)->action = &cancelAction;
+  ((button_widget_t*)w->content)->font=font_menu;
 
   newWidget(&w,widget_editable,scr);
   Widget_Cal_Measured=w;
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
+  dis->font=font_menu;
   dis->reservedChars = 5;
   dis->endString = "\260C";
   dis->getData = &getMeasuredTemp;
@@ -518,10 +523,13 @@ static void Cal_Settings_create(screen_t *scr){
   widget_t* w;
   editable_widget_t* edit;
 
+  update_language();
+
   // Combo Start
   newWidget(&w,widget_combo,scr);
+  ((comboBox_widget_t*)w->content)->font = font_menu;
 
-  newComboEditable(w, "Cal 250", &edit, &Cal_Combo_Adjust_C250);
+  newComboEditable(w, strings[lang]._Cal_250, &edit, &Cal_Combo_Adjust_C250);
   edit->inputData.reservedChars=4;
   edit->inputData.getData = &getCal250;
   edit->big_step = 100;
@@ -531,7 +539,7 @@ static void Cal_Settings_create(screen_t *scr){
   edit->min_value = 0;
   edit->selectable.processInput=&Cal250_processInput;
 
-  newComboEditable(w, "Cal 350", &edit, &Cal_Combo_Adjust_C350);
+  newComboEditable(w, strings[lang]._Cal_350, &edit, &Cal_Combo_Adjust_C350);
   edit->inputData.reservedChars=4;
   edit->inputData.getData = &getCal350;
   edit->big_step = 100;
@@ -541,7 +549,7 @@ static void Cal_Settings_create(screen_t *scr){
   edit->min_value = 0;
   edit->selectable.processInput=&Cal350_processInput;
 
-  newComboEditable(w, "Cal 450", &edit, &Cal_Combo_Adjust_C450);
+  newComboEditable(w, strings[lang]._Cal_450, &edit, &Cal_Combo_Adjust_C450);
   edit->inputData.reservedChars=4;
   edit->inputData.getData = &getCal450;
   edit->big_step = 100;
@@ -551,8 +559,8 @@ static void Cal_Settings_create(screen_t *scr){
   edit->min_value = 0;
   edit->selectable.processInput=&Cal450_processInput;
 
-  newComboAction(w, "SAVE", &Cal_Settings_SaveAction, NULL);
-  newComboAction(w, "CANCEL", &Cal_Settings_CancelAction, NULL);
+  newComboAction(w, strings[lang]._SAVE, &Cal_Settings_SaveAction, NULL);
+  newComboScreen(w, strings[lang]._CANCEL, screen_calibration, NULL);
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------

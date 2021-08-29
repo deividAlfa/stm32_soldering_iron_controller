@@ -14,8 +14,11 @@
 // Boot Screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
 screen_t Screen_boot;
-static widget_t *Widget_profile_edit;
+static widget_t *Widget_profile;
+static widget_t *Widget_lang;
+static widget_t *Widget_ok;
 static uint8_t boot_step=0;
+static uint8_t current_lang = lang_english;
 
 // Credits: Jesus Vallejo  https://github.com/jesusvallejo/
 const uint8_t splashXBM[] = {
@@ -107,7 +110,7 @@ const uint8_t splashXBM[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, };
 
-
+void boot_screen_create(screen_t *scr);
 
 //=========================================================
 static void * getProfile() {
@@ -118,23 +121,58 @@ static void setProfile(int32_t *val) {
   profile=*val;
 }
 //=========================================================
+static void * getLanguage() {
+  temp = systemSettings.settings.language;
+  return &temp;
+}
 
+static void setLanguage(uint32_t *val) {
+  lang = *val;
+  systemSettings.settings.language=*val;
+}
+//=========================================================
+
+static int SaveSetup(widget_t* w) {
+  loadProfile(profile);
+  saveSettingsFromMenu(save_Settings);
+  boot_step++;
+  return -1;
+}
+//=========================================================
+void draw_boot_strings(void){
+  u8g2_SetFont(&u8g2, font_menu );
+  u8g2_SetDrawColor(&u8g2, WHITE);
+  putStrAligned(strings[lang].boot_firstBoot, 0, align_center);
+  u8g2_DrawHLine(&u8g2, 0, 13, OledWidth);
+  u8g2_DrawUTF8(&u8g2, 0, 20, strings[lang].boot_Profile);
+  u8g2_DrawUTF8(&u8g2, 0, 37, strings[lang]._Language);
+}
 
 void boot_screen_draw(screen_t *scr){
+  uint8_t refresh = scr->refresh;
   default_screenDraw(scr);
+
+  if(refresh>screen_Idle){
+    draw_boot_strings();
+  }
+
   if(boot_step==1){
-    boot_step++;;
-    u8g2_SetFont(&u8g2,default_font );
-    u8g2_SetDrawColor(&u8g2, WHITE);
-    putStrAligned("First boot!", 0, align_center);
-    u8g2_DrawHLine(&u8g2, 0, 16, OledWidth);
-    u8g2_DrawStr(&u8g2, 8, 32, "Profile:");
-    return;
+    boot_step++;
   }
 }
 
 
 int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
+  if(lang!=current_lang){                                                       // If language changed
+    oled_destroy_screen(scr);                                                   // Destroy and create the screen
+    boot_screen_create(scr);
+    scr->current_widget = Widget_lang;
+    scr->refresh = screen_Erase;
+    ((editable_widget_t*)Widget_lang->content)->selectable.state=widget_edit;
+    widgetEnable(Widget_lang);
+    widgetEnable(Widget_profile);
+    widgetEnable(Widget_ok);
+  }
 
   if(input!=Rotate_Nothing){
     refreshOledDim();
@@ -147,15 +185,10 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
     }
     else if(boot_step==0){
       boot_step++;
-      widgetEnable(Widget_profile_edit);
-      ((editable_widget_t*)Widget_profile_edit->content)->selectable.previous_state = widget_selected;
-      ((editable_widget_t*)Widget_profile_edit->content)->selectable.state = widget_edit;
+      widgetEnable(Widget_lang);
+      widgetEnable(Widget_profile);
+      widgetEnable(Widget_ok);
       scr->refresh = screen_Erase;
-    }
-    else if((boot_step==2) && (((editable_widget_t*)Widget_profile_edit->content)->selectable.state!=widget_edit)){
-      loadProfile(profile);
-      saveSettingsFromMenu(save_Settings);
-      boot_step++;
     }
     else if(boot_step==3){
       systemSettings.setupMode=disable;
@@ -172,7 +205,6 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 
 void boot_screen_init(screen_t * scr){
   default_init(scr);
-
   profile=systemSettings.settings.currentProfile;
   if( (systemSettings.settings.NotInitialized!=initialized) || (profile>profile_C210) ){
     profile=profile_T12;
@@ -188,13 +220,19 @@ void boot_screen_init(screen_t * scr){
 
 void boot_screen_create(screen_t *scr){
   widget_t *w;
+  displayOnly_widget_t *dis;
+  editable_widget_t *edit;
+
+  update_language();
+  current_lang = lang;
 
   //  [ Profile Select Widget ]
   //
   newWidget(&w, widget_multi_option, scr);
-  Widget_profile_edit = w;
-  displayOnly_widget_t *dis=extractDisplayPartFromWidget(w);
-  editable_widget_t *edit=extractEditablePartFromWidget(w);
+  Widget_profile = w;
+  dis=extractDisplayPartFromWidget(w);
+  edit=extractEditablePartFromWidget(w);
+  dis->font = font_menu;
   dis->reservedChars=4;
   dis->getData = &getProfile;
   edit->big_step = 1;
@@ -205,7 +243,42 @@ void boot_screen_create(screen_t *scr){
   edit->options = profileStr;
   edit->numberOfOptions = ProfileSize;
   w->posX = 76;
-  w->posY = 30;
+  w->posY = 16;
+  w->width = 44;
+  w->enabled=0;
+
+  //  [ Language Select Widget ]
+  //
+  newWidget(&w, widget_multi_option, scr);
+  Widget_lang = w;
+  dis=extractDisplayPartFromWidget(w);
+  edit=extractEditablePartFromWidget(w);
+  dis->font = font_menu;
+  dis->reservedChars=2;
+  dis->getData = &getLanguage;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->selectable.tab = 1;
+  edit->setData = (void (*)(void *))&setLanguage;
+  edit->max_value = 1;
+  edit->options = Langs;
+  edit->numberOfOptions = 2;
+  w->posX = 76;
+  w->posY = 32;
+  w->width = 44;
+  w->enabled=0;
+
+  //  [ OK button Widget ]
+  //
+  newWidget(&w, widget_button, scr);
+  Widget_ok = w;
+  button_widget_t* button=Widget_ok->content;
+  button->displayString = strings[lang]._SAVE;
+  button->font = font_menu;
+  button->selectable.tab = 2;
+  button->action = &SaveSetup;
+  w->posX = 76;
+  w->posY = 48;
   w->width = 44;
   w->enabled=0;
 }

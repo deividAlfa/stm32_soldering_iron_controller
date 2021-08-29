@@ -577,7 +577,7 @@ static void drawIcons(uint8_t *refresh){
 static void drawError(void){
   if(Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
     u8g2_SetFont(&u8g2, u8g2_font_noIron_Sleep);
-    putStrAligned("NO IRON", 20, align_center);
+    putStrAligned(strings[lang].main_error_noIron, 20, align_center);
   }
   else{
     uint8_t Err_ypos;
@@ -589,25 +589,26 @@ static void drawError(void){
     else{
       Err_ypos=12;
     }
-    u8g2_SetFont(&u8g2, u8g2_font_small);
+    u8g2_SetFont(&u8g2, u8g2_font_6x13_t_cyrillic);
+    //u8g2_SetFont(&u8g2, u8g2_font_small);
     if(Iron.Error.V_low){
-      putStrAligned("VOLTAGE LOW", Err_ypos, align_center);
+      putStrAligned(strings[lang].main_error_VoltageLow, Err_ypos, align_center);
       Err_ypos+=12;
     }
     if(Iron.Error.safeMode){
-      putStrAligned("FAILSAFE MODE", Err_ypos, align_center);
+      putStrAligned(strings[lang].main_error_failsafe, Err_ypos, align_center);
       Err_ypos+=12;
     }
     if(Iron.Error.NTC_high){
-      putStrAligned("NTC READ HIGH", Err_ypos, align_center);
+      putStrAligned(strings[lang].main_error_NTC_high, Err_ypos, align_center);
       Err_ypos+=12;
     }
     else if(Iron.Error.NTC_low){
-      putStrAligned("NTC READ LOW", Err_ypos, align_center);
+      putStrAligned(strings[lang].main_error_NTC_low, Err_ypos, align_center);
       Err_ypos+=12;
     }
     if(Iron.Error.noIron){
-      putStrAligned("NO IRON DETECTED", Err_ypos, align_center);
+      putStrAligned(strings[lang].main_error_noIron_Detected, Err_ypos, align_center);
       Err_ypos+=12;
     }
   }
@@ -631,28 +632,29 @@ static void drawScreenSaver(uint8_t *refresh){
 static void drawMode(uint8_t *refresh){
   if(!*refresh) return;
 
-  u8g2_SetFont(&u8g2, u8g2_font_small);
+  u8g2_SetFont(&u8g2, font_small);
 
+  //u8g2_SetFont(&u8g2, u8g2_font_small);
   switch(getCurrentMode()){
 
     case mode_run:
     {
       char SetTemp[6];
       sprintf(SetTemp,"%u\260C", Iron.CurrentSetTemperature);
-      u8g2_DrawStr(&u8g2, 44, 0, SetTemp);
+      u8g2_DrawUTF8(&u8g2, 47, 0, SetTemp);
       break;
     }
 
     case mode_sleep:
-      u8g2_DrawStr(&u8g2, 41, 0, "SLEEP");
+      u8g2_DrawUTF8(&u8g2, 43, 0, strings[lang].main_mode_Sleep);
       break;
 
     case mode_standby:
-      u8g2_DrawStr(&u8g2, 46, 0, "STBY");
+      u8g2_DrawUTF8(&u8g2, 47, 0, strings[lang].main_mode_Standby);
       break;
 
     case mode_boost:
-      u8g2_DrawStr(&u8g2, 42, 0, "BOOST");
+      u8g2_DrawUTF8(&u8g2, 44, 0, strings[lang].main_mode_Boost);
 
     default:
       break;
@@ -746,13 +748,13 @@ void drawAux(uint8_t *refresh){
       break;
   }
   if(error) drawError();
-  u8g2_SetFont(&u8g2, u8g2_font_small);
+  u8g2_SetFont(&u8g2, font_small);
   if(frame){
-    uint8_t len = u8g2_GetStrWidth(&u8g2, tipNames[systemSettings.Profile.currentTip])+4;   // Draw edit frame
+    uint8_t len = u8g2_GetUTF8Width(&u8g2, tipNames[systemSettings.Profile.currentTip])+4;   // Draw edit frame
     u8g2_DrawRBox(&u8g2, 0, 54, len, 10, 2);
     u8g2_SetDrawColor(&u8g2, BLACK);
   }
-  u8g2_DrawStr(&u8g2, 2, 54, tipNames[systemSettings.Profile.currentTip]);                  // Draw tip name
+  u8g2_DrawUTF8(&u8g2, 2, 54, tipNames[systemSettings.Profile.currentTip]);                  // Draw tip name
   u8g2_SetDrawColor(&u8g2, WHITE);
 }
 
@@ -815,6 +817,8 @@ static void main_screen_create(screen_t *scr){
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
 
+  update_language();
+
   //  [ Iron Temp Widget ]
   //
   newWidget(&w,widget_display,scr);
@@ -860,7 +864,7 @@ static void main_screen_create(screen_t *scr){
   dis->reservedChars=5;
   dis->textAlign=align_center;
   dis->number_of_dec=1;
-  dis->font=u8g2_font_small;
+  dis->font=font_small;
   w->posY= 0;
   w->posX = voltXBM[0]+2;
   edit=extractEditablePartFromWidget(w);
@@ -877,7 +881,7 @@ static void main_screen_create(screen_t *scr){
   dis->dispAlign=align_right;
   dis->textAlign=align_right;
   dis->number_of_dec=1;
-  dis->font=u8g2_font_small;
+  dis->font=font_small;
   dis->getData = &main_screen_getAmbTemp;
   w->posY = 0;
   w->width = 38;

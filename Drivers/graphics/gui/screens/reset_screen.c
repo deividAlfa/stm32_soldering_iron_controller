@@ -65,19 +65,22 @@ static void reset_onEnter(screen_t *scr){
 static void reset_create(screen_t *scr){
   widget_t* w;
   comboBox_item_t *item;
+  update_language();
 
   //  [ RESET OPTIONS COMBO ]
   //
   newWidget(&w,widget_combo, scr);
-  newComboAction(w, "Reset Settings", &doSettingsReset, &item);
+  ((comboBox_widget_t*)w->content)->font = font_menu;
+
+  newComboAction(w, strings[lang].RESET_Reset_Settings, &doSettingsReset, &item);
   item->dispAlign=align_left;
-  newComboAction(w, "Reset Profile", &doProfileReset, &item);
+  newComboAction(w, strings[lang].RESET_Reset_Profile, &doProfileReset, &item);
   item->dispAlign=align_left;
-  newComboAction(w, "Reset Profiles", &doProfilesReset, &item);
+  newComboAction(w, strings[lang].RESET_Reset_Profiles, &doProfilesReset, &item);
   item->dispAlign=align_left;
-  newComboAction(w, "Reset All", &doFactoryReset, &item);
+  newComboAction(w, strings[lang].RESET_Reset_All, &doFactoryReset, &item);
   item->dispAlign=align_left;
-  newComboScreen(w, "BACK", screen_system, NULL);
+  newComboScreen(w, strings[lang]._BACK, screen_system, NULL);
 }
 
 
@@ -86,25 +89,25 @@ static void reset_confirmation_init(screen_t *scr){
   //FillBuffer(BLACK, fill_dma);                              // Manually clear the screen
   //Screen_reset_confirmation.refresh=screen_Erased;          // Set to already cleared so it doesn't get erased automatically
 
-  u8g2_SetFont(&u8g2,default_font);
+  u8g2_SetFont(&u8g2,font_menu);
   u8g2_SetDrawColor(&u8g2, WHITE);
 
   switch(resStatus){
   case 0:
-    putStrAligned("RESET SYSTEM", 0, align_center);
-    putStrAligned("SETTINGS?", 16, align_center);
+    putStrAligned(strings[lang].RESET_Reset_msg_settings_1, 0, align_center);
+    putStrAligned(strings[lang].RESET_Reset_msg_settings_2, 16, align_center);
     break;
   case 1:
-    putStrAligned("RESET CURRENT",0 , align_center);
-    putStrAligned("PROFILE?", 16, align_center);
+    putStrAligned(strings[lang].RESET_Reset_msg_profile_1, 0 , align_center);
+    putStrAligned(strings[lang].RESET_Reset_msg_profile_2, 16, align_center);
     break;
   case 2:
-    putStrAligned("RESET ALL",0 , align_center);
-    putStrAligned("PROFILES?", 16, align_center);
+    putStrAligned(strings[lang].RESET_Reset_msg_profiles_1,0 , align_center);
+    putStrAligned(strings[lang].RESET_Reset_msg_profiles_2, 16, align_center);
     break;
   case 3:
-    putStrAligned("PERFORM FULL", 0, align_center);
-    putStrAligned("SYSTEM RESET?", 16, align_center);
+    putStrAligned(strings[lang].RESET_Reset_msg_all_1, 0, align_center);
+    putStrAligned(strings[lang].RESET_Reset_msg_all_2, 16, align_center);
     break;
   }
 }
@@ -112,13 +115,15 @@ static void reset_confirmation_init(screen_t *scr){
 
 static void reset_confirmation_create(screen_t *scr){
   widget_t* w;
+  update_language();
 
   //  [ Name Save Button Widget ]
   //
   newWidget(&w,widget_button,scr);
-  ((button_widget_t*)w->content)->displayString="RESET";
+  ((button_widget_t*)w->content)->displayString=strings[lang]._RESET;
   ((button_widget_t*)w->content)->selectable.tab = 1;
   ((button_widget_t*)w->content)->action = &doReset;
+  ((button_widget_t*)w->content)->font= font_menu;
   w->posX = 0;
   w->posY = 48;
   w->width = 50;
@@ -126,9 +131,10 @@ static void reset_confirmation_create(screen_t *scr){
   //  [ Name Back Button Widget ]
   //
   newWidget(&w,widget_button,&Screen_reset_confirmation);
-  ((button_widget_t*)w->content)->displayString="CANCEL";
+  ((button_widget_t*)w->content)->displayString=strings[lang]._CANCEL;
   ((button_widget_t*)w->content)->selectable.tab = 0;
   ((button_widget_t*)w->content)->action = &cancelReset;
+  ((button_widget_t*)w->content)->font= font_menu;
   w->posX = 72;
   w->posY = 48;
   w->width = 56;
