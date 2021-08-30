@@ -139,7 +139,6 @@ typedef struct{
 
   char *OffOn[2];
   char *DownUp[2];
-  char *tempUnit[2];
   char *wakeMode[2];
   char *encMode[2];
   char *InitMode[3];
@@ -148,6 +147,7 @@ typedef struct{
 }strings_t;
 
 extern const strings_t strings[LANGUAGE_COUNT];
+extern char * tempUnit[2];
 extern char *profileStr[ProfileSize];
 extern char *Langs[LANGUAGE_COUNT];
 

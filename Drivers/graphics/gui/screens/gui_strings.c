@@ -138,7 +138,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
      .OffOn =       { "OFF", "ON" },
      .DownUp =      { "DOWN", "UP" },
      .WakeModes =   { "OFF", "STBY", "SLP", "ALL" },
-     .tempUnit =    { "\260C", "\260F" },
      .wakeMode =    { "SHAKE", "STAND" },
      .encMode =     { "REVERSE", "NORMAL" },
      .InitMode =    { "SLP", "STBY", "RUN" },
@@ -246,7 +245,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .CAL_DELTA_HIGH_1 = "РАЗНИЦА ВЕЛИКА",
       .CAL_DELTA_HIGH_2 = "задайте вручную",
       .CAL_DELTA_HIGH_3 = "и повторите",
-      .CAL_Error = "ERROR DETECTED!",
+      .CAL_Error = "ERROR DETECTED!",           // TODO translate this
       .CAL_Aborting = "Aborting...",
 
       .__Temp = " Нагрев",
@@ -269,10 +268,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .ERROR_SYSTEM_HALTED = "БЫЛИННЫЙ ОТКАЗ",
       .ERROR_BTN_RESET = "наж.для рестарта",
 
-      .OffOn =       { "OFF", "ON" },
+      .OffOn =       { "OFF", "ON" },           // TODO translate this
       .DownUp =      { "DOWN", "UP" },
       .WakeModes =   { "OFF", "STBY", "SLP", "ALL" },
-      .tempUnit =    { "\260C", "\260F" },
       .wakeMode =    { "SHAKE", "STAND" },
       .encMode =     { "REVERSE", "NORMAL" },
       .InitMode =    { "SLP", "STBY", "RUN" },
@@ -281,6 +279,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 };
 
 
+char * tempUnit[2] =    { "\260C", "\260F" };
 char * profileStr[ProfileSize] = { "T12", "C245", "C210" };
 char * Langs[LANGUAGE_COUNT] = {
                                    [lang_english] = "EN",
