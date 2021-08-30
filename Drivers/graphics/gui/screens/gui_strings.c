@@ -53,7 +53,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
      .FILTER_Reset_limit = "Reset limit",
 
      .SYSTEM_Profile = "Profile",
-     ._Language = "Language",
      .SYSTEM_Contrast = "Contrast",
      .SYSTEM_Auto_Dim = "Auto dim",
      .SYSTEM_Offset = "Offset",
@@ -115,6 +114,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
      .CAL_Error = "ERROR DETECTED!",
      .CAL_Aborting = "Aborting...",
 
+     ._Language = "Language",
      .__Temp = " Temp",
      .__Delay = " Delay",
      ._Cal_250 = "Cal 250\260C",
@@ -185,7 +185,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER__Min = " Минимум",
       .FILTER_Reset_limit = "Порог сброса",
 
-      ._Language = "Язык",
       .SYSTEM_Profile = "Тип",
       .SYSTEM_Contrast = "Яркость",
       .SYSTEM_Auto_Dim = "Затемнять",
@@ -248,6 +247,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .CAL_Error = "ERROR DETECTED!",           // TODO translate this
       .CAL_Aborting = "Aborting...",
 
+      ._Language = "Язык",
       .__Temp = " Нагрев",
       .__Delay = " Задержка",
       ._Cal_250 = "АЦП 250\260C",
