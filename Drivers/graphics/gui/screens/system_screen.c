@@ -443,7 +443,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setTmpUnit;
   edit->max_value = mode_Farenheit;
   edit->min_value = mode_Celsius;
-  edit->options = strings[lang].tempUnit;
+  edit->options = tempUnit;
   edit->numberOfOptions = 2;
 
 
