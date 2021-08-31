@@ -80,6 +80,8 @@ Iron settings control the operation of the handle/tips. <br>
 Upper adjustable temperature limit.<br>
   - **Min temperature**<br>
 Lower adjustable temperature limit.<br>
+  - **User temperature**<br>
+Temperature applied at boot. To reduce flash wear, setpoint adjustment is not saved!<br>
   - **Boost time**<br>
 Boost mode run time before resuming normal mode.<br>
   - **Boost temperature**<br>
