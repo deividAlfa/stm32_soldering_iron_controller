@@ -45,7 +45,6 @@ extern "C" {
 /* USER CODE BEGIN ET */
 extern IWDG_HandleTypeDef hiwdg;
 extern CRC_HandleTypeDef hcrc;
-extern struct mallinfo mi;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -56,7 +55,12 @@ extern struct mallinfo mi;
 //               __attribute__((optimize("O0")))
 
 #define DEBUG_ERROR
-#define DEBUG_ALLOC
+
+#ifdef DEBUG
+extern struct mallinfo mi;
+#define DEBUG_ALLOC                   // Enable alloc debugging in debug builds
+#endif
+
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -72,8 +76,6 @@ extern struct mallinfo mi;
 	void _Error_Handler(char *, int);
 #endif
 /* USER CODE END EM */
-
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
@@ -107,7 +109,6 @@ extern uint32_t max_allocated;
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-
 /* USER CODE BEGIN Private defines */
 #define WAKE_input()		HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin)
 #define BUTTON_input()		HAL_GPIO_ReadPin(ENC_SW_GPIO_Port, ENC_SW_Pin)
