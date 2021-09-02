@@ -144,8 +144,8 @@ void draw_boot_strings(void){
   u8g2_SetDrawColor(&u8g2, WHITE);
   putStrAligned(strings[lang].boot_firstBoot, 0, align_center);
   u8g2_DrawHLine(&u8g2, 0, 13, OledWidth);
-  u8g2_DrawUTF8(&u8g2, 0, 20, strings[lang].boot_Profile);
-  u8g2_DrawUTF8(&u8g2, 0, 37, strings[lang]._Language);
+  u8g2_DrawUTF8(&u8g2, 0, 18, strings[lang].boot_Profile);
+  u8g2_DrawUTF8(&u8g2, 0, 34, strings[lang]._Language);
 }
 
 void boot_screen_draw(screen_t *scr){
@@ -242,7 +242,7 @@ void boot_screen_create(screen_t *scr){
   edit->max_value = ProfileSize-1;
   edit->options = profileStr;
   edit->numberOfOptions = ProfileSize;
-  w->posX = 76;
+  w->posX = 74;
   w->posY = 16;
   w->width = 44;
   w->enabled=0;
@@ -263,7 +263,7 @@ void boot_screen_create(screen_t *scr){
   edit->max_value = 1;
   edit->options = Langs;
   edit->numberOfOptions = 2;
-  w->posX = 76;
+  w->posX = 74;
   w->posY = 32;
   w->width = 44;
   w->enabled=0;
@@ -277,7 +277,7 @@ void boot_screen_create(screen_t *scr){
   button->font = font_menu;
   button->selectable.tab = 2;
   button->action = &SaveSetup;
-  w->posX = 76;
+  w->posX = 74;
   w->posY = 48;
   w->width = 44;
   w->enabled=0;
