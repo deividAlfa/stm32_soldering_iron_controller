@@ -1,2 +1,0 @@
-rem bdfconv_2_22.exe -v -b0 -f1 -m "33,45,46,48-57,62,66,67,70,72,79,83,84,86,89,176" ../bdf/wizzard12_.bdf -o c\labels.c  -n u8g2_font_labels
-bdfconv_2_22.exe -v -b0 -f1 -m "32,33,45,46,48-57,65-90,176" ../bdf/wizzard12_.bdf -o c\labels.c  -n u8g2_font_labels

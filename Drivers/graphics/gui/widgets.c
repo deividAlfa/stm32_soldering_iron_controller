@@ -714,7 +714,6 @@ void default_widgetDraw(widget_t *w) {
   }
 
   if(frameDraw || w->frameType==frame_outline){
-    if(font==u8g2_font_ironTemp){ cHeight+=3; }
     switch(w->type){
       case widget_bmp_button:
         u8g2_SetDrawColor(&u8g2, frameColor);

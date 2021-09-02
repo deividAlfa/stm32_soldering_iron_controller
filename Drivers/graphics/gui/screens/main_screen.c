@@ -576,7 +576,7 @@ static void drawIcons(uint8_t *refresh){
 
 static void drawError(void){
   if(lang!=lang_russian && Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
-    u8g2_SetFont(&u8g2, u8g2_font_noIron_Sleep);
+    u8g2_SetFont(&u8g2, u8g2_font_no_iron_big);
     putStrAligned(strings[lang].main_error_noIron, 20, align_center);
   }
   else{
@@ -727,7 +727,7 @@ static void drawPlot(uint8_t *refresh){
   }
 }
 
-void drawAux(uint8_t *refresh){
+void drawMisc(uint8_t *refresh){
   if(!*refresh) return;
   uint8_t frame=0, error=0;
   switch(mainScr.currentMode){
@@ -786,7 +786,7 @@ void main_screen_draw(screen_t *scr){
   drawPowerBar(&refresh);
   drawIcons(&refresh);
   drawMode(&refresh);
-  drawAux(&refresh);
+  drawMisc(&refresh);
   drawPlot(&refresh);
 
   default_screenDraw(scr);
@@ -826,7 +826,7 @@ static void main_screen_create(screen_t *scr){
   dis->reservedChars=5;
   dis->dispAlign=align_center;
   dis->textAlign=align_center;
-  dis->font=u8g2_font_ironTemp;
+  dis->font=u8g2_font_iron_temp;
   w->posY = 15;
   dis->getData = &main_screen_getIronTemp;
   w->enabled=0;
