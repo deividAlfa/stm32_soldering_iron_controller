@@ -262,7 +262,7 @@ void boot_screen_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setLanguage;
   edit->max_value = 1;
   edit->options = Langs;
-  edit->numberOfOptions = 2;
+  edit->numberOfOptions = 3;
   w->posX = 74;
   w->posY = 32;
   w->width = 44;

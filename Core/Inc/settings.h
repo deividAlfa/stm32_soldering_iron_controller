@@ -33,9 +33,9 @@
 
 #endif
 
-#define LANGUAGE_COUNT    2
+#define LANGUAGE_COUNT    3
 //#define SWSTRING        "SW: v1.10"                               // For releases
-#define SWSTRING          "SW: 2021-09-02"                          // For git
+#define SWSTRING          "SW: 210902-SE"                          // For git
 #define SETTINGS_VERSION  11                                         // Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize         2                                         // In KB
 #define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
@@ -106,6 +106,7 @@ enum{
 
   lang_english             = 0,
   lang_russian             = 1,
+  lang_swedish			   = 2,
 };
 
 
