@@ -243,7 +243,7 @@ static void debug_onEnter(screen_t *scr){
   displayOnly_widget_t *dis = extractDisplayPartFromWidget(widget_Temp);
 
   if(systemSettings.settings.tempUnit==mode_Celsius){
-    if(scr==&Screen_pid_debug){
+    if(scr!=&Screen_debug){
       edit->max_value = 450;
       edit->min_value = 50;
       edit->big_step = 20;
@@ -253,7 +253,7 @@ static void debug_onEnter(screen_t *scr){
     dis->endString="\260C";
   }
   else{
-    if(scr==&Screen_pid_debug){
+    if(scr!=&Screen_debug){
       edit->max_value = 850;
       edit->min_value = 120;
       edit->big_step = 50;
