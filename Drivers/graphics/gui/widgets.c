@@ -549,21 +549,18 @@ void default_widgetDraw(widget_t *w) {
   selectable_widget_t* sel = extractSelectablePartFromWidget(w);
   button_widget_t* button = NULL;
   bmp_widget_t* bmp = NULL;
-  const uint8_t* font = NULL;
   uint8_t refresh = w->refresh | w->parent->refresh;
   uint8_t cHeight = 0;
 
   if( dis ){
     u8g2_SetFont(&u8g2, dis->font);
     cHeight = u8g2_GetMaxCharHeight(&u8g2);
-    font = dis->font;
   }
   else if((w->type == widget_button)||(w->type == widget_bmp_button)){
     button = (button_widget_t*)w->content;
     if(w->type == widget_button){
       u8g2_SetFont(&u8g2, button->font);
       cHeight = u8g2_GetMaxCharHeight(&u8g2);
-      font = button->font;
     }
   }
   else if(w->type == widget_bmp){
