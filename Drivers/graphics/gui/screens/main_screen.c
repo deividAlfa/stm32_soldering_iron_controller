@@ -385,6 +385,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         case Rotate_Decrement:
           if(Iron.CurrentMode==mode_boost){
             setCurrentMode(mode_run);
+            break;
           }
           else if(current_mode!=mode_run){
             IronWake(wakeButton);
