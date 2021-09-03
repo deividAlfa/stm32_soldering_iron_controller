@@ -86,7 +86,7 @@ Use one of these ST-LINK clones ($3 or less), refer to the schematics for the SW
 
 Download the binary **STM32SolderingStation.bin** already compiled from the /BOARDS folder and flash it using stlink.<br>
 You don't need to erase the whole flash, that way you can preserve the settings when you updating to a new version.<br>
-The firmware will check and reset the settings if it finds out an uncompatible version, this happoens when the settings structure has changed.<br>
+In any case, the firmware will check the settings and reset them if not valid.<br>
 Follow this pictures to update the firmware without erasing the stored settings:<br>
 <img src="/Readme_files/stlink_erase.png?raw=true"><br>
 <img src="/Readme_files/stlink_program.png?raw=true"><br>
