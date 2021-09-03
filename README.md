@@ -117,7 +117,7 @@ So the factory calibration is intentionally set lower than real, to avoid possib
 Once you set the firmware, go to calibration and set there the real temperature measured with the external probe.<br>
 
 ### Cold tip not showing ambient temperature
-A cold tip will display 30-50ºC over the ambient temperature.<br>
+Usually, a cold tip will display 20-50ºC over the ambient temperature.<br>
 Every amplifier has a small inherent voltage offset at the inputs, and this issue directly caused by that offset.<br>
 The actual offset is very low, 30ºC is about 360uV (0.000360V), so it can't be fixed easily.<br>
 Not a a firmware bug, and it doesn't affect the working temperatures when calibrated.<br>
