@@ -464,7 +464,7 @@ void setCurrentMode(uint8_t mode){
     Iron.CurrentSetTemperature = systemSettings.Profile.standbyTemperature;               // Set standby temp
   }
   else if(mode==mode_boost){
-    Iron.CurrentSetTemperature = systemSettings.Profile.UserSetTemperature+systemSettings.Profile.boostTemperature;
+   	Iron.CurrentSetTemperature = Iron.UserSetTemperature+systemSettings.Profile.boostTemperature;
     if(Iron.CurrentSetTemperature>systemSettings.Profile.MaxSetTemperature){
       Iron.CurrentSetTemperature=systemSettings.Profile.MaxSetTemperature;
     }
