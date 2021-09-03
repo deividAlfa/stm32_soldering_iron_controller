@@ -85,7 +85,8 @@ There's no support for custom bootloaders.<br>
 Use one of these ST-LINK clones ($3 or less), refer to the schematics for the SWD pinout.<br>
 
 Download the binary **STM32SolderingStation.bin** already compiled from the /BOARDS folder and flash it using stlink.<br>
-Follow this pictures to update the firmware without erasing the stored settings:<br>
+Follow this pictures to update the firmware without erasing the stored settings.<br>
+Important: STM32F072 has a 2KB flash sector size, so only de-select the last sector.<br>
 (Click for bigger picture)<br>
 <img src="/Readme_files/stlink_erase.png?raw=true"><br>
 <img src="/Readme_files/stlink_program.png?raw=true"><br>
