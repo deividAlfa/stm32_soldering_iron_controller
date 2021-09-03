@@ -1,9 +1,14 @@
 # Operating Instructions<br>
 
 ## Initial Startup<br>
-When an unconfigured (new or fully reset) controller starts, it first offers a choice of which tip profile to use.<br>
-Select the one appropriate for your iron. (JBC cartidges usually require electrical changes to the controller).<br>
+When an unconfigured (new or fully reset) controller starts, an initial setup screen will be shown to setup the system language and the tip profile.<br>
 
+Currently, these are the available languages:
+- **English**<br>
+- **Russian**<br>
+- **Swedish**<br>
+
+You can select between the following profiles:
 - **Hakko T12** (T15 Series in North America & EU) This is the handle normally used with these controllers.<br>
 - **JBC C210**<br>
 - **JBC C245**<br>
@@ -152,6 +157,8 @@ Return to system menu.<br>
 
 ### SYSTEM
 General settings for the controller.<br>
+  - **Language**<br>
+Sets the display language.<br>
   - **Profile**<br>
 Sets which iron profile (__T12__, __C210__, __C245__) to use.<br>
   - **Contrast**<br>
