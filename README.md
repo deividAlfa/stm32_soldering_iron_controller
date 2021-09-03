@@ -68,6 +68,9 @@ There are several compatible/cloned boards in the market that will work fine wit
 
 First, make sure to read the [Operations guide](Readme_files/Operation.md)!<br>
 
+### Changelog<br>
+You can check the [commit history](https://github.com/deividAlfa/stm32_soldering_iron_controller/commits/master) to see what have been changed between builds.
+
 ### Backing up the original firmware
 Be warned, usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.<br>
 For KSGER boards, some can be found over internet.<br>
