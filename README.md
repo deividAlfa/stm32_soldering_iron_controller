@@ -41,7 +41,7 @@ The actual requirements are 10KB RAM and 64KB **(\*)** flash.<br>
 **(\*)** Currently the firmware has surpassed the 64KB limit, and uses the additional undocumented 64KB flash block.<br>
 **(\*)** All 64KB devices have 128KB, with the 2nd 64KB block untested from the factory, so not guaranteed to work.<br>
 **(\*)** To date, I have found zero issues. Original KSGER firmware also does this.<br>
-**(\*)** ST-Link checks the written data and the firmware uses CRC32 checksum to protect the settings, so any error will be detected.<br>
+**(\*)** ST-Link checks the written data, and the firmware uses checksums to protect the settings, any error will be detected.<br>
 
 The BOARDS folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.<br>
 Current working controller:<br>
