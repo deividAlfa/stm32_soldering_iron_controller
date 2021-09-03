@@ -508,9 +508,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;
         }
       }
+      /*
       if(input!=Rotate_Nothing){
         IronWake(wakeButton);
       }
+      */
       break;
 
     case main_setpoint:
