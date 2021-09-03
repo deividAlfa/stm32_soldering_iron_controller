@@ -33,7 +33,7 @@
 
 #endif
 
-#define LANGUAGE_COUNT    2
+#define LANGUAGE_COUNT    3
 //#define SWSTRING        "SW: v1.10"                               // For releases
 #define SWSTRING          "SW: 2021-09-03a"                          // For git
 #define SETTINGS_VERSION  11                                         // Change this if you change the struct below to prevent people getting out of sync
@@ -106,6 +106,7 @@ enum{
 
   lang_english             = 0,
   lang_russian             = 1,
+  lang_swedish             = 2,
 };
 
 
