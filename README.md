@@ -120,7 +120,7 @@ Once you set the firmware, go to calibration and set there the real temperature 
 Usually, a cold tip will display 20-50ºC over the ambient temperature.<br>
 Every amplifier has a small inherent voltage offset at the inputs, and this issue directly caused by that offset.<br>
 The actual offset is very low, 30ºC is about 360uV (0.000360V), so it can't be fixed easily.<br>
-Not a a firmware bug, and it doesn't affect the working temperatures when calibrated.<br>
+Not a a firmware bug, and it doesn't affect the working temperatures when the station has been calibrated.<br>
 Some firmwares hide this reading and show the ambient temperature instead. For now, this is not a planned feature.<br>
 
 ### Calibration issues<br>
