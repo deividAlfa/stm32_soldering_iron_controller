@@ -115,7 +115,7 @@ Buying a cheap high temperature meter is highly recommended!<br>
 These boards can have pretty different readings and tolerances. Even between T12 tips.<br>
 So the factory calibration is intentionally set lower than real, to avoid possible overheating problems.<br>
 Once you set the firmware, go to calibration and set there the real temperature measured with the external probe.<br>
-A cold tip will display 30-50ºC over the ambient temperature. This is caused by the amplifier's own voltage offset, not a firmware bug.<br
+A cold tip will display 30-50ºC over the ambient temperature. This is caused by the amplifier's input offset, not a firmware bug.<br
 That offset doesn't affect the working temperatures when calibrated.<br
 Some firmwares hide this reading and show the ambient temperature instead. For now, this is not a planned feature.<br
 
