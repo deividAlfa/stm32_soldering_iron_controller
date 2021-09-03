@@ -82,10 +82,15 @@ There are some hacks / vulnerabilities that can be used to backup protected firm
 
 ### Flashing the firmware
 There's no support for custom bootloaders.<br>
+Use one of these ST-LINK clones ($3 or less), refer to the schematics for the SWD pinout.<br>
+
 Download the binary **STM32SolderingStation.bin** already compiled from the /BOARDS folder and flash it using stlink.<br>
 You don't need to erase the whole flash, that way you can preserve the settings when you updating to a new version.<br>
 The firmware will check and reset the settings if it finds out an uncompatible version, this happoens when the settings structure has changed.<br>
-Use one of these ST-LINK clones ($3 or less), refer to the schematics for the SWD pinout.<br>
+Follow this pictures to update the firmware without erasing the stored settings:<br>
+<img src="/Readme_files/stlink_erase.png?raw=true"><br>
+<img src="/Readme_files/stlink_program.png?raw=true"><br>
+
 ### Display issues<br>
 If the display has right/left line like this picture: Go to [System menu](Readme_files/Operation.md#system) / Offset and adjust the value until it's centered.<br>
 <img src="/Readme_files/oled_offset.jpg?raw=true" width="320"><br>
