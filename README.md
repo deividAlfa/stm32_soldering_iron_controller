@@ -88,8 +88,10 @@ Download the binary **STM32SolderingStation.bin** already compiled from the /BOA
 You don't need to erase the whole flash, that way you can preserve the settings when you updating to a new version.<br>
 In any case, the firmware will check the settings and reset them if not valid.<br>
 Follow this pictures to update the firmware without erasing the stored settings:<br>
+(Click for bigger picture)<br>
 <img src="/Readme_files/stlink_erase.png?raw=true"><br>
 <img src="/Readme_files/stlink_program.png?raw=true"><br>
+
 
 ### Display issues<br>
 If the display has right/left line like this picture: Go to [System menu](Readme_files/Operation.md#system) / Offset and adjust the value until it's centered.<br>
