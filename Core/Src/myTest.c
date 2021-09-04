@@ -13,6 +13,7 @@
 #include "ssd1306.h"
 #include "gui.h"
 
+#ifdef RUN_MY_TEST
 struct{
   uint32_t tim_fps, tim_move;
   uint16_t fps,last_fps, rate, seconds;
@@ -87,3 +88,5 @@ void myTest(void){
     }
   }
 }
+
+#endif
