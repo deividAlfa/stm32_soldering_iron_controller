@@ -749,7 +749,7 @@ void drawMisc(uint8_t *refresh){
       break;
   }
   if(error) drawError();
-  u8g2_SetFont(&u8g2, font_small);
+  u8g2_SetFont(&u8g2, u8g2_font_small);
   if(frame){
     uint8_t len = u8g2_GetUTF8Width(&u8g2, tipNames[systemSettings.Profile.currentTip])+4;   // Draw edit frame
     u8g2_DrawRBox(&u8g2, 0, 54, len, 10, 2);
@@ -865,7 +865,7 @@ static void main_screen_create(screen_t *scr){
   dis->reservedChars=5;
   dis->textAlign=align_center;
   dis->number_of_dec=1;
-  dis->font=font_small;
+  dis->font=u8g2_font_small;
   w->posY= 0;
   w->posX = voltXBM[0]+2;
   edit=extractEditablePartFromWidget(w);
@@ -882,7 +882,7 @@ static void main_screen_create(screen_t *scr){
   dis->dispAlign=align_right;
   dis->textAlign=align_right;
   dis->number_of_dec=1;
-  dis->font=font_small;
+  dis->font=u8g2_font_small;
   dis->getData = &main_screen_getAmbTemp;
   w->posY = 0;
   w->width = 38;
