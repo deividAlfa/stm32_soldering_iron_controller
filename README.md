@@ -66,7 +66,7 @@ There are several compatible/cloned boards in the market that will work fine wit
 <a id="faq"></a>
 ## Frequently asked questions<br>
 
-First, make sure to read the [Operations guide](Readme_files/Operation.md)!<br>
+First, make sure to read the [Operating instructions](Readme_files/Operation.md)!<br>
 
 ### Changelog<br>
 You can check the [commit history](https://github.com/deividAlfa/stm32_soldering_iron_controller/commits/master) to see what have been changed between builds.
