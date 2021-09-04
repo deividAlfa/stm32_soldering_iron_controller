@@ -9,14 +9,9 @@
 #define GRAPHICS_GUI_WIDGETS_H_
 
 #include "rotary_encoder.h"
+
 #define default_font u8g2_font_menu
-//#define default_font u8g2_font_t0_16_tr
-// Just some fonts I tried and wanted to remember
-//u8g2_font_helvR10_tr  // ok
-//u8g2_font_t0_16_tr    // meh
-//u8g2_font_DigitalDisco_tr
-//u8g2_font_timB10_tr
-//u8g2_font_timB12_tr
+
 
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
 typedef enum widgetFieldType {field_int32, field_bmp, field_string}widgetFieldType;
