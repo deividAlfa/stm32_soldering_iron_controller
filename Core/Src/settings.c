@@ -520,7 +520,7 @@ void Button_reset(void){
 //Max 99 seconds countdown.
 void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
   uint32_t timErr = 0;
-  char str[4];
+  char str[5];
   uint8_t length;
   if(Start>99){Start=99;}
   if(Start>9){
