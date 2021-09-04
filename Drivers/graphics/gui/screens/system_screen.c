@@ -714,7 +714,7 @@ static void system_ntc_create(screen_t *scr){
   dis=&edit->inputData;
   dis->number_of_dec=1;
   dis->reservedChars=7;
-  dis->endString="K\261";
+  dis->endString="KΩ";
   dis->getData = &get_Pull_res;
   edit->big_step = 10;
   edit->step = 1;
@@ -742,7 +742,7 @@ static void system_ntc_create(screen_t *scr){
   dis=&edit->inputData;
   dis->number_of_dec=1;
   dis->reservedChars=7;
-  dis->endString="K\261";
+  dis->endString="KΩ";
   dis->getData = &get_NTC_detect_high_res;
   edit->big_step = 10;
   edit->step = 1;
@@ -768,7 +768,7 @@ static void system_ntc_create(screen_t *scr){
   dis=&edit->inputData;
   dis->number_of_dec=1;
   dis->reservedChars=7;
-  dis->endString="K\261";
+  dis->endString="KΩ";
   dis->getData = &get_NTC_detect_low_res;
   edit->big_step = 10;
   edit->step = 1;
@@ -794,7 +794,7 @@ static void system_ntc_create(screen_t *scr){
   dis=&edit->inputData;
   dis->number_of_dec=1;
   dis->reservedChars=7;
-  dis->endString="K\261";
+  dis->endString="KΩ";
   dis->getData = &get_NTC_res;
   edit->big_step = 10;
   edit->step = 1;
