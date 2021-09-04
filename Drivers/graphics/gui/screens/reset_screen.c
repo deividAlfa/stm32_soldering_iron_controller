@@ -65,12 +65,10 @@ static void reset_onEnter(screen_t *scr){
 static void reset_create(screen_t *scr){
   widget_t* w;
   comboBox_item_t *item;
-  update_language();
 
   //  [ RESET OPTIONS COMBO ]
   //
   newWidget(&w,widget_combo, scr);
-  ((comboBox_widget_t*)w->content)->font = font_menu;
 
   newComboAction(w, strings[lang].RESET_Reset_Settings, &doSettingsReset, &item);
   item->dispAlign=align_left;
@@ -89,7 +87,7 @@ static void reset_confirmation_init(screen_t *scr){
   //FillBuffer(BLACK, fill_dma);                              // Manually clear the screen
   //Screen_reset_confirmation.refresh=screen_Erased;          // Set to already cleared so it doesn't get erased automatically
 
-  u8g2_SetFont(&u8g2,font_menu);
+  u8g2_SetFont(&u8g2,u8g2_font_menu);
   u8g2_SetDrawColor(&u8g2, WHITE);
 
   switch(resStatus){
@@ -115,7 +113,6 @@ static void reset_confirmation_init(screen_t *scr){
 
 static void reset_confirmation_create(screen_t *scr){
   widget_t* w;
-  update_language();
 
   //  [ Name Save Button Widget ]
   //
@@ -123,7 +120,7 @@ static void reset_confirmation_create(screen_t *scr){
   ((button_widget_t*)w->content)->displayString=strings[lang]._RESET;
   ((button_widget_t*)w->content)->selectable.tab = 1;
   ((button_widget_t*)w->content)->action = &doReset;
-  ((button_widget_t*)w->content)->font= font_menu;
+  ((button_widget_t*)w->content)->font= u8g2_font_menu;
   w->posX = 0;
   w->posY = 48;
   w->width = 50;
@@ -134,7 +131,7 @@ static void reset_confirmation_create(screen_t *scr){
   ((button_widget_t*)w->content)->displayString=strings[lang]._CANCEL;
   ((button_widget_t*)w->content)->selectable.tab = 0;
   ((button_widget_t*)w->content)->action = &cancelReset;
-  ((button_widget_t*)w->content)->font= font_menu;
+  ((button_widget_t*)w->content)->font= u8g2_font_menu;
   w->posX = 72;
   w->posY = 48;
   w->width = 56;

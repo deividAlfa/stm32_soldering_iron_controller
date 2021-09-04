@@ -42,11 +42,9 @@ static void tip_list_init(screen_t *scr) {
 
 static void tip_list_create(screen_t *scr){
   widget_t* w;
-  update_language();
   //  [ IRON TIPS COMBO ]
   //
   newWidget(&w,widget_combo,scr);
-  ((comboBox_widget_t*)w->content)->font = font_menu;
 
   for(int x = 0; x < TipSize; x++) {
     newComboAction(w, " ", &editTip, NULL);              // Names filled when entering the menu

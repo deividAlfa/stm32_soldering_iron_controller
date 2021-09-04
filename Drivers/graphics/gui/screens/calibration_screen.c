@@ -274,10 +274,7 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
 static void Cal_create(screen_t *scr) {
   widget_t* w;
 
-  update_language();
-
   newWidget(&w,widget_combo,scr);
-  ((comboBox_widget_t*)w->content)->font = font_menu;
 
   newComboScreen(w, strings[lang]._START, screen_calibration_start, NULL);
   newComboScreen(w, strings[lang]._SETTINGS, screen_calibration_settings, NULL);
@@ -395,7 +392,7 @@ static void Cal_Start_draw(screen_t *scr){
     FillBuffer(BLACK, fill_dma);
     scr->refresh=screen_Erased;
     u8g2_SetDrawColor(&u8g2, WHITE);
-    u8g2_SetFont(&u8g2, font_menu);
+    u8g2_SetFont(&u8g2, u8g2_font_menu);
     lastTipTemp = readTipTemperatureCompensated(old_reading, read_average);
 
     if(current_state<cal_suceed){
@@ -441,8 +438,6 @@ static void Cal_Start_create(screen_t *scr) {
   displayOnly_widget_t *dis;
   editable_widget_t* edit;
 
-  update_language();
-
   newWidget(&w,widget_button,scr);
   Widget_Cal_Back=w;
   w->posX = 78;
@@ -451,13 +446,13 @@ static void Cal_Start_create(screen_t *scr) {
   ((button_widget_t*)w->content)->displayString=strings[lang]._STOP;
   ((button_widget_t*)w->content)->selectable.tab=0;
   ((button_widget_t*)w->content)->action = &cancelAction;
-  ((button_widget_t*)w->content)->font=font_menu;
+  ((button_widget_t*)w->content)->font=u8g2_font_menu;
 
   newWidget(&w,widget_editable,scr);
   Widget_Cal_Measured=w;
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
-  dis->font=font_menu;
+  dis->font=u8g2_font_menu;
   dis->reservedChars = 5;
   dis->endString = "\260C";
   dis->getData = &getMeasuredTemp;
@@ -523,11 +518,9 @@ static void Cal_Settings_create(screen_t *scr){
   widget_t* w;
   editable_widget_t* edit;
 
-  update_language();
 
   // Combo Start
   newWidget(&w,widget_combo,scr);
-  ((comboBox_widget_t*)w->content)->font = font_menu;
 
   newComboEditable(w, strings[lang]._Cal_250, &edit, &Cal_Combo_Adjust_C250);
   edit->inputData.reservedChars=4;

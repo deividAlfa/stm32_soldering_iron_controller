@@ -271,13 +271,12 @@ static void system_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
-  update_language();
+
   current_lang = lang;
 
   //  [ SYSTEM COMBO ]
   //
   newWidget(&w,widget_combo,scr);
-  ((comboBox_widget_t*)w->content)->font = font_menu;
 
   //  [ Language Widget ]
   //
@@ -540,7 +539,8 @@ static void system_create(screen_t *scr){
 
 int system_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
 
-  if(lang!=current_lang){                                                       // If language changed
+  if(current_lang!=lang){                                                       // If language changed
+    current_lang=lang;
     oled_backup_comboStatus(scr);
     oled_destroy_screen(scr);                                                   // Destroy and create the screen
     system_create(scr);
@@ -675,13 +675,10 @@ static void system_ntc_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
-  update_language();
-  current_lang=lang;
 
   //  [ SYSTEM COMBO ]
   //
   newWidget(&w,widget_combo,scr);
-  ((comboBox_widget_t*)w->content)->font = font_menu;
 
   //  [ NTC enabled Widget ]
   //

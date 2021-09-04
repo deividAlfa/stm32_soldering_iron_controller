@@ -268,12 +268,9 @@ static void iron_create(screen_t *scr){
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
 
-  update_language();
-
   //  [ IRON COMBO ]
   //
   newWidget(&w,widget_combo, scr);
-  ((comboBox_widget_t*)w->content)->font = font_menu;
 
   //  [ Max Temp Widget ]
   //
@@ -395,7 +392,7 @@ static void iron_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=5;
   dis->number_of_dec=1;
-  dis->endString="\261";
+  dis->endString="Ω";
   dis->getData = &getTipImpedance;
   edit->big_step = 10;
   edit->step = 1;
@@ -485,12 +482,9 @@ static void iron_advFilter_create(screen_t *scr){
   displayOnly_widget_t *dis;
   editable_widget_t *edit;
 
-  update_language();
-
   //  [ IRON COMBO ]
   //
   newWidget(&w,widget_combo, scr);
-  ((comboBox_widget_t*)w->content)->font = font_menu;
 
   //  [ Low noise filter Widget ]
   //

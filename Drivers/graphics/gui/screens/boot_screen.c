@@ -140,7 +140,7 @@ static int SaveSetup(widget_t* w) {
 }
 //=========================================================
 void draw_boot_strings(void){
-  u8g2_SetFont(&u8g2, font_menu );
+  u8g2_SetFont(&u8g2, u8g2_font_menu );
   u8g2_SetDrawColor(&u8g2, WHITE);
   putStrAligned(strings[lang].boot_firstBoot, 0, align_center);
   u8g2_DrawHLine(&u8g2, 0, 13, OledWidth);
@@ -163,7 +163,8 @@ void boot_screen_draw(screen_t *scr){
 
 
 int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
-  if(lang!=current_lang){                                                       // If language changed
+  if(current_lang!=lang){                                                       // If language changed
+    current_lang=lang;
     oled_destroy_screen(scr);                                                   // Destroy and create the screen
     boot_screen_create(scr);
     scr->current_widget = Widget_lang;
@@ -222,8 +223,10 @@ void boot_screen_create(screen_t *scr){
   widget_t *w;
   displayOnly_widget_t *dis;
   editable_widget_t *edit;
-
-  update_language();
+  lang = systemSettings.settings.language;
+  if(lang>LANGUAGE_COUNT-1){
+    lang=lang_english;
+  }
   current_lang = lang;
 
   //  [ Profile Select Widget ]
@@ -232,7 +235,7 @@ void boot_screen_create(screen_t *scr){
   Widget_profile = w;
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
-  dis->font = font_menu;
+  dis->font = u8g2_font_menu;
   dis->reservedChars=4;
   dis->getData = &getProfile;
   edit->big_step = 1;
@@ -253,7 +256,7 @@ void boot_screen_create(screen_t *scr){
   Widget_lang = w;
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
-  dis->font = font_menu;
+  dis->font = u8g2_font_menu;
   dis->reservedChars=2;
   dis->getData = &getLanguage;
   edit->big_step = 1;
@@ -274,7 +277,7 @@ void boot_screen_create(screen_t *scr){
   Widget_ok = w;
   button_widget_t* button=Widget_ok->content;
   button->displayString = strings[lang]._SAVE;
-  button->font = font_menu;
+  button->font = u8g2_font_menu;
   button->selectable.tab = 2;
   button->action = &SaveSetup;
   w->posX = 74;

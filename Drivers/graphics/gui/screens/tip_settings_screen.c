@@ -277,12 +277,9 @@ static void tip_settings_create(screen_t *scr){
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
 
-  update_language();
-
   //  [ PID COMBO ]
   //
   newWidget(&w,widget_combo,scr);
-  ((comboBox_widget_t*)w->content)->font = font_menu;
 
   //[ TIP label]
   //

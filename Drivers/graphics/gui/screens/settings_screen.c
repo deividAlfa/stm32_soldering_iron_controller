@@ -16,12 +16,10 @@ static comboBox_item_t *comboitem_system_debug;
 static void SETTINGS_create(screen_t *scr) {
   widget_t* w;
 
-  update_language();
 
   //  [ SETTINGS MAIN SCREEN ]
   //
   newWidget(&w,widget_combo,scr);
-  ((comboBox_widget_t*)w->content)->font = font_menu;
 
   newComboScreen(w, strings[lang].settings_IRON, screen_iron, NULL);
   newComboScreen(w, strings[lang].settings_SYSTEM, screen_system, NULL);

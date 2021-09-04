@@ -578,7 +578,7 @@ static void drawIcons(uint8_t *refresh){
 
 
 static void drawError(void){
-  if(lang!=lang_russian && Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
+  if(Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
     u8g2_SetFont(&u8g2, u8g2_font_no_iron_big);
     putStrAligned(strings[lang].main_error_noIron, 20, align_center);
   }
@@ -592,7 +592,7 @@ static void drawError(void){
     else{
       Err_ypos=12;
     }
-    u8g2_SetFont(&u8g2, font_small);
+    u8g2_SetFont(&u8g2, u8g2_font_small);
     if(Iron.Error.V_low){
       putStrAligned(strings[lang].main_error_VoltageLow, Err_ypos, align_center);
       Err_ypos+=12;
@@ -634,7 +634,7 @@ static void drawScreenSaver(uint8_t *refresh){
 static void drawMode(uint8_t *refresh){
   if(!*refresh) return;
 
-  u8g2_SetFont(&u8g2, font_small);
+  u8g2_SetFont(&u8g2, u8g2_font_small);
 
   switch(getCurrentMode()){
 
@@ -642,20 +642,20 @@ static void drawMode(uint8_t *refresh){
     {
       char SetTemp[6];
       sprintf(SetTemp,"%u\260C", Iron.CurrentSetTemperature);
-      u8g2_DrawUTF8(&u8g2, 47, 0, SetTemp);
+      u8g2_DrawUTF8(&u8g2, 43, 0, SetTemp);
       break;
     }
 
     case mode_sleep:
-      u8g2_DrawUTF8(&u8g2, 43, 0, strings[lang].main_mode_Sleep);
+      u8g2_DrawUTF8(&u8g2,  strings[lang].main_mode_Sleep_xpos, 0, strings[lang].main_mode_Sleep);
       break;
 
     case mode_standby:
-      u8g2_DrawUTF8(&u8g2, 47, 0, strings[lang].main_mode_Standby);
+      u8g2_DrawUTF8(&u8g2, strings[lang].main_mode_Standby_xpos, 0, strings[lang].main_mode_Standby);
       break;
 
     case mode_boost:
-      u8g2_DrawUTF8(&u8g2, 44, 0, strings[lang].main_mode_Boost);
+      u8g2_DrawUTF8(&u8g2, strings[lang].main_mode_Boost_xpos, 0, strings[lang].main_mode_Boost);
 
     default:
       break;
@@ -817,8 +817,6 @@ static void main_screen_create(screen_t *scr){
   widget_t *w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
-
-  update_language();
 
   //  [ Iron Temp Widget ]
   //
