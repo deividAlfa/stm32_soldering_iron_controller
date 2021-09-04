@@ -1,1 +1,1 @@
-bdfconv_2_22.exe -v -b0 -f1 -m "32-126,176,177,196,197,214,228,229,246" "../bdf/t0-16-uni_mod.bdf" -o c\font_menu.c  -n u8g2_font_menu
+bdfconv.exe -v -b0 -f1 -m "32-126,176,177,196,197,214,228,229,246,937,1040-1103" "../bdf/t0-16-uni_mod.bdf" -o c\font_menu.c  -n u8g2_font_menu
