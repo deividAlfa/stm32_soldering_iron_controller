@@ -22,8 +22,11 @@ typedef struct{
   char * main_error_NTC_low;
   char * main_error_VoltageLow;
   char * main_mode_Sleep;
+  uint8_t main_mode_Sleep_xpos;
   char * main_mode_Standby;
+  uint8_t main_mode_Standby_xpos;
   char * main_mode_Boost;
+  uint8_t main_mode_Boost_xpos;
 
   char * settings_IRON;
   char * settings_SYSTEM;
