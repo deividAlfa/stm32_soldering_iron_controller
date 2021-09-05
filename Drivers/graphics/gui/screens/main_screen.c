@@ -217,7 +217,6 @@ static void setMainScrTempUnit(void) {
   }
   else{
     ((displayOnly_widget_t*)Widget_IronTemp->content)->endString="\260C";
-
     #ifdef USE_NTC
     ((displayOnly_widget_t*)Widget_AmbTemp->content)->endString="\260C";
     #endif
@@ -641,7 +640,14 @@ static void drawMode(uint8_t *refresh){
     case mode_run:
     {
       char SetTemp[6];
-      sprintf(SetTemp,"%u\260C", Iron.CurrentSetTemperature);
+      char c;
+      if(systemSettings.settings.tempUnit==mode_Celsius){
+        c='C';
+      }
+      else{
+        c='F';
+      }
+      sprintf(SetTemp,"%u\260%c", Iron.CurrentSetTemperature,c);
       u8g2_DrawUTF8(&u8g2, 43, 0, SetTemp);
       break;
     }
