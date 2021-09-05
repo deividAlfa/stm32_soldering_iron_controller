@@ -63,6 +63,9 @@ int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t base) {
 
 void resetPID(void){
   pid.reset = 1;
+  pid.proportional=0;         // If not cleared, they'll stay the same is the station enters sleep (or error mode), makign a bit of sense in debug screen
+  pid.integrator=0;
+  pid.derivative=0;
 }
 
 float getPID_D() {
