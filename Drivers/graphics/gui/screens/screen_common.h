@@ -36,8 +36,9 @@ typedef struct{
 extern slide_t screenSaver;
 extern plotData_t plot;
 
-extern int32_t temp, temp2, temp3;
+extern int32_t temp;
 extern uint8_t status, profile, Selected_Tip,lang;
+extern uint16_t backupTemp;
 extern bool disableTipCopy;
 extern char *tipName;
 extern bool newTip;

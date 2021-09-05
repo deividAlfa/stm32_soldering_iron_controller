@@ -6,7 +6,8 @@
  */
 #include "screen_common.h"
 
-int32_t temp, temp2, temp3, dimTimer;
+int32_t temp, dimTimer;
+uint16_t backupTemp;
 uint8_t status, profile, Selected_Tip,lang;
 int8_t dimStep;
 

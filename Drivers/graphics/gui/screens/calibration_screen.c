@@ -12,7 +12,6 @@ typedef enum { cal_250=0, cal_350=1, cal_450=2, cal_input_250=10, cal_input_350=
 static bool error;
 static uint32_t errorTimer;
 static int16_t lastTipTemp;
-static uint16_t backupTemp;
 static bool backupTempUnit;
 static uint16_t backupCal250;
 static uint16_t backupCal350;
