@@ -155,13 +155,11 @@ void handleIron(void) {
   #endif
 
   // Update PID
-  volatile uint16_t PID_temp;
   if(Iron.DebugMode==enable){                                                               // If in debug mode, use debug setpoint value
     Iron.Pwm_Out = calculatePID(Iron.Debug_SetTemperature, TIP.last_avg, Iron.Pwm_Max);
   }
-  else{                                                                                       // Else, use current setpoint value
-    PID_temp = (human2adc(Iron.CurrentSetTemperature) + human2adc(Iron.CurrentSetTemperature+1))/2;   // +0.5C for better display stability
-    Iron.Pwm_Out = calculatePID(PID_temp, TIP.last_avg, Iron.Pwm_Max);
+  else{                                                                                               // Else, use current setpoint value
+    Iron.Pwm_Out = calculatePID(human2adc(Iron.CurrentSetTemperature), TIP.last_avg, Iron.Pwm_Max);
   }
 
   if(!Iron.Pwm_Out){
@@ -213,7 +211,9 @@ void setSystemTempUnit(bool unit){
   }
 
   systemSettings.settings.tempUnit = unit;
+  Iron.UserSetTemperature = round_10(TempConversion(Iron.UserSetTemperature,unit,0));
   setCurrentMode(Iron.CurrentMode);     // Reload temps
+
   __enable_irq();
 }
 
@@ -320,7 +320,11 @@ void runAwayCheck(void){
   uint16_t tipTemp = readTipTemperatureCompensated(old_reading, read_average);
   static uint8_t pos, prev_power[RUNAWAY_SZ];
   uint8_t power = 0;
-
+  if(pid.reset){
+    for(uint8_t t=0; t<RUNAWAY_SZ; t++){                                                      // Clear power history if pid was resetted
+       prev_power[t]=0;
+    }
+  }
   if(systemSettings.setupMode==enable || (Iron.Error.safeMode && Iron.Error.active)){
     return;
   }
@@ -625,6 +629,7 @@ uint8_t getDebugMode(void){
 void setUserTemperature(uint16_t temperature) {
   __disable_irq();
   Iron.UserSetTemperature = temperature;
+  resetPID();
   if(Iron.CurrentMode==mode_run){
     Iron.temperatureReached = 0;
     Iron.CurrentSetTemperature = temperature;
