@@ -286,7 +286,7 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
     InputData->EMA_of_Input = (InputData->EMA_of_Input*k) + ((float)avg_data*(1.0-k));
  }
 #endif
-  InputData->last_avg = InputData->EMA_of_Input;
+  InputData->last_avg = InputData->EMA_of_Input+0.5f;
 }
 
 uint16_t ADC_to_mV (uint16_t adc){
