@@ -38,10 +38,11 @@ extern plotData_t plot;
 
 extern int32_t temp;
 extern uint8_t status, profile, Selected_Tip, lang, backupMode;
-extern uint16_t backupTemp;
+extern int16_t backupTemp, ambTemp, ambTemp_x10;
 extern bool disableTipCopy;
 extern char *tipName;
 extern bool newTip;
+extern tipData_t backupTip;
 
 #ifdef ENABLE_DEBUG_SCREEN
 extern bool dbg_scr_en;
@@ -53,4 +54,5 @@ int longClickReturn(widget_t *w);
 int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state);
 void updatePlot(void);
 uint8_t update_GUI_Timer(void);
+void updateAmbientTemp(void);
 #endif /* GRAPHICS_GUI_SCREENS_SCREEN_COMMON_H_ */
