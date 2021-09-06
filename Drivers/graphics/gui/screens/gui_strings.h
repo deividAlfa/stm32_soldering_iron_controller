@@ -60,6 +60,7 @@ typedef struct{
   char * SYSTEM_Contrast;
   char * SYSTEM_Auto_Dim;
   char * SYSTEM_Offset;
+  char * SYSTEM_OledOff;
   char * SYSTEM_Wake_Mode;
   char * SYSTEM_Stand_Mode;
   char * SYSTEM_Boot;
