@@ -108,10 +108,11 @@ typedef struct{
   char * TIP_SETTINGS_DELETE;
   char * TIP_SETTINGS_COPY;
 
+  char * CAL_InsertColdTip;
   char * CAL_Step;
   char * CAL_Wait;
   char * CAL_Measured;
-  char * CAL_Succeed;
+  char * CAL_Success;
   char * CAL_Failed;
   char * CAL_DELTA_HIGH_1;
   char * CAL_DELTA_HIGH_2;
