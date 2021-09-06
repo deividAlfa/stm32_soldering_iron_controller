@@ -196,7 +196,7 @@ tipData_t *getCurrentTip() {
 }
 
 // Translate the human readable t into internal value
-int16_t human2adc(int16_t t) {
+uint16_t human2adc(int16_t t) {
   t = t*10;
   // If using Farenheit, convert to Celsius
   if(systemSettings.settings.tempUnit==mode_Farenheit){
@@ -232,7 +232,7 @@ int16_t human2adc(int16_t t) {
       tH = adc2Human_x10(--temp,0,mode_Celsius);
     }
   }
-  if(temp>4090){                                                // Safety check to avoid exceeding ADC range
+  if(temp>4090 || temp<0){                                                // Safety check to avoid exceeding ADC range
     temp=0;
   }
   return temp;
