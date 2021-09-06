@@ -120,8 +120,17 @@ static void * getOledOffset() {
   return &temp;
 }
 static void setOledOffset(uint32_t *val) {
-  systemSettings.settings.OledOffset= * val;
+  systemSettings.settings.OledOffset= *val;
 }
+//=========================================================
+static void * getOledTurnOff() {
+  temp = systemSettings.settings.turnOffScreen;
+  return &temp;
+}
+static void setOledTurnOff(uint32_t *val) {
+  systemSettings.settings.turnOffScreen = *val;
+}
+//========
 //=========================================================
 static void * getOledDimming() {
   temp = systemSettings.settings.screenDimming;
@@ -327,6 +336,20 @@ static void system_create(screen_t *scr){
   edit->max_value = 240;
   edit->min_value = 0;
   edit->selectable.processInput=&OledDimming_ProcessInput;
+
+  //  [ Oled turn off Widget ]
+  //
+  newComboMultiOption(w, strings[lang].SYSTEM_OledOff, &edit, NULL);
+  dis=&edit->inputData;
+  dis->getData = &getOledTurnOff;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setOledTurnOff;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
+
 
   //  [ Oled Offset Widget ]
   //
