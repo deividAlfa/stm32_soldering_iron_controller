@@ -123,7 +123,7 @@ static void reset_confirmation_create(screen_t *scr){
   ((button_widget_t*)w->content)->font= u8g2_font_menu;
   w->posX = 0;
   w->posY = 48;
-  w->width = 50;
+  w->width = 60;
 
   //  [ Name Back Button Widget ]
   //
@@ -132,9 +132,9 @@ static void reset_confirmation_create(screen_t *scr){
   ((button_widget_t*)w->content)->selectable.tab = 0;
   ((button_widget_t*)w->content)->action = &cancelReset;
   ((button_widget_t*)w->content)->font= u8g2_font_menu;
-  w->posX = 72;
   w->posY = 48;
-  w->width = 56;
+  w->width = 60;
+  w->posX = (OledWidth-1) - w->width;
 }
 
 

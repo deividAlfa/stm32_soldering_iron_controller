@@ -292,9 +292,9 @@ void boot_screen_create(screen_t *scr){
   button->font = u8g2_font_menu;
   button->selectable.tab = 2;
   button->action = &SaveSetup;
-  w->posX = 74;
   w->posY = 48;
-  w->width = 44;
+  w->width = 60;
+  w->posX = (OledWidth-1) - w->width;
   w->enabled=0;
 }
 
