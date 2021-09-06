@@ -136,7 +136,6 @@ typedef struct{
   uint8_t       tempUnit;
   uint8_t       currentNumberOfTips;
   uint8_t       currentTip;
-  int8_t        CalNTC;
   uint8_t       pwmMul;
   uint8_t       sleepTimeout;
   uint8_t       standbyTimeout;
@@ -162,12 +161,13 @@ typedef struct{
   uint8_t       language;
   uint8_t       contrast;
   uint8_t       OledOffset;
+  uint8_t       screenDimming;
+  uint8_t       turnOffScreen;
   uint8_t       currentProfile;
   uint8_t       saveSettingsDelay;
   uint8_t       initMode;
   uint8_t       tempStep;
   uint8_t       tempBigStep;
-  uint8_t       screenDimming;
   uint8_t       tempUnit;
   uint8_t       activeDetection;
   uint8_t       buzzerMode;

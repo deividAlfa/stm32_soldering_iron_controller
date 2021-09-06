@@ -15,6 +15,7 @@ oled_t oled = {
 };
 
 static uint8_t lastContrast;
+static uint8_t powerStatus;
 
 // Silicon bug workaround for STM32F103 as ST document ES093 rev 7
 /*
@@ -409,6 +410,19 @@ void setOledRow(uint8_t row){
 }
 #endif
 
+void setOledPower(uint8_t power){
+  powerStatus = power;
+  if(power==enable){
+    write_cmd(0xAF);          // Display On
+  }
+  else{
+    write_cmd(0xAE);          // Display Off
+  }
+}
+uint8_t getOledPower(void){
+  return powerStatus;
+}
+
 void setContrast(uint8_t value) {
   write_cmd(0x81);                                        // Set Contrast Control
   write_cmd(value);                                       // Default => 0xFF
@@ -499,7 +513,7 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
 #elif !defined OLED_DEVICE
     oled.use_sw=1;
 #endif
-  write_cmd(0xAE);          // Display Off
+  setOledPower(disable);
   write_cmd(0xD5);          // Set Display Clock Divide Ratio / Oscillator Frequency
   write_cmd(0xF0);          // Set max framerate
   write_cmd(0xA8);          // Set Multiplex Ratio
@@ -530,7 +544,7 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
 
   while(oled.status!=oled_idle);  // Wait for DMA completion (If enabled)
 
-  write_cmd(0xAF);          // Set Display On
+  setOledPower(enable);
 }
 
 /*

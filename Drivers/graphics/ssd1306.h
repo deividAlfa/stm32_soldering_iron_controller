@@ -130,6 +130,8 @@ void pset(uint8_t x, uint8_t y, bool c);
 void update_display(void);
 void display_abort(void);
 void update_display_ErrorHandler(void);
+void setOledPower(uint8_t power);
+uint8_t getOledPower(void);
 void setContrast(uint8_t value);
 void setOledRow(uint8_t row);
 uint8_t getContrast();

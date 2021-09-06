@@ -268,6 +268,7 @@ void resetSystemSettings(void) {
   systemSettings.settings.contrast          = 255;
   systemSettings.settings.screenDimming     = 10;
   systemSettings.settings.OledOffset        = OLED_OFFSET;
+  systemSettings.settings.turnOffScreen     = disable;
   systemSettings.settings.errorDelay        = 1;                    // *100mS
   systemSettings.settings.guiUpdateDelay    = 200;
   systemSettings.settings.tempUnit          = mode_Celsius;
@@ -404,8 +405,6 @@ void resetCurrentProfile(void){
   systemSettings.Profile.tipFilter.step             = -3;   // -5% less everytime the reading diff exceeds threshold_limit and the counter is greater than count_limit
   systemSettings.Profile.tipFilter.reset_threshold  = 600;  // Any diff over 500 reset the filter (Tip removed or connected)
 
-
-  systemSettings.Profile.CalNTC                   = 25;
   systemSettings.Profile.sleepTimeout             = 5;
   systemSettings.Profile.standbyTimeout           = 5;
   systemSettings.Profile.standbyTemperature       = 180;
