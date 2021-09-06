@@ -251,16 +251,16 @@ static void iron_onEnter(screen_t *scr){
     editable_IRON_UserTemp->inputData.endString="\260C";
   }
   if(scr==&Screen_settings){
-    bak_f = systemSettings.Profile.tipFilter;
     comboResetIndex(Screen_iron.widgets);
   }
 }
 
-static void iron_onExit(screen_t *scr){
+int filter_Save(void){
   __disable_irq();
   systemSettings.Profile.tipFilter = bak_f;
   TIP.filter=bak_f;
   __enable_irq();
+  return screen_iron;
 }
 
 static void iron_create(screen_t *scr){
@@ -476,6 +476,7 @@ static void iron_create(screen_t *scr){
 
 static void iron_advFilter_onEnter(screen_t *scr){
   comboResetIndex(Screen_advFilter.widgets);
+  bak_f = systemSettings.Profile.tipFilter;
 }
 static void iron_advFilter_create(screen_t *scr){
   widget_t *w;
@@ -505,7 +506,7 @@ static void iron_advFilter_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=3;
   dis->getData = &get_threshold;
-  edit->big_step = 20;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_threshold;
   edit->max_value = 500;
@@ -530,8 +531,8 @@ static void iron_advFilter_create(screen_t *scr){
   dis->reservedChars=4;
   dis->getData = &get_limit_step;
   dis->endString="%";
-  edit->big_step = -5;
-  edit->step = -1;
+  edit->big_step = 5;
+  edit->step = 1;
   edit->setData = (void (*)(void *))&set_limit_step;
   edit->max_value = -1;
   edit->min_value = -20;
@@ -561,16 +562,13 @@ static void iron_advFilter_create(screen_t *scr){
   edit->max_value = 1000;
   edit->min_value = 10;
 
-
-
-  newComboScreen(w, strings[lang]._BACK, screen_iron, NULL);
-
+  newComboAction(w, strings[lang]._SAVE, &filter_Save , NULL);
+  newComboScreen(w, strings[lang]._CANCEL, screen_iron, NULL);
 }
 
 void iron_screen_setup(screen_t *scr){
   screen_t *sc;
   scr->onEnter = &iron_onEnter;
-  scr->onExit = &iron_onExit;
   scr->processInput = &autoReturn_ProcessInput;
   scr->create = &iron_create;
 
