@@ -121,6 +121,7 @@ typedef struct{
 }filter_t;
 
 typedef struct{
+  uint16_t      calADC_Cold;
   uint16_t      calADC_At_250;
   uint16_t      calADC_At_350;
   uint16_t      calADC_At_450;

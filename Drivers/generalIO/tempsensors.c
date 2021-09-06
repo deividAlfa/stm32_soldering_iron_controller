@@ -203,7 +203,8 @@ int16_t human2adc(int16_t t) {
     t = TempConversion(t,mode_Celsius,1);
   }
   int16_t temp = t;
-  t -= readColdJunctionSensorTemp_x10(old_reading, mode_Celsius);
+  int16_t ambTemp=readColdJunctionSensorTemp_x10(old_reading, mode_Celsius);
+  t -= ambTemp;
 
   if (t < 0){ return 0; }                                 // If requested temp below min, return 0
 
@@ -211,10 +212,14 @@ int16_t human2adc(int16_t t) {
   if (t >= 3500){
     temp = map(t, 3500, 4500, currentTipData->calADC_At_350, currentTipData->calADC_At_450);
   }
-  // Else, map between ADC values Cal_250 - Cal_350
-  else{
+  // Map between ADC values Cal_250 - Cal_350
+  else if (t >= 2500){
      temp = map(t, 2500, 3500, currentTipData->calADC_At_250, currentTipData->calADC_At_350);
   }
+  // Map between ADC values Cal_ambient - Cal_250
+  else{
+    temp = map(t, ambTemp, 2500, currentTipData->calADC_Cold, currentTipData->calADC_At_250);
+ }
 
   int16_t tH = adc2Human_x10(temp,0,mode_Celsius);                // Find +0.5ºC to provide better reading stability
   if (tH < (t+4)) {
@@ -240,8 +245,11 @@ int16_t adc2Human_x10(uint16_t adc_value,bool correction, bool tempUnit) {
   if (adc_value >= currentTipData->calADC_At_350) {
     temp = map(adc_value, currentTipData->calADC_At_350, currentTipData->calADC_At_450, 3500, 4500);
   }
-  else{
+  else if (adc_value >= currentTipData->calADC_At_250) {
     temp = map(adc_value, currentTipData->calADC_At_250, currentTipData->calADC_At_350, 2500, 3500);
+  }
+  else{
+    temp = map(adc_value, currentTipData->calADC_Cold, currentTipData->calADC_At_250, 0, 2500);
   }
   if(correction){ temp += ambTemp; }
   if(tempUnit==mode_Farenheit){
