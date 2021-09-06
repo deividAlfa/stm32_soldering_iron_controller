@@ -182,6 +182,17 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
   if(current_time - screen_timer > SPLASH_TIMEOUT){        // After splash timeout
 
     if(!systemSettings.setupMode){
+      __disable_irq();
+      TIP.EMA_of_Input =  TIP.last_avg = TIP.last_raw;                        // Now override filter values with last raw reading
+      #ifdef USE_NTC
+      NTC.EMA_of_Input = NTC.last_avg = NTC.last_raw;
+      #endif
+      #ifdef USE_VIN
+      VIN.EMA_of_Input = VIN.last_avg = VIN.last_raw;
+      #endif
+      readColdJunctionSensorTemp_x10(new_reading, systemSettings.settings.tempUnit);                        // Refresh the temperatures to show current temperature from the beginning
+      readTipTemperatureCompensated(new_reading, systemSettings.settings.tempUnit);
+      __enable_irq();
       return screen_main;
     }
     else if(boot_step==0){
