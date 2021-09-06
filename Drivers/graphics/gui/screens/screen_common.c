@@ -124,9 +124,13 @@ void refreshOledDim(void){
 void handleOledDim(void){
   static uint32_t stepTimer;
   uint8_t contrast=getContrast();
+  int16_t temp = readTipTemperatureCompensated(old_reading,read_average);
   if(dimStep==0){
-    if(systemSettings.settings.screenDimming && contrast>5 && ((current_time-dimTimer)>=((uint32_t)systemSettings.settings.screenDimming*1000))){
+    if(systemSettings.settings.oledDimming && contrast>5 && ((current_time-dimTimer)>=((uint32_t)systemSettings.settings.oledDimming*1000))){
       dimStep=-5;
+    }
+    if(systemSettings.settings.turnOffScreen && getCurrentMode()==mode_sleep && temp<100 && contrast==1){
+      setOledPower(disable);
     }
   }
   // Smooth screen brightness dimming
@@ -143,9 +147,6 @@ void handleOledDim(void){
       }
       else{
         setContrast(1);
-        if(systemSettings.settings.turnOffScreen){
-          setOledPower(disable);
-        }
       }
       dimTimer = current_time;
       dimStep=0;

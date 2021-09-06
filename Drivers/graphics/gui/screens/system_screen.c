@@ -130,14 +130,21 @@ static void * getOledTurnOff() {
 static void setOledTurnOff(uint32_t *val) {
   systemSettings.settings.turnOffScreen = *val;
 }
-//========
+//=========================================================
+static void * getRunModeDimming() {
+  temp = systemSettings.settings.runModeDimming;
+  return &temp;
+}
+static void setRunModeDimming(uint32_t *val) {
+  systemSettings.settings.runModeDimming = * val;
+}
 //=========================================================
 static void * getOledDimming() {
-  temp = systemSettings.settings.screenDimming;
+  temp = systemSettings.settings.oledDimming;
   return &temp;
 }
 static void setOledDimming(uint32_t *val) {
-  systemSettings.settings.screenDimming = * val;
+  systemSettings.settings.oledDimming = * val;
 }
 int OledDimming_ProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
   if(input==LongClick){
@@ -337,9 +344,22 @@ static void system_create(screen_t *scr){
   edit->min_value = 0;
   edit->selectable.processInput=&OledDimming_ProcessInput;
 
+  //  [ Oled rum mode dimming Widget ]
+  //
+  newComboMultiOption(w, strings[lang].SYSTEM_Run_Dimming, &edit, NULL);
+  dis=&edit->inputData;
+  dis->getData = &getRunModeDimming;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setRunModeDimming;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
+
   //  [ Oled turn off Widget ]
   //
-  newComboMultiOption(w, strings[lang].SYSTEM_OledOff, &edit, NULL);
+  newComboMultiOption(w, strings[lang].SYSTEM_OledPwrOff, &edit, NULL);
   dis=&edit->inputData;
   dis->getData = &getOledTurnOff;
   edit->big_step = 1;

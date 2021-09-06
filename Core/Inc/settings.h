@@ -161,7 +161,8 @@ typedef struct{
   uint8_t       language;
   uint8_t       contrast;
   uint8_t       OledOffset;
-  uint8_t       screenDimming;
+  uint8_t       oledDimming;
+  uint8_t       runModeDimming;
   uint8_t       turnOffScreen;
   uint8_t       currentProfile;
   uint8_t       saveSettingsDelay;

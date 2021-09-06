@@ -328,8 +328,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   }
 
 
-
-
   // Timer for ignoring user input
   if(current_time < mainScr.inputBlockTimer){
     input=Rotate_Nothing;
@@ -340,11 +338,16 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     if(getOledPower()==disable){                                            // If oled off, block user action
       input=Rotate_Nothing;
     }
-    refreshOledDim();
+    refreshOledDim();                                                       // But  wake up screen
   }
-  if(current_mode!=mode_sleep || current_temp>99 || Iron.shakeActive){
-    refreshOledDim();
+
+  if(!systemSettings.settings.runModeDimming){                              // Allow screen dimign if enabled in run mode
+    if(current_mode!=mode_sleep || current_temp>99){
+      refreshOledDim();
+    }
   }
+
+
 
   handleOledDim();
 
@@ -352,6 +355,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   if( !mainScr.shakeActive && Iron.shakeActive){
     Iron.shakeActive=0;
     mainScr.shakeActive=1;
+    if(!systemSettings.settings.runModeDimming){
+      refreshOledDim();                                                     // Shake doesn't wake the screen if wunmode dimming  is enabled
+    }
   }
   else if(mainScr.shakeActive==2 && (current_time-Iron.lastShakeTime)>50){
     mainScr.shakeActive=3; // Clear
