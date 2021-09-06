@@ -14,7 +14,6 @@
 
 screen_t Screen_tip_settings;
 static uint8_t return_screen;
-static tipData_t tipCfg;
 
 static comboBox_item_t *comboitem_tip_settings_save;
 static comboBox_item_t *comboitem_tip_settings_copy;
@@ -28,81 +27,81 @@ static editable_widget_t *editable_tip_settings_cal450;
 
 //=========================================================
 static void *getTipName() {
-  return tipCfg.name;
+  return backupTip.name;
 }
 static void setTipName(char *s) {
-  strcpy(tipCfg.name, s);
+  strcpy(backupTip.name, s);
 }
 //=========================================================
 static void * getKp() {
-  temp = tipCfg.PID.Kp;
+  temp = backupTip.PID.Kp;
   return &temp;
 }
 static void setKp(int32_t *val) {
-  tipCfg.PID.Kp = *val;
+  backupTip.PID.Kp = *val;
 }
 //=========================================================
 static void * getKi() {
-  temp = tipCfg.PID.Ki;
+  temp = backupTip.PID.Ki;
   return &temp;
 }
 static void setKi(int32_t *val) {
-  tipCfg.PID.Ki = *val;
+  backupTip.PID.Ki = *val;
 }
 //=========================================================
 static void * getKd() {
-  temp = tipCfg.PID.Kd;
+  temp = backupTip.PID.Kd;
   return &temp;
 }
 static void setKd(int32_t *val) {
-  tipCfg.PID.Kd = *val;
+  backupTip.PID.Kd = *val;
 }
 //=========================================================
 static void * getImax() {
-  temp = tipCfg.PID.maxI;
+  temp = backupTip.PID.maxI;
   return &temp;
 }
 static void setImax(int32_t *val) {
-  tipCfg.PID.maxI = *val;
+  backupTip.PID.maxI = *val;
 }
 //=========================================================
 static void * getImin() {
-  temp = tipCfg.PID.minI;
+  temp = backupTip.PID.minI;
   return &temp;
 }
 static void setImin(int32_t *val) {
-  tipCfg.PID.minI= *val;
+  backupTip.PID.minI= *val;
 }
 //=========================================================
 static void * getCal250() {
-  temp = tipCfg.calADC_At_250;
+  temp = backupTip.calADC_At_250;
   return &temp;
 }
 static void setCal250(int32_t *val) {
-  tipCfg.calADC_At_250 = *val;
+  backupTip.calADC_At_250 = *val;
 }
 //=========================================================
 static void * getCal350() {
-  temp = tipCfg.calADC_At_350;
-  editable_tip_settings_cal350->min_value = tipCfg.calADC_At_250 + 1;
-  editable_tip_settings_cal350->max_value = tipCfg.calADC_At_450 - 1;
+  temp = backupTip.calADC_At_350;
+  editable_tip_settings_cal350->min_value = backupTip.calADC_At_250 + 1;
+  editable_tip_settings_cal350->max_value = backupTip.calADC_At_450 - 1;
   return &temp;
 }
 static void setCal350(int32_t *val) {
-  tipCfg.calADC_At_350 = *val;
+  backupTip.calADC_At_350 = *val;
 }
 //=========================================================
 static void * getCal450() {
-  temp = tipCfg.calADC_At_450;
-  editable_tip_settings_cal450->min_value = tipCfg.calADC_At_350 + 1;
+  temp = backupTip.calADC_At_450;
+  editable_tip_settings_cal450->min_value = backupTip.calADC_At_350 + 1;
   return &temp;
 }
 static void setCal450(int32_t *val) {
-  tipCfg.calADC_At_450 = *val;
+  backupTip.calADC_At_450 = *val;
 }
 //=========================================================
 static int tip_save() {
-  systemSettings.Profile.tip[Selected_Tip] = tipCfg;                                                            // Store tip data
+  systemSettings.Profile.tip[Selected_Tip] = backupTip;                                                            // Store tip data
   if(Selected_Tip==systemSettings.Profile.currentTip){                                                          // If current used tip, update PID
     __disable_irq();
     setCurrentTip(Selected_Tip);                                                                                // Reload tip settings
@@ -140,7 +139,7 @@ static int tip_delete() {
 //=========================================================
 static int tip_copy() {
   Selected_Tip = systemSettings.Profile.currentNumberOfTips;                                                    // Select first empty slot
-  strcpy(tipCfg.name, _BLANK_TIP);                                                                              // Copy empty name
+  strcpy(backupTip.name, _BLANK_TIP);                                                                              // Copy empty name
   comboitem_tip_settings_delete->enabled=0;                                                                     // Disable copying, deleting and saving(Until name is written)
   comboitem_tip_settings_copy->enabled=0;
   comboitem_tip_settings_save->enabled=0;
@@ -189,12 +188,12 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
   }
   if(update){
     bool enable=1;
-    if(strcmp(tipCfg.name, _BLANK_TIP) == 0){                                                                   // Check that the name is not empty
+    if(strcmp(backupTip.name, _BLANK_TIP) == 0){                                                                   // Check that the name is not empty
       enable=0;                                                                                                 // If empty, disable save button
     }
     else{
       for(uint8_t x = 0; x < TipSize; x++) {                                                                    // Compare tip names with current edit
-        if( (strcmp(tipCfg.name, systemSettings.Profile.tip[x].name) == 0) && x!=Selected_Tip ){                // If match is found, and it's not the tip being edited
+        if( (strcmp(backupTip.name, systemSettings.Profile.tip[x].name) == 0) && x!=Selected_Tip ){                // If match is found, and it's not the tip being edited
           enable=0;                                                                                             // Disable save button
           break;
         }
@@ -248,10 +247,10 @@ static void tip_settings_onEnter(screen_t *scr){
   }
   comboitem_tip_settings_cancel->action_screen = return_screen;
 
-  tipCfg = systemSettings.Profile.tip[Selected_Tip];                                                      // Copy selected tip
+  backupTip = systemSettings.Profile.tip[Selected_Tip];                                                      // Copy selected tip
 
   if(new){                                                                                                // If new tip selected
-    strcpy(tipCfg.name, _BLANK_TIP);                                                                      // Set an empty name
+    strcpy(backupTip.name, _BLANK_TIP);                                                                      // Set an empty name
     Selected_Tip=systemSettings.Profile.currentNumberOfTips;                                              // Selected tip is next position
     disableTipCopy=1;                                                                                     // Cannot copy a new tip
   }
@@ -288,7 +287,7 @@ static void tip_settings_create(screen_t *scr){
   dis->reservedChars=TipCharSize-1;
   dis->getData = &getTipName;
   dis->type = field_string;
-  dis->displayString=tipCfg.name;
+  dis->displayString=backupTip.name;
   edit->big_step = 1;
   edit->step = 1;
   edit->selectable.tab = 0;
