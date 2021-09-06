@@ -248,7 +248,7 @@ static void debug_onEnter(screen_t *scr){
   if(systemSettings.settings.tempUnit==mode_Celsius){
     if(scr!=&Screen_debug){
       edit->max_value = 450;
-      edit->min_value = 50;
+      edit->min_value = 0;
       edit->big_step = 20;
       edit->step = 5;
       edit->inputData.endString="\260C";
@@ -258,7 +258,7 @@ static void debug_onEnter(screen_t *scr){
   else{
     if(scr!=&Screen_debug){
       edit->max_value = 850;
-      edit->min_value = 120;
+      edit->min_value = 0;
       edit->big_step = 50;
       edit->step = 10;
       edit->inputData.endString="\260F";
@@ -267,14 +267,14 @@ static void debug_onEnter(screen_t *scr){
   }
 
   if(scr==&Screen_settings){
-
+    backupMode=getCurrentMode();
     backupTemp=getUserTemperature();
 
     if(systemSettings.settings.tempUnit==mode_Celsius){
-      debug_temp=100;
+      debug_temp=0;
     }
     else{
-      debug_temp=200;
+      debug_temp=0;
     }
     setUserTemperature(debug_temp);
 
@@ -302,6 +302,7 @@ static void debug_onExit(screen_t *scr){
   if(scr!=&Screen_debug && scr!=&Screen_pid_debug){
     _free(pidPlot);
     setUserTemperature(backupTemp);
+    setCurrentMode(backupMode);
   }
 }
 
