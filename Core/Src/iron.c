@@ -169,7 +169,7 @@ void handleIron(void) {
   else if(Iron.Pwm_Out == Iron.Pwm_Max){
     Iron.CurrentIronPower = 100;
   }
-  else if(Iron.Pwm_Out < Iron.Pwm_Max){
+  else if(Iron.Pwm_Out <= Iron.Pwm_Max){
     Iron.CurrentIronPower = ((uint32_t)Iron.Pwm_Out*100)/Iron.Pwm_Max;                        // Compute new %
   }
   else{
