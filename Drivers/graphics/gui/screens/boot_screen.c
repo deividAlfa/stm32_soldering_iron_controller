@@ -192,6 +192,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
       #endif
       readColdJunctionSensorTemp_x10(new_reading, systemSettings.settings.tempUnit);                        // Refresh the temperatures to show current temperature from the beginning
       readTipTemperatureCompensated(new_reading, systemSettings.settings.tempUnit);
+      resetIronError();
       __enable_irq();
       return screen_main;
     }

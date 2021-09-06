@@ -82,6 +82,7 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 }
 
 void handleIron(void) {
+  static uint8_t reachedCount = 0;
   CurrentTime = HAL_GetTick();
 
   readTipTemperatureCompensated(new_reading, read_average);     // Update readings
@@ -181,9 +182,14 @@ void handleIron(void) {
   __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Load new calculated PWM Duty
 
   // For calibration process. Add +-2ºC detection margin
-  if( !Iron.temperatureReached && (last_TIP>=(Iron.CurrentSetTemperature-2)) && (last_TIP<=(Iron.CurrentSetTemperature+2))) {
-    temperatureReached( Iron.CurrentSetTemperature);
-    Iron.temperatureReached = 1;
+  if( !Iron.temperatureReached && abs(Iron.CurrentSetTemperature-last_TIP)<3 ) {              // Allow +-2° margin
+    if(++reachedCount>5){                                                                     // Get at least 5 stable readings
+      temperatureReached( Iron.CurrentSetTemperature);
+      Iron.temperatureReached = 1;
+    }
+  }
+  else{
+    reachedCount = 0;
   }
 }
 
@@ -537,6 +543,10 @@ void readWake(void){
     }
 }
 
+void resetIronError(void){
+  Iron.LastErrorTime += (systemSettings.settings.errorDelay+1*100);                     // Bypass timeout
+  checkIronError();                                                                     // Refresh Errors
+}
 
 // Checks for non critical iron errors (Errors that can be cleared)
 void checkIronError(void){
@@ -550,11 +560,11 @@ void checkIronError(void){
   Err.V_low = (getSupplyVoltage_v_x10() < systemSettings.settings.lvp);
   #endif
   Err.noIron = (TIP.last_raw>systemSettings.Profile.noIronValue);
-
+/*
   if(current_screen==&Screen_boot || CurrentTime<1000){                               // Don't check sensor errors during first second or in boot screen, wait for readings need to get stable
     Err.Flags &= _SAFE_MODE;
   }
-
+*/
   if(Err.Flags){
     Iron.Error.Flags = Err.Flags | (Iron.Error.Flags & _ACTIVE);
     Iron.LastErrorTime = CurrentTime;
