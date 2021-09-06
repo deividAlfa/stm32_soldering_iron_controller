@@ -150,11 +150,10 @@ void oled_processInput(void) {
   int ret = current_screen->processInput(current_screen, RE_Rotation, RE_State);
   if(ret > 0) {   // -1 do nothing, -2 nothing processed
     screen_t *scr = screens;
+    FillBuffer(BLACK, fill_dma);
     current_time = HAL_GetTick();
     while(scr) {
       if(scr->index == ret) {
-        FillBuffer(BLACK, fill_dma);
-        scr->refresh=screen_Erased;
 
         if(current_screen->onExit){
           current_screen->onExit(scr);
@@ -183,6 +182,7 @@ void oled_processInput(void) {
           scr->update(scr);
         }
         current_screen = scr;
+        scr->refresh=screen_Erased;
         return;
       }
       scr = scr->next_screen;
