@@ -172,7 +172,8 @@ static void * main_screen_getVin() {
 #ifdef USE_NTC
 static void * main_screen_getAmbTemp() {
   if(mainScr.updateReadings){
-    mainScr.lastAmb = readColdJunctionSensorTemp_x10(old_reading, systemSettings.settings.tempUnit);
+    updateAmbientTemp();
+    mainScr.lastAmb = ambTemp_x10;
   }
   temp=mainScr.lastAmb;
   return &temp;
@@ -331,6 +332,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
   if(input!=Rotate_Nothing){
     mainScr.idleTimer = current_time;
+    if(getOledPower()==disable){                                            // If oled off, block user action
+      input=Rotate_Nothing;
+    }
     refreshOledDim();
   }
   if(current_mode!=mode_sleep || current_temp>99 || Iron.shakeActive){
