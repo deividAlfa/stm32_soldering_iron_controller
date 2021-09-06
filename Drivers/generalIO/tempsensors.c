@@ -227,6 +227,9 @@ int16_t human2adc(int16_t t) {
       tH = adc2Human_x10(--temp,0,mode_Celsius);
     }
   }
+  if(temp>4090){                                                // Safety check to avoid exceeding ADC range
+    temp=0;
+  }
   return temp;
 }
 
