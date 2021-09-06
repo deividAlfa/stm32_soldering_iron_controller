@@ -746,7 +746,7 @@ void comboBoxDraw(widget_t *w) {
   comboBox_item_t *item = combo->first;
   uint8_t scroll = 0;
   uint8_t r;
-  if(!w || ((w->refresh==refresh_idle) && (w->parent->refresh==screen_Idle))){
+  if( !w || !w->enabled || ((w->refresh==refresh_idle) && (w->parent->refresh==screen_Idle)) ){
     return;
   }
 
@@ -905,7 +905,7 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
 
   comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
 
-  if(!w || (input == Rotate_Nothing)){
+  if(!w || !w->enabled || input == Rotate_Nothing ){
     return -1;
   }
   u8g2_SetFont(&u8g2, combo->font);
