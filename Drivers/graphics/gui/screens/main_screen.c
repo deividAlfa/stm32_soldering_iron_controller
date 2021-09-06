@@ -154,6 +154,11 @@ static void * getTemp() {
 static void * main_screen_getIronTemp() {
   if(mainScr.updateReadings){
     mainScr.lastTip=readTipTemperatureCompensated(old_reading,read_average);
+    if(getCurrentMode()>mode_sleep){
+      if(abs(mainScr.lastTip-Iron.CurrentSetTemperature<6)){
+        mainScr.lastTip = Iron.CurrentSetTemperature;
+      }
+    }
   }
   temp=mainScr.lastTip;
   return &temp;
