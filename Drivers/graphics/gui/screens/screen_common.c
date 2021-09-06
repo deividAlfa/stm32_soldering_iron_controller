@@ -8,7 +8,7 @@
 
 int32_t temp, dimTimer;
 uint16_t backupTemp;
-uint8_t status, profile, Selected_Tip,lang;
+uint8_t status, profile, Selected_Tip, lang, backupMode;
 int8_t dimStep;
 
 char *tipName;
