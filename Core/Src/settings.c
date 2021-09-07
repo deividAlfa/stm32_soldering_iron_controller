@@ -323,10 +323,8 @@ void resetCurrentProfile(void){
     if(systemSettings.settings.currentProfile==profile_T12){
     systemSettings.Profile.ID = profile_T12;
     for(uint8_t x = 0; x < TipSize; x++) {
-      systemSettings.Profile.tip[x].calADC_Cold     = T12_Cal_Cold;
       systemSettings.Profile.tip[x].calADC_At_250   = T12_Cal250;
-      systemSettings.Profile.tip[x].calADC_At_350   = T12_Cal350;     // These values are way lower, but better to be safe than sorry
-      systemSettings.Profile.tip[x].calADC_At_450   = T12_Cal450;     // User needs to calibrate its station
+      systemSettings.Profile.tip[x].calADC_At_400   = T12_Cal400;     // These values are way lower, but better to be safe than sorry
       systemSettings.Profile.tip[x].PID.Kp          = 7500;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Ki          = 4800;           // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Kd          = 1200;           // val = /1.000.000
@@ -341,18 +339,15 @@ void resetCurrentProfile(void){
     systemSettings.Profile.power                    = 80;             // 80W
     systemSettings.Profile.noIronValue              = 4000;
     systemSettings.Profile.Cal250_default           = T12_Cal250;
-    systemSettings.Profile.Cal350_default           = T12_Cal350;
-    systemSettings.Profile.Cal450_default           = T12_Cal450;
+    systemSettings.Profile.Cal400_default           = T12_Cal400;
 
   }
 
   else if(systemSettings.settings.currentProfile==profile_C245){
     systemSettings.Profile.ID = profile_C245;
     for(uint8_t x = 0; x < TipSize; x++) {
-      systemSettings.Profile.tip[x].calADC_Cold     = C245_Cal_Cold;
       systemSettings.Profile.tip[x].calADC_At_250   = C245_Cal250;
-      systemSettings.Profile.tip[x].calADC_At_350   = C245_Cal350;
-      systemSettings.Profile.tip[x].calADC_At_450   = C245_Cal450;
+      systemSettings.Profile.tip[x].calADC_At_400   = C245_Cal400;
       systemSettings.Profile.tip[x].PID.Kp          = 1800;
       systemSettings.Profile.tip[x].PID.Ki          = 500;
       systemSettings.Profile.tip[x].PID.Kd          = 200;
@@ -367,17 +362,14 @@ void resetCurrentProfile(void){
     systemSettings.Profile.power                    = 150;
     systemSettings.Profile.noIronValue              = 4000;
     systemSettings.Profile.Cal250_default           = C245_Cal250;
-    systemSettings.Profile.Cal350_default           = C245_Cal350;
-    systemSettings.Profile.Cal450_default           = C245_Cal450;
+    systemSettings.Profile.Cal400_default           = C245_Cal400;
   }
 
   else if(systemSettings.settings.currentProfile==profile_C210){
     systemSettings.Profile.ID = profile_C210;
     for(uint8_t x = 0; x < TipSize; x++) {
-      systemSettings.Profile.tip[x].calADC_Cold     = C210_Cal_Cold;
       systemSettings.Profile.tip[x].calADC_At_250   = C210_Cal250;
-      systemSettings.Profile.tip[x].calADC_At_350   = C210_Cal350;
-      systemSettings.Profile.tip[x].calADC_At_450   = C210_Cal450;
+      systemSettings.Profile.tip[x].calADC_At_400   = C210_Cal400;
       systemSettings.Profile.tip[x].PID.Kp          = 1800;
       systemSettings.Profile.tip[x].PID.Ki          = 500;
       systemSettings.Profile.tip[x].PID.Kd          = 200;
@@ -392,8 +384,7 @@ void resetCurrentProfile(void){
     systemSettings.Profile.impedance              = 21;
     systemSettings.Profile.noIronValue            = 1200;
     systemSettings.Profile.Cal250_default         = C210_Cal250;
-    systemSettings.Profile.Cal350_default         = C210_Cal350;
-    systemSettings.Profile.Cal450_default         = C210_Cal450;
+    systemSettings.Profile.Cal400_default         = C210_Cal400;
   }
   else{
     Error_Handler();  // We shouldn't get here!

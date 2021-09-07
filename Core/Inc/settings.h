@@ -36,7 +36,7 @@
 #define LANGUAGE_COUNT    3
 //#define SWSTRING        "SW: v1.10"                               // For releases
 #define SWSTRING          "SW: 21-09-05"                          // For git
-#define SETTINGS_VERSION  11                                         // Change this if you change the struct below to prevent people getting out of sync
+#define SETTINGS_VERSION  12                                         // Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize         2                                         // In KB
 #define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
 
@@ -125,10 +125,8 @@ typedef struct{
 }filter_t;
 
 typedef struct{
-  uint16_t      calADC_Cold;
   uint16_t      calADC_At_250;
-  uint16_t      calADC_At_350;
-  uint16_t      calADC_At_450;
+  uint16_t      calADC_At_400;
   char          name[TipCharSize];
   pid_values_t  PID;
 }tipData_t;
@@ -155,8 +153,7 @@ typedef struct{
   uint16_t      noIronValue;
   uint16_t      power;
   uint16_t      Cal250_default;
-  uint16_t      Cal350_default;
-  uint16_t      Cal450_default;
+  uint16_t      Cal400_default;
   tipData_t     tip[TipSize];
 }profile_t;
 
