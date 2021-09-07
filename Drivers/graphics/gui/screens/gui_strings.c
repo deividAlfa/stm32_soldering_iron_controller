@@ -57,8 +57,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .SYSTEM_Profile = "Profile",
       .SYSTEM_Contrast = "Contrast",
-      .SYSTEM_Oled_Dim = "Dimming",
-      .SYSTEM_Oled_Dim_SleepPower = " Slp pwr",
+      .SYSTEM_Oled_Dim = "Dimmer",
+      .SYSTEM_Oled_Dim_SleepPower = " In sleep",
       .SYSTEM_Offset = "Offset",
       .SYSTEM_Wake_Mode = "Wake mode",
       .SYSTEM_Stand_Mode = "Stand mode",
