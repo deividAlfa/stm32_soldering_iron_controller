@@ -336,8 +336,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .SYSTEM_Profile = "Profil",
       .SYSTEM_Contrast = "Kontrast",
-      .SYSTEM_Oled_Dim = "Dimming",
-      .SYSTEM_Oled_Dim_SleepPower = " Slp pwr",
+      .SYSTEM_Oled_Dim = "Dimmer",
+      .SYSTEM_Oled_Dim_SleepPower = " SOV-OLED",
       .SYSTEM_Offset = "Offset",
       .SYSTEM_Wake_Mode = "Väckmetod",
       .SYSTEM_Stand_Mode = "Ställ-läge",
@@ -386,7 +386,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .TIP_SETTINGS_COPY = "KOPIERA",
       .TIP_SETTINGS_DELETE = "RADERA",
 
-      .CAL_InsertColdTip = "Insert cold tip",
+      .CAL_InsertColdTip = "Isätt kall spets",
       .CAL_Step = "KAL STEG:",
       .CAL_Wait = "VÄNTA...",
       .CAL_Measured = "UPPMÄTT:",
