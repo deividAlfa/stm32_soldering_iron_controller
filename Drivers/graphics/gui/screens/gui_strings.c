@@ -57,9 +57,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .SYSTEM_Profile = "Profile",
       .SYSTEM_Contrast = "Contrast",
-      .SYSTEM_Auto_Dim = "Auto dim",
-      .SYSTEM_OledPwrOff = "Pwr off",
-      .SYSTEM_Run_Dimming = "Runmode dim",
+      .SYSTEM_Oled_Dim = "Dimming",
+      .SYSTEM_Oled_Dim_SleepPower = " Slp pwr",
       .SYSTEM_Offset = "Offset",
       .SYSTEM_Wake_Mode = "Wake mode",
       .SYSTEM_Stand_Mode = "Stand mode",
@@ -147,6 +146,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .wakeMode =    { "SHAKE", "STAND" },
       .encMode =     { "REVERSE", "NORMAL" },
       .InitMode =    { "SLP", "STBY", "RUN" },
+      .dimMode =     { "OFF", "SLP", "ALL" },
     },
 
     [lang_russian] = {
@@ -196,9 +196,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .SYSTEM_Profile = "Тип",
       .SYSTEM_Contrast = "Яркость",
-      .SYSTEM_Auto_Dim = "Затемнять",
-      .SYSTEM_OledPwrOff = "Oled power",
-      .SYSTEM_Run_Dimming = "Runmode dim",
+      .SYSTEM_Oled_Dim = "Dimming",
+      .SYSTEM_Oled_Dim_SleepPower = " Slp pwr",
       .SYSTEM_Offset = "Сдвиг",
       .SYSTEM_Wake_Mode = "ДатчикСна",
       .SYSTEM_Stand_Mode = "Подставка",
@@ -286,6 +285,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .wakeMode =    { "РУЧКА", "СТОЙКА" },
       .encMode =     { "ОБРАТНО", "ПРЯМО" },
       .InitMode =    { "ВЫКЛ", "СОН", "ПУСК" },
+      .dimMode =     { "откл", "ВЫКЛ", "все" },
 
     },
 
@@ -336,9 +336,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .SYSTEM_Profile = "Profil",
       .SYSTEM_Contrast = "Kontrast",
-      .SYSTEM_Auto_Dim = "Auto dim",
-      .SYSTEM_OledPwrOff = "Oled power",
-      .SYSTEM_Run_Dimming = "Runmode dim",
+      .SYSTEM_Oled_Dim = "Dimming",
+      .SYSTEM_Oled_Dim_SleepPower = " Slp pwr",
       .SYSTEM_Offset = "Offset",
       .SYSTEM_Wake_Mode = "Väckmetod",
       .SYSTEM_Stand_Mode = "Ställ-läge",
@@ -426,6 +425,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .wakeMode =    { "SKAKA", "STÄLL" },
       .encMode =     { "OMVÄND", "NORMAL" },
       .InitMode =    { "SOV", "STBY", "KÖR" },
+      .dimMode =     { "AV", "SOV", "ALLA" },
     },
 };
 
