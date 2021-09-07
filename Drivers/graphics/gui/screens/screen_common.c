@@ -7,7 +7,7 @@
 #include "screen_common.h"
 
 int32_t temp, dimTimer;
-int16_t backupTemp, ambTemp,ambTemp_x10;
+int16_t backupTemp, ambTemp;
 uint8_t status, profile, Selected_Tip, lang, backupMode;
 int8_t dimStep;
 tipData_t backupTip;
@@ -27,16 +27,11 @@ void updatePlot(void){
     return;
   }
 
-  int16_t current_temp = readTipTemperatureCompensated(old_reading,read_average);
-
-  if(systemSettings.settings.tempUnit==mode_Farenheit){
-    current_temp = TempConversion(current_temp, mode_Celsius, 0);
-  }
   if(plot.timeStep<20){ plot.timeStep = 20; }
   if((current_time-plot.timer)>=plot.timeStep){                                          // Only store values if running
     plot.update=plot.enabled;
     plot.timer=current_time;
-    plot.d[plot.index] = current_temp;
+    plot.d[plot.index] = last_TIP_C;
     if(++plot.index>99){
       plot.index=0;
     }
@@ -124,12 +119,11 @@ void refreshOledDim(void){
 void handleOledDim(void){
   static uint32_t stepTimer;
   uint8_t contrast=getContrast();
-  int16_t temp = readTipTemperatureCompensated(old_reading,read_average);
   if(dimStep==0){
     if(systemSettings.settings.dim_mode && contrast>5 && ((current_time-dimTimer)>=((uint32_t)systemSettings.settings.dim_Timeout*1000))){
       dimStep=-5;
     }
-    if(systemSettings.settings.dim_sleepMode==disable && getCurrentMode()==mode_sleep && temp<100 && contrast==1){
+    if(systemSettings.settings.dim_sleepMode==disable && getCurrentMode()==mode_sleep && last_TIP_C<100 && contrast==1){
       setOledPower(disable);
     }
   }
@@ -155,6 +149,5 @@ void handleOledDim(void){
 }
 
 void updateAmbientTemp(void){
-  ambTemp_x10 = readColdJunctionSensorTemp_x10(old_reading, mode_Celsius);
-  ambTemp = (ambTemp_x10+5)/10;
+  ambTemp = (last_NTC_C+5)/10;
 }

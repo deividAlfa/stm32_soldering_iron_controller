@@ -85,8 +85,8 @@ void handleIron(void) {
   static uint8_t reachedCount = 0;
   CurrentTime = HAL_GetTick();
 
-  readTipTemperatureCompensated(new_reading, read_average);     // Update readings
   readColdJunctionSensorTemp_x10(new_reading, mode_Celsius);
+  readTipTemperatureCompensated(new_reading, read_average, mode_Celsius);     // Update readings
 
   if(!Iron.Error.safeMode){
     if( (systemSettings.setupMode==enable) || systemSettings.settings.NotInitialized || systemSettings.Profile.NotInitialized!=initialized ||
@@ -182,7 +182,11 @@ void handleIron(void) {
   __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Load new calculated PWM Duty
 
   // For calibration process. Add +-2ºC detection margin
-  if( !Iron.temperatureReached && abs(Iron.CurrentSetTemperature-last_TIP)<3 ) {              // Allow +-2° margin
+  int16_t setTemp = Iron.CurrentSetTemperature;
+  if(systemSettings.settings.tempUnit==mode_Farenheit){{
+    setTemp = TempConversion(setTemp, mode_Celsius, 0);
+  }
+  if( !Iron.temperatureReached && abs(setTemp-last_TIP_C)<5)                                  // Allow +-5° margin
     if(++reachedCount>5){                                                                     // Get at least 5 stable readings
       temperatureReached( Iron.CurrentSetTemperature);
       Iron.temperatureReached = 1;
@@ -321,18 +325,21 @@ void configurePWMpin(uint8_t mode){
 #define RUNAWAY_SZ  3
 
 void runAwayCheck(void){
-  uint16_t TempStep,TempLimit;
   uint32_t CurrentTime = HAL_GetTick();
-  uint16_t tipTemp = readTipTemperatureCompensated(old_reading, read_average);
+  uint16_t setTemp = Iron.CurrentSetTemperature;
   static uint8_t pos, prev_power[RUNAWAY_SZ];
   uint8_t power = 0;
+
+  if(systemSettings.setupMode==enable || (Iron.Error.safeMode && Iron.Error.active)){
+    return;
+  }
   if(pid.reset){
     for(uint8_t t=0; t<RUNAWAY_SZ; t++){                                                      // Clear power history if pid was resetted
        prev_power[t]=0;
     }
   }
-  if(systemSettings.setupMode==enable || (Iron.Error.safeMode && Iron.Error.active)){
-    return;
+  if(systemSettings.settings.tempUnit==mode_Farenheit){
+    setTemp = TempConversion(setTemp, mode_Celsius, 0);
   }
   prev_power[pos]=Iron.CurrentIronPower;                                                      // Circular buffer
   if(++pos>RUNAWAY_SZ-1){ pos=0; }
@@ -346,21 +353,14 @@ void runAwayCheck(void){
   if((Iron.Pwm_Out > (Iron.Pwm_Period+1)) || (Iron.Pwm_Out != __HAL_TIM_GET_COMPARE(Iron.Pwm_Timer,Iron.Pwm_Channel))){
     Error_Handler();
   }
-  if(systemSettings.settings.tempUnit==mode_Celsius){
-    TempStep = 25;
-    TempLimit = 500;
-  }else{
-    TempStep = 45;
-    TempLimit = 930;
-  }
 
-  if(power && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==disable) &&(tipTemp > Iron.CurrentSetTemperature)){
+  if(power && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==disable) && (last_TIP_C > setTemp)){
 
-    if(tipTemp>TempLimit){ Iron.RunawayLevel=runaway_500; }
+    if(last_TIP_C>500){ Iron.RunawayLevel=runaway_500; }                                    // 500ºC limit
     else{
       for(int8_t c=runaway_100; c>=runaway_ok; c--){                                        // Check temperature diff
         Iron.RunawayLevel=c;
-        if(tipTemp > (Iron.CurrentSetTemperature + (TempStep*Iron.RunawayLevel)) ){         // 25ºC steps
+        if(last_TIP_C > (setTemp + (25*Iron.RunawayLevel)) ){                               // 25ºC steps
           break;                                                                            // Stop at the highest overrun condition
         }
       }
@@ -551,11 +551,10 @@ void resetIronError(void){
 // Checks for non critical iron errors (Errors that can be cleared)
 void checkIronError(void){
   CurrentTime = HAL_GetTick();
-  int16_t ambTemp = readColdJunctionSensorTemp_x10(old_reading, mode_Celsius);
   IronError_t Err = { 0 };
   Err.safeMode = Iron.Error.safeMode;
-  Err.NTC_high = (ambTemp > 800);
-  Err.NTC_low = (ambTemp < -200);
+  Err.NTC_high = (last_NTC_C > 800);
+  Err.NTC_low = (last_NTC_C < -200);
   #ifdef USE_VIN
   Err.V_low = (getSupplyVoltage_v_x10() < systemSettings.settings.lvp);
   #endif

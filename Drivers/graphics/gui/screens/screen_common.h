@@ -38,7 +38,7 @@ extern plotData_t plot;
 
 extern int32_t temp;
 extern uint8_t status, profile, Selected_Tip, lang, backupMode;
-extern int16_t backupTemp, ambTemp, ambTemp_x10;
+extern int16_t backupTemp, ambTemp;
 extern bool disableTipCopy;
 extern char *tipName;
 extern bool newTip;

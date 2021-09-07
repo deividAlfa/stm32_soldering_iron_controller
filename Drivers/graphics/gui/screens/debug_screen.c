@@ -66,7 +66,7 @@ static int32_t clampValues(int32_t val){
 static void * getTemp() {
   static int32_t value;
   if(update){
-    value=readTipTemperatureCompensated(old_reading, read_average);
+    value=readTipTemperatureCompensated(old_reading, read_average, systemSettings.settings.tempUnit);
   }
   temp=value;
   return &temp;

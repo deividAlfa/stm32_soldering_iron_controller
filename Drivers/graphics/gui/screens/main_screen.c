@@ -153,7 +153,7 @@ static void * getTemp() {
 
 static void * main_screen_getIronTemp() {
   if(mainScr.updateReadings){
-    mainScr.lastTip=readTipTemperatureCompensated(old_reading,read_average);
+    mainScr.lastTip=readTipTemperatureCompensated(old_reading, read_average, systemSettings.settings.tempUnit);
     if(getCurrentMode()>mode_sleep){
       uint8_t threshold = 10;
       if(systemSettings.settings.tempUnit==mode_Farenheit){
@@ -182,7 +182,7 @@ static void * main_screen_getVin() {
 static void * main_screen_getAmbTemp() {
   if(mainScr.updateReadings){
     updateAmbientTemp();
-    mainScr.lastAmb = ambTemp_x10;
+    mainScr.lastAmb = last_NTC_C;
   }
   temp=mainScr.lastAmb;
   return &temp;
@@ -307,10 +307,7 @@ int8_t switchScreenMode(void){
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   uint8_t current_mode = getCurrentMode();
-  int16_t current_temp = readTipTemperatureCompensated(old_reading,read_average);
-  if(systemSettings.settings.tempUnit==mode_Farenheit){
-    current_temp = TempConversion(current_temp, mode_Celsius, 0);
-  }
+  int16_t current_temp = last_TIP_C;
   mainScr.updateReadings=update_GUI_Timer();
   updateIronPower();
   updatePlot();

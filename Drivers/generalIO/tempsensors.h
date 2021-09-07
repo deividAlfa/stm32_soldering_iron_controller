@@ -13,14 +13,11 @@
 #include "settings.h"
 #include "iron.h"
 
-extern int16_t    last_TIP_Raw;
-extern int16_t    last_TIP;
-extern int16_t    last_NTC_F;
-extern int16_t    last_NTC_C;
+extern volatile int16_t last_TIP_C, last_TIP_F, last_TIP_Raw_C, last_TIP_Raw_F, last_NTC_F, last_NTC_C;
 
 void detectNTC(void);
 int16_t   readColdJunctionSensorTemp_x10(bool new, bool tempUnit);
-int16_t   readTipTemperatureCompensated(bool new, bool mode);
+int16_t readTipTemperatureCompensated(bool new, bool mode, bool tempUnit);
 void      setCurrentTip(uint8_t tip);
 tipData_t *getCurrentTip();
 
