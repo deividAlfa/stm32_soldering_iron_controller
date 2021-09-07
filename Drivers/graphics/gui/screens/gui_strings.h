@@ -109,7 +109,6 @@ typedef struct{
   char * TIP_SETTINGS_DELETE;
   char * TIP_SETTINGS_COPY;
 
-  char * CAL_InsertColdTip;
   char * CAL_Step;
   char * CAL_Wait;
   char * CAL_Measured;
@@ -125,8 +124,7 @@ typedef struct{
   char * __Temp;
   char * __Delay;
   char * _Cal_250;
-  char * _Cal_350;
-  char * _Cal_450;
+  char * _Cal_400;
   char * _BACK;
   char * _SAVE;
   char * _CANCEL;
