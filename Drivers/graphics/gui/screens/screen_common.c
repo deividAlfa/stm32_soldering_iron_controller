@@ -126,10 +126,10 @@ void handleOledDim(void){
   uint8_t contrast=getContrast();
   int16_t temp = readTipTemperatureCompensated(old_reading,read_average);
   if(dimStep==0){
-    if(systemSettings.settings.oledDimming && contrast>5 && ((current_time-dimTimer)>=((uint32_t)systemSettings.settings.oledDimming*1000))){
+    if(systemSettings.settings.dim_mode && contrast>5 && ((current_time-dimTimer)>=((uint32_t)systemSettings.settings.dim_Timeout*1000))){
       dimStep=-5;
     }
-    if(systemSettings.settings.turnOffScreen && getCurrentMode()==mode_sleep && temp<100 && contrast==1){
+    if(systemSettings.settings.dim_sleepMode==disable && getCurrentMode()==mode_sleep && temp<100 && contrast==1){
       setOledPower(disable);
     }
   }

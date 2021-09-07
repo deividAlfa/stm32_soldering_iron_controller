@@ -341,8 +341,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     refreshOledDim();                                                       // But  wake up screen
   }
 
-  if(!systemSettings.settings.runModeDimming){                              // Allow screen dimign if enabled in run mode
-    if(current_mode!=mode_sleep || current_temp>99){
+  if(systemSettings.settings.dim_mode!=dim_always){                         // If dim not enabled in all modes
+    if(current_mode!=mode_sleep || current_temp>99){                        // Refresh timeout if not in sleep mode
       refreshOledDim();
     }
   }
@@ -355,8 +355,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   if( !mainScr.shakeActive && Iron.shakeActive){
     Iron.shakeActive=0;
     mainScr.shakeActive=1;
-    if(!systemSettings.settings.runModeDimming){
-      refreshOledDim();                                                     // Shake doesn't wake the screen if wunmode dimming  is enabled
+    if(systemSettings.settings.dim_mode<dim_always){                        // If shake is detected
+      refreshOledDim();                                                     // Only wake up the screen if dimming is not enabled in all modes
     }
   }
   else if(mainScr.shakeActive==2 && (current_time-Iron.lastShakeTime)>50){

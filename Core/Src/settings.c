@@ -266,9 +266,9 @@ void resetSystemSettings(void) {
   __disable_irq();
   systemSettings.settings.version           = SETTINGS_VERSION;
   systemSettings.settings.contrast          = 255;
-  systemSettings.settings.oledDimming       = 10;
-  systemSettings.settings.runModeDimming    = disable;
-  systemSettings.settings.turnOffScreen     = disable;
+  systemSettings.settings.dim_mode          = dim_sleep;
+  systemSettings.settings.dim_Timeout       = 10;
+  systemSettings.settings.dim_sleepMode     = enable;
   systemSettings.settings.OledOffset        = OLED_OFFSET;
   systemSettings.settings.errorDelay        = 1;                    // *100mS
   systemSettings.settings.guiUpdateDelay    = 200;

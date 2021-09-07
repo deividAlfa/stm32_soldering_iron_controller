@@ -107,6 +107,10 @@ enum{
   lang_english             = 0,
   lang_russian             = 1,
   lang_swedish             = 2,
+
+  dim_off                  = 0,
+  dim_sleep                = 1,
+  dim_always               = 2,
 };
 
 
@@ -161,9 +165,9 @@ typedef struct{
   uint8_t       language;
   uint8_t       contrast;
   uint8_t       OledOffset;
-  uint8_t       oledDimming;
-  uint8_t       runModeDimming;
-  uint8_t       turnOffScreen;
+  uint8_t       dim_mode;
+  uint8_t       dim_Timeout;
+  uint8_t       dim_sleepMode;
   uint8_t       currentProfile;
   uint8_t       saveSettingsDelay;
   uint8_t       initMode;
