@@ -224,18 +224,8 @@ uint16_t human2adc(int16_t t) {
 
   if (t < 0){ return 0; }                                 // If requested temp below min, return 0
 
-  // If t>350, map between ADC values Cal_350 - Cal_450
-  if (t >= state_temps[cal_350]){
-    temp = map(t, state_temps[cal_350], state_temps[cal_450], currentTipData->calADC_At_350, currentTipData->calADC_At_450);
-  }
-  // Map between ADC values Cal_250 - Cal_350
-  else if (t >= state_temps[cal_250]){
-     temp = map(t, state_temps[cal_250], state_temps[cal_350], currentTipData->calADC_At_250, currentTipData->calADC_At_350);
-  }
-  // Map between ADC values Cal_cold - Cal_250
-  else{
-    temp = map(t, 0, state_temps[cal_250], currentTipData->calADC_Cold, currentTipData->calADC_At_250);
- }
+  temp = map(t, state_temps[cal_250], state_temps[cal_400], currentTipData->calADC_At_250, currentTipData->calADC_At_400);
+
   int16_t tH = adc2Human_x10(temp,0,mode_Celsius);                // Find +0.5ºC to provide better reading stability
   if (tH < (t+4)) {
     while(tH < (t+4)){
@@ -256,15 +246,8 @@ uint16_t human2adc(int16_t t) {
 // Translate temperature from internal units to the human readable value
 int16_t adc2Human_x10(uint16_t adc_value,bool correction, bool tempUnit) {
   int16_t temp;
-  if (adc_value >= currentTipData->calADC_At_350) {
-    temp = map(adc_value, currentTipData->calADC_At_350, currentTipData->calADC_At_450, state_temps[cal_350], state_temps[cal_450]);
-  }
-  else if (adc_value >= currentTipData->calADC_At_250) {
-    temp = map(adc_value, currentTipData->calADC_At_250, currentTipData->calADC_At_350, state_temps[cal_250], state_temps[cal_350]);
-  }
-  else{
-    temp = map(adc_value, currentTipData->calADC_Cold, currentTipData->calADC_At_250, 0, state_temps[cal_250]);
-  }
+  temp = map(adc_value, currentTipData->calADC_At_250, currentTipData->calADC_At_400, state_temps[cal_250], state_temps[cal_400]);
+  
   if(correction){ temp += last_NTC_C; }
   if(tempUnit==mode_Farenheit){
     temp=TempConversion(temp,mode_Farenheit,1);
