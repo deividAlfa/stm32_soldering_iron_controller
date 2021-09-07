@@ -20,8 +20,7 @@ static comboBox_item_t *comboitem_tip_settings_copy;
 static comboBox_item_t *comboitem_tip_settings_delete;
 static comboBox_item_t *comboitem_tip_settings_cancel;
 static editable_widget_t *editable_tip_settings_cal250;
-static editable_widget_t *editable_tip_settings_cal350;
-static editable_widget_t *editable_tip_settings_cal450;
+static editable_widget_t *editable_tip_settings_cal400;
 
 
 
@@ -78,26 +77,21 @@ static void * getCal250() {
   return &temp;
 }
 static void setCal250(int32_t *val) {
+  if(*val>=backupTip.calADC_At_400){
+    *val = backupTip.calADC_At_400-1;
+  }
   backupTip.calADC_At_250 = *val;
 }
 //=========================================================
-static void * getCal350() {
-  temp = backupTip.calADC_At_350;
-  editable_tip_settings_cal350->min_value = backupTip.calADC_At_250 + 1;
-  editable_tip_settings_cal350->max_value = backupTip.calADC_At_450 - 1;
+static void * getCal400() {
+  temp = backupTip.calADC_At_400;
   return &temp;
 }
-static void setCal350(int32_t *val) {
-  backupTip.calADC_At_350 = *val;
-}
-//=========================================================
-static void * getCal450() {
-  temp = backupTip.calADC_At_450;
-  editable_tip_settings_cal450->min_value = backupTip.calADC_At_350 + 1;
-  return &temp;
-}
-static void setCal450(int32_t *val) {
-  backupTip.calADC_At_450 = *val;
+static void setCal400(int32_t *val) {
+  if(*val<=backupTip.calADC_At_250){
+    *val = backupTip.calADC_At_250+1;
+  }
+  backupTip.calADC_At_400 = *val;
 }
 //=========================================================
 static int tip_save() {
@@ -371,33 +365,18 @@ static void tip_settings_create(screen_t *scr){
   edit->step = 1;
   edit->setData = (void (*)(void *))&setCal250;
 
-
-  //[ Cal350 Widget ]
+  //[ Cal400 Widget ]
   //
-  newComboEditable(w, strings[lang]._Cal_350, &edit, NULL);
-  editable_tip_settings_cal350=edit;
+  newComboEditable(w, strings[lang]._Cal_400, &edit, NULL);
+  editable_tip_settings_cal400=edit;
   dis=&edit->inputData;
   dis->reservedChars=4;
-  dis->getData = &getCal350;
+  dis->getData = &getCal400;
   edit->max_value = 4090;
   edit->min_value = 0;
   edit->big_step = 20;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setCal350;
-
-
-  //[ Cal450 Widget ]
-  //
-  newComboEditable(w, strings[lang]._Cal_450, &edit, NULL);
-  editable_tip_settings_cal450=edit;
-  dis=&edit->inputData;
-  dis->reservedChars=4;
-  dis->getData = &getCal450;
-  edit->max_value = 4090;
-  edit->min_value = 0;
-  edit->big_step = 20;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&setCal450;
+  edit->setData = (void (*)(void *))&setCal400;
 
   newComboAction(w, strings[lang]._SAVE, &tip_save, &comboitem_tip_settings_save);
   newComboAction(w, strings[lang].TIP_SETTINGS_COPY, &tip_copy, &comboitem_tip_settings_copy);
