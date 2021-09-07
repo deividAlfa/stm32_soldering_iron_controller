@@ -183,10 +183,10 @@ void handleIron(void) {
 
   // For calibration process. Add +-2ºC detection margin
   int16_t setTemp = Iron.CurrentSetTemperature;
-  if(systemSettings.settings.tempUnit==mode_Farenheit){{
+  if(systemSettings.settings.tempUnit==mode_Farenheit){
     setTemp = TempConversion(setTemp, mode_Celsius, 0);
   }
-  if( !Iron.temperatureReached && abs(setTemp-last_TIP_C)<5)                                  // Allow +-5° margin
+  if( !Iron.temperatureReached && abs(setTemp-last_TIP_C)<5){                                   // Allow +-5° margin
     if(++reachedCount>5){                                                                     // Get at least 5 stable readings
       temperatureReached( Iron.CurrentSetTemperature);
       Iron.temperatureReached = 1;

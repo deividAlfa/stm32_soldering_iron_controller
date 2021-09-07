@@ -89,7 +89,6 @@ void setModefromStand(uint8_t mode);
 void setUserTemperature(uint16_t temperature);
 uint16_t getUserTemperature(void);
 uint8_t getCurrentMode(void);
-uint16_t getSetTemperature();
 uint16_t getCurrentTemperature();
 int8_t getCurrentPower();
 void initTimers(void);
