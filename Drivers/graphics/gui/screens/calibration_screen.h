@@ -9,6 +9,8 @@
 #define GRAPHICS_GUI_CALIBRATION_SCREEN_H_
 #include "screen.h"
 
+typedef enum { cal_cold = 0, cal_250=1, cal_350=2, cal_450=3, cal_input_250=11, cal_input_350=12, cal_input_450=13, cal_finished=20, cal_failed=21, cal_needsAdjust=22 }state_t;
+extern const uint16_t state_temps[4];
 
 extern screen_t Screen_calibration;
 extern screen_t Screen_calibration_start;
