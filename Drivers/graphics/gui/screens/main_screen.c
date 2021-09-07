@@ -155,7 +155,11 @@ static void * main_screen_getIronTemp() {
   if(mainScr.updateReadings){
     mainScr.lastTip=readTipTemperatureCompensated(old_reading,read_average);
     if(getCurrentMode()>mode_sleep){
-      if(abs(mainScr.lastTip-Iron.CurrentSetTemperature<6)){
+      uint8_t threshold = 10;
+      if(systemSettings.settings.tempUnit==mode_Farenheit){
+        threshold = 20;
+      }
+      if(abs(mainScr.lastTip-Iron.CurrentSetTemperature<threshold)){                       // Lock numeric display if within limits
         mainScr.lastTip = Iron.CurrentSetTemperature;
       }
     }
