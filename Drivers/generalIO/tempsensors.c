@@ -6,7 +6,7 @@
  */
 
 #include "tempsensors.h"
-#include "math.h"
+#include "calibration_screen.h"
 
 #ifdef ENABLE_INT_TEMP
 uint8_t use_int_temp;
