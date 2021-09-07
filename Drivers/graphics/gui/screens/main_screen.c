@@ -551,6 +551,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         case Rotate_Increment_while_click:
         case Rotate_Decrement_while_click:
+          mainScr.setMode=main_irontemp;
+          break;
+
         default:
           break;
       }
