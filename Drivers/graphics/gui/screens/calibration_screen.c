@@ -8,7 +8,7 @@
 #include "calibration_screen.h"
 #include "screen_common.h"
 
-const  uint16_t state_temps[2] = { 2500, 4000 };                     // Temp *10 for better accuracy
+const  int16_t state_temps[2] = { 2500, 4000 };                     // Temp *10 for better accuracy
 static uint8_t error;
 static uint32_t errorTimer;
 static bool backupTempUnit;
@@ -40,16 +40,16 @@ static uint8_t processCalibration(void) {
 
   //  Ensure measured temps and adc measures are valid (cold<250<350<450)
   if (  (measured_temps[cal_400]<measured_temps[cal_250]) || (adcAtTemp[cal_400]<adcAtTemp[cal_250]) ){
-    return 0;
+    return 1;
   }
 
   adcCal[cal_250] = map(state_temps[cal_250], measured_temps[cal_250], measured_temps[cal_400], adcAtTemp[cal_250], adcAtTemp[cal_400]);
   adcCal[cal_400] = map(state_temps[cal_400], measured_temps[cal_250], measured_temps[cal_400], adcAtTemp[cal_250], adcAtTemp[cal_400]);
 
   if(adcCal[cal_250]>4090 || adcCal[cal_400]>4090 || adcCal[cal_400]<adcCal[cal_250]){    // Check that values are valid and don't exceed ADC range
-    return 0;
+    return 1;
   }
-  return 1;
+  return 0;
 }
 //=========================================================
 static void tempReached(uint16_t temp) {
@@ -118,7 +118,7 @@ static int Cal400_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
   return ret;
 }
 //=========================================================
-static int Cal_Settings_SaveAction() {
+static int Cal_Settings_SaveAction(widget_t *w, RE_Rotation_t input) {
   if( systemSettings.Profile.Cal250_default != calAdjust[cal_250] ||
       systemSettings.Profile.Cal400_default != calAdjust[cal_400] ){
 
@@ -157,7 +157,7 @@ static void setCalState(state_t s) {
     ((editable_widget_t*)Widget_Cal_Measured->content)->selectable.previous_state=widget_selected;
     ((editable_widget_t*)Widget_Cal_Measured->content)->selectable.state=widget_edit;
   }
-  else if(current_state == cal_finished){
+  else{
     setUserTemperature(0);
     widgetDisable(Widget_Cal_Measured);
     widgetEnable(Widget_Cal_Button);
@@ -165,12 +165,14 @@ static void setCalState(state_t s) {
     ((button_widget_t*)Widget_Cal_Button->content)->selectable.previous_state=widget_selected;
     ((button_widget_t*)Widget_Cal_Button->content)->selectable.state=widget_selected;
     ((button_widget_t*)Widget_Cal_Button->content)->displayString = strings[lang]._BACK;
-    if(processCalibration()){
-      backupTip.calADC_At_250 = adcCal[cal_250];       // If calibration correct, save values to backup tip
-      backupTip.calADC_At_400 = adcCal[cal_400];        // Which will be transferred to the curtrent tip on exiting the screen
-    }
-    else{
-      current_state = cal_failed;
+    if(current_state == cal_finished){
+      if(processCalibration()){
+        current_state = cal_failed;
+      }
+      else{
+        backupTip.calADC_At_250 = adcCal[cal_250];       // If calibration correct, save values to backup tip
+        backupTip.calADC_At_400 = adcCal[cal_400];        // Which will be transferred to the curtrent tip on exiting the screen
+      }
     }
   }
 
@@ -271,18 +273,18 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
   handleOledDim();
 
   if(input!=Rotate_Nothing){
-    screen_timer=current_time;
+    screen_timer = current_time;
   }
   if (input==LongClick){
     return screen_main;
   }
   if(current_state>=cal_finished){
-    if((current_time-screen_timer)>5000 || input==Click){
+    if((current_time-screen_timer)>15000 || input==Click){
       return screen_calibration;
     }
   }
   else{
-    if((current_time-screen_timer)>180000){   // 3min inactivity
+    if((current_time-screen_timer)>300000){   // 5min inactivity
       setCurrentMode(mode_sleep);
       return screen_main;
     }
@@ -300,7 +302,7 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
     else if(current_state<cal_finished){
       if(((editable_widget_t*)Widget_Cal_Measured->content)->selectable.state!=widget_edit){
         measuredTemp*=10;
-        if( measuredTemp > (state_temps[current_state-10]+500)){      // Abort if the measured temp is >50ºC than requested
+        if( abs(measuredTemp - (state_temps[current_state-10])) > 500 ){      // Abort if the measured temp is >50ºC away from target
           setCalState(cal_needsAdjust);
         }
         else{
@@ -361,17 +363,17 @@ static void Cal_Start_draw(screen_t *scr){
     else if(current_state==cal_finished){
       for(uint8_t x=cal_250;x<(cal_400+1);x++){
         sprintf(str, "%s: %u", state_tempstr[x], adcCal[x]);
-        u8g2_DrawUTF8(&u8g2, 20, (x*17), str);
+        u8g2_DrawUTF8(&u8g2, 20, (x*14), str);
       }
-      //u8g2_DrawUTF8(&u8g2, 0, 49, strings[lang].CAL_Success);
+      putStrAligned(strings[lang].CAL_Success, 30, align_center);
     }
     else if(current_state==cal_failed){
       putStrAligned(strings[lang].CAL_Failed, 24, align_center);
     }
     else if(current_state==cal_needsAdjust){
       putStrAligned(strings[lang].CAL_DELTA_HIGH_1, 0, align_center);
-      putStrAligned(strings[lang].CAL_DELTA_HIGH_2, 17, align_center);
-      putStrAligned(strings[lang].CAL_DELTA_HIGH_3, 34, align_center);
+      putStrAligned(strings[lang].CAL_DELTA_HIGH_2, 15, align_center);
+      putStrAligned(strings[lang].CAL_DELTA_HIGH_3, 30, align_center);
     }
   }
   default_screenDraw(scr);
@@ -459,7 +461,7 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
   if(input!=Rotate_Nothing){
     screen_timer=current_time;
   }
-  if((current_time-screen_timer)>180000){     // 3 min inactivity
+  if((current_time-screen_timer)>300000){     // 5 min inactivity
     setCurrentMode(mode_sleep);
     return screen_main;
   }
