@@ -101,7 +101,7 @@ struct comboBox_item_t {
   AlignType dispAlign;
   union{
     uint8_t action_screen;
-    int (*action)(widget_t*);
+    int (*action)(widget_t* w, RE_Rotation_t input);
     editable_widget_t *widget;
   };
   char *text;
@@ -148,7 +148,7 @@ void comboBoxDraw(widget_t *w);
 void newComboScreen(widget_t *w, char *label, uint8_t actionScreen, comboBox_item_t **newItem);
 void newComboEditable( widget_t *combo, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem);
 void newComboMultiOption(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem);
-void newComboAction(widget_t *w, char *label, int (*action)(), comboBox_item_t **newItem);
+void newComboAction(widget_t *w, char *label, int (*action)(widget_t *w, RE_Rotation_t input), comboBox_item_t **newItem);
 void comboResetIndex(widget_t *w);
 int32_t strsum(char* str);
 void insertDot(char *str, uint8_t dec);

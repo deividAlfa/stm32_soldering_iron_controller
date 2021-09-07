@@ -921,7 +921,7 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
   }
   if((input == Click) || (input == LongClick)){                                                               // If clicked
     if (combo->currentItem->type==combo_Action){                                                              // If combo Action type
-      return combo->currentItem->action(w);                                                                   // Process action
+      return combo->currentItem->action(w, input);                                                                   // Process action
     }
     else if (combo->currentItem->type==combo_Screen){                                                         // If combo screen type
       return combo->currentItem->action_screen;                                                               // Return screen index
@@ -1290,7 +1290,7 @@ void newComboMultiOption(widget_t *w, char *label, editable_widget_t **newEdit, 
   }
 }
 
-void newComboAction(widget_t *w, char *label, int (*action)(), comboBox_item_t **newItem){
+void newComboAction(widget_t *w, char *label, int (*action)(widget_t *w, RE_Rotation_t input), comboBox_item_t **newItem){
   comboBox_item_t *item = _malloc(sizeof(comboBox_item_t));
   if(!item || !w || !label || !action){
     Error_Handler();

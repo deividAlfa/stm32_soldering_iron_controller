@@ -67,6 +67,17 @@ static void setDbgScr(uint32_t *val) {
 }
 #endif
 
+int hwAction(widget_t *w, RE_Rotation_t input){
+  static uint32_t last=0;
+  if(input==Click){
+    if((current_time-last)<500){
+      screenSaver.enabled=1;
+    }
+    last=current_time;
+  }
+  return -1;
+}
+
 static void * getTmpUnit() {
   temp = systemSettings.settings.tempUnit;
   return &temp;
@@ -90,7 +101,6 @@ static void * getTmpStep() {
 static void setTmpStep(uint32_t *val) {
   systemSettings.settings.tempStep = *val;
 }
-
 //=========================================================
 
 static void * getBigTmpStep() {
@@ -139,12 +149,6 @@ static void * getdimMode() {
     comboitem_system_Dim_Timeout->enabled = 0;
   }
   return &temp;
-}
-int OledDimMode_ProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
-  if(input==LongClick){
-    screenSaver.enabled=1;
-  }
-  return default_widgetProcessInput(w, input, state);
 }
 static void setdimMode(uint32_t *val) {
   systemSettings.settings.dim_mode = * val;
@@ -367,7 +371,6 @@ static void system_create(screen_t *scr){
   edit->min_value = 0;
   edit->options = strings[lang].dimMode;
   edit->numberOfOptions = 3;
-  edit->selectable.processInput=&OledDimMode_ProcessInput;
 
   //  [ Oled delay Widget ]
   //
@@ -588,7 +591,7 @@ static void system_create(screen_t *scr){
 #endif
   newComboScreen(w, strings[lang].SYSTEM_RESET_MENU, screen_reset, NULL);
   newComboScreen(w, SWSTRING, -1, NULL);
-  newComboScreen(w, HWSTRING, -1, NULL);
+  newComboAction(w, HWSTRING, &hwAction, NULL);
   newComboScreen(w, strings[lang]._BACK, screen_settings, NULL);
 }
 
@@ -692,7 +695,7 @@ static void * get_NTC_detect_low_res_beta() {
   return &temp;
 }
 //=========================================================
-static int saveNTC() {
+static int saveNTC(widget_t *w, RE_Rotation_t input) {
   __disable_irq();
   systemSettings.settings.enableNTC=backup_enableNTC;
   systemSettings.settings.NTC_detect=backup_NTC_detect;

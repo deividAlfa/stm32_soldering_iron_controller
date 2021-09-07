@@ -12,12 +12,12 @@ screen_t Screen_tip_list;
 static comboBox_item_t *comboitem_tip_list_addNewTip;
 
 
-static int addNewTip() {
+static int addNewTip(widget_t *w, RE_Rotation_t input){
   newTip=1;
   return screen_tip_settings;
 }
 
-static int editTip(widget_t *w) {
+static int editTip(widget_t *w, RE_Rotation_t input) {
   tipName=((comboBox_widget_t*)w->content)->currentItem->text;
   return screen_tip_settings;
 }

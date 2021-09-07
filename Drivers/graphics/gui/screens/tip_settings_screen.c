@@ -94,7 +94,7 @@ static void setCal400(int32_t *val) {
   backupTip.calADC_At_400 = *val;
 }
 //=========================================================
-static int tip_save() {
+static int tip_save(widget_t *w, RE_Rotation_t input) {
   systemSettings.Profile.tip[Selected_Tip] = backupTip;                                                            // Store tip data
   if(Selected_Tip==systemSettings.Profile.currentTip){                                                          // If current used tip, update PID
     __disable_irq();
@@ -107,7 +107,7 @@ static int tip_save() {
   return comboitem_tip_settings_cancel->action_screen;
 }
 //=========================================================
-static int tip_delete() {
+static int tip_delete(widget_t *w, RE_Rotation_t input) {
   char name[TipCharSize]=_BLANK_TIP;
   systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
 
@@ -131,7 +131,7 @@ static int tip_delete() {
   return comboitem_tip_settings_cancel->action_screen;                                                          // And return to main screen or system menu screen
 }
 //=========================================================
-static int tip_copy() {
+static int tip_copy(widget_t *w, RE_Rotation_t input) {
   Selected_Tip = systemSettings.Profile.currentNumberOfTips;                                                    // Select first empty slot
   strcpy(backupTip.name, _BLANK_TIP);                                                                              // Copy empty name
   comboitem_tip_settings_delete->enabled=0;                                                                     // Disable copying, deleting and saving(Until name is written)

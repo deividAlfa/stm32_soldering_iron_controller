@@ -37,19 +37,19 @@ static int doReset(widget_t *w) {
     }
     return -1;
 }
-static int doSettingsReset() {
+static int doSettingsReset(widget_t *w, RE_Rotation_t input) {
   resStatus=reset_settings;
   return screen_reset_confirmation;
 }
-static int doProfileReset() {
+static int doProfileReset(widget_t *w, RE_Rotation_t input) {
   resStatus=reset_profile;
   return screen_reset_confirmation;
 }
-static int doProfilesReset() {
+static int doProfilesReset(widget_t *w, RE_Rotation_t input) {
   resStatus=reset_profiles;
   return screen_reset_confirmation;
 }
-static int doFactoryReset() {
+static int doFactoryReset(widget_t *w, RE_Rotation_t input) {
   resStatus=reset_all;
   return screen_reset_confirmation;
 }

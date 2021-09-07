@@ -255,7 +255,7 @@ static void iron_onEnter(screen_t *scr){
   }
 }
 
-int filter_Save(void){
+int filter_Save(widget_t *w, RE_Rotation_t input){
   __disable_irq();
   systemSettings.Profile.tipFilter = bak_f;
   TIP.filter=bak_f;
