@@ -389,7 +389,7 @@ void resetCurrentProfile(void){
   else{
     Error_Handler();  // We shouldn't get here!
   }
-
+  systemSettings.Profile.calADC_At_0                = 0;
   systemSettings.Profile.tipFilter.coefficient      = 90;   // % of old data (more %, more filtering)
   systemSettings.Profile.tipFilter.threshold        = 50;
   systemSettings.Profile.tipFilter.min              = 65;   // Don't go below x% when decreasing after exceeding threshold limits

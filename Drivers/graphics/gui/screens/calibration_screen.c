@@ -8,6 +8,7 @@
 #include "calibration_screen.h"
 #include "screen_common.h"
 
+enum { zero_disabled, zero_sampling, zero_capture };
 const  int16_t state_temps[2] = { 2500, 4000 };                     // Temp *10 for better accuracy
 static uint8_t error;
 static uint32_t errorTimer;
@@ -16,21 +17,23 @@ static char* state_tempstr[2] = { "250\260C", "400\260C" };
 static uint16_t measured_temps[2];
 static uint16_t adcAtTemp[2];
 static uint16_t adcCal[2];
-static uint16_t calAdjust[2];
+static uint16_t calAdjust[3];
+static uint16_t backup_calADC_At_0;
 static state_t current_state;
 static uint8_t tempReady;
 static int32_t measuredTemp;
 static uint8_t processCalibration(void);
 static void setCalState(state_t s);
 static tipData_t *Currtip;
-static uint8_t update, update_draw;
+static uint8_t update, update_draw, zero_state;
 screen_t Screen_calibration;
 screen_t Screen_calibration_start;
 screen_t Screen_calibration_settings;
-
+static char zeroStr[16];
 static widget_t *Widget_Cal_Button;
 static widget_t *Widget_Cal_Measured;
 
+static comboBox_item_t *Cal_Combo_Adjust_zero;
 static comboBox_item_t *Cal_Combo_Adjust_C250;
 static comboBox_item_t *Cal_Combo_Adjust_C400;
 
@@ -42,8 +45,8 @@ static uint8_t processCalibration(void) {
   if (  (measured_temps[cal_400]<measured_temps[cal_250]) || (adcAtTemp[cal_400]<adcAtTemp[cal_250]) ){
     return 1;
   }
-
-  adcCal[cal_250] = map(state_temps[cal_250], measured_temps[cal_250], measured_temps[cal_400], adcAtTemp[cal_250], adcAtTemp[cal_400]);
+  adcCal[cal_250] = map(state_temps[cal_250], 0, measured_temps[cal_250], systemSettings.Profile.calADC_At_0, adcAtTemp[cal_250]);
+  //adcCal[cal_250] = map(state_temps[cal_250], measured_temps[cal_250], measured_temps[cal_400], adcAtTemp[cal_250], adcAtTemp[cal_400]);
   adcCal[cal_400] = map(state_temps[cal_400], measured_temps[cal_250], measured_temps[cal_400], adcAtTemp[cal_250], adcAtTemp[cal_400]);
 
   if(adcCal[cal_250]>4090 || adcCal[cal_400]>4090 || adcCal[cal_400]<adcCal[cal_250]){    // Check that values are valid and don't exceed ADC range
@@ -120,10 +123,14 @@ static int Cal400_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 //=========================================================
 static int Cal_Settings_SaveAction(widget_t *w, RE_Rotation_t input) {
   if( systemSettings.Profile.Cal250_default != calAdjust[cal_250] ||
-      systemSettings.Profile.Cal400_default != calAdjust[cal_400] ){
+      systemSettings.Profile.Cal400_default != calAdjust[cal_400] ||
+      backup_calADC_At_0 != calAdjust[cal_0] ){
 
+    __disable_irq();
     systemSettings.Profile.Cal250_default = calAdjust[cal_250];
     systemSettings.Profile.Cal400_default = calAdjust[cal_400];
+    backup_calADC_At_0 = calAdjust[cal_0];                               // backup_calADC_At_0 is transferred to profile on screen exiting
+    __enable_irq();
 
     saveSettingsFromMenu(save_Settings);
   }
@@ -134,6 +141,23 @@ static int cancelAction(widget_t* w) {
   return screen_calibration;
 }
 
+static int zero_setAction(widget_t* w, RE_Rotation_t input) {
+  if(input==Click){
+    if(++zero_state>zero_capture){
+      zero_state=zero_disabled;
+      __disable_irq();
+      systemSettings.Profile.calADC_At_0 = calAdjust[cal_0] = backup_calADC_At_0;   // Apply zero value in real time
+      __enable_irq();
+    }
+    else if(zero_state==zero_capture){
+      __disable_irq();
+      systemSettings.Profile.calADC_At_0 = calAdjust[cal_0] = TIP.last_avg;
+      __enable_irq();
+    }
+    update=1;
+  }
+  return -1;
+}
 //=========================================================
 static void setCalState(state_t s) {
   current_state = s;
@@ -170,8 +194,8 @@ static void setCalState(state_t s) {
         current_state = cal_failed;
       }
       else{
-        backupTip.calADC_At_250 = adcCal[cal_250];       // If calibration correct, save values to backup tip
-        backupTip.calADC_At_400 = adcCal[cal_400];        // Which will be transferred to the curtrent tip on exiting the screen
+        backupTip.calADC_At_250 = adcCal[cal_250];        // If calibration correct, save values to backup tip
+        backupTip.calADC_At_400 = adcCal[cal_400];        // Which will be transferred to the current tip on exiting the screen
       }
     }
   }
@@ -181,16 +205,22 @@ static void setCalState(state_t s) {
 //=========================================================
 static void Cal_onEnter(screen_t *scr) {
   if(scr == &Screen_settings) {
+    Iron.calibrating=1;
+    setCurrentMode(mode_run);
+    backupMode=getCurrentMode();
+    backupTemp=getUserTemperature();
     Currtip = getCurrentTip();
-    error=0;
     comboResetIndex(Screen_calibration.widgets);
+    error=0;
   }
+
+  setUserTemperature(0);
 }
 static void Cal_onExit(screen_t *scr) {
-  if(current_state==cal_finished){
-    __disable_irq();
-    *Currtip = backupTip;                                 // Apply values to current tip
-    __enable_irq();
+  if(scr!=&Screen_calibration_start && scr!=&Screen_calibration_settings ){
+    Iron.calibrating=0;
+    setCurrentMode(backupMode);
+    setUserTemperature(backupTemp);
   }
 }
 
@@ -247,11 +277,8 @@ static void Cal_create(screen_t *scr) {
 
 static void Cal_Start_init(screen_t *scr) {
   default_init(scr);
-  Iron.calibrating=1;
   updateAmbientTemp();
   tempReady = 0;
-  backupTemp = getUserTemperature();
-  backupMode = getCurrentMode();
   backupTempUnit=systemSettings.settings.tempUnit;
   setSystemTempUnit(mode_Celsius);
   backupTip =  *Currtip;
@@ -262,7 +289,6 @@ static void Cal_Start_init(screen_t *scr) {
   __enable_irq();
 
   setCalState(cal_250);
-  setCurrentMode(mode_run);
 }
 
 static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
@@ -275,9 +301,6 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
   if(input!=Rotate_Nothing){
     screen_timer = current_time;
   }
-  if (input==LongClick){
-    return screen_main;
-  }
   if(current_state>=cal_finished){
     if((current_time-screen_timer)>15000 || input==Click){
       return screen_calibration;
@@ -286,7 +309,7 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
   else{
     if((current_time-screen_timer)>300000){   // 5min inactivity
       setCurrentMode(mode_sleep);
-      return screen_main;
+      return screen_calibration;
     }
   }
 
@@ -324,10 +347,6 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
 
 static void Cal_Start_OnExit(screen_t *scr) {
   setSystemTempUnit(backupTempUnit);
-  setUserTemperature(backupTemp);
-  setCurrentMode(backupMode);
-  Iron.calibrating=0;
-
   __disable_irq();
   *Currtip = backupTip;
   __enable_irq();
@@ -419,16 +438,11 @@ static void Cal_Settings_init(screen_t *scr) {
   comboResetIndex(Screen_calibration_settings.widgets);
 
   updateAmbientTemp();
-  setCurrentMode(mode_run);
-  backupMode = getCurrentMode();
-  backupTemp = getUserTemperature();
-  setUserTemperature(0);
-  Iron.calibrating=1;
-
+  zero_state = zero_disabled;
   calAdjust[cal_250] = systemSettings.Profile.Cal250_default;
   calAdjust[cal_400] = systemSettings.Profile.Cal400_default;
-
-  Currtip = getCurrentTip();
+  calAdjust[cal_0] = systemSettings.Profile.calADC_At_0;
+  backup_calADC_At_0 = systemSettings.Profile.calADC_At_0;
   backupTip= *Currtip;
 
   __disable_irq();
@@ -438,14 +452,10 @@ static void Cal_Settings_init(screen_t *scr) {
 }
 
 static void Cal_Settings_OnExit(screen_t *scr) {
-  Iron.calibrating=0;
-
   __disable_irq();
   *Currtip = backupTip;
+  systemSettings.Profile.calADC_At_0 = backup_calADC_At_0;
   __enable_irq();
-
-  setUserTemperature(backupTemp);
-  setCurrentMode(backupMode);
 }
 
 static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
@@ -457,13 +467,26 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
   }
   refreshOledDim();
   handleOledDim();
-
+  if(update || update_GUI_Timer()){
+    scr->widgets->refresh=refresh_triggered;
+    switch(zero_state){
+      case zero_disabled:
+        sprintf(zeroStr, "Zero set   %4u", backup_calADC_At_0 );
+        break;
+      case zero_sampling:
+        sprintf(zeroStr, "Sampling   %4u", TIP.last_avg );
+        break;
+      case zero_capture:
+        sprintf(zeroStr, "Captured   %4u", calAdjust[cal_0]);
+        break;
+    }
+  }
   if(input!=Rotate_Nothing){
     screen_timer=current_time;
   }
   if((current_time-screen_timer)>300000){     // 5 min inactivity
     setCurrentMode(mode_sleep);
-    return screen_main;
+    return screen_calibration;
   }
 
   if(input==Rotate_Decrement_while_click){
@@ -487,6 +510,9 @@ static void Cal_Settings_create(screen_t *scr){
 
   // Combo Start
   newWidget(&w,widget_combo,scr);
+
+  newComboAction(w, zeroStr, &zero_setAction, &Cal_Combo_Adjust_zero);
+  Cal_Combo_Adjust_zero->dispAlign=align_left;
 
   newComboEditable(w, strings[lang]._Cal_250, &edit, &Cal_Combo_Adjust_C250);
   edit->inputData.reservedChars=4;

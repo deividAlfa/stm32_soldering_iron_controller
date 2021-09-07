@@ -152,6 +152,7 @@ typedef struct{
   uint16_t      readDelay;
   uint16_t      noIronValue;
   uint16_t      power;
+  uint16_t      calADC_At_0;
   uint16_t      Cal250_default;
   uint16_t      Cal400_default;
   tipData_t     tip[TipSize];
