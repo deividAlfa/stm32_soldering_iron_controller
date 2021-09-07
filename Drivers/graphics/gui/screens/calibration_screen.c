@@ -17,7 +17,6 @@ static uint16_t measured_temps[2];
 static uint16_t adcAtTemp[2];
 static uint16_t adcCal[2];
 static uint16_t calAdjust[2];
-static bool cal_drawText;
 static state_t current_state;
 static uint8_t tempReady;
 static int32_t measuredTemp;
@@ -138,7 +137,6 @@ static int cancelAction(widget_t* w) {
 //=========================================================
 static void setCalState(state_t s) {
   current_state = s;
-  cal_drawText = 1;
 
   if(current_state <= cal_400) {
     setUserTemperature(state_temps[s]/10);
@@ -160,6 +158,8 @@ static void setCalState(state_t s) {
     ((editable_widget_t*)Widget_Cal_Measured->content)->selectable.state=widget_edit;
   }
   else if(current_state == cal_finished){
+    setUserTemperature(0);
+    widgetDisable(Widget_Cal_Measured);
     widgetEnable(Widget_Cal_Button);
     Screen_calibration_start.current_widget=Widget_Cal_Button;
     ((button_widget_t*)Widget_Cal_Button->content)->selectable.previous_state=widget_selected;
@@ -172,12 +172,6 @@ static void setCalState(state_t s) {
     else{
       current_state = cal_failed;
     }
-  }
-
-  if(current_state >= cal_finished) {
-    setUserTemperature(0);
-    widgetDisable(Widget_Cal_Button);
-    widgetDisable(Widget_Cal_Measured);
   }
 
   update_draw = 1;
@@ -340,8 +334,7 @@ static void Cal_Start_OnExit(screen_t *scr) {
 static void Cal_Start_draw(screen_t *scr){
   char str[20];
 
-  if(cal_drawText || update_draw){
-    cal_drawText=0;
+  if(update_draw){
     update_draw=0;
 
     FillBuffer(BLACK, fill_dma);
