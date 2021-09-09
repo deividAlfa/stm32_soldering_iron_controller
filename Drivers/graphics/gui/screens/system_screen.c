@@ -337,7 +337,7 @@ static void system_create(screen_t *scr){
 
   //  [ Contrast Widget ]
   //
-  newComboEditable(w, strings[lang].SYSTEM_Contrast, &edit, NULL);
+  newComboEditable(w, strings[lang].SYSTEM_Oled_Contrast, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=3;
   dis->getData = &getContrast_;
@@ -349,7 +349,7 @@ static void system_create(screen_t *scr){
 
   //  [ Oled Offset Widget ]
   //
-  newComboEditable(w, strings[lang].SYSTEM_Offset, &edit, NULL);
+  newComboEditable(w, strings[lang].SYSTEM_Oled_Offset, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=2;
   dis->getData = &getOledOffset;
@@ -387,7 +387,7 @@ static void system_create(screen_t *scr){
 
   //  [ Oled dim turn off Widget ]
   //
-  newComboMultiOption(w, strings[lang].SYSTEM_Oled_Dim_SleepPower, &edit, &comboitem_system_Dim_PowerOff);
+  newComboMultiOption(w, strings[lang].SYSTEM_Oled_Dim_inSleep, &edit, &comboitem_system_Dim_PowerOff);
   dis=&edit->inputData;
   dis->getData = &getDimTurnOff;
   edit->big_step = 1;

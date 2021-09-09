@@ -57,10 +57,10 @@ typedef struct{
   char * FILTER_Reset_limit;
 
   char * SYSTEM_Profile;
-  char * SYSTEM_Offset;
-  char * SYSTEM_Contrast;
+  char * SYSTEM_Oled_Offset;
+  char * SYSTEM_Oled_Contrast;
   char * SYSTEM_Oled_Dim;
-  char * SYSTEM_Oled_Dim_SleepPower;
+  char * SYSTEM_Oled_Dim_inSleep;
   char * SYSTEM_Wake_Mode;
   char * SYSTEM_Stand_Mode;
   char * SYSTEM_Boot;
@@ -109,6 +109,9 @@ typedef struct{
   char * TIP_SETTINGS_DELETE;
   char * TIP_SETTINGS_COPY;
 
+  char * CAL_ZeroSet;
+  char * CAL_Sampling;
+  char * CAL_Captured;
   char * CAL_Step;
   char * CAL_Wait;
   char * CAL_Measured;

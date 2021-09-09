@@ -56,10 +56,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "Reset limit",
 
       .SYSTEM_Profile = "Profile",
-      .SYSTEM_Contrast = "Contrast",
+      .SYSTEM_Oled_Contrast = "Contrast",
       .SYSTEM_Oled_Dim = "Dimmer",
-      .SYSTEM_Oled_Dim_SleepPower = " In sleep",
-      .SYSTEM_Offset = "Offset",
+      .SYSTEM_Oled_Dim_inSleep = " In sleep",
+      .SYSTEM_Oled_Offset = "Offset",
       .SYSTEM_Wake_Mode = "Wake mode",
       .SYSTEM_Stand_Mode = "Stand mode",
       .SYSTEM_Boot = "Boot",
@@ -107,6 +107,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .TIP_SETTINGS_COPY = "COPY",
       .TIP_SETTINGS_DELETE = "DELETE",
 
+      .CAL_ZeroSet = "Zero set   %4u",
+      .CAL_Sampling = "Sampling   %4u",
+      .CAL_Captured = "Captured   %4u",
       .CAL_Step = "CAL STEP:",
       .CAL_Wait = "WAIT...",
       .CAL_Measured = "MEASURED:",
@@ -193,10 +196,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "ПорогСброса",
 
       .SYSTEM_Profile = "Тип",
-      .SYSTEM_Contrast = "Яркость",
-      .SYSTEM_Oled_Dim = "Dimming",
-      .SYSTEM_Oled_Dim_SleepPower = " Slp pwr",
-      .SYSTEM_Offset = "Сдвиг",
+      .SYSTEM_Oled_Contrast = "Яркость",
+      .SYSTEM_Oled_Dim = "Dimmer",                       // TODO
+      .SYSTEM_Oled_Dim_inSleep = " In sleep",                       // TODO
+      .SYSTEM_Oled_Offset = "Сдвиг",
       .SYSTEM_Wake_Mode = "ДатчикСна",
       .SYSTEM_Stand_Mode = "Подставка",
       .SYSTEM_Boot = "Старт с",
@@ -244,6 +247,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .TIP_SETTINGS_COPY = "ДУБЛИРОВАТЬ",
       .TIP_SETTINGS_DELETE = "УДАЛИТЬ",
 
+
+      .CAL_ZeroSet = "Zero set   %4u",                       // TODO
+      .CAL_Sampling = "Sampling   %4u",                       // TODO
+      .CAL_Captured = "Captured   %4u",                       // TODO
       .CAL_Step = "ШАГ:",
       .CAL_Wait = "ЖДИТЕ...",
       .CAL_Measured = "ЗАМЕР:",
@@ -331,10 +338,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "Resetgräns",
 
       .SYSTEM_Profile = "Profil",
-      .SYSTEM_Contrast = "Kontrast",
+      .SYSTEM_Oled_Contrast = "Kontrast",
       .SYSTEM_Oled_Dim = "Dimmer",
-      .SYSTEM_Oled_Dim_SleepPower = " SOV-OLED",
-      .SYSTEM_Offset = "Offset",
+      .SYSTEM_Oled_Dim_inSleep = " In sleep",                       // TODO
+      .SYSTEM_Oled_Offset = "Offset",
       .SYSTEM_Wake_Mode = "Väckmetod",
       .SYSTEM_Stand_Mode = "Ställ-läge",
       .SYSTEM_Boot = "Startläge",
@@ -382,6 +389,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .TIP_SETTINGS_COPY = "KOPIERA",
       .TIP_SETTINGS_DELETE = "RADERA",
 
+
+      .CAL_ZeroSet = "Zero set   %4u",                       // TODO
+      .CAL_Sampling = "Sampling   %4u",                       // TODO
+      .CAL_Captured = "Captured   %4u",                       // TODO
       .CAL_Step = "KAL STEG:",
       .CAL_Wait = "VÄNTA...",
       .CAL_Measured = "UPPMÄTT:",

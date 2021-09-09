@@ -471,13 +471,13 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
     scr->widgets->refresh=refresh_triggered;
     switch(zero_state){
       case zero_disabled:
-        sprintf(zeroStr, "Zero set   %4u", backup_calADC_At_0 );
+        sprintf(zeroStr, strings[lang].CAL_ZeroSet, backup_calADC_At_0 );
         break;
       case zero_sampling:
-        sprintf(zeroStr, "Sampling   %4u", TIP.last_avg );
+        sprintf(zeroStr, strings[lang].CAL_Sampling, TIP.last_avg );
         break;
       case zero_capture:
-        sprintf(zeroStr, "Captured   %4u", calAdjust[cal_0]);
+        sprintf(zeroStr, strings[lang].CAL_Captured, calAdjust[cal_0]);
         break;
     }
   }
