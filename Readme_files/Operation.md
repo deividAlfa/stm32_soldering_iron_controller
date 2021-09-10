@@ -174,9 +174,9 @@ Fades the display after a timeout.
 Sets the dimmer timeout. This option is disabled if the dimmer is OFF.<br>
   - **Dimmer, in sleep mode**<br>
 Allows to turn off the screen in sleep mode. This option is disabled if the dimmer is OFF.<br>
+For safety reasons,the screen will only turn off when the iron temperature is below 100°C.<br>
 	- OFF: In sleep mode, the screen turns off after dimming.<br>
 	- ON: The screen stays on at low brightness.<br>
-For safety reasons,the screen will only dim when the iron temperature is below 100°C.<br>
   - **Wake mode**<br>
 How to detect activity. SHAKE or STAND.<br>
 SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip up to wake.<br>
