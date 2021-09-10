@@ -35,8 +35,8 @@
 
 #define LANGUAGE_COUNT    3
 //#define SWSTRING        "SW: v1.10"                               // For releases
-#define SWSTRING          "SW: 21-09-08"                          // For git
-#define SETTINGS_VERSION  12                                         // Change this if you change the struct below to prevent people getting out of sync
+#define SWSTRING          "SW: 21-09-10"                            // For git
+#define SETTINGS_VERSION  12                                        // Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize         2                                         // In KB
 #define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
 
