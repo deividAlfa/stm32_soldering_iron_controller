@@ -308,19 +308,18 @@ Requires a tip thermometer (e.g. Hakko FG-100 or similar). Calibrates the curren
 Wait for tip temperature to settle (When the thermomether reading stops moving), it can take up to 20 seconds in some cases.<br>
 Then enter temperature as measured by the thermometer for each step.<br>
 If the entered temperature is more than 50ºC away from the target, the process will be aborted and you will have to adjust it manually.<br>
-This values have nothing to do with the Tip Settings calibration values!<br>
-These are for the tip, while this ones are only used for the calibration process.<br>
+This values have nothing to do with the Tip Settings calibration values! These are for the tip, while this ones are only used for the calibration process.<br>
 You can cancel the process at any time by clicking the STOP button.<br>
   - **SETTINGS**<br>
 Here you can manually adjust the default calibration values, normally this needs to be done only once.<br> 
 Cal 250 depends on Zero set, and Cal 400 depends on Cal 250, so if you're changing this, you must follow the correct order:<br>
-Zero set -> Cal 250 -> Cal 400 -> Save<br>  
+Zero set (Sampling->Captured) -> Cal 250 -> Cal 400 -> Save<br>  
   	- **Zero set**<br>
 Calibrates the zero offset of the amplifier. You must have inserted a completely cold tip, or the calibration result will be wrong.<br>
 This widgets has 3 states than change when clicking on it:<br>
 		- Zero set: Shows the current value in the system (No changes).<br>
 		- Sampling: Shows the ADC value in real time.<br>
-		- Captured: Shows the captured value and applies it.<br>
+		- Captured: Shows the captured value and applies it. To calibrate the zero offset, you must set this mode before moving to the next step.<br>
 	- **Cal 250ºC**<br>
 	- **Cal 400ºC**<br>
 Adjusts the value for 250/400°C. When editing this widget, the power is enabled and the value applied in real time.<br>
