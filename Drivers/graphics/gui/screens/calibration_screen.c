@@ -29,7 +29,7 @@ static uint8_t update, update_draw, zero_state;
 screen_t Screen_calibration;
 screen_t Screen_calibration_start;
 screen_t Screen_calibration_settings;
-static char zeroStr[20];
+static char zeroStr[32];
 static widget_t *Widget_Cal_Button;
 static widget_t *Widget_Cal_Measured;
 
@@ -471,13 +471,13 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
     scr->widgets->refresh=refresh_triggered;
     switch(zero_state){
       case zero_disabled:
-        sprintf(zeroStr, strings[lang].CAL_ZeroSet, backup_calADC_At_0 );
+        sprintf(zeroStr, "%s%4u", strings[lang].CAL_ZeroSet, backup_calADC_At_0 );
         break;
       case zero_sampling:
-        sprintf(zeroStr, strings[lang].CAL_Sampling, TIP.last_avg );
+        sprintf(zeroStr, "%s%4u", strings[lang].CAL_Sampling, TIP.last_avg );
         break;
       case zero_capture:
-        sprintf(zeroStr, strings[lang].CAL_Captured, calAdjust[cal_0]);
+        sprintf(zeroStr, "%s%4u", strings[lang].CAL_Captured, calAdjust[cal_0]);
         break;
     }
   }

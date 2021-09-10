@@ -1,8 +1,7 @@
 @echo off  
-set MIN=18
-set MAX=20
-set FONTS=	"arial.ttf";^
- 		"ITC Avant Garde Gothic Book Cyrillic.otf"
+set MIN=16
+set MAX=18
+set FONTS=	"arial.ttf"
 
 for %%F in (%FONTS%) do (
      for /l %%S in (%MIN%, 1, %MAX%) do (
