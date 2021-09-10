@@ -117,7 +117,7 @@ static struct{
   uint8_t shakeActive;
   int8_t  dimStep;
   uint8_t ironStatus;
-  uint8_t prevIronStatus;
+  uint8_t lastError;
   uint8_t setMode;
   uint8_t currentMode;
   uint8_t displayMode;
@@ -307,7 +307,6 @@ int8_t switchScreenMode(void){
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   uint8_t current_mode = getCurrentMode();
-  int16_t current_temp = last_TIP_C;
   mainScr.updateReadings=update_GUI_Timer();
   updateIronPower();
   updatePlot();
@@ -315,17 +314,25 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 
   if(Iron.Error.Flags & _ACTIVE){
-    if(mainScr.ironStatus != status_error){
+    if(mainScr.ironStatus != status_error){                                   // If error appeared
+      refreshOledDim();                                                       // Wake up screen
       mainScr.ironStatus = status_error;
       mainScr.idleTimer = current_time;
     }
-    current_temp=0;
     if(mainScr.shakeActive){
       mainScr.shakeActive=3;
     }
+    if(mainScr.lastError!=Iron.Error.Flags){                                  // If error changed
+      mainScr.lastError=Iron.Error.Flags;
+      refreshOledDim();                                                       // Wake up screen
+    }
   }
   else{
-    mainScr.ironStatus = status_ok;
+    if(mainScr.ironStatus != status_ok){                                      // If error is gone
+      mainScr.ironStatus = status_ok;
+      refreshOledDim();                                                       // Wake up screen
+    }
+
   }
 
 
@@ -342,10 +349,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     refreshOledDim();                                                       // But  wake up screen
   }
 
-  if(systemSettings.settings.dim_mode!=dim_always){                         // If dim not enabled in all modes
-    if(current_mode!=mode_sleep || current_temp>99){                        // Refresh timeout if not in sleep mode
-      refreshOledDim();
-    }
+  if(systemSettings.settings.dim_mode!=dim_always && current_mode>mode_standby){  // If dim not enabled in all modes
+    refreshOledDim();																															// Refresh timeout if running
   }
 
 
@@ -356,8 +361,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   if( !mainScr.shakeActive && Iron.shakeActive){
     Iron.shakeActive=0;
     mainScr.shakeActive=1;
-    if(systemSettings.settings.dim_mode<dim_always || (systemSettings.settings.dim_mode==dim_always && current_mode==mode_sleep)){                        // If shake is detected
-      refreshOledDim();                                                     // If dimmer is enabled for run mode, don't wake up the screen, only in sleep mode
+    if(systemSettings.settings.dim_mode<dim_always || current_mode<mode_run){			// Wake up the screen if in low power mode, 
+      refreshOledDim();                                 													// Or if dim always disabled
     }
   }
   else if(mainScr.shakeActive==2 && (current_time-Iron.lastShakeTime)>50){
