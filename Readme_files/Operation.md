@@ -302,7 +302,7 @@ Discard any changes and return.<br>
 ---
 
 ### CALIBRATION
-When entering this menu, the power is removed from the tip. For best calibration results, insert a cold tip now.
+When entering this menu, the power is removed from the tip. For best calibration results, insert a cold tip now.<br>
   - **START**<br>
 Requires a tip thermometer (e.g. Hakko FG-100 or similar). Calibrates the current tip at temperatures of 250 and 400°C.<br>
 Wait for tip temperature to settle (When the thermomether reading stops moving), it can take up to 20 seconds in some cases.<br>
@@ -315,7 +315,7 @@ Youy can cancel the process at any time by clicking the STOP button.<br>
 Here you can manually adjust the default calibration values.<br>
 This is an adjustment made to avoid burning the tip in the calibration process if your controller is reading are too far from target.<br>
   	- **Zero set**<br>
-Calibrates the zero offset of the amplifier. You must have inserted a completely cold tip, or the calibration won't be done properly.
+Calibrates the zero offset of the amplifier. You must have inserted a completely cold tip, or the calibration result will be wrong.<br>
 This widgets has 3 states than change when clicking on it:<br>
 		- Zero set: Shows the current value in the system (No changes).<br>
 		- Sampling: Shows the ADC value in real time.<br>
