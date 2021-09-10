@@ -319,13 +319,13 @@ This widgets has 3 states than change when clicking on it:<br>
 		- Zero set: Shows the current value in the system (No changes).<br>
 		- Sampling: Shows the ADC value in real time.<br>
 		- Captured: Shows the captured value and applies it.<br>
-- **Cal 250ºC**<br>
-- **Cal 400ºC**<br>
+	- **Cal 250ºC**<br>
+	- **Cal 400ºC**<br>
 Adjusts the value for 250/400°C. When editing this widget, the power is enabled and the value applied in real time.<br>
 Move in small steps until the thermometer matches the target temperature
-  - **SAVE**<br> 
+  	- **SAVE**<br> 
 Return to system menu saving changes.<br>
-  - **CANCEL**<br>
+ 	 - **CANCEL**<br>
 Return to system menu discarding changes.<br>
 
 ---
