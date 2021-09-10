@@ -1,6 +1,6 @@
 @echo off  
-set MIN=8
-set MAX=50
+set MIN=20
+set MAX=31
 set FONTS=	"ITC Avant Garde Gothic Medium";^
  		"ITC Avant Garde Gothic CE Book";^
  		"ITC Avant Garde Gothic Book Condensed"
