@@ -163,11 +163,20 @@ Sets the display language.<br>
 Sets which iron profile (__T12__, __C210__, __C245__) to use.<br>
   - **Contrast**<br>
 Screen Contrast/brightness.<br>
-  - **Auto dim**<br>
-Fade the display after 10s in sleep or error modes to prevent display burning.<br>
-For safety reasons,the screen will only dim when the iron temperature is below 100°C.<br>
   - **Offset**<br>
 Screen offset. This can accomodate the different screens which the controllers have come with. Use it to center the display on the screen.<br>
+  - **Dimmer**<br>
+Fades the display after a timeout.
+	- OFF: Never dim the screen.<br>
+	- SLP: Dim only in low power modes (Standby and sleep).<br>
+	- ALL: Dim also in run mode.<br>
+  - **Dimmer Delay**<br>
+Sets the dimmer timeout. This option is disabled if the dimmer is OFF.<br>
+  - **Dimmer, in sleep mode**<br>
+Allows to turn off the screen in sleep mode. This option is disabled if the dimmer is OFF.<br>
+	- OFF: In sleep mode, the screen turns off after dimming.<br>
+	- ON: The screen stays on at low brightness.<br>
+For safety reasons,the screen will only dim when the iron temperature is below 100°C.<br>
   - **Wake mode**<br>
 How to detect activity. SHAKE or STAND.<br>
 SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip up to wake.<br>
@@ -293,20 +302,31 @@ Discard any changes and return.<br>
 ---
 
 ### CALIBRATION
+When entering this menu, the power is removed from the tip. For best calibration results, insert a cold tip now.
   - **START**<br>
-Requires a tip thermometer (e.g. Hakko FG-100 or similar). Calibrates the current tip at temperatures of 250, 350 and 450°C.<br>
+Requires a tip thermometer (e.g. Hakko FG-100 or similar). Calibrates the current tip at temperatures of 250 and 400°C.<br>
 Wait for tip temperature to settle (When the thermomether reading stops moving), it can take up to 20 seconds in some cases.<br>
 Then enter temperature as measured by the thermometer for each step.<br>
-If the entered temperature is higher than 50ºC than the target calibration value, the process will be aborted and you will have to adjust it manually.<br>
+If the entered temperature is more than 50ºC away from the target, the process will be aborted and you will have to adjust it manually.<br>
+This values have nothing to do with the Tip Settings calibration values!<br>
+These are for the tip, while this ones are only used for the calibration process.<br>
   - **SETTINGS**<br>
 Here you can manually adjust the default calibration values.<br>
-For every step (250,350,450ºC), adjust the value until the tip temperature it's close to the target temperature.<br>
-The power is removed in this menu. When editing a value, the power is resumed and the value applied in real time.<br>
-This is an adjustment made to avoid burning the tip in the calibration process if your controller reading are too low from real.<br> 
-This values have nothing to do with the Tip Settings calibration values! (Those are temperature-compensated).<br>
-Click on save to apply and store the changes, or cancel to discard.<br> 
-  - **BACK**<br>
-Return to system menu.<br>
+This is an adjustment made to avoid burning the tip in the calibration process if your controller is reading are too far from target.<br>
+  	- **Zero set**<br>
+Calibrates the zero offset of the amplifier. You must have inserted a completely cold tip, or the calibration won't be done properly.
+This widgets has 3 states than change when clicking on it:<br>
+	- Zero set: Shows the current value in the system (No changes).<br>
+	- Sampling: Shows the ADC value in real time.<br>
+	- Captured: Shows the captured value and applies it.<br>
+- **Cal 250ºC**<br>
+- **Cal 400ºC**<br>
+Adjusts the value for 250/400°C. When editing this widget, the power is enabled and the value applied in real time.<br>
+Move in small steps until the thermometer matches the target temperature
+  - **SAVE**<br> 
+Return to system menu saving changes.<br>
+  - **CANCEL**<br>
+Return to system menu discarding changes.<br>
 
 ---
 
