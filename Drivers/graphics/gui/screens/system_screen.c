@@ -163,11 +163,11 @@ static void setDimTimeout(uint32_t *val) {
 }
 //=========================================================
 static void * getDimTurnOff() {
-  temp = systemSettings.settings.dim_sleepMode;
+  temp = systemSettings.settings.dim_inSleep;
   return &temp;
 }
 static void setDimTurnOff(uint32_t *val) {
-  systemSettings.settings.dim_sleepMode = *val;
+  systemSettings.settings.dim_inSleep = *val;
 }
 //=========================================================
 static void * getActiveDetection() {

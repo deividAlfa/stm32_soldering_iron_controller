@@ -165,7 +165,7 @@ typedef struct{
   uint8_t       OledOffset;
   uint8_t       dim_mode;
   uint8_t       dim_Timeout;
-  uint8_t       dim_sleepMode;
+  uint8_t       dim_inSleep;
   uint8_t       currentProfile;
   uint8_t       saveSettingsDelay;
   uint8_t       initMode;

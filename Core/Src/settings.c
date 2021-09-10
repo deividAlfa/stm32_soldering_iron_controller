@@ -268,7 +268,7 @@ void resetSystemSettings(void) {
   systemSettings.settings.contrast          = 255;
   systemSettings.settings.dim_mode          = dim_sleep;
   systemSettings.settings.dim_Timeout       = 10;
-  systemSettings.settings.dim_sleepMode     = enable;
+  systemSettings.settings.dim_inSleep     = enable;
   systemSettings.settings.OledOffset        = OLED_OFFSET;
   systemSettings.settings.errorDelay        = 1;                    // *100mS
   systemSettings.settings.guiUpdateDelay    = 200;
