@@ -319,7 +319,8 @@ Calibrates the zero offset of the amplifier. You must have inserted a completely
 This widgets has 3 states than change when clicking on it:<br>
 		- Zero set: Shows the current value in the system (No changes).<br>
 		- Sampling: Shows the ADC value in real time.<br>
-		- Captured: Shows the captured value and applies it. To calibrate the zero offset, you must set this mode before moving to the next step.<br>
+		- Captured: Shows the captured value and applies it.<br>
+To calibrate the zero offset, you must set this mode before moving to the next step.<br>
 	- **Cal 250ºC**<br>
 	- **Cal 400ºC**<br>
 Adjusts the value for 250/400°C. When editing this widget, the power is enabled and the value applied in real time.<br>
