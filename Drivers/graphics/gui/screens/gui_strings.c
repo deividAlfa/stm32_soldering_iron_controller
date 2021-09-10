@@ -107,9 +107,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .TIP_SETTINGS_COPY = "COPY",
       .TIP_SETTINGS_DELETE = "DELETE",
 
-      .CAL_ZeroSet = "Zero set   %4u",
-      .CAL_Sampling = "Sampling   %4u",
-      .CAL_Captured = "Captured   %4u",
+      .CAL_ZeroSet = "Zero set   ",       // Must be 11 chars long
+      .CAL_Sampling = "Sampling   ",      // Must be 11 chars long
+      .CAL_Captured = "Captured   ",      // Must be 11 chars long
       .CAL_Step = "CAL STEP:",
       .CAL_Wait = "WAIT...",
       .CAL_Measured = "MEASURED:",
@@ -197,8 +197,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .SYSTEM_Profile = "Тип",
       .SYSTEM_Oled_Contrast = "Яркость",
-      .SYSTEM_Oled_Dim = "Dimmer",                       // TODO
-      .SYSTEM_Oled_Dim_inSleep = " In sleep",                       // TODO
+      .SYSTEM_Oled_Dim = "Затемнение",
+      .SYSTEM_Oled_Dim_inSleep = " Реж.Экрана",
       .SYSTEM_Oled_Offset = "Сдвиг",
       .SYSTEM_Wake_Mode = "ДатчикСна",
       .SYSTEM_Stand_Mode = "Подставка",
@@ -247,10 +247,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .TIP_SETTINGS_COPY = "ДУБЛИРОВАТЬ",
       .TIP_SETTINGS_DELETE = "УДАЛИТЬ",
 
-
-      .CAL_ZeroSet = "Zero set   %4u",                       // TODO
-      .CAL_Sampling = "Sampling   %4u",                       // TODO
-      .CAL_Captured = "Captured   %4u",                       // TODO
+      .CAL_ZeroSet = "ХолСмещОУ  ",       // Must be 11 chars long
+      .CAL_Sampling = "Замер...   ",      // Must be 11 chars long
+      .CAL_Captured = "Записано   ",      // Must be 11 chars long
       .CAL_Step = "ШАГ:",
       .CAL_Wait = "ЖДИТЕ...",
       .CAL_Measured = "ЗАМЕР:",
@@ -288,7 +287,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .wakeMode =    { "РУЧКА", "СТОЙКА" },
       .encMode =     { "ОБРАТНО", "ПРЯМО" },
       .InitMode =    { "ВЫКЛ", "СОН", "ПУСК" },
-      .dimMode =     { "откл", "ВЫКЛ", "все" },
+      .dimMode =     { "откл", "СОН", "все" },
 
     },
 
@@ -340,7 +339,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Profile = "Profil",
       .SYSTEM_Oled_Contrast = "Kontrast",
       .SYSTEM_Oled_Dim = "Dimmer",
-      .SYSTEM_Oled_Dim_inSleep = " In sleep",                       // TODO
+      .SYSTEM_Oled_Dim_inSleep = " I sovläge",
       .SYSTEM_Oled_Offset = "Offset",
       .SYSTEM_Wake_Mode = "Väckmetod",
       .SYSTEM_Stand_Mode = "Ställ-läge",
@@ -389,10 +388,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .TIP_SETTINGS_COPY = "KOPIERA",
       .TIP_SETTINGS_DELETE = "RADERA",
 
-
-      .CAL_ZeroSet = "Zero set   %4u",                       // TODO
-      .CAL_Sampling = "Sampling   %4u",                       // TODO
-      .CAL_Captured = "Captured   %4u",                       // TODO
+      .CAL_ZeroSet = "Nolläge    ",       // Must be 11 chars long
+      .CAL_Sampling = "Mäter...   ",      // Must be 11 chars long
+      .CAL_Captured = "Uppmätt    ",      // Must be 11 chars long
       .CAL_Step = "KAL STEG:",
       .CAL_Wait = "VÄNTA...",
       .CAL_Measured = "UPPMÄTT:",
