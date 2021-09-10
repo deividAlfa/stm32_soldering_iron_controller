@@ -310,10 +310,11 @@ Then enter temperature as measured by the thermometer for each step.<br>
 If the entered temperature is more than 50ºC away from the target, the process will be aborted and you will have to adjust it manually.<br>
 This values have nothing to do with the Tip Settings calibration values!<br>
 These are for the tip, while this ones are only used for the calibration process.<br>
-Youy can cancel the process at any time by clicking the STOP button.<br>
+You can cancel the process at any time by clicking the STOP button.<br>
   - **SETTINGS**<br>
-Here you can manually adjust the default calibration values.<br>
-This is an adjustment made to avoid burning the tip in the calibration process if your controller is reading are too far from target.<br>
+Here you can manually adjust the default calibration values, normally this needs to be done only once.<br> 
+Cal 250 depends on Zero set, and Cal 400 depends on Cal 250, so if you're changing this, you must follow the correct order:<br>
+Zero set -> Cal 250 -> Cal 400 -> Save<br>  
   	- **Zero set**<br>
 Calibrates the zero offset of the amplifier. You must have inserted a completely cold tip, or the calibration result will be wrong.<br>
 This widgets has 3 states than change when clicking on it:<br>
