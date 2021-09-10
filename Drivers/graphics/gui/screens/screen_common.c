@@ -123,7 +123,7 @@ void handleOledDim(void){
     if(systemSettings.settings.dim_mode && contrast>5 && ((current_time-dimTimer)>=((uint32_t)systemSettings.settings.dim_Timeout*1000))){
       dimStep=-5;
     }
-    if(systemSettings.settings.dim_sleepMode==disable && getCurrentMode()==mode_sleep && last_TIP_C<100 && contrast==1){
+    if(systemSettings.settings.dim_inSleep==disable && getCurrentMode()==mode_sleep && last_TIP_C<100 && contrast==1){
       setOledPower(disable);
     }
   }
