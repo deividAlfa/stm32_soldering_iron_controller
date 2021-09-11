@@ -35,7 +35,7 @@
 
 #define LANGUAGE_COUNT    3
 //#define SWSTRING        "SW: v1.10"                               // For releases
-#define SWSTRING          "SW: 21-09-10"                            // For git
+#define SWSTRING          "SW: 21-09-11"                            // For git
 #define SETTINGS_VERSION  12                                        // Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize         2                                         // In KB
 #define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
@@ -111,6 +111,11 @@ enum{
   dim_off                  = 0,
   dim_sleep                = 1,
   dim_always               = 2,
+
+  error_sleep              = 0,
+  error_run                = 1,
+  error_resume             = 2,
+
 };
 
 
@@ -141,6 +146,8 @@ typedef struct{
   uint8_t       pwmMul;
   uint8_t       sleepTimeout;
   uint8_t       standbyTimeout;
+  uint8_t       errorDelay;
+  uint8_t       errorResumeMode;
   filter_t      tipFilter;
   uint16_t      standbyTemperature;
   uint16_t      UserSetTemperature;
@@ -182,7 +189,6 @@ typedef struct{
   uint8_t       NTC_detect;
   uint8_t       EncoderMode;
   uint8_t       lvp;
-  uint8_t       errorDelay;
   uint8_t       guiUpdateDelay;
   uint8_t       debugEnabled;
   uint16_t      NTC_Beta;
