@@ -108,6 +108,10 @@ void handleIron(void) {
     }
   }
 
+  if(Iron.calibrating){                                                             // If calibrating, force run mode
+    setCurrentMode(mode_run);
+  }
+
   // If sleeping or error, stop here
   if(Iron.CurrentMode==mode_sleep || Iron.Error.active) {                           // For safety, force PWM low everytime
     Iron.Pwm_Out=0;
@@ -123,9 +127,6 @@ void handleIron(void) {
   uint32_t sleep_time = (uint32_t)systemSettings.Profile.sleepTimeout*60000;
   uint32_t standby_time = (uint32_t)systemSettings.Profile.standbyTimeout*60000;
 
-  if(Iron.calibrating){                                                                     // If calibrating for run mode
-    setCurrentMode(mode_run);
-  }
   // Don't enter low power states while calibrating. Calibration always forces run mode
   if((Iron.CurrentMode==mode_boost) && (mode_time>boost_time)){                             // If boost mode and time expired
     setCurrentMode(mode_run);
@@ -485,11 +486,13 @@ void setCurrentMode(uint8_t mode){
     Iron.CurrentSetTemperature = Iron.UserSetTemperature;                                 // Set user temp (sleep mode ignores this)
   }
   if(Iron.CurrentMode != mode){                                                           // If current mode is different
-    resetPID();
-    buzzer_long_beep();
     Iron.CurrentMode = mode;
-    modeChanged(mode);
-    if(Iron.CurrentMode == mode_run){
+    resetPID();
+    if(!Iron.calibrating){
+      buzzer_long_beep();
+      modeChanged(mode);
+    }
+    if(mode == mode_run){
       Iron.temperatureReached = 0;
     }
   }
