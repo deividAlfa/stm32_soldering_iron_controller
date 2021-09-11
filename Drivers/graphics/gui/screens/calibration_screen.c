@@ -205,20 +205,19 @@ static void setCalState(state_t s) {
 //=========================================================
 static void Cal_onEnter(screen_t *scr) {
   if(scr == &Screen_settings) {
-    Iron.calibrating=1;
-    setCurrentMode(mode_run);
     backupMode=getCurrentMode();
     backupTemp=getUserTemperature();
     Currtip = getCurrentTip();
     comboResetIndex(Screen_calibration.widgets);
     error=0;
+    setCalibrationMode(enable);
   }
 
   setUserTemperature(0);
 }
 static void Cal_onExit(screen_t *scr) {
   if(scr!=&Screen_calibration_start && scr!=&Screen_calibration_settings ){
-    Iron.calibrating=0;
+    setCalibrationMode(disable);
     setCurrentMode(backupMode);
     setUserTemperature(backupTemp);
   }
