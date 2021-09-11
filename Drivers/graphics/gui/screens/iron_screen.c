@@ -203,11 +203,19 @@ static void setMinTemp(uint32_t *val) {
 }
 //=========================================================
 static void * geterrorDelay() {
-  temp = systemSettings.settings.errorDelay*100;
+  temp = systemSettings.Profile.errorDelay;
   return &temp;
 }
 static void seterrorDelay(uint32_t *val) {
-  systemSettings.settings.errorDelay = *val/100;
+  systemSettings.Profile.errorDelay = *val;
+}
+//=========================================================
+static void * geterrorResume() {
+  temp = systemSettings.Profile.errorResumeMode;
+  return &temp;
+}
+static void seterrorResume(uint32_t *val) {
+  systemSettings.Profile.errorResumeMode = *val;
 }
 //=========================================================
 static void * getNoIronADC() {
@@ -455,18 +463,32 @@ static void iron_create(screen_t *scr){
   edit->max_value = 4096;
   edit->min_value = 200;
 
-  //  [ No Iron Delay Widget ]
+  //  [ Error Delay Widget ]
   //
-  newComboEditable(w, strings[lang].__Delay, &edit, NULL);
+  newComboEditable(w, strings[lang].IRON_Error_Timeout, &edit, NULL);
   dis=&edit->inputData;
-  dis->endString="ms";
-  dis->reservedChars=6;
+  dis->endString="s";
+  dis->reservedChars=5;
+  dis->number_of_dec = 1;
   dis->getData = &geterrorDelay;
-  edit->big_step = 200;
-  edit->step = 100;
+  edit->big_step = 5;
+  edit->step = 1;
   edit->setData = (void (*)(void *))&seterrorDelay;
-  edit->max_value = 2000;
-  edit->min_value = 100;
+  edit->max_value = 600;
+  edit->min_value = 1;
+
+  //  [ Error resume mode Widget ]
+  //
+  newComboMultiOption(w, strings[lang].IRON_Error_Mode, &edit, NULL);
+  dis=&edit->inputData;
+  dis->getData = &geterrorResume;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&seterrorResume;
+  edit->max_value = error_resume;
+  edit->min_value = error_sleep;
+  edit->options = strings[lang].errMode;
+  edit->numberOfOptions = 3;
 
   //  [ BACK button ]
   //
