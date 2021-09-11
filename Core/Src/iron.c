@@ -549,7 +549,7 @@ void readWake(void){
 }
 
 void resetIronError(void){
-  Iron.LastErrorTime += (systemSettings.settings.errorDelay+1*100);                     // Bypass timeout
+  Iron.LastErrorTime += (systemSettings.Profile.errorDelay+1*100);                     // Bypass timeout
   checkIronError();                                                                     // Refresh Errors
 }
 
@@ -576,6 +576,7 @@ void checkIronError(void){
       if(Err.Flags!=_NO_IRON){                                                        // Avoid alarm if only the tip is removed
         buzzer_alarm_start();
       }
+      Iron.beforeErrorMode = Iron.CurrentMode;
       Iron.Error.active = 1;
       setCurrentMode(mode_sleep);
       Iron.Pwm_Out = 0;
@@ -584,10 +585,18 @@ void checkIronError(void){
     }
   }
   else if (Iron.Error.active && !Err.Flags){                                                // If global flag set, but no errors
-    if((CurrentTime-Iron.LastErrorTime)>(systemSettings.settings.errorDelay*100)){          // Check enough time has passed
+    if((CurrentTime-Iron.LastErrorTime)>(systemSettings.Profile.errorDelay*100)){           // Check enough time has passed
       Iron.Error.Flags = 0;
       buzzer_alarm_stop();
-      setCurrentMode(mode_run);
+      if(systemSettings.Profile.errorResumeMode==error_sleep){
+        setCurrentMode(mode_sleep);
+      }
+      else if(systemSettings.Profile.errorResumeMode==error_run){
+        setCurrentMode(mode_run);
+      }
+      else{
+        setCurrentMode(Iron.beforeErrorMode);
+      }
     }
   }
   else{

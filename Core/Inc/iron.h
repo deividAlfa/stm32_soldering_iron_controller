@@ -55,6 +55,7 @@ typedef struct {
   uint8_t             DebugMode;                            // Flag to indicate Debug is enabled
   uint8_t             updatePwm;                            // Flag to indicate PWM need to be updated
   IronError_t         Error;                                // Error flags
+  uint8_t             beforeErrorMode;                      // Active mode before the error.
 
   uint16_t            Pwm_Period;                           // PWM period
   uint16_t            Pwm_Max;                              // Max PWM output for power limit
