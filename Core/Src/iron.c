@@ -639,11 +639,11 @@ uint8_t getDebugMode(void){
 
 void setCalibrationMode(uint8_t mode){
   __disable_irq();
-  Iron.calibrating = value;
+  Iron.calibrating = mode;
   __enable_irq();
 }
 
-uint8_t setCalibrationMode(void){
+uint8_t getCalibrationMode(void){
   return Iron.calibrating;
 }
 void setUserTemperature(uint16_t temperature) {

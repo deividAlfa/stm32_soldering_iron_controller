@@ -107,7 +107,7 @@ uint16_t getDebugTemp(void);
 void setDebugMode(uint8_t value);
 uint8_t getDebugMode(void);
 void setCalibrationMode(uint8_t mode);
-uint8_t setCalibrationMode(void);
+uint8_t getCalibrationMode(void);
 void configurePWMpin(uint8_t mode);
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim);
 #endif /* IRON_H_ */
