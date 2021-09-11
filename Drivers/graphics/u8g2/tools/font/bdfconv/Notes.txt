@@ -1,0 +1,39 @@
+When the bdf font is generated, the current approach for adding cyrillic characters is patching them.
+
+The font files are:
+
+font_menu:	bdf/font_menu.bdf	(Modded using t0-16-uni.bdf)
+		Uses cyrillic chars 410-44F (hex), 1040-1103 (decimal) from unifont.bdf
+
+font_small: 	bdf/font_small.bdf	(Modded using bdf/Wizzard12.bdf)
+		Uses cyrillic chars 410-44F (hex), 1040-1103 (decimal) from 6x13.bdf
+
+font_no_iron:	bdf/font_no_iron	(Modded using bdf/ITC Avant Garde Gothic CE Book_20.bdf)
+		Uses cyrillic chars 415, 41A, 41B, 41D, 41E, 422, 427, 423, 42E (hex),  1045, 1050, 1051, 1053, 1054, 1058, 1063, 1059,1070 (decimal) from arial_16_cyrillic.bdf
+
+font_iron_temp: bdf/ITC Avant Garde Gothic Medium_31.bdf
+		Only displays 0-9, C, F and ° (ASCII 176), no special characters.
+
+To modify and insert data from a different bdf font:
+Open the both BDFs with a text editor.
+
+The number of fonts are defined in this line
+CHARS 64
+
+Each character uses this structure
+
+STARTCHAR 0411		-> Start character block. The name can be anything (ex. STARTCHAR A_Letter)
+ENCODING 1041		-> Actual unicode in decimal (1041 = 0x411)
+SWIDTH 675 0
+DWIDTH 15 0
+BBX 12 16 2 0
+BITMAP				-> Start of bitmap data
+---					-> Bitmap data	
+---
+ENDCHAR				-> End of character block
+
+
+To add a character from one font to another, just copy the STARTCHAR--->ENDCHAR blocks and paste them in the destination font.
+Take care to not duplicate them, always search the ENCODING number and replace the whole block.
+If it doesn't exists, the CHARS count must be increased.
+Now the font will have the new symbol, and be ready for conversion using bdfconv.
