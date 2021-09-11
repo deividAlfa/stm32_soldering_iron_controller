@@ -47,6 +47,8 @@ typedef struct{
   char * IRON_ADC_Time;
   char * IRON_PWM_mul;
   char * IRON_No_Iron;
+  char * IRON_Error_Timeout;
+  char * IRON_Error_Mode;
   char * IRON_Filter_Settings;
 
   char * FILTER_Filter;
@@ -148,6 +150,7 @@ typedef struct{
   char * DownUp[2];
   char * wakeMode[2];
   char * encMode[2];
+  char * errMode[3];
   char * InitMode[3];
   char * WakeModes[4];
 

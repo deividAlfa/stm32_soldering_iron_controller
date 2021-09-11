@@ -46,6 +46,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_ADC_Time = "ADC Time",
       .IRON_PWM_mul = "PWM mul.",
       .IRON_No_Iron = "No iron",
+      .IRON_Error_Timeout = "Err delay",
+      .IRON_Error_Mode = "Err mode",
       .IRON_Filter_Settings = "FILTER SETTINGS",
 
       .FILTER_Filter = "Filter",
@@ -148,6 +150,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .encMode =     { "REVERSE", "NORMAL" },
       .InitMode =    { "SLP", "STBY", "RUN" },
       .dimMode =     { "OFF", "SLP", "ALL" },
+      .errMode =     { "SLP", "RUN", "LAST" },
     },
 
     [lang_russian] = {
@@ -186,6 +189,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_ADC_Time = "АЦП Замер",
       .IRON_PWM_mul = "ШИМ множ.",
       .IRON_No_Iron = "ПорогОткл",
+      .IRON_Error_Timeout = "Err delay",                  // TODO
+      .IRON_Error_Mode = "Err mode",                      // TODO
       .IRON_Filter_Settings = "ПАРАМ. ФИЛЬТРА",
 
       .FILTER_Filter = "Фильтр",
@@ -288,6 +293,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .encMode =     { "ОБРАТНО", "ПРЯМО" },
       .InitMode =    { "ВЫКЛ", "СОН", "ПУСК" },
       .dimMode =     { "откл", "СОН", "все" },
+      .errMode =     { "SLP", "RUN", "LAST" },                // TODO
 
     },
 
@@ -327,6 +333,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_ADC_Time = "ADO Tid",
       .IRON_PWM_mul = "PWM mul.",
       .IRON_No_Iron = "Kolv ur",
+      .IRON_Error_Timeout = "Err delay",                  // TODO
+      .IRON_Error_Mode = "Err mode",                      // TODO
       .IRON_Filter_Settings = "FILTER INST.",
 
       .FILTER_Filter = "Filter",
@@ -429,6 +437,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .encMode =     { "OMVÄND", "NORMAL" },
       .InitMode =    { "SOV", "STBY", "KÖR" },
       .dimMode =     { "AV", "SOV", "ALLA" },
+      .errMode =     { "SLP", "RUN", "LAST" },                // TODO
     },
 };
 
