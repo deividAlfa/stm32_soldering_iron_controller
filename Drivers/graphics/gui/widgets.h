@@ -12,6 +12,7 @@
 
 #define default_font u8g2_font_menu
 
+//#define COMBO_SLIDE_TEXT                                                    // Testing feature, not enabled by default
 
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
 typedef enum widgetFieldType {field_int32, field_bmp, field_string}widgetFieldType;
@@ -20,6 +21,8 @@ typedef enum widgetFrameType {frame_auto, frame_solid, frame_outline, frame_disa
 typedef enum widgetType {widget_combo, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button, widget_bmp_button}widgetType;
 typedef enum comboType {combo_Screen, combo_Editable, combo_MultiOption, combo_Action}comboType;
 typedef enum widgetRefreshType {refresh_idle, refresh_triggered, refresh_always}widgetRefreshType;
+typedef enum slideStatus {slide_reset, slide_disabled, slide_restart, slide_running, slide_limit}slideStatus;
+
 typedef struct widget_t widget_t;
 typedef struct selectable_widget_t selectable_widget_t;
 typedef struct editable_widget_t editable_widget_t;

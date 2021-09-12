@@ -12,6 +12,15 @@
 static char displayString[32];
 static bool callFromCombo;
 
+#ifdef COMBO_SLIDE_TEXT
+struct{
+  uint8_t status;
+  int16_t offset;
+  int16_t len;
+  uint32_t time;
+}slide;
+#endif
+
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
 #define __BASE_FILE__ "widgets.c"
@@ -746,6 +755,290 @@ uint8_t default_widgetDraw(widget_t *w) {
 }
 
 
+
+uint8_t comboItemToIndex(widget_t *w, comboBox_item_t *item) {
+  if(!w || !item){ return 0; }
+  uint8_t index = 0;
+  comboBox_item_t *i = ((comboBox_widget_t*)w->content)->first;
+  while(i && i != item) {
+    i = i->next_item;
+    if(i->enabled)
+      ++ index;
+  }
+  return index;
+}
+
+#ifdef COMBO_SLIDE_TEXT
+
+uint8_t comboBoxDraw(widget_t *w) {
+  if(!w || !w->enabled){ return 0; }                                                // Return if null or disabled
+
+  comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
+  if(!combo){ return 0; }                                                           // Return if null
+  comboBox_item_t *item = combo->first;
+  if(!item){ return 0; }                                                            // Return if null
+
+  uint16_t yDim = OledHeight - w->posY;
+  uint8_t height;
+  int8_t frameY=0;
+  int8_t posY;
+  bool drawFrame=0;
+  bool drawSeparator=0;
+  uint8_t scroll = 0;
+  uint8_t r;
+  uint32_t currentTime=HAL_GetTick();
+  uint16_t len = 0;
+  uint8_t refresh_slide=0;
+  int16_t offset;
+
+  if( w->parent->refresh==screen_Idle){                                                           // If screen idling
+
+      switch(slide.status){
+
+        case slide_reset:
+          if(u8g2.font != combo->font){
+            u8g2_SetFont(&u8g2, combo->font);
+          }
+          slide.offset = 0;                                                                   // Clear offset
+          slide.len = u8g2_GetUTF8Width(&u8g2, combo->currentItem->text);                     // Compute string length only once
+          slide.status = slide_restart;
+          slide.time = currentTime;
+          break;
+
+        case slide_disabled:
+          break;
+
+        case slide_restart:
+          if((currentTime-slide.time)>500){                                                   // If resetted, freeze the text 500ms
+            slide.time = currentTime;
+            slide.status = slide_running;
+          }
+          break;
+
+        case slide_running:
+          if((currentTime-slide.time)>19){
+
+            if(u8g2.font != combo->font){
+              u8g2_SetFont(&u8g2, combo->font);
+            }
+
+            slide.time=currentTime;
+            uint16_t limit;
+            if(combo->currentItem->type==combo_Editable || combo->currentItem->type==combo_MultiOption){                      // For editable widgets, limit is half of the oled width
+              limit = (OledWidth/2)+8-4;
+            }
+            else{
+              limit = OledWidth-8;                                                          // Else, use all the space available
+            }
+            if(slide.len<limit){                                                            // Return if label text shorter than limit (No need to slide text)
+              slide.status = slide_disabled;
+              break;
+            }
+            if((slide.len - ++slide.offset)<limit){                                         // Increase x offset, check limits
+              slide.status = slide_limit;
+            }                                                                               // If text sliding running, update every 10mS
+            refresh_slide=1;
+          }
+          break;
+        case slide_limit:
+          if((currentTime-slide.time)>500){                                                 // If reached the end, freeze the text 500ms
+            slide.time = currentTime;
+            slide.status = slide_restart;
+            slide.offset = 0;
+            refresh_slide=1;
+          }
+
+          break;
+        default:
+          break;
+      }
+      if(w->refresh==refresh_idle && !refresh_slide){                                       // If nothing to do, return
+        return 0;
+      }
+  }
+  else{
+    slide.offset=0;                                                                         // If screen erased, reset offset
+    slide.status = slide_reset;
+  }
+
+
+  if(w->refresh==refresh_triggered){
+    w->refresh=refresh_idle;
+  }
+  if(w->parent->refresh < screen_Erase){                    // If screen not erased already
+    if(!refresh_slide){                                     // If not updating sliding text
+      w->parent->refresh = screen_Erased;                   //
+      FillBuffer(BLACK, fill_dma);                          // Erase fast using dma
+    }
+  }
+  if(u8g2.font != combo->font){
+    u8g2_SetFont(&u8g2, combo->font);
+  }
+  height= u8g2_GetMaxCharHeight(&u8g2)+1;                 // +1 to allow separation between combobox items
+
+  if(w->radius<0){
+    r=(height-1)/2;
+  }
+  else{
+    r = w->radius;
+  }
+
+  while(scroll < combo->currentScroll) {
+    if(!item->next_item)
+      break;
+    item = item->next_item;
+    if(item->enabled)
+      ++scroll;
+  }
+  for(uint8_t y = 0; y < yDim / height; ++y) {
+    uint8_t align = item->dispAlign;
+    bool editable = (item->type==combo_Editable)||(item->type==combo_MultiOption);
+
+                                                                      // Store Y position
+    if(item == combo->currentItem) {                                  // If the current combo item is selected
+      offset=slide.offset;
+      frameY=y * height + w->posY;
+      if(refresh_slide==1){                                           // If only refreshing sliding text and this is the matching item
+        len = slide.len;
+        refresh_slide++;                                              // = 2 means update current item label
+        u8g2_SetDrawColor(&u8g2, BLACK);
+        if (editable){                                                // Clear textfield
+          u8g2_DrawBox(&u8g2, 4, frameY+1, (OledWidth/2)+6, height-2);
+        }
+        else{
+          u8g2_DrawBox(&u8g2, 4, frameY+1, OledWidth-8, height-2);
+        }
+      }
+      else{                                   // Normal drawing, draw frame
+        drawFrame=1;
+        drawSeparator = editable;             // Draw separator if editable
+      }
+    }
+    else{
+      if(refresh_slide==2){                   // I sliding text has been updated, nothing else to do
+        break;
+      }
+      offset=0;                               // If not selected item, use 0 offset
+    }
+    if(!refresh_slide || refresh_slide==2){                             // Only continue if no sliding text (full redraw) or this is the item that needs updating
+      if (!editable){                                                   // If screen or action item, just draw the label
+        if(!refresh_slide){
+          len = u8g2_GetUTF8Width(&u8g2, item->text);                   // When sliding text, length is already done.
+        }
+        if(len>OledWidth-9){                                            // If too long, override with left align to provide sliding text
+          align=align_left;
+        }
+        u8g2_SetDrawColor(&u8g2, WHITE);
+        u8g2_SetClipWindow(&u8g2, 4, 0, OledWidth-4, OledHeight-1);
+
+        if(align==align_left){
+          u8g2_DrawUTF8(&u8g2, (int16_t)4-offset, y * height + w->posY +2, item->text);
+        }
+        else if(align==align_right){
+          u8g2_DrawUTF8(&u8g2, OledWidth-3-len, y * height + w->posY +2, item->text);
+        }
+        else{     // Align center
+          u8g2_DrawUTF8(&u8g2, (OledWidth-1-len)/2, y * height + w->posY +2, item->text);
+        }
+      }
+      else{                                                                                 // Editable or multioption
+        if(!refresh_slide){                                                                 // Draw the editable data if not coming for text slide.
+          editable_widget_t* edit = item->widget;
+          selectable_widget_t *sel = &edit->selectable;
+          displayOnly_widget_t* dis = &edit->inputData;
+          default_widgetUpdate(w);
+          u8g2_SetClipWindow(&u8g2, (OledWidth/2)+10, 0, OledWidth-5, OledHeight-1);
+          posY = y * height + w->posY;                                                      // Set drawing Ypos same as the current combo option
+          if(sel->state==widget_edit){                                                      // If edit mode
+            u8g2_SetClipWindow(&u8g2, (OledWidth/2)+11, 0, OledWidth-1, OledHeight-1);      // Draw edit frame
+            u8g2_SetDrawColor(&u8g2, WHITE);
+            u8g2_DrawRBox(&u8g2, (OledWidth/2)+11-4, frameY, OledWidth-((OledWidth/2)+11-4), height, r);  // Only ~half of the width, the rest is used for the label, not highlighted
+            u8g2_SetDrawColor(&u8g2, BLACK);
+          }
+          else{
+            u8g2_SetDrawColor(&u8g2, WHITE);
+          }
+          if(item->type==combo_MultiOption){
+            len = u8g2_GetUTF8Width(&u8g2,edit->options[*(uint8_t*)dis->getData()]);
+          }
+          else if(item->type==combo_Editable){
+            if(dis->type==field_int32){
+              int32_t val_ui = *(int32_t*)dis->getData();                         // Get data
+              uint8_t decimals = dis->number_of_dec+1;                            // Load decimal count
+              if(val_ui<0){                                                       // If negative, add a decimal (decimals are just used as min char output in sprintf)
+                decimals++;
+              }
+              if(decimals>10){ decimals=10; }                                     // Limit max decimals
+              snprintf(dis->displayString, dis->reservedChars+1, "%0*ld", decimals, (int32_t)val_ui);    // Convert value into string
+              uint8_t dispLen=strlen(dis->displayString);                         // Get string len
+              uint8_t endLen=strlen(dis->endString);                              // Get endStr len
+              if(dis->number_of_dec){                                             // If there're decimals
+                if(dis->reservedChars >= (dispLen+1)){                            // Ensure there's enough space in the string for adding the decimal point
+                  insertDot(dis->displayString,  dis->number_of_dec);             // Insert decimal dot
+                }
+              }
+              if(dis->reservedChars >= (dispLen+endLen)){                         // Ensure there's enough space in the string for adding the end String
+                strcat(dis->displayString, dis->endString);                       // Append endString
+              }
+              dis->displayString[dis->reservedChars]=0;                           // Ensure last string char is 0
+              len=u8g2_GetUTF8Width(&u8g2,dis->displayString);
+            }
+            else if(dis->type==field_string){
+              strncpy(displayString,dis->getData(),dis->reservedChars+1);
+              len=u8g2_GetUTF8Width(&u8g2,displayString);
+            }
+          }
+
+          dis->stringStart = OledWidth-len-5;                                   // Align to the left measuring actual string width
+          if(item->type==combo_Editable){
+            if((dis->type==field_string && (sel->state==widget_edit))){
+              char str[sizeof(displayString)+1];
+              uint8_t start,width;
+              strcpy(str,displayString);
+              str[edit->current_edit+1]=0;
+              width=u8g2_GetUTF8Width(&u8g2, str);
+              str[edit->current_edit]=0;
+              start=u8g2_GetUTF8Width(&u8g2, str);
+              width-=start;
+
+              u8g2_SetDrawColor(&u8g2, BLACK);
+              u8g2_DrawBox(&u8g2, dis->stringStart+start, posY+1, width+1, height-2);
+              u8g2_SetDrawColor(&u8g2, XOR);
+              u8g2_DrawUTF8(&u8g2,dis->stringStart, posY+2, displayString);
+            }
+            else{
+              u8g2_DrawUTF8(&u8g2,dis->stringStart, posY+2, dis->displayString);
+            }
+          }
+          else if(item->type==combo_MultiOption){
+            u8g2_DrawUTF8(&u8g2,dis->stringStart, posY+2,  edit->options[*(uint8_t*)dis->getData()]);
+          }
+        }
+
+        u8g2_SetDrawColor(&u8g2, WHITE);
+        u8g2_SetClipWindow(&u8g2, 4, 0, (OledWidth/2)+8, OledHeight-1);
+        u8g2_DrawUTF8(&u8g2, (int16_t)4-offset, y * height + w->posY +2, item->text);                 // Draw the combo item label
+      }
+    }
+    do {
+      item = item->next_item;
+    }while(item && !item->enabled);                                                                     // Find next enabled item
+
+    if(!item){
+      break;
+    }
+  }
+  u8g2_SetMaxClipWindow(&u8g2);
+  if(drawFrame){
+    u8g2_SetDrawColor(&u8g2, WHITE);
+    if(drawSeparator){
+      u8g2_DrawVLine(&u8g2, (OledWidth/2)+10, frameY, height);
+    }
+    u8g2_DrawRFrame(&u8g2, 0, frameY, OledWidth, height,  r);
+  }
+  return 1;
+}
+#else
 uint8_t comboBoxDraw(widget_t *w) {
   if(!w || !w->enabled){ return 0; }                                                // Return if null or disabled
 
@@ -902,18 +1195,7 @@ uint8_t comboBoxDraw(widget_t *w) {
   }
   return 1;
 }
-
-uint8_t comboItemToIndex(widget_t *w, comboBox_item_t *item) {
-  if(!w || !item){ return 0; }
-  uint8_t index = 0;
-  comboBox_item_t *i = ((comboBox_widget_t*)w->content)->first;
-  while(i && i != item) {
-    i = i->next_item;
-    if(i->enabled)
-      ++ index;
-  }
-  return index;
-}
+#endif
 
 int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
 
@@ -970,6 +1252,9 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
         if(index > lastIndex)
           ++combo->currentScroll;
       }
+      #ifdef COMBO_SLIDE_TEXT
+      slide.status=slide_reset;
+      #endif
     }
     else if(input == Rotate_Decrement) {
       comboBox_item_t *current = NULL;
@@ -986,6 +1271,9 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
         if(index < firstIndex)
           --combo->currentScroll;
       }
+      #ifdef COMBO_SLIDE_TEXT
+      slide.status=slide_reset;
+      #endif
     }
   }
   return -1;
@@ -1002,12 +1290,14 @@ int32_t strsum(char* str){
 
 //returns -1 if processed, -2 if not processed, or next screen
 int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
-  displayOnly_widget_t* dis = extractDisplayPartFromWidget(w);
+  if(!w || !w->enabled || (input == Rotate_Nothing)){ return -1;  }
+
   selectable_widget_t* sel = extractSelectablePartFromWidget(w);
+  if(!sel) {  return -2;  }
+
+  displayOnly_widget_t* dis = extractDisplayPartFromWidget(w);
   editable_widget_t* edit = extractEditablePartFromWidget(w);
   comboBox_widget_t* combo = NULL;
-  if(!w || !w->enabled || (input == Rotate_Nothing)){ return -1;  }
-  if(!sel) {  return -2;  }
 
   if(w->type==widget_combo){
     combo = (comboBox_widget_t*)w->content;
