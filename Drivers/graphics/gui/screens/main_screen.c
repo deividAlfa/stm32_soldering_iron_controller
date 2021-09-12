@@ -362,7 +362,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     Iron.shakeActive=0;
     mainScr.shakeActive=1;
   }
-  else if(mainScr.shakeActive==2 && (current_time-Iron.lastShakeTime)>50){
+  else if(mainScr.shakeActive==2 && (current_time-Iron.lastShakeTime)>150){
     mainScr.shakeActive=3; // Clear
   }
 
