@@ -599,6 +599,9 @@ static uint8_t  drawIcons(uint8_t *refresh){
     u8g2_SetDrawColor(&u8g2,WHITE);
     return 1;
   }
+  if(refresh){
+    return 1;
+  }
   return 0;
 }
 
@@ -838,6 +841,8 @@ static uint8_t main_screen_draw(screen_t *scr){
 static void main_screen_init(screen_t *scr) {
   editable_widget_t *edit;
   default_init(scr);
+  Iron.shakeActive = 0;
+  mainScr.shakeActive = 0;
   mainScr.dimStep=0;
   plot.timeStep = (systemSettings.Profile.readPeriod+1)/200;                                                         // Update at the same rate as the system pwm
 

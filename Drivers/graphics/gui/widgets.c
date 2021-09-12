@@ -723,7 +723,7 @@ uint8_t default_widgetDraw(widget_t *w) {
     sel->previous_state = sel->state;
   }
 
-  if(frameDraw || w->frameType==frame_outline){
+  if(frameDraw ||(refresh && w->frameType==frame_outline)){
     switch(w->type){
       case widget_bmp_button:
         u8g2_SetDrawColor(&u8g2, frameColor);
@@ -744,14 +744,13 @@ uint8_t default_widgetDraw(widget_t *w) {
       default:
         break;
     }
+    refresh=1;                                    // For drawing detection
   }
+  u8g2_SetDrawColor(&u8g2, WHITE);
   if(refresh){
-    u8g2_SetDrawColor(&u8g2, WHITE);
     return 1;                                       // Widget drawn
   }
-  else{
-    return 0;                                      // Nothing drawn
-  }
+  return 0;
 }
 
 

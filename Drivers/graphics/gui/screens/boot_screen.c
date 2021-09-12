@@ -149,18 +149,12 @@ void draw_boot_strings(void){
 }
 
 static uint8_t boot_screen_draw(screen_t *scr){
-  uint8_t refresh = scr->refresh;
-  uint8_t ret = default_screenDraw(scr);
-
-  if(refresh>screen_Idle){
-    if(systemSettings.setupMode){
-      draw_boot_strings();
-    }
-    ret = 1;
-  }
+  uint8_t ret = (scr->refresh | default_screenDraw(scr));
 
   if(boot_step==1){
     boot_step++;
+    draw_boot_strings();
+    ret = 1;
   }
   return ret;
 }
