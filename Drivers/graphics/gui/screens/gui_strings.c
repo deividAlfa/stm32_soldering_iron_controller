@@ -335,8 +335,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_ADC_Time = "ADO Tid",
       .IRON_PWM_mul = "PWM mul.",
       .IRON_No_Iron = "Kolv ur",
-      .IRON_Error_Timeout = "Err time",                         // TODO
-      .IRON_Error_Resume_Mode = " Resume",                      // TODO
+      .IRON_Error_Timeout = "Feltid",
+      .IRON_Error_Resume_Mode = " Återst.",
       .IRON_Filter_Settings = "FILTER INST.",
 
       .FILTER_Filter = "Filter",
@@ -352,7 +352,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Oled_Dim_inSleep = " I sovläge",
       .SYSTEM_Oled_Offset = "Offset",
       .SYSTEM_Wake_Mode = "Väckmetod",
-      .SYSTEM_Shake_Filtering = " Filter",                      // TODO
+      .SYSTEM_Shake_Filtering = " Filter",
       .SYSTEM_Stand_Mode = "Ställ-läge",
       .SYSTEM_Boot = "Startläge",
       .SYSTEM_Button_Wake = "Knappväck",
@@ -440,7 +440,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .encMode =     { "OMVÄND", "NORMAL" },
       .InitMode =    { "SOV", "STBY", "KÖR" },
       .dimMode =     { "AV", "SOV", "ALLA" },
-      .errMode =     { "SLP", "RUN", "LAST" },                // TODO
+      .errMode =     { "SOV", "KÖR", "FRG" },
     },
 };
 
