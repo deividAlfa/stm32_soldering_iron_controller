@@ -17,6 +17,7 @@ struct{
   uint8_t status;
   int16_t offset;
   int16_t len;
+  int16_t limit;
   uint32_t time;
 }slide;
 #endif
@@ -796,7 +797,18 @@ uint8_t comboBoxDraw(widget_t *w) {
             u8g2_SetFont(&u8g2, combo->font);
           }
           slide.offset = 0;                                                                   // Clear offset
-          slide.len = u8g2_GetUTF8Width(&u8g2, combo->currentItem->text);                     // Compute string length only once
+          slide.len = u8g2_GetUTF8Width(&u8g2, combo->currentItem->text);                     // Compute string length and limit only once
+
+          if(combo->currentItem->type==combo_Editable || combo->currentItem->type==combo_MultiOption){                      // For editable widgets, limit is ~half of the oled width
+            slide.limit = (OledWidth/2)+8-4;
+          }
+          else{
+            slide.limit = OledWidth-8;                                                          // Else, use all the space available for the label
+          }
+          if(slide.len<slide.limit){                                                            // Disable if label text shorter than limit (No need to slide text)
+            slide.status = slide_disabled;
+            break;
+          }
           slide.status = slide_restart;
           slide.time = currentTime;
           break;
@@ -812,27 +824,11 @@ uint8_t comboBoxDraw(widget_t *w) {
           break;
 
         case slide_running:
-          if((currentTime-slide.time)>19){
-
-            if(u8g2.font != combo->font){
-              u8g2_SetFont(&u8g2, combo->font);
-            }
-
+          if((currentTime-slide.time)>19){                                                    // If text sliding running, update every 20mS
             slide.time=currentTime;
-            uint16_t limit;
-            if(combo->currentItem->type==combo_Editable || combo->currentItem->type==combo_MultiOption){                      // For editable widgets, limit is half of the oled width
-              limit = (OledWidth/2)+8-4;
+            if((slide.len - ++slide.offset)<=slide.limit){                                    // Increase x offset, check limits
+              slide.status = slide_limit;                                                     // If reached end
             }
-            else{
-              limit = OledWidth-8;                                                          // Else, use all the space available
-            }
-            if(slide.len<limit){                                                            // Return if label text shorter than limit (No need to slide text)
-              slide.status = slide_disabled;
-              break;
-            }
-            if((slide.len - ++slide.offset)<limit){                                         // Increase x offset, check limits
-              slide.status = slide_limit;
-            }                                                                               // If text sliding running, update every 10mS
             refresh_slide=1;
           }
           break;

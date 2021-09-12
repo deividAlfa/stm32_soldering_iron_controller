@@ -12,7 +12,7 @@
 
 #define default_font u8g2_font_menu
 
-//#define COMBO_SLIDE_TEXT                                                    // Testing feature, not enabled by default
+#define COMBO_SLIDE_TEXT                                                    // Testing feature, not enabled by default
 
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
 typedef enum widgetFieldType {field_int32, field_bmp, field_string}widgetFieldType;
