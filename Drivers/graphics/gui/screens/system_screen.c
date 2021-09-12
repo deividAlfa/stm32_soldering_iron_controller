@@ -372,7 +372,7 @@ static void system_create(screen_t *scr){
   edit->options = strings[lang].dimMode;
   edit->numberOfOptions = 3;
 
-  //  [ Oled delay Widget ]
+  //  [ Oled dim delay Widget ]
   //
   newComboEditable(w, strings[lang].__Delay, &edit, &comboitem_system_Dim_Timeout);
   dis=&edit->inputData;
@@ -382,7 +382,7 @@ static void system_create(screen_t *scr){
   edit->big_step = 10;
   edit->step = 5;
   edit->setData = (void (*)(void *))&setDimTimeout;
-  edit->max_value = 240;
+  edit->max_value = 250;
   edit->min_value = 5;
 
   //  [ Oled dim turn off Widget ]

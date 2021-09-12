@@ -474,7 +474,7 @@ static void iron_create(screen_t *scr){
   edit->big_step = 5;
   edit->step = 1;
   edit->setData = (void (*)(void *))&seterrorDelay;
-  edit->max_value = 600;
+  edit->max_value = 250;
   edit->min_value = 1;
 
   //  [ Error resume mode Widget ]
