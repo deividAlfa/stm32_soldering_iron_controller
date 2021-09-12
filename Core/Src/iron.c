@@ -521,7 +521,7 @@ void IronWake(bool source){                                                     
     }
   }
 
-  if(systemSettings.settings.shakeFiltering){                           // Sensitivity workaround enabled
+  if(systemSettings.settings.shakeFiltering && source==wakeInput){      // Sensitivity workaround enabled
     uint32_t time=(HAL_GetTick()-last_time);
     last_time = HAL_GetTick();
     if(time<100 || time>500){                                           // Ignore changes happening faster than 100mS or slower than 500mS.
