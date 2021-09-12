@@ -917,12 +917,15 @@ uint8_t comboItemToIndex(widget_t *w, comboBox_item_t *item) {
 
 int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
 
-  comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
-
   if(!w || !w->enabled || input == Rotate_Nothing ){
     return -1;
   }
-  u8g2_SetFont(&u8g2, combo->font);
+  comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
+
+
+  if(u8g2.font != combo->font){
+    u8g2_SetFont(&u8g2, combo->font);
+  }
 
   uint8_t firstIndex = combo->currentScroll;
   uint16_t yDim = OledHeight - w->posY;
