@@ -18,6 +18,7 @@ static comboBox_item_t *comboitem_system_Dim_PowerOff;
 
 static comboBox_item_t *comboitem_system_ButtonWakeMode;
 static comboBox_item_t *comboitem_system_ShakeWakeMode;
+static comboBox_item_t *comboitem_system_ShakeFiltering;
 static comboBox_item_t *comboitem_system_StandMode;
 static comboBox_item_t *comboitem_system_BootMode;
 
@@ -181,9 +182,10 @@ static void setActiveDetection(uint32_t *val) {
 static void * getWakeMode() {
   temp = systemSettings.settings.WakeInputMode;
 
-  bool mode = (systemSettings.settings.WakeInputMode==mode_shake);   // 0=shake, 1=stand
+  bool mode = (systemSettings.settings.WakeInputMode==mode_shake);   // 0=stand, 1=shake
 
   comboitem_system_StandMode->enabled       = !mode;
+  comboitem_system_ShakeFiltering->enabled  = mode;
   comboitem_system_BootMode->enabled        = mode;
   comboitem_system_ShakeWakeMode->enabled   = mode;
   comboitem_system_ButtonWakeMode->enabled  = mode;
@@ -275,6 +277,14 @@ static void setShakeWakeMode(uint32_t *val) {
 }
 static void * getShakeWakeMode() {
   temp = systemSettings.settings.shakeWakeMode;
+  return &temp;
+}
+//=========================================================
+static void setShakeFiltering(uint32_t *val) {
+  systemSettings.settings.shakeFiltering = *val;
+}
+static void * getShakeFiltering() {
+  temp = systemSettings.settings.shakeFiltering;
   return &temp;
 }
 //=========================================================
@@ -411,6 +421,18 @@ static void system_create(screen_t *scr){
   edit->options = strings[lang].wakeMode;
   edit->numberOfOptions = 2;
 
+  //  [ Shake filtering Widget ]
+  //
+  newComboMultiOption(w, strings[lang].SYSTEM_Shake_Filtering, &edit, &comboitem_system_ShakeFiltering);
+  dis=&edit->inputData;
+  dis->getData = &getShakeFiltering;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setShakeFiltering;
+  edit->max_value = enable;
+  edit->min_value = disable;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
 
   //  [ Stand mode Widget ]
   //

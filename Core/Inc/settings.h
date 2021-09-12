@@ -183,6 +183,7 @@ typedef struct{
   uint8_t       buzzerMode;
   uint8_t       buttonWakeMode;                                     // 0=Nothing, 1= standby, 2= sleep,  3= both
   uint8_t       shakeWakeMode;
+  uint8_t       shakeFiltering;
   uint8_t       WakeInputMode;
   uint8_t       StandMode;
   uint8_t       Pullup;

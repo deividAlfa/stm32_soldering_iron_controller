@@ -64,6 +64,7 @@ typedef struct{
   char * SYSTEM_Oled_Dim;
   char * SYSTEM_Oled_Dim_inSleep;
   char * SYSTEM_Wake_Mode;
+  char * SYSTEM_Shake_Filtering;
   char * SYSTEM_Stand_Mode;
   char * SYSTEM_Boot;
   char * SYSTEM_Button_Wake;

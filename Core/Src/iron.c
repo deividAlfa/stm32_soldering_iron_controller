@@ -520,15 +520,19 @@ void IronWake(bool source){                                                     
       return;
     }
   }
-  uint32_t time=(HAL_GetTick()-last_time)
-  if(time>100 && time<500){                                          // Sensitivity workaround. Ignore changes happening faster than 100mS or slower than 500mS.
-    if(Iron.CurrentMode<mode_boost){
-        __disable_irq();
-        setCurrentMode(mode_run);
-        __enable_irq();
-      }
+
+  if(systemSettings.settings.shakeFiltering){                           // Sensitivity workaround enabled
+    uint32_t time=(HAL_GetTick()-last_time);
+    last_time = HAL_GetTick();
+    if(time<100 || time>500){                                           // Ignore changes happening faster than 100mS or slower than 500mS.
+      return;
+    }
   }
-  last_time = HAL_GetTick();
+  if(Iron.CurrentMode<mode_boost){
+      __disable_irq();
+      setCurrentMode(mode_run);
+      __enable_irq();
+  }
 }
 
 void readWake(void){
