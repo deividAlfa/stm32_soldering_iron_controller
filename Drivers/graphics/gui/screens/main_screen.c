@@ -361,9 +361,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   if( !mainScr.shakeActive && Iron.shakeActive){
     Iron.shakeActive=0;
     mainScr.shakeActive=1;
-    if(systemSettings.settings.dim_mode<dim_always || current_mode<mode_run){			// Wake up the screen if in low power mode, 
-      refreshOledDim();                                 													// Or if dim always disabled
-    }
   }
   else if(mainScr.shakeActive==2 && (current_time-Iron.lastShakeTime)>50){
     mainScr.shakeActive=3; // Clear

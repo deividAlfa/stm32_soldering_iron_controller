@@ -119,6 +119,9 @@ void refreshOledDim(void){
 void handleOledDim(void){
   static uint32_t stepTimer;
   uint8_t contrast=getContrast();
+  if(getCurrentMode()>mode_sleep && !getOledPower()){                   // If screen turned off and not in sleep mode, wake it.
+    refreshOledDim();                                                   //(Something woke the station from sleep)
+  }
   if(dimStep==0){
     if(systemSettings.settings.dim_mode && contrast>5 && ((current_time-dimTimer)>=((uint32_t)systemSettings.settings.dim_Timeout*1000))){
       dimStep=-5;
