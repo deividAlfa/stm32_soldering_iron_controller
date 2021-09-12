@@ -669,12 +669,12 @@ static uint8_t  drawPowerBar(uint8_t *refresh){
       u8g2_SetDrawColor(&u8g2,BLACK);                               // Draw a black square to wipe old widget data
       u8g2_DrawBox(&u8g2, OledWidth-PWR_BAR_WIDTH-2 , OledHeight-7, PWR_BAR_WIDTH, 5);
       u8g2_SetDrawColor(&u8g2,WHITE);
-      return 1;
     }
     else{
       u8g2_DrawRFrame(&u8g2, OledWidth-PWR_BAR_WIDTH-4, OledHeight-9, PWR_BAR_WIDTH+4, 9, 2);
     }
     u8g2_DrawBox(&u8g2, OledWidth-PWR_BAR_WIDTH-2, OledHeight-7, mainScr.lastPwr, 5);
+    return 1;
   }
   return 0;
 }
