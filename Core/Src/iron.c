@@ -500,24 +500,24 @@ void setCurrentMode(uint8_t mode){
 }
 
 // Called from program timer if WAKE change is detected
-void IronWake(bool source){                                                                 // source: handle shake, encoder push button
+bool IronWake(bool source){                                                                 // source: handle shake, encoder push button
   static uint32_t last_time;
   if(Iron.Error.Flags || systemSettings.settings.WakeInputMode==mode_stand){
-    return;
+    return 0;
   }
 
   if(Iron.CurrentMode==mode_standby){
     if( (source==wakeButton && !(systemSettings.settings.buttonWakeMode & wake_standby)) ||
         (source==wakeInput && !(systemSettings.settings.shakeWakeMode & wake_standby))){
 
-      return;
+      return 0;
     }
   }
   else if(Iron.CurrentMode==mode_sleep){
     if( (source==wakeButton && !(systemSettings.settings.buttonWakeMode & wake_sleep)) ||
         (source==wakeInput && !(systemSettings.settings.shakeWakeMode & wake_sleep))){
 
-      return;
+      return 0;
     }
   }
 
@@ -525,7 +525,7 @@ void IronWake(bool source){                                                     
     uint32_t time=(HAL_GetTick()-last_time);
     last_time = HAL_GetTick();
     if(time<100 || time>500){                                           // Ignore changes happening faster than 100mS or slower than 500mS.
-      return;
+      return 0;
     }
   }
   if(Iron.CurrentMode<mode_boost){
@@ -533,6 +533,7 @@ void IronWake(bool source){                                                     
       setCurrentMode(mode_run);
       __enable_irq();
   }
+  return 1;
 }
 
 void readWake(void){
@@ -550,9 +551,10 @@ void readWake(void){
         }
       }
       else{
-        IronWake(wakeInput);
-        Iron.shakeActive = 1;
-        Iron.lastShakeTime = HAL_GetTick();
+        if(IronWake(wakeInput)){
+          Iron.shakeActive = 1;
+          Iron.lastShakeTime = HAL_GetTick();
+        }
       }
     }
 }
