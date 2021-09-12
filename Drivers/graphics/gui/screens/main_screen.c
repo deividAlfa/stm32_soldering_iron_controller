@@ -574,7 +574,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 }
 
 static uint8_t  drawIcons(uint8_t *refresh){
-  if(refresh){
+  if(*refresh){
     #ifdef USE_NTC
     u8g2_DrawXBMP(&u8g2, Widget_AmbTemp->posX-tempXBM[0]-2, 0, tempXBM[0], tempXBM[1], &tempXBM[2]);
     #endif
@@ -594,9 +594,6 @@ static uint8_t  drawIcons(uint8_t *refresh){
     u8g2_SetDrawColor(&u8g2,BLACK);
     u8g2_DrawBox(&u8g2, 49, OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1]);
     u8g2_SetDrawColor(&u8g2,WHITE);
-    return 1;
-  }
-  if(refresh){
     return 1;
   }
   return 0;
@@ -619,8 +616,8 @@ static uint8_t  drawScreenSaver(uint8_t *refresh){
   return 0;
 }
 
-static uint8_t  drawMode(uint8_t *refresh){
-  if(!*refresh) return 0;
+static void  drawMode(uint8_t *refresh){
+  if(!*refresh) return;
 
   u8g2_SetFont(&u8g2, u8g2_font_small);
 
@@ -655,7 +652,6 @@ static uint8_t  drawMode(uint8_t *refresh){
     default:
       break;
   }
-  return 1;
 }
 
 static uint8_t  drawPowerBar(uint8_t *refresh){
@@ -673,12 +669,12 @@ static uint8_t  drawPowerBar(uint8_t *refresh){
       u8g2_SetDrawColor(&u8g2,BLACK);                               // Draw a black square to wipe old widget data
       u8g2_DrawBox(&u8g2, OledWidth-PWR_BAR_WIDTH-2 , OledHeight-7, PWR_BAR_WIDTH, 5);
       u8g2_SetDrawColor(&u8g2,WHITE);
+      return 1;
     }
     else{
       u8g2_DrawRFrame(&u8g2, OledWidth-PWR_BAR_WIDTH-4, OledHeight-9, PWR_BAR_WIDTH+4, 9, 2);
     }
     u8g2_DrawBox(&u8g2, OledWidth-PWR_BAR_WIDTH-2, OledHeight-7, mainScr.lastPwr, 5);
-    return 1;
   }
   return 0;
 }
@@ -769,8 +765,8 @@ static void  drawError(void){
   }
 }
 
-static uint8_t  drawMisc(uint8_t *refresh){
-  if(!*refresh) return 0;
+static void  drawMisc(uint8_t *refresh){
+  if(!*refresh) return;
   uint8_t frame=0, error=0;
   switch(mainScr.currentMode){
     case main_error:
@@ -796,7 +792,7 @@ static uint8_t  drawMisc(uint8_t *refresh){
   }
   u8g2_DrawUTF8(&u8g2, 2, 54, tipNames[systemSettings.Profile.currentTip]);                  // Draw tip name
   u8g2_SetDrawColor(&u8g2, WHITE);
-  return 1;
+  return;
 }
 
 static uint8_t main_screen_draw(screen_t *scr){
@@ -828,8 +824,8 @@ static uint8_t main_screen_draw(screen_t *scr){
   }
   ret |= drawPowerBar(&refresh);
   ret |= drawIcons(&refresh);
-  ret |= drawMode(&refresh);
-  ret |= drawMisc(&refresh);
+  drawMode(&refresh);
+  drawMisc(&refresh);
   ret |= drawPlot(&refresh);
 
   return (ret | default_screenDraw(scr));
@@ -925,6 +921,7 @@ static void main_screen_create(screen_t *scr){
   dis->font=u8g2_font_small;
   dis->getData = &main_screen_getAmbTemp;
   w->posY = 0;
+  w->posX = 90;
   w->width = 38;
   #endif
 }
