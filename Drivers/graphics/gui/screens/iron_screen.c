@@ -479,7 +479,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Error resume mode Widget ]
   //
-  newComboMultiOption(w, strings[lang].IRON_Error_Mode, &edit, NULL);
+  newComboMultiOption(w, strings[lang].IRON_Error_Resume_Mode, &edit, NULL);
   dis=&edit->inputData;
   dis->getData = &geterrorResume;
   edit->big_step = 1;

@@ -48,7 +48,7 @@ typedef struct{
   char * IRON_PWM_mul;
   char * IRON_No_Iron;
   char * IRON_Error_Timeout;
-  char * IRON_Error_Mode;
+  char * IRON_Error_Resume_Mode;
   char * IRON_Filter_Settings;
 
   char * FILTER_Filter;
