@@ -47,7 +47,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_PWM_mul = "PWM mul.",
       .IRON_No_Iron = "No iron",
       .IRON_Error_Timeout = "Err delay",
-      .IRON_Error_Mode = "Err mode",
+      .IRON_Error_Mode = "Err resume",
       .IRON_Filter_Settings = "FILTER SETTINGS",
 
       .FILTER_Filter = "Filter",
