@@ -747,10 +747,7 @@ uint8_t default_widgetDraw(widget_t *w) {
     refresh=1;                                    // For drawing detection
   }
   u8g2_SetDrawColor(&u8g2, WHITE);
-  if(refresh){
-    return 1;                                       // Widget drawn
-  }
-  return 0;
+  return refresh;
 }
 
 
