@@ -254,7 +254,7 @@ void Error_Handler(void)
   #endif
   setSafeMode(enable);
   buzzer_fatal_beep();
-  Diag_init();
+  Oled_error_init();
 
   char strOut[16];
   uint8_t outPos=0;
