@@ -233,7 +233,7 @@ static uint8_t Cal_draw(screen_t *scr){
     putStrAligned(strings[lang].CAL_Error, 10, align_center);
     putStrAligned(strings[lang].CAL_Aborting, 25, align_center);
   }
-  return (default_screenDraw(scr));
+  return (error==2 || default_screenDraw(scr));
 }
 
 static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
@@ -242,7 +242,10 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
   handleOledDim();
 
   if(error){
-    if(error==2 && (current_time-errorTimer)>2000 ){
+    if(error==2){
+      error++;
+    }
+    else if(error==3 && (current_time-errorTimer)>2000 ){
       error=0;
       widgetEnable(Screen_calibration.widgets);
       scr->refresh=screen_Erase;
