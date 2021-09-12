@@ -46,8 +46,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_ADC_Time = "ADC Time",
       .IRON_PWM_mul = "PWM mul.",
       .IRON_No_Iron = "No iron",
-      .IRON_Error_Timeout = "Err delay",
-      .IRON_Error_Resume_Mode = "Err resume",
+      .IRON_Error_Timeout = "Err time",
+      .IRON_Error_Resume_Mode = " Resume",
       .IRON_Filter_Settings = "FILTER SETTINGS",
 
       .FILTER_Filter = "Filter",
@@ -189,8 +189,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_ADC_Time = "АЦП Замер",
       .IRON_PWM_mul = "ШИМ множ.",
       .IRON_No_Iron = "ПорогОткл",
-      .IRON_Error_Timeout = "Err delay",                  // TODO
-      .IRON_Error_Resume_Mode = "Err mode",                      // TODO
+      .IRON_Error_Timeout = "Err time",                         // TODO
+      .IRON_Error_Resume_Mode = " Resume",                      // TODO
       .IRON_Filter_Settings = "ПАРАМ. ФИЛЬТРА",
 
       .FILTER_Filter = "Фильтр",
@@ -333,8 +333,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_ADC_Time = "ADO Tid",
       .IRON_PWM_mul = "PWM mul.",
       .IRON_No_Iron = "Kolv ur",
-      .IRON_Error_Timeout = "Err delay",                  // TODO
-      .IRON_Error_Resume_Mode = "Err mode",                      // TODO
+      .IRON_Error_Timeout = "Err time",                         // TODO
+      .IRON_Error_Resume_Mode = " Resume",                      // TODO
       .IRON_Filter_Settings = "FILTER INST.",
 
       .FILTER_Filter = "Filter",
