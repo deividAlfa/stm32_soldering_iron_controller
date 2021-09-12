@@ -45,8 +45,9 @@ void oled_addScreen(screen_t *screen, uint8_t index){
 void oled_draw() {
 
   if(oled.status!=oled_idle) { return; }                // If Oled busy, skip update
-  current_screen->draw(current_screen);
-  update_display();
+  if(current_screen->draw(current_screen)){
+    update_display();                                   // Only update if something was drawn
+  }
 }
 
 void oled_update() {

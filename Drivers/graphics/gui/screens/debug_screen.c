@@ -222,7 +222,7 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   return (default_screenProcessInput(scr, input, state));
 }
 
-void debug_Draw(screen_t *scr){
+static uint8_t debug_Draw(screen_t *scr){
   if(scr->refresh==screen_Erased){
     u8g2_SetFont(&u8g2, u8g2_font_small);
     u8g2_SetDrawColor(&u8g2, WHITE);
@@ -236,8 +236,7 @@ void debug_Draw(screen_t *scr){
     u8g2_DrawUTF8(&u8g2, 64, 44, "PWM");
     u8g2_DrawUTF8(&u8g2, 64, 55, "PWR");
   }
-
-  default_screenDraw(scr);
+  return (default_screenDraw(scr));
 }
 
 static void debug_onEnter(screen_t *scr){
@@ -512,7 +511,7 @@ static void pid_debug_create(screen_t *scr){
   w->width=32;
 }
 
-static void pid_debug_Draw(screen_t * scr){
+static uint8_t pid_debug_Draw(screen_t * scr){
   if(update_draw || scr->refresh==screen_Erased){
     if(update_draw){
       update_draw=0;
@@ -537,7 +536,7 @@ static void pid_debug_Draw(screen_t * scr){
       u8g2_DrawLine(&u8g2, x+(OledWidth-PID_SZ), 63-pidPlot->d[prev], x+(OledWidth-PID_SZ+1), 63-pidPlot->d[pos]);
     }
   }
-  default_screenDraw(scr);
+  return (default_screenDraw(scr));
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------

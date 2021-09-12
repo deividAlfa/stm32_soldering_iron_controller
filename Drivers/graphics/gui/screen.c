@@ -50,8 +50,9 @@ int default_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *
   return ret;
 }
 
-void default_screenDraw(screen_t *scr) {
+uint8_t default_screenDraw(screen_t *scr) {
   widget_t *current_widget = NULL;
+  uint8_t ret = 0;
   if(scr->widgets) {
     if(scr->refresh==screen_Erase){
       FillBuffer(BLACK,fill_dma);
@@ -59,13 +60,13 @@ void default_screenDraw(screen_t *scr) {
     current_widget = scr->widgets;
     while(current_widget) {
       if(current_widget->draw){
-        current_widget->draw(current_widget);
+        ret |= current_widget->draw(current_widget);
       }
       current_widget = current_widget->next_widget;
     }
     scr->refresh=screen_Idle;
   }
-
+  return ret;
 }
 
 void default_screenUpdate(screen_t *scr) {

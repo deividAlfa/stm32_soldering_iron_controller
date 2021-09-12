@@ -148,17 +148,21 @@ void draw_boot_strings(void){
   u8g2_DrawUTF8(&u8g2, 0, 34, strings[lang]._Language);
 }
 
-void boot_screen_draw(screen_t *scr){
+static uint8_t boot_screen_draw(screen_t *scr){
   uint8_t refresh = scr->refresh;
-  default_screenDraw(scr);
+  uint8_t ret = default_screenDraw(scr);
 
   if(refresh>screen_Idle){
-    draw_boot_strings();
+    if(systemSettings.setupMode){
+      draw_boot_strings();
+    }
+    ret = 1;
   }
 
   if(boot_step==1){
     boot_step++;
   }
+  return ret;
 }
 
 
@@ -226,6 +230,7 @@ void boot_screen_init(screen_t * scr){
   }
   u8g2_SetDrawColor(&u8g2,WHITE);
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM[0], splashXBM[1], &splashXBM[2]);
+  scr->refresh = screen_Erased;
   setContrast(0);
   refreshOledDim();
 }

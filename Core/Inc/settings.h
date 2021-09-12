@@ -222,7 +222,7 @@ typedef __attribute__((aligned(4)))  struct{
 extern systemSettings_t systemSettings;
 extern flashSettings_t* flashSettings;
 
-void Diag_init(void);
+void Oled_error_init(void);
 void checkSettings(void);
 void saveSettingsFromMenu(uint8_t mode);
 void saveSettings(uint8_t mode);

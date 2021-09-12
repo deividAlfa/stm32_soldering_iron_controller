@@ -576,7 +576,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   return default_screenProcessInput(scr, input, state);
 }
 
-static void drawIcons(uint8_t *refresh){
+static uint8_t  drawIcons(uint8_t *refresh){
   if(refresh){
     #ifdef USE_NTC
     u8g2_DrawXBMP(&u8g2, Widget_AmbTemp->posX-tempXBM[0]-2, 0, tempXBM[0], tempXBM[1], &tempXBM[2]);
@@ -590,72 +590,37 @@ static void drawIcons(uint8_t *refresh){
   if(mainScr.shakeActive==1 || (mainScr.shakeActive==2 && refresh) ){ //1 = new draw, 2 = already drawn
     mainScr.shakeActive=2;
     u8g2_DrawXBMP(&u8g2, 49, OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1], &shakeXBM[2]);
+    return 1;
   }
   else if(mainScr.shakeActive==3){  // 3 = clear
     mainScr.shakeActive=0;
     u8g2_SetDrawColor(&u8g2,BLACK);
     u8g2_DrawBox(&u8g2, 49, OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1]);
     u8g2_SetDrawColor(&u8g2,WHITE);
+    return 1;
   }
+  return 0;
 }
 
 
-static void drawError(void){
-  if(Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
-    u8g2_SetFont(&u8g2, u8g2_font_no_iron_big);
-    putStrAligned(strings[lang].main_error_noIron, 20, align_center);
-  }
-  else{
-    uint8_t Err_ypos;
-
-    uint8_t err = (uint8_t)Iron.Error.V_low+Iron.Error.safeMode+(Iron.Error.NTC_low|Iron.Error.NTC_high)+Iron.Error.noIron;
-    if(err<4){
-      Err_ypos= 12+ ((40-(err*12))/2);
-    }
-    else{
-      Err_ypos=12;
-    }
-    u8g2_SetFont(&u8g2, u8g2_font_small);
-    if(Iron.Error.V_low){
-      putStrAligned(strings[lang].main_error_VoltageLow, Err_ypos, align_center);
-      Err_ypos+=12;
-    }
-    if(Iron.Error.safeMode){
-      putStrAligned(strings[lang].main_error_failsafe, Err_ypos, align_center);
-      Err_ypos+=12;
-    }
-    if(Iron.Error.NTC_high){
-      putStrAligned(strings[lang].main_error_NTC_high, Err_ypos, align_center);
-      Err_ypos+=12;
-    }
-    else if(Iron.Error.NTC_low){
-      putStrAligned(strings[lang].main_error_NTC_low, Err_ypos, align_center);
-      Err_ypos+=12;
-    }
-    if(Iron.Error.noIron){
-      putStrAligned(strings[lang].main_error_noIron_Detected, Err_ypos, align_center);
-      Err_ypos+=12;
-    }
-  }
-}
-
-
-static void drawScreenSaver(uint8_t *refresh){
+static uint8_t  drawScreenSaver(uint8_t *refresh){
 #ifdef SCREENSAVER
   if(!*refresh || !screenSaver.enabled || getCurrentMode()!=mode_sleep || mainScr.currentMode!=main_irontemp){
-    return;
+    return 0;
   }
   screenSaver.update=0;
   //uint16_t _x=(screenSaver.x*5)/2;
   if(screenSaver.x<OledWidth || screenSaver.y<OledHeight){
     u8g2_SetDrawColor(&u8g2, WHITE);
     u8g2_DrawXBMP(&u8g2, screenSaver.x, screenSaver.y, ScrSaverXBM[0], ScrSaverXBM[1], &ScrSaverXBM[2]);
+    return 1;
   }
 #endif
+  return 0;
 }
 
-static void drawMode(uint8_t *refresh){
-  if(!*refresh) return;
+static uint8_t  drawMode(uint8_t *refresh){
+  if(!*refresh) return 0;
 
   u8g2_SetFont(&u8g2, u8g2_font_small);
 
@@ -690,9 +655,10 @@ static void drawMode(uint8_t *refresh){
     default:
       break;
   }
+  return 1;
 }
 
-static void drawPowerBar(uint8_t *refresh){
+static uint8_t  drawPowerBar(uint8_t *refresh){
   static uint8_t previousPower=0;
   uint8_t update=*refresh;
   if((current_time-barTime)>9){
@@ -712,13 +678,15 @@ static void drawPowerBar(uint8_t *refresh){
       u8g2_DrawRFrame(&u8g2, OledWidth-PWR_BAR_WIDTH-4, OledHeight-9, PWR_BAR_WIDTH+4, 9, 2);
     }
     u8g2_DrawBox(&u8g2, OledWidth-PWR_BAR_WIDTH-2, OledHeight-7, mainScr.lastPwr, 5);
+    return 1;
   }
+  return 0;
 }
 
-static void drawPlot(uint8_t *refresh){
+static uint8_t  drawPlot(uint8_t *refresh){
 #define PLOT_X  7
 #define PLOT_Y  12
-  if(!plot.enabled){ return; }
+  if(!plot.enabled){ return 0; }
   if(*refresh || plot.update){
     int16_t ref;
     if(Iron.CurrentMode!=mode_sleep){
@@ -757,11 +725,52 @@ static void drawPlot(uint8_t *refresh){
     }
     #define set (PLOT_Y+20)
     u8g2_DrawTriangle(&u8g2, PLOT_X+116, set-3, PLOT_X+116, set+3, PLOT_X+110, set);           // Setpoint marker
+    return 1;
+  }
+  return 0;
+}
+
+static void  drawError(void){
+  if(Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
+    u8g2_SetFont(&u8g2, u8g2_font_no_iron_big);
+    putStrAligned(strings[lang].main_error_noIron, 20, align_center);
+  }
+  else{
+    uint8_t Err_ypos;
+
+    uint8_t err = (uint8_t)Iron.Error.V_low+Iron.Error.safeMode+(Iron.Error.NTC_low|Iron.Error.NTC_high)+Iron.Error.noIron;
+    if(err<4){
+      Err_ypos= 12+ ((40-(err*12))/2);
+    }
+    else{
+      Err_ypos=12;
+    }
+    u8g2_SetFont(&u8g2, u8g2_font_small);
+    if(Iron.Error.V_low){
+      putStrAligned(strings[lang].main_error_VoltageLow, Err_ypos, align_center);
+      Err_ypos+=12;
+    }
+    if(Iron.Error.safeMode){
+      putStrAligned(strings[lang].main_error_failsafe, Err_ypos, align_center);
+      Err_ypos+=12;
+    }
+    if(Iron.Error.NTC_high){
+      putStrAligned(strings[lang].main_error_NTC_high, Err_ypos, align_center);
+      Err_ypos+=12;
+    }
+    else if(Iron.Error.NTC_low){
+      putStrAligned(strings[lang].main_error_NTC_low, Err_ypos, align_center);
+      Err_ypos+=12;
+    }
+    if(Iron.Error.noIron){
+      putStrAligned(strings[lang].main_error_noIron_Detected, Err_ypos, align_center);
+      Err_ypos+=12;
+    }
   }
 }
 
-void drawMisc(uint8_t *refresh){
-  if(!*refresh) return;
+static uint8_t  drawMisc(uint8_t *refresh){
+  if(!*refresh) return 0;
   uint8_t frame=0, error=0;
   switch(mainScr.currentMode){
     case main_error:
@@ -787,10 +796,11 @@ void drawMisc(uint8_t *refresh){
   }
   u8g2_DrawUTF8(&u8g2, 2, 54, tipNames[systemSettings.Profile.currentTip]);                  // Draw tip name
   u8g2_SetDrawColor(&u8g2, WHITE);
+  return 1;
 }
 
-void main_screen_draw(screen_t *scr){
-  uint8_t refresh=0;
+static uint8_t main_screen_draw(screen_t *scr){
+  uint8_t refresh=0,ret=0;
   static uint32_t lastState = 0;
   uint32_t currentState = (uint32_t)Iron.Error.Flags<<24 | (uint32_t)Iron.CurrentMode<<16 | mainScr.currentMode;    // Simple method to detect changes
 
@@ -814,15 +824,15 @@ void main_screen_draw(screen_t *scr){
   u8g2_SetDrawColor(&u8g2, WHITE);
 
   if(mainScr.ironStatus != status_error){
-    drawScreenSaver(&refresh);
+    ret |= drawScreenSaver(&refresh);
   }
-  drawPowerBar(&refresh);
-  drawIcons(&refresh);
-  drawMode(&refresh);
-  drawMisc(&refresh);
-  drawPlot(&refresh);
+  ret |= drawPowerBar(&refresh);
+  ret |= drawIcons(&refresh);
+  ret |= drawMode(&refresh);
+  ret |= drawMisc(&refresh);
+  ret |= drawPlot(&refresh);
 
-  default_screenDraw(scr);
+  return (ret | default_screenDraw(scr));
 }
 
 static void main_screen_init(screen_t *scr) {

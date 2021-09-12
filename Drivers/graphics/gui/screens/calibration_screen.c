@@ -223,7 +223,7 @@ static void Cal_onExit(screen_t *scr) {
   }
 }
 
-static void Cal_draw(screen_t *scr){
+static uint8_t Cal_draw(screen_t *scr){
   if(error==1){
     error=2;
     Screen_calibration.widgets->enabled=0;
@@ -233,7 +233,7 @@ static void Cal_draw(screen_t *scr){
     putStrAligned(strings[lang].CAL_Error, 10, align_center);
     putStrAligned(strings[lang].CAL_Aborting, 25, align_center);
   }
-  default_screenDraw(scr);
+  return (default_screenDraw(scr));
 }
 
 static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
@@ -351,7 +351,7 @@ static void Cal_Start_OnExit(screen_t *scr) {
   __enable_irq();
 }
 
-static void Cal_Start_draw(screen_t *scr){
+static uint8_t Cal_Start_draw(screen_t *scr){
   char str[20];
 
   if(update_draw){
@@ -394,7 +394,7 @@ static void Cal_Start_draw(screen_t *scr){
       putStrAligned(strings[lang].CAL_DELTA_HIGH_3, 30, align_center);
     }
   }
-  default_screenDraw(scr);
+  return (default_screenDraw(scr));
 }
 
 static void Cal_Start_create(screen_t *scr) {

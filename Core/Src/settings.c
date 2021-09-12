@@ -23,7 +23,7 @@ flashSettings_t* flashSettings = (flashSettings_t*)FLASH_ADDR;
 void checksumError(uint8_t mode);
 void Flash_error(void);
 void Button_reset(void);
-void Diag_init(void);
+void Oled_error_init(void);
 void ErrCountDown(uint8_t Start,uint8_t xpos, uint8_t ypos);
 
 
@@ -454,11 +454,12 @@ void loadProfile(uint8_t profile){
   __enable_irq();
 }
 
-void Diag_init(void){
+void Oled_error_init(void){
   setContrast(255);
   FillBuffer(BLACK,fill_soft);
   u8g2_SetFont(&u8g2,default_font );
   u8g2_SetDrawColor(&u8g2, WHITE);
+  u8g2_SetMaxClipWindow(&u8g2);
   systemSettings.settings.OledOffset = OLED_OFFSET;
 }
 
@@ -470,7 +471,7 @@ void Flash_error(void){
 }
 
 void checksumError(uint8_t mode){
-  Diag_init();
+  Oled_error_init();
   putStrAligned("BAD CHECKSUM!", 0, align_center);
   putStrAligned("RESTORING...", 30, align_center);
   update_display();
@@ -489,7 +490,7 @@ void checksumError(uint8_t mode){
 void Button_reset(void){
   uint16_t ResetTimer= HAL_GetTick();
   if(!BUTTON_input()){
-    Diag_init();
+    Oled_error_init();
     putStrAligned("HOLD BUTTON", 10, align_center);
     putStrAligned("TO RESTORE", 26, align_center);
     putStrAligned("DEFAULTS", 42, align_center);

@@ -539,8 +539,8 @@ void widgetAlign(widget_t* w){
   }
 }
 
-void default_widgetDraw(widget_t *w) {
-  if(!w || !w->enabled){ return; }
+uint8_t default_widgetDraw(widget_t *w) {
+  if(!w || !w->enabled){ return 0; }
 
   bool frameDraw = 0;
   bool frameColor = BLACK;
@@ -553,13 +553,17 @@ void default_widgetDraw(widget_t *w) {
   uint8_t cHeight = 0;
 
   if( dis ){
-    u8g2_SetFont(&u8g2, dis->font);
+    if(u8g2.font != dis->font){
+      u8g2_SetFont(&u8g2, dis->font);
+    }
     cHeight = u8g2_GetMaxCharHeight(&u8g2);
   }
   else if((w->type == widget_button)||(w->type == widget_bmp_button)){
     button = (button_widget_t*)w->content;
     if(w->type == widget_button){
-      u8g2_SetFont(&u8g2, button->font);
+      if(u8g2.font != button->font){
+        u8g2_SetFont(&u8g2, button->font);
+      }
       cHeight = u8g2_GetMaxCharHeight(&u8g2);
     }
   }
@@ -594,7 +598,7 @@ void default_widgetDraw(widget_t *w) {
             }
             break;
           default:
-            return;
+            return 0;
         }
       }
       else{                                           // Else, redraw frames
@@ -607,7 +611,7 @@ void default_widgetDraw(widget_t *w) {
           case widget_edit:
             break;
           default:
-            return;
+            return 0;
         }
       }
     }
@@ -647,7 +651,7 @@ void default_widgetDraw(widget_t *w) {
       case widget_bmp:
         u8g2_SetDrawColor(&u8g2, WHITE);
         u8g2_DrawXBMP(&u8g2, w->posX, w->posY, bmp->xbm[0], bmp->xbm[1], &bmp->xbm[2]);
-        return;
+        return 1;
 
       case widget_bmp_button:
         u8g2_SetDrawColor(&u8g2, WHITE);
@@ -702,7 +706,7 @@ void default_widgetDraw(widget_t *w) {
         break;
 
       default:
-        return;
+        return 0;
     }
   }
 
@@ -732,22 +736,33 @@ void default_widgetDraw(widget_t *w) {
         break;
     }
   }
-  u8g2_SetDrawColor(&u8g2, WHITE);
+  if(refresh){
+    u8g2_SetDrawColor(&u8g2, WHITE);
+    return 1;                                       // Widget drawn
+  }
+  else{
+    return 0;                                      // Nothing drawn
+  }
 }
 
 
-void comboBoxDraw(widget_t *w) {
+uint8_t comboBoxDraw(widget_t *w) {
+  if(!w || !w->enabled){ return 0; }                                                // Return if null or disabled
+
+  comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
+  if(!combo){ return 0; }                                                           // Return if null
+  comboBox_item_t *item = combo->first;
+  if(!item){ return 0; }                                                            // Return if null
+
   uint16_t yDim = OledHeight - w->posY;
   uint8_t height;
   int8_t frameY=0;
   int8_t posY;
-  uint8_t drawFrame=1;
-  comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
-  comboBox_item_t *item = combo->first;
+  bool drawFrame=1;
   uint8_t scroll = 0;
   uint8_t r;
-  if( !w || !w->enabled || ((w->refresh==refresh_idle) && (w->parent->refresh==screen_Idle)) ){
-    return;
+  if(w->refresh==refresh_idle && w->parent->refresh==screen_Idle){
+    return 0;
   }
 
 
@@ -758,10 +773,9 @@ void comboBoxDraw(widget_t *w) {
     w->parent->refresh = screen_Erased;
     FillBuffer(BLACK, fill_dma);                          // Erase fast using dma
   }
-
-  if(!item){ return; }                                    // Return if null item
-
-  u8g2_SetFont(&u8g2, combo->font);
+  if(u8g2.font != combo->font){
+    u8g2_SetFont(&u8g2, combo->font);
+  }
   height= u8g2_GetMaxCharHeight(&u8g2)+1;                 // +1 to allow separation between combobox items
 
   if(w->radius<0){
@@ -886,7 +900,7 @@ void comboBoxDraw(widget_t *w) {
     u8g2_SetDrawColor(&u8g2, WHITE);
     u8g2_DrawRFrame(&u8g2, 0, frameY, OledWidth, height,  r);
   }
-  return;
+  return 1;
 }
 
 uint8_t comboItemToIndex(widget_t *w, comboBox_item_t *item) {

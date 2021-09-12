@@ -434,7 +434,7 @@ static void iron_create(screen_t *scr){
   edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&_setReadDelay;
-  edit->max_value = 1000;
+  edit->max_value = 900;
   edit->min_value = 1;
 
   //  [ PWM Mult Widget ]

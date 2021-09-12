@@ -746,7 +746,7 @@ void FatalError(uint8_t type){
 
   setSafeMode(enable);
   buzzer_fatal_beep();
-  Diag_init();
+  Oled_error_init();
   switch(type){
     case error_FLASH:
       putStrAligned("FLASH ERROR", 0, align_center);

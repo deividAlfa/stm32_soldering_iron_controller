@@ -53,7 +53,7 @@ struct screen_t
   screenRefreshType refresh;
   int (*processInput)(struct screen_t *scr, RE_Rotation_t input, RE_State_t *);
   void (*update)(screen_t *scr);
-  void (*draw)(screen_t *scr);
+  uint8_t (*draw)(screen_t *scr);
   void (*onExit)(screen_t *scr);
   void (*onEnter)(screen_t *scr);
   uint8_t index;
@@ -67,7 +67,7 @@ struct screen_t
 
 widget_t *screen_tabToWidget(screen_t * scr, uint8_t tab);
 void screen_addWidget(widget_t *widget, screen_t *scr);
-void default_screenDraw(screen_t *scr);
+uint8_t default_screenDraw(screen_t *scr);
 int default_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *);
 void default_screenUpdate(screen_t *scr);
 void screen_setDefaults(screen_t *scr);
