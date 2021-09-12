@@ -692,7 +692,7 @@ static uint8_t  drawPlot(uint8_t *refresh){
       }
     }
     else{
-      ref = 100;
+      ref = (last_NTC_C+5)/10;                                          // Use ambient temperature as reference when sleeping
     }
 
     plot.update=0;
