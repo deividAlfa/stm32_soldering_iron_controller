@@ -267,10 +267,10 @@ void resetSystemSettings(void) {
   systemSettings.settings.version           = SETTINGS_VERSION;
   systemSettings.settings.contrast          = 255;
   systemSettings.settings.dim_mode          = dim_sleep;
-  systemSettings.settings.dim_Timeout       = 10;
+  systemSettings.settings.dim_Timeout       = 10000;                // ms
   systemSettings.settings.dim_inSleep       = enable;
   systemSettings.settings.OledOffset        = OLED_OFFSET;
-  systemSettings.settings.guiUpdateDelay    = 200;
+  systemSettings.settings.guiUpdateDelay    = 200;                  //ms
   systemSettings.settings.tempUnit          = mode_Celsius;
   systemSettings.settings.tempStep          = 5;                    // 5º steps
   systemSettings.settings.tempBigStep       = 20;                   // 20º big steps
@@ -397,19 +397,19 @@ void resetCurrentProfile(void){
   systemSettings.Profile.tipFilter.step             = -3;   // -5% less everytime the reading diff exceeds threshold_limit and the counter is greater than count_limit
   systemSettings.Profile.tipFilter.reset_threshold  = 600;  // Any diff over 500 reset the filter (Tip removed or connected)
 
-  systemSettings.Profile.errorDelay                 = 1;    // *100mS
+  systemSettings.Profile.errorTimeout               = 100;                    // ms
   systemSettings.Profile.errorResumeMode            = error_resume;
-  systemSettings.Profile.sleepTimeout               = 5;
-  systemSettings.Profile.standbyTimeout             = 5;
+  systemSettings.Profile.sleepTimeout               = (uint32_t)5*60000;      // ms
+  systemSettings.Profile.standbyTimeout             = (uint32_t)5*60000;
   systemSettings.Profile.standbyTemperature         = 180;
   systemSettings.Profile.UserSetTemperature         = 180;
   systemSettings.Profile.MaxSetTemperature          = 450;
   systemSettings.Profile.MinSetTemperature          = 180;
-  systemSettings.Profile.boostTimeout               = 30;
+  systemSettings.Profile.boostTimeout               = 60000;                  // ms
   systemSettings.Profile.boostTemperature           = 50;
   systemSettings.Profile.pwmMul                     = 1;
   systemSettings.Profile.readPeriod                 = (200*200)-1;             // 200ms * 200  because timer period is 5us
-  systemSettings.Profile.readDelay                  = (20*200)-1;              // 20ms
+  systemSettings.Profile.readDelay                  = (20*200)-1;              // 20ms (Also uses 5us clock)
   systemSettings.Profile.tempUnit                   = mode_Celsius;
   systemSettings.Profile.NotInitialized             = initialized;
   __enable_irq();

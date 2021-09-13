@@ -144,16 +144,12 @@ typedef struct{
   uint8_t       currentNumberOfTips;
   uint8_t       currentTip;
   uint8_t       pwmMul;
-  uint8_t       sleepTimeout;
-  uint8_t       standbyTimeout;
-  uint8_t       errorDelay;
   uint8_t       errorResumeMode;
   filter_t      tipFilter;
   uint16_t      standbyTemperature;
   uint16_t      UserSetTemperature;
   uint16_t      MaxSetTemperature;
   uint16_t      MinSetTemperature;
-  uint16_t      boostTimeout;
   uint16_t      boostTemperature;
   uint16_t      readPeriod;
   uint16_t      readDelay;
@@ -163,6 +159,10 @@ typedef struct{
   uint16_t      Cal250_default;
   uint16_t      Cal400_default;
   tipData_t     tip[TipSize];
+  uint32_t      errorTimeout;
+  uint32_t      boostTimeout;
+  uint32_t      sleepTimeout;
+  uint32_t      standbyTimeout;
 }profile_t;
 
 typedef struct{
@@ -171,7 +171,6 @@ typedef struct{
   uint8_t       contrast;
   uint8_t       OledOffset;
   uint8_t       dim_mode;
-  uint8_t       dim_Timeout;
   uint8_t       dim_inSleep;
   uint8_t       currentProfile;
   uint8_t       saveSettingsDelay;
@@ -190,8 +189,8 @@ typedef struct{
   uint8_t       NTC_detect;
   uint8_t       EncoderMode;
   uint8_t       lvp;
-  uint8_t       guiUpdateDelay;
   uint8_t       debugEnabled;
+  uint16_t      guiUpdateDelay;
   uint16_t      NTC_Beta;
   uint16_t      Pull_res;
   uint16_t      enableNTC;
@@ -200,7 +199,8 @@ typedef struct{
   uint16_t      NTC_detect_low_res;
   uint16_t      NTC_detect_high_res_beta;
   uint16_t      NTC_detect_low_res_beta;
-  uint16_t      version;                                            // Used to track if a reset is needed on firmware upgrade
+  uint32_t      dim_Timeout;
+  uint32_t      version;                                            // Used to track if a reset is needed on firmware upgrade
 }settings_t;
 
 typedef __attribute__((aligned(4)))  struct{

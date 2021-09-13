@@ -123,28 +123,25 @@ void handleIron(void) {
 
   // Controls inactivity timer and enters low power modes
   uint32_t mode_time = CurrentTime - Iron.CurrentModeTimer;
-  uint32_t boost_time = (uint32_t)systemSettings.Profile.boostTimeout*1000;
-  uint32_t sleep_time = (uint32_t)systemSettings.Profile.sleepTimeout*60000;
-  uint32_t standby_time = (uint32_t)systemSettings.Profile.standbyTimeout*60000;
 
   // Don't enter low power states while calibrating. Calibration always forces run mode
-  if((Iron.CurrentMode==mode_boost) && (mode_time>boost_time)){                             // If boost mode and time expired
+  if((Iron.CurrentMode==mode_boost) && (mode_time>systemSettings.Profile.boostTimeout)){    // If boost mode and time expired
     setCurrentMode(mode_run);
   }
   else if(Iron.CurrentMode==mode_run){                                                      // If running
-    if(standby_time){                                                                       // If standby timer enabled
-      if(mode_time>standby_time){                                                           // Check timeout
+    if(systemSettings.Profile.standbyTimeout){                                              // If standby timer enabled
+      if(mode_time>systemSettings.Profile.standbyTimeout){                                  // Check timeout
         setCurrentMode(mode_standby);
       }
     }
     else{                                                                                   // Otherwise, check sleep timeout
-      if(mode_time>sleep_time){                                                             //
+      if(mode_time>systemSettings.Profile.sleepTimeout){                                    //
         setCurrentMode(mode_sleep);
       }
     }
   }
   else if(Iron.CurrentMode==mode_standby){                                                  // If in standby
-    if(mode_time>sleep_time){                                                               // Check sleep timeout
+    if(mode_time>systemSettings.Profile.sleepTimeout){                                      // Check sleep timeout
       setCurrentMode(mode_sleep);
     }
   }
@@ -172,19 +169,17 @@ void handleIron(void) {
   else if(Iron.Pwm_Out == Iron.Pwm_Max){
     Iron.CurrentIronPower = 100;
   }
-  else if(Iron.Pwm_Out <= Iron.Pwm_Max){
+  else if(Iron.Pwm_Out < Iron.Pwm_Max){
     Iron.CurrentIronPower = ((uint32_t)Iron.Pwm_Out*100)/Iron.Pwm_Max;                        // Compute new %
   }
-  else{
-    Error_Handler();
-  }
+  
   if(Iron.updatePwm){
     Iron.updatePwm=0;
     __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer, Iron.Pwm_Period);
   }
   __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Load new calculated PWM Duty
 
-  // For calibration process. Add +-2ºC detection margin
+  // For calibration process. Add +-5ºC detection margin
   int16_t setTemp = Iron.CurrentSetTemperature;
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     setTemp = TempConversion(setTemp, mode_Celsius, 0);
@@ -560,7 +555,7 @@ void readWake(void){
 }
 
 void resetIronError(void){
-  Iron.LastErrorTime += (systemSettings.Profile.errorDelay+1*100);                     // Bypass timeout
+  Iron.LastErrorTime += (systemSettings.Profile.errorTimeout+1);                        // Bypass timeout
   checkIronError();                                                                     // Refresh Errors
 }
 
@@ -596,7 +591,7 @@ void checkIronError(void){
     }
   }
   else if (Iron.Error.active && !Err.Flags){                                                // If global flag set, but no errors
-    if((CurrentTime-Iron.LastErrorTime)>(systemSettings.Profile.errorDelay*100)){           // Check enough time has passed
+    if((CurrentTime-Iron.LastErrorTime)>systemSettings.Profile.errorTimeout){           // Check enough time has passed
       Iron.Error.Flags = 0;
       buzzer_alarm_stop();
       if(systemSettings.Profile.errorResumeMode==error_sleep){

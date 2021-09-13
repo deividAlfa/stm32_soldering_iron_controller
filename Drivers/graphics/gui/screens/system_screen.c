@@ -156,11 +156,11 @@ static void setdimMode(uint32_t *val) {
 }
 //=========================================================
 static void * getDimTimeout() {
-  temp = systemSettings.settings.dim_Timeout;
+  temp = systemSettings.settings.dim_Timeout/1000;
   return &temp;
 }
 static void setDimTimeout(uint32_t *val) {
-  systemSettings.settings.dim_Timeout = * val;
+  systemSettings.settings.dim_Timeout = *val*1000;
 }
 //=========================================================
 static void * getDimTurnOff() {
@@ -392,7 +392,7 @@ static void system_create(screen_t *scr){
   edit->big_step = 10;
   edit->step = 5;
   edit->setData = (void (*)(void *))&setDimTimeout;
-  edit->max_value = 250;
+  edit->max_value = 600;
   edit->min_value = 5;
 
   //  [ Oled dim turn off Widget ]

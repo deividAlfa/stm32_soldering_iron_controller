@@ -101,18 +101,18 @@ static void setTipImpedance(uint32_t *val) {
 #endif
 //=========================================================
 static void setSleepTime(uint32_t *val) {
-  systemSettings.Profile.sleepTimeout= *val;
+  systemSettings.Profile.sleepTimeout= *val*60000;
 }
 static void * getSleepTime() {
-  temp = systemSettings.Profile.sleepTimeout;
+  temp = systemSettings.Profile.sleepTimeout/60000;
   return &temp;
 }
 //=========================================================
 static void setStandbyTime(uint32_t *val) {
-  systemSettings.Profile.standbyTimeout= *val;
+  systemSettings.Profile.standbyTimeout= *val*60000;
 }
 static void * getStandbyTime() {
-  temp = systemSettings.Profile.standbyTimeout;
+  temp = systemSettings.Profile.standbyTimeout/60000;
   return &temp;
 }
 //=========================================================
@@ -203,11 +203,11 @@ static void setMinTemp(uint32_t *val) {
 }
 //=========================================================
 static void * geterrorDelay() {
-  temp = systemSettings.Profile.errorDelay;
+  temp = systemSettings.Profile.errorTimeout/100;
   return &temp;
 }
 static void seterrorDelay(uint32_t *val) {
-  systemSettings.Profile.errorDelay = *val;
+  systemSettings.Profile.errorTimeout = *val*100;
 }
 //=========================================================
 static void * geterrorResume() {
@@ -227,10 +227,10 @@ static void setNoIronADC(uint32_t *val) {
 }
 //=========================================================
 static void setBoostTime(uint32_t *val) {
-  systemSettings.Profile.boostTimeout= *val;
+  systemSettings.Profile.boostTimeout= *val*60000;
 }
 static void * getBoostTime() {
-  temp = systemSettings.Profile.boostTimeout;
+  temp = systemSettings.Profile.boostTimeout/60000;
   return &temp;
 }
 //=========================================================
@@ -358,13 +358,13 @@ static void iron_create(screen_t *scr){
   //
   newComboEditable(w, strings[lang].IRON_Boost, &edit, NULL);
   dis=&edit->inputData;
-  dis->endString="s";
+  dis->endString="min";
   dis->reservedChars=5;
   dis->getData = &getBoostTime;
   edit->big_step = 10;
-  edit->step = 5;
-  edit->max_value = 120;
-  edit->min_value = 10;
+  edit->step = 1;
+  edit->max_value = 60;
+  edit->min_value = 1;
   edit->setData = (void (*)(void *))&setBoostTime;
 
   //  [ Boost Temp Widget ]
