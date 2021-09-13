@@ -190,8 +190,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_ADC_Time = "АЦП Замер",
       .IRON_PWM_mul = "ШИМ множ.",
       .IRON_No_Iron = "ПорогОткл",
-      .IRON_Error_Timeout = "Err time",                         // TODO
-      .IRON_Error_Resume_Mode = " Resume",                      // TODO
+      .IRON_Error_Timeout = "Вр.Ошибки",
+      .IRON_Error_Resume_Mode = " Возврат К",
       .IRON_Filter_Settings = "ПАРАМ. ФИЛЬТРА",
 
       .FILTER_Filter = "Фильтр",
@@ -207,7 +207,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Oled_Dim_inSleep = " Реж.Экрана",
       .SYSTEM_Oled_Offset = "Сдвиг",
       .SYSTEM_Wake_Mode = "ДатчикСна",
-      .SYSTEM_Shake_Filtering = " Filter",                    // TODO
+      .SYSTEM_Shake_Filtering = " Фильтр",                    // TODO
       .SYSTEM_Stand_Mode = "Подставка",
       .SYSTEM_Boot = "Старт с",
       .SYSTEM_Button_Wake = "Кнопка раб.",
@@ -295,7 +295,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .encMode =     { "ОБРАТНО", "ПРЯМО" },
       .InitMode =    { "ВЫКЛ", "СОН", "ПУСК" },
       .dimMode =     { "откл", "СОН", "все" },
-      .errMode =     { "SLP", "RUN", "LAST" },                // TODO
+      .errMode =     { "ВЫКЛ", "ПУСК", "ПРЕД" },
 
     },
 
