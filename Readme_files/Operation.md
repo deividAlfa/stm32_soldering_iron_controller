@@ -127,9 +127,10 @@ Sets the ADC reading threshold that detects when no iron is present.<br>
 Usually when no iron is plugged in, the measured temperature will read at or close to maximum ADC range(4095).<br>
 Values >4095 will disable "no iron" detection.<br>
 Default 4000, max 4096.<br>
-  - **No iron delay**<br>
-Time in milliseconds that an iron must be plugged in before it is considered present.<br>
-If the screen bounces between run mode and no iron, increase this value.<br>
+  - **Error timeout**<br>
+Time to wait after an error has gone before resuming normal operation.<br>
+  - **Error resume**<br>
+Set the mode the station will be set after errors are no longer present: Sleep, Run, Last mode.<br>
   - **FILTER SETTINGS**<br>
 Here you can adjust the different the filtering settings.<br>
 The firmware uses Exponential Moving Average (EMA) to filter the noise from the ADC readings.<br>
@@ -173,7 +174,7 @@ Fades the display after a timeout.
   - **Dimmer Delay**<br>
 Sets the dimmer timeout. This option is disabled if the dimmer is OFF.<br>
   - **Dimmer, in sleep mode**<br>
-Allows to turn off the screen in sleep mode. This option is disabled if the dimmer is OFF.<br>
+Allows to turn off the screen in sleep or error modes. This option is disabled if the dimmer is OFF.<br>
 For safety reasons,the screen will only turn off when the iron temperature is below 100°C.<br>
 	- OFF: In sleep mode, the screen turns off after dimming.<br>
 	- ON: The screen stays on at low brightness.<br>
@@ -182,6 +183,9 @@ How to detect activity. SHAKE or STAND.<br>
 SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip up to wake.<br>
 STAND uses the same input, but disconnected from the handle. Must be shorted to gnd when the handle is in the stand.<br>
 (Stand mode operation operation: Shorted to gnd = sleep/standby, open = run ).<br>
+  - **Filter**<br>
+Filters the wake input to make it less sensitive, so it doesn't get waken by any little noise or movement.<br>
+This option is disabled in stand mode.<br>
   - **Stand mode**<br>
 Sets the mode that will be applied when the handle is put in the stand (__STANDBY__ or __SLEEP__).<br>
 This option is disabled in shake mode.<br>
