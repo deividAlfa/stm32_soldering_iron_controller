@@ -149,14 +149,14 @@ void draw_boot_strings(void){
 }
 
 static uint8_t boot_screen_draw(screen_t *scr){
-  uint8_t ret = (scr->refresh | default_screenDraw(scr));
+  uint8_t refresh = scr->refresh;                 // Save refresh state. If screen set to be erased, default_screenDraw will erase it.
+  uint8_t ret = default_screenDraw(scr);          // So we need to run screenDraw first and save the return value
 
-  if(boot_step==1){
-    boot_step++;
-    draw_boot_strings();
-    ret = 1;
+  if(refresh!=screen_Idle && boot_step==1){       // If screen not idle (erased) and boot_step=1 (Setup screen)
+    draw_boot_strings();                          // Redraw strings
   }
-  return ret;
+
+  return (ret);                                   // return the ret value from screenDraw
 }
 
 
@@ -177,40 +177,45 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
     refreshOledDim();
   }
   handleOledDim();
-  if(current_time - screen_timer > SPLASH_TIMEOUT){        // After splash timeout
 
-    if(!systemSettings.setupMode){
-      __disable_irq();
-      TIP.EMA_of_Input =  TIP.last_avg = TIP.last_raw;                        // Now override filter values with last raw reading
-      #ifdef USE_NTC
-      NTC.EMA_of_Input = NTC.last_avg = NTC.last_raw;
-      #endif
-      #ifdef USE_VIN
-      VIN.EMA_of_Input = VIN.last_avg = VIN.last_raw;
-      #endif
-      readColdJunctionSensorTemp_x10(new_reading, systemSettings.settings.tempUnit);                        // Refresh the temperatures to show current temperature from the beginning
-      readTipTemperatureCompensated(new_reading, read_average, systemSettings.settings.tempUnit);
-      resetIronError();
-      __enable_irq();
-      return screen_main;
-    }
-    else if(boot_step==0){
-      boot_step++;
-      widgetEnable(Widget_lang);
-      widgetEnable(Widget_profile);
-      widgetEnable(Widget_ok);
-      scr->refresh = screen_Erase;
-    }
-    else if(boot_step==3){
-      systemSettings.setupMode=disable;
-      setSafeMode(disable);
-      HAL_Delay(200);                                     // To let the ADC refresh
-    }
+  switch(boot_step){
+
+    case 2:
+      systemSettings.setupMode=disable;                                                               // Save button clicked, disable setup mode
+      setSafeMode(disable);                                                                           // Disable safe mode and exit
+
+    case 0:
+      if(current_time - screen_timer > SPLASH_TIMEOUT){                                               // After splash timeout
+        if(!systemSettings.setupMode){                                                                // If not in setup mode
+          __disable_irq();
+          TIP.EMA_of_Input =  TIP.last_avg = TIP.last_raw;                                            // Now override filter values with last raw reading
+          #ifdef USE_NTC
+          NTC.EMA_of_Input = NTC.last_avg = NTC.last_raw;
+          #endif
+          #ifdef USE_VIN
+          VIN.EMA_of_Input = VIN.last_avg = VIN.last_raw;
+          #endif
+          readColdJunctionSensorTemp_x10(new_reading, systemSettings.settings.tempUnit);              // Refresh the temperatures to show current temperature from the beginning
+          readTipTemperatureCompensated(new_reading, read_average, systemSettings.settings.tempUnit);
+          resetIronError();                                                                           // Force resetting the timeout of any error (This won't clear errors if still detected)
+          __enable_irq();
+          return screen_main;                                                                         // Go to main screen
+        }
+        widgetEnable(Widget_lang);                                                                    // In setup mode, enable widgets
+        widgetEnable(Widget_profile);
+        widgetEnable(Widget_ok);
+        scr->refresh = screen_Erase;                                                                  // Force screen wipe to clear the boot logo
+        boot_step++;                                                                                  // Increase boot step
+      }
+      else{
+        return -1;                                                                                    // Boot timeout not expired, do nothing
+      }
+
+    default:
+       break;
   }
-  else{
-    return -1;
-  }
-  return default_screenProcessInput(scr, input, state);
+
+  return (default_screenProcessInput(scr, input, state));
 }
 
 
