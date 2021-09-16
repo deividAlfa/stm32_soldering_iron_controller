@@ -233,7 +233,7 @@ static uint8_t Cal_draw(screen_t *scr){
     putStrAligned(strings[lang].CAL_Error, 10, align_center);
     putStrAligned(strings[lang].CAL_Aborting, 25, align_center);
   }
-  return (error==2 || default_screenDraw(scr));
+  return (default_screenDraw(scr));
 }
 
 static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
