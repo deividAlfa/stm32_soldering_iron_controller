@@ -320,6 +320,9 @@ You can cancel the process at any time by clicking the STOP button.<br>
 Here you can manually adjust the default calibration values, normally this needs to be done only once.<br> 
 Cal 250 depends on Zero set, and Cal 400 depends on Cal 250, so if you're changing this, you must follow the correct order:<br>
 Zero set (Sampling->Captured) -> Cal 250 -> Cal 400 -> Save<br>  
+If by any means the 250°C calibration needs to go higher than the 400°C value, increase 400°C value carefully and repeat the 250°C calibration.<br>
+For best accuracy, always calibrate 250°C value if CAL_Zero value was changed, and always calibrate 400°C value if 250°C value was changed.<br>
+  
   	- **Zero set**<br>
 Calibrates the zero offset of the amplifier. You must have inserted a completely cold tip, or the calibration result will be wrong.<br>
 This widgets has 3 states than change when clicking on it:<br>
