@@ -53,10 +53,11 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
   If the current mode is sleep/standby/boost, clicking will set run mode instead (If button wake is enabled).<br>
   Boost mode always exits on clicking, no matter the button configuration.<br>
   The graph update rate is the same as the ADC reading frequency.<br>
+  The numerical display uses a noise supression filter to show setday values. Once the setpoint was reached, variations in the +-5ºC range will be ignored.<br>    
+  The plot graph always uses real time readings.<br>
   - **Temperature setpoint adjustment**<br>
   Rotate the encoder, the setpoint will be shown, continue rotating to adjust it.<br>
   After 1 second of inactivity it will return to normal mode.<br>
-  Click within this time to trigger boost mode.
 - **Sleep/Standby modes**<br>
   You can manually enter lower power modes by clicking and rotating counter-clockwise.<br>
   The sequence would be [run/boost mode]->[standby mode]->[sleep mode].<br>
@@ -64,6 +65,7 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
   To wake up you can make a click (If button wake is enabled) or move the handle (If shake wake is enabled or in stand mode).<br>  
 - **Boost mode**<br>
   Rotate the encoder to show up the setpoint adjustment and click within 1 second to trigger boost mode.<br>
+  If more than 1 second has passed, clicking won't trigger boost mode.<br>
   Clicking or rotating the encoder will return to normal mode.<br>
 - **Tip selection**<br>
   Click and rotate clockwise to show the tip selection. The bottom left corner will be highlighted.<br>
@@ -123,8 +125,8 @@ PWM     |___|   |___|   |_____________________|   |___|   |___
 Sets the PWM period, using the formula ADC Time/multiplier.<br>
 Default: x1.<br>
   - **No iron**<br>
-Sets the ADC reading threshold that detects when no iron is present.<br>
-Usually when no iron is plugged in, the measured temperature will read at or close to maximum ADC range(4095).<br>
+Sets the ADC reading threshold that detects when there's no iron present.<br>
+When the iron is not inserted, usually the measured temperature will read at or close to maximum ADC range(4095).<br>
 Values >4095 will disable "no iron" detection.<br>
 Default 4000, max 4096.<br>
   - **Error timeout**<br>
@@ -169,12 +171,12 @@ Screen offset. This can accomodate the different screens which the controllers h
   - **Dimmer**<br>
 Fades the display after a timeout.
 	- OFF: Never dim the screen.<br>
-	- SLP: Dim only in low power modes (Standby and sleep).<br>
+	- SLP: Dim only in low power modes (Standby, Sleep, Error).<br>
 	- ALL: Dim also in run mode.<br>
   - **Dimmer Delay**<br>
-Sets the dimmer timeout. This option is disabled if the dimmer is OFF.<br>
+Sets the dimmer timeout. This option is disabled when the dimmer is set to OFF.<br>
   - **Dimmer, in sleep mode**<br>
-Allows to turn off the screen in sleep or error modes. This option is disabled if the dimmer is OFF.<br>
+Allows to turn off the screen in sleep or error modes. This option is disabled if the dimmer is set to OFF.<br>
 For safety reasons,the screen will only turn off when the iron temperature is below 100°C.<br>
 	- OFF: In sleep mode, the screen turns off after dimming.<br>
 	- ON: The screen stays on at low brightness.<br>
@@ -184,22 +186,22 @@ SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip 
 STAND uses the same input, but disconnected from the handle. Must be shorted to gnd when the handle is in the stand.<br>
 (Stand mode operation operation: Shorted to gnd = sleep/standby, open = run ).<br>
   - **Filter**<br>
-Filters the wake input to make it less sensitive, so it doesn't get waken by any little noise or movement.<br>
+Filters the wake input to make it less sensitive, so it doesn't get waken by any little noise or slight  movement.<br>
 This option is disabled in stand mode.<br>
   - **Stand mode**<br>
 Sets the mode that will be applied when the handle is put in the stand (__STANDBY__ or __SLEEP__).<br>
-This option is disabled in shake mode.<br>
+This option is disabled in shake input mode.<br>
   - **Boot**<br>
 Operation mode when powered on (__RUN__, __STANDBY__ or __SLEEP__).<br>
 This option is disabled in stand mode.<br>
   - **Button Wake**<br>
 Selects what modes can be waken with encoder activity.<br>
 [None] [Standby only] [Sleep only] [All]<br>
-This option is disabled in stand mode.<br>
+This option is disabled when Wake mode is set to Stand.<br>
   - **Shake Wake**<br>
 Selects what modes can be waken with shake activity.<br>
 [None] [Standby only] [Sleep only] [All]<br>
-This option is disabled in stand mode.<br>
+This option is disabled when Wake mode is set to Stand.<br>
   - **Encoder**<br>
 Invert the encoder direction.<br>
   - **Buzzer**<br>
@@ -209,12 +211,12 @@ Invert the encoder direction.<br>
    	- Alarm when no iron is detected or system error happens<br>
   - **Active detection**<br>
 Use iron active detection by leaving the PWM slightly on all the time. If your amp has a pullup resistor it can be disabled.<br>
-  - **Unit**<br>
-Temperature scale. Celsius or Fahrenheit<br>
+  - **Temperature unit**<br>
+Sets the system temperature in Celsius or Fahrenheit.<br>
   - **Step**<br>
-Temperature step when adjusting tip temperature.<br>
+Step for adjusting tip temperature in the main screen.<br>
  - **Big Step**<br>
-Temperature Big step when adjusting tip temperature, click and rotate to activate big step in temperature screen<br>
+Big step for adjusting tip temperature in the main screen, when the encoder is rotated fast.<br>
   - **LVP**<br>
 Adjust Low voltage protection.<br>
   - **GUI Time**<br>
