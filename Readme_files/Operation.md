@@ -330,6 +330,8 @@ This widgets has 3 states than change when clicking on it:<br>
 		- Sampling: Shows the ADC value in real time.<br>
 		- Captured: Shows the captured value and applies it.<br>
 To calibrate the zero offset, you must set this mode before moving to the next step.<br>
+Zero set value is applied system-wide, not per-tip calibrated.<br
+If you already know your tip calibration values, you can adjust only this parameter and save, then restore the tip calibration values.<br>
 	- **Cal 250ºC**<br>
 	- **Cal 400ºC**<br>
 Adjusts the value for 250/400°C. When editing this widget, the power is enabled and the value applied in real time.<br>
