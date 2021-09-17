@@ -189,8 +189,9 @@ Click in the right arrow of the build button (Hammer icon), select Release, then
 
 At some point, the firmware might not fit into the flash when compiling for debugging, as it'll skip optimizations, and use much more space.<br>
 In that case, you'll need to force some optimization level, starting with "Optimize for debug" (Og), and going to higher levels if still being too big (O1,O2,Osize).<br>
-The settings can be changed in project Properties / Build / Settings / MCU GCC Compiler / Optimizations.
-When debugging, it's desirable to completely disable optimizations. If you had to enable any level of global optimizations, you can still selectively disable build optimizations for any function.<br>
+The settings can be changed in project Properties / Build / Settings / MCU GCC Compiler / Optimizations.<br>
+However, when debugging, it's desirable to completely disable optimizations to see the program flow clearly.<br>
+If you had to enable any level of global optimizations, you can still selectively disable build optimizations for any function.<br>
 A line of code can be found at the start of main.h:<br>
 
   __attribute__((optimize("O0")))
