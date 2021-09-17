@@ -187,15 +187,15 @@ Ensure these are present:<br>
 Click in the right arrow of the build button (Hammer icon), select Release, then click on the build button and should build right away.<br>
 <img src="/Readme_files/release.jpg?raw=true">
 
-At some point, the firmware might not fit into the flash when compiling for debugging as  it'll skip optimizations and use a lot more space.<br>
-In that case, you'll need to force some otmization level, starting with "Optimize for debug" (Og), and going to higher levels if still being too big (O1,O2,Osize).<br>
+At some point, the firmware might not fit into the flash when compiling for debugging, as it'll skip optimizations, and use much more space.<br>
+In that case, you'll need to force some optimization level, starting with "Optimize for debug" (Og), and going to higher levels if still being too big (O1,O2,Osize).<br>
 The settings can be changed in project Properties / Build / Settings / MCU GCC Compiler / Optimizations.
-When debugging, it's desirable to completely disable optimizations. If you had to enable any level of global optimizations, you can still selectively disable build optimizations for any functions.<br>
+When debugging, it's desirable to completely disable optimizations. If you had to enable any level of global optimizations, you can still selectively disable build optimizations for any function.<br>
 A line of code can be found at the start of main.h:<br>
 
   __attribute__((optimize("O0")))
 
-Copy that line before the function like this:<br>
+Copy that line before a function to disable optimization, like this:<br>
 
    __attribute__((optimize("O0"))) void ThisFunctionWillNotBeOptimized(...)
    
