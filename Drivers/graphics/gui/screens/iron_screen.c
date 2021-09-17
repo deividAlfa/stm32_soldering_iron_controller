@@ -398,7 +398,7 @@ static void iron_create(screen_t *scr){
   //
   newComboEditable(w, strings[lang].IRON_Heater, &edit, NULL);
   dis=&edit->inputData;
-  dis->reservedChars=5;
+  dis->reservedChars=6;
   dis->number_of_dec=1;
   dis->endString="Ω";
   dis->getData = &getTipImpedance;
