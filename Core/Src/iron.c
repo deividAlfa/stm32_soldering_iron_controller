@@ -82,7 +82,7 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 }
 
 void handleIron(void) {
-  static uint8_t reachedCount = 0;
+  static uint32_t reachedTime = 0;
   CurrentTime = HAL_GetTick();
 
   readColdJunctionSensorTemp_x10(new_reading, mode_Celsius);
@@ -147,7 +147,7 @@ void handleIron(void) {
   }
 
 
-  if(Iron.updatePwm){
+  if(Iron.updatePwm){                                                                       // If pending PWM period update, refresh Iron Pwm_period
     Iron.Pwm_Period = ((systemSettings.Profile.readPeriod+1)/systemSettings.Profile.pwmMul)-1;
   }
 
@@ -172,8 +172,11 @@ void handleIron(void) {
   else if(Iron.Pwm_Out < Iron.Pwm_Max){
     Iron.CurrentIronPower = ((uint32_t)Iron.Pwm_Out*100)/Iron.Pwm_Max;                        // Compute new %
   }
+  else{                                                                                       // Iron.Pwm_Out should never be greater than Iron.Pwm_Max
+    Error_Handler();
+  }
   
-  if(Iron.updatePwm){
+  if(Iron.updatePwm){                                                                         // If pending PWM period update, refresh timer
     Iron.updatePwm=0;
     __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer, Iron.Pwm_Period);
   }
@@ -184,14 +187,17 @@ void handleIron(void) {
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     setTemp = TempConversion(setTemp, mode_Celsius, 0);
   }
-  if( !Iron.temperatureReached && abs(setTemp-last_TIP_C)<5){                                   // Allow +-5° margin
-    if(++reachedCount>5){                                                                     // Get at least 5 stable readings
+  if( !Iron.temperatureReached && abs(setTemp-last_TIP_C)<5){                                 // Allow +-5° margin for noisier stations
+    if(reachedTime==0){
+      reachedTime=CurrentTime;
+    }
+    else if(CurrentTime-reachedTime>1000){                                                    // Wait 1s for stable readings
       temperatureReached( Iron.CurrentSetTemperature);
       Iron.temperatureReached = 1;
     }
   }
   else{
-    reachedCount = 0;
+    reachedTime = 0;
   }
 }
 
