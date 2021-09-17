@@ -116,27 +116,27 @@ These boards can have pretty different readings and tolerances. Even between T12
 So the factory calibration is intentionally set lower than real, to avoid possible overheating problems.<br>
 Once you set the firmware, go to calibration and set there the real temperature measured with the external probe.<br>
 
-### Cold tip not showing ambient temperature
-Usually, a cold tip will display 20-50ºC over the ambient temperature.<br>
-Every amplifier has a small inherent voltage offset at the inputs, and this issue directly caused by that offset.<br>
-The actual offset is very low, 30ºC is about 360uV (0.000360V), so it can't be fixed easily.<br>
-Not a a firmware bug, and it doesn't affect the working temperatures when the station has been calibrated.<br>
-Some firmwares hide this reading and show the ambient temperature instead. For now, this is not a planned feature.<br>
-
 ### Calibration issues<br>
 Ensure to read [Calibration menu](Readme_files/Operation.md#calibration) first!.<br>
 To calibrate, go into Calibration / Start.<br>
 Attach the temperature probe before proceeding!<br>
 If the difference between measured and real is higher than 50ºC, the calibration will be aborted, telling you to go into Calibration / Settings and manually adjust the values.<br>
-The calibration settings menu has 3 calibration steps: 250, 350 and 450ºC.<br>
-When you edit the value, the it will be applied in real time, so be careful!<br>
-The iron will be turned off if no setting is being edited.<br>
-Adjust each value until is close to the target temperature.Repeat for each step and save.<br>
+The calibration settings menu has 3 calibration steps: Zero set, 250 and 400°C.<br>
+When you edit 250/400ºC value, the power will be enabled and the value applied in real time, so be careful!<br>
+The power will be removed when no settings are being edited.<br>
+Adjust each value until it's close to the target temperature. Repeat for each step and save.<br>
 This values are only used by the calibration process, to prevent burning the tip if your board reads too low.<br>
 After adjusting, repeat calibration, this time it should work correctly.<br>
 The calibration results for the current tip can be seen in the tip settings menu.<br>
 In the case you lose, wipe or reset the data, you can go back into that menu and adjust the values based on previous calibration results.<br>
+Zero set can't be manually restored, but it only takes few seconds to adjust it.<br>
 Otherwise, they aren't meant to be another calibration menu! Only for viewing (Ex. reporting calibration results) and making backup/restore of the values.<br>
+
+### Cold tip not showing ambient temperature
+Some amplifiers can introduce a small voltage offset that will translate into the cold tip reading 30-50°C higher than ambient temperature.<br>
+To fix that, enter the [Calibration menu](Readme_files/Operation.md#calibration), insert a completely cold tip, enter Settings, adjust Zero set calibration and save.<br>
+After that, the offset will be compensated and the cold temperature will be normal.<br>
+It's highly recommended to recalibrate after changing this value.<br>
 
 ### Other issues<br>
 After fully reading the documentaion, if you still have problems or doubts, please ask in the EEVblog thread:<br>
@@ -187,8 +187,10 @@ Ensure these are present:<br>
 Click in the right arrow of the build button (Hammer icon), select Release, then click on the build button and should build right away.<br>
 <img src="/Readme_files/release.jpg?raw=true">
 
-Keep in mind that in 64KB devices the flash is almost full and will not fit unless optimization is set to "Optimize for size".<br>
-To debug MCUs where the flash space is unsufficient to store a unoptimized build, you can selectively disable build optimizations.<br>
+At some point, the firmware might not fit into the flash when compiling for debugging as  it'll skip optimizations and use a lot more space.<br>
+In that case, you'll need to force some otmization level, starting with "Optimize for debug" (Og), and going to higher levels if still being too big (O1,O2,Osize).<br>
+The settings can be changed in project Properties / Build / Settings / MCU GCC Compiler / Optimizations.
+When debugging, it's desirable to completely disable optimizations. If you had to enable any level of global optimizations, you can still selectively disable build optimizations for any functions.<br>
 A line of code can be found at the start of main.h:<br>
 
   __attribute__((optimize("O0")))
