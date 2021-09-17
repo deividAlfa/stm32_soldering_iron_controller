@@ -400,7 +400,7 @@ static void iron_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=6;
   dis->number_of_dec=1;
-  dis->endString="Ω";
+  dis->endString="Ω";									// Unicode, needs 2 bytes. So "10.0Ω" string uses 5 bytes
   dis->getData = &getTipImpedance;
   edit->big_step = 10;
   edit->step = 1;
