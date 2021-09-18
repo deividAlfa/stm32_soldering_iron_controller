@@ -129,9 +129,9 @@ Adjust each value until it's close to the target temperature. Repeat for each st
 This values are only used by the calibration process, to prevent burning the tip if your board reads too low.<br>
 After adjusting, repeat calibration, this time it should work correctly.<br>
 The calibration results for the current tip can be seen in the tip settings menu.<br>
+Tip settings menu calibration values aren't meant to be another calibration menu, only for viewing (Ex. reporting calibration results) and for backup/restore purposes.<br>
 In the case you lose, wipe or reset the data, you can go back into that menu and adjust the values based on previous calibration results.<br>
-Zero set can't be manually restored, but it only takes few seconds to adjust it.<br>
-Otherwise, they aren't meant to be another calibration menu! Only for viewing (Ex. reporting calibration results) and making backup/restore of the values.<br>
+Zero calibration can't be manually restored, but it only takes few seconds to adjust.<br>
 
 ### Cold tip not showing ambient temperature
 Some amplifiers can introduce a small voltage offset that will translate into the cold tip reading 30-50°C higher than ambient temperature.<br>
