@@ -68,6 +68,7 @@ There are several compatible/cloned boards in the market that will work fine wit
 
 First, make sure to read the [Operating instructions](Readme_files/Operation.md)!<br>
 
+ 
 ### Changelog<br>
 You can check the [commit history](https://github.com/deividAlfa/stm32_soldering_iron_controller/commits/master) to see what have been changed between builds.
 
@@ -140,7 +141,11 @@ It's highly recommended to recalibrate after changing this value.<br>
 
 ### Other issues<br>
 After fully reading the documentaion, if you still have problems or doubts, please ask in the EEVblog thread:<br>
-https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle<br>
+https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle.<br>
+
+### Donations
+If you liked the firmware, you can send me a beer here: paypal.me/davidalfistas<br>
+(Gin tonics, coffees and steaks are also accepted 🙂 )<br>
 
 ---
 
