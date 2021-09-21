@@ -248,11 +248,10 @@ void updateScreenSaver(void){
     screenSaver.timer=current_time;
     screenSaver.x+=screenSaver.xAdd;
     screenSaver.y+=screenSaver.yAdd;
-    //uint16_t _x = (screenSaver.x*5)/2;
-    if(screenSaver.x<1 || screenSaver.x>(OledWidth-2)){
+    if(screenSaver.x<-(ScrSaverXBM[0]+10) || screenSaver.x>(OledWidth+10)){
       screenSaver.xAdd = -screenSaver.xAdd;
     }
-    if(screenSaver.y<1 || screenSaver.y>(OledHeight-2)){
+    if(screenSaver.y<-(ScrSaverXBM[1]+10) || screenSaver.y>(OledHeight+10)){
       screenSaver.yAdd = -screenSaver.yAdd;
     }
     screenSaver.update=1;
@@ -607,7 +606,7 @@ static uint8_t  drawScreenSaver(uint8_t *refresh){
   }
   screenSaver.update=0;
   //uint16_t _x=(screenSaver.x*5)/2;
-  if(screenSaver.x<OledWidth || screenSaver.y<OledHeight){
+  if(screenSaver.x>(-ScrSaverXBM[0]) ||screenSaver.x<OledWidth || screenSaver.y>(-ScrSaverXBM[1]) || screenSaver.y<OledHeight ){
     u8g2_SetDrawColor(&u8g2, WHITE);
     u8g2_DrawXBMP(&u8g2, screenSaver.x, screenSaver.y, ScrSaverXBM[0], ScrSaverXBM[1], &ScrSaverXBM[2]);
     return 1;
