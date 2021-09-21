@@ -563,8 +563,10 @@ void FillBuffer(bool color, bool mode){
   else{ fillVal=0; }                          // Fill color = black
 
   if(mode==fill_dma){                         // use DMA
-     HAL_DMA_Start(oled.fillDMA,(uint32_t)&fillVal,(uint32_t)oled.ptr,sizeof(oled.buffer)/sizeof(uint32_t));
-     HAL_DMA_PollForTransfer(oled.fillDMA, HAL_DMA_FULL_TRANSFER, 3000);
+     if(HAL_DMA_Start(oled.fillDMA,(uint32_t)&fillVal,(uint32_t)oled.ptr,sizeof(oled.buffer)/sizeof(uint32_t))!=HAL_OK){
+	    	Error_Handler();
+     }
+     HAL_DMA_PollForTransfer(oled.fillDMA, HAL_DMA_FULL_TRANSFER, 5);
   }
   else{                                       // use software
     uint32_t* bf=(uint32_t*)oled.ptr;         // Pointer to oled buffer using 32bit data for faster operation
@@ -654,10 +656,8 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 #endif
 
   if(device == oled.device){
-    if(oled.device->hdmatx->State!=HAL_DMA_STATE_READY){
-      if(HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 10)!=HAL_OK){          //Wait for DMA to finish
-        Error_Handler();
-      }
+    if(HAL_DMA_GetState(oled.device->hdmatx)!=HAL_DMA_STATE_READY){           // If DMA busy
+      HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 10);
     }
     if(oled.row>7){
 
@@ -720,7 +720,10 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
         oled.status=oled_busy;
         try--;
       }
-    }    
+    }
+    if(try==0){
+      Error_Handler();
+    }
     if(HAL_I2C_Mem_Write_DMA(oled.device, OLED_ADDRESS, 0x40, 1, oled.ptr+(128*oled.row), 128)!=HAL_OK){
       Error_Handler();
     }
