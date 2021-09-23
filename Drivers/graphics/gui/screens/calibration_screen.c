@@ -169,9 +169,6 @@ static void setCalState(state_t s) {
     Screen_calibration_start.current_widget=Widget_Cal_Button;
     ((button_widget_t*)Widget_Cal_Button->content)->selectable.previous_state=widget_selected;
     ((button_widget_t*)Widget_Cal_Button->content)->selectable.state=widget_selected;
-
-    Widget_Cal_Button->width = 60;
-    Widget_Cal_Button->posX = 67;
     measuredTemp = state_temps[(int)s]/10;
   }
   else if(current_state <= cal_input_400) {
@@ -407,8 +404,8 @@ static void Cal_Start_create(screen_t *scr) {
 
   newWidget(&w,widget_button,scr);
   Widget_Cal_Button=w;
-  w->width = 60;
-  w->posX = (OledWidth-1) - w->width;
+  w->width = 65;
+  w->posX = OledWidth - w->width - 1;
   w->posY = 48;
   ((button_widget_t*)w->content)->displayString=strings[lang]._CANCEL;
   ((button_widget_t*)w->content)->selectable.tab=0;

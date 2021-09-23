@@ -114,7 +114,7 @@ static void reset_confirmation_init(screen_t *scr){
 static void reset_confirmation_create(screen_t *scr){
   widget_t* w;
 
-  //  [ Name Save Button Widget ]
+  //  [ RESET Button Widget ]
   //
   newWidget(&w,widget_button,scr);
   ((button_widget_t*)w->content)->displayString=strings[lang]._RESET;
@@ -125,7 +125,7 @@ static void reset_confirmation_create(screen_t *scr){
   w->posY = 48;
   w->width = 60;
 
-  //  [ Name Back Button Widget ]
+  //  [ CANCEL Button Widget ]
   //
   newWidget(&w,widget_button,&Screen_reset_confirmation);
   ((button_widget_t*)w->content)->displayString=strings[lang]._CANCEL;
@@ -133,8 +133,8 @@ static void reset_confirmation_create(screen_t *scr){
   ((button_widget_t*)w->content)->action = &cancelReset;
   ((button_widget_t*)w->content)->font= u8g2_font_menu;
   w->posY = 48;
-  w->width = 60;
-  w->posX = (OledWidth-1) - w->width;
+  w->width = 65;
+  w->posX = OledWidth - w->width -1;
 }
 
 
