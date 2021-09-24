@@ -74,7 +74,7 @@ You can check the [commit history](https://github.com/deividAlfa/stm32_soldering
 
 ### Backing up the original firmware
 The original firmwares are available in BOARDS folder.<br>
-Some KSGER firmwares require an activation code, can be generated [here](http://t12.omegahg.com/keygen.htm), or [here \(mirror\)](https://raw.githubusercontent.com/deividAlfa/stm32_soldering_iron_controller/BOARDS/KSGER/Original FW/Gen/keygen.htm).<br>
+Some KSGER firmwares require an activation code, can be generated [here](http://t12.omegahg.com/keygen.htm), or [here](https://raw.githubusercontent.com/deividAlfa/stm32_soldering_iron_controller/BOARDS/KSGER/Original FW/Gen/keygen.htm).<br>
 
 Be warned, usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.<br> 
 The simplest way to not loose the original FW is actually to buy a new MCU, replace it, and store the original MCU in a safe place.<br>
