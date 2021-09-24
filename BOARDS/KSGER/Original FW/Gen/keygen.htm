@@ -1,0 +1,152 @@
+
+<!-- saved from url=(0033)http://t12.omegahg.com/keygen.htm -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><script type="text/javascript">
+  function crc16tbl(poly = 0x1021) {
+    var tbl = new Array(256)
+    for (var x = 0; x < 256; x++) {
+      var w = x << 8
+      for (var i = 0; i < 8; i++) {
+        w = (w & 0x8000) ? ((w << 1) ^ poly) : (w << 1)
+      }
+      tbl[x] = w & 0xffff
+    }
+    return tbl
+  }
+
+  function crc16tbl_permutate(tbl) {
+    var permutation = [
+       1,  2,  3,  4, 31,  5,  6,  7,
+       8,  9, 10, 11, 12,  0, 13, 25,
+      14, 15, 16, 17, 18, 19, 20, 21,
+      22, 23, 24, 26, 27, 28, 29, 30,
+    ]
+
+    var tblp = new Array()
+    for (i of permutation) {
+      var idx = i << 3
+      Array.prototype.push.apply(tblp, tbl.slice(idx, idx + 8))
+    }
+    return tblp
+  }
+
+  function crc16(tbl, data, init = 0) {
+    var crc = init
+    for (b of data) {
+      crc = ((crc << 8) & 0xFF00) ^ (tbl[(crc >> 8) ^ (b & 0xFF)] & 0xFFFF)
+    }
+    return crc
+  }
+
+  function stripNonHex(str) {
+    return str.replace(/[^0-9a-fA-F]/gi, '')
+  }
+  
+  function hexStringToByte(str) {
+    var a = []
+    for (var i = 0, len = str.length; i < len; i+=2) {
+      a.push(parseInt(str.substr(i,2),16))
+    }  
+    return new Uint8Array(a)
+  }
+
+  function hwordPad(s) {
+    s = ('000' + s.toUpperCase())
+    return s.substring(s.length - 4)
+  }
+
+  function hwordToStr(hw) {
+    return hwordPad(hw.toString(16))
+  }  
+
+  function convertID()
+  {
+    var idmcu_v = document.keygen.idmcu.value
+    document.getElementById('idmcuError').innerHTML = ''
+
+    var idmcu = stripNonHex(idmcu_v)
+    idmcu = hexStringToByte(idmcu)
+    if (12 != idmcu.length) {
+      document.getElementById('idmcuError').innerHTML = 'MCU ID must be 96-bit (12-bytes) HEX number'
+      return
+    }
+
+    var tbl = crc16tbl()
+    var id1 = crc16(tbl, idmcu.subarray(0, 6))
+    var id2 = crc16(tbl, idmcu.subarray(6, 12))
+
+    document.keygen.id1.value = hwordToStr(id1)
+    document.keygen.id2.value = hwordToStr(id2)
+    document.getElementById('idError').innerHTML = ''
+  }
+
+  function genCode()
+  {
+    var id1_v = document.keygen.id1.value
+    var id2_v = document.keygen.id2.value
+
+    var id1 = parseInt(id1_v, 16)
+    var id2 = parseInt(id2_v, 16)
+    var error = ''
+    if (hwordToStr(id1) != hwordPad(id1_v)) {
+      error = 'ID1'
+    } else
+    if (hwordToStr(id2) != hwordPad(id2_v)) {
+      error = 'ID2'
+    }
+    if (error.length) {
+      error += ' must be 16-bit (2-bytes) HEX number'
+    }
+    document.getElementById('idError').innerHTML = error
+    if (error.length) {
+      return 
+    }
+    
+    var glyph_800F4BB = '00-04-04-44-c4-4f-44-44-c4-24-24-2f-b4-24-04-04-00-40-44-24-24-15-0c-04-fe-04-0c-15-24-24-44-40'
+    var glyph_800F4FB = '00-10-60-02-8c-00-00-fe-92-92-92-92-92-fe-00-00-00-04-04-7e-01-40-7e-42-42-7e-42-7e-42-42-7e-40'
+    var manyXorValue = 0x9AEF
+    var xorCodeCrc16 = 0x5E31
+
+    var tbl = crc16tbl()
+    var tblp = crc16tbl_permutate(tbl)
+    var id = id1 + (id2 << 16)
+    var code = new Uint8Array([id, id>>8, id>>16, id>>24])
+
+    var glyph1 = hexStringToByte(stripNonHex(glyph_800F4BB))
+    var glyph2 = hexStringToByte(stripNonHex(glyph_800F4FB))
+    var crcInit = manyXorValue ^ xorCodeCrc16
+
+    glyph1.set(code, glyph1.length - code.length)
+    glyph2.set(code, glyph2.length - code.length)
+
+    var rg1 = crc16(tblp, glyph1, crcInit)
+    var rg2 = crc16(tblp, glyph2, crcInit)
+
+    document.keygen.rg1.value = hwordToStr(rg1)
+    document.keygen.rg2.value = hwordToStr(rg2)
+  }
+</script>
+
+</head><body><form name="keygen">
+  <fieldset>
+    <legend>Keygen for v2.1s:</legend>
+    MCU ID:<input type="text" name="idmcu" size="36" value="56-FF-76-06-51-80-48-54-38-18-10-87"><input type="button" value="Convert to ID1 &amp; ID2" onclick="convertID()">
+    <br>
+    <span id="idmcuError" style="color:#FF0000"></span>
+    <br>
+
+    <br>
+    ID1:<input type="text" name="id1" size="4"><br>
+    ID2:<input type="text" name="id2" size="4"><br>
+    <span id="idError" style="color:#FF0000">ID1 must be 16-bit (2-bytes) HEX number</span>
+    <br>
+    <input type="button" value="Generate" onclick="genCode()">
+    <br><br>
+
+    RG1:<input type="text" name="rg1" size="4" readonly=""><br>
+    RG2:<input type="text" name="rg2" size="4" readonly="">
+    <br><br>
+
+    <a href="http://t12.omegahg.com/keygen.py" download="">Python version</a><br>
+    screwer@gmail.com
+  </fieldset>
+</form></body></html>
