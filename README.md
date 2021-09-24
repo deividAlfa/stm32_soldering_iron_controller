@@ -73,8 +73,10 @@ First, make sure to read the [Operating instructions](Readme_files/Operation.md)
 You can check the [commit history](https://github.com/deividAlfa/stm32_soldering_iron_controller/commits/master) to see what have been changed between builds.
 
 ### Backing up the original firmware
-Be warned, usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.<br>
-For KSGER boards, some can be found over internet.<br>
+The original firmwares are available in BOARDS folder.<br>
+Some KSGER firmwares require an activation code, can be generated (here)[http://t12.omegahg.com/keygen.htm], or (here)[https://raw.githubusercontent.com/deividAlfa/stm32_soldering_iron_controller/BOARDS/KSGER/Original FW/Gen/keygen.htm].<br>
+
+Be warned, usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.<br> 
 The simplest way to not loose the original FW is actually to buy a new MCU, replace it, and store the original MCU in a safe place.<br>
 Any difference in the pinout will require firmware tuning, although one of the main proposits of this firmware is easing that.<br>
 There are some hacks / vulnerabilities that can be used to backup protected firmware, more details here:<br>
