@@ -48,9 +48,8 @@ Currently supported controllers (Click to download the latest build):<br>
 * [**Quicko T12-072**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/Quicko/STM32F072/STM32SolderingStation.bin): For STM32F072 variant.
 * [**Quicko T12-103**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/Quicko/STM32F103/STM32SolderingStation.bin): For STM32F103 variant.
 * [**KSGER v1.5**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/KSGER/%5Bv1.5%5D/STM32SolderingStation.bin): Profile for STM32F103 (There are no other known CPUs used in this board).
-* [**KSGER v2.x**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/KSGER/%5Bv2%5D/STM32SolderingStation.bin): Profile compatible with all STM32F101/2/3xx models.
+* [**KSGER v2.x**, **JCD T12**, **QUECOO T12-955**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/KSGER/%5Bv2%5D/STM32SolderingStation.bin): Profile compatible with all STM32F101/2/3xx models.
 * [**KSGER v3.x**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/KSGER/%5Bv3%5D/STM32SolderingStation.bin): Profile compatible with all STM32F101/2/3xx models.
-* [**JCD T12**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/KSGER/%5Bv2%5D/STM32SolderingStation.bin): Different board layout, but it's the same as the KSGER v2.
 
 
 Actually, the easiest way to quickly identify your KGSER version is by looking at the Oled screen connection:<br>
