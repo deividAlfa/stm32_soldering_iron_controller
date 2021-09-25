@@ -143,7 +143,7 @@ After that, the offset will be compensated and the cold temperature will be norm
 It's highly recommended to recalibrate after changing this value.<br>
 
 ### Other issues<br>
-After fully reading the documentaion, if you still have problems or doubts, please ask in the EEVblog thread:<br>
+After fully reading the documentation, if you still have problems or doubts, please ask in the EEVblog thread:<br>
 https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle.<br>
 
 ### Donations
