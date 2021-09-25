@@ -73,8 +73,8 @@ First, make sure to read the [Operating instructions](Readme_files/Operation.md)
 You can check the [commit history](https://github.com/deividAlfa/stm32_soldering_iron_controller/commits/master) to see what have been changed between builds.
 
 ### Backing up the original firmware
-The original firmwares are available here: [[KSGER]](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS/KSGER/Original_FW)  [[Quicko]](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS/Quicko/Original_FW)<br>
-Some KSGER firmwares require an activation code which can be generated [[HERE]](http://t12.omegahg.com/keygen.htm)  [[Alternative link]](https://raw.githack.com/deividAlfa/stm32_soldering_iron_controller/master/[BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS)/KSGER/Original_FW/Gen/gen.htm)<br>
+The original firmwares are available [[HERE]](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/Original_FW)<br>
+Some KSGER firmwares require an activation code which can be generated [[HERE]](http://t12.omegahg.com/keygen.htm)  [[Alternative link]](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/Original_FW/KSGER/Gen/gen.htm)<br>
 
 Be warned, usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.<br> 
 The simplest way to not loose the original FW is actually to buy a new MCU, replace it, and store the original MCU in a safe place.<br>
