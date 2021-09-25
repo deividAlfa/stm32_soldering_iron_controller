@@ -44,12 +44,13 @@ The actual requirements are 10KB RAM and 64KB **(\*)** flash.<br>
 **(\*)** ST-Link checks the written data, and the firmware uses checksums to protect the settings, any error will be detected.<br>
 
 The [BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.<br>
-Current working controller:<br>
-* Quicko T12 [STABLE]: Profiles for STM32F072 and STM32F103.
-* JCD T12    [STABLE]: Different board layout, but it's 100% the same as the KSGER v2. Use that firmware.
-* KSGER v1.5 [STABLE]: Profile for STM32F103 (There are no other known CPUs used in this board).
-* KSGER v2.x [STABLE]: Profile compatible with all STM32F101/2/3xx. Use 101C8 profile.
-* KSGER v3.x [STABLE]: Profile compatible with all STM32F101/2/3xx. Use 101C8 profile.
+Current working controller (Click to download the latest build):<br>
+* [[Quicko T12]](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/BOARDS/Quicko/STM32F103/STM32SolderingStation.bin): For STM32F103 variant.
+* [[Quicko T12]](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/BOARDS/Quicko/STM32F072/STM32SolderingStation.bin): For STM32F072 variant.
+* [[JCD T12]](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/BOARDS/KSGER/%5Bv2%5D/STM32SolderingStation.bin): Different board layout, but it's the same as the KSGER v2.
+* [[KSGER v1.5]](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/BOARDS/KSGER/%5Bv1.5%5D/STM32SolderingStation.bin): Profile for STM32F103 (There are no other known CPUs used in this board).
+* [[KSGER v2.x]](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/BOARDS/KSGER/%5Bv2%5D/STM32SolderingStation.bin): Profile compatible with all STM32F101/2/3xx models.
+* [[KSGER v3.x]](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/BOARDS/KSGER/%5Bv3%5D/STM32SolderingStation.bin): Profile compatible with all STM32F101/2/3xx models.
 
 
 Actually, the easiest way to quickly identify your KGSER version is by looking at the Oled screen connection:<br>
