@@ -147,7 +147,7 @@ After fully reading the documentaion, if you still have problems or doubts, plea
 https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle.<br>
 
 ### Donations
-If you liked the firmware, you can send me a beer with [PAYPAL](paypal.me/davidalfistas)<br>
+If you liked the firmware, you can send me a beer with [PAYPAL](https://www.paypal.me/davidalfistas)<br>
 (Gin tonics, coffees and steaks are also accepted 🙂 )<br>
 
 ---
