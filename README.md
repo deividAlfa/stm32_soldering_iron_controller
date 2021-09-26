@@ -51,6 +51,7 @@ Currently supported controllers (Click to download the latest build):<br>
 * [**KSGER v2.x**, **JCD T12**, **QUECOO T12-955**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/KSGER/%5Bv2%5D/STM32SolderingStation.bin): Profile compatible with all STM32F101/2/3xx models.
 * [**KSGER v3.x**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/KSGER/%5Bv3%5D/STM32SolderingStation.bin): Profile compatible with all STM32F101/2/3xx models.
 
+For KSGER v2/v2: As long as you choose the correct firmware, any STM32 variant (101/102/103/C8/R8/CB/RB) will work.<br>
 
 Actually, the easiest way to quickly identify your KGSER version is by looking at the Oled screen connection:<br>
 - **4 pin** (I2C) = v2.x<br>
