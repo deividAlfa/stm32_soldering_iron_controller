@@ -7,7 +7,7 @@ REM ##################  [PROFILE LIST]  ##################
 Rem Sort by MCU type, compiling same cpu profiles together improves the speed, as the compiler cache is kept
 
 set MODELS=    "BOARDS\KSGER\[v1.5]\STM32F103";^
-               "BOARDS\Quicko\STM32F103":^
+               "BOARDS\Quicko\STM32F103";^
                "BOARDS\KSGER\[v2]\STM32F101";^
                "BOARDS\KSGER\[v3]\STM32F101";^
                "BOARDS\Quicko\STM32F072"
