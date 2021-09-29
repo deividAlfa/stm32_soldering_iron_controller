@@ -463,7 +463,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_IRON = "LÖTKOLBEN",
       .settings_SYSTEM = "SYSTEM",
       .settings_DEBUG = "DEBUG",
-      .settings_EDIT_TIPS = "LÖTSPITZEN EDIT.",
+      .settings_EDIT_TIPS = "LÖTSPITZEN EDIT",
       .settings_CALIBRATION = "KALIBRIERUNG",
       .settings_EXIT = "ENDE",
 
