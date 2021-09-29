@@ -159,7 +159,7 @@ static void * main_screen_getIronTemp() {
       if(systemSettings.settings.tempUnit==mode_Farenheit){
         threshold = 20;
       }
-      if(Iron.temperatureReached && abs(mainScr.lastTip-Iron.CurrentSetTemperature<threshold)){                       // Lock numeric display if within limits
+      if(Iron.temperatureReached && abs(mainScr.lastTip-Iron.CurrentSetTemperature)<threshold){                       // Lock numeric display if within limits
         mainScr.lastTip = Iron.CurrentSetTemperature;
       }
     }
