@@ -168,8 +168,8 @@ The source is stripped from ST own libraries and unnecesary stuff, only includes
 CubeMX will add the STM32 and CMSIS libraries automatically after a code generation.<br>
 Open the [BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder, find your board (or take any to work with) and copy all the contents to the root of the project.<br>
 Now you're ready to open STM32CUBE IDE and import the project.<br>
-Open the .ioc file,  make any small change, ex. take an unused pin and set is as GPIO_Input, then revert it to reset state.<br>
-This will trigger the code generation. Close saving changes and the code will be generated. And it's ready for building.<br>
+Open the .ioc file, (CubeMX will open), then click on generate code <img src="/Readme_files/gen.png?raw=true"><br>
+After this,it'll be ready for compiling.<br>
 CubeMX should care of adding the new folders to the search path, if it fails follow this steps.<br>
 Right click on project -> Properties -> C/C++ Build -> Settings ->  Tool Settings -> MCU GCC Compiler -> Include paths<br>
 On the upper menu, Configuration, Select [All configurations]<br>
