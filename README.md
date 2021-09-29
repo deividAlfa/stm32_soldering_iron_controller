@@ -166,29 +166,33 @@ As long as the GPIO names are called the same way, no further changes are needed
 If you want to build your own, clone or download the source.<br>
 The source is stripped from ST own libraries and unnecesary stuff, only includes the very basic code owning to the project.<br>
 CubeMX will add the STM32 and CMSIS libraries automatically after a code generation.<br>
-Open the [BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder, find your board (or take any to work with) and copy all the contents to the root of the project.<br>
-Now you're ready to open STM32CUBE IDE and import the project.<br>
-Open the .ioc file, (CubeMX will open), then click on generate code <img src="/Readme_files/gen.png?raw=true"><br>
-After this,it'll be ready for compiling.<br>
-CubeMX should care of adding the new folders to the search path, if it fails follow this steps.<br>
-Right click on project -> Properties -> C/C++ Build -> Settings ->  Tool Settings -> MCU GCC Compiler -> Include paths<br>
-On the upper menu, Configuration, Select [All configurations]<br>
-Click on Add... Select Workspace and select these folder while holding Control key:<br>
-Ensure these are present:<br>
+Open the [BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder, find your board (or take any to work with) and copy all the contents to the root of the project.<br><br>
+Open STM32CUBE IDE, click on Import/Existing project and select the project folder.<br>
+You'll see various projects. That's because of the BOARDS folder, ignore them and select only the project in the root of the folder.<br>
+After that, double-click on [STM32SolderingStation.ioc] file, CubeMX will open, then click on generate code:<br>
+<img src="/Readme_files/gen.png?raw=true"><br><br>
+After this, it'll be ready for compiling, click in the right arrow of the build button (Hammer icon) and select [Release]:<br>
+<img src="/Readme_files/release.jpg?raw=true"><br><br>
+After a while you'll have the compiled bin/hex files inside Release folder.<br><br>
+If the build fails with files no found or undeclared functions errors, check the Include search path:<br>
+Right click on project -> [Properties] -> [C/C++ Build] -> [Settings] ->  [Tool Settings] -> [MCU GCC Compiler] -> [Include paths]<br>
+Select [All configurations] in [Configuration] dropdown menu.<br>
+Now ensure these are present:<br>
 
-      /Core/Inc
-      /Core/Src
-      /Drivers/generalIO
-      /Drivers/graphics
-      /Drivers/graphics/gui
-      /Drivers/graphics/gui/screens    
-      /Drivers/graphics/u8g2
-      /Drivers/STM32Fxxx_HAL_Driver/Inc
-      /Drivers/STM32Fxxx_HAL_Driver/Inc/Legacy
-      /Drivers/CMSIS/Device/ST/STM32Fxxx/Include
-      /Drivers/CMSIS/Include
-      
-(STM32Fxxx matches your current mcu family, ex. STM32F0xx, STM32F1xx)<br>
+      /Core/Inc<br>
+      /Core/Src<br>
+      /Drivers/generalIO<br>
+      /Drivers/graphics<br>
+      /Drivers/graphics/gui<br>
+      /Drivers/graphics/gui/screens<br>
+      /Drivers/graphics/u8g2<br>
+      /Drivers/STM32Fxxx_HAL_Driver/Inc<br>
+      /Drivers/STM32Fxxx_HAL_Driver/Inc/Legacy<br>
+      /Drivers/CMSIS/Device/ST/STM32Fxxx/Include<br>
+      /Drivers/CMSIS/Include<br>
+(STM32Fxxx matches your current mcu family, ex. STM32F0xx, STM32F1xx)<br><br>
+If any is missing, click on Add... Select Workspace and select the missing ones.<br>
+You can make multiple selection  while holding the Control key:<br>      
 <img src="/Readme_files/Includes.jpg?raw=true">
 
 
