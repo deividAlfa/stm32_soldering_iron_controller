@@ -18,8 +18,59 @@
 #define __BASE_FILE__ "settings.c"
 #endif
 
+const settings_t defaultSettings = {
+  .version           = SETTINGS_VERSION,
+  .contrast          = 255,
+  .dim_mode          = dim_sleep,
+  .dim_Timeout       = 10000,                // ms
+  .dim_inSleep       = enable,
+  .OledOffset        = OLED_OFFSET,
+  .guiUpdateDelay    = 200,                  //ms
+  .guiTempDenoise    = 5,                    // ±5°C
+  .tempUnit          = mode_Celsius,
+  .tempStep          = 5,                    // 5º steps
+  .tempBigStep       = 20,                   // 20º big steps
+  .activeDetection   = true,
+  .saveSettingsDelay = 5,                    // 5s
+  .lvp               = 110,                  // 11.0V Low voltage
+  .currentProfile    = profile_None,
+  .initMode          = mode_run,
+  .buzzerMode        = disable,
+  .buttonWakeMode    = wake_all,
+  .shakeWakeMode     = wake_all,
+  .shakeFiltering    = enable,
+  .WakeInputMode     = mode_shake,
+  .StandMode         = mode_sleep,
+  .EncoderMode       = RE_Mode_One,
+  .debugEnabled      = disable,
+  .language          = lang_english,
+  .state             = initialized,
+
+  #ifdef USE_NTC
+  .enableNTC         = 1,
+    #ifdef PULLUP
+    .Pullup            = 1,
+    #elif defined PULLDOWN
+    .Pullup            = 0,
+    #else
+    #error NO PULL MODE DEFINED
+    #endif
+  .NTC_detect        = 0,
+  .NTC_detect_high_res = 1000,   // 100.0K
+  .NTC_detect_high_res_beta = NTC_BETA,
+  .NTC_detect_low_res = 100,     // 10.0K
+  .NTC_detect_low_res_beta = NTC_BETA,     // 10.0K
+  .Pull_res          = PULL_RES/100,
+  .NTC_res           = NTC_RES/100,
+  .NTC_Beta          = NTC_BETA,
+  #else
+  .enableNTC         = 0,
+  #endif
+};
+
+__attribute__((section(".settings"))) flashSettings_t flashSettings;
 systemSettings_t systemSettings;
-flashSettings_t* flashSettings = (flashSettings_t*)FLASH_ADDR;
+
 void checksumError(uint8_t mode);
 void Flash_error(void);
 void Button_reset(void);
@@ -119,11 +170,14 @@ void saveSettings(uint8_t mode){
   #endif
 
   uint32_t error=0;
+  uint32_t *dest = (uint32_t*)&flashSettings;
   uint8_t profile = systemSettings.settings.currentProfile;
-
   flashSettings_t *flashBuffer=_malloc(sizeof(flashSettings_t));
+  uint32_t *src = &*(uint32_t*)flashBuffer;
+
   if(!flashBuffer){ Error_Handler(); }
-  memcpy(flashBuffer,flashSettings,sizeof(flashSettings_t));
+
+  *flashBuffer = flashSettings;                                     // Backup current flash data before erasing
 
   while(ADC_Status != ADC_Idle);
   __disable_irq();
@@ -131,7 +185,7 @@ void saveSettings(uint8_t mode){
   configurePWMpin(output_Low);
   __enable_irq();
 
-  if( (systemSettings.settings.NotInitialized!=initialized) || (systemSettings.Profile.NotInitialized!=initialized) ){
+  if( (systemSettings.settings.state!=initialized) || (systemSettings.Profile.state!=initialized) ){
     Error_Handler();
   }
 
@@ -147,7 +201,7 @@ void saveSettings(uint8_t mode){
   else{
     mode = wipeProfiles;
     for(uint8_t x=0;x<ProfileSize;x++){
-      flashBuffer->Profile[x].NotInitialized = 0xFF;
+      flashBuffer->Profile[x].state = 0xFF;
       flashBuffer->ProfileChecksum[x] = 0xFFFFFFFF;
       memset(&flashBuffer->Profile[x],0xFF,sizeof(profile_t));
     }
@@ -157,7 +211,7 @@ void saveSettings(uint8_t mode){
 
   FLASH_EraseInitTypeDef erase;
   erase.NbPages = (1024*StoreSize)/FLASH_PAGE_SIZE;
-  erase.PageAddress = FLASH_ADDR;
+  erase.PageAddress = (uint32_t)dest;
   erase.TypeErase = FLASH_TYPEERASE_PAGES;
 
   if((HAL_FLASHEx_Erase(&erase, &error)!=HAL_OK) || (error!=0xFFFFFFFF)){
@@ -167,28 +221,26 @@ void saveSettings(uint8_t mode){
   __enable_irq();
 
   // Ensure flash was erased
-  for (uint16_t i = 0; i < sizeof(flashSettings_t)/2; i++) {
-    if( *(uint16_t*)(FLASH_ADDR+(i*2)) != 0xFFFF){
+  for (uint16_t i = 0; i < sizeof(flashSettings_t)/(sizeof(uint32_t)); i++) {
+    if( *dest++ != 0xFFFFFFFF){
       Flash_error();
     }
   }
+  dest = (uint32_t*)&flashSettings;
 
   __disable_irq();
   HAL_FLASH_Unlock();
   __enable_irq();
 
-  uint32_t dest = (uint32_t)flashSettings;
-  uint16_t *data = (uint16_t*)flashBuffer;
-
   // Store settings
   // written = number of 16-bit values written
-  for(uint16_t written=0; written < (sizeof(flashSettings_t)/2); written++){
+  for(uint16_t written=0; written < (sizeof(flashSettings_t)/4); written++){
     __disable_irq();
-    if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, dest, *data ) != HAL_OK){
+    if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)dest, *src ) != HAL_OK){
       Flash_error();
     }
-    dest += 2;                // address +2 because we write 16 bit data
-    data++;                   // +1 because it's 16Bit pointer
+    dest++;                // increase pointers
+    src++;
     __enable_irq();
   }
 
@@ -197,16 +249,16 @@ void saveSettings(uint8_t mode){
   __enable_irq();
 
   if(mode==keepProfiles){
-    uint32_t ProfileFlash  = ChecksumProfile(&flashSettings->Profile[profile]);
+    uint32_t ProfileFlash  = ChecksumProfile(&flashSettings.Profile[profile]);
     uint32_t ProfileRam    = ChecksumProfile(&systemSettings.Profile);
 
-    if((ProfileFlash != ProfileRam) ||  (flashSettings->settings.currentProfile != profile)){
+    if((ProfileFlash != ProfileRam) ||  (flashSettings.settings.currentProfile != profile)){
       Flash_error();
     }
   }
 
   // Check flash and system settings have same checksum
-  uint32_t SettingsFlash  = ChecksumSettings(&flashSettings->settings);
+  uint32_t SettingsFlash  = ChecksumSettings(&flashSettings.settings);
   uint32_t SettingsRam  = ChecksumSettings(&systemSettings.settings);
   if(SettingsFlash != SettingsRam){
     Flash_error();
@@ -226,16 +278,15 @@ void restoreSettings() {
   return;
 #endif
 
-  if(flashSettings->settings.NotInitialized != initialized){
+  if(flashSettings.settings.state != initialized){
     resetSystemSettings();
     saveSettings(wipeProfiles);
   }
   else{
     Button_reset();
   }
-
-  memcpy(&systemSettings.settings,&flashSettings->settings,sizeof(settings_t));
-  systemSettings.settingsChecksum = flashSettings->settingsChecksum;
+  systemSettings.settings = flashSettings.settings;
+  systemSettings.settingsChecksum = flashSettings.settingsChecksum;
 
   if(systemSettings.settings.version!=SETTINGS_VERSION){    // Silent reset
     resetSystemSettings();
@@ -264,53 +315,7 @@ uint32_t ChecksumProfile(profile_t* profile){
 
 void resetSystemSettings(void) {
   __disable_irq();
-  systemSettings.settings.version           = SETTINGS_VERSION;
-  systemSettings.settings.contrast          = 255;
-  systemSettings.settings.dim_mode          = dim_sleep;
-  systemSettings.settings.dim_Timeout       = 10000;                // ms
-  systemSettings.settings.dim_inSleep       = enable;
-  systemSettings.settings.OledOffset        = OLED_OFFSET;
-  systemSettings.settings.guiUpdateDelay    = 200;                  //ms
-  systemSettings.settings.tempUnit          = mode_Celsius;
-  systemSettings.settings.tempStep          = 5;                    // 5º steps
-  systemSettings.settings.tempBigStep       = 20;                   // 20º big steps
-  systemSettings.settings.activeDetection   = true;
-  systemSettings.settings.saveSettingsDelay = 5;                    // 5s
-  systemSettings.settings.lvp               = 110;                  // 11.0V Low voltage
-  systemSettings.settings.currentProfile    = profile_None;
-  systemSettings.settings.initMode          = mode_run;
-  systemSettings.settings.buzzerMode        = disable;
-  systemSettings.settings.buttonWakeMode    = wake_all;
-  systemSettings.settings.shakeWakeMode     = wake_all;
-  systemSettings.settings.shakeFiltering    = enable;
-  systemSettings.settings.WakeInputMode     = mode_shake;
-  systemSettings.settings.StandMode         = mode_sleep;
-  systemSettings.settings.EncoderMode       = RE_Mode_One;
-  systemSettings.settings.debugEnabled      = disable;
-  systemSettings.settings.language          = lang_english;
-  systemSettings.settings.NotInitialized    = initialized;
-
-  #ifdef USE_NTC
-  systemSettings.settings.enableNTC         = 1;
-  #ifdef PULLUP
-  systemSettings.settings.Pullup            = 1;
-  #elif defined PULLDOWN
-  systemSettings.settings.Pullup            = 0;
-  #else
-  #error NO PULL MODE DEFINED
-  #endif
-  systemSettings.settings.NTC_detect        = 0;
-  systemSettings.settings.NTC_detect_high_res = 1000;   // 100.0K
-  systemSettings.settings.NTC_detect_high_res_beta = NTC_BETA;
-  systemSettings.settings.NTC_detect_low_res = 100;     // 10.0K
-  systemSettings.settings.NTC_detect_low_res_beta = NTC_BETA;     // 10.0K
-  systemSettings.settings.Pull_res          = PULL_RES/100;
-  systemSettings.settings.NTC_res           = NTC_RES/100;
-  systemSettings.settings.NTC_Beta          = NTC_BETA;
-  #else
-  systemSettings.settings.enableNTC         = 0;
-  #endif
-
+  systemSettings.settings = defaultSettings;
   __enable_irq();
 }
 
@@ -411,7 +416,7 @@ void resetCurrentProfile(void){
   systemSettings.Profile.readPeriod                 = (200*200)-1;             // 200ms * 200  because timer period is 5us
   systemSettings.Profile.readDelay                  = (20*200)-1;              // 20ms (Also uses 5us clock)
   systemSettings.Profile.tempUnit                   = mode_Celsius;
-  systemSettings.Profile.NotInitialized             = initialized;
+  systemSettings.Profile.state             = initialized;
   __enable_irq();
 }
 
@@ -426,10 +431,10 @@ void loadProfile(uint8_t profile){
     systemSettings.settings.currentProfile=profile_None;                        // Revert to none
   }
   else if(profile<=profile_C210){
-    systemSettings.Profile = flashSettings->Profile[profile];
-    systemSettings.ProfileChecksum = flashSettings->ProfileChecksum[profile];
+    systemSettings.Profile = flashSettings.Profile[profile];
+    systemSettings.ProfileChecksum = flashSettings.ProfileChecksum[profile];
 
-    if(systemSettings.Profile.NotInitialized!=initialized){
+    if(systemSettings.Profile.state!=initialized){
       resetCurrentProfile();
       systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
     }

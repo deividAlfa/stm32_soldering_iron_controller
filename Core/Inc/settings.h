@@ -35,10 +35,10 @@
 
 #define LANGUAGE_COUNT    4
 //#define SWSTRING        "SW: v1.10"                               // For releases
-#define SWSTRING          "SW: 21-09-29"                            // For git
-#define SETTINGS_VERSION  13                                        // Change this if you change the struct below to prevent people getting out of sync
+#define SWSTRING          "SW: 21-10-01"                            // For git
+#define SETTINGS_VERSION  14                                        // Change this if you change the struct below to prevent people getting out of sync
 #define StoreSize         2                                         // In KB
-#define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
+//#define FLASH_ADDR        (0x8000000 + ((FLASH_SZ-StoreSize)*1024)) // Last 2KB flash (Minimum erase size, page size=2KB)
 
 enum{
   mode_shake              = 0,
@@ -138,7 +138,7 @@ typedef struct{
 }tipData_t;
 
 typedef struct{
-  uint8_t       NotInitialized;
+  uint8_t       state;
   uint8_t       ID;
   uint8_t       impedance;
   uint8_t       tempUnit;
@@ -167,7 +167,7 @@ typedef struct{
 }profile_t;
 
 typedef struct{
-  uint8_t       NotInitialized;                                     // Always 1 if flash is erased
+  uint8_t       state;                                     // Always 1 if flash is erased
   uint8_t       language;
   uint8_t       contrast;
   uint8_t       OledOffset;
@@ -178,6 +178,7 @@ typedef struct{
   uint8_t       initMode;
   uint8_t       tempStep;
   uint8_t       tempBigStep;
+  uint8_t       guiTempDenoise;
   uint8_t       tempUnit;
   uint8_t       activeDetection;
   uint8_t       buzzerMode;
@@ -222,7 +223,6 @@ typedef __attribute__((aligned(4)))  struct{
 }flashSettings_t;
 
 extern systemSettings_t systemSettings;
-extern flashSettings_t* flashSettings;
 
 void Oled_error_init(void);
 void checkSettings(void);

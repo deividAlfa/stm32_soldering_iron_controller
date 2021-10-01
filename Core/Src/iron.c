@@ -89,7 +89,7 @@ void handleIron(void) {
   readTipTemperatureCompensated(new_reading, read_average, mode_Celsius);     // Update readings
 
   if(!Iron.Error.safeMode){
-    if( (systemSettings.setupMode==enable) || systemSettings.settings.NotInitialized || systemSettings.Profile.NotInitialized!=initialized ||
+    if( (systemSettings.setupMode==enable) || systemSettings.settings.state!=initialized || systemSettings.Profile.state!=initialized ||
         (systemSettings.Profile.ID != systemSettings.settings.currentProfile) || (systemSettings.settings.currentProfile>profile_C210)){
 
       Iron.Error.safeMode=1;
@@ -225,6 +225,7 @@ void setSystemTempUnit(bool unit){
   }
 
   systemSettings.settings.tempUnit = unit;
+  systemSettings.settings.guiTempDenoise  = round_10(TempConversion(systemSettings.settings.guiTempDenoise,unit,0));
   Iron.UserSetTemperature = round_10(TempConversion(Iron.UserSetTemperature,unit,0));
   setCurrentMode(Iron.CurrentMode);     // Reload temps
 
