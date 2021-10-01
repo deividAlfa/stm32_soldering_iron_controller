@@ -36,6 +36,7 @@ static comboBox_item_t *comboitem_Detect_low_res_beta;
 
 static editable_widget_t *editable_system_TempStep;
 static editable_widget_t *editable_system_bigTempStep;
+static editable_widget_t *editable_system_GuiTempDenoise;
 
 
 #ifdef USE_NTC
@@ -62,10 +63,14 @@ void updateTemperatureUnit(void){
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     editable_system_TempStep->inputData.endString="\260F";
     editable_system_bigTempStep->inputData.endString="\260F";
+    editable_system_GuiTempDenoise->inputData.endString="\260F";
+    editable_system_GuiTempDenoise->max_value=70;
   }
   else{
     editable_system_TempStep->inputData.endString="\260C";
     editable_system_bigTempStep->inputData.endString="\260C";
+    editable_system_GuiTempDenoise->inputData.endString="\260C";
+    editable_system_GuiTempDenoise->max_value=20;
   }
 }
 
@@ -116,6 +121,16 @@ static void * getBigTmpStep() {
 
 static void setBigTmpStep(uint32_t *val) {
   systemSettings.settings.tempBigStep = *val;
+}
+//=========================================================
+
+static void * getGuiTempDenoise() {
+  temp = systemSettings.settings.guiTempDenoise;
+  return &temp;
+}
+
+static void setGuiTempDenoise(uint32_t *val) {
+  systemSettings.settings.guiTempDenoise = *val;
 }
 //=========================================================
 static void * getContrast_() {
@@ -549,6 +564,19 @@ static void system_create(screen_t *scr){
   edit->max_value = 50;
   edit->min_value = 1;
   
+  // [ Denoisethreshold Widget ]
+  //
+  newComboEditable(w, strings[lang].FILTER__Threshold, &edit, NULL);
+  editable_system_GuiTempDenoise=edit;
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &getGuiTempDenoise;
+  edit->big_step = 5;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setGuiTempDenoise;
+  edit->max_value = 50;
+  edit->min_value = 0;
+
   //  [ Active detection Widget ]
   //
   newComboMultiOption(w, strings[lang].SYSTEM_Active_Detection,&edit, NULL);
