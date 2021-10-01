@@ -44,6 +44,15 @@ MEMORY
 /* Sections */
 SECTIONS
 {
+
+  /* Firmware settings storage section */  
+  .settings (NOLOAD) :
+  {
+    . = ALIGN(4);
+    KEEP(*(.settings))/* .settings sections */
+  } >SETTINGS
+  
+  
   /* The startup code into "FLASH" Rom type memory */
   .isr_vector :
   {
