@@ -219,7 +219,7 @@ Step for adjusting tip temperature in the main screen.<br>
 Big step for adjusting tip temperature in the main screen, when the encoder is rotated fast.<br>
  - **Threshold for widget de-noiser**<br>
 The screen widget will ignore the real temperature and show the setpoint if the deviation is lower than this value.<br>
-Ex. Using value of 5, the screeen will ignore changes of ±5°(C/F). Useful if your controller readings are noisy.<br>
+Ex. Using value of 5, the screen will ignore changes of ±5°(C/F). Useful if your controller readings are noisy.<br>
 A value of 0 will disable the threshold, always showing the real remperature.<br>
 This is not aplied to the plot graph.<br>
   - **LVP**<br>
