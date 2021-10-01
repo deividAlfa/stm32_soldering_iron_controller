@@ -202,7 +202,7 @@ typedef struct{
   uint32_t      version;                                            // Used to track if a reset is needed on firmware upgrade
 }settings_t;
 
-typedef __attribute__((aligned(4)))  struct{
+__attribute__((aligned(4))) typedef struct{
   settings_t    settings;
   uint32_t      settingsChecksum;
   profile_t     Profile;
@@ -212,7 +212,7 @@ typedef __attribute__((aligned(4)))  struct{
   uint8_t       isSaving;
 }systemSettings_t;
 
-typedef __attribute__((aligned(4)))  struct{
+__attribute__((aligned(4))) typedef struct{
   profile_t     Profile[ProfileSize];
   uint32_t      ProfileChecksum[ProfileSize];
   settings_t    settings;

@@ -210,7 +210,7 @@ void saveSettings(uint8_t mode){
   HAL_FLASH_Unlock();
 
   FLASH_EraseInitTypeDef erase;
-  erase.NbPages = (1024*StoreSize)/FLASH_PAGE_SIZE;
+  erase.NbPages = (sizeof(flashSettings_t)+FLASH_PAGE_SIZE-1)/FLASH_PAGE_SIZE;
   erase.PageAddress = (uint32_t)dest;
   erase.TypeErase = FLASH_TYPEERASE_PAGES;
 
