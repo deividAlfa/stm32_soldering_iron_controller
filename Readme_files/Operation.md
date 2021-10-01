@@ -221,7 +221,7 @@ Big step for adjusting tip temperature in the main screen, when the encoder is r
 The screen widget will ignore the real temperature and show the setpoint if the deviation is lower than this value.<br>
 Ex. Using value of 5, the screen will ignore changes of ±5°(C/F). Useful if your controller readings are noisy.<br>
 A value of 0 will disable the threshold, always showing the real remperature.<br>
-This is not aplied to the plot graph.<br>
+This is not applied to the plot graph.<br>
   - **LVP**<br>
 Adjust Low voltage protection.<br>
   - **GUI Time**<br>
