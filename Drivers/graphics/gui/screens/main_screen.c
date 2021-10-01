@@ -25,7 +25,7 @@ slide_t screenSaver = {
 };
 
 static char *tipNames[TipSize];
-enum mode{  main_none=0, main_irontemp, main_error, main_ironstatus, main_setpoint, main_tipselect };
+enum mode{  main_none=0, main_irontemp, main_error, main_setpoint, main_tipselect };
 enum{ status_ok=0x20, status_error };
 enum { temp_numeric, temp_graph };
 const uint8_t shakeXBM[] ={
@@ -92,6 +92,24 @@ const uint8_t ScrSaverXBM[] = {
  0x00, 0x00, 0x00, 0x00, 0xE0, 0xFF, 0x1F, 0x00, 0x00, 0x00, 0x00, 0x00,
  0x80, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
 #endif
+
+const uint8_t iron[] = {
+  105, 7,
+  0xFE, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+  0x07, 0x00, 0x01, 0x3E, 0xF8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x1C, 0x00, 0x01, 0x3E, 0xF8, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0xFC, 0x00, 0x01, 0x3E, 0xF8, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFC, 0x01, 0x01, 0x3E, 0xF8, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFC, 0x00, 0x01, 0x3E,
+  0xF8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1C, 0x00,
+  0xFE, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+  0x07, 0x00, };
+
+const uint8_t x_mark[] = {
+  12,15,
+  0x03, 0x0C, 0x07, 0x0E, 0x06, 0x06, 0x0C, 0x03, 0x9C, 0x03, 0xF8, 0x01,
+    0xF0, 0x00, 0x60, 0x00, 0xF0, 0x00, 0xF8, 0x01, 0x9C, 0x03, 0x0C, 0x03,
+    0x06, 0x06, 0x07, 0x0E, 0x03, 0x0C };
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -155,11 +173,7 @@ static void * main_screen_getIronTemp() {
   if(mainScr.updateReadings){
     mainScr.lastTip=readTipTemperatureCompensated(old_reading, read_average, systemSettings.settings.tempUnit);
     if(getCurrentMode()>mode_sleep){
-      uint8_t threshold = 10;
-      if(systemSettings.settings.tempUnit==mode_Farenheit){
-        threshold = 20;
-      }
-      if(Iron.temperatureReached && abs(mainScr.lastTip-Iron.CurrentSetTemperature)<threshold){                       // Lock numeric display if within limits
+      if(Iron.temperatureReached && abs(mainScr.lastTip-Iron.CurrentSetTemperature)<systemSettings.settings.guiTempDenoise){                       // Lock numeric display if within limits
         mainScr.lastTip = Iron.CurrentSetTemperature;
       }
     }
@@ -725,12 +739,42 @@ static uint8_t  drawPlot(uint8_t *refresh){
   return 0;
 }
 
-static void  drawError(void){
+static uint8_t  drawError(uint8_t *refresh){
+
+  if(mainScr.ironStatus!=status_error || mainScr.currentMode==main_setpoint ) return 0;
+
+  static uint32_t last_time;
+  static uint8_t x_mark_state;
+
   if(Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
-    u8g2_SetFont(&u8g2, u8g2_font_no_iron_big);
-    putStrAligned(strings[lang].main_error_noIron, 20, align_center);
+
+    uint8_t xp = (OledWidth-iron[0]-x_mark[0]-5)/2;
+    uint8_t update = 0;
+
+    if(*refresh){
+      u8g2_DrawXBM(&u8g2, xp, (OledHeight-iron[1])/2, iron[0], iron[1], &iron[2]);
+      update = 1;
+    }
+
+    if(current_time-last_time>500){
+      last_time=current_time;
+      x_mark_state ^=1;
+      update=1;
+    }
+
+    if(update){
+      if(x_mark_state){
+        u8g2_SetDrawColor(&u8g2, BLACK);
+        u8g2_DrawBox(&u8g2, xp+iron[0]+5, (OledHeight-x_mark[1])/2, x_mark[0], x_mark[1]);
+        u8g2_SetDrawColor(&u8g2, WHITE);
+      }
+      else{
+        u8g2_DrawXBM(&u8g2, xp+iron[0]+5, (OledHeight-x_mark[1])/2, x_mark[0], x_mark[1], &x_mark[2]);
+      }
+    }
+    return update;
   }
-  else{
+  else if(*refresh){
     uint8_t Err_ypos;
 
     uint8_t err = (uint8_t)Iron.Error.V_low+Iron.Error.safeMode+(Iron.Error.NTC_low|Iron.Error.NTC_high)+Iron.Error.noIron;
@@ -762,29 +806,13 @@ static void  drawError(void){
       Err_ypos+=12;
     }
   }
+  return 1;
 }
 
 static void  drawMisc(uint8_t *refresh){
   if(!*refresh) return;
-  uint8_t frame=0, error=0;
-  switch(mainScr.currentMode){
-    case main_error:
-      error=1;
-      break;
-
-    case main_tipselect:
-      error=(mainScr.ironStatus==status_error);
-      plot.enabled &= !error;
-      frame=1;            // In "edit" mode
-    case main_irontemp:
-      Widget_SetPoint->enabled=0;
-    case main_setpoint:
-    default:
-      break;
-  }
-  if(error) drawError();
   u8g2_SetFont(&u8g2, u8g2_font_small);
-  if(frame){
+  if(mainScr.currentMode==main_tipselect){
     uint8_t len = u8g2_GetUTF8Width(&u8g2, tipNames[systemSettings.Profile.currentTip])+4;   // Draw edit frame
     u8g2_DrawRBox(&u8g2, 0, 54, len, 10, 2);
     u8g2_SetDrawColor(&u8g2, BLACK);
@@ -826,6 +854,7 @@ static uint8_t main_screen_draw(screen_t *scr){
   drawMode(&refresh);
   drawMisc(&refresh);
   ret |= drawPlot(&refresh);
+  ret |= drawError(&refresh);
 
   return (ret | default_screenDraw(scr));
 }
