@@ -10,9 +10,7 @@
 #define __BASE_FILE__ "ssd1306.c"
 #endif
 
-oled_t oled = {
-    .ptr =  &oled.buffer[0]
-};
+oled_t oled;
 
 static uint8_t lastContrast;
 static uint8_t powerStatus;
@@ -440,7 +438,7 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
 #elif defined OLED_SPI && defined OLED_DEVICE
 void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma){
   oled.device  = device;
-
+  oled.ptr =  oled.buffer;
 #elif defined OLED_I2C && defined OLED_DEVICE
 void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
   oled.device  = device;

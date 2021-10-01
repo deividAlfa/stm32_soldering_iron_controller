@@ -52,6 +52,7 @@ typedef struct{
 
 	DMA_HandleTypeDef *fillDMA;
 }oled_t;
+
 extern oled_t oled;
 
 enum { fill_soft, fill_dma };
