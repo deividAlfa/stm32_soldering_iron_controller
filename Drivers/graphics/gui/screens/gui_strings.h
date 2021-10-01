@@ -15,7 +15,6 @@ typedef struct{
   char * boot_firstBoot;
   char * boot_Profile;
 
-  char * main_error_noIron;
   char * main_error_noIron_Detected;
   char * main_error_failsafe;
   char * main_error_NTC_high;

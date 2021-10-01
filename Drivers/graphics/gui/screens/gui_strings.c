@@ -14,7 +14,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .boot_firstBoot = "First Boot!",
       .boot_Profile = "Profile",
 
-      .main_error_noIron = "NO IRON",
       .main_error_noIron_Detected = "NO IRON DETECTED",
       .main_error_failsafe = "FAILSAFE MODE",
       .main_error_NTC_high = "NTC READ HIGH",
@@ -158,7 +157,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .boot_firstBoot = "Выберите",
       .boot_Profile = "Тип",
 
-      .main_error_noIron = "ОТКЛЮЧЕН",
       .main_error_noIron_Detected = "ОТСОЕДИНЕН",
       .main_error_failsafe = "РЕЖИМ ЗАЩИТЫ",
       .main_error_NTC_high = "NTC ЗНАЧ ВЫС",
@@ -303,7 +301,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .boot_firstBoot = "Första Start!",
       .boot_Profile = "Profil",
 
-      .main_error_noIron = "KOLV UR",
       .main_error_noIron_Detected = "KOLV EJ UPPTÄCKT",
       .main_error_failsafe = "FELSÄKERT LÄGE",
       .main_error_NTC_high = "NTC-VÄRDE HÖGT",
@@ -447,7 +444,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .boot_firstBoot = "Erster Start",
       .boot_Profile = "Profile",
 
-      .main_error_noIron = "KEIN KOLBEN.",
       .main_error_noIron_Detected = "KEIN KOLBEN.",
       .main_error_failsafe = "FAILSAFE MODUS",
       .main_error_NTC_high = "NTC WERT HOCH",
