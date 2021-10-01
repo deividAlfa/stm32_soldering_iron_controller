@@ -89,4 +89,5 @@ for %%M in (%MODELS%) do (
 echo [32mBuild complete![0m
 
 :end
+rd EWARM /Q /S 2>nul
 timeout 2 >nul
