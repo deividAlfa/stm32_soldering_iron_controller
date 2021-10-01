@@ -19,52 +19,52 @@
 #endif
 
 const settings_t defaultSettings = {
-  .version           = SETTINGS_VERSION,
-  .contrast          = 255,
-  .dim_mode          = dim_sleep,
-  .dim_Timeout       = 10000,                // ms
-  .dim_inSleep       = enable,
-  .OledOffset        = OLED_OFFSET,
-  .guiUpdateDelay    = 200,                  //ms
-  .guiTempDenoise    = 5,                    // ±5°C
-  .tempUnit          = mode_Celsius,
-  .tempStep          = 5,                    // 5º steps
-  .tempBigStep       = 20,                   // 20º big steps
-  .activeDetection   = true,
-  .saveSettingsDelay = 5,                    // 5s
-  .lvp               = 110,                  // 11.0V Low voltage
-  .currentProfile    = profile_None,
-  .initMode          = mode_run,
-  .buzzerMode        = disable,
-  .buttonWakeMode    = wake_all,
-  .shakeWakeMode     = wake_all,
-  .shakeFiltering    = enable,
-  .WakeInputMode     = mode_shake,
-  .StandMode         = mode_sleep,
-  .EncoderMode       = RE_Mode_One,
-  .debugEnabled      = disable,
-  .language          = lang_english,
-  .state             = initialized,
+  .version            = SETTINGS_VERSION,
+  .contrast           = 255,
+  .dim_mode           = dim_sleep,
+  .dim_Timeout        = 10000,                // ms
+  .dim_inSleep        = enable,
+  .OledOffset         = OLED_OFFSET,
+  .guiUpdateDelay     = 200,                  //ms
+  .guiTempDenoise     = 5,                    // ±5°C
+  .tempUnit           = mode_Celsius,
+  .tempStep           = 5,                    // 5º steps
+  .tempBigStep        = 20,                   // 20º big steps
+  .activeDetection    = true,
+  .saveSettingsDelay  = 5,                    // 5s
+  .lvp                = 110,                  // 11.0V Low voltage
+  .currentProfile     = profile_None,
+  .initMode           = mode_run,
+  .buzzerMode         = disable,
+  .buttonWakeMode     = wake_all,
+  .shakeWakeMode      = wake_all,
+  .shakeFiltering     = enable,
+  .WakeInputMode      = mode_shake,
+  .StandMode          = mode_sleep,
+  .EncoderMode        = RE_Mode_One,
+  .debugEnabled       = disable,
+  .language           = lang_english,
+  .state              = initialized,
 
   #ifdef USE_NTC
-  .enableNTC         = 1,
+  .enableNTC          = 1,
     #ifdef PULLUP
-    .Pullup            = 1,
+    .Pullup           = 1,
     #elif defined PULLDOWN
-    .Pullup            = 0,
+    .Pullup           = 0,
     #else
     #error NO PULL MODE DEFINED
     #endif
-  .NTC_detect        = 0,
-  .NTC_detect_high_res = 1000,   // 100.0K
+  .NTC_detect         = 0,
+  .NTC_detect_high_res  = 1000,   // 100.0K
+  .NTC_detect_low_res   = 100,     // 10.0K
+  .NTC_Beta             = NTC_BETA,
+  .NTC_res              = NTC_RES/100,
+  .Pull_res             = PULL_RES/100,
   .NTC_detect_high_res_beta = NTC_BETA,
-  .NTC_detect_low_res = 100,     // 10.0K
-  .NTC_detect_low_res_beta = NTC_BETA,     // 10.0K
-  .Pull_res          = PULL_RES/100,
-  .NTC_res           = NTC_RES/100,
-  .NTC_Beta          = NTC_BETA,
+  .NTC_detect_low_res_beta  = NTC_BETA,
   #else
-  .enableNTC         = 0,
+  .enableNTC          = 0,
   #endif
 };
 
