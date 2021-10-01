@@ -361,7 +361,7 @@ static void tip_settings_create(screen_t *scr){
   dis->getData = &getCal250;
   edit->max_value = 4090;
   edit->min_value = 0;
-  edit->big_step = 20;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setCal250;
 
@@ -374,7 +374,7 @@ static void tip_settings_create(screen_t *scr){
   dis->getData = &getCal400;
   edit->max_value = 4090;
   edit->min_value = 0;
-  edit->big_step = 20;
+  edit->big_step = 10;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setCal400;
 
