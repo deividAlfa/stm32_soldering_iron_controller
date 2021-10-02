@@ -14,7 +14,7 @@
 
 #define SWSTRING          "SW: 21-10-02"                            // Software version reported in settings creen
 #define SETTINGS_VERSION  14                                        // Change this if you change the settings/profile struct to prevent getting out of sync
-#define LANGUAGE_COUNT    4
+#define LANGUAGE_COUNT    5
 #define ProfileSize       3                                         // Number of profiles
 #define TipSize           20                                        // Number of tips for each profile
 #define TipCharSize       5                                         // String size for each tip name (Including null terminator)
@@ -105,6 +105,8 @@ enum{
   lang_russian             = 1,
   lang_swedish             = 2,
   lang_german              = 3,
+  lang_turkish             = 4,
+
 
   dim_off                  = 0,
   dim_sleep                = 1,
