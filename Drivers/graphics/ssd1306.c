@@ -438,7 +438,6 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
 #elif defined OLED_SPI && defined OLED_DEVICE
 void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma){
   oled.device  = device;
-  oled.ptr =  oled.buffer;
 #elif defined OLED_I2C && defined OLED_DEVICE
 void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
   oled.device  = device;
@@ -451,6 +450,7 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
 #endif
 
   oled.fillDMA= dma;
+  oled.ptr=oled.buffer;
 
 #if defined OLED_SPI
   #ifndef USE_DC
