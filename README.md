@@ -233,7 +233,8 @@ For adding new languages, you have to modify these files:<br>
 * Src/settings.h<br>
   LANGUAGE_COUNT, lang_english,lang_xxxx in system_types enum<br><br>
 * Drivers/gui/gui_strings.c<br>
-  strings_t strings, Langs[LANGUAGE_COUNT]<br><br>
+  strings_t strings, Langs[LANGUAGE_COUNT]<br>
+
 For adding new characters to the existing fonts symbols, there're some instructions here:<br>
 * Drivers/graphics/u8g2/tools/font/bdfconv/Notes.txt<br>
 
