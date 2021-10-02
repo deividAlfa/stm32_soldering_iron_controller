@@ -450,7 +450,6 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
 #endif
 
   oled.fillDMA= dma;
-  oled.ptr=oled.buffer;
 
 #if defined OLED_SPI
   #ifndef USE_DC
@@ -561,13 +560,13 @@ void FillBuffer(bool color, bool mode){
   else{ fillVal=0; }                          // Fill color = black
 
   if(mode==fill_dma){                         // use DMA
-     if(HAL_DMA_Start(oled.fillDMA,(uint32_t)&fillVal,(uint32_t)oled.ptr,sizeof(oled.buffer)/sizeof(uint32_t))!=HAL_OK){
+     if(HAL_DMA_Start(oled.fillDMA,(uint32_t)&fillVal,(uint32_t)oled.buffer,sizeof(oled.buffer)/sizeof(uint32_t))!=HAL_OK){
 	    	Error_Handler();
      }
      HAL_DMA_PollForTransfer(oled.fillDMA, HAL_DMA_FULL_TRANSFER, 5);
   }
   else{                                       // use software
-    uint32_t* bf=(uint32_t*)oled.ptr;         // Pointer to oled buffer using 32bit data for faster operation
+    uint32_t *bf = (uint32_t*)oled.buffer;         // Pointer to oled buffer using 32bit data for faster operation
     for(uint16_t x=0;x<sizeof(oled.buffer)/sizeof(uint32_t);x++){  // Write to oled buffer
       bf[x]=fillVal;
     }
@@ -621,7 +620,7 @@ void update_display_ErrorHandler(void){
     Oled_Set_DC();
     #endif
 
-    if(HAL_SPI_Transmit(oled.device, (uint8_t*)oled.ptr + (row * 128), 128, 1000)!=HAL_OK){
+    if(HAL_SPI_Transmit(oled.device, &oled.buffer[128*row], 128, 1000)!=HAL_OK){
       while(1){                                                               // If error happens at this stage, just do nothing
         HAL_IWDG_Refresh(&hiwdg);
       }
@@ -633,7 +632,7 @@ void update_display_ErrorHandler(void){
         HAL_IWDG_Refresh(&hiwdg);
       }
     }
-    if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x40, 1, (uint8_t*)oled.ptr + (row * 128), 128, 1000)!=HAL_OK){
+    if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x40, 1, &oled.buffer[128*row], 128, 1000)!=HAL_OK){
       while(1){                                                               // If error happens at this stage, just do nothing
         HAL_IWDG_Refresh(&hiwdg);
       }
@@ -703,7 +702,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
     Oled_Set_DC();
     #endif
 
-    if(HAL_SPI_Transmit_DMA(oled.device,(uint8_t *) oled.ptr+((uint16_t)128*oled.row), 128)!= HAL_OK){      // Send row data in DMA interrupt mode
+    if(HAL_SPI_Transmit_DMA(oled.device, &oled.buffer[128*oled.row], 128)!= HAL_OK){      // Send row data in DMA interrupt mode
       Error_Handler();
     }
 
@@ -722,7 +721,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
     if(try==0){
       Error_Handler();
     }
-    if(HAL_I2C_Mem_Write_DMA(oled.device, OLED_ADDRESS, 0x40, 1, oled.ptr+(128*oled.row), 128)!=HAL_OK){
+    if(HAL_I2C_Mem_Write_DMA(oled.device, OLED_ADDRESS, 0x40, 1, &oled.buffer[128*row], 128)!=HAL_OK){
       Error_Handler();
     }
 #endif

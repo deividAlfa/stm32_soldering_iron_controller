@@ -39,7 +39,6 @@ typedef enum{
 // buffer needs to be aligned to 32bit(4byte) boundary, as FillBuffer() uses 32bit transfer for increased speed
 typedef struct{
 	__attribute__((aligned(4))) uint8_t buffer[128*8]; // 128x64 1BPP OLED
-	uint8_t *ptr;
 	volatile uint8_t status;
 	volatile uint8_t row;
 	volatile uint8_t use_sw;
