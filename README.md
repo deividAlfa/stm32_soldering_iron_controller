@@ -7,6 +7,7 @@
 * [Operating instructions](Readme_files/Operation.md)
 * [Frequently asked questions](#faq)
 * [Building the firmware](#build)
+* [Translations](#translations)
 * [Creating a .ioc file from scratch](Readme_files/Creating_ioc.md)
 * [Additional Documentation](#docs)
 * [Pending or non working features](#pending)
@@ -223,6 +224,19 @@ Run the included script "Clean_Profile.bat", or manually delete these files:<br>
 
 And then copy the board profile files overwriting any existing files.<br>
  
+---
+
+<a id="translations"></a>     
+## Translations
+
+For adding new languages, you have to modify these files:<br>
+* Src/settings.h<br>
+  LANGUAGE_COUNT, lang_english,lang_xxxx in system_types enum<br><br>
+* Drivers/gui/gui_strings.c<br>
+  strings_t strings, Langs[LANGUAGE_COUNT]<br><br>
+For adding new characters to the existing fonts symbols, there're some instructions here:<br>
+* Drivers/graphics/u8g2/tools/font/bdfconv/Notes.txt<br>
+
 ---
            
 <a id="pending"></a>
