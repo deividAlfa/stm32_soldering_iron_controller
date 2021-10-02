@@ -116,7 +116,7 @@ enum{
   error_run                = 1,
   error_resume             = 2,
 
-};
+}system_types;
 
 
 typedef struct{
