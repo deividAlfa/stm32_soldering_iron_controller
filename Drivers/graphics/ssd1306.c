@@ -462,7 +462,7 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
 
   #ifdef USE_RST
   Oled_Clear_RES();       // Set RST
-  HAL_Delay(1);           // Delay
+  HAL_Delay(10);          // Delay
   Oled_Set_RES();         // Release RST
   #endif
 
@@ -486,7 +486,7 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
 #endif
   systemSettings.settings.OledOffset = 2;         // Set by default while system settings are not loaded
   HAL_IWDG_Refresh(&hiwdg);                       // Clear watchdog
-  HAL_Delay(100);                                 // 100mS wait for internal initialization
+  HAL_Delay(200);                                 // 200mS wait for internal initialization
 #if defined OLED_I2C && defined OLED_DEVICE && defined I2C_TRY_HW
   oled.use_sw=1;
   //disable_soft_Oled();
