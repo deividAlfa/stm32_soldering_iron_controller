@@ -126,7 +126,7 @@ void handleOledDim(void){
     if(systemSettings.settings.dim_mode && contrast>5 && ((current_time-dimTimer)>=systemSettings.settings.dim_Timeout)){
       dimStep=-5;
     }
-    if(systemSettings.settings.dim_inSleep==disable && getCurrentMode()==mode_sleep && contrast==1 && (last_TIP_C<100 || (Iron.Error.Flags & _ACTIVE))){  // Turn of screen if temp<100ºC or error active
+    if(getOledPower()==enable && systemSettings.settings.dim_inSleep==disable && getCurrentMode()==mode_sleep && contrast==1 && (last_TIP_C<100 || (Iron.Error.Flags & _ACTIVE))){  // Turn of screen if temp<100ºC or error active
       setOledPower(disable);
     }
   }

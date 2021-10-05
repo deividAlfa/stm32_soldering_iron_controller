@@ -805,8 +805,9 @@ static uint8_t  drawError(uint8_t *refresh){
       putStrAligned(strings[lang].main_error_noIron_Detected, Err_ypos, align_center);
       Err_ypos+=12;
     }
+    return 1;
   }
-  return 1;
+  return 0;
 }
 
 static void  drawMisc(uint8_t *refresh){
