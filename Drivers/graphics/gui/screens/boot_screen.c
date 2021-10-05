@@ -240,7 +240,7 @@ void boot_screen_create(screen_t *scr){
   displayOnly_widget_t *dis;
   editable_widget_t *edit;
   lang = systemSettings.settings.language;
-  if(lang>LANGUAGE_COUNT-1){
+  if(lang>=LANGUAGE_COUNT){
     lang=lang_english;
   }
   current_lang = lang;
