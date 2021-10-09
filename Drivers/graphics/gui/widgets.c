@@ -783,7 +783,6 @@ uint8_t comboBoxDraw(widget_t *w) {
   bool drawSeparator=0;
   uint8_t scroll = 0;
   uint8_t r;
-  uint32_t currentTime=HAL_GetTick();
   uint16_t len = 0;
   uint8_t refresh_slide=0;
   int16_t offset;
@@ -810,22 +809,22 @@ uint8_t comboBoxDraw(widget_t *w) {
             break;
           }
           slide.status = slide_restart;
-          slide.time = currentTime;
+          slide.time = current_time;
           break;
 
         case slide_disabled:
           break;
 
         case slide_restart:
-          if((currentTime-slide.time)>500){                                                   // If resetted, freeze the text 500ms
-            slide.time = currentTime;
+          if((current_time-slide.time)>500){                                                   // If resetted, freeze the text 500ms
+            slide.time = current_time;
             slide.status = slide_running;
           }
           break;
 
         case slide_running:
-          if((currentTime-slide.time)>19){                                                    // If text sliding running, update every 20mS
-            slide.time=currentTime;
+          if((current_time-slide.time)>19){                                                    // If text sliding running, update every 20mS
+            slide.time=current_time;
             if((slide.len - ++slide.offset)<=slide.limit){                                    // Increase x offset, check limits
               slide.status = slide_limit;                                                     // If reached end
             }
@@ -833,8 +832,8 @@ uint8_t comboBoxDraw(widget_t *w) {
           }
           break;
         case slide_limit:
-          if((currentTime-slide.time)>500){                                                 // If reached the end, freeze the text 500ms
-            slide.time = currentTime;
+          if((current_time-slide.time)>500){                                                 // If reached the end, freeze the text 500ms
+            slide.time = current_time;
             slide.status = slide_restart;
             slide.offset = 0;
             refresh_slide=1;
