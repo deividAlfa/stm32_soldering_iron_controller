@@ -327,25 +327,22 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 
   if(Iron.Error.Flags & FLAG_ACTIVE){
+    if(mainScr.shakeActive){
+      mainScr.shakeActive=3;
+    }
     if(mainScr.ironStatus != status_error){                                   // If error appeared
       refreshOledDim();                                                       // Wake up screen
       mainScr.ironStatus = status_error;
       mainScr.idleTimer = current_time;
     }
-    if(mainScr.shakeActive){
-      mainScr.shakeActive=3;
-    }
-    if(mainScr.lastError!=Iron.Error.Flags){                                  // If error changed
+    else if(mainScr.lastError!=Iron.Error.Flags){                             // If error changed
       mainScr.lastError=Iron.Error.Flags;
       refreshOledDim();                                                       // Wake up screen
     }
   }
-  else{
-    if(mainScr.ironStatus != status_ok){                                      // If error is gone
-      mainScr.ironStatus = status_ok;
-      refreshOledDim();                                                       // Wake up screen
-    }
-
+  else if(mainScr.ironStatus != status_ok){                                   // If error is gone
+    mainScr.ironStatus = status_ok;
+    refreshOledDim();                                                         // Wake up screen
   }
 
 
