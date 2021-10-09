@@ -60,7 +60,7 @@ void oled_update() {
 }
 
 void oled_init(RE_Rotation_t (*GetData)(RE_State_t*), RE_State_t *State) {
-  current_time = HAL_GetTick();
+  screen_timer = current_time = HAL_GetTick();
   RE_State = State;
   RE_GetData = GetData;
   screen_t *scr = screens;
