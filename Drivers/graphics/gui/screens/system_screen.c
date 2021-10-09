@@ -160,15 +160,10 @@ static void setOledOffset(uint32_t *val) {
 //=========================================================
 static void * getdimMode() {
   temp = systemSettings.settings.dim_mode;
+  bool mode = (systemSettings.settings.dim_mode>dim_off);
+  comboitem_system_Dim_PowerOff->enabled = mode;
+  comboitem_system_Dim_Timeout->enabled = mode;
 
-  if(systemSettings.settings.dim_mode>dim_off){
-    comboitem_system_Dim_PowerOff->enabled = 1;
-    comboitem_system_Dim_Timeout->enabled = 1;
-  }
-  else{
-    comboitem_system_Dim_PowerOff->enabled = 0;
-    comboitem_system_Dim_Timeout->enabled = 0;
-  }
   return &temp;
 }
 static void setdimMode(uint32_t *val) {
