@@ -31,18 +31,17 @@ void detectNTC(void){
 int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
 #ifdef USE_NTC
   static uint32_t error_timer=0;
-  static uint8_t detected=0;
+  static uint8_t detected = 0;  
   if(new){
-
+  
     #ifdef ENABLE_INT_TEMP
-    if(systemSettings.settings.enableNTC){                               // If NTC enabled
-      if(Iron.Error.active && Iron.Error.noIron){                        // If handle removed, always force external NTC mode
+    if(systemSettings.settings.enableNTC){                                                              // If NTC enabled
+      if(Iron.Error.Flags&(FLAG_ACTIVE | FLAG_NO_IRON)){                                                // If handle removed, always force external NTC mode
         use_int_temp = 0;
       }
-      else if (!use_int_temp){
-        if( (Iron.Error.active && (Iron.Error.NTC_high || Iron.Error.NTC_low))  &&                      // If handle connected, but NTC error is still active
-            (!systemSettings.settings.NTC_detect || (systemSettings.settings.NTC_detect && detected))){ // and NTC autodetection is done or disabled
-
+      else if (!use_int_temp){																																					// Else, handle connected 
+        detected |= !(systemSettings.settings.NTC_detect && 1);                                         // If NTC detection disabled, set detected flag to skip further checks
+        if(detected && ((Iron.Error.Flags&(FLAG_ACTIVE | FLAG_NTC_HIGH | FLAG_NTC_LOW ))>FLAG_ACTIVE)){ // If NTC error active and NTC detection is done
           use_int_temp = 1;                                                                             // Use internal sensor
         }
       }
@@ -51,7 +50,7 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
       use_int_temp = 1;                                                                                 // Use internal sensor
     }
 
-    if(!use_int_temp){                                                                                  // Compute NTC temperature
+    if(!use_int_temp){                                                                                  // Compute external NTC temperature
     #else
     if(systemSettings.settings.enableNTC){
     #endif
@@ -66,7 +65,7 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
       if(systemSettings.settings.NTC_detect){                                                           // NTC Autodetect enabled?
         NTC_res = systemSettings.settings.NTC_detect_low_res*100;                                       // Set lower by default
         NTC_Beta = systemSettings.settings.NTC_detect_low_res_beta;
-        if(!(Iron.Error.Flags & _ACTIVE) && (current_time-error_timer>1000)){                           // If no errors for 1000mS (Stable reading), check value
+        if(!(Iron.Error.Flags & FLAG_ACTIVE) && (current_time-error_timer>1000)){                       // If no errors for 1000mS (Stable reading), check value
           if(!detected){                                                                                // If not done detection yet (Only detect once after error is gone)
             detected=1;                                                                                 // Set detected flag
             if(last_NTC_C<0){                                                                           // If temp negative, set higher res
