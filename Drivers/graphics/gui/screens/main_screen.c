@@ -255,7 +255,7 @@ void blockInput(uint32_t time){
 
 void updateScreenSaver(void){
 #ifdef SCREENSAVER
-  if(!screenSaver.enabled || Iron.CurrentMode!=mode_sleep || (Iron.Error.Flags & _ACTIVE)){
+  if(!screenSaver.enabled || Iron.CurrentMode!=mode_sleep || (Iron.Error.Flags & FLAG_ACTIVE)){
     return;
   }
   if(current_time-screenSaver.timer>50){
@@ -326,7 +326,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   updateScreenSaver();
 
 
-  if(Iron.Error.Flags & _ACTIVE){
+  if(Iron.Error.Flags & FLAG_ACTIVE){
     if(mainScr.ironStatus != status_error){                                   // If error appeared
       refreshOledDim();                                                       // Wake up screen
       mainScr.ironStatus = status_error;
@@ -746,7 +746,7 @@ static uint8_t  drawError(uint8_t *refresh){
   static uint32_t last_time;
   static uint8_t x_mark_state;
 
-  if(Iron.Error.Flags==(_ACTIVE | _NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
+  if(Iron.Error.Flags==(FLAG_ACTIVE | FLAG_NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
 
     uint8_t xp = (OledWidth-iron[0]-x_mark[0]-5)/2;
     uint8_t update = 0;
