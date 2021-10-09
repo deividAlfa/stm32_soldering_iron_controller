@@ -76,7 +76,7 @@ volatile ADCDataTypeDef_t INT_TMP = {
 };
 #endif
 static ADC_HandleTypeDef *adc_device;
-
+volatile uint8_t reset_measures;
 
 
 uint8_t ADC_Cal(void){
@@ -210,6 +210,11 @@ void ADC_Stop_DMA(void){
   HAL_ADC_Stop_DMA(adc_device);
 }
 
+void ADC_Reset_measures(void){
+  reset_measures=1;                                                                           // Set the ADC flag to reset all averages
+  while(reset_measures);                                                                      // Cleared after new ADC conversion
+}
+
 /*
  * Some credits: https://kiritchatterjee.wordpress.com/2014/11/10/a-simple-digital-low-pass-filter-in-c/
  */
@@ -245,6 +250,14 @@ void DoAverage(volatile ADCDataTypeDef_t* InputData){
   // Calculate average
   avg_data = adc_sum  / (ADC_BFSIZ-2);
   InputData->last_raw = avg_data;
+
+  // Reset measures active?
+  if(reset_measures){
+    InputData->last_avg = avg_data;
+    InputData->EMA_of_Input = avg_data;
+    return;
+  }
+
 #ifdef SELECTIVE_FILTERING
 
 #if defined DEBUG_PWM && defined SWO_PRINT
@@ -321,6 +334,7 @@ void handle_ADC_Data(void){
   #ifdef ENABLE_INT_TEMP
   DoAverage(&INT_TMP);
   #endif
+  reset_measures = 0;
 }
 
 
