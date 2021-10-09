@@ -113,6 +113,7 @@ void restore_contrast(void){
 }
 
 void refreshOledDim(void){
+  dim.timer = current_time;
   if(dim.step<=0 && getContrast()<systemSettings.settings.contrast ){
     if(getOledPower()==disable){
       setOledPower(enable);
