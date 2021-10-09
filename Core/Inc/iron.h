@@ -31,13 +31,13 @@ typedef union{
 }IronError_t;
 # define ErrorMask    (uint8_t)0b11111                      // mask for used error bit fields (skipping global flag)
 
-#define _NOERROR      0
-#define _NO_IRON      1
-#define _NTC_HIGH     2
-#define _NTC_LOW      4
-#define _V_LOW        8
-#define _SAFE_MODE    16
-#define _ACTIVE       128
+#define FLAG_NOERROR      0
+#define FLAG_NO_IRON      1
+#define FLAG_NTC_HIGH     2
+#define FLAG_NTC_LOW      4
+#define FLAG_V_LOW        8
+#define FLAG_SAFE_MODE    16
+#define FLAG_ACTIVE       128
 
 typedef struct {
 
@@ -55,7 +55,7 @@ typedef struct {
   uint8_t             DebugMode;                            // Flag to indicate Debug is enabled
   uint8_t             updatePwm;                            // Flag to indicate PWM need to be updated
   IronError_t         Error;                                // Error flags
-  uint8_t             beforeErrorMode;                      // Active mode before the error.
+  uint8_t             lastMode;                             // Last mode before error condition.
 
   uint16_t            Pwm_Period;                           // PWM period
   uint16_t            Pwm_Max;                              // Max PWM output for power limit
