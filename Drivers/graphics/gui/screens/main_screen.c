@@ -335,7 +335,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       mainScr.ironStatus = status_error;
       mainScr.idleTimer = current_time;
     }
-    else if(mainScr.lastError!=Iron.Error.Flags){                             // If error changed
+    if(mainScr.lastError!=Iron.Error.Flags){                                  // If error changed
       mainScr.lastError=Iron.Error.Flags;
       refreshOledDim();                                                       // Wake up screen
     }
@@ -421,8 +421,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             }
           }
           if(mainScr.displayMode==temp_graph){
-            Widget_SetPoint->enabled=1;
-            default_widgetProcessInput(Widget_SetPoint, input, state);
+            Widget_SetPoint->enabled=1;                                   // Enable setpoint, but don't set it as current widget
+            default_widgetProcessInput(Widget_SetPoint, input, state);    // Just to be able to process the input. It will be disabled before drawing in drawMisc()
           }
           else{
             mainScr.setMode=main_setpoint;
@@ -616,7 +616,6 @@ static uint8_t  drawScreenSaver(uint8_t *refresh){
     return 0;
   }
   screenSaver.update=0;
-  //uint16_t _x=(screenSaver.x*5)/2;
   if(screenSaver.x>(-ScrSaverXBM[0]) ||screenSaver.x<OledWidth || screenSaver.y>(-ScrSaverXBM[1]) || screenSaver.y<OledHeight ){
     u8g2_SetDrawColor(&u8g2, WHITE);
     u8g2_DrawXBMP(&u8g2, screenSaver.x, screenSaver.y, ScrSaverXBM[0], ScrSaverXBM[1], &ScrSaverXBM[2]);
@@ -809,6 +808,10 @@ static uint8_t  drawError(uint8_t *refresh){
 
 static void  drawMisc(uint8_t *refresh){
   if(!*refresh) return;
+
+  Widget_SetPoint->enabled = (mainScr.currentMode==main_tipselect);                          // Disable setpoint widget if not in setpoint screen
+  plot.enabled &= !(Iron.Error.Flags & FLAG_ACTIVE);
+
   u8g2_SetFont(&u8g2, u8g2_font_small);
   if(mainScr.currentMode==main_tipselect){
     uint8_t len = u8g2_GetUTF8Width(&u8g2, tipNames[systemSettings.Profile.currentTip])+4;   // Draw edit frame
