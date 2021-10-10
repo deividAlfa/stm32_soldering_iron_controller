@@ -230,13 +230,13 @@ uint16_t human2adc(int16_t t) {
   }
 
   int16_t tH = adc2Human_x10(temp,0,mode_Celsius);                // Find +0.5ºC to provide better reading stability
-  if (tH < (t+4)) {
-    while(tH < (t+4)){
+  if (tH < (t)) {
+    while(tH < (t)){
       tH = adc2Human_x10(++temp,0,mode_Celsius);
     }
   }
-  else if (tH > (t+6)) {
-    while(tH > (t+6)){
+  else if (tH > (t)) {
+    while(tH > (t)){
       tH = adc2Human_x10(--temp,0,mode_Celsius);
     }
   }
