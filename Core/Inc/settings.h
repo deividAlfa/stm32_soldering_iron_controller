@@ -12,7 +12,7 @@
 #include "pid.h"
 #include "board.h"
 
-#define SWSTRING          "SW: 21-10-09"                            // Software version reported in settings screen
+#define SWSTRING          "SW: 21-10-10"                            // Software version reported in settings screen
 #define SETTINGS_VERSION  14                                        // Change this if you change the settings/profile struct to prevent getting out of sync
 #define LANGUAGE_COUNT    5                                         // Number of languages
 #define ProfileSize       3                                         // Number of profiles
