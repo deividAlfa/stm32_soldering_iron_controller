@@ -809,7 +809,7 @@ static uint8_t  drawError(uint8_t *refresh){
 static void  drawMisc(uint8_t *refresh){
   if(!*refresh) return;
 
-  Widget_SetPoint->enabled = (mainScr.currentMode==main_tipselect);                          // Disable setpoint widget if not in setpoint screen
+  Widget_SetPoint->enabled &= (mainScr.currentMode==main_setpoint);                            // Disable setpoint widget if not in setpoint screen
   plot.enabled &= !(Iron.Error.Flags & FLAG_ACTIVE);
 
   u8g2_SetFont(&u8g2, u8g2_font_small);
