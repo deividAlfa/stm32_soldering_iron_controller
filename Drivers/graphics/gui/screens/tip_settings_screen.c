@@ -22,7 +22,37 @@ static comboBox_item_t *comboitem_tip_settings_cancel;
 static editable_widget_t *editable_tip_settings_cal250;
 static editable_widget_t *editable_tip_settings_cal400;
 
+//=========================================================
+void sortTips(void){
+  uint8_t min;
+  char current[TipCharSize];
 
+  strcpy (current, getCurrentTip()->name);                                                        // Copy tip name being used in the system
+
+  __disable_irq();
+  for(uint8_t j=0; j<systemSettings.Profile.currentNumberOfTips; j++){                            // Sort alphabetically
+    min = j;                                                                                      // Min is start position
+    for(uint8_t i=j+1; i<systemSettings.Profile.currentNumberOfTips; i++){
+      if(strcmp(systemSettings.Profile.tip[min].name, systemSettings.Profile.tip[i].name) > 0){   // If Tip[Min] > Tip[i]
+        min = i;                                                                                  // Update min
+      }
+    }
+    if(min!=j){                                                                                   // If j is not the min
+      backupTip = systemSettings.Profile.tip[j];                                                  // Swap j and min
+      systemSettings.Profile.tip[j] = systemSettings.Profile.tip[min];
+      systemSettings.Profile.tip[min] = backupTip;
+    }
+  }
+
+  for(uint8_t i=0; i<systemSettings.Profile.currentNumberOfTips; i++){                            // Find used tip after sorting
+    if(strcmp(current, systemSettings.Profile.tip[i].name) == 0){                                 // If matching name
+      setCurrentTip(i);                                                                           // Reload tip (This will also reload the new tip settings)
+      systemSettings.Profile.currentTip = i;
+      break;
+    }
+  }
+  __enable_irq();
+}
 
 //=========================================================
 static void *getTipName() {
@@ -95,37 +125,32 @@ static void setCal400(int32_t *val) {
 }
 //=========================================================
 static int tip_save(widget_t *w, RE_Rotation_t input) {
-  systemSettings.Profile.tip[Selected_Tip] = backupTip;                                                            // Store tip data
-  if(Selected_Tip==systemSettings.Profile.currentTip){                                                          // If current used tip, update PID
-    __disable_irq();
-    setCurrentTip(Selected_Tip);                                                                                // Reload tip settings
-    __enable_irq();
-  }
-  else if(Selected_Tip==systemSettings.Profile.currentNumberOfTips){                                            // If new tip
+  __disable_irq();
+  systemSettings.Profile.tip[Selected_Tip] = backupTip;                                                         // Store tip data
+  __enable_irq();
+  if(Selected_Tip==systemSettings.Profile.currentNumberOfTips){                                                 // If new tip
     systemSettings.Profile.currentNumberOfTips++;                                                               // Increase number of tips in the system
   }
+  sortTips();
   return comboitem_tip_settings_cancel->action_screen;
 }
 //=========================================================
 static int tip_delete(widget_t *w, RE_Rotation_t input) {
-  char name[TipCharSize]=_BLANK_TIP;
-  systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
-
-  if(Selected_Tip==systemSettings.Profile.currentTip){                                                          // If deleted tip was the current being used
-    if(systemSettings.Profile.currentTip){                                                                      // If not zero
-      systemSettings.Profile.currentTip--;                                                                      // Select previous tip
-    }
-    __disable_irq();
-    setCurrentTip(systemSettings.Profile.currentTip);                                                           // Reload tip settings
-    __enable_irq();
-  }
-
-  for(int x = Selected_Tip; x < TipSize-1;x++) {                                                                // Overwrite selected tip and move the rest one position backwards
+  __disable_irq();
+  for(uint8_t x = Selected_Tip; x <systemSettings.Profile.currentNumberOfTips;x++) {                            // Overwrite selected tip and move the rest one position backwards
     systemSettings.Profile.tip[x] = systemSettings.Profile.tip[x+1];
   }
+  systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
+  if(Selected_Tip<=systemSettings.Profile.currentTip){                                                          // If deleted tip is lower or equal than current used tip
+    if(systemSettings.Profile.currentTip){                                                                      // Move one position back if possible
+      systemSettings.Profile.currentTip--;
+    }
+    setCurrentTip(systemSettings.Profile.currentTip);                                                           // Reload tip settings
+  }
+  __enable_irq();
 
-  for(int x = systemSettings.Profile.currentNumberOfTips; x < TipSize;x++) {                                    // Fill the unused tips with blank names
-    strcpy(systemSettings.Profile.tip[x].name, name);
+  for(uint8_t x = systemSettings.Profile.currentNumberOfTips; x < TipSize;x++) {                                // Fill the unused tips with blank names
+    strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
   }
                                                                                                                 // Skip tip settings (As tip is now deleted)
   return comboitem_tip_settings_cancel->action_screen;                                                          // And return to main screen or system menu screen
