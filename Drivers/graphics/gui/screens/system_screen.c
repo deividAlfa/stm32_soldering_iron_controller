@@ -59,6 +59,19 @@ void update_NTC_menu(void){
 }
 #endif
 
+void update_System_menu(void){
+  bool mode = (systemSettings.settings.dim_mode>dim_off);
+  comboitem_system_Dim_PowerOff->enabled = mode;
+  comboitem_system_Dim_Timeout->enabled = mode;
+
+  mode = (systemSettings.settings.WakeInputMode==mode_shake);
+  comboitem_system_StandMode->enabled       = !mode;
+  comboitem_system_ShakeFiltering->enabled  = mode;
+  comboitem_system_BootMode->enabled        = mode;
+  comboitem_system_ShakeWakeMode->enabled   = mode;
+  comboitem_system_ButtonWakeMode->enabled  = mode;
+}
+
 void updateTemperatureUnit(void){
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     editable_system_TempStep->inputData.endString="\260F";
@@ -160,10 +173,7 @@ static void setOledOffset(uint32_t *val) {
 //=========================================================
 static void * getdimMode() {
   temp = systemSettings.settings.dim_mode;
-  bool mode = (systemSettings.settings.dim_mode>dim_off);
-  comboitem_system_Dim_PowerOff->enabled = mode;
-  comboitem_system_Dim_Timeout->enabled = mode;
-
+  update_System_menu();
   return &temp;
 }
 static void setdimMode(uint32_t *val) {
@@ -196,15 +206,7 @@ static void setActiveDetection(uint32_t *val) {
 //=========================================================
 static void * getWakeMode() {
   temp = systemSettings.settings.WakeInputMode;
-
-  bool mode = (systemSettings.settings.WakeInputMode==mode_shake);   // 0=stand, 1=shake
-
-  comboitem_system_StandMode->enabled       = !mode;
-  comboitem_system_ShakeFiltering->enabled  = mode;
-  comboitem_system_BootMode->enabled        = mode;
-  comboitem_system_ShakeWakeMode->enabled   = mode;
-  comboitem_system_ButtonWakeMode->enabled  = mode;
-
+  update_System_menu();
   return &temp;
 }
 static void setWakeMode(uint32_t *val) {
@@ -306,8 +308,8 @@ static void * getShakeFiltering() {
 static void system_onEnter(screen_t *scr){
   if(scr==&Screen_settings){
     comboResetIndex(Screen_system.widgets);
+    profile=systemSettings.settings.currentProfile;
   }
-  profile=systemSettings.settings.currentProfile;
 }
 
 static void system_onExit(screen_t *scr){
@@ -531,7 +533,6 @@ static void system_create(screen_t *scr){
   edit->options = tempUnit;
   edit->numberOfOptions = 2;
 
-
   //  [ Temp step Widget ]
   //
   newComboEditable(w, strings[lang].SYSTEM__Step, &edit, NULL);
@@ -544,7 +545,6 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setTmpStep;
   edit->max_value = 50;
   edit->min_value = 1;
-
   
   // [ Temp big step Widget ]
   //
@@ -558,7 +558,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setBigTmpStep;
   edit->max_value = 50;
   edit->min_value = 1;
-  
+
   // [ Denoisethreshold Widget ]
   //
   newComboEditable(w, strings[lang].FILTER__Threshold, &edit, NULL);
@@ -636,6 +636,7 @@ static void system_create(screen_t *scr){
   newComboScreen(w, strings[lang]._BACK, screen_settings, NULL);
 
   updateTemperatureUnit();
+  update_System_menu();
 }
 
 int system_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
