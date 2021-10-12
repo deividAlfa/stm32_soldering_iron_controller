@@ -153,6 +153,7 @@ void newComboEditable( widget_t *combo, char *label, editable_widget_t **newEdit
 void newComboMultiOption(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem);
 void newComboAction(widget_t *w, char *label, int (*action)(widget_t *w, RE_Rotation_t input), comboBox_item_t **newItem);
 void comboResetIndex(widget_t *w);
+uint8_t comboItemToIndex(widget_t *w, comboBox_item_t *item);
 int32_t strsum(char* str);
 void insertDot(char *str, uint8_t dec);
 #endif /* GRAPHICS_GUI_WIDGETS_H_ */
