@@ -751,20 +751,6 @@ uint8_t default_widgetDraw(widget_t *w) {
   return refresh;
 }
 
-
-
-uint8_t comboItemToIndex(widget_t *w, comboBox_item_t *item) {
-  if(!w || !item){ return 0; }
-  uint8_t index = 0;
-  comboBox_item_t *i = ((comboBox_widget_t*)w->content)->first;
-  while(i && i != item) {
-    i = i->next_item;
-    if(i->enabled)
-      ++ index;
-  }
-  return index;
-}
-
 #ifdef COMBO_SLIDE_TEXT
 
 uint8_t comboBoxDraw(widget_t *w) {
@@ -1628,4 +1614,30 @@ void comboResetIndex(widget_t *w){
   }
   combo->currentItem = combo->first;
   combo->currentScroll=0;
+}
+
+uint8_t comboItemToIndex(widget_t *w, comboBox_item_t *item) {
+  if(!w || !item){ return 0; }
+  uint8_t index = 0;
+  comboBox_item_t *i = ((comboBox_widget_t*)w->content)->first;
+  while(i->next_item && i != item) {
+    i = i->next_item;
+    if(i->enabled)
+      index++;
+  }
+  return index;
+}
+
+comboBox_item_t *comboIndexToItem(widget_t *w, uint8_t index) {
+  if(!w){ return NULL; }
+  comboBox_widget_t *combo = (comboBox_widget_t*)w->content;
+  comboBox_item_t *i=combo->first;
+  if(!i){ return NULL; }
+  while(i->next_item && index) {
+      i = i->next_item;
+      if(i->enabled){
+        index--;
+      }
+   }
+  return i;
 }
