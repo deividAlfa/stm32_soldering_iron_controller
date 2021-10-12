@@ -18,12 +18,7 @@ struct{
   uint32_t stepTimer;
 }dim;
 
-char *tipName;
-bool disableTipCopy;
-bool newTip;
-#ifdef ENABLE_DEBUG_SCREEN
-bool dbg_scr_en;
-#endif
+uint8_t newTip;
 
 plotData_t plot;
 

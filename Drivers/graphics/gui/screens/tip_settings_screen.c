@@ -14,7 +14,7 @@
 
 screen_t Screen_tip_settings;
 static uint8_t return_screen;
-
+static widget_t        *widget_tip_settings;
 static comboBox_item_t *comboitem_tip_settings_save;
 static comboBox_item_t *comboitem_tip_settings_copy;
 static comboBox_item_t *comboitem_tip_settings_delete;
@@ -158,19 +158,17 @@ static int tip_delete(widget_t *w, RE_Rotation_t input) {
 //=========================================================
 static int tip_copy(widget_t *w, RE_Rotation_t input) {
   Selected_Tip = systemSettings.Profile.currentNumberOfTips;                                                    // Select first empty slot
-  strcpy(backupTip.name, _BLANK_TIP);                                                                              // Copy empty name
-  comboitem_tip_settings_delete->enabled=0;                                                                     // Disable copying, deleting and saving(Until name is written)
-  comboitem_tip_settings_copy->enabled=0;
-  comboitem_tip_settings_save->enabled=0;
+  strcpy(backupTip.name, _BLANK_TIP);                                                                           // Copy empty name
+  comboitem_tip_settings_save->enabled=0;                                                                       // Disable save, will be enabled when the name is modified
+  comboitem_tip_settings_copy->enabled=0;                                                                       // Cannot copy a new tip
+  comboitem_tip_settings_delete->enabled=0;                                                                     // Cannot delete a new tip
   comboResetIndex(Screen_tip_settings.widgets);                                                                 // Reset menu to 1st option
-  disableTipCopy=1;
   return -1;                                                                                                    // And return to main screen or system menu screen
 }
 //=========================================================
 
 static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
-  static uint32_t last_update=0;
-  bool update=0;
+  int ret;
 
   refreshOledDim();
   handleOledDim();
@@ -189,10 +187,6 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
   if(input!=Rotate_Nothing){
     screen_timer=current_time;
   }
-  else if((current_time-last_update)>99){                                                                       // Update on user activity but also every 100mS
-    last_update=current_time;
-    update=1;
-  }
 
   if(input==Rotate_Decrement_while_click){
    comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
@@ -205,88 +199,52 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
       return return_screen;
     }
   }
-  if(update){
+
+  ret  = default_screenProcessInput(scr, input, state);                                                           // Process screen
+
+  if(widget_tip_settings->refresh>refresh_idle){                                                                  // If something changed, check conditions
     bool enable=1;
-    if(strcmp(backupTip.name, _BLANK_TIP) == 0){                                                                   // Check that the name is not empty
-      enable=0;                                                                                                 // If empty, disable save button
+    if(strcmp(backupTip.name, _BLANK_TIP) == 0){                                                                  // Check that the name is not empty
+      enable=0;                                                                                                   // If empty, disable saving
     }
     else{
-      for(uint8_t x = 0; x < TipSize; x++) {                                                                    // Compare tip names with current edit
-        if( (strcmp(backupTip.name, systemSettings.Profile.tip[x].name) == 0) && x!=Selected_Tip ){                // If match is found, and it's not the tip being edited
-          enable=0;                                                                                             // Disable save button
+      for(uint8_t x = 0; x < TipSize; x++) {                                                                      // Compare tip names with current edit
+        if( (strcmp(backupTip.name, systemSettings.Profile.tip[x].name) == 0) && x!=Selected_Tip ){               // If match is found, and it's not the tip being edited
+          enable=0;                                                                                               // Disable save button
           break;
         }
       }
     }
     comboitem_tip_settings_save->enabled=enable;
-    if(disableTipCopy){
-      comboitem_tip_settings_delete->enabled=0;
-      comboitem_tip_settings_copy->enabled=0;
-    }
-    else{
-      comboitem_tip_settings_copy->enabled=enable;
-    }
   }
-  return default_screenProcessInput(scr, input, state);
+
+  return ret;
 }
 
 
 static void tip_settings_onEnter(screen_t *scr){
-  bool new=0;
-  disableTipCopy=0;
   comboResetIndex(Screen_tip_settings.widgets);
 
-  if(scr==&Screen_tip_list){                                                                      // If coming from tips menu
-    if(newTip) {                                                                                      // If was Add New tip option
-      newTip=0;
-      for(uint8_t x = 0; x < TipSize; x++) {                                                            // Find first valid tip and store the position
-        if(strcmp(systemSettings.Profile.tip[x].name, _BLANK_TIP)!=0){
-          Selected_Tip=x;
-          new=1;
-          break;
-        }
-      }
-      if(!new){
-        Error_Handler();                                                                                // This shouldn't happen
-      }
-    }
-    else{
-      for(uint8_t x = 0; x < TipSize; x++) {                                                            // Else, find the selected tip
-        if(strcmp(tipName, systemSettings.Profile.tip[x].name)==0){
-          Selected_Tip = x;
-          break;
-        }
-      }
-    }
+  if(scr==&Screen_tip_list){                                                                                    // If coming from tips menu
     return_screen= screen_tip_list;
   }
   else{
     return_screen = screen_main;
-    Selected_Tip = systemSettings.Profile.currentTip;
   }
   comboitem_tip_settings_cancel->action_screen = return_screen;
 
-  backupTip = systemSettings.Profile.tip[Selected_Tip];                                                      // Copy selected tip
-
-  if(new){                                                                                                // If new tip selected
-    strcpy(backupTip.name, _BLANK_TIP);                                                                      // Set an empty name
-    Selected_Tip=systemSettings.Profile.currentNumberOfTips;                                              // Selected tip is next position
-    disableTipCopy=1;                                                                                     // Cannot copy a new tip
+  if(newTip){                                                                                                   // If new tip selected
+    newTip=0;
+    backupTip = systemSettings.Profile.tip[0];                                                                  // Copy data from first tip in the system
+    strcpy(backupTip.name, _BLANK_TIP);                                                                         // Set an empty name
+    Selected_Tip=systemSettings.Profile.currentNumberOfTips;                                                    // Selected tip is next position
+    comboitem_tip_settings_copy->enabled=0;                                                                     // Cannot copy a new tip
+    comboitem_tip_settings_delete->enabled=0;                                                                   // Cannot delete a new tip
   }
   else{
-    if(systemSettings.Profile.currentNumberOfTips>1){                                                     // If more than 1 tip in the system, enable delete
-      comboitem_tip_settings_delete->enabled=1;
-    }
-    else{
-      comboitem_tip_settings_delete->enabled=0;
-    }
-    if(systemSettings.Profile.currentNumberOfTips<TipSize){                                               // If not full
-      comboitem_tip_settings_copy->enabled=1;                                                         // Existing tip, enable copy button;
-    }
-    else{
-      disableTipCopy=1;
-      comboitem_tip_settings_copy->enabled=0;                                                         // No space left
-    }
+    backupTip = systemSettings.Profile.tip[Selected_Tip];                                                       // Copy selected tip
+    comboitem_tip_settings_delete->enabled = (systemSettings.Profile.currentNumberOfTips>1);                    // If more than 1 tip in the system, enable delete
+    comboitem_tip_settings_copy->enabled = (systemSettings.Profile.currentNumberOfTips<TipSize);                // If tip slots available, enable copy button
   }
 }
 
@@ -295,9 +253,10 @@ static void tip_settings_create(screen_t *scr){
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
 
-  //  [ PID COMBO ]
+  //  [ TIP settings combo ]
   //
   newWidget(&w,widget_combo,scr);
+  widget_tip_settings = w;
 
   //[ TIP label]
   //

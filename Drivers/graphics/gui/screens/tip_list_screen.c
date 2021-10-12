@@ -18,13 +18,12 @@ static int addNewTip(widget_t *w, RE_Rotation_t input){
 }
 
 static int editTip(widget_t *w, RE_Rotation_t input) {
-  tipName=((comboBox_widget_t*)w->content)->currentItem->text;
+  Selected_Tip = comboItemToIndex(w,((comboBox_widget_t*)w->content)->currentItem);
   return screen_tip_settings;
 }
 
 static void tip_list_init(screen_t *scr) {
   default_init(scr);
-  newTip=0;
   comboResetIndex(Screen_tip_list.widgets);
   comboBox_item_t *i = ((comboBox_widget_t*)Screen_tip_list.widgets->content)->first;
   for(int x = 0; x < TipSize; x++) {

@@ -500,6 +500,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       }
       switch((uint8_t)input){
         case LongClick:
+          Selected_Tip = systemSettings.Profile.currentTip;
           return screen_tip_settings;
 
         case Click:

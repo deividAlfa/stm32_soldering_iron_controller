@@ -39,14 +39,9 @@ extern plotData_t plot;
 extern int32_t temp;
 extern uint8_t status, profile, Selected_Tip, lang, backupMode;
 extern int16_t backupTemp, ambTemp;
-extern bool disableTipCopy;
-extern char *tipName;
-extern bool newTip;
+extern uint8_t newTip;
 extern tipData_t backupTip;
 
-#ifdef ENABLE_DEBUG_SCREEN
-extern bool dbg_scr_en;
-#endif
 
 void handleOledDim(void);
 void refreshOledDim(void);
