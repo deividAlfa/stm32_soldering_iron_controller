@@ -134,11 +134,12 @@ void enable_soft_Oled(void){
   // Reset the bus
   i2cStart();
   Oled_Set_SDA();
+  i2c_Delay_H();
   for(uint8_t c=0;c<9;c++){
     Oled_Set_SCL();
-    i2cDelay();
+    i2c_Delay_H();
     Oled_Clear_SCL();
-    i2cDelay();
+    i2c_Delay_H();
   }
   i2cStop();
   #endif
@@ -172,136 +173,106 @@ void disable_soft_Oled(void){
 
 #endif
 
-#if defined OLED_SPI && !defined OLED_DEVICE
-
-void spi_send(uint8_t* bf, uint16_t count){
-  uint8_t shift,data;
-  while(count--){
+#if (defined OLED_SPI && !defined OLED_DEVICE) || (defined OLED_I2C && (!defined OLED_DEVICE  || (defined OLED_DEVICE && defined I2C_TRY_HW)))
+#if (defined OLED_SPI)
+void oled_send(uint8_t* bf, uint16_t count){
+#elif (defined OLED_I2C)
+void oled_send(uint8_t* bf, uint16_t count, uint8_t mode){
+  i2cStart();
+  i2cBegin(mode);
+#endif
+  uint8_t data;
+  while(count--){                     // Unrolled byte loop increase a lot the performance
     data = *bf++;
-    if((data==0) || (data==0xFF)){
-      if(data==0)
-        Oled_Clear_SDA();
-      else
-        Oled_Set_SDA();
-
-      // Much faster without a loop!
-      Oled_Set_SCL();
-      Oled_Clear_SCL();
-      Oled_Set_SCL();
-      Oled_Clear_SCL();
-      Oled_Set_SCL();
-      Oled_Clear_SCL();
-      Oled_Set_SCL();
-      Oled_Clear_SCL();
-      Oled_Set_SCL();
-      Oled_Clear_SCL();
-      Oled_Set_SCL();
-      Oled_Clear_SCL();
-      Oled_Set_SCL();
-      Oled_Clear_SCL();
-      Oled_Set_SCL();
-      Oled_Clear_SCL();
+    if((!data) || (data==0xFF)){
+      Oled_Bit(data);
+      Oled_Clock();
+      Oled_Clock();
+      Oled_Clock();
+      Oled_Clock();
+      Oled_Clock();
+      Oled_Clock();
+      Oled_Clock();
     }
     else{
-      for(shift = 0; shift < 8; shift++){
-        if(data & 0x80){
-          Oled_Set_SDA();
-        }
-        else{
-          Oled_Clear_SDA();
-        }
-
-        Oled_Set_SCL();
-        data <<= 1;
-        Oled_Clear_SCL();
-      }
+      Oled_Bit(data & 0x80);
+      Oled_Bit(data & 0x40);
+      Oled_Bit(data & 0x20);
+      Oled_Bit(data & 0x10);
+      Oled_Bit(data & 0x08);
+      Oled_Bit(data & 0x04);
+      Oled_Bit(data & 0x02);
+      Oled_Bit(data & 0x01);
     }
+    #if (defined OLED_I2C)
+    Oled_Set_SDA();
+    Oled_Clock();                     // Ack Nack pulse (we don't read it)
+    #endif
   }
+  #if (defined OLED_I2C)
+  i2cStop();
+  #endif
 }
 #endif
 
+
 #if defined OLED_I2C && (!defined OLED_DEVICE  || (defined OLED_DEVICE && defined I2C_TRY_HW))
-void i2cDelay(void){
-  asm( "nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n\
-        nop\nnop\nnop\nnop\nnop\nnop\nnop/*\nnop\n\
-        nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop*/");
+// This delays are made for 36MHz (Ksger v2 software i2c). If increasing the cpu frequency, also increase the nop count 
+__attribute__ ((noinline)) void i2c_Delay_H(void){                  // Intended no inline to add further delay and reduce nops
+  asm("nop\nnop\nnop\nnop\nnop\nnop");
 }
+
+__attribute__ ((always_inline)) inline  void i2c_Delay_L(void){     // Inline here, we need very short delay
+  asm("nop\nnop\nnop\nnop");
+}
+
 void i2cStart(void){                                      // Start condition, SDA transition to low with SCL high
   Oled_Set_SCL();
-  i2cDelay();
+  i2c_Delay_H();
   Oled_Clear_SDA();
-  i2cDelay();
+  i2c_Delay_L();
   Oled_Clear_SCL();
-  i2cDelay();
+  i2c_Delay_L();
 }
 void i2cStop(void){                                       // Stop condition, SCL transition to high with SDA low
   Oled_Clear_SDA();
-  i2cDelay();
+  i2c_Delay_L();
   Oled_Set_SCL();
-  i2cDelay();
+  i2c_Delay_H();
   Oled_Set_SDA();
-  i2cDelay();
+  i2c_Delay_L();
 }
 
 // This sw i2c driver is extremely timing optimized, done specially for ksger v2.1 and compatibles running at 36MHz.
 // Hacks clock low time using the slow rise time (i2c pullup resistors) as the delay.
 // Will start failing if the core runs faster than 44-48MHz because of the tight timing.
 void i2cBegin(uint8_t mode){
-  uint8_t bytes, shift, data[2]= { OLED_ADDRESS, mode };
-  uint8_t *bf=data;
-  bytes=1;
-  do{
-    shift=7;
-    do{
-    SW_SDA_GPIO_Port->BSRR = SW_SDA_Pin<<(16*!(*bf & (1<<shift)));
-      Oled_Set_SCL();
-      i2cDelay();
-      Oled_Clear_SCL();
-    }while(shift--);
-
-    i2cDelay();
-    Oled_Set_SCL();
-    i2cDelay();
-    //Oled_Set_SDA();                                     // As we don't care about the ACK, don't release SDA
-    //i2cDelay();
-    //Get ACK here
-    Oled_Clear_SCL();
-    bf++;
-  }while(bytes--);
-}
-
-void i2cSend(uint8_t* bf, uint16_t count, uint8_t mode){
-  uint8_t shift;
-  i2cStart();
-  i2cBegin(mode);
-  while(count--){
-    shift=7;
-    if( (*bf==0)||(*bf==0xFF)){                         // If data 0 or 0xff, we don't have to toggle data line, send the data fast
-      SW_SDA_GPIO_Port->BSRR = SW_SDA_Pin<<(16*(*bf==0));
-      do{
-        Oled_Set_SCL();
-        i2cDelay();
-        Oled_Clear_SCL();
-      }while(shift--);
-    }
-    else{
-      do{
-        SW_SDA_GPIO_Port->BSRR = SW_SDA_Pin<<(16*!(*bf & (1<<shift)));
-        Oled_Set_SCL();
-        i2cDelay();
-        Oled_Clear_SCL();
-      }while(shift--);
-    }
-    i2cDelay();
-    Oled_Set_SCL();
-    i2cDelay();
-    //Oled_Set_SDA();                                   // As we don't care about the ACK, don't release SDA
-    //i2cDelay();
-    //Get ACK here
-    Oled_Clear_SCL();
-    bf++;
+  uint8_t data, bf[2] = { OLED_ADDRESS, mode };
+  for(uint8_t bytes=0;bytes<2;bytes++){
+      data = bf[bytes];
+      if((!data) || (data==0xFF)){                     // Unrolled byte loop increase a lot the performance
+        Oled_Bit(data);
+        Oled_Clock();
+        Oled_Clock();
+        Oled_Clock();
+        Oled_Clock();
+        Oled_Clock();
+        Oled_Clock();
+        Oled_Clock();
+      }
+      else{
+        Oled_Bit(data & 0x80);
+        Oled_Bit(data & 0x40);
+        Oled_Bit(data & 0x20);
+        Oled_Bit(data & 0x10);
+        Oled_Bit(data & 0x08);
+        Oled_Bit(data & 0x04);
+        Oled_Bit(data & 0x02);
+        Oled_Bit(data & 0x01);
+      }
+      Oled_Set_SDA();
+      Oled_Clock();                     // Ack Nack pulse (we don't read it)
   }
-  i2cStop();
 }
 #endif
 
@@ -326,7 +297,7 @@ void write_cmd(uint8_t cmd) {
     Error_Handler();
   }
   #else
-  spi_send(&cmd,1);
+  oled_send(&cmd,1);
   #endif
 
   #ifdef USE_DC
@@ -345,7 +316,7 @@ void write_cmd(uint8_t cmd) {
   }
   #elif defined OLED_DEVICE && defined I2C_TRY_HW
   if(oled.use_sw){
-    i2cSend(&cmd,1,i2cCmd);
+    oled_send(&cmd,1,i2cCmd);
   }
   else{
   	if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, 0x00, 1, &cmd, 1, 100)!=HAL_OK){
@@ -353,7 +324,7 @@ void write_cmd(uint8_t cmd) {
 	  }
   }
   #else
-  i2cSend(&cmd,1,i2cCmd);
+  oled_send(&cmd,1,i2cCmd);
   #endif
 #endif
 }
@@ -378,14 +349,14 @@ void update_display( void ){
         Oled_Set_DC();
         #endif
 
-        spi_send((uint8_t *)&oled.buffer[128*row],128);
+        oled_send((uint8_t *)&oled.buffer[128*row],128);
 
         #ifdef USE_CS
         Oled_Set_CS();
         #endif
 
         #elif defined OLED_I2C
-        i2cSend((uint8_t *)&oled.buffer[128*row],128,i2cData);
+        oled_send((uint8_t *)&oled.buffer[128*row],128,i2cData);
         #endif
       }
       return;

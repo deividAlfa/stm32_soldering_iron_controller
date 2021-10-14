@@ -33,7 +33,7 @@ typedef enum{
   error_FLASH,
 }FatalErrors;
 
-#define OledWidth	128
+#define OledWidth	  128
 #define OledHeight	64
 
 // buffer needs to be aligned to 32bit(4byte) boundary, as FillBuffer() uses 32bit transfer for increased speed
@@ -56,25 +56,35 @@ extern oled_t oled;
 
 enum { fill_soft, fill_dma };
 
-#define Oled_Set_SCL() 		SW_SCL_GPIO_Port->BSRR = (uint32_t)SW_SCL_Pin
-#define Oled_Clear_SCL() 	SW_SCL_GPIO_Port->BRR = (uint32_t)SW_SCL_Pin
+#if defined OLED_SPI
+#define Oled_Set_SCL() 		SW_SCL_GPIO_Port->BSRR = SW_SCL_Pin
+#define Oled_Clear_SCL() 	SW_SCL_GPIO_Port->BRR = SW_SCL_Pin
 
-#define Oled_Set_SDA() 		SW_SDA_GPIO_Port->BSRR = (uint32_t)SW_SDA_Pin
-#define Oled_Clear_SDA() 	SW_SDA_GPIO_Port->BRR = (uint32_t)SW_SDA_Pin
+#elif  defined OLED_I2C
+#define Oled_Set_SCL()    SW_SCL_GPIO_Port->BSRR = SW_SCL_Pin; i2c_Delay_H()							// Rise time needs more time, as it's open drain
+#define Oled_Clear_SCL()  SW_SCL_GPIO_Port->BRR = SW_SCL_Pin; i2c_Delay_L()								// Fall time can be much faster
+#endif
+
+#define Oled_Clock()      Oled_Set_SCL(); Oled_Clear_SCL()
+
+#define Oled_Set_SDA() 		SW_SDA_GPIO_Port->BSRR = SW_SDA_Pin
+#define Oled_Clear_SDA() 	SW_SDA_GPIO_Port->BRR = SW_SDA_Pin
+
+#define Oled_Bit(n)      if(!(n))Oled_Clear_SDA();else Oled_Set_SDA(); Oled_Clock()				// Testing !n compiles faster code than testing n
 
 #ifdef USE_CS
-#define Oled_Set_CS() 		OLED_CS_GPIO_Port->BSRR = (uint32_t)OLED_CS_Pin
-#define Oled_Clear_CS() 	OLED_CS_GPIO_Port->BRR = (uint32_t)OLED_CS_Pin
+#define Oled_Set_CS() 		OLED_CS_GPIO_Port->BSRR = OLED_CS_Pin
+#define Oled_Clear_CS() 	OLED_CS_GPIO_Port->BRR = OLED_CS_Pin
 #endif
 
 #ifdef USE_DC
-#define Oled_Set_DC() 		OLED_DC_GPIO_Port->BSRR = (uint32_t)OLED_DC_Pin
-#define Oled_Clear_DC() 	OLED_DC_GPIO_Port->BRR = (uint32_t)OLED_DC_Pin
+#define Oled_Set_DC() 		OLED_DC_GPIO_Port->BSRR = OLED_DC_Pin
+#define Oled_Clear_DC() 	OLED_DC_GPIO_Port->BRR = OLED_DC_Pin
 #endif
 
 #ifdef USE_RST
-#define Oled_Set_RES() 		OLED_RST_GPIO_Port->BSRR = (uint32_t)OLED_RST_Pin
-#define Oled_Clear_RES() 	OLED_RST_GPIO_Port->BRR = (uint32_t)OLED_RST_Pin
+#define Oled_Set_RES() 		OLED_RST_GPIO_Port->BSRR = OLED_RST_Pin
+#define Oled_Clear_RES() 	OLED_RST_GPIO_Port->BRR = OLED_RST_Pin
 #endif
 
 #define BLACK 0
@@ -94,7 +104,7 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *device);
 #elif defined OLED_SPI
 void Enable_Soft_SPI(void);
 void ssd1306_init(DMA_HandleTypeDef *dma);
-void spi_send(uint8_t* bf, uint16_t count);
+void oled_send(uint8_t* bf, uint16_t count);
 #endif
 
 #if !defined OLED_DEVICE || (defined OLED_DEVICE && defined I2C_TRY_HW)
@@ -110,8 +120,9 @@ void disable_soft_Oled(void);
 void i2cStart(void);
 void i2cStop(void);
 void i2cBegin(uint8_t mode);
-void i2cSend(uint8_t* bf, uint16_t count, uint8_t mode);
-void i2cDelay(void);
+void oled_send(uint8_t* bf, uint16_t count, uint8_t mode);
+void i2c_Delay_L(void);
+void i2c_Delay_H(void);
 #endif
 
 #if defined OLED_DEVICE
