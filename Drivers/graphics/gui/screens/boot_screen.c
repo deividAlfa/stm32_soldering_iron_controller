@@ -18,7 +18,6 @@ static widget_t *Widget_profile;
 static widget_t *Widget_lang;
 static widget_t *Widget_ok;
 static uint8_t boot_step=0;
-static uint8_t current_lang = lang_english;
 
 // Credits: Jesus Vallejo  https://github.com/jesusvallejo/
 const uint8_t splashXBM[] = {

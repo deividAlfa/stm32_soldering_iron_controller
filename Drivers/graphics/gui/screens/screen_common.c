@@ -8,7 +8,7 @@
 
 int32_t temp;
 int16_t backupTemp, ambTemp;
-uint8_t status, profile, Selected_Tip, lang, backupMode;
+uint8_t status, profile, Selected_Tip, lang, backupMode, current_lang=lang_english;
 tipData_t backupTip;
 
 struct{

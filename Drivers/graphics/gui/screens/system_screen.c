@@ -38,12 +38,9 @@ static editable_widget_t *editable_system_TempStep;
 static editable_widget_t *editable_system_bigTempStep;
 static editable_widget_t *editable_system_GuiTempDenoise;
 
-
 #ifdef USE_NTC
 uint8_t backup_Pullup, backup_NTC_detect, backup_enableNTC;
 uint16_t backup_Pull_res, backup_NTC_res, backup_NTC_Beta, backup_NTC_detect_high_res, backup_NTC_detect_low_res, backup_NTC_detect_high_res_beta, backup_NTC_detect_low_res_beta;
-static uint8_t current_lang = lang_english;
-
 void update_NTC_menu(void){
   uint8_t NTC_auto = (backup_NTC_detect && backup_enableNTC);
   uint8_t NTC_fixed = (!backup_NTC_detect && backup_enableNTC);
