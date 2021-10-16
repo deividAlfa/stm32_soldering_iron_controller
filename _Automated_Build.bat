@@ -56,28 +56,23 @@ if "%MX%"=="" (
         echo.
     )    
 )
-echo.
-
 
 REM ##################  [BUILD PROFILES]  ##################
-echo [93mEach time CubeMX is launched, click on "Generate code", wait until finishes, and exit[0m
-echo.
-echo.
 for %%M in (%MODELS%) do (
     echo [93mProfile: %%~M[0m
      
     del Core\Inc\board.h Core\Inc\*stm32*.* Core\Src\*stm32*.* Core\Startup\*.s .cproject .project *.ioc *.bin /Q 2>nul	
     xcopy /e /k /h /i /s /q /y %%M 2>nul >nul
     
-    echo [94mLaunching CubeMX...[0m
-    start /w /min java -jar %MX% STM32SolderingStation.ioc
+    echo [94mRunning CubeMX...[0m
+    start /w /min java -jar %MX% -q cubemx_script >nul 2>nul
     IF /I "!ERRORLEVEL!" NEQ "0" (
         echo [91mCubeMX error![0m
         goto :end
     )   
     
     echo [94mCompiling...[0m
-    start /w /min %IDE% --launcher.suppressErrors -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import %cd% -build STM32SolderingStation/Release
+    start /w /min %IDE% --launcher.suppressErrors -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import %cd% -build STM32SolderingStation/Release  >nul 2>nul
     IF /I "!ERRORLEVEL!" NEQ "0" (
         echo [91mCompiler error![0m
         goto :end
@@ -90,4 +85,6 @@ echo [32mBuild complete![0m
 
 :end
 rd EWARM /Q /S 2>nul
-timeout 2 >nul
+rem CubeMx or CubeIDE outputs something that breaks the pause command. So this is a quick way to clear any pending key in the buffer
+choice /C yn /T 0 /D y >nul
+pause
