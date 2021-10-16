@@ -13,7 +13,12 @@ uint8_t use_int_temp;
 #endif
 
 static tipData_t *currentTipData;
-volatile int16_t last_TIP_C, last_TIP_F, last_TIP_Raw_C, last_TIP_Raw_F, last_NTC_F, last_NTC_C;
+volatile int16_t last_TIP_C, last_TIP_F, last_TIP_F_Raw, last_TIP_C_Raw;
+#ifdef USE_NTC
+volatile int16_t last_NTC_C=-999, last_NTC_F=-999;
+#else
+volatile int16_t last_NTC_C=350, last_NTC_F=950;
+#endif
 
 #ifdef USE_NTC
 static uint32_t detect_error_timer=1000;
@@ -27,119 +32,124 @@ void detectNTC(void){
   detect_error_timer = HAL_GetTick();
 }
 #endif
-
+#define _DETECTED           0x80      // Detected flag
+#define _FIRST              0x10      // First pass flag
+#define _USE_EXTERNAL       0x00      // For normal NTC: Use single NTC values, NTC autodetect mode: Use lower NTC values
+#define _USE_EXTERNAL_HIGH  0x01      // For NTC autodetect mode: Use higher NTC values
+#define _USE_INTERNAL       0x02      // Use internal sensor flag
 int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
 #ifdef USE_NTC
-  static uint32_t error_timer=0;
-  static uint8_t detected = 0;  
+  static uint8_t status;
+
+  uint8_t error = (Iron.Error.Flags&(FLAG_ACTIVE | FLAG_NO_IRON))==(FLAG_ACTIVE | FLAG_NO_IRON);
+
   if(new){
-  
-    #ifdef ENABLE_INT_TEMP
-    if(systemSettings.settings.enableNTC){                                                              // If NTC enabled
-      if(Iron.Error.Flags&(FLAG_ACTIVE | FLAG_NO_IRON)){                                                // If handle removed, always force external NTC mode
-        use_int_temp = 0;
-      }
-      else if (!use_int_temp){																																					// Else, handle connected 
-        detected |= !(systemSettings.settings.NTC_detect && 1);                                         // If NTC detection disabled, set detected flag to skip further checks
-        if(detected && ((Iron.Error.Flags&(FLAG_ACTIVE | FLAG_NTC_HIGH | FLAG_NTC_LOW ))>FLAG_ACTIVE)){ // If NTC error active and NTC detection is done
-          use_int_temp = 1;                                                                             // Use internal sensor
+    do{                                                                                                 // Detection loop
+      if(systemSettings.settings.enableNTC){                                                            // If NTC enabled
+        if(error){                                                                                      // If errors (handle removed)
+          status = _USE_EXTERNAL;                                                                       // Force external NTC mode, clear detected and first pass flag
+        }
+        else if (!(status&_DETECTED)){                                                                  // If no errors and not detected yet
+          if(!(status&_FIRST)){                                                                         // If first pass not done
+            status=_FIRST;                                                                              // Set first pass flag, wait for next call to get new readings
+          }
+          else if(last_NTC_C<-100){                                                                     // If temp <-10.0ºC or not done first pass yet
+            if(systemSettings.settings.NTC_detect){                                                     // If NTC detection enabled
+              if(status&_USE_EXTERNAL_HIGH){                                                            // If already trying higher values
+                status = (_DETECTED | _USE_INTERNAL);                                                   // NTC invalid, use internal sensor
+              }
+              else{                                                                                     // This reading was with lower NTC values
+                status |= _USE_EXTERNAL_HIGH;                                                           // Now try with higher ones
+              }
+            }
+            else{                                                                                       // If reading <10.0ºC and NTC detect disabled, use internal sensor
+              status = (_DETECTED | _USE_INTERNAL);
+            }
+          }
+          else{                                                                                         // If temp valid
+            status |= _DETECTED;                                                                        // Set detected bit (NTC External/External_high bit remains)
+          }
         }
       }
-    }
-    else{                                                                                               // If NTC disabled
-      use_int_temp = 1;                                                                                 // Use internal sensor
-    }
+      else{                                                                                             // If NTC disabled
+        status = (_DETECTED | _USE_INTERNAL);                                                           // Use internal sensor
+      }
 
-    if(!use_int_temp){                                                                                  // Compute external NTC temperature
-    #else
-    if(systemSettings.settings.enableNTC){
-    #endif
+      if(!(status&_USE_INTERNAL)){                                                                      // Compute external NTC temperature if not in internal mode
+        float NTC_res;
+        float pull_res=systemSettings.settings.Pull_res*100;
+        float NTC_Beta;
+        float adcValue=NTC.last_avg;
+        float result;
 
-      uint32_t current_time = HAL_GetTick();
-      float NTC_res;
-      float pull_res=systemSettings.settings.Pull_res*100;
-      float NTC_Beta;
-      float adcValue=NTC.last_avg;
-      float result;
+        if(systemSettings.settings.NTC_detect){                                                         // NTC Autodetect enabled?
+          if(status & _USE_EXTERNAL_HIGH){
+            NTC_res = systemSettings.settings.NTC_detect_high_res*100;                                  // Second stage, use higher NTC values
+            NTC_Beta = systemSettings.settings.NTC_detect_high_res_beta;
+          }
+          else{
+            NTC_res = systemSettings.settings.NTC_detect_low_res*100;                                   // First stage, use lower NTC values
+            NTC_Beta = systemSettings.settings.NTC_detect_low_res_beta;
+          }
+        }
+        else{                                                                                           // NTC Autodetect disabled, use normal values
+          NTC_res = systemSettings.settings.NTC_res*100;
+          NTC_Beta = systemSettings.settings.NTC_Beta;
+        }
 
-      if(systemSettings.settings.NTC_detect){                                                           // NTC Autodetect enabled?
-        NTC_res = systemSettings.settings.NTC_detect_low_res*100;                                       // Set lower by default
-        NTC_Beta = systemSettings.settings.NTC_detect_low_res_beta;
-        if(!(Iron.Error.Flags & FLAG_ACTIVE) && (current_time-error_timer>1000)){                       // If no errors for 1000mS (Stable reading), check value
-          if(!detected){                                                                                // If not done detection yet (Only detect once after error is gone)
-            detected=1;                                                                                 // Set detected flag
-            if(last_NTC_C<0){                                                                           // If temp negative, set higher res
-              NTC_res = systemSettings.settings.NTC_detect_high_res*100;
-              NTC_Beta = systemSettings.settings.NTC_detect_high_res_beta;
-            }
+        if(systemSettings.settings.Pullup){
+          if(adcValue > 4094){
+            result = (float)-99.9;
+          }
+          else if(adcValue == 0){
+            result = (float)99.9;
+          }
+          else{
+            result = (1/((log(((pull_res * adcValue) / (4095.0 - adcValue))/NTC_res)/NTC_Beta) + (1 / (273.15 + 25.000)))) - 273.15;
           }
         }
         else{
-          error_timer = current_time;                                                                   // If error, refresh timer
+          if(adcValue > 4094){
+            result = (float)99.9;
+          }
+          else if(adcValue == 0){
+            result = (float)-99.9;
+          }
+          else{
+            result = (1/((log(((pull_res * (4095.0 - adcValue)) / adcValue)/NTC_res)/NTC_Beta) + (1 / (273.15 + 25.000)))) - 273.15;
+          }
         }
-      }
-      else{
-        NTC_res = systemSettings.settings.NTC_res*100;
-        NTC_Beta = systemSettings.settings.NTC_Beta;
-      }
-
-      if(systemSettings.settings.Pullup){
-        if(adcValue > 4094){
-          result = (float)-99.9;
-        }
-        else if(adcValue == 0){
-          result = (float)99.9;
-        }
-        else{
-          result = (1/((log(((pull_res * adcValue) / (4095.0 - adcValue))/NTC_res)/NTC_Beta) + (1 / (273.15 + 25.000)))) - 273.15;
-        }
-      }
-      else{
-        if(adcValue > 4094){
-          result = (float)99.9;
-        }
-        else if(adcValue == 0){
-          result = (float)-99.9;
+        result*=10;
+        last_NTC_C = result;
+        if(last_NTC_C < -200){
+          last_NTC_C = -999;
+          last_NTC_F = -999;
         }
         else{
-          result = (1/((log(((pull_res * (4095.0 - adcValue)) / adcValue)/NTC_res)/NTC_Beta) + (1 / (273.15 + 25.000)))) - 273.15;
+          last_NTC_F = TempConversion(result, mode_Farenheit, 1);
         }
       }
-      result*=10;
-      last_NTC_C = result;
-      if(last_NTC_C < -200){
-        last_NTC_C = -999;
-        last_NTC_F = -999;
+      #ifdef ENABLE_INT_TEMP
+      else{                                                                                               // Compute internal temperature if int temp enabled
+        #if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
+        last_NTC_C = (((1.43f-(INT_TMP.last_avg*3.3f/4096))/0.00439f)+25)*10;
+        #else
+        float adcCalValue30 = *((uint16_t*)((uint32_t)0x1FFF7A2E));
+        float adcCalValue110 = *((uint16_t*)((uint32_t)0x1FFF7A2C));
+        last_NTC_C = (((110-30)*(INT_TMP.last_avg-adcCalValue30)/(adcCalValue110-adcCalValue30))+30)*10;
+        #endif
+        last_NTC_F = TempConversion(last_NTC_C, mode_Farenheit, 1);
       }
-      else{
-        last_NTC_F = TempConversion(result, mode_Farenheit, 1);
-      }
-    }
-    #ifdef ENABLE_INT_TEMP
-    else{                                                                                               // Compute internal temperature
-      #if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
-      last_NTC_C = (((1.43f-(INT_TMP.last_avg*3.3f/4096))/0.00439f)+25)*10;
       #else
-      float adcCalValue30 = *((uint16_t*)((uint32_t)0x1FFF7A2E));
-      float adcCalValue110 = *((uint16_t*)((uint32_t)0x1FFF7A2C));
-      last_NTC_C = (((110-30)*(INT_TMP.last_avg-adcCalValue30)/(adcCalValue110-adcCalValue30))+30)*10;
+      else{                                                                                              // If internal temperature disabled in options, use always 35.0ºC
+        last_NTC_C = 350;
+        last_NTC_F = 950;
+      }
       #endif
-      last_NTC_F = TempConversion(last_NTC_C, mode_Farenheit, 1);
-    }
-    #else
-    else{                                                                                              // NTC disabled in options, use always 35.0ºC
-      last_NTC_C = 350;
-      last_NTC_F = 950;
-    }
-    #endif
+    }while(!error && !(status&_DETECTED));                                                              // Repeat if no errors and not detected keep trying the next options until finding a valid one
   }
-#else
-  if(new){                                                                                              // NTC disabled in build options, use always 35.0ºC
-    last_NTC_C = 350;
-    last_NTC_F = 950;
-  }
-#endif
 
+#endif
   if(tempUnit==mode_Celsius){
     return last_NTC_C;
   }
@@ -173,20 +183,20 @@ int16_t readTipTemperatureCompensated(bool new, bool mode, bool tempUnit){
     }
     if(systemSettings.settings.tempUnit==mode_Celsius){
       last_TIP_C = temp;
-      last_TIP_Raw_C = temp_Raw;
+      last_TIP_C_Raw = temp_Raw;
       last_TIP_F = TempConversion(last_TIP_C,mode_Farenheit,0);
-      last_TIP_Raw_F = TempConversion(last_TIP_Raw_C,mode_Farenheit,0);
+      last_TIP_F_Raw = TempConversion(last_TIP_C_Raw,mode_Farenheit,0);
     }
     else{
       last_TIP_F = temp;
-      last_TIP_Raw_F = temp_Raw;
+      last_TIP_F_Raw = temp_Raw;
       last_TIP_C = TempConversion(last_TIP_F,mode_Celsius,0);
-      last_TIP_Raw_C = TempConversion(last_TIP_Raw_F,mode_Celsius,0);
+      last_TIP_C_Raw = TempConversion(last_TIP_F_Raw,mode_Celsius,0);
     }
   }
   if(tempUnit==mode_Celsius){
     if(mode==read_unfiltered){
-      return last_TIP_Raw_C;
+      return last_TIP_C_Raw;
     }
     else{
       return last_TIP_C;
@@ -194,7 +204,7 @@ int16_t readTipTemperatureCompensated(bool new, bool mode, bool tempUnit){
   }
   else{
     if(mode==read_unfiltered){
-      return last_TIP_Raw_F;
+      return last_TIP_F_Raw;
     }
     else{
       return last_TIP_F;

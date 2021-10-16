@@ -13,7 +13,7 @@
 #include "settings.h"
 #include "iron.h"
 
-extern volatile int16_t last_TIP_C, last_TIP_F, last_TIP_Raw_C, last_TIP_Raw_F, last_NTC_F, last_NTC_C;
+extern volatile int16_t last_TIP_C, last_TIP_F, last_NTC_F, last_TIP_F_Raw, last_NTC_C, last_TIP_C_Raw;
 
 void detectNTC(void);
 int16_t   readColdJunctionSensorTemp_x10(bool new, bool tempUnit);
