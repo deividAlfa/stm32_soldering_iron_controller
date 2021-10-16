@@ -157,7 +157,9 @@ If you liked the firmware, you can send me a beer with [PAYPAL](https://www.payp
 ## Building the firmware
 
 Video of building steps:<br>
-[![IMAGE ALT TEXT](http://img.youtube.com/vi/8oeGVSSxudk/0.jpg)](https://www.youtube.com/watch?v=8oeGVSSxudk "Firmware build")
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/8oeGVSSxudk/0.jpg)](https://www.youtube.com/watch?v=8oeGVSSxudk "Firmware build")<br><br>
+There're some helpers in the root of the project that will copy the required files for your controller (_KSGER_v2.bat, _Quicko_F072.bat...).<br>
+Additionally, there's an automated build script (_Automated_Build.bat) that will build all profiles. The compiled binaries will be placed in their respective BOARDS/... folders.<br><br>
 
 If you use an existing project template and modify it, the changes must be reflected in /Core/Inc/board.h.<br>
 All the project code takes the data from there. The file it's pretty much self-explaining.<br>
