@@ -21,25 +21,23 @@ volatile int16_t last_NTC_C=350, last_NTC_F=950;
 #endif
 
 #ifdef USE_NTC
-static uint32_t detect_error_timer=1000;
-static uint8_t detected=0;
 
-void detectNTC(void){
-  #ifdef ENABLE_INT_TEMP
-  use_int_temp=0;
-  #endif
-  detected=0;
-  detect_error_timer = HAL_GetTick();
-}
-#endif
 #define _DETECTED           0x80      // Detected flag
 #define _FIRST              0x10      // First pass flag
 #define _USE_EXTERNAL       0x00      // For normal NTC: Use single NTC values, NTC autodetect mode: Use lower NTC values
 #define _USE_EXTERNAL_HIGH  0x01      // For NTC autodetect mode: Use higher NTC values
 #define _USE_INTERNAL       0x02      // Use internal sensor flag
+
+static uint8_t ntc_status;
+
+void detectNTC(void){
+  ntc_status=_USE_EXTERNAL;           // Force NTC detection
+}
+
+#endif
+
 int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
 #ifdef USE_NTC
-  static uint8_t status;
 
   uint8_t error = (Iron.Error.Flags&(FLAG_ACTIVE | FLAG_NO_IRON))==(FLAG_ACTIVE | FLAG_NO_IRON);
 
@@ -47,35 +45,36 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
     do{                                                                                                 // Detection loop
       if(systemSettings.settings.enableNTC){                                                            // If NTC enabled
         if(error){                                                                                      // If errors (handle removed)
-          status = _USE_EXTERNAL;                                                                       // Force external NTC mode, clear detected and first pass flag
+          ntc_status = _USE_EXTERNAL;                                                                   // Force external NTC mode, clear detected and first pass flag
         }
-        else if (!(status&_DETECTED)){                                                                  // If no errors and not detected yet
-          if(!(status&_FIRST)){                                                                         // If first pass not done
-            status=_FIRST;                                                                              // Set first pass flag, wait for next call to get new readings
+        else if (!(ntc_status&_DETECTED)){                                                              // If no errors and not detected yet
+          if(!(ntc_status&_FIRST)){                                                                     // If first pass not done
+            ntc_status=_FIRST;                                                                          // Set first pass flag, wait for next call to get new readings
           }
-          else if(last_NTC_C<-100){                                                                     // If temp <-10.0ºC or not done first pass yet
+          else if(last_NTC_C<-100 || last_NTC_C>900){                                                   // If temp <-10.0ºC or >90.0ºC
             if(systemSettings.settings.NTC_detect){                                                     // If NTC detection enabled
-              if(status&_USE_EXTERNAL_HIGH){                                                            // If already trying higher values
-                status = (_DETECTED | _USE_INTERNAL);                                                   // NTC invalid, use internal sensor
+              if(ntc_status&_USE_EXTERNAL_HIGH){                                                        // If already trying higher values
+                ntc_status = (_DETECTED | _USE_INTERNAL);                                               // NTC invalid, use internal sensor
               }
               else{                                                                                     // This reading was with lower NTC values
-                status |= _USE_EXTERNAL_HIGH;                                                           // Now try with higher ones
+                ntc_status |= _USE_EXTERNAL_HIGH;                                                       // Now try with higher ones
               }
             }
-            else{                                                                                       // If reading <10.0ºC and NTC detect disabled, use internal sensor
-              status = (_DETECTED | _USE_INTERNAL);
+            else{                                                                                       // If NTC detection disabled, use internal sensor
+              ntc_status = (_DETECTED | _USE_INTERNAL);
             }
           }
           else{                                                                                         // If temp valid
-            status |= _DETECTED;                                                                        // Set detected bit (NTC External/External_high bit remains)
+            ntc_status |= _DETECTED;                                                                    // Set detected bit (NTC External/External_high bit remains unchanged)
+            break;
           }
         }
       }
       else{                                                                                             // If NTC disabled
-        status = (_DETECTED | _USE_INTERNAL);                                                           // Use internal sensor
+        ntc_status = (_DETECTED | _USE_INTERNAL);                                                       // Use internal sensor
       }
 
-      if(!(status&_USE_INTERNAL)){                                                                      // Compute external NTC temperature if not in internal mode
+      if(!(ntc_status&_USE_INTERNAL)){                                                                  // Compute external NTC temperature (if internal sensor not selected)
         float NTC_res;
         float pull_res=systemSettings.settings.Pull_res*100;
         float NTC_Beta;
@@ -83,7 +82,7 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
         float result;
 
         if(systemSettings.settings.NTC_detect){                                                         // NTC Autodetect enabled?
-          if(status & _USE_EXTERNAL_HIGH){
+          if(ntc_status & _USE_EXTERNAL_HIGH){
             NTC_res = systemSettings.settings.NTC_detect_high_res*100;                                  // Second stage, use higher NTC values
             NTC_Beta = systemSettings.settings.NTC_detect_high_res_beta;
           }
@@ -121,16 +120,20 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
         }
         result*=10;
         last_NTC_C = result;
-        if(last_NTC_C < -200){
+        if(last_NTC_C < -200){                                                                          // If temperature <-20.0ºC, assume it's wrong
           last_NTC_C = -999;
           last_NTC_F = -999;
+        }
+        else if(last_NTC_C > 900){                                                                      // If temperature >90.0ºC, also assume it's wrong
+          last_NTC_C = 999;
+          last_NTC_F = 1999;
         }
         else{
           last_NTC_F = TempConversion(result, mode_Farenheit, 1);
         }
       }
       #ifdef ENABLE_INT_TEMP
-      else{                                                                                               // Compute internal temperature if int temp enabled
+      else{                                                                                             // Compute internal temperature if int temp enabled
         #if defined STM32F101xB || defined STM32F102xB || defined STM32F103xB
         last_NTC_C = (((1.43f-(INT_TMP.last_avg*3.3f/4096))/0.00439f)+25)*10;
         #else
@@ -141,14 +144,16 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
         last_NTC_F = TempConversion(last_NTC_C, mode_Farenheit, 1);
       }
       #else
-      else{                                                                                              // If internal temperature disabled in options, use always 35.0ºC
+      else{                                                                                             // If internal temperature disabled in options, use always 35.0ºC
         last_NTC_C = 350;
         last_NTC_F = 950;
       }
       #endif
-    }while(!error && !(status&_DETECTED));                                                              // Repeat if no errors and not detected keep trying the next options until finding a valid one
+    }while(!error && !(ntc_status&_DETECTED));                                                          // Repeat if no errors and not detected yet, keep trying the next options until finding a valid one
   }
-
+  if(last_NTC_C==-999 || last_NTC_C ==999){                                                             // If invalid NTC reading
+    checkIronError();                                                                                   // Update iron error
+  }
 #endif
   if(tempUnit==mode_Celsius){
     return last_NTC_C;
