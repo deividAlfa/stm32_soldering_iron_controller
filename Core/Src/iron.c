@@ -88,13 +88,14 @@ void handleIron(void) {
     if( (systemSettings.setupMode==enable) || systemSettings.settings.state!=initialized || systemSettings.Profile.state!=initialized ||
         (systemSettings.Profile.ID != systemSettings.settings.currentProfile) || (systemSettings.settings.currentProfile>profile_C210)){
 
-      Iron.Error.safeMode=1;
+      setSafeMode(enable);
     }
   }
 
-  checkIronError();                                                           // Check iron error must be called before coldJuctionSensor to detect if iron is disconnected
+  checkIronError();                                                           // Check iron error presence, must be called before coldJuctionSensor
   readColdJunctionSensorTemp_x10(new_reading, mode_Celsius);                  // to reset the NTC detection status
   readTipTemperatureCompensated(new_reading, read_average, mode_Celsius);     // Update readings
+  checkIronError();                                                           // Check iron error again (Special case when iron has been detected, show other errors)
 
   // Controls external mode changes (from stand mode changes), this acts as a debouncing timer
   if(Iron.updateStandMode==needs_update){
@@ -561,38 +562,42 @@ void readWake(void){
 }
 
 void resetIronError(void){
-  Iron.LastErrorTime += (systemSettings.Profile.errorTimeout+1);                        // Bypass timeout
-  checkIronError();                                                                     // Refresh Errors
+  Iron.LastErrorTime += (systemSettings.Profile.errorTimeout+2);                        // Bypass timeout
+  checkIronError();                                                            // Refresh Errors
 }
 
 // Checks for non critical iron errors (Errors that can be cleared)
+
 void checkIronError(void){
   CurrentTime = HAL_GetTick();
-  IronError_t Err = { 0 };
-  Err.safeMode = Iron.Error.safeMode;
-  #ifdef USE_VIN
-  Err.V_low = (getSupplyVoltage_v_x10() < systemSettings.settings.lvp);
-  #endif
+  IronError_t Err;
+  Err.Flags=0;
   Err.noIron = (TIP.last_raw>systemSettings.Profile.noIronValue);
-  Err.NTC_high = Iron.Error.active ? 0 : (last_NTC_C > 800);                              // Disable NTC errors when no iron detected
-  Err.NTC_low =  Iron.Error.active ? 0 : (last_NTC_C < -200);
+
+  if(!Iron.Error.noIron){                                                               // Bypass other errors when no iron detected
+      Err.NTC_high =  (last_NTC_C > 800);
+      Err.NTC_low =  (last_NTC_C < -200);
+      Err.safeMode = Iron.Error.safeMode;
+      #ifdef USE_VIN
+      Err.V_low = (getSupplyVoltage_v_x10() < systemSettings.settings.lvp);
+      #endif
+  }
+
   if(Err.Flags){
-    Iron.Error.Flags |= Err.Flags | (Iron.Error.Flags&(FLAG_ACTIVE | FLAG_NO_IRON));       // Update any errors, keep existing no iron and Active flags
+    Iron.Error.Flags |= Err.Flags;                                                      // Update other errors
     Iron.LastErrorTime = CurrentTime;
     if(!Iron.Error.active){
-      if(Err.Flags!=FLAG_NO_IRON){                                                        // Avoid alarm if only the tip is removed
+      if(Err.Flags!=FLAG_NO_IRON){                                                      // Avoid alarm if only the tip is removed
         buzzer_alarm_start();
       }
       Iron.lastMode = Iron.CurrentMode;
       Iron.Error.active = 1;
       setCurrentMode(mode_sleep);
-      Iron.Pwm_Out = 0;
-      __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, 0);
       configurePWMpin(output_Low);
     }
   }
-  else if (Iron.Error.active && !Err.Flags){                                                // If global flag set, but no errors
-    if((CurrentTime-Iron.LastErrorTime)>systemSettings.Profile.errorTimeout){           		// Check if enough time has passed
+  else if (Iron.Error.active && !Err.Flags){                                            // If global flag set, but no errors
+    if((CurrentTime-Iron.LastErrorTime)>systemSettings.Profile.errorTimeout){           // Check if enough time has passed
       Iron.Error.Flags = 0;
       buzzer_alarm_stop();
       if(systemSettings.Profile.errorResumeMode==error_sleep){
@@ -618,7 +623,7 @@ bool GetIronError(void){
 
 void setSafeMode(bool mode){
   __disable_irq();
-  if(mode==disable && Iron.Error.Flags==(FLAG_ACTIVE |FLAG_SAFE_MODE)){                             // If only failsafe was active? (This should only happen because it was on first init screen)
+  if(mode==disable && Iron.Error.Flags==(FLAG_ACTIVE | FLAG_SAFE_MODE)){                 // If only failsafe was active? (This should only happen because it was on first init screen)
     Iron.Error.Flags = FLAG_NOERROR;
     setCurrentMode(mode_run);
   }
