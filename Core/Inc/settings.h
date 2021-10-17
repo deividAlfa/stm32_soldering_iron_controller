@@ -119,7 +119,7 @@ enum{
 }system_types;
 
 
-typedef struct{
+__attribute__((aligned(4))) typedef struct{
   int8_t        coefficient;          // Filter normally applied
   int8_t        counter;              // Counter for threshold limit
   int8_t        min;                  // Minimum filtering when decreasing
@@ -129,14 +129,14 @@ typedef struct{
   uint16_t      reset_threshold;      // Threshold for completely resetting the filter
 }filter_t;
 
-typedef struct{
+__attribute__((aligned(4))) typedef struct{
   uint16_t      calADC_At_250;
   uint16_t      calADC_At_400;
   char          name[TipCharSize];
   pid_values_t  PID;
 }tipData_t;
 
-typedef struct{
+__attribute__((aligned(4))) typedef struct{
   uint8_t       enabled;
   uint8_t       detection;
   uint8_t       pullup;
@@ -149,7 +149,7 @@ typedef struct{
   uint16_t      low_NTC_beta;
 }ntc_data_t;
 
-typedef struct{
+__attribute__((aligned(4))) typedef struct{
   uint8_t       state;                // Always 0xFF if flash is erased
   uint8_t       ID;
   uint8_t       impedance;
@@ -179,7 +179,7 @@ typedef struct{
   uint32_t      standbyTimeout;
 }profile_t;
 
-typedef struct{
+__attribute__((aligned(4))) typedef struct{
   uint8_t       language;
   uint8_t       contrast;
   uint8_t       OledOffset;
