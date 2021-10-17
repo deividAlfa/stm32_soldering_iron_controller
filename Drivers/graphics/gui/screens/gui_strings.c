@@ -47,7 +47,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_No_Iron = "No iron",
       .IRON_Error_Timeout = "Err time",
       .IRON_Error_Resume_Mode = " Resume",
-      .IRON_Filter_Settings = "FILTER SETTINGS",
+      .IRON_FILTER_MENU = "FILTER MENU",
+      .IRON_NTC_MENU = "NTC MENU",
 
       .FILTER_Filter = "Filter",
       .FILTER__Threshold = " Threshold",
@@ -76,7 +77,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "LVP",
       .SYSTEM_Gui_Time = "Gui time",
       .SYSTEM_DEBUG = "DEBUG",
-      .SYSTEM_NTC_MENU = "NTC MENU",
       .SYSTEM_RESET_MENU = "RESET MENU",
 
       .NTC_Enable_NTC = "Enable NTC",
@@ -190,7 +190,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_No_Iron = "ПорогОткл",
       .IRON_Error_Timeout = "Вр.Ошибки",
       .IRON_Error_Resume_Mode = " Возврат К",
-      .IRON_Filter_Settings = "ПАРАМ. ФИЛЬТРА",
+      .IRON_FILTER_MENU = "ПАРАМ. ФИЛЬТРА",
+      .IRON_NTC_MENU = "ПАРАМ. NTC",
 
       .FILTER_Filter = "Фильтр",
       .FILTER__Threshold = " Порог",
@@ -219,7 +220,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "ПорогНапр.",
       .SYSTEM_Gui_Time = "Отрисовка",
       .SYSTEM_DEBUG = "Отладка",
-      .SYSTEM_NTC_MENU = "NTC ПАР-РЫ",
       .SYSTEM_RESET_MENU = "МЕНЮ СБРОСА",
 
       .NTC_Enable_NTC = "Внешний NTC",
@@ -334,7 +334,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_No_Iron = "Kolv ur",
       .IRON_Error_Timeout = "Feltid",
       .IRON_Error_Resume_Mode = " Återst.",
-      .IRON_Filter_Settings = "FILTER INST.",
+      .IRON_FILTER_MENU = "FILTER MENY",
+      .IRON_NTC_MENU = "NTC MENY",
 
       .FILTER_Filter = "Filter",
       .FILTER__Threshold = " Tröskel",
@@ -363,7 +364,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "LSS",
       .SYSTEM_Gui_Time = "Gui-tid",
       .SYSTEM_DEBUG = "DEBUG",
-      .SYSTEM_NTC_MENU = "NTC MENY",
       .SYSTEM_RESET_MENU = "ÅTERST. MENY",
 
       .NTC_Enable_NTC = "Aktivera NTC",
@@ -477,7 +477,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_No_Iron = "Kein Kolben",
       .IRON_Error_Timeout = "Err time",
       .IRON_Error_Resume_Mode = " Fortsetz.",
-      .IRON_Filter_Settings = "FILTER EINST.",
+      .IRON_FILTER_MENU = "FILTER MENÜ",
+      .IRON_NTC_MENU = "NTC MENÜ",
 
       .FILTER_Filter = "Filter",
       .FILTER__Threshold = " Schwelle",
@@ -506,7 +507,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "LVP",
       .SYSTEM_Gui_Time = "Gui Zeit",
       .SYSTEM_DEBUG = "DEBUG",
-      .SYSTEM_NTC_MENU = "NTC MENÜ",
       .SYSTEM_RESET_MENU = "RESET MENÜ",
 
       .NTC_Enable_NTC = "NTC Anschalt",
@@ -620,7 +620,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_No_Iron = "Uç yok",
       .IRON_Error_Timeout = "Hata zamanı",
       .IRON_Error_Resume_Mode = " Devam Et",
-      .IRON_Filter_Settings = "FİLTRE AYARLARI",
+      .IRON_FILTER_MENU = "FİLTRE AYARLARI",
+      .IRON_NTC_MENU = "NTC AYARLARI",
 
       .FILTER_Filter = "Filtre",
       .FILTER__Threshold = " Eşik",
@@ -649,7 +650,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "DVK",
       .SYSTEM_Gui_Time = "Gui zamanı",
       .SYSTEM_DEBUG = "Geliştirici",
-      .SYSTEM_NTC_MENU = "NTC MENU",
       .SYSTEM_RESET_MENU = "MENÜ SIFIRLA",
 
       .NTC_Enable_NTC = "NTC Etkin",

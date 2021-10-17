@@ -48,7 +48,8 @@ typedef struct{
   char * IRON_No_Iron;
   char * IRON_Error_Timeout;
   char * IRON_Error_Resume_Mode;
-  char * IRON_Filter_Settings;
+  char * IRON_FILTER_MENU;
+  char * IRON_NTC_MENU;
 
   char * FILTER_Filter;
   char * FILTER__Threshold;
@@ -77,7 +78,6 @@ typedef struct{
   char * SYSTEM_LVP;
   char * SYSTEM_Gui_Time;
   char * SYSTEM_DEBUG;
-  char * SYSTEM_NTC_MENU;
   char * SYSTEM_RESET_MENU;
 
   char * NTC_Enable_NTC;
