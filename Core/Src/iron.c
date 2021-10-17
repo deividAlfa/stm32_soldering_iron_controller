@@ -584,7 +584,12 @@ void checkIronError(void){
   }
 
   if(Err.Flags){
-    Iron.Error.Flags |= Err.Flags;                                                      // Update other errors
+
+    if(Err.noIron){																																			// If no iron flag
+      Iron.Error.Flags &= (FLAG_NO_IRON | FLAG_ACTIVE);																	// Clear other existing errors
+    }
+    Iron.Error.Flags |= Err.Flags;                                                    	// Update Iron errors
+    
     Iron.LastErrorTime = CurrentTime;
     if(!Iron.Error.active){
       if(Err.Flags!=FLAG_NO_IRON){                                                      // Avoid alarm if only the tip is removed
