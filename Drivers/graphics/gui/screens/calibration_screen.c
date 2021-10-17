@@ -75,7 +75,7 @@ static void *getCal250() {
 static void setCal250(int32_t *val) {
   int16_t temp=*val;
   if(temp>=calAdjust[cal_400]){
-    temp=calAdjust[cal_400]-1;
+    temp=calAdjust[cal_400]-10;
   }
   calAdjust[cal_250] = temp;
 
@@ -102,7 +102,7 @@ static void *getCal400() {
 static void setCal400(int32_t *val) {
   uint16_t temp=*val;
   if(temp<=calAdjust[cal_250]){
-    temp=calAdjust[cal_250]+1;
+    temp=calAdjust[cal_250]+10;
   }
   calAdjust[cal_400] = temp;
   __disable_irq();
@@ -213,7 +213,7 @@ static void Cal_onEnter(screen_t *scr) {
   setUserTemperature(0);
 }
 static void Cal_onExit(screen_t *scr) {
-  if(last_scr!=screen_calibration_start && last_scr!=screen_calibration_settings ){
+  if(scr!=&Screen_calibration_start && scr!=&Screen_calibration_settings ){
     setCalibrationMode(disable);
     setCurrentMode(backupMode);
     setUserTemperature(backupTemp);
@@ -512,8 +512,8 @@ static void Cal_Settings_create(screen_t *scr){
   newComboEditable(w, strings[lang]._Cal_250, &edit, &Cal_Combo_Adjust_C250);
   edit->inputData.reservedChars=4;
   edit->inputData.getData = &getCal250;
-  edit->big_step = 100;
-  edit->step = 20;
+  edit->big_step = 20;
+  edit->step = 10;
   edit->setData = (void (*)(void *))&setCal250;
   edit->max_value = 4000;
   edit->min_value = 0;
@@ -522,8 +522,8 @@ static void Cal_Settings_create(screen_t *scr){
   newComboEditable(w, strings[lang]._Cal_400, &edit, &Cal_Combo_Adjust_C400);
   edit->inputData.reservedChars=4;
   edit->inputData.getData = &getCal400;
-  edit->big_step = 100;
-  edit->step = 20;
+  edit->big_step = 20;
+  edit->step = 10;
   edit->setData = (void (*)(void *))&setCal400;
   edit->max_value = 4000;
   edit->min_value = 0;
