@@ -573,11 +573,11 @@ void checkIronError(void){
   IronError_t Err;
   Err.Flags=0;
   Err.noIron = (TIP.last_raw>systemSettings.Profile.noIronValue);
+  Err.safeMode = Iron.Error.safeMode;
 
   if(!Iron.Error.noIron){                                                               // Bypass other errors when no iron detected
       Err.NTC_high =  (last_NTC_C > 800);
       Err.NTC_low =  (last_NTC_C < -200);
-      Err.safeMode = Iron.Error.safeMode;
       #ifdef USE_VIN
       Err.V_low = (getSupplyVoltage_v_x10() < systemSettings.settings.lvp);
       #endif
@@ -586,7 +586,7 @@ void checkIronError(void){
   if(Err.Flags){
 
     if(Err.noIron){																																			// If no iron flag
-      Iron.Error.Flags &= (FLAG_NO_IRON | FLAG_ACTIVE);																	// Clear other existing errors
+      Iron.Error.Flags &= (FLAG_ACTIVE | FLAG_SAFE_MODE | FLAG_NO_IRON );		    				// Clear other existing errors except safe mode
     }
     Iron.Error.Flags |= Err.Flags;                                                    	// Update Iron errors
     
