@@ -195,8 +195,12 @@ static void * main_screen_getVin() {
 #ifdef USE_NTC
 static void * main_screen_getAmbTemp() {
   if(mainScr.updateReadings){
-    updateAmbientTemp();
-    mainScr.lastAmb = last_NTC_C;
+    if(systemSettings.settings.tempUnit==mode_Celsius){
+      mainScr.lastAmb = last_NTC_C;
+    }
+    else{
+      mainScr.lastAmb = last_NTC_F;
+    }
   }
   temp=mainScr.lastAmb;
   return &temp;
@@ -692,6 +696,9 @@ static uint8_t  drawPowerBar(uint8_t *refresh){
 static uint8_t  drawPlot(uint8_t *refresh){
 #define PLOT_X  7
 #define PLOT_Y  12
+
+  plot.enabled &= !(Iron.Error.Flags & FLAG_ACTIVE);
+
   if(!plot.enabled){ return 0; }
   if(*refresh || plot.update){
     int16_t ref;
@@ -737,11 +744,14 @@ static uint8_t  drawPlot(uint8_t *refresh){
 }
 
 static uint8_t  drawError(uint8_t *refresh){
-
-  if(mainScr.ironStatus!=status_error || mainScr.currentMode==main_setpoint ) return 0;
-
   static uint32_t last_time;
   static uint8_t x_mark_state;
+  if(mainScr.ironStatus!=status_error || mainScr.currentMode==main_setpoint ){
+    x_mark_state=0;
+    last_time = current_time;
+    return 0;
+  }
+
 
   if(Iron.Error.Flags==(FLAG_ACTIVE | FLAG_NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
 
@@ -811,7 +821,6 @@ static void  drawMisc(uint8_t *refresh){
   if(!*refresh) return;
 
   Widget_SetPoint->enabled &= (mainScr.currentMode==main_setpoint);                            // Disable setpoint widget if not in setpoint screen
-  plot.enabled &= !(Iron.Error.Flags & FLAG_ACTIVE);
 
   u8g2_SetFont(&u8g2, u8g2_font_small);
   if(mainScr.currentMode==main_tipselect){
@@ -857,8 +866,11 @@ static uint8_t main_screen_draw(screen_t *scr){
   drawMisc(&refresh);
   ret |= drawPlot(&refresh);
   ret |= drawError(&refresh);
-
-  return (ret | default_screenDraw(scr));
+  ret |= default_screenDraw(scr);
+  if((Iron.Error.Flags&FLAG_ACTIVE) && mainScr.ironStatus!=status_error){
+    return 0;                                                                                // If a new error appeared during the screen draw, skip oled update to avoid random artifacts
+  }
+  return (ret);
 }
 
 static void main_screen_init(screen_t *scr) {
