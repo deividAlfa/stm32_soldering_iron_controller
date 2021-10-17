@@ -57,11 +57,13 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
                 ntc_status = (_DETECTED | _USE_INTERNAL);                                               // NTC invalid, use internal sensor
               }
               else{                                                                                     // This reading was with lower NTC values
-                ntc_status |= _USE_EXTERNAL_HIGH;                                                       // Now try with higher ones
+                //ntc_status |= _USE_EXTERNAL_HIGH;                                                       // Now try with higher ones
+                ntc_status |= _DETECTED;                                                                    // Set detected bit (NTC External/External_high bit remains unchanged)
               }
             }
             else{                                                                                       // If NTC detection disabled, use internal sensor
-              ntc_status = (_DETECTED | _USE_INTERNAL);
+              //ntc_status = (_DETECTED | _USE_INTERNAL);
+              ntc_status |= _DETECTED;                                                                    // Set detected bit (NTC External/External_high bit remains unchanged)
             }
           }
           else{                                                                                         // If temp valid
