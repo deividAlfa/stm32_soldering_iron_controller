@@ -45,27 +45,6 @@ const settings_t defaultSettings = {
   .debugEnabled       = disable,
   .language           = lang_english,
   .state              = initialized,
-
-  #ifdef USE_NTC
-  .enableNTC          = 1,
-    #ifdef PULLUP
-    .Pullup           = 1,
-    #elif defined PULLDOWN
-    .Pullup           = 0,
-    #else
-    #error NO PULL MODE DEFINED
-    #endif
-  .NTC_detect         = 0,
-  .NTC_detect_high_res  = 1000,   // 100.0K
-  .NTC_detect_low_res   = 100,     // 10.0K
-  .NTC_Beta             = NTC_BETA,
-  .NTC_res              = NTC_RES/100,
-  .Pull_res             = PULL_RES/100,
-  .NTC_detect_high_res_beta = NTC_BETA,
-  .NTC_detect_low_res_beta  = NTC_BETA,
-  #else
-  .enableNTC          = 0,
-  #endif
 };
 
 __attribute__((section(".settings"))) flashSettings_t flashSettings;
@@ -345,6 +324,27 @@ void resetCurrentProfile(void){
     systemSettings.Profile.noIronValue              = 4000;
     systemSettings.Profile.Cal250_default           = T12_Cal250;
     systemSettings.Profile.Cal400_default           = T12_Cal400;
+
+    #ifdef USE_NTC
+    systemSettings.Profile.ntc.enabled              = enable;
+    #ifdef PULLUP
+    systemSettings.Profile.ntc.pullup               = 1;
+    #elif defined PULLDOWN
+    systemSettings.Profile.ntc.pullup               = 0;
+    #else
+    #error NO PULL MODE DEFINED
+    #endif
+    systemSettings.Profile.ntc.detection            = 0;
+    systemSettings.Profile.ntc.NTC_res              = NTC_RES/100;
+    systemSettings.Profile.ntc.NTC_beta             = NTC_BETA;
+    systemSettings.Profile.ntc.high_NTC_res         = 1000;           // 100.0K
+    systemSettings.Profile.ntc.low_NTC_res          = 100;            // 10.0K
+    systemSettings.Profile.ntc.high_NTC_beta        = NTC_BETA;
+    systemSettings.Profile.ntc.low_NTC_beta         = NTC_BETA;
+    systemSettings.Profile.ntc.pull_res             = PULL_RES/100;
+    #else
+    systemSettings.Profile.ntc.enabled              = 0;
+    #endif
 
   }
 

@@ -137,6 +137,19 @@ typedef struct{
 }tipData_t;
 
 typedef struct{
+  uint8_t       enabled;
+  uint8_t       detection;
+  uint8_t       pullup;
+  uint16_t      pull_res;
+  uint16_t      NTC_res;
+  uint16_t      NTC_beta;
+  uint16_t      high_NTC_res;
+  uint16_t      low_NTC_res;
+  uint16_t      high_NTC_beta;
+  uint16_t      low_NTC_beta;
+}ntc_data_t;
+
+typedef struct{
   uint8_t       state;                // Always 0xFF if flash is erased
   uint8_t       ID;
   uint8_t       impedance;
@@ -146,6 +159,7 @@ typedef struct{
   uint8_t       pwmMul;
   uint8_t       errorResumeMode;
   filter_t      tipFilter;
+  ntc_data_t    ntc;
   uint16_t      standbyTemperature;
   uint16_t      UserSetTemperature;
   uint16_t      MaxSetTemperature;
@@ -186,20 +200,10 @@ typedef struct{
   uint8_t       shakeFiltering;
   uint8_t       WakeInputMode;
   uint8_t       StandMode;
-  uint8_t       Pullup;
-  uint8_t       NTC_detect;
   uint8_t       EncoderMode;
   uint8_t       lvp;
   uint8_t       debugEnabled;
   uint16_t      guiUpdateDelay;
-  uint16_t      NTC_Beta;
-  uint16_t      Pull_res;
-  uint16_t      enableNTC;
-  uint16_t      NTC_res;
-  uint16_t      NTC_detect_high_res;
-  uint16_t      NTC_detect_low_res;
-  uint16_t      NTC_detect_high_res_beta;
-  uint16_t      NTC_detect_low_res_beta;
   uint32_t      dim_Timeout;
   uint32_t      version;            // Used to track if a reset is needed on firmware upgrade
 }settings_t;
