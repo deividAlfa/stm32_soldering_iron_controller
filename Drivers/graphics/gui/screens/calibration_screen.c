@@ -294,6 +294,7 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
   update_draw |= update;
   refreshOledDim();
   handleOledDim();
+  updatePlot();
 
   if(input!=Rotate_Nothing){
     screen_timer = current_time;
@@ -460,6 +461,7 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
   }
   refreshOledDim();
   handleOledDim();
+  updatePlot();
   if(update || update_GUI_Timer()){
     scr->widgets->refresh=refresh_triggered;
     switch(zero_state){

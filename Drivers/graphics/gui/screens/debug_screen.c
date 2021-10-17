@@ -190,6 +190,7 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 
   update=update_GUI_Timer();
   update_draw |= update;
+  updatePlot();
   updatePIDplot();
 
   refreshOledDim();                                         // Prevent display dim
