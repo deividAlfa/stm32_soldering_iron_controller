@@ -12,6 +12,7 @@
 extern screen_t *current_screen;
 extern uint32_t current_time;
 extern uint32_t screen_timer;
+extern uint8_t last_scr;
 
 void oled_destroy_screen(screen_t *scr);
 void oled_backup_comboStatus(screen_t *scr);

@@ -16,7 +16,7 @@ resStatus_t resStatus;
 
 
 static int cancelReset(widget_t *w) {
-  return screen_reset;
+  return last_scr;
 }
 static int doReset(widget_t *w) {
   switch(resStatus){
@@ -56,7 +56,7 @@ static int doFactoryReset(widget_t *w, RE_Rotation_t input) {
 
 
 static void reset_onEnter(screen_t *scr){
-  if(scr==&Screen_system){
+  if(last_scr==screen_system){
     comboResetIndex(Screen_reset.widgets);
   }
 }

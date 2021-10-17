@@ -79,7 +79,7 @@ extern volatile iron_t Iron;
 void readWake(void);
 bool IronWake(bool source);
 void resetIronError(void);
-void checkIronError(void);
+void checkIronError(uint8_t type);
 bool GetIronError(void);
 void updatePowerLimit(void);
 void runAwayCheck(void);

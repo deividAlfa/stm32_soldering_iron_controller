@@ -13,12 +13,10 @@
 #endif
 
 screen_t Screen_tip_settings;
-static uint8_t return_screen;
 static widget_t        *widget_tip_settings;
 static comboBox_item_t *comboitem_tip_settings_save;
 static comboBox_item_t *comboitem_tip_settings_copy;
 static comboBox_item_t *comboitem_tip_settings_delete;
-static comboBox_item_t *comboitem_tip_settings_cancel;
 static editable_widget_t *editable_tip_settings_cal250;
 static editable_widget_t *editable_tip_settings_cal400;
 
@@ -132,7 +130,7 @@ static int tip_save(widget_t *w, RE_Rotation_t input) {
     systemSettings.Profile.currentNumberOfTips++;                                                               // Increase number of tips in the system
   }
   sortTips();
-  return comboitem_tip_settings_cancel->action_screen;
+  return last_scr;
 }
 //=========================================================
 static int tip_delete(widget_t *w, RE_Rotation_t input) {
@@ -153,7 +151,7 @@ static int tip_delete(widget_t *w, RE_Rotation_t input) {
     strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
   }
                                                                                                                 // Skip tip settings (As tip is now deleted)
-  return comboitem_tip_settings_cancel->action_screen;                                                          // And return to main screen or system menu screen
+  return last_scr;                                                                                       // And return to main screen or system menu screen
 }
 //=========================================================
 static int tip_copy(widget_t *w, RE_Rotation_t input) {
@@ -192,11 +190,11 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
    comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
     if(item->type==combo_Editable || item->type==combo_MultiOption){
       if(item->widget->selectable.state!=widget_edit){
-        return return_screen;
+        return last_scr;
       }
     }
     else{
-      return return_screen;
+      return last_scr;
     }
   }
 
@@ -224,15 +222,6 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
 
 static void tip_settings_onEnter(screen_t *scr){
   comboResetIndex(Screen_tip_settings.widgets);
-
-  if(scr==&Screen_tip_list){                                                                                    // If coming from tips menu
-    return_screen= screen_tip_list;
-  }
-  else{
-    return_screen = screen_main;
-  }
-  comboitem_tip_settings_cancel->action_screen = return_screen;
-
   if(newTip){                                                                                                   // If new tip selected
     newTip=0;
     backupTip = systemSettings.Profile.tip[0];                                                                  // Copy data from first tip in the system
@@ -365,7 +354,7 @@ static void tip_settings_create(screen_t *scr){
   newComboAction(w, strings[lang]._SAVE, &tip_save, &comboitem_tip_settings_save);
   newComboAction(w, strings[lang].TIP_SETTINGS_COPY, &tip_copy, &comboitem_tip_settings_copy);
   newComboAction(w, strings[lang].TIP_SETTINGS_DELETE, &tip_delete, &comboitem_tip_settings_delete);
-  newComboScreen(w, strings[lang]._CANCEL, -1, &comboitem_tip_settings_cancel);                                         // Return value set automatically on enter
+  newComboScreen(w, strings[lang]._CANCEL, last_scr, NULL);
 }
 
 

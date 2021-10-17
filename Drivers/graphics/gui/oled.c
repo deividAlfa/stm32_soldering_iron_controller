@@ -13,6 +13,7 @@ static screen_t *screens = NULL;
 screen_t *current_screen;
 uint32_t current_time;
 uint32_t screen_timer;
+uint8_t last_scr;
 static RE_State_t* RE_State;
 
 RE_Rotation_t (*RE_GetData)(RE_State_t*);
@@ -139,6 +140,7 @@ void oled_processInput(void) {
     current_time = HAL_GetTick();
     while(scr) {
       if(scr->index == ret) {
+        last_scr = current_screen->index;
 
         if(current_screen->onExit){
           current_screen->onExit(scr);

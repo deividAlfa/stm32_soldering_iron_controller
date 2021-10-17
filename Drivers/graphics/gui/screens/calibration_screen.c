@@ -134,11 +134,11 @@ static int Cal_Settings_SaveAction(widget_t *w, RE_Rotation_t input) {
 
     saveSettingsFromMenu(save_Settings);
   }
-  return screen_calibration;
+  return last_scr;
 }
 
 static int cancelAction(widget_t* w) {
-  return screen_calibration;
+  return last_scr;
 }
 
 static int zero_setAction(widget_t* w, RE_Rotation_t input) {
@@ -201,7 +201,7 @@ static void setCalState(state_t s) {
 }
 //=========================================================
 static void Cal_onEnter(screen_t *scr) {
-  if(scr == &Screen_settings) {
+  if(last_scr == screen_settings) {
     backupMode=getCurrentMode();
     backupTemp=getUserTemperature();
     Currtip = getCurrentTip();
@@ -213,7 +213,7 @@ static void Cal_onEnter(screen_t *scr) {
   setUserTemperature(0);
 }
 static void Cal_onExit(screen_t *scr) {
-  if(scr!=&Screen_calibration_start && scr!=&Screen_calibration_settings ){
+  if(last_scr!=screen_calibration_start && last_scr!=screen_calibration_settings ){
     setCalibrationMode(disable);
     setCurrentMode(backupMode);
     setUserTemperature(backupTemp);
@@ -256,7 +256,7 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
       return screen_main;
     }
     else if(input==Rotate_Decrement_while_click){
-      return screen_settings;
+      return last_scr;
     }
     return default_screenProcessInput(scr, input, s);
   }
@@ -300,19 +300,19 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
   }
   if(current_state>=cal_finished){
     if((current_time-screen_timer)>15000 || input==Click){
-      return screen_calibration;
+      return last_scr;
     }
   }
   else{
     if((current_time-screen_timer)>300000){   // 5min inactivity
       setCurrentMode(mode_sleep);
-      return screen_calibration;
+      return last_scr;
     }
   }
 
   if(GetIronError()){
     error=1;
-    return screen_calibration;
+    return last_scr;
   }
 
   if(tempReady){
@@ -456,7 +456,7 @@ static void Cal_Settings_OnExit(screen_t *scr) {
 static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
   if(GetIronError()){
     error=1;
-    return screen_calibration;
+    return last_scr;
   }
   refreshOledDim();
   handleOledDim();
@@ -479,18 +479,18 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
   }
   if((current_time-screen_timer)>300000){     // 5 min inactivity
     setCurrentMode(mode_sleep);
-    return screen_calibration;
+    return screen_main;
   }
 
   if(input==Rotate_Decrement_while_click){
    comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
     if(item->type==combo_Editable || item->type==combo_MultiOption){
       if(item->widget->selectable.state!=widget_edit){
-        return screen_calibration;
+        return last_scr;
       }
     }
     else{
-      return screen_calibration;
+      return last_scr;
     }
   }
   return default_screenProcessInput(scr, input, s);
@@ -528,7 +528,7 @@ static void Cal_Settings_create(screen_t *scr){
   edit->selectable.processInput=&Cal400_processInput;
 
   newComboAction(w, strings[lang]._SAVE, &Cal_Settings_SaveAction, NULL);
-  newComboScreen(w, strings[lang]._CANCEL, screen_calibration, NULL);
+  newComboScreen(w, strings[lang]._CANCEL, last_scr , NULL);
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------

@@ -17,8 +17,38 @@ static editable_widget_t *editable_IRON_BoostTemp;
 static editable_widget_t *editable_IRON_MaxTemp;
 static editable_widget_t *editable_IRON_MinTemp;
 static editable_widget_t *editable_IRON_UserTemp;
+#ifdef USE_NTC
+static comboBox_item_t *comboitem_PullRes;
+static comboBox_item_t *comboitem_PullMode;
+static comboBox_item_t *comboitem_AutoDetect;
+static comboBox_item_t *comboitem_NTC_res;
+static comboBox_item_t *comboitem_NTC_res_beta;
+static comboBox_item_t *comboitem_Detect_high_res;
+static comboBox_item_t *comboitem_Detect_low_res;
+static comboBox_item_t *comboitem_Detect_high_res_beta;
+static comboBox_item_t *comboitem_Detect_low_res_beta;
+#endif
 
 filter_t bak_f;
+
+#ifdef USE_NTC
+ntc_data_t backup_ntc;
+
+void update_NTC_menu(void){
+  uint8_t NTC_auto = (backup_ntc.detection && backup_ntc.enabled);
+  uint8_t NTC_fixed = (!backup_ntc.detection && backup_ntc.enabled);
+  comboitem_PullMode->enabled = backup_ntc.enabled;
+  comboitem_PullRes->enabled =  backup_ntc.enabled;
+  comboitem_AutoDetect->enabled =  backup_ntc.enabled;
+  comboitem_NTC_res->enabled = NTC_fixed;
+  comboitem_NTC_res_beta->enabled = NTC_fixed;
+  comboitem_Detect_high_res->enabled = NTC_auto;
+  comboitem_Detect_low_res->enabled = NTC_auto;
+  comboitem_Detect_high_res_beta->enabled = NTC_auto;
+  comboitem_Detect_low_res_beta->enabled = NTC_auto;
+}
+#endif
+
 
 
 //=========================================================
@@ -258,7 +288,7 @@ static void iron_onEnter(screen_t *scr){
     editable_IRON_BoostTemp->inputData.endString="\260C";
     editable_IRON_UserTemp->inputData.endString="\260C";
   }
-  if(scr==&Screen_settings){
+  if(last_scr==screen_settings){
     comboResetIndex(Screen_iron.widgets);
   }
 }
@@ -268,8 +298,259 @@ int filter_Save(widget_t *w, RE_Rotation_t input){
   systemSettings.Profile.tipFilter = bak_f;
   TIP.filter=bak_f;
   __enable_irq();
-  return screen_iron;
+  return last_scr;
 }
+
+
+#ifdef USE_NTC
+
+
+static void set_enable_NTC(uint32_t *val) {
+  backup_ntc.enabled = *val;
+  update_NTC_menu();
+}
+static void * get_enable_NTC() {
+  temp = backup_ntc.enabled;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_beta(uint32_t *val) {
+  backup_ntc.NTC_beta = *val;
+}
+static void * get_NTC_beta() {
+  temp = backup_ntc.NTC_beta;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_res(uint32_t *val) {
+  backup_ntc.NTC_res = *val;
+}
+static void * get_NTC_res() {
+  temp = backup_ntc.NTC_res;
+  return &temp;
+}
+//=========================================================
+static void set_Pull_res(uint32_t *val) {
+  backup_ntc.pull_res = *val;
+}
+static void * get_Pull_res() {
+  temp = backup_ntc.pull_res;
+  return &temp;
+}
+//=========================================================
+static void set_Pull_mode(uint32_t *val) {
+  backup_ntc.pullup = *val;
+}
+static void * get_Pull_mode() {
+  temp = backup_ntc.pullup;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_detect(uint32_t *val) {
+  backup_ntc.detection = *val;
+  update_NTC_menu();
+}
+static void * get_NTC_detect() {
+  temp = backup_ntc.detection;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_detect_high_res(uint32_t *val) {
+  backup_ntc.high_NTC_res = *val;
+}
+static void * get_NTC_detect_high_res() {
+  temp = backup_ntc.high_NTC_res;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_detect_low_res(uint32_t *val) {
+  backup_ntc.low_NTC_res = *val;
+}
+static void * get_NTC_detect_low_res() {
+  temp = backup_ntc.low_NTC_res;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_detect_high_res_beta(uint32_t *val) {
+  backup_ntc.high_NTC_beta = *val;
+}
+static void * get_NTC_detect_high_res_beta() {
+  temp = backup_ntc.high_NTC_beta;
+  return &temp;
+}
+//=========================================================
+static void set_NTC_detect_low_res_beta(uint32_t *val) {
+  backup_ntc.low_NTC_beta = *val;
+}
+static void * get_NTC_detect_low_res_beta() {
+  temp = backup_ntc.low_NTC_beta;
+  return &temp;
+}
+//=========================================================
+static int saveNTC(widget_t *w, RE_Rotation_t input) {
+  __disable_irq();
+  systemSettings.Profile.ntc = backup_ntc;
+  detectNTC();
+
+  __enable_irq();
+  return last_scr;
+}
+//=========================================================
+
+static void system_ntc_onEnter(screen_t *scr){
+  comboResetIndex(Screen_system_ntc.widgets);
+  backup_ntc = systemSettings.Profile.ntc;
+  update_NTC_menu();
+}
+
+static void system_ntc_create(screen_t *scr){
+  widget_t* w;
+  displayOnly_widget_t* dis;
+  editable_widget_t* edit;
+
+  //  [ SYSTEM COMBO ]
+  //
+  newWidget(&w,widget_combo,scr);
+
+  //  [ NTC enabled Widget ]
+  //
+  newComboMultiOption(w, strings[lang].NTC_Enable_NTC,&edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=3;
+  dis->getData = &get_enable_NTC;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_enable_NTC;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
+
+  //  [ Pullup mode Widget ]
+  //
+  newComboMultiOption(w, strings[lang].NTC_Pull,&edit, &comboitem_PullMode);
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &get_Pull_mode;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_Pull_mode;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options = strings[lang].DownUp;
+  edit->numberOfOptions = 2;
+
+  //  [ Pull res Widget ]
+  //
+  newComboEditable(w, strings[lang].NTC__Res, &edit, &comboitem_PullRes);
+  dis=&edit->inputData;
+  dis->number_of_dec=1;
+  dis->reservedChars=7;
+  dis->endString="KΩ";
+  dis->getData = &get_Pull_res;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_Pull_res;
+  edit->max_value = 5000;
+  edit->min_value = 1;
+
+  //  [ Auto detect Widget ]
+  //
+  newComboMultiOption(w, strings[lang].NTC_NTC_Detect,&edit, &comboitem_AutoDetect);
+  dis=&edit->inputData;
+  dis->reservedChars=3;
+  dis->getData = &get_NTC_detect;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_NTC_detect;
+  edit->max_value = 1;
+  edit->min_value = 0;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
+
+  //  [ NTC auto higher Widget ]
+  //
+  newComboEditable(w, strings[lang].NTC__High, &edit, &comboitem_Detect_high_res);
+  dis=&edit->inputData;
+  dis->number_of_dec=1;
+  dis->reservedChars=7;
+  dis->endString="KΩ";
+  dis->getData = &get_NTC_detect_high_res;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_NTC_detect_high_res;
+  edit->max_value = 5000;
+  edit->min_value = 1;
+
+  //  [ NTC auto higher beta Widget ]
+  //
+  newComboEditable(w, strings[lang].NTC__Beta, &edit, &comboitem_Detect_high_res_beta);
+  dis=&edit->inputData;
+  dis->reservedChars=5;
+  dis->getData = &get_NTC_detect_high_res_beta;
+  edit->big_step = 100;
+  edit->step = 10;
+  edit->setData = (void (*)(void *))&set_NTC_detect_high_res_beta;
+  edit->max_value = 50000;
+  edit->min_value = 500;
+
+  //  [ NTC auto lower Widget ]
+  //
+  newComboEditable(w, strings[lang].NTC__Low, &edit, &comboitem_Detect_low_res);
+  dis=&edit->inputData;
+  dis->number_of_dec=1;
+  dis->reservedChars=7;
+  dis->endString="KΩ";
+  dis->getData = &get_NTC_detect_low_res;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_NTC_detect_low_res;
+  edit->max_value = 5000;
+  edit->min_value = 1;
+
+  //  [ NTC auto lower beta Widget ]
+  //
+  newComboEditable(w, strings[lang].NTC__Beta, &edit, &comboitem_Detect_low_res_beta);
+  dis=&edit->inputData;
+  dis->reservedChars=5;
+  dis->getData = &get_NTC_detect_low_res_beta;
+  edit->big_step = 100;
+  edit->step = 10;
+  edit->setData = (void (*)(void *))&set_NTC_detect_low_res_beta;
+  edit->max_value = 50000;
+  edit->min_value = 500;
+
+  //  [ NTC res Widget ]
+  //
+  newComboEditable(w, strings[lang].NTC__Res, &edit, &comboitem_NTC_res);
+  dis=&edit->inputData;
+  dis->number_of_dec=1;
+  dis->reservedChars=7;
+  dis->endString="KΩ";
+  dis->getData = &get_NTC_res;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&set_NTC_res;
+  edit->max_value = 5000;
+  edit->min_value = 1;
+
+  //  [ NTC Beta Widget ]
+  //
+  newComboEditable(w, strings[lang].NTC__Beta, &edit, &comboitem_NTC_res_beta);
+  dis=&edit->inputData;
+  dis->reservedChars=5;
+  dis->getData = &get_NTC_beta;
+  edit->big_step = 100;
+  edit->step = 10;
+  edit->setData = (void (*)(void *))&set_NTC_beta;
+  edit->max_value = 50000;
+  edit->min_value = 500;
+
+  newComboAction(w, strings[lang]._SAVE, &saveNTC, NULL);
+  newComboScreen(w, strings[lang]._BACK, last_scr , NULL);
+}
+
+#endif
 
 static void iron_create(screen_t *scr){
   widget_t* w;
@@ -490,9 +771,18 @@ static void iron_create(screen_t *scr){
   edit->options = strings[lang].errMode;
   edit->numberOfOptions = 3;
 
+  //  [ Filter screen ]
+  //
+  newComboScreen(w, strings[lang].IRON_FILTER_MENU, screen_advFilter, &comboItem_advFilter);
+
+  #ifdef USE_NTC
+  //  [ NTC screen ]
+  //
+  newComboScreen(w, strings[lang].IRON_NTC_MENU, screen_ntc, NULL);
+  #endif
+
   //  [ BACK button ]
   //
-  newComboScreen(w, strings[lang].IRON_Filter_Settings, screen_advFilter, &comboItem_advFilter);
   newComboScreen(w, strings[lang]._BACK, screen_settings, NULL);
 }
 
@@ -585,7 +875,7 @@ static void iron_advFilter_create(screen_t *scr){
   edit->min_value = 10;
 
   newComboAction(w, strings[lang]._SAVE, &filter_Save , NULL);
-  newComboScreen(w, strings[lang]._CANCEL, screen_iron, NULL);
+  newComboScreen(w, strings[lang]._CANCEL, last_scr, NULL);
 }
 
 void iron_screen_setup(screen_t *scr){
@@ -599,6 +889,14 @@ void iron_screen_setup(screen_t *scr){
   sc->onEnter = &iron_advFilter_onEnter;
   sc->processInput = &autoReturn_ProcessInput;
   sc->create = &iron_advFilter_create;
+
+  #ifdef USE_NTC
+  sc=&Screen_system_ntc;
+  oled_addScreen(sc, screen_ntc);
+  sc->onEnter = &system_ntc_onEnter;
+  sc->processInput=&autoReturn_ProcessInput;
+  sc->create = &system_ntc_create;
+  #endif
 
 }
 
