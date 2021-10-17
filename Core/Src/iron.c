@@ -84,10 +84,6 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
 void handleIron(void) {
   static uint32_t reachedTime = 0;
   CurrentTime = HAL_GetTick();
-
-  readColdJunctionSensorTemp_x10(new_reading, mode_Celsius);
-  readTipTemperatureCompensated(new_reading, read_average, mode_Celsius);     // Update readings
-
   if(!Iron.Error.safeMode){
     if( (systemSettings.setupMode==enable) || systemSettings.settings.state!=initialized || systemSettings.Profile.state!=initialized ||
         (systemSettings.Profile.ID != systemSettings.settings.currentProfile) || (systemSettings.settings.currentProfile>profile_C210)){
@@ -96,7 +92,10 @@ void handleIron(void) {
     }
   }
 
-  checkIronError();
+  checkIronError();                                                           // Check iron error must be called before coldJuctionSensor to detect if iron is disconnected
+  readColdJunctionSensorTemp_x10(new_reading, mode_Celsius);                  // to reset the NTC detection status
+  readTipTemperatureCompensated(new_reading, read_average, mode_Celsius);     // Update readings
+
   // Controls external mode changes (from stand mode changes), this acts as a debouncing timer
   if(Iron.updateStandMode==needs_update){
     if(Iron.Error.active || Iron.calibrating){                                      // Ignore changes when error active or calibrating
@@ -571,14 +570,14 @@ void checkIronError(void){
   CurrentTime = HAL_GetTick();
   IronError_t Err = { 0 };
   Err.safeMode = Iron.Error.safeMode;
-  Err.NTC_high = (last_NTC_C > 800);
-  Err.NTC_low = (last_NTC_C < -200);
   #ifdef USE_VIN
   Err.V_low = (getSupplyVoltage_v_x10() < systemSettings.settings.lvp);
   #endif
   Err.noIron = (TIP.last_raw>systemSettings.Profile.noIronValue);
+  Err.NTC_high = Iron.Error.active ? 0 : (last_NTC_C > 800);                              // Disable NTC errors when no iron detected
+  Err.NTC_low =  Iron.Error.active ? 0 : (last_NTC_C < -200);
   if(Err.Flags){
-    Iron.Error.Flags = Err.Flags | (Iron.Error.Flags & FLAG_ACTIVE);
+    Iron.Error.Flags |= Err.Flags | (Iron.Error.Flags&(FLAG_ACTIVE | FLAG_NO_IRON));       // Update any errors, keep existing no iron and Active flags
     Iron.LastErrorTime = CurrentTime;
     if(!Iron.Error.active){
       if(Err.Flags!=FLAG_NO_IRON){                                                        // Avoid alarm if only the tip is removed
