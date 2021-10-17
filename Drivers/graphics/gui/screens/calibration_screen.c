@@ -256,7 +256,7 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
       return screen_main;
     }
     else if(input==Rotate_Decrement_while_click){
-      return last_scr;
+      return screen_settings;
     }
     return default_screenProcessInput(scr, input, s);
   }
