@@ -19,7 +19,7 @@
 #endif
 
 const settings_t defaultSettings = {
-  .version            = SETTINGS_VERSION,
+  .version            = (~((uint32_t)SETTINGS_VERSION<<16)&0xFFFF0000) | SETTINGS_VERSION,  // Higher 16bit is 1s complement to make detection stronger against padding/endianness
   .contrast           = 255,
   .dim_mode           = dim_sleep,
   .dim_Timeout        = 10000,                // ms
@@ -264,14 +264,18 @@ void restoreSettings() {
   else{
     Button_reset();
   }
-  systemSettings.settings = flashSettings.settings;
-  systemSettings.settingsChecksum = flashSettings.settingsChecksum;
 
-  if(systemSettings.settings.version!=SETTINGS_VERSION){    // Silent reset
+  if(flashSettings.settings.version!=defaultSettings.version){    // Silent reset if version mismatch
     resetSystemSettings();
     saveSettings(wipeProfiles);
   }
-  else if(ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum){   // Show error msg
+  else{
+    systemSettings.settings = flashSettings.settings;
+    systemSettings.settingsChecksum = flashSettings.settingsChecksum;
+  }
+
+
+  if(ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum){   // Show error message if bad checksum
     checksumError(reset_All);
   }
 
@@ -479,7 +483,13 @@ void Flash_error(void){
 void checksumError(uint8_t mode){
   Oled_error_init();
   putStrAligned("BAD CHECKSUM!", 0, align_center);
-  putStrAligned("RESTORING...", 30, align_center);
+  putStrAligned("RESTORING THE", 20, align_center);
+  if(mode==reset_Profile){
+    putStrAligned("PROFILE", 36, align_center);
+  }
+  else{
+    putStrAligned("SYSTEM", 36, align_center);
+  }
   update_display();
   ErrCountDown(3,117,50);
   if(mode==reset_Profile){

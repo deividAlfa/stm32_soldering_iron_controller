@@ -13,7 +13,7 @@
 #include "board.h"
 
 #define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
-#define SETTINGS_VERSION  14                                        // Change this if you change the settings/profile struct to prevent getting out of sync
+#define SETTINGS_VERSION  15                                        // Change this if you change the settings/profile struct to prevent getting out of sync
 #define LANGUAGE_COUNT    5                                         // Number of languages
 #define ProfileSize       3                                         // Number of profiles
 #define TipSize           20                                        // Number of tips for each profile
@@ -180,7 +180,6 @@ typedef struct{
 }profile_t;
 
 typedef struct{
-  uint8_t       state;              // Always 0xFF if flash is erased
   uint8_t       language;
   uint8_t       contrast;
   uint8_t       OledOffset;
@@ -189,10 +188,10 @@ typedef struct{
   uint8_t       currentProfile;
   uint8_t       saveSettingsDelay;
   uint8_t       initMode;
+  uint8_t       tempUnit;
   uint8_t       tempStep;
   uint8_t       tempBigStep;
   uint8_t       guiTempDenoise;
-  uint8_t       tempUnit;
   uint8_t       activeDetection;
   uint8_t       buzzerMode;
   uint8_t       buttonWakeMode;
@@ -203,6 +202,7 @@ typedef struct{
   uint8_t       EncoderMode;
   uint8_t       lvp;
   uint8_t       debugEnabled;
+  uint8_t       state;              // Always 0xFF if flash is erased
   uint16_t      guiUpdateDelay;
   uint32_t      dim_Timeout;
   uint32_t      version;            // Used to track if a reset is needed on firmware upgrade
