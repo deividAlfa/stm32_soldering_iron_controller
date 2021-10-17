@@ -562,8 +562,11 @@ void readWake(void){
 }
 
 void resetIronError(void){
-  Iron.LastErrorTime += (systemSettings.Profile.errorTimeout+2);                        // Bypass timeout
+  __disable_irq();
+  Iron.Error.Flags &= (FLAG_ACTIVE | FLAG_SAFE_MODE | FLAG_NO_IRON);           // Clear all errors except active, safe mode and no iron
+  Iron.LastErrorTime += (systemSettings.Profile.errorTimeout+2);               // Bypass timeout
   checkIronError();                                                            // Refresh Errors
+  __enable_irq();
 }
 
 // Checks for non critical iron errors (Errors that can be cleared)
