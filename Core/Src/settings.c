@@ -328,28 +328,6 @@ void resetCurrentProfile(void){
     systemSettings.Profile.noIronValue              = 4000;
     systemSettings.Profile.Cal250_default           = T12_Cal250;
     systemSettings.Profile.Cal400_default           = T12_Cal400;
-
-    #ifdef USE_NTC
-    systemSettings.Profile.ntc.enabled              = enable;
-    #ifdef PULLUP
-    systemSettings.Profile.ntc.pullup               = 1;
-    #elif defined PULLDOWN
-    systemSettings.Profile.ntc.pullup               = 0;
-    #else
-    #error NO PULL MODE DEFINED
-    #endif
-    systemSettings.Profile.ntc.detection            = 0;
-    systemSettings.Profile.ntc.NTC_res              = NTC_RES/100;
-    systemSettings.Profile.ntc.NTC_beta             = NTC_BETA;
-    systemSettings.Profile.ntc.high_NTC_res         = 1000;           // 100.0K
-    systemSettings.Profile.ntc.low_NTC_res          = 100;            // 10.0K
-    systemSettings.Profile.ntc.high_NTC_beta        = NTC_BETA;
-    systemSettings.Profile.ntc.low_NTC_beta         = NTC_BETA;
-    systemSettings.Profile.ntc.pull_res             = PULL_RES/100;
-    #else
-    systemSettings.Profile.ntc.enabled              = 0;
-    #endif
-
   }
 
   else if(systemSettings.settings.currentProfile==profile_C245){
@@ -406,6 +384,27 @@ void resetCurrentProfile(void){
   systemSettings.Profile.tipFilter.step             = -3;   // -5% less everytime the reading diff exceeds threshold_limit and the counter is greater than count_limit
   systemSettings.Profile.tipFilter.reset_threshold  = 600;  // Any diff over 500 reset the filter (Tip removed or connected)
 
+  #ifdef USE_NTC
+  systemSettings.Profile.ntc.enabled                = enable;
+  #ifdef PULLUP
+  systemSettings.Profile.ntc.pullup                 = 1;
+  #elif defined PULLDOWN
+  systemSettings.Profile.ntc.pullup                 = 0;
+  #else
+  #error NO PULL MODE DEFINED
+  #endif
+  systemSettings.Profile.ntc.detection              = 0;
+  systemSettings.Profile.ntc.NTC_res                = NTC_RES/100;
+  systemSettings.Profile.ntc.NTC_beta               = NTC_BETA;
+  systemSettings.Profile.ntc.high_NTC_res           = 1000;           // 100.0K
+  systemSettings.Profile.ntc.low_NTC_res            = 100;            // 10.0K
+  systemSettings.Profile.ntc.high_NTC_beta          = NTC_BETA;
+  systemSettings.Profile.ntc.low_NTC_beta           = NTC_BETA;
+  systemSettings.Profile.ntc.pull_res               = PULL_RES/100;
+  #else
+  systemSettings.Profile.ntc.enabled                = 0;
+  #endif
+
   systemSettings.Profile.errorTimeout               = 100;                    // ms
   systemSettings.Profile.errorResumeMode            = error_resume;
   systemSettings.Profile.sleepTimeout               = (uint32_t)5*60000;      // ms
@@ -420,7 +419,7 @@ void resetCurrentProfile(void){
   systemSettings.Profile.readPeriod                 = (200*200)-1;             // 200ms * 200  because timer period is 5us
   systemSettings.Profile.readDelay                  = (20*200)-1;              // 20ms (Also uses 5us clock)
   systemSettings.Profile.tempUnit                   = mode_Celsius;
-  systemSettings.Profile.state             = initialized;
+  systemSettings.Profile.state                      = initialized;
   __enable_irq();
 }
 
