@@ -276,7 +276,6 @@ static void Cal_create(screen_t *scr) {
 
 static void Cal_Start_init(screen_t *scr) {
   default_init(scr);
-  updateAmbientTemp();
   tempReady = 0;
   backupTempUnit=systemSettings.settings.tempUnit;
   setSystemTempUnit(mode_Celsius);
@@ -293,7 +292,6 @@ static void Cal_Start_init(screen_t *scr) {
 static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
   update = update_GUI_Timer();
   update_draw |= update;
-  updateAmbientTemp();
   refreshOledDim();
   handleOledDim();
 
@@ -435,8 +433,6 @@ static void Cal_Start_create(screen_t *scr) {
 static void Cal_Settings_init(screen_t *scr) {
   default_init(scr);
   comboResetIndex(Screen_calibration_settings.widgets);
-
-  updateAmbientTemp();
   zero_state = zero_disabled;
   calAdjust[cal_250] = systemSettings.Profile.Cal250_default;
   calAdjust[cal_400] = systemSettings.Profile.Cal400_default;
@@ -458,8 +454,6 @@ static void Cal_Settings_OnExit(screen_t *scr) {
 }
 
 static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
-  updateAmbientTemp();
-
   if(GetIronError()){
     error=1;
     return screen_calibration;

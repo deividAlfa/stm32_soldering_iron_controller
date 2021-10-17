@@ -7,7 +7,7 @@
 #include "screen_common.h"
 
 int32_t temp;
-int16_t backupTemp, ambTemp;
+int16_t backupTemp;
 uint8_t status, profile, Selected_Tip, lang, backupMode, current_lang=lang_english;
 tipData_t backupTip;
 
@@ -159,6 +159,3 @@ void handleOledDim(void){
   }
 }
 
-void updateAmbientTemp(void){
-  ambTemp = (last_NTC_C+5)/10;
-}
