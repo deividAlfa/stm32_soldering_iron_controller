@@ -208,13 +208,12 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
     return screen_main;
   }
   else if(input==Click){
-    if(last_scr==screen_debug){
+    if(last_scr!=screen_debug){
       return screen_pid_debug;
     }
-    else if(last_scr==screen_pid_debug){
+    else{
       return screen_debug;
     }
-    return -1;
   }
   else if(input==Rotate_Decrement_while_click){
     return screen_settings;
