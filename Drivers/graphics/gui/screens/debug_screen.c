@@ -193,18 +193,15 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   updatePlot();
   updatePIDplot();
 
-  refreshOledDim();                                         // Prevent display dim
+  wakeOledDim();                                         // Prevent display dim
   handleOledDim();
+  updateScreenTimer(input);
   setCurrentMode(mode_run);                                 // Prevent mode timeout
-
-  if(input!=Rotate_Nothing){
-    screen_timer=current_time;
-  }
 
   if(input==LongClick){
     return screen_main;
   }
-  if((current_time-screen_timer)>300000){   // 5 min timeout
+  if(checkScreenTimer(300000)){   // 5 min timeout
     setCurrentMode(mode_sleep);
     return screen_main;
   }

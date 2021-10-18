@@ -25,45 +25,31 @@ static int editTip(widget_t *w, RE_Rotation_t input) {
 static void tip_list_init(screen_t *scr) {
   default_init(scr);
   comboResetIndex(Screen_tip_list.widgets);
-  comboBox_item_t *i = ((comboBox_widget_t*)Screen_tip_list.widgets->content)->first;
-  for(int x = 0; x < TipSize; x++) {
-    if(x < systemSettings.Profile.currentNumberOfTips) {
-      i->text = systemSettings.Profile.tip[x].name;
-      i->enabled = 1;
-    }
-    else
-      i->enabled = 0;
-    i = i->next_item;
-  }
-  comboitem_tip_list_addNewTip->enabled = (systemSettings.Profile.currentNumberOfTips < TipSize);
 }
 
 int tip_list_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
   comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
   if(input==LongClick){
-    if( item!=comboitem_tip_list_addNewTip && item!=comboitem_tip_list_back){                         // If long click over a tip
-      for(uint8_t i=0; i<systemSettings.Profile.currentNumberOfTips; i++){                            // Find selected tip
-        if(strcmp(item->text, systemSettings.Profile.tip[i].name) == 0){                              // If matching name
-          setCurrentTip(i);                                                                           // Set tip
-          systemSettings.Profile.currentTip = i;
-          break;
-        }
-      }
-      return screen_main;                                                                             // Exit to main screen
+    if( item!=comboitem_tip_list_addNewTip && item!=comboitem_tip_list_back){                                   // If long click over a tip
+      __disable_irq();
+      setCurrentTip(comboItemToIndex(scr->widgets,((comboBox_widget_t*)scr->widgets->content)->currentItem));   // Set tip
+      __enable_irq();
+      return screen_main;                                                                                       // Exit to main screen
     }
   }
   return (autoReturn_ProcessInput(scr,input,state));
 }
 static void tip_list_create(screen_t *scr){
   widget_t* w;
+  comboBox_item_t *i;
   //  [ IRON TIPS COMBO ]
   //
   newWidget(&w,widget_combo,scr);
-
-  for(int x = 0; x < TipSize; x++) {
-    newComboAction(w, " ", &editTip, NULL);              // Names filled when entering the menu
+  for(int x = 0; x < systemSettings.Profile.currentNumberOfTips; x++) {
+    newComboAction(w, systemSettings.Profile.tip[x].name, &editTip, &i);
   }
   newComboAction(w, strings[lang]._ADD_NEW, &addNewTip, &comboitem_tip_list_addNewTip);
+  comboitem_tip_list_addNewTip->enabled = (systemSettings.Profile.currentNumberOfTips < TipSize);
   newComboScreen(w, strings[lang]._BACK, screen_settings, &comboitem_tip_list_back);
 }
 

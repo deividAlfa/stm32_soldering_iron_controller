@@ -15,5 +15,4 @@
 extern u8g2_t u8g2;
 
 void guiInit(void);
-void guiDraw();
 #endif /* GRAPHICS_GUI_GUI_H_ */

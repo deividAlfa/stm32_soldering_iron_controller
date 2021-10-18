@@ -43,10 +43,13 @@ extern uint8_t newTip;
 extern tipData_t backupTip;
 
 void handleOledDim(void);
-void refreshOledDim(void);
+void wakeOledDim(void);
 int longClickReturn(widget_t *w);
 int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state);
 void updatePlot(void);
 uint8_t update_GUI_Timer(void);
+void resetScreenTimer(void);
+void updateScreenTimer(RE_Rotation_t input);
+uint8_t checkScreenTimer(uint32_t time);
 void updateAmbientTemp(void);
 #endif /* GRAPHICS_GUI_SCREENS_SCREEN_COMMON_H_ */

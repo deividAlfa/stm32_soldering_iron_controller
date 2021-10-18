@@ -42,10 +42,9 @@ void sortTips(void){
     }
   }
 
-  for(uint8_t i=0; i<systemSettings.Profile.currentNumberOfTips; i++){                            // Find used tip after sorting
+  for(uint8_t i=0; i<systemSettings.Profile.currentNumberOfTips; i++){                            // Find the same tip after sorting
     if(strcmp(current, systemSettings.Profile.tip[i].name) == 0){                                 // If matching name
       setCurrentTip(i);                                                                           // Reload tip (This will also reload the new tip settings)
-      systemSettings.Profile.currentTip = i;
       break;
     }
   }
@@ -135,7 +134,7 @@ static int tip_save(widget_t *w, RE_Rotation_t input) {
 //=========================================================
 static int tip_delete(widget_t *w, RE_Rotation_t input) {
   __disable_irq();
-  for(uint8_t x = Selected_Tip; x <systemSettings.Profile.currentNumberOfTips;x++) {                            // Overwrite selected tip and move the rest one position backwards
+  for(uint8_t x = Selected_Tip; x <systemSettings.Profile.currentNumberOfTips-1;x++) {                          // Overwrite selected tip and move the rest one position backwards
     systemSettings.Profile.tip[x] = systemSettings.Profile.tip[x+1];
   }
   systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
@@ -151,26 +150,27 @@ static int tip_delete(widget_t *w, RE_Rotation_t input) {
     strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
   }
                                                                                                                 // Skip tip settings (As tip is now deleted)
-  return last_scr;                                                                                       // And return to main screen or system menu screen
+  return last_scr;                                                                                              // And return to main screen or system menu screen
 }
 //=========================================================
 static int tip_copy(widget_t *w, RE_Rotation_t input) {
-  Selected_Tip = systemSettings.Profile.currentNumberOfTips;                                                    // Select first empty slot
-  strcpy(backupTip.name, _BLANK_TIP);                                                                           // Copy empty name
+  Selected_Tip = systemSettings.Profile.currentNumberOfTips;                                                    // Select next available slot
+  strcpy(backupTip.name, _BLANK_TIP);                                                                           // Copy empty name (But keep the settings from the tip we're copying from)
   comboitem_tip_settings_save->enabled=0;                                                                       // Disable save, will be enabled when the name is modified
   comboitem_tip_settings_copy->enabled=0;                                                                       // Cannot copy a new tip
   comboitem_tip_settings_delete->enabled=0;                                                                     // Cannot delete a new tip
   comboResetIndex(Screen_tip_settings.widgets);                                                                 // Reset menu to 1st option
-  return -1;                                                                                                    // And return to main screen or system menu screen
+  return -1;                                                                                                    //
 }
 //=========================================================
 
 static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   int ret;
 
-  refreshOledDim();
+  wakeOledDim();
   handleOledDim();
   updatePlot();
+  updateScreenTimer(input);
 
   if(input==LongClick){
     int x = longClickReturn(scr->current_widget);
@@ -178,12 +178,8 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
       return x;
     }
   }
-  else if((current_time-screen_timer)>30000){                                                                   // 30s timeout if no activity is detected
+  else if(checkScreenTimer(30000)){                                                                   // 30s timeout if no activity is detected
     return screen_main;
-  }
-
-  if(input!=Rotate_Nothing){
-    screen_timer=current_time;
   }
 
   if(input==Rotate_Decrement_while_click){
@@ -200,14 +196,16 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
 
   ret  = default_screenProcessInput(scr, input, state);                                                           // Process screen
 
-  if(widget_tip_settings->refresh>refresh_idle){                                                                  // If something changed, check conditions
+  if(widget_tip_settings->refresh > refresh_idle){                                                                // If something changed, check conditions
     bool enable=1;
     if(strcmp(backupTip.name, _BLANK_TIP) == 0){                                                                  // Check that the name is not empty
-      enable=0;                                                                                                   // If empty, disable saving
+      enable=0;                                                                                                   // If empty, disable save button
     }
     else{
-      for(uint8_t x = 0; x < TipSize; x++) {                                                                      // Compare tip names with current edit
-        if( (strcmp(backupTip.name, systemSettings.Profile.tip[x].name) == 0) && x!=Selected_Tip ){               // If match is found, and it's not the tip being edited
+      for(uint8_t x = 0; x < systemSettings.Profile.currentNumberOfTips-1; x++) {                                 // Compare tip names with current edit
+        if(x==Selected_Tip)																																												// Skip tip being edited
+          continue;
+        if( (strcmp(backupTip.name, systemSettings.Profile.tip[x].name) == 0) ){               										// If match is found
           enable=0;                                                                                               // Disable save button
           break;
         }

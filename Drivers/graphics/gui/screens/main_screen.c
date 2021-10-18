@@ -48,12 +48,6 @@ const uint8_t warningXBM[] ={
   9, 8,
   0x10, 0x00, 0x28, 0x00, 0x54, 0x00, 0x54, 0x00, 0x82, 0x00, 0x92, 0x00,
   0x01, 0x01, 0xFF, 0x01, };
-/*
-const uint8_t savingXBM[] ={
-    9, 9,
-    0x00, 0x00, 0xFE, 0x00, 0xFE, 0x00, 0xFE, 0x00, 0xFE, 0x00, 0x82, 0x00,
-    0xB2, 0x00, 0xB2, 0x00, 0x01, 0x00, };
-*/
 
 #ifdef SCREENSAVER
 const uint8_t ScrSaverXBM[] = {
@@ -124,41 +118,41 @@ static widget_t *Widget_Voltage;
 #endif
 
 static widget_t *Widget_IronTemp;
-
-//static widget_t *Widget_TipSelect;
-
 static widget_t *Widget_SetPoint;
 
 static struct{
-  uint8_t lastPwr;
-  uint8_t idle;
-  uint8_t shakeActive;
-  int8_t  dimStep;
-  uint8_t ironStatus;
-  uint8_t lastError;
-  uint8_t setMode;
-  uint8_t currentMode;
-  uint8_t displayMode;
-  uint8_t menuPos;
-  uint8_t updateReadings;
-  int16_t lastTip;
+  uint8_t lastPwr;                        // Last stored power for widget
+  uint8_t shakeActive;                    // Shake icon status: 0=disabled, 1=needs drawing, 2=drawign done, 3=needs clearing
+  uint8_t ironStatus;                     // iron status: status_ok, status_error
+  uint8_t lastError;                      // Last error, stored to detect error changes
+  uint8_t setMode;                        // Main screen variable, set to switch between modes (iron_temp, setpoint, tip_select)
+  uint8_t currentMode;                    // Current screen mode (iron_temp, setpoint, tip_select)
+  uint8_t displayMode;                    // Iron temp display mode (temp_numeric, temp_graph)
+  uint8_t updateReadings;                 // Flag to update power, tip, ambient, voltage widgets
+  int16_t lastTip;                        // Last stored tip temperature for widget
   #ifdef USE_NTC
-  int16_t lastAmb;
+  int16_t lastAmb;                        // Last stored ambient temperature for widget
   #endif
   #ifdef USE_VIN
-  uint16_t lastVin;
+  uint16_t lastVin;                       // Last stored voltage for widget
   #endif
-  widget_t* Selected;
-  uint32_t dimTimer;
-  uint32_t idleTimer;
-  uint32_t inputBlockTimer;
-  uint32_t modeTimer;
+  uint32_t modeTimer;                     // Timer to track current screen mode time
+  uint32_t inputBlockTimer;               // Timer to block user input Load current time+blocking time in ms
 }mainScr;
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen widgets functions
 //-------------------------------------------------------------------------------------------------------------------------------
 
+void resetModeTimer(void){
+  mainScr.modeTimer=current_time;
+}
+uint8_t checkModeTimer(uint16_t time){
+  if((current_time-mainScr.modeTimer)>time){
+    return 1;
+  }
+  return 0;
+}
 
 static void setTemp(uint16_t *val) {
   setUserTemperature(*val);
@@ -227,7 +221,6 @@ static void updateIronPower() {
 
 static void setMainWidget(widget_t* w){
   Screen_main.refresh=screen_Erase;
-  mainScr.Selected=w;
   Screen_main.current_widget=w;
   widgetEnable(w);
 }
@@ -253,7 +246,7 @@ static void setMainScrTempUnit(void) {
 }
 
 // Ignore future input for specified amount of time
-void blockInput(uint32_t time){
+void blockInput(uint16_t time){
   mainScr.inputBlockTimer = current_time+time;
 }
 
@@ -281,9 +274,8 @@ void updateScreenSaver(void){
 int8_t switchScreenMode(void){
   if(mainScr.setMode!=main_none){
     mainScr.updateReadings=1;
-    mainScr.idleTimer=current_time;
-    mainScr.modeTimer=current_time;
-
+    resetScreenTimer();
+    resetModeTimer();
     plot.enabled = (mainScr.displayMode==temp_graph);
     Screen_main.refresh=screen_Erase;
 
@@ -334,19 +326,15 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     if(mainScr.shakeActive){
       mainScr.shakeActive=3;
     }
-    if(mainScr.ironStatus != status_error){                                   // If error appeared
-      refreshOledDim();                                                       // Wake up screen
+    if(mainScr.ironStatus!=status_error || mainScr.lastError!=Iron.Error.Flags){  // If error appeared or changed
+      wakeOledDim();                                                          		// Wake up screen
       mainScr.ironStatus = status_error;
-      mainScr.idleTimer = current_time;
-    }
-    if(mainScr.lastError!=Iron.Error.Flags){                                  // If error changed
       mainScr.lastError=Iron.Error.Flags;
-      refreshOledDim();                                                       // Wake up screen
     }
   }
   else if(mainScr.ironStatus != status_ok){                                   // If error is gone
     mainScr.ironStatus = status_ok;
-    refreshOledDim();                                                         // Wake up screen
+    wakeOledDim();                                                            // Wake up screen
   }
 
 
@@ -356,18 +344,16 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   }
 
   if(input!=Rotate_Nothing){
-    mainScr.idleTimer = current_time;
+    resetScreenTimer();                                                     // Reset screen idle timer
     if(getOledPower()==disable){                                            // If oled off, block user action
       input=Rotate_Nothing;
     }
-    refreshOledDim();                                                       // But  wake up screen
+    wakeOledDim();                                                          // But  wake up screen
   }
 
   if(systemSettings.settings.dim_mode!=dim_always && current_mode>mode_standby){  // If dim not enabled in all modes
-    refreshOledDim();																															// Refresh timeout if running
+    wakeOledDim();																															// Refresh timeout if running
   }
-
-
 
   handleOledDim();
 
@@ -380,6 +366,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     mainScr.shakeActive=3; // Clear
   }
 
+
   // Handle main screen
   switch(mainScr.currentMode){
 
@@ -387,9 +374,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     case main_irontemp:
 
       if(mainScr.ironStatus!=status_ok){                // When the screen goes to error state
-        memset(&plot,0,sizeof(plotData_t));             // Clear plotdata
-        plot.timeStep = (systemSettings.Profile.readPeriod+1)/200;
-        mainScr.setMode=main_error;
+        mainScr.setMode=main_error;                     // Set error screen
         break;
       }
       switch((uint8_t)input){
@@ -398,12 +383,10 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           return screen_settings;
 
         case Rotate_Increment_while_click:
-          //blockInput(100);
           mainScr.setMode=main_tipselect;
           break;
 
         case Rotate_Decrement_while_click:
-          //blockInput(100);
           if(Iron.CurrentMode>mode_standby){
             setCurrentMode(mode_standby);
           }
@@ -420,12 +403,12 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           }
           else if(current_mode!=mode_run){
             IronWake(wakeButton);
-            if(getCurrentMode()==mode_run){   // If mode changed, don't process the click
+            if(getCurrentMode()==mode_run){                               // If mode changed, don't process the click
               break;
             }
           }
           if(mainScr.displayMode==temp_graph){
-            Widget_SetPoint->enabled=1;                                   // Enable setpoint, but don't set it as current widget
+            widgetEnable(Widget_SetPoint);                                // Enable setpoint, but don't set it as current widget
             default_widgetProcessInput(Widget_SetPoint, input, state);    // Just to be able to process the input. It will be disabled before drawing in drawMisc()
           }
           else{
@@ -435,7 +418,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;
 
         case Click:
-          //blockInput(100);
           if(Iron.CurrentMode==mode_boost){
             setCurrentMode(mode_run);
             break;
@@ -508,12 +490,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           return screen_tip_settings;
 
         case Click:
-          //blockInput(100);
           mainScr.setMode=main_irontemp;
           break;
 
         case Rotate_Nothing:
-          if(current_time-mainScr.idleTimer > 2000){
+          if(checkScreenTimer(2000)){
             mainScr.setMode=main_irontemp;
           }
           break;
@@ -532,7 +513,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             }
           }
           if(tip!=systemSettings.Profile.currentTip){
-            systemSettings.Profile.currentTip = tip;
             __disable_irq();
             setCurrentTip(tip);
             __enable_irq();
@@ -541,11 +521,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;
         }
       }
-      /*
-      if(input!=Rotate_Nothing){
-        IronWake(wakeButton);
-      }
-      */
       break;
 
     case main_setpoint:
@@ -553,15 +528,14 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       switch((uint8_t)input){
         case LongClick:
         case Click:
-          //blockInput(100);
-          if(mainScr.ironStatus != status_error && current_mode==mode_run && (current_time-mainScr.modeTimer < 1000)){
+          if(mainScr.ironStatus != status_error && current_mode==mode_run && !checkModeTimer(1000)){
             setCurrentMode(mode_boost);
           }
           mainScr.setMode=main_irontemp;
           break;
 
         case Rotate_Nothing:
-          if(current_time-mainScr.idleTimer > 1000){
+          if(checkScreenTimer(1000)){
             mainScr.setMode=main_irontemp;
           }
           break;
@@ -588,8 +562,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   return default_screenProcessInput(scr, input, state);
 }
 
-static uint8_t  drawIcons(uint8_t *refresh){
-  if(*refresh){
+static uint8_t  drawIcons(uint8_t refresh){
+  if(refresh){
     #ifdef USE_NTC
     u8g2_DrawXBMP(&u8g2, Widget_AmbTemp->posX-tempXBM[0]-2, 0, tempXBM[0], tempXBM[1], &tempXBM[2]);
     #endif
@@ -599,12 +573,12 @@ static uint8_t  drawIcons(uint8_t *refresh){
     #endif
   }
 
-  if(mainScr.shakeActive==1 || (mainScr.shakeActive==2 && refresh) ){ //1 = new draw, 2 = already drawn
+  if(mainScr.shakeActive==1 || (mainScr.shakeActive==2 && refresh) ){ //1 = needs drawing, 2 = already drawn
     mainScr.shakeActive=2;
     u8g2_DrawXBMP(&u8g2, 49, OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1], &shakeXBM[2]);
     return 1;
   }
-  else if(mainScr.shakeActive==3){  // 3 = clear
+  else if(mainScr.shakeActive==3){                                    // 3 = needs clearing
     mainScr.shakeActive=0;
     u8g2_SetDrawColor(&u8g2,BLACK);
     u8g2_DrawBox(&u8g2, 49, OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1]);
@@ -615,9 +589,9 @@ static uint8_t  drawIcons(uint8_t *refresh){
 }
 
 
-static uint8_t  drawScreenSaver(uint8_t *refresh){
+static uint8_t  drawScreenSaver(uint8_t refresh){
 #ifdef SCREENSAVER
-  if(!*refresh || !screenSaver.enabled || getCurrentMode()!=mode_sleep || mainScr.currentMode!=main_irontemp){
+  if(!refresh || !screenSaver.enabled || getCurrentMode()!=mode_sleep || mainScr.currentMode!=main_irontemp){
     return 0;
   }
   screenSaver.update=0;
@@ -630,8 +604,8 @@ static uint8_t  drawScreenSaver(uint8_t *refresh){
   return 0;
 }
 
-static void  drawMode(uint8_t *refresh){
-  if(!*refresh) return;
+static void  drawMode(uint8_t refresh){
+  if(!refresh) return;
 
   u8g2_SetFont(&u8g2, u8g2_font_small);
 
@@ -668,9 +642,9 @@ static void  drawMode(uint8_t *refresh){
   }
 }
 
-static uint8_t  drawPowerBar(uint8_t *refresh){
+static uint8_t  drawPowerBar(uint8_t refresh){
   static uint8_t previousPower=0;
-  uint8_t update=*refresh;
+  uint8_t update=refresh;
   if((current_time-barTime)>9){
     barTime = current_time;
     if(previousPower!=mainScr.lastPwr){
@@ -679,7 +653,7 @@ static uint8_t  drawPowerBar(uint8_t *refresh){
     }
   }
   if(update){                          // Update every 10mS or if screen was erased
-    if(!*refresh){                           // If screen not erased
+    if(!refresh){                           // If screen not erased
       u8g2_SetDrawColor(&u8g2,BLACK);                               // Draw a black square to wipe old widget data
       u8g2_DrawBox(&u8g2, OledWidth-PWR_BAR_WIDTH-2 , OledHeight-7, PWR_BAR_WIDTH, 5);
       u8g2_SetDrawColor(&u8g2,WHITE);
@@ -693,14 +667,14 @@ static uint8_t  drawPowerBar(uint8_t *refresh){
   return 0;
 }
 
-static uint8_t  drawPlot(uint8_t *refresh){
+static uint8_t  drawPlot(uint8_t refresh){
 #define PLOT_X  7
 #define PLOT_Y  12
 
   plot.enabled &= !(Iron.Error.Flags & FLAG_ACTIVE);
 
   if(!plot.enabled){ return 0; }
-  if(*refresh || plot.update){
+  if(refresh || plot.update){
     int16_t ref;
     if(Iron.CurrentMode!=mode_sleep){
       ref=Iron.CurrentSetTemperature;
@@ -743,7 +717,7 @@ static uint8_t  drawPlot(uint8_t *refresh){
   return 0;
 }
 
-static uint8_t  drawError(uint8_t *refresh){
+static uint8_t  drawError(uint8_t refresh){
   static uint32_t last_time;
   static uint8_t x_mark_state;
   if(mainScr.ironStatus!=status_error || mainScr.currentMode==main_setpoint ){
@@ -758,7 +732,7 @@ static uint8_t  drawError(uint8_t *refresh){
     uint8_t xp = (OledWidth-iron[0]-x_mark[0]-5)/2;
     uint8_t update = 0;
 
-    if(*refresh){
+    if(refresh){
       u8g2_DrawXBM(&u8g2, xp, (OledHeight-iron[1])/2, iron[0], iron[1], &iron[2]);
       update = 1;
     }
@@ -781,7 +755,7 @@ static uint8_t  drawError(uint8_t *refresh){
     }
     return update;
   }
-  else if(*refresh){
+  else if(refresh){
     uint8_t Err_ypos;
 
     uint8_t err = (uint8_t)Iron.Error.V_low+Iron.Error.safeMode+(Iron.Error.NTC_low|Iron.Error.NTC_high)+Iron.Error.noIron;
@@ -817,8 +791,8 @@ static uint8_t  drawError(uint8_t *refresh){
   return 0;
 }
 
-static void  drawMisc(uint8_t *refresh){
-  if(!*refresh) return;
+static void  drawMisc(uint8_t refresh){
+  if(!refresh) return;
 
   Widget_SetPoint->enabled &= (mainScr.currentMode==main_setpoint);                            // Disable setpoint widget if not in setpoint screen
 
@@ -858,14 +832,14 @@ static uint8_t main_screen_draw(screen_t *scr){
   u8g2_SetDrawColor(&u8g2, WHITE);
 
   if(mainScr.ironStatus != status_error){
-    ret |= drawScreenSaver(&refresh);
+    ret |= drawScreenSaver(refresh);
   }
-  ret |= drawPowerBar(&refresh);
-  ret |= drawIcons(&refresh);
-  drawMode(&refresh);
-  drawMisc(&refresh);
-  ret |= drawPlot(&refresh);
-  ret |= drawError(&refresh);
+  ret |= drawPowerBar(refresh);
+  ret |= drawIcons(refresh);
+  drawMode(refresh);
+  drawMisc(refresh);
+  ret |= drawPlot(refresh);
+  ret |= drawError(refresh);
   ret |= default_screenDraw(scr);
   if((Iron.Error.Flags&FLAG_ACTIVE) && mainScr.ironStatus!=status_error){
     return 0;                                                                                // If a new error appeared during the screen draw, skip oled update to avoid random artifacts
@@ -878,7 +852,6 @@ static void main_screen_init(screen_t *scr) {
   default_init(scr);
   Iron.shakeActive = 0;
   mainScr.shakeActive = 0;
-  mainScr.dimStep=0;
   plot.timeStep = (systemSettings.Profile.readPeriod+1)/200;                                                         // Update at the same rate as the system pwm
 
   mainScr.setMode = main_irontemp;
@@ -890,7 +863,6 @@ static void main_screen_init(screen_t *scr) {
   edit->max_value = systemSettings.Profile.MaxSetTemperature;
   edit->min_value = systemSettings.Profile.MinSetTemperature;
   setMainScrTempUnit();
-  mainScr.idleTimer=current_time;
 }
 
 static void main_screen_create(screen_t *scr){

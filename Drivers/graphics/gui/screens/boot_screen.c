@@ -173,7 +173,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
   }
 
   if(input!=Rotate_Nothing){
-    refreshOledDim();
+    wakeOledDim();
   }
   handleOledDim();
 
@@ -184,7 +184,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
       setSafeMode(disable);                                                                           // Disable safe mode and exit
 
     case 0:
-      if(current_time - screen_timer > SPLASH_TIMEOUT){                                               // After splash timeout
+      if(checkScreenTimer(SPLASH_TIMEOUT)){                                                           // After splash timeout
         if(!systemSettings.setupMode){                                                                // If not in setup mode
           ADC_Reset_measures();                                                                       // Reset the averages, show current values to avoid filtering delay at startup
           resetIronError();                                                                           // Force timeout of any error (This won't clear errors if still detected)
@@ -220,7 +220,7 @@ void boot_screen_init(screen_t * scr){
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM[0], splashXBM[1], &splashXBM[2]);
   scr->refresh = screen_Erased;
   setContrast(0);
-  refreshOledDim();
+  wakeOledDim();
 }
 
 
