@@ -1328,7 +1328,7 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
     }
     return -1;
   }
-  if(((w->type == widget_editable) && (sel->state == widget_edit)) || ((w->type == widget_combo)&&combo->currentItem->type==combo_Editable)) {
+  if( edit && sel->state==widget_edit) {
     int32_t val_ui;
     int32_t inc;
     if(w->refresh==refresh_idle){
@@ -1343,7 +1343,34 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
     if(state->Diff < 0){
         inc = -inc;
     }
-    if(edit->inputData.type==field_string){
+    if( (w->type == widget_multi_option || (combo && combo->currentItem->type==combo_MultiOption)) ) {
+        int8_t option = *(uint8_t*)dis->getData();
+        if(input == Rotate_Increment && option < edit->numberOfOptions -1)
+          option++;
+        else if(input == Rotate_Decrement && option > 0)
+          option--;
+        edit->setData(&option);
+    }
+    else if(dis->type==field_string){
+      if(input == Rotate_Decrement_while_click ||input == Rotate_Increment_while_click){
+        if(input == Rotate_Decrement_while_click){
+          if(edit->current_edit==0){
+            edit->current_edit=dis->reservedChars-1;
+          }
+          else{
+            edit->current_edit--;
+          }
+        }
+        else{
+          if(edit->current_edit<dis->reservedChars-1){
+            edit->current_edit++;
+          }
+          else{
+            edit->current_edit=0;
+          }
+        }
+        return -1;
+      }
       int16_t current_edit = (char)dis->displayString[edit->current_edit];
       current_edit += inc;
 
@@ -1376,8 +1403,7 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
       dis->displayString[edit->current_edit]=(char)current_edit;
       edit->setData(dis->displayString);
     }
-
-    else if(edit->inputData.type==field_int32){
+    else if(dis->type==field_int32){
       if(!dis->displayString){                            // If empty
         widgetDisable(w);                                 // This shouldn't happen. Disable widget to avoid possible errors.
         return -1;
@@ -1402,21 +1428,6 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
       edit->setData(&val_ui);
     }
     return -1;
-  }
-  else if( ((w->type == widget_multi_option) && (sel->state == widget_edit)) || ((w->type == widget_combo)&&combo->currentItem->type==combo_MultiOption)) {
-    if(w->refresh==refresh_idle){
-      w->refresh=refresh_triggered;
-    }
-    int temp = *(uint8_t*)dis->getData();
-    if(input == Rotate_Increment)
-      ++temp;
-    else if(input == Rotate_Decrement)
-      --temp;
-    if(temp < 0)
-      temp = edit->numberOfOptions - 1;
-    else if(temp > edit->numberOfOptions -1)
-      temp = 0;
-    edit->setData(&temp);
   }
   else if (sel->state == widget_selected) {
     uint8_t next = 0xFF;
