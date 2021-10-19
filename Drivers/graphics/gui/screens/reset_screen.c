@@ -56,8 +56,8 @@ static int doFactoryReset(widget_t *w, RE_Rotation_t input) {
 
 
 static void reset_onEnter(screen_t *scr){
-  if(last_scr==screen_system){
-    comboResetIndex(Screen_reset.widgets);
+  if(scr==&Screen_system){
+    comboResetIndex(Screen_reset.current_widget);
   }
 }
 

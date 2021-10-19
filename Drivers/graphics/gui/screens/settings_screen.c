@@ -34,8 +34,8 @@ static void SETTINGS_create(screen_t *scr) {
 
 
 static void SETTINGS_OnEnter(screen_t *scr) {
-  if(last_scr==screen_main){
-    comboResetIndex(Screen_settings.widgets);
+  if(scr==&Screen_main){
+    comboResetIndex(Screen_settings.current_widget);
   }
   if(ChecksumProfile(&systemSettings.Profile)!=systemSettings.ProfileChecksum){         // If there's unsaved profile data
     saveSettingsFromMenu(save_Settings);                                                // Save settings

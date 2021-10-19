@@ -24,7 +24,7 @@ static int editTip(widget_t *w, RE_Rotation_t input) {
 
 static void tip_list_init(screen_t *scr) {
   default_init(scr);
-  comboResetIndex(Screen_tip_list.widgets);
+  comboResetIndex(Screen_tip_list.current_widget);
 }
 
 int tip_list_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){

@@ -159,7 +159,7 @@ static int tip_copy(widget_t *w, RE_Rotation_t input) {
   comboitem_tip_settings_save->enabled=0;                                                                       // Disable save, will be enabled when the name is modified
   comboitem_tip_settings_copy->enabled=0;                                                                       // Cannot copy a new tip
   comboitem_tip_settings_delete->enabled=0;                                                                     // Cannot delete a new tip
-  comboResetIndex(Screen_tip_settings.widgets);                                                                 // Reset menu to 1st option
+  comboResetIndex(Screen_tip_settings.current_widget);                                                          // Reset menu to 1st option
   return -1;                                                                                                    //
 }
 //=========================================================
@@ -214,7 +214,7 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
 
 
 static void tip_settings_onEnter(screen_t *scr){
-  comboResetIndex(Screen_tip_settings.widgets);
+  comboResetIndex(Screen_tip_settings.current_widget);
   if(newTip){                                                                                                   // If new tip selected
     newTip=0;
     backupTip = systemSettings.Profile.tip[0];                                                                  // Copy data from first tip in the system

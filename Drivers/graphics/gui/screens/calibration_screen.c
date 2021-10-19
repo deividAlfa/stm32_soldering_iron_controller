@@ -205,11 +205,11 @@ static void setCalState(state_t s) {
 }
 //=========================================================
 static void Cal_onEnter(screen_t *scr) {
-  if(last_scr == screen_settings) {
+  if(scr == &Screen_settings) {
     backupMode=getCurrentMode();
     backupTemp=getUserTemperature();
     Currtip = getCurrentTip();
-    comboResetIndex(Screen_calibration.widgets);
+    comboResetIndex(Screen_calibration.current_widget);
     error=0;
     setCalibrationMode(enable);
   }
@@ -227,7 +227,7 @@ static void Cal_onExit(screen_t *scr) {
 static uint8_t Cal_draw(screen_t *scr){
   if(error==1){
     error=2;
-    Screen_calibration.widgets->enabled=0;
+    Screen_calibration.current_widget->enabled=0;
     FillBuffer(BLACK,fill_dma);
     scr->refresh=screen_Erased;
     putStrAligned(strings[lang].CAL_Error, 10, align_center);
@@ -246,7 +246,7 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
     if(checkScreenTimer(2000)){
       resetScreenTimer();                       // Reset screen idle timer
       error=0;
-      widgetEnable(Screen_calibration.widgets);
+      widgetEnable(Screen_calibration.current_widget);
       scr->refresh=screen_Erase;
     }
   }
@@ -428,7 +428,7 @@ static void Cal_Start_create(screen_t *scr) {
 
 static void Cal_Settings_init(screen_t *scr) {
   default_init(scr);
-  comboResetIndex(Screen_calibration_settings.widgets);
+  comboResetIndex(Screen_calibration_settings.current_widget);
   zero_state = zero_disabled;
   calAdjust[cal_250] = systemSettings.Profile.Cal250_default;
   calAdjust[cal_400] = systemSettings.Profile.Cal400_default;

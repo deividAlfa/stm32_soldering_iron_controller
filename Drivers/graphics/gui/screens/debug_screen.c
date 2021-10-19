@@ -206,7 +206,7 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
     return screen_main;
   }
   else if(input==Click){
-    if(last_scr!=screen_debug){
+    if(scr==&Screen_debug){
       return screen_pid_debug;
     }
     else{
@@ -241,8 +241,9 @@ static void debug_onEnter(screen_t *scr){
   editable_widget_t *edit = extractEditablePartFromWidget(widget_setPoint);
   displayOnly_widget_t *dis = extractDisplayPartFromWidget(widget_Temp);
 
+
   if(systemSettings.settings.tempUnit==mode_Celsius){
-    if(last_scr!=screen_debug){
+    if(scr!=&Screen_debug){
       edit->max_value = 450;
       edit->min_value = 0;
       edit->big_step = 20;
@@ -252,7 +253,7 @@ static void debug_onEnter(screen_t *scr){
     dis->endString="\260C";
   }
   else{
-    if(last_scr!=screen_debug){
+    if(scr!=&Screen_debug){
       edit->max_value = 850;
       edit->min_value = 0;
       edit->big_step = 50;
@@ -262,7 +263,7 @@ static void debug_onEnter(screen_t *scr){
     dis->endString="\260F";
   }
 
-  if(last_scr==screen_settings){
+  if(scr==&Screen_settings){
     backupMode=getCurrentMode();
     backupTemp=getUserTemperature();
 
@@ -295,7 +296,7 @@ static void debug_onEnter(screen_t *scr){
 }
 
 static void debug_onExit(screen_t *scr){
-  if(last_scr!=screen_debug && last_scr!=screen_pid_debug){
+  if(scr!=&Screen_debug && scr!=&Screen_pid_debug){
     _free(pidPlot);
     setUserTemperature(backupTemp);
     setCurrentMode(backupMode);

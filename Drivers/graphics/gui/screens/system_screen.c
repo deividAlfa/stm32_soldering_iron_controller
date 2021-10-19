@@ -272,8 +272,8 @@ static void setShakeFiltering(uint32_t *val) {
 }
 //=========================================================
 static void system_onEnter(screen_t *scr){
-  if(last_scr==screen_settings){
-    comboResetIndex(Screen_system.widgets);
+  if(scr==&Screen_settings){
+    comboResetIndex(Screen_system.current_widget);
     profile=systemSettings.settings.currentProfile;
   }
 }

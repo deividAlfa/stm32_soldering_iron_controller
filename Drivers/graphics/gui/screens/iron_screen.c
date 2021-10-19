@@ -288,8 +288,8 @@ static void iron_onEnter(screen_t *scr){
     editable_IRON_BoostTemp->inputData.endString="\260C";
     editable_IRON_UserTemp->inputData.endString="\260C";
   }
-  if(last_scr==screen_settings){
-    comboResetIndex(Screen_iron.widgets);
+  if(scr==&Screen_settings){
+    comboResetIndex(Screen_iron.current_widget);
   }
 }
 
@@ -398,7 +398,7 @@ static int saveNTC(widget_t *w, RE_Rotation_t input) {
 //=========================================================
 
 static void system_ntc_onEnter(screen_t *scr){
-  comboResetIndex(Screen_system_ntc.widgets);
+  comboResetIndex(Screen_system_ntc.current_widget);
   backup_ntc = systemSettings.Profile.ntc;
   update_NTC_menu();
 }
@@ -779,7 +779,7 @@ static void iron_create(screen_t *scr){
 }
 
 static void iron_advFilter_onEnter(screen_t *scr){
-  comboResetIndex(Screen_advFilter.widgets);
+  comboResetIndex(Screen_advFilter.current_widget);
   bak_f = systemSettings.Profile.tipFilter;
 }
 static void iron_advFilter_create(screen_t *scr){
