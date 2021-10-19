@@ -278,7 +278,7 @@ int8_t switchScreenMode(void){
     resetModeTimer();
     plot.enabled = (mainScr.displayMode==temp_graph);
     Screen_main.refresh=screen_Erase;
-
+    mainScr.updateReadings=1;
     switch(mainScr.setMode){
 
       case main_irontemp:
@@ -438,6 +438,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           }
           scr->refresh=screen_Erase;
           if(mainScr.displayMode==temp_numeric){
+            mainScr.updateReadings=1;
             mainScr.displayMode=temp_graph;
             widgetDisable(Widget_IronTemp);
             plot.enabled=1;
@@ -452,6 +453,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
               setCurrentMode(mode_boost);                                   // Set boost mode
             }
             else{
+              mainScr.updateReadings=1;
               mainScr.displayMode=temp_numeric;                             // Else, switch to numeric display mode
               widgetEnable(Widget_IronTemp);
               plot.enabled=0;
