@@ -223,12 +223,12 @@ void setSystemTempUnit(bool unit){
     systemSettings.Profile.MaxSetTemperature = round_10(TempConversion(systemSettings.Profile.MaxSetTemperature,unit,0));
     systemSettings.Profile.MinSetTemperature = round_10(TempConversion(systemSettings.Profile.MinSetTemperature,unit,0));
   }
-
-  systemSettings.settings.tempUnit = unit;
-  systemSettings.settings.guiTempDenoise  = round_10(TempConversion(systemSettings.settings.guiTempDenoise,unit,0));
-  Iron.UserSetTemperature = round_10(TempConversion(Iron.UserSetTemperature,unit,0));
-  setCurrentMode(Iron.CurrentMode);     // Reload temps
-
+  if(systemSettings.settings.tempUnit != unit){
+    systemSettings.settings.guiTempDenoise  = round_10(TempConversion(systemSettings.settings.guiTempDenoise,unit,0));
+    systemSettings.settings.tempUnit = unit;
+    Iron.UserSetTemperature = round_10(TempConversion(Iron.UserSetTemperature,unit,0));
+    setCurrentMode(Iron.CurrentMode);     // Reload temps
+  }
   __enable_irq();
 }
 
