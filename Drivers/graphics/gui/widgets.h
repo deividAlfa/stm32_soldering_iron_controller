@@ -50,7 +50,7 @@ struct displayOnly_widget_t {
   const uint8_t *font;
   char* displayString;
   char* endString;
-  void * (*getData)();
+  void * (*getData)();                      // For multioption & field_int32, use uint32_t*. For field_string use char*
   int32_t last_value;
 };
 
@@ -62,7 +62,7 @@ struct editable_widget_t {
   int32_t min_value;
   int32_t max_value;
   char * const * options;
-  void (*setData)(void *);
+  void (*setData)(void *);                  // For multioption & field_int32, use uint32_t*. For field_string use char*
   selectable_widget_t selectable;
   displayOnly_widget_t inputData;
 };
@@ -119,7 +119,7 @@ struct widget_t
   uint8_t posY;
   uint8_t width;
   uint8_t enabled;
-  int8_t radius;
+  int8_t radius;											// Frame radius: -1=auto(r=Height/2). 0=Square, else use defined radius
   widget_t *next_widget;
 
   struct screen_t *parent;
