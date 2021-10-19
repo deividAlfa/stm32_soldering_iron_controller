@@ -1126,7 +1126,7 @@ uint8_t comboBoxDraw(widget_t *w) {
           len=u8g2_GetUTF8Width(&u8g2,dis->displayString);
         }
         else if(dis->type==field_string){
-          strncpy(displayString,dis->getData(),dis->reservedChars+1);
+          strncpy(displayString,(char*)dis->getData(),dis->reservedChars+1);
           len=u8g2_GetUTF8Width(&u8g2,displayString);
         }
       }
@@ -1154,7 +1154,7 @@ uint8_t comboBoxDraw(widget_t *w) {
         }
       }
       else if(item->type==combo_MultiOption){
-        u8g2_DrawUTF8(&u8g2,dis->stringStart, posY+2,  edit->options[*(uint8_t*)dis->getData()]);
+        u8g2_DrawUTF8(&u8g2,dis->stringStart, posY+2,  edit->options[*(uint32_t*)dis->getData()]);
       }
       u8g2_DrawUTF8(&u8g2, 4, y * height + w->posY +2, item->text);          // Draw the combo item label
     }
@@ -1344,11 +1344,19 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
         inc = -inc;
     }
     if( (w->type == widget_multi_option || (combo && combo->currentItem->type==combo_MultiOption)) ) {
-        int8_t option = *(uint8_t*)dis->getData();
-        if(input == Rotate_Increment && option < edit->numberOfOptions -1)
-          option++;
-        else if(input == Rotate_Decrement && option > 0)
-          option--;
+        int32_t option = *(int32_t*)dis->getData();
+        if(input == Rotate_Increment){
+          if(option < edit->numberOfOptions -1)
+            option++;
+          else
+            option = edit->numberOfOptions -1;
+        }
+        else if(input == Rotate_Decrement){
+          if(option > 0)
+            option--;
+          else
+            option=0;
+        }
         edit->setData(&option);
     }
     else if(dis->type==field_string){
@@ -1371,7 +1379,7 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
         }
         return -1;
       }
-      int16_t current_edit = (char)dis->displayString[edit->current_edit];
+      char current_edit = (char)dis->displayString[edit->current_edit];
       current_edit += inc;
 
       switch(current_edit){//     \0, ' ', 0-9, A-Z
