@@ -109,7 +109,6 @@ static void * getGuiTempDenoise() {
   temp = systemSettings.settings.guiTempDenoise;
   return &temp;
 }
-
 static void setGuiTempDenoise(uint32_t *val) {
   systemSettings.settings.guiTempDenoise = *val;
 }
@@ -141,11 +140,11 @@ static void setOledOffset(uint32_t *val) {
 //=========================================================
 static void * getdimMode() {
   temp = systemSettings.settings.dim_mode;
-  update_System_menu();
   return &temp;
 }
 static void setdimMode(uint32_t *val) {
   systemSettings.settings.dim_mode = * val;
+  update_System_menu();
 }
 //=========================================================
 static void * getDimTimeout() {
@@ -191,11 +190,11 @@ static void setStandMode(uint32_t *val) {
 //=========================================================
 static void * getEncoderMode() {
   temp = systemSettings.settings.EncoderMode;
-  RE_SetMode(&RE1_Data, systemSettings.settings.EncoderMode);
   return &temp;
 }
 static void setEncoderMode(uint32_t *val) {
   systemSettings.settings.EncoderMode = * val;
+  RE_SetMode(&RE1_Data, systemSettings.settings.EncoderMode);
 }
 //=========================================================
 static void * getGuiUpd_ms() {
@@ -243,34 +242,33 @@ static void * getLanguage() {
   temp = systemSettings.settings.language;
   return &temp;
 }
-
 static void setLanguage(uint32_t *val) {
   lang = *val;
   systemSettings.settings.language=*val;
 }
 //=========================================================
-static void setButtonWakeMode(uint32_t *val) {
-  systemSettings.settings.buttonWakeMode = *val;
-}
 static void * getButtonWakeMode() {
   temp = systemSettings.settings.buttonWakeMode;
   return &temp;
 }
-//=========================================================
-static void setShakeWakeMode(uint32_t *val) {
-  systemSettings.settings.shakeWakeMode = *val;
+static void setButtonWakeMode(uint32_t *val) {
+  systemSettings.settings.buttonWakeMode = *val;
 }
+//=========================================================
 static void * getShakeWakeMode() {
   temp = systemSettings.settings.shakeWakeMode;
   return &temp;
 }
-//=========================================================
-static void setShakeFiltering(uint32_t *val) {
-  systemSettings.settings.shakeFiltering = *val;
+static void setShakeWakeMode(uint32_t *val) {
+  systemSettings.settings.shakeWakeMode = *val;
 }
+//=========================================================
 static void * getShakeFiltering() {
   temp = systemSettings.settings.shakeFiltering;
   return &temp;
+}
+static void setShakeFiltering(uint32_t *val) {
+  systemSettings.settings.shakeFiltering = *val;
 }
 //=========================================================
 static void system_onEnter(screen_t *scr){
@@ -304,8 +302,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setLanguage;
-  edit->max_value = LANGUAGE_COUNT-1;
-  edit->min_value = 0;
   edit->options = Langs;
   edit->numberOfOptions = LANGUAGE_COUNT;
 
@@ -316,8 +312,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setProfile;
-  edit->max_value = ProfileSize-1;
-  edit->min_value = 0;
   edit->options = profileStr;
   edit->numberOfOptions = ProfileSize;
 
@@ -353,8 +347,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setdimMode;
-  edit->max_value = 2;
-  edit->min_value = 0;
   edit->options = strings[lang].dimMode;
   edit->numberOfOptions = 3;
 
@@ -379,8 +371,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setDimTurnOff;
-  edit->max_value = 1;
-  edit->min_value = 0;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -392,8 +382,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setWakeMode;
-  edit->max_value = mode_stand;
-  edit->min_value = mode_shake;
   edit->options = strings[lang].wakeMode;
   edit->numberOfOptions = 2;
 
@@ -405,8 +393,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setShakeFiltering;
-  edit->max_value = enable;
-  edit->min_value = disable;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -418,8 +404,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setStandMode;
-  edit->max_value = mode_standby;
-  edit->min_value = mode_sleep;
   edit->options = strings[lang].InitMode;
   edit->numberOfOptions = 2;
 
@@ -431,8 +415,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setInitMode;
-  edit->max_value = mode_run;
-  edit->min_value = mode_sleep;
   edit->options = strings[lang].InitMode;
   edit->numberOfOptions = 3;
 
@@ -444,8 +426,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setButtonWakeMode;
-  edit->max_value = 3;
-  edit->min_value = 0;
   edit->options = strings[lang].WakeModes;
   edit->numberOfOptions = 4;
 
@@ -457,8 +437,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setShakeWakeMode;
-  edit->max_value = 3;
-  edit->min_value = 0;
   edit->options = strings[lang].WakeModes;
   edit->numberOfOptions = 4;
 
@@ -470,8 +448,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setEncoderMode;
-  edit->max_value = encoder_reverse;
-  edit->min_value = encoder_normal;
   edit->options = strings[lang].encMode;
   edit->numberOfOptions = 2;
 
@@ -483,8 +459,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setbuzzerMode;
-  edit->max_value = 1;
-  edit->min_value = 0;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -496,8 +470,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setTmpUnit;
-  edit->max_value = mode_Farenheit;
-  edit->min_value = mode_Celsius;
   edit->options = tempUnit;
   edit->numberOfOptions = 2;
 
@@ -527,7 +499,7 @@ static void system_create(screen_t *scr){
   edit->max_value = 50;
   edit->min_value = 1;
 
-  // [ Denoisethreshold Widget ]
+  // [ De-noise threshold Widget ]
   //
   newComboEditable(w, strings[lang].FILTER__Threshold, &edit, NULL);
   editable_system_GuiTempDenoise=edit;
@@ -548,8 +520,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setActiveDetection;
-  edit->max_value = 1;
-  edit->min_value = 0;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -590,8 +560,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setDbgScr;
-  edit->max_value = 1;
-  edit->min_value = 0;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 #endif
@@ -607,13 +575,14 @@ static void system_create(screen_t *scr){
 int system_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
 
   if(current_lang!=lang){                                                       // If language changed
+    selectable_widget_t *sel = &((comboBox_widget_t*)scr->current_widget->content)->currentItem->widget->selectable;
     current_lang=lang;
     oled_backup_comboStatus(scr);
     oled_destroy_screen(scr);                                                   // Destroy and create the screen
     system_create(scr);
     oled_restore_comboStatus(scr);
-    ((comboBox_widget_t*)scr->widgets->content)->currentItem->widget->selectable.state=widget_edit;
-    ((comboBox_widget_t*)scr->widgets->content)->currentItem->widget->selectable.previous_state=widget_edit;
+    sel->state=widget_edit;
+    sel->previous_state=widget_edit;
     scr->refresh = refresh_triggered;
   }
   return autoReturn_ProcessInput(scr, input, state);

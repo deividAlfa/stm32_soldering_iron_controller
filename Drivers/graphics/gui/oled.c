@@ -111,10 +111,10 @@ void oled_destroy_screen(screen_t *scr){
 }
 
 void oled_backup_comboStatus(screen_t *scr){
-  if((scr->widgets)&&(scr->widgets->type==widget_combo)){
-    comboBox_widget_t *combo = (comboBox_widget_t*)scr->widgets->content;
+  if((scr->current_widget)&&(scr->current_widget->type==widget_combo)){
+    comboBox_widget_t *combo = (comboBox_widget_t*)scr->current_widget->content;
     if(combo->currentItem){
-      scr->backup_combo_index = comboItemToIndex(scr->widgets,combo->currentItem);
+      scr->backup_combo_index = comboItemToIndex(scr->current_widget,combo->currentItem);
       scr->backup_combo_scroll=combo->currentScroll;
     }
     else{
@@ -124,10 +124,10 @@ void oled_backup_comboStatus(screen_t *scr){
   }
 }
 void oled_restore_comboStatus(screen_t *scr){
-  if((scr->widgets)&&(scr->widgets->type==widget_combo)){
-    comboBox_widget_t *combo = (comboBox_widget_t*)scr->widgets->content;
+  if((scr->current_widget)&&(scr->current_widget->type==widget_combo)){
+    comboBox_widget_t *combo = (comboBox_widget_t*)scr->current_widget->content;
     combo->currentScroll=scr->backup_combo_scroll;
-    combo->currentItem = comboIndexToItem(scr->widgets,scr->backup_combo_index);
+    combo->currentItem = comboIndexToItem(scr->current_widget,scr->backup_combo_index);
   }
 }
 void oled_processInput(void) {

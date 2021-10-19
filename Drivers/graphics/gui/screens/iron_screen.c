@@ -421,8 +421,6 @@ static void system_ntc_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_enable_NTC;
-  edit->max_value = 1;
-  edit->min_value = 0;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -435,8 +433,6 @@ static void system_ntc_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_Pull_mode;
-  edit->max_value = 1;
-  edit->min_value = 0;
   edit->options = strings[lang].DownUp;
   edit->numberOfOptions = 2;
 
@@ -463,8 +459,6 @@ static void system_ntc_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&set_NTC_detect;
-  edit->max_value = 1;
-  edit->min_value = 0;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -766,8 +760,6 @@ static void iron_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&seterrorResume;
-  edit->max_value = error_resume;
-  edit->min_value = error_sleep;
   edit->options = strings[lang].errMode;
   edit->numberOfOptions = 3;
 

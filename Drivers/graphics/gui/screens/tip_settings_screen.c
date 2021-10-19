@@ -184,12 +184,7 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
 
   if(input==Rotate_Decrement_while_click){
    comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
-    if(item->type==combo_Editable || item->type==combo_MultiOption){
-      if(item->widget->selectable.state!=widget_edit){
-        return last_scr;
-      }
-    }
-    else{
+    if( item->type!=combo_Editable || (item->type==combo_Editable && item->widget->selectable.state!=widget_edit)){
       return last_scr;
     }
   }

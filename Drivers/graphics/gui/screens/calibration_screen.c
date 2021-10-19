@@ -458,7 +458,7 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
   updateScreenTimer(input);
 
   if(update || update_GUI_Timer()){
-    scr->widgets->refresh=refresh_triggered;
+    scr->current_widget->refresh=refresh_triggered;
     switch(zero_state){
       case zero_disabled:
         sprintf(zeroStr, "%s%4u", strings[lang].CAL_ZeroSet, backup_calADC_At_0 );
@@ -479,13 +479,8 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
 
   if(input==Rotate_Decrement_while_click){
    comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
-    if(item->type==combo_Editable || item->type==combo_MultiOption){
-      if(item->widget->selectable.state!=widget_edit){
+    if(item->type!=combo_Editable || (item->type==combo_Editable && item->widget->selectable.state!=widget_edit)){
         return last_scr;
-      }
-    }
-    else{
-      return last_scr;
     }
   }
   return default_screenProcessInput(scr, input, s);

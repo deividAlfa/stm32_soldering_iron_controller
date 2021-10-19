@@ -116,7 +116,7 @@ static void * getProfile() {
   temp = profile;
   return &temp;
 }
-static void setProfile(int32_t *val) {
+static void setProfile(uint32_t *val) {
   profile=*val;
 }
 //=========================================================
@@ -124,7 +124,6 @@ static void * getLanguage() {
   temp = systemSettings.settings.language;
   return &temp;
 }
-
 static void setLanguage(uint32_t *val) {
   lang = *val;
   systemSettings.settings.language=*val;
@@ -247,7 +246,6 @@ void boot_screen_create(screen_t *scr){
   edit->step = 1;
   edit->selectable.tab = 0;
   edit->setData = (void (*)(void *))&setProfile;
-  edit->max_value = ProfileSize-1;
   edit->options = profileStr;
   edit->numberOfOptions = ProfileSize;
   w->posX = 74;
@@ -268,7 +266,6 @@ void boot_screen_create(screen_t *scr){
   edit->step = 1;
   edit->selectable.tab = 1;
   edit->setData = (void (*)(void *))&setLanguage;
-  edit->max_value = LANGUAGE_COUNT-1;
   edit->options = Langs;
   edit->numberOfOptions = LANGUAGE_COUNT;
   w->posX = 74;
