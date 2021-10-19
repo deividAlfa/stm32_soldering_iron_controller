@@ -289,6 +289,8 @@ int32_t map(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t 
 // So (temp*117965)>>10 == temp*1.8 (Real: 1,800003052)
 // (temp*36409)>>10 == temp/1.8 (Real: 1,799994507)
 // Max input: 110.000°F, 35.000°C (risk of uint32_t overflow)
+
+// Absolute temperature conversion
 int16_t TempConversion(int16_t temperature, bool conversion, bool x10mode){
   if(conversion==mode_Farenheit){  // Input==Celsius, Output==Farenheit
     temperature=(((int32_t)temperature*117965)>>16);// F = (C*1.8)+32
@@ -306,6 +308,17 @@ int16_t TempConversion(int16_t temperature, bool conversion, bool x10mode){
     else{
       temperature -= 32;
     }
+    temperature=((int32_t)temperature*36409)>>16;// C = (F-32)/1.8
+  }
+  return temperature;
+}
+
+// Relative temperature conversion (ex. increment or difference)
+int16_t TempIncrementConversion(int16_t temperature, bool conversion){
+  if(conversion==mode_Farenheit){  // Input==Celsius, Output==Farenheit
+    temperature=(((int32_t)temperature*117965)>>16);// F = (C*1.8)+*9/5
+  }
+  else{// Input==Farenheit, Output==Celsius
     temperature=((int32_t)temperature*36409)>>16;// C = (F-32)/1.8
   }
   return temperature;
