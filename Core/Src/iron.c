@@ -204,10 +204,10 @@ void handleIron(void) {
 // Round to closest 10
 uint16_t round_10(uint16_t input){
   if((input%10)>5){
-    input+=(10-input%10);                                                                     // ex. 640°F=337°C->340°C)
+    input+=(10-input%10);                                                                 // ex. 640°F=337°C->340°C)
   }
   else{
-    input-=input%10;                                                                          // ex. 300°C=572°F->570°F
+    input-=input%10;                                                                      // ex. 300°C=572°F->570°F
   }
   return input;
 }
@@ -218,18 +218,18 @@ void setSystemTempUnit(bool unit){
   __disable_irq();
   if(systemSettings.Profile.tempUnit != unit){
     systemSettings.Profile.tempUnit = unit;
+    Iron.UserSetTemperature = round_10(TempConversion(Iron.UserSetTemperature,unit,0));                                         // User temp is loaded from the profile, thus it uses the same unit
     systemSettings.Profile.UserSetTemperature = round_10(TempConversion(systemSettings.Profile.UserSetTemperature,unit,0));
     systemSettings.Profile.standbyTemperature = round_10(TempConversion(systemSettings.Profile.standbyTemperature,unit,0));
     systemSettings.Profile.MaxSetTemperature = round_10(TempConversion(systemSettings.Profile.MaxSetTemperature,unit,0));
     systemSettings.Profile.MinSetTemperature = round_10(TempConversion(systemSettings.Profile.MinSetTemperature,unit,0));
+    systemSettings.Profile.boostTemperature = round_10(TempIncrementConversion(systemSettings.Profile.boostTemperature,unit));
   }
   if(systemSettings.settings.tempUnit != unit){
-    systemSettings.settings.guiTempDenoise  = round_10(TempConversion(systemSettings.settings.guiTempDenoise,unit,0));
     systemSettings.settings.tempUnit = unit;
-    Iron.UserSetTemperature = round_10(TempConversion(Iron.UserSetTemperature,unit,0));
-    setCurrentMode(Iron.CurrentMode);     // Reload temps
   }
   __enable_irq();
+  setCurrentMode(Iron.CurrentMode);     // Reload temps
 }
 
 // This function inits the timers and sets the prescaler settings depending on the system core clock
