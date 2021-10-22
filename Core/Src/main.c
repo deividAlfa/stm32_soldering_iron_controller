@@ -23,7 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "iron.h"
-#include  "pid.h"
+#include "pid.h"
 #include "settings.h"
 #include "adc_global.h"
 #include "buzzer.h"
@@ -193,6 +193,43 @@ int main(void)
     oled_handle();                                                                            // Handle oled drawing
   }
   /* USER CODE END 3 */
+}
+
+/* USER CODE BEGIN 4 */
+
+// Called from SysTick IRQ every 1mS
+void Program_Handler(void) {
+  handle_buzzer();                                                    // Handle buzzer state
+  RE_Process(&RE1_Data);                                              // Handle Encoder
+  if(systemSettings.settings.WakeInputMode!=mode_stand){
+    readWake();
+  }
+}
+
+
+/*
+ *
+ *  Timer working in load preload mode! The value loaded now is loaded on next event. That's why the values are reversed!
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
+  if(_htim == Iron.Read_Timer){
+    __HAL_TIM_CLEAR_FLAG(Iron.Read_Timer,TIM_FLAG_UPDATE);
+
+    if(ADC_Status==ADC_Idle){
+      __HAL_TIM_SET_AUTORELOAD(Iron.Read_Timer,systemSettings.Profile.readPeriod-(systemSettings.Profile.readDelay+1)); // load (period-delay) time
+
+      if(systemSettings.settings.activeDetection && !Iron.Error.safeMode){
+        configurePWMpin(output_High);                                                   // Force PWM high for a few uS (typically 5-10uS)
+        while(__HAL_TIM_GET_COUNTER(Iron.Read_Timer)<(PWM_DETECT_TIME/5));
+      }
+      configurePWMpin(output_Low);                                                      // Force PWM low
+      ADC_Status = ADC_Waiting;
+    }
+    else if(ADC_Status==ADC_Waiting){
+      __HAL_TIM_SET_AUTORELOAD(Iron.Read_Timer,systemSettings.Profile.readDelay);       // Load Delay time
+      ADC_Start_DMA();
+    }
+  }
 }
 /* USER CODE END 4 */
 
