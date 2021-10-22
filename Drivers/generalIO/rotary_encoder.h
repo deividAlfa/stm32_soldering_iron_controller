@@ -27,8 +27,8 @@ typedef enum {
  * @brief  Rotary encoder mode selection for rotation
  */
 typedef enum {
-  RE_Mode_Zero,                       /*!< Rotary encoder mode zero. It is used for direction when it will be increment od decrement, default used */
-  RE_Mode_One                         /*!< Rotary encoder mode one. It is used for direction when it will be increment od decrement */
+  RE_Mode_Forward,                        // Rotary encoder forward mode.
+  RE_Mode_Reverse                         // Rotary encoder reverse mode
 } RE_Mode_t;
 
 typedef enum {
