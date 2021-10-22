@@ -219,28 +219,28 @@ void oled_send(uint8_t* bf, uint16_t count, uint8_t mode){
 #if defined OLED_I2C && (!defined OLED_DEVICE  || (defined OLED_DEVICE && defined I2C_TRY_HW))
 // This delays are made for 36MHz (Ksger v2 software i2c). If increasing the cpu frequency, also increase the nop count 
 __attribute__ ((noinline)) void i2c_Delay_H(void){                  // Intended no inline to add further delay and reduce nops
-  asm("nop\nnop\nnop\nnop\nnop\nnop");
+  asm("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop");
 }
 
-__attribute__ ((always_inline)) inline  void i2c_Delay_L(void){     // Inline here, we need very short delay
-  asm("nop\nnop\nnop\nnop");
+__attribute__ ((noinline)) void i2c_Delay_L(void){
+  asm("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop");
 }
 
 void i2cStart(void){                                      // Start condition, SDA transition to low with SCL high
   Oled_Set_SCL();
   i2c_Delay_H();
   Oled_Clear_SDA();
-  i2c_Delay_L();
+  i2c_Delay_H();
   Oled_Clear_SCL();
-  i2c_Delay_L();
+  i2c_Delay_H();
 }
 void i2cStop(void){                                       // Stop condition, SCL transition to high with SDA low
   Oled_Clear_SDA();
-  i2c_Delay_L();
+  i2c_Delay_H();
   Oled_Set_SCL();
   i2c_Delay_H();
   Oled_Set_SDA();
-  i2c_Delay_L();
+  i2c_Delay_H();
 }
 
 // This sw i2c driver is extremely timing optimized, done specially for ksger v2.1 and compatibles running at 36MHz.
