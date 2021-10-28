@@ -44,6 +44,8 @@ The actual requirements are 10KB RAM and 64KB **(\*)** flash.<br>
 **(\*)** To date, I have found zero issues. Original KSGER firmware also does this.<br>
 **(\*)** ST-Link checks the written data, and the firmware uses checksums to protect the settings, any error will be detected.<br>
 
+**CLONES** Some controllers began to put stm32 clones due the chip shortage. CKS32 works well, but CH32F doesn't! Avoid the CH32F, the ADC makes strange things.<br>
+
 The [BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.<br>
 Currently supported controllers (Click to download the latest build):<br>
 * [**Quicko T12-072**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/Quicko/STM32F072/STM32SolderingStation.bin): For STM32F072 variant.
@@ -142,6 +144,16 @@ Some amplifiers can introduce a small voltage offset that will translate into th
 To fix that, enter the [Calibration menu](Readme_files/Operation.md#calibration), insert a completely cold tip, enter Settings, adjust Zero set calibration and save.<br>
 After that, the offset will be compensated and the cold temperature will be normal.<br>
 It's highly recommended to recalibrate after changing this value.<br>
+
+### KSGER self-resetting<br>
+Some KSGER controllers use a linear regulator to convert 24V to 3.3V, which is a very bad design and generates a lot of heat.<br>
+With the oled displays, each pixel turned on consumes more power, and this firmware uses much larger numbers for the display.<br>
+Thus, this firmware uses some more power. The design is so bad that regulators will overload, dropping the voltage and causing a reset.<br>
+Ther're some options to fix this:<br>
+- Lower the display brightness to reduce the power consumption.<br>
+- Put a 100-150Ω resistor in series with the regulator (24V->Resistor->LDO input). The resistor will drop part of the voltage and reduce the stress on the regulator.<br>
+- Replace the LDO with a better one, or modify the board, adding a LDO that accepts a small heatsink to take away the heat.<br>
+- Use a small DC/DC step-down module to convert 24V to 5V, and feed 5V to the 3.3V LDO (best option, barely makes any heat).<br>
 
 ### Other issues<br>
 After fully reading the documentation, if you still have problems or doubts, please ask in the EEVblog thread:<br>
