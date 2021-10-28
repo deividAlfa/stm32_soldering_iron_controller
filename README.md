@@ -148,8 +148,8 @@ It's highly recommended to recalibrate after changing this value.<br>
 ### KSGER self-resetting<br>
 Some KSGER controllers use a linear regulator to convert 24V to 3.3V, which is a very bad design and generates a lot of heat.<br>
 With the oled displays, each pixel turned on consumes more power, and this firmware uses much larger numbers for the display.<br>
-Thus, this firmware uses some more power. The design is so bad that regulators will overload, dropping the voltage and causing a reset.<br>
-Ther're some options to fix this:<br>
+Thus, this firmware uses some more power. The design is so bad that the regulator will overload and shut down, resetting the board.<br>
+There're some options to fix this:<br>
 - Lower the display brightness to reduce the power consumption.<br>
 - Put a 100-150Ω resistor in series with the regulator (24V->Resistor->LDO input). The resistor will drop part of the voltage and reduce the stress on the regulator.<br>
 - Replace the LDO with a better one, or modify the board, adding a LDO that accepts a small heatsink to take away the heat.<br>
