@@ -27,8 +27,8 @@ typedef enum {
  * @brief  Rotary encoder mode selection for rotation
  */
 typedef enum {
-  RE_Mode_Forward,                        // Rotary encoder forward mode.
-  RE_Mode_Reverse                         // Rotary encoder reverse mode
+  RE_Mode_Reverse,                         // Rotary encoder reverse mode
+  RE_Mode_Forward                          // Rotary encoder forward mode.
 } RE_Mode_t;
 
 typedef enum {

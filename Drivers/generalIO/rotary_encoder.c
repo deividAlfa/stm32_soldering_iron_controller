@@ -108,7 +108,7 @@ void RE_Process(RE_State_t* data) {
       lastStep=current_time;
 
       /* Check mode */
-      if (data->Mode == RE_Mode_Forward) {
+      if (data->Mode == RE_Mode_Reverse) {
         if (data->direction) {
           data->RE_Count += -add;
         } else {
