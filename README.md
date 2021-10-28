@@ -151,7 +151,7 @@ With the oled displays, each pixel turned on consumes more power, and this firmw
 Thus, this firmware uses some more power. The design is so bad that the regulator will overload and shut down, resetting the board.<br>
 There're some options to fix this:<br>
 - Lower the display brightness to reduce the power consumption.<br>
-- Put a 100-150Ω resistor in series with the regulator (24V->Resistor->LDO input). The resistor will drop part of the voltage and reduce the stress on the regulator.<br>
+- Put a 100-150Ω 2W resistor in series with the regulator (24V->Resistor->LDO input). The resistor will drop part of the voltage and reduce the stress on the regulator.<br>
 - Replace the LDO with a better one, or modify the board, adding a LDO that accepts a small heatsink to take away the heat.<br>
 - Use a small DC/DC step-down module to convert 24V to 5V, and feed 5V to the 3.3V LDO (best option, barely makes any heat).<br>
 
