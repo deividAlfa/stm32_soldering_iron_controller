@@ -149,7 +149,7 @@ void resetModeTimer(void){
   mainScr.modeTimer=current_time;
 }
 
-// Checks elapsed time since the current iron mode was set
+// Checks elapsed time since the current main screen mode was set
 uint8_t checkMainScreenModeTimer(uint32_t time){
   if((current_time-mainScr.modeTimer)>time){
     return 1;
@@ -157,7 +157,7 @@ uint8_t checkMainScreenModeTimer(uint32_t time){
   return 0;
 }
 
-// Checks elapsed time since the current main screen mode was set
+// Checks elapsed time since the current iron mode was set
 uint8_t checkIronModeTimer(uint32_t time){
   if((current_time-Iron.CurrentModeTimer)>time){
     return 1;
