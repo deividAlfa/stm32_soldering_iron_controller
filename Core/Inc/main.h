@@ -55,7 +55,7 @@ extern CRC_HandleTypeDef hcrc;
 // Don't uncomment!!
 //               __attribute__((optimize("O0")))
 
-#define DISABLE_OUTPUT                // Enable to fully disable the tip power (Ex. for debugging)
+//#define DISABLE_OUTPUT                // Enable to fully disable the tip power (Ex. for debugging)
 #define DEBUG_ERROR                   // Enable to show file/line error messages
 
 #ifdef DEBUG
