@@ -148,8 +148,18 @@ static struct{
 void resetModeTimer(void){
   mainScr.modeTimer=current_time;
 }
-uint8_t checkModeTimer(uint32_t time){
+
+// Checks elapsed time since the current iron mode was set
+uint8_t checkMainScreenModeTimer(uint32_t time){
   if((current_time-mainScr.modeTimer)>time){
+    return 1;
+  }
+  return 0;
+}
+
+// Checks elapsed time since the current main screen mode was set
+uint8_t checkIronModeTimer(uint32_t time){
+  if((current_time-Iron.CurrentModeTimer)>time){
     return 1;
   }
   return 0;
@@ -398,29 +408,31 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         case Rotate_Increment:
         case Rotate_Decrement:
-          if(Iron.CurrentMode==mode_boost){
-            setCurrentMode(mode_run);
-            break;
-          }
-          else if(current_mode!=mode_run){
-            IronWake(wakeButton);
-            if(getCurrentMode()==mode_run){                                 // If mode changed, don't process the click
+          if((Iron.CurrentMode!=mode_run && checkIronModeTimer(250)) || Iron.CurrentMode==mode_run){  // To avoid unwanted mode changing, ignore rotation if not in run mode and set <250ms ago
+            if(Iron.CurrentMode==mode_boost){
+              setCurrentMode(mode_run);
               break;
             }
-          }
-          if(mainScr.displayMode==temp_graph){
-            if(!checkModeTimer(1000)){                                      // If last step happened less than 1 second ago, disable boost flag and modify the setpoint.
-              mainScr.boost_enable=0;                                       // Disable boost flag
-              widgetEnable(Widget_SetPoint);                                // Enable the setpoint widget, but don't set it as current widget (Dirty hack)
-              default_widgetProcessInput(Widget_SetPoint, input, state);    // Just to be able to process the input. If the widget is disabled, the widget process will skip it. It will be disabled before drawing in drawMisc function
+            else if(current_mode!=mode_run){
+              IronWake(wakeButton);
+              if(getCurrentMode()==mode_run){                                 // If mode changed, don't process the click
+                break;
+              }
             }
-            else{                                                           // If last step was more than 1 second ago, enable boost flag
-              mainScr.boost_enable=1;                                       // Set boost flag. Click within 1 second to enable boost mode
+            if(mainScr.displayMode==temp_graph){
+              if(!checkMainScreenModeTimer(1000)){                            // If last step happened less than 1 second ago, disable boost flag and modify the setpoint.
+                mainScr.boost_enable=0;                                       // Disable boost flag
+                widgetEnable(Widget_SetPoint);                                // Enable the setpoint widget, but don't set it as current widget (Dirty hack)
+                default_widgetProcessInput(Widget_SetPoint, input, state);    // Just to be able to process the input. If the widget is disabled, the widget process will skip it. It will be disabled before drawing in drawMisc function
+              }
+              else{                                                           // If last step was more than 1 second ago, enable boost flag
+                mainScr.boost_enable=1;                                       // Set boost flag. Click within 1 second to enable boost mode
+              }
+              resetModeTimer();                                               // Reset mode timer
             }
-            resetModeTimer();                                               // Reset mode timer
-          }
-          else{
-            mainScr.setMode=main_setpoint;
+            else{
+              mainScr.setMode=main_setpoint;
+            }
           }
           return -1;
           break;
@@ -445,7 +457,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             plot.update=1;
           }
           else if(mainScr.displayMode==temp_graph){
-            if(checkModeTimer(1000)){                                       // If more than 1 second since last rotation, disable boost flag
+            if(checkMainScreenModeTimer(1000)){                             // If more than 1 second since last rotation, disable boost flag
               mainScr.boost_enable=0;
             }
             if(mainScr.boost_enable && current_mode==mode_run){             // If boost flag enabled and iron running
@@ -546,7 +558,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       switch((uint8_t)input){
         case LongClick:
         case Click:
-          if(mainScr.ironStatus != status_error && current_mode==mode_run && !checkModeTimer(1000)){
+          if(mainScr.ironStatus != status_error && current_mode==mode_run && !checkMainScreenModeTimer(1000)){
             setCurrentMode(mode_boost);
           }
           mainScr.setMode=main_irontemp;
