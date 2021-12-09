@@ -56,6 +56,7 @@ typedef struct {
   uint8_t             updatePwm;                            // Flag to indicate PWM need to be updated
   IronError_t         Error;                                // Error flags
   uint8_t             lastMode;                             // Last mode before error condition.
+  uint8_t             boot_complete;                        // Flag set to 1 when boot screen exits (Used for error handlding)
 
   uint16_t            Pwm_Period;                           // PWM period
   uint16_t            Pwm_Max;                              // Max PWM output for power limit

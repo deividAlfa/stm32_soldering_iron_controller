@@ -362,7 +362,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     }
 
     __HAL_TIM_SET_COUNTER(Iron.Pwm_Timer,0);                                                // Synchronize PWM
-    if(!Iron.Error.safeMode && Iron.CurrentMode!=mode_sleep){
+    if(!Iron.Error.safeMode && Iron.CurrentMode!=mode_sleep && Iron.boot_complete){
     #ifndef DISABLE_OUTPUT
       configurePWMpin(output_PWM);
     #endif

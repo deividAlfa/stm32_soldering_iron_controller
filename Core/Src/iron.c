@@ -108,41 +108,37 @@ void handleIron(void) {
     }
   }
 
-  if(Iron.calibrating){                                                             // If calibrating, force run mode
-    setCurrentMode(mode_run);
-  }
-
   // If sleeping or error, stop here
-  if(Iron.CurrentMode==mode_sleep || Iron.Error.active) {                           // For safety, force PWM low everytime
+  if(!Iron.boot_complete || Iron.CurrentMode==mode_sleep || Iron.Error.active) {                           // For safety, force PWM low everytime
     Iron.Pwm_Out=0;
     __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, 0);
     Iron.CurrentIronPower=0;
     return;
   }
   
-
   // Controls inactivity timer and enters low power modes
-  uint32_t mode_time = CurrentTime - Iron.CurrentModeTimer;
+  if(!Iron.calibrating){                                                                      // Don't check timeout when calibrating
+    uint32_t mode_time = CurrentTime - Iron.CurrentModeTimer;
 
-  // Don't enter low power states while calibrating. Calibration always forces run mode
-  if((Iron.CurrentMode==mode_boost) && (mode_time>systemSettings.Profile.boostTimeout)){    // If boost mode and time expired
-    setCurrentMode(mode_run);
-  }
-  else if(Iron.CurrentMode==mode_run){                                                      // If running
-    if(systemSettings.Profile.standbyTimeout){                                              // If standby timer enabled
-      if(mode_time>systemSettings.Profile.standbyTimeout){                                  // Check timeout
-        setCurrentMode(mode_standby);
+    if((Iron.CurrentMode==mode_boost) && (mode_time>systemSettings.Profile.boostTimeout)){    // If boost mode and time expired
+      setCurrentMode(mode_run);
+    }
+    else if(Iron.CurrentMode==mode_run){                                                      // If running
+      if(systemSettings.Profile.standbyTimeout){                                              // If standby timer enabled
+        if(mode_time>systemSettings.Profile.standbyTimeout){                                  // Check timeout
+          setCurrentMode(mode_standby);
+        }
+      }
+      else{                                                                                   // Otherwise, check sleep timeout
+        if(mode_time>systemSettings.Profile.sleepTimeout){                                    //
+          setCurrentMode(mode_sleep);
+        }
       }
     }
-    else{                                                                                   // Otherwise, check sleep timeout
-      if(mode_time>systemSettings.Profile.sleepTimeout){                                    //
+    else if(Iron.CurrentMode==mode_standby){                                                  // If in standby
+      if(mode_time>systemSettings.Profile.sleepTimeout){                                      // Check sleep timeout
         setCurrentMode(mode_sleep);
       }
-    }
-  }
-  else if(Iron.CurrentMode==mode_standby){                                                  // If in standby
-    if(mode_time>systemSettings.Profile.sleepTimeout){                                      // Check sleep timeout
-      setCurrentMode(mode_sleep);
     }
   }
 
@@ -472,6 +468,10 @@ void setModefromStand(uint8_t mode){
 
 // Set the iron operating mode
 void setCurrentMode(uint8_t mode){
+  if(Iron.Error.active){
+    mode=mode_sleep;                                                                      // If error active, override with sleep mode
+  }
+
   __disable_irq();
   CurrentTime=HAL_GetTick();                                                              // Update local time value just in case it's called by handleIron, to avoid drift
   Iron.CurrentModeTimer = CurrentTime;                                                    // Refresh current mode timer
@@ -526,7 +526,7 @@ bool IronWake(bool source){                                                     
   if(systemSettings.settings.shakeFiltering && source==wakeInput){      // Sensitivity workaround enabled
     uint32_t time=(HAL_GetTick()-last_time);
     last_time = HAL_GetTick();
-    if(time<200 || time>400){                                           // Ignore changes happening faster than 100mS or slower than 500mS.
+    if(time<100 || time>500){                                           // Ignore changes happening faster than 100mS or slower than 500mS.
       return 0;
     }
   }
@@ -608,14 +608,19 @@ void checkIronError(void){
     if((CurrentTime-Iron.LastErrorTime)>systemSettings.Profile.errorTimeout){           // Check if enough time has passed
       Iron.Error.Flags = 0;
       buzzer_alarm_stop();
-      if(systemSettings.Profile.errorResumeMode==error_sleep){
-        setCurrentMode(mode_sleep);
+      if(Iron.boot_complete){                                                           // If error happened after booting, set resume mode
+        if(systemSettings.Profile.errorResumeMode==error_sleep){
+          setCurrentMode(mode_sleep);
+        }
+        else if(systemSettings.Profile.errorResumeMode==error_run){
+          setCurrentMode(mode_run);
+        }
+        else{
+          setCurrentMode(Iron.lastMode);
+        }
       }
-      else if(systemSettings.Profile.errorResumeMode==error_run){
-        setCurrentMode(mode_run);
-      }
-      else{
-        setCurrentMode(Iron.lastMode);
+      else{                                                                             // If error before booting, set init mode
+        setCurrentMode(systemSettings.settings.initMode);
       }
     }
   }
@@ -672,6 +677,11 @@ uint8_t getDebugMode(void){
 void setCalibrationMode(uint8_t mode){
   __disable_irq();
   Iron.calibrating = mode;
+
+  if(mode==enable){
+    setCurrentMode(mode_run);
+  }
+
   __enable_irq();
 }
 
