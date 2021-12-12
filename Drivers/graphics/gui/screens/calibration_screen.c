@@ -8,6 +8,8 @@
 #include "calibration_screen.h"
 #include "screen_common.h"
 
+#define CAL_TIMEOUT 300000                                          // Inactivity timeout in milliseconds
+
 enum { zero_disabled, zero_sampling, zero_capture };
 const  int16_t state_temps[2] = { 2500, 4000 };                     // Temp *10 for better accuracy
 static uint8_t error;
@@ -301,9 +303,11 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
     }
   }
   else{
-    if(checkScreenTimer(300000)){   // 5min inactivity
+    if(checkScreenTimer(CAL_TIMEOUT)){
+      setUserTemperature(backupTemp);
+      setCalibrationMode(disable);
       setCurrentMode(mode_sleep);
-      return last_scr;
+      return screen_main;
     }
   }
 
@@ -472,9 +476,11 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
     }
   }
 
-  if(checkScreenTimer(300000)){     // 5 min inactivity
+  if(checkScreenTimer(CAL_TIMEOUT)){
+    setUserTemperature(backupTemp);
+    setCalibrationMode(disable);
     setCurrentMode(mode_sleep);
-    return last_scr;
+    return screen_main;
   }
 
   if(input==Rotate_Decrement_while_click){
