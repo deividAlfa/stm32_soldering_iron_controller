@@ -474,7 +474,7 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
 
   if(checkScreenTimer(300000)){     // 5 min inactivity
     setCurrentMode(mode_sleep);
-    return screen_main;
+    return last_scr;
   }
 
   if(input==Rotate_Decrement_while_click){
