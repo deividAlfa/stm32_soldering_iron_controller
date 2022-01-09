@@ -92,7 +92,9 @@ There's no support for custom bootloaders.<br>
 Use one of these ST-LINK clones ($3 or less), refer to the schematics for the SWD pinout.<br>
 
 Download the binary **STM32SolderingStation.bin** already compiled from the [BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder and flash it using stlink.<br>
-Follow this pictures to update the firmware without erasing the stored settings.<br>
+If coming from factory firmware, run a Full chip erase (Erase the whole stm32, including configuration bits).<br>
+Because this firmware stores the settings in the flash, doing so when updating to a newer version would wipe the settings.<br>
+Follow this pictures to keep them when updating. Don't do this when coming from original firmware!<br>
 Important: STM32F072 has 2KB flash sector size, so only de-select the last sector.<br>
 (Click for bigger picture)<br>
 <img src="/Readme_files/stlink_erase.png?raw=true"><br>
