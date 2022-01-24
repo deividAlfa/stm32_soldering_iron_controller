@@ -52,7 +52,7 @@ Currently supported controllers (Click to download the latest build):<br>
 * [**Quicko T12-103**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/Quicko/STM32F103/STM32SolderingStation.bin): For STM32F103 variant.
 * [**KSGER v1.5**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/KSGER/%5Bv1.5%5D/STM32F103/STM32SolderingStation.bin): Profile for STM32F103 (There are no other known CPUs used in this board).
 * [**KSGER v2.x**, **JCD T12**, **QUECOO T12-955**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/KSGER/%5Bv2%5D/STM32F101/STM32SolderingStation.bin): Profile compatible with all STM32F101/2/3xx models.
-* [**KSGER v3.x**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/KSGER/%5Bv3%5D/STM32F101/STM32SolderingStation.bin): Profile compatible with all STM32F101/2/3xx models.
+* [**KSGER v3.x**, **QUECOO T12-95(? Untested)**](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/master/BOARDS/KSGER/%5Bv3%5D/STM32F101/STM32SolderingStation.bin): Profile compatible with all STM32F101/2/3xx models.
 
 For KSGER v2/v3: As long as use the correct firmware, any STM32 variant (101/102/103/C8/R8/CB/RB) will work.<br>
 
