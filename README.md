@@ -4,6 +4,7 @@
 
 * [Project details](#Details)
 * [Compatibility](#Compatibility)
+* [Programming](Readme_files/Programming.md)
 * [Operating instructions](Readme_files/Operation.md)
 * [Frequently asked questions](#faq)
 * [Building the firmware](#build)
@@ -87,21 +88,6 @@ Any difference in the pinout will require firmware tuning, although one of the m
 There are some hacks / vulnerabilities that can be used to backup protected firmware, more details here:<br>
 **[STM32 power glitching timing attack](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/tools/software/STM32CubeIDE#option-2-power-glitching-timing-attack
 )**<br>
-
-### Flashing the firmware
-There's no support for custom bootloaders.<br>
-Use one of these ST-LINK clones ($3 or less), refer to the schematics for the SWD pinout.<br>
-
-Download the binary **STM32SolderingStation.bin** already compiled from the [BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder and flash it using stlink.<br>
-If coming from factory firmware, run a Full chip erase (Erase the whole stm32, including configuration bits).<br>
-Because this firmware stores the settings in the flash, doing so when updating to a newer version would wipe the settings.<br>
-Follow this pictures to keep them when updating. Don't do this when coming from original firmware!<br>
-Important: STM32F072 has 2KB flash sector size, so only de-select the last sector.<br>
-(Click for bigger picture)<br>
-<img src="/Readme_files/stlink_erase.png?raw=true"><br>
-<img src="/Readme_files/stlink_program.png?raw=true"><br>
-
-In any case, the firmware will check the settings and reset them if not valid.<br>
 
 ### Display issues<br>
 If the display has right/left line like this picture: Go to [System menu](Readme_files/Operation.md#system) / Offset and adjust the value until it's centered.<br>
