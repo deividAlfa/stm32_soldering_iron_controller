@@ -37,7 +37,7 @@
 #endif
 
 
-enum{
+typedef enum{
   mode_shake              = 0,
   mode_stand              = 1,
 
