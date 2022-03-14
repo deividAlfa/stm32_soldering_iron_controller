@@ -183,25 +183,22 @@ Right click on project -> [Properties] -> [C/C++ Build] -> [Settings] ->  [Tool 
 Select [All configurations] in [Configuration] dropdown menu.<br>
 Now ensure these are present:<br>
 
-      /Core/Inc<br>
-      /Core/Src<br>
-      /Drivers/generalIO<br>
-      /Drivers/graphics<br>
-      /Drivers/graphics/gui<br>
-      /Drivers/graphics/gui/screens<br>
-      /Drivers/graphics/u8g2<br>
-      /Drivers/STM32Fxxx_HAL_Driver/Inc<br>
-      /Drivers/STM32Fxxx_HAL_Driver/Inc/Legacy<br>
-      /Drivers/CMSIS/Device/ST/STM32Fxxx/Include<br>
-      /Drivers/CMSIS/Include<br>
+      /Core/Inc
+      /Core/Src
+      /Drivers/generalIO
+      /Drivers/graphics
+      /Drivers/graphics/gui
+      /Drivers/graphics/gui/screens
+      /Drivers/graphics/u8g2
+      /Drivers/STM32Fxxx_HAL_Driver/Inc
+      /Drivers/STM32Fxxx_HAL_Driver/Inc/Legacy
+      /Drivers/CMSIS/Device/ST/STM32Fxxx/Include
+      /Drivers/CMSIS/Include
+      
 (STM32Fxxx matches your current mcu family, ex. STM32F0xx, STM32F1xx)<br><br>
 If any is missing, click on Add... Select Workspace and select the missing ones.<br>
 You can make multiple selection  while holding the Control key:<br>      
 <img src="/Readme_files/Includes.jpg?raw=true">
-
-
-Click in the right arrow of the build button (Hammer icon), select Release, then click on the build button and should build right away.<br>
-<img src="/Readme_files/release.jpg?raw=true">
 
 At some point, the firmware might not fit into the flash when compiling for debugging, as it'll skip optimizations, and use much more space.<br>
 In that case, you'll need to force some optimization level, starting with "Optimize for debug" (Og), and going to higher levels if still being too big (O1,O2,Osize).<br>
