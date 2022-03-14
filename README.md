@@ -174,7 +174,7 @@ Open the [BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/
 Open STM32CUBE IDE, click on Import/Existing project and select the project folder.<br>
 Important: Disable "Search for nested projects", select only the project in the root of the folder.<br>
 After that, double-click on [STM32SolderingStation.ioc] file:<br>
-<img src="/Readme_files/ioc_open.png?raw=true"><br><br>
+<img src="/Readme_files/open_ioc.png?raw=true"><br><br>
 CubeMX will open, then click on generate code:<br>
 <img src="/Readme_files/gen.png?raw=true"><br><br>
 After this, it'll be ready for compiling, click in the right arrow of the build button (Hammer icon) and select [Release]:<br>
