@@ -93,6 +93,17 @@ Temperature applied at boot. To reduce flash wear, setpoint adjustment is not sa
 Boost mode run time before resuming normal mode.<br>
   - **Boost temperature**<br>
 Temperature offset applied in boost mode. It's added to the current temperature and limited to system maximum temperature.<br>
+  - **Wake mode**<br>
+How to detect activity. SHAKE or STAND.<br>
+SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip up to wake.<br>
+STAND uses the same input, but disconnected from the handle. Must be shorted to gnd when the handle is in the stand.<br>
+(Stand mode operation operation: Shorted to gnd = sleep/standby, open = run ).<br>
+  - **Filter**<br>
+Filters the wake input to make it less sensitive, so it doesn't get waken by any little noise or slight  movement.<br>
+This option is disabled in stand mode.<br>
+  - **Stand mode**<br>
+Sets the mode that will be applied when the handle is put in the stand (__STANDBY__ or __SLEEP__).<br>
+This option is disabled in shake input mode.<br>
   - **Standby time**<br>
 If there is no soldering activity for this period, the controller will reduce the temperature to extend the tip life and reduce power waste.<br>
 Setting this option to 0 will disable standby mode, the station will switch to sleep state.<br>
@@ -180,17 +191,6 @@ Allows to turn off the screen in sleep or error modes. This option is disabled i
 For safety reasons,the screen will only turn off when the iron temperature is below 100°C.<br>
 	- OFF: In sleep mode, the screen turns off after dimming.<br>
 	- ON: The screen stays on at low brightness.<br>
-  - **Wake mode**<br>
-How to detect activity. SHAKE or STAND.<br>
-SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip up to wake.<br>
-STAND uses the same input, but disconnected from the handle. Must be shorted to gnd when the handle is in the stand.<br>
-(Stand mode operation operation: Shorted to gnd = sleep/standby, open = run ).<br>
-  - **Filter**<br>
-Filters the wake input to make it less sensitive, so it doesn't get waken by any little noise or slight  movement.<br>
-This option is disabled in stand mode.<br>
-  - **Stand mode**<br>
-Sets the mode that will be applied when the handle is put in the stand (__STANDBY__ or __SLEEP__).<br>
-This option is disabled in shake input mode.<br>
   - **Boot**<br>
 Operation mode when powered on (__RUN__, __STANDBY__ or __SLEEP__).<br>
 This option is disabled in stand mode.<br>
