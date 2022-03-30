@@ -64,7 +64,7 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
   Iron.Pwm_Channel    = pwmchannel;
   Iron.Error.Flags    = FLAG_NOERROR;
 
-  if(systemSettings.settings.WakeInputMode == mode_shake){
+  if(systemSettings.Profile.WakeInputMode == mode_shake){
     setCurrentMode(systemSettings.settings.initMode);
   }
   else{
@@ -72,7 +72,7 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
       setCurrentMode(mode_run);
     }
     else{
-      setCurrentMode(systemSettings.settings.StandMode);
+      setCurrentMode(systemSettings.Profile.StandMode);
     }
   }
   initTimers();
@@ -504,7 +504,7 @@ void setCurrentMode(uint8_t mode){
 // Called from program timer if WAKE change is detected
 bool IronWake(bool source){                                                                 // source: handle shake, encoder push button
   static uint32_t last_time;
-  if(Iron.Error.Flags || systemSettings.settings.WakeInputMode==mode_stand){
+  if(Iron.Error.Flags || systemSettings.Profile.WakeInputMode==mode_stand){
     return 0;
   }
 
@@ -523,7 +523,7 @@ bool IronWake(bool source){                                                     
     }
   }
 
-  if(systemSettings.settings.shakeFiltering && source==wakeInput){      // Sensitivity workaround enabled
+  if(systemSettings.Profile.shakeFiltering && source==wakeInput){      // Sensitivity workaround enabled
     uint32_t time=(HAL_GetTick()-last_time);
     last_time = HAL_GetTick();
     if(time<100 || time>500){                                           // Ignore changes happening faster than 100mS or slower than 500mS.
@@ -544,12 +544,12 @@ void readWake(void){
 
     if(last_wake!=now_wake){                                            // If wake sensor input changed
       last_wake=now_wake;
-      if(systemSettings.settings.WakeInputMode==mode_stand){   // In stand mode
+      if(systemSettings.Profile.WakeInputMode==mode_stand){   // In stand mode
         if(now_wake){
           setModefromStand(mode_run);
         }
         else{
-          setModefromStand(systemSettings.settings.StandMode);          // Set sleep or standby mode depending on system setting
+          setModefromStand(systemSettings.Profile.StandMode);          // Set sleep or standby mode depending on system setting
         }
       }
       else{

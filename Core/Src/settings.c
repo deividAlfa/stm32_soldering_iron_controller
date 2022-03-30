@@ -38,9 +38,6 @@ const settings_t defaultSettings = {
   .buzzerMode         = disable,
   .buttonWakeMode     = wake_all,
   .shakeWakeMode      = wake_all,
-  .shakeFiltering     = disable,
-  .WakeInputMode      = mode_shake,
-  .StandMode          = mode_sleep,
   .EncoderMode        = RE_Mode_Forward,
   .debugEnabled       = disable,
   .language           = lang_english,
@@ -422,6 +419,9 @@ void resetCurrentProfile(void){
   systemSettings.Profile.readPeriod                 = (200*200)-1;             // 200ms * 200  because timer period is 5us
   systemSettings.Profile.readDelay                  = (20*200)-1;              // 20ms (Also uses 5us clock)
   systemSettings.Profile.tempUnit                   = mode_Celsius;
+  systemSettings.Profile.shakeFiltering             = disable;
+  systemSettings.Profile.WakeInputMode              = mode_shake;
+  systemSettings.Profile.StandMode                  = mode_sleep;
   systemSettings.Profile.state                      = initialized;
 }
 

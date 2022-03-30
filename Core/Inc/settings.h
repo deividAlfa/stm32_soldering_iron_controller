@@ -13,7 +13,7 @@
 #include "board.h"
 
 #define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
-#define SETTINGS_VERSION  15                                        // Change this if you change the settings/profile struct to prevent getting out of sync
+#define SETTINGS_VERSION  16                                        // Change this if you change the settings/profile struct to prevent getting out of sync
 #define LANGUAGE_COUNT    5                                         // Number of languages
 #define ProfileSize       3                                         // Number of profiles
 #define TipSize           20                                        // Number of tips for each profile
@@ -158,6 +158,9 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       currentTip;
   uint8_t       pwmMul;
   uint8_t       errorResumeMode;
+  uint8_t       shakeFiltering;
+  uint8_t       WakeInputMode;
+  uint8_t       StandMode;
   filter_t      tipFilter;
   ntc_data_t    ntc;
   uint16_t      standbyTemperature;
@@ -196,9 +199,6 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       buzzerMode;
   uint8_t       buttonWakeMode;
   uint8_t       shakeWakeMode;
-  uint8_t       shakeFiltering;
-  uint8_t       WakeInputMode;
-  uint8_t       StandMode;
   uint8_t       EncoderMode;
   uint8_t       lvp;
   uint8_t       debugEnabled;

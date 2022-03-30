@@ -11,7 +11,9 @@
 
 screen_t Screen_iron;
 screen_t Screen_advFilter;
-comboBox_item_t *comboItem_advFilter;
+static comboBox_item_t *comboItem_advFilter;
+static comboBox_item_t *comboitem_ShakeFiltering;
+static comboBox_item_t *comboitem_StandMode;
 static editable_widget_t *editable_IRON_StandbyTemp;
 static editable_widget_t *editable_IRON_BoostTemp;
 static editable_widget_t *editable_IRON_MaxTemp;
@@ -110,6 +112,12 @@ static void set_reset_threshold(uint32_t *val) {
 static void * get_reset_threshold() {
   temp = bak_f.reset_threshold;
   return &temp;
+}
+//=========================================================
+void update_Iron_menu(void){
+  bool mode = (systemSettings.Profile.WakeInputMode==mode_shake);
+  comboitem_StandMode->enabled       = !mode;
+  comboitem_ShakeFiltering->enabled  = mode;
 }
 //=========================================================
 #ifdef USE_VIN
@@ -272,8 +280,34 @@ static void * getBoostTemp() {
   return &temp;
 }
 //=========================================================
+static void * getWakeMode() {
+  temp = systemSettings.Profile.WakeInputMode;
+  update_Iron_menu();
+  return &temp;
+}
+static void setWakeMode(uint32_t *val) {
+  systemSettings.Profile.WakeInputMode = *val;
+}
+//=========================================================
+static void * getStandMode() {
+  temp = systemSettings.Profile.StandMode;
+  return &temp;
+}
+static void setStandMode(uint32_t *val) {
+  systemSettings.Profile.StandMode = *val;
+}
+//=========================================================
+static void * getShakeFiltering() {
+  temp = systemSettings.Profile.shakeFiltering;
+  return &temp;
+}
+static void setShakeFiltering(uint32_t *val) {
+  systemSettings.Profile.shakeFiltering = *val;
+}
+//=========================================================
 
 static void iron_onEnter(screen_t *scr){
+  update_Iron_menu();
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     editable_IRON_MaxTemp->inputData.endString="\260F";
     editable_IRON_MinTemp->inputData.endString="\260F";
@@ -655,6 +689,38 @@ static void iron_create(screen_t *scr){
   edit->min_value = 10;
   edit->setData = (void (*)(void *))&setBoostTemp;
 
+  //  [ Wake mode Widget ]
+  //
+  newComboMultiOption(w, strings[lang].IRON_Wake_Mode, &edit, NULL);
+  dis=&edit->inputData;
+  dis->getData = &getWakeMode;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setWakeMode;
+  edit->options = strings[lang].wakeMode;
+  edit->numberOfOptions = 2;
+
+  //  [ Shake filtering Widget ]
+  //
+  newComboMultiOption(w, strings[lang].IRON_Shake_Filtering, &edit, &comboitem_ShakeFiltering);
+  dis=&edit->inputData;
+  dis->getData = &getShakeFiltering;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setShakeFiltering;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
+
+  //  [ Stand mode Widget ]
+  //
+  newComboMultiOption(w, strings[lang].IRON_Stand_Mode, &edit, &comboitem_StandMode);
+  dis=&edit->inputData;
+  dis->getData = &getStandMode;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setStandMode;
+  edit->options = strings[lang].InitMode;
+  edit->numberOfOptions = 2;
   #ifdef USE_VIN
   //  [ Power Widget ]
   //

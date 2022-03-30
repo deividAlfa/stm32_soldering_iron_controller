@@ -41,6 +41,9 @@ typedef struct{
   char * IRON_Sleep;
   char * IRON_Boost;
   char * IRON_Boost_Add;
+  char * IRON_Wake_Mode;
+  char * IRON_Shake_Filtering;
+  char * IRON_Stand_Mode;
   char * IRON_Power;
   char * IRON_Heater;
   char * IRON_ADC_Time;
@@ -63,9 +66,6 @@ typedef struct{
   char * SYSTEM_Oled_Contrast;
   char * SYSTEM_Oled_Dim;
   char * SYSTEM_Oled_Dim_inSleep;
-  char * SYSTEM_Wake_Mode;
-  char * SYSTEM_Shake_Filtering;
-  char * SYSTEM_Stand_Mode;
   char * SYSTEM_Boot;
   char * SYSTEM_Button_Wake;
   char * SYSTEM_Shake_Wake;

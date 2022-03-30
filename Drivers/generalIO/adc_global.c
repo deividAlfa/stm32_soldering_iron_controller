@@ -357,7 +357,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     #ifdef DEBUG_PWM
     PWM_DBG_GPIO_Port->BSRR=PWM_DBG_Pin<<16;                                                // Set TEST to 0
     #endif
-    if(systemSettings.settings.WakeInputMode==mode_stand){
+    if(systemSettings.Profile.WakeInputMode==mode_stand){
       readWake();
     }
 

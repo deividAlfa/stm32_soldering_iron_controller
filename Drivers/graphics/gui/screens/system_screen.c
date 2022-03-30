@@ -18,8 +18,6 @@ static comboBox_item_t *comboitem_system_Dim_PowerOff;
 
 static comboBox_item_t *comboitem_system_ButtonWakeMode;
 static comboBox_item_t *comboitem_system_ShakeWakeMode;
-static comboBox_item_t *comboitem_system_ShakeFiltering;
-static comboBox_item_t *comboitem_system_StandMode;
 static comboBox_item_t *comboitem_system_BootMode;
 
 
@@ -32,9 +30,7 @@ void update_System_menu(void){
   comboitem_system_Dim_PowerOff->enabled = mode;
   comboitem_system_Dim_Timeout->enabled = mode;
 
-  mode = (systemSettings.settings.WakeInputMode==mode_shake);
-  comboitem_system_StandMode->enabled       = !mode;
-  comboitem_system_ShakeFiltering->enabled  = mode;
+  mode = (systemSettings.Profile.WakeInputMode==mode_shake);
   comboitem_system_BootMode->enabled        = mode;
   comboitem_system_ShakeWakeMode->enabled   = mode;
   comboitem_system_ButtonWakeMode->enabled  = mode;
@@ -171,23 +167,6 @@ static void setActiveDetection(uint32_t *val) {
   systemSettings.settings.activeDetection = * val;
 }
 //=========================================================
-static void * getWakeMode() {
-  temp = systemSettings.settings.WakeInputMode;
-  update_System_menu();
-  return &temp;
-}
-static void setWakeMode(uint32_t *val) {
-  systemSettings.settings.WakeInputMode = *val;
-}
-//=========================================================
-static void * getStandMode() {
-  temp = systemSettings.settings.StandMode;
-  return &temp;
-}
-static void setStandMode(uint32_t *val) {
-  systemSettings.settings.StandMode = *val;
-}
-//=========================================================
 static void * getEncoderMode() {
   temp = systemSettings.settings.EncoderMode;
   return &temp;
@@ -261,14 +240,6 @@ static void * getShakeWakeMode() {
 }
 static void setShakeWakeMode(uint32_t *val) {
   systemSettings.settings.shakeWakeMode = *val;
-}
-//=========================================================
-static void * getShakeFiltering() {
-  temp = systemSettings.settings.shakeFiltering;
-  return &temp;
-}
-static void setShakeFiltering(uint32_t *val) {
-  systemSettings.settings.shakeFiltering = *val;
 }
 //=========================================================
 static void system_onEnter(screen_t *scr){
@@ -372,39 +343,6 @@ static void system_create(screen_t *scr){
   edit->step = 1;
   edit->setData = (void (*)(void *))&setDimTurnOff;
   edit->options = strings[lang].OffOn;
-  edit->numberOfOptions = 2;
-
-  //  [ Wake mode Widget ]
-  //
-  newComboMultiOption(w, strings[lang].SYSTEM_Wake_Mode, &edit, NULL);
-  dis=&edit->inputData;
-  dis->getData = &getWakeMode;
-  edit->big_step = 1;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&setWakeMode;
-  edit->options = strings[lang].wakeMode;
-  edit->numberOfOptions = 2;
-
-  //  [ Shake filtering Widget ]
-  //
-  newComboMultiOption(w, strings[lang].SYSTEM_Shake_Filtering, &edit, &comboitem_system_ShakeFiltering);
-  dis=&edit->inputData;
-  dis->getData = &getShakeFiltering;
-  edit->big_step = 1;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&setShakeFiltering;
-  edit->options = strings[lang].OffOn;
-  edit->numberOfOptions = 2;
-
-  //  [ Stand mode Widget ]
-  //
-  newComboMultiOption(w, strings[lang].SYSTEM_Stand_Mode, &edit, &comboitem_system_StandMode);
-  dis=&edit->inputData;
-  dis->getData = &getStandMode;
-  edit->big_step = 1;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&setStandMode;
-  edit->options = strings[lang].InitMode;
   edit->numberOfOptions = 2;
 
   //  [ Boot mode Widget ]
