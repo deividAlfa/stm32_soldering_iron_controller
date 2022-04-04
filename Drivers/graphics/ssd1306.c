@@ -497,10 +497,10 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
   write_cmd(0x02|0x10);     // Default => 0x12 (0x10)
   setContrast(0xFF);        // Init in max contrast
   write_cmd(0xD9);          // Set Pre-Charge Period
-  write_cmd(0x22);          // Default => 0x22 (2 Display Clocks [Phase 2] / 2 Display Clocks [Phase 1])
+  write_cmd(0x44);          // 0x44 (4 Display Clocks [Phase 2] / 4 Display Clocks [Phase 1])
 
   write_cmd(0xDB);          // Set VCOMH Deselect Level
-  write_cmd(0x30);          // Default => 0x20 (0.77*VCC)
+  write_cmd(0x3C);          // 0x3C (0.84*VCC)
 
   write_cmd(0xA4|0x00);     // Set Entire Display On/Off
   write_cmd(0xA6|0x00);     // Set Inverse Display On/Off
