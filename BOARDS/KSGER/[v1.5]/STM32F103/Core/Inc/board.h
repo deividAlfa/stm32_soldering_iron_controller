@@ -93,6 +93,16 @@
 
 
 /********************************
+ *       Addons                 *
+ ********************************/
+#define ENABLE_ADDON_FUME_EXTRACTOR // addon for controlling a fume extractor, must define a gpio output pin "EXTRACTOR" to use
+
+#if defined(ENABLE_ADDON_FUME_EXTRACTOR) // logical or together all the addons
+#define ENABLE_ADDONS
+#endif
+
+
+/********************************
  *       Misc    *
  ********************************/
 //#define NOSAVESETTINGS                                      // Don't use flash to save or load settings. Always use defaults (for debugging purposes)

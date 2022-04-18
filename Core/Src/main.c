@@ -34,6 +34,9 @@
 #include "gui.h"
 #include "screen.h"
 #include "myTest.h"
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+#include "addon_fume_extractor.h"
+#endif
 
 
 /* USER CODE END Includes */
@@ -201,6 +204,9 @@ int main(void)
 void Program_Handler(void) {
   handle_buzzer();                                                    // Handle buzzer state
   RE_Process(&RE1_Data);                                              // Handle Encoder
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+  handleAddonFumeExtractor();
+#endif
   if(systemSettings.Profile.WakeInputMode!=mode_stand){
     readWake();
   }
