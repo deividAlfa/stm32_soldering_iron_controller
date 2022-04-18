@@ -910,7 +910,7 @@ static void main_screen_create(screen_t *scr){
   dis->dispAlign=align_center;
   dis->textAlign=align_center;
   dis->font=u8g2_font_iron_temp;
-  w->posY = 15;
+  w->posY = 16;
   dis->getData = &main_screen_getIronTemp;
   w->enabled=0;
 
