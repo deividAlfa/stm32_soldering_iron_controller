@@ -217,7 +217,7 @@ void oled_send(uint8_t* bf, uint16_t count, uint8_t mode){
 
 
 #if defined OLED_I2C && (!defined OLED_DEVICE  || (defined OLED_DEVICE && defined I2C_TRY_HW))
-// This delays are made for 36MHz (Ksger v2 software i2c). If increasing the cpu frequency, also increase the nop count 
+// This delays are made for 36MHz (Ksger v2 software i2c). If increasing the cpu frequency, also increase the nop count
 __attribute__ ((noinline)) void i2c_Delay_H(void){                  // Intended no inline to add further delay and reduce nops
   asm("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop");
 }
@@ -804,4 +804,13 @@ void Reset_onError(void){
     HAL_IWDG_Refresh(&hiwdg);               // Clear watchdog
   }
   NVIC_SystemReset();                       // Reset system
+}
+
+void Oled_error_init(void){
+  setContrast(255);
+  FillBuffer(BLACK,fill_soft);
+  u8g2_SetFont(&u8g2,default_font );
+  u8g2_SetDrawColor(&u8g2, WHITE);
+  u8g2_SetMaxClipWindow(&u8g2);
+  systemSettings.settings.OledOffset = OLED_OFFSET;
 }

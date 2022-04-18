@@ -9,9 +9,9 @@
 #include "pid.h"
 #include "iron.h"
 #include "gui.h"
-#include "ssd1306.h"
 #include "tempsensors.h"
 #include "main.h"
+#include "ssd1306.h"
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
@@ -44,16 +44,38 @@ const settings_t defaultSettings = {
   .state              = initialized,
 };
 
+#ifdef ENABLE_ADDONS
+const addonSettings_t defaultAddonSettings = {
+    .enabledAddons    = 0
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+                          + 0x1
+#endif
+  ,
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+  .fumeExtractorEnabled       = enable,
+  .fumeExtractorAfterrunDelay = 2,
+#endif
+};
+#endif
+
 __attribute__((section(".settings"))) flashSettings_t flashSettings;
 systemSettings_t systemSettings;
 
+void saveSettings(uint8_t mode);
 void checksumError(uint8_t mode);
 void Flash_error(void);
 void Button_reset(void);
-void Oled_error_init(void);
 void ErrCountDown(uint8_t Start,uint8_t xpos, uint8_t ypos);
+uint32_t ChecksumSettings(settings_t* settings);
+uint32_t ChecksumProfile(profile_t* profile);
+void resetSystemSettings(void);
+void resetCurrentProfile(void);
 
-
+#ifdef ENABLE_ADDONS
+void loadAddonSettings(void);
+void resetAddonSettings();
+uint32_t ChecksumAddons(addonSettings_t* addonSettings);
+#endif
 
 void checkSettings(void){
 
@@ -61,15 +83,25 @@ void checkSettings(void){
   return;
   #endif
 
-  static uint32_t prevSysChecksum=0, newSysChecksum=0, prevTipChecksum=0, newTipChecksum=0, lastCheckTime=0, lastChangeTime=0;
+  static uint32_t prevSysChecksum    = 0u;
+  static uint32_t newSysChecksum     = 0u;
+  static uint32_t prevTipChecksum    = 0u;
+  static uint32_t newProfileChecksum = 0u;
+#ifdef ENABLE_ADDONS
+  static uint32_t prevAddonChecksum  = 0u;
+  static uint32_t newAddonChecksum   = 0u;
+#endif
+  static uint32_t lastCheckTime=0;
+  static uint32_t lastChangeTime=0;
   uint32_t CurrentTime = HAL_GetTick();
   uint8_t scr_index=current_screen->index;
 
   // Disable saving when screens that use a lot of ram are active.
   // Change detection will be active, but saving will postponed until exiting the screen. This is done to ensure compatibility with 10KB RAM devices
-  uint8_t noSave = (scr_index==screen_iron || scr_index==screen_system || scr_index==screen_tip_settings || scr_index==screen_debug );
-
-
+  uint8_t noSave = (scr_index == screen_iron         ||
+                    scr_index == screen_system       ||
+                    scr_index == screen_tip_settings ||
+                    scr_index == screen_debug);
 
   // Save from menu
   if(systemSettings.save_Flag && !noSave){
@@ -115,15 +147,33 @@ void checkSettings(void){
     return;
   }
 
-  lastCheckTime = CurrentTime;                                                                                              // Store current time
-  newSysChecksum = ChecksumSettings(&systemSettings.settings);                                                              // Calculate system checksum
-  newTipChecksum = ChecksumProfile(&systemSettings.Profile);                                                                // Calculate tip profile checksum
+  lastCheckTime = CurrentTime;                                          // Store current time
+  newSysChecksum     = ChecksumSettings(&systemSettings.settings);      // Calculate system checksum
+  newProfileChecksum = ChecksumProfile(&systemSettings.Profile);        // Calculate profile checksum
+#ifdef ENABLE_ADDONS
+  newAddonChecksum   = ChecksumAddons(&(systemSettings.addonSettings)); // Calculate the addon checksum
+#endif
 
-  if((systemSettings.settingsChecksum != newSysChecksum) || (systemSettings.ProfileChecksum != newTipChecksum)){            // If anything was changed (Checksum mismatch)
+  // If anything was changed (Checksum mismatch)
+  if(   (systemSettings.settingsChecksum      != newSysChecksum    )
+     || (systemSettings.ProfileChecksum       != newProfileChecksum)
+#ifdef ENABLE_ADDONS
+     || (systemSettings.addonSettingsChecksum != newAddonChecksum  )
+#endif
+  ){
 
-    if((prevSysChecksum != newSysChecksum) || (prevTipChecksum != newTipChecksum)){                                         // If different from the previous calculated checksum (settings are being changed quickly, don't save every time).
+    if(    (prevSysChecksum != newSysChecksum)
+        || (prevTipChecksum != newProfileChecksum)
+#ifdef ENABLE_ADDONS
+        || (prevAddonChecksum != newAddonChecksum)
+#endif
+    ){
+      // If different from the previous calculated checksum (settings are being changed quickly, don't save every time).
       prevSysChecksum = newSysChecksum;                                                                                     // Store last computed checksum
-      prevTipChecksum = newTipChecksum;
+      prevTipChecksum = newProfileChecksum;
+#ifdef ENABLE_ADDONS
+      prevAddonChecksum = newAddonChecksum;
+#endif
       lastChangeTime = CurrentTime;                                                                                         // Reset timer (we don't save anything until we pass a certain time without changes)
     }
 
@@ -184,6 +234,13 @@ void saveSettings(uint8_t mode){
       memset(&flashBuffer->Profile[x],0xFF,sizeof(profile_t));
     }
   }
+
+#ifdef ENABLE_ADDONS
+  flashBuffer->addonSettings = systemSettings.addonSettings;
+  systemSettings.addonSettingsChecksum =  ChecksumAddons(&flashBuffer->addonSettings);
+  flashBuffer->addonSettingsChecksum = systemSettings.addonSettingsChecksum;
+#endif
+
   __disable_irq();
   HAL_FLASH_Unlock();
 
@@ -241,6 +298,17 @@ void saveSettings(uint8_t mode){
   if(SettingsFlash != SettingsRam){
     Flash_error();
   }
+
+
+#ifdef ENABLE_ADDONS
+  // Verify addon crc
+  uint32_t addonsFlashCrc  = ChecksumAddons(&flashSettings.addonSettings);
+  uint32_t addonsRamCrc  = ChecksumAddons(&systemSettings.addonSettings);
+  if(addonsFlashCrc != addonsRamCrc){
+    Flash_error();
+  }
+#endif
+
   _free(flashBuffer);
   __disable_irq();
   systemSettings.isSaving = 0;
@@ -260,6 +328,9 @@ void restoreSettings() {
 
   if(flashSettings.settings.state != initialized){
     resetSystemSettings();
+#ifdef ENABLE_ADDONS
+    resetAddonSettings();
+#endif
     saveSettings(wipeProfiles);
   }
   else{
@@ -282,7 +353,9 @@ void restoreSettings() {
 
   loadProfile(systemSettings.settings.currentProfile);
 
-  setContrast(systemSettings.settings.contrast);
+#ifdef ENABLE_ADDONS
+  loadAddonSettings();
+#endif
 }
 
 uint32_t ChecksumSettings(settings_t* settings){
@@ -296,6 +369,33 @@ uint32_t ChecksumProfile(profile_t* profile){
   checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)profile, sizeof(profile_t)/sizeof(uint32_t));
   return checksum;
 }
+
+#ifdef ENABLE_ADDONS
+void loadAddonSettings(void)
+{
+  systemSettings.addonSettings = flashSettings.addonSettings;
+  systemSettings.addonSettingsChecksum = ChecksumAddons(&(systemSettings.addonSettings));
+  if((systemSettings.addonSettings.enabledAddons != defaultAddonSettings.enabledAddons) || // list of addons changed
+      (systemSettings.addonSettingsChecksum != flashSettings.addonSettingsChecksum))       // crc mismatch
+  {
+    checksumError(reset_Addons);
+  }
+}
+
+void resetAddonSettings()
+{
+  __disable_irq();
+  systemSettings.addonSettings = defaultAddonSettings;
+  systemSettings.addonSettingsChecksum = 0u;
+  __enable_irq();
+}
+
+uint32_t ChecksumAddons(addonSettings_t* addonSettings){
+  uint32_t checksum;
+  checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)addonSettings, sizeof(addonSettings_t)/sizeof(uint32_t));
+  return checksum;
+}
+#endif
 
 void resetSystemSettings(void) {
   __disable_irq();
@@ -471,15 +571,6 @@ void loadProfile(uint8_t profile){
   __enable_irq();
 }
 
-void Oled_error_init(void){
-  setContrast(255);
-  FillBuffer(BLACK,fill_soft);
-  u8g2_SetFont(&u8g2,default_font );
-  u8g2_SetDrawColor(&u8g2, WHITE);
-  u8g2_SetMaxClipWindow(&u8g2);
-  systemSettings.settings.OledOffset = OLED_OFFSET;
-}
-
 void Flash_error(void){
   __disable_irq();
   HAL_FLASH_Lock();
@@ -494,17 +585,30 @@ void checksumError(uint8_t mode){
   if(mode==reset_Profile){
     putStrAligned("PROFILE", 36, align_center);
   }
+#ifdef ENABLE_ADDONS
+  else if(mode == reset_Addons)
+  {
+    putStrAligned("ADDONS", 36, align_center);
+  }
+#endif
   else{
     putStrAligned("SYSTEM", 36, align_center);
   }
   update_display();
   ErrCountDown(3,117,50);
-  if(mode==reset_Profile){
+  if(mode == reset_Profile){
     __disable_irq();
     resetCurrentProfile();
     __enable_irq();
     saveSettings(keepProfiles);
   }
+#ifdef ENABLE_ADDONS
+  else if(mode == reset_Addons)
+  {
+    resetAddonSettings();
+    saveSettings(keepProfiles);
+  }
+#endif
   else{
     resetSystemSettings();
     saveSettings(wipeProfiles);
@@ -531,11 +635,19 @@ void Button_reset(void){
           HAL_IWDG_Refresh(&hiwdg);
         }
         resetSystemSettings();
+#ifdef ENABLE_ADDONS
+        resetAddonSettings();
+#endif
         saveSettings(wipeProfiles);
         NVIC_SystemReset();
       }
     }
   }
+}
+
+bool isCurrentProfileChanged(void)
+{
+  return ChecksumProfile(&systemSettings.Profile) != systemSettings.ProfileChecksum;
 }
 
 //Max 99 seconds countdown.

@@ -119,6 +119,7 @@ void Init(void){
     ADC_Init(&ADC_DEVICE);
     buzzer_init();
     restoreSettings();
+    setContrast(systemSettings.settings.contrast);
     ironInit(&READ_TIMER, &PWM_TIMER,PWM_CHANNEL);
     RE_Init((RE_State_t *)&RE1_Data, ENC_L_GPIO_Port, ENC_L_Pin, ENC_R_GPIO_Port, ENC_R_Pin, ENC_SW_GPIO_Port, ENC_SW_Pin);
     oled_init(&RE_Get,&RE1_Data);

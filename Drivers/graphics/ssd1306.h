@@ -134,6 +134,7 @@ void ssd1306_init(DMA_HandleTypeDef *dma);
 #endif
 #endif
 
+void Oled_error_init(void);
 void FatalError(uint8_t type);
 void write_data(uint8_t* data, uint16_t count);
 void write_cmd(uint8_t cmd);

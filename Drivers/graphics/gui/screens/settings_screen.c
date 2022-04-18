@@ -37,8 +37,8 @@ static void SETTINGS_OnEnter(screen_t *scr) {
   if(scr==&Screen_main){
     comboResetIndex(Screen_settings.current_widget);
   }
-  if(ChecksumProfile(&systemSettings.Profile)!=systemSettings.ProfileChecksum){         // If there's unsaved profile data
-    saveSettingsFromMenu(save_Settings);                                                // Save settings
+  if(isCurrentProfileChanged()){         // If there's unsaved profile data
+    saveSettingsFromMenu(save_Settings); // Save settings
   }
 }
 

@@ -8,11 +8,9 @@
 #include "main.h"
 #include "addon_fume_extractor.h"
 #include "iron.h"
+#include "settings.h"
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-
-#define AFTERRUN_IN_SEC 10
-#define AFTERRUN (AFTERRUN_IN_SEC * 1000u)
 
 void handleAddonFumeExtractor()
 {
@@ -23,22 +21,30 @@ void handleAddonFumeExtractor()
   uint32_t currentTimeStamp  = HAL_GetTick();
   uint8_t  currentMode       = getCurrentMode();
 
-  if((currentMode == mode_run) ||
-     (currentMode == mode_boost))
+  if(systemSettings.addonSettings.fumeExtractorEnabled)
   {
-    lastActiveTime = currentTimeStamp;
-    extractorRequired = true;
-    afterrunRequired = true;
-  }
+    if((currentMode == mode_run) ||
+       (currentMode == mode_boost))
+    {
+      lastActiveTime = currentTimeStamp;
+      extractorRequired = true;
+      afterrunRequired = true;
+    }
 
-  if(afterrunRequired &&
-     ((lastActiveTime  + AFTERRUN) < currentTimeStamp))
+    if(afterrunRequired &&
+       ((lastActiveTime + (systemSettings.addonSettings.fumeExtractorAfterrunDelay * 5000u)) < currentTimeStamp))
+    {
+      // iron has not been in the active state for AFTERRUN_IN_SEC of time
+      afterrunRequired = false;
+    }
+
+    HAL_GPIO_WritePin(EXTRACTOR_GPIO_Port, EXTRACTOR_Pin, (extractorRequired || afterrunRequired) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  }
+  else
   {
-    // iron has not been in the active state for AFTERRUN_IN_SEC of time
-    afterrunRequired = false;
+    // addon disabled
+    HAL_GPIO_WritePin(EXTRACTOR_GPIO_Port, EXTRACTOR_Pin, GPIO_PIN_RESET);
   }
-
-  HAL_GPIO_WritePin(EXTRACTOR_GPIO_Port, EXTRACTOR_Pin, (extractorRequired || afterrunRequired) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 #endif

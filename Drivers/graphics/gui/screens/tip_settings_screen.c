@@ -212,7 +212,6 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
   return ret;
 }
 
-
 static void tip_settings_onEnter(screen_t *scr){
   comboResetIndex(Screen_tip_settings.current_widget);
   if(newTip){                                                                                                   // If new tip selected

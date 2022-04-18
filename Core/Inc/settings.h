@@ -92,7 +92,10 @@ typedef enum{
   reset_Profiles          = 0x80,
   reset_Profile           = 0x81,
   reset_Settings          = 0x82,
-  reset_All               = 0x83,
+#ifdef ENABLE_ADDONS
+  reset_Addons            = 0x83,
+#endif
+  reset_All               = 0x84,
 
   keepProfiles            = 1,
   wipeProfiles            = 0x80,
@@ -208,35 +211,54 @@ __attribute__((aligned(4))) typedef struct{
   uint32_t      version;            // Used to track if a reset is needed on firmware upgrade
 }settings_t;
 
+#ifdef ENABLE_ADDONS
+__attribute__((aligned(4))) typedef struct {
+  // bitmask for enabled addons, used to check if switching on and off multiple addons causes the struct
+  // to be the same size, thus matching CRC, but in reality its incompatible due to layout change
+  uint64_t enabledAddons;
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+  uint8_t fumeExtractorEnabled;
+  uint8_t fumeExtractorAfterrunDelay; // amount of delay in 5 second increments
+#endif
+}addonSettings_t;
+#endif
+
 __attribute__((aligned(4))) typedef struct{
-  settings_t    settings;
-  uint32_t      settingsChecksum;
-  profile_t     Profile;
-  uint32_t      ProfileChecksum;
-  uint8_t       save_Flag;
-  uint8_t       setupMode;
-  uint8_t       isSaving;
+  settings_t      settings;
+  uint32_t        settingsChecksum;
+  profile_t       Profile;
+  uint32_t        ProfileChecksum;
+#ifdef ENABLE_ADDONS
+  addonSettings_t addonSettings;
+#endif
+  uint32_t        addonSettingsChecksum;
+  uint8_t         save_Flag;
+  uint8_t         setupMode;
+  uint8_t         isSaving;
 }systemSettings_t;
 
 __attribute__((aligned(4))) typedef struct{
-  profile_t     Profile[ProfileSize];
-  uint32_t      ProfileChecksum[ProfileSize];
-  settings_t    settings;
-  uint32_t      settingsChecksum;
+  profile_t       Profile[ProfileSize];
+  uint32_t        ProfileChecksum[ProfileSize];
+  settings_t      settings;
+  uint32_t        settingsChecksum;
+#ifdef ENABLE_ADDONS
+  addonSettings_t addonSettings;
+  uint32_t        addonSettingsChecksum;
+#endif
 }flashSettings_t;
 
 extern systemSettings_t systemSettings;
 
-void Oled_error_init(void);
+/** Cyclic task to save the settings if needed. */
 void checkSettings(void);
+/** Sets a flag to save the settings in the background task. */
 void saveSettingsFromMenu(uint8_t mode);
-void saveSettings(uint8_t mode);
+/** Loads the settings from flash on boot. */
 void restoreSettings();
-uint32_t ChecksumSettings(settings_t* settings);
-uint32_t ChecksumProfile(profile_t* profile);
-void resetSystemSettings(void);
-void resetCurrentProfile(void);
-void storeTipData(uint8_t tip);
-void loadProfile(uint8_t tip);
+/** Load the profile at the given index into RAM */
+void loadProfile(uint8_t profile);
+/** Checks if the current profile in RAM is changed */
+bool isCurrentProfileChanged(void);
 
 #endif /* SETTINGS_H_ */
