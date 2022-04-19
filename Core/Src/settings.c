@@ -249,6 +249,7 @@ void saveSettings(uint8_t mode){
   erase.PageAddress = (uint32_t)dest;
   erase.TypeErase = FLASH_TYPEERASE_PAGES;
 
+  HAL_IWDG_Refresh(&hiwdg);
   if((HAL_FLASHEx_Erase(&erase, &error)!=HAL_OK) || (error!=0xFFFFFFFF)){
     Flash_error();
   }
