@@ -26,7 +26,7 @@ const uint8_t disp_init[] = { // Initialization for ST7565R
     1, 0,   c_start_line,
     1, 50,  c_pwr_ctrl | c_pwr_boost,
     1, 50,  c_pwr_ctrl | c_pwr_boost | c_pwr_vreg,
-    1, 50,  c_pwr_ctrl | c_pwr_boost | c_pwr_follow,
+    1, 50,  c_pwr_ctrl | c_pwr_boost | c_pwr_vreg | c_pwr_follow,
     2, 50,  c_boost_ratio, c_boost_234,
     1, 50,  c_res_ratio | 0x07,
     2, 0,   c_set_volume, 0x16,
@@ -337,11 +337,12 @@ void setOledRow(uint8_t row){
 
 void setOledPower(uint8_t power){
 #ifdef  ST7565
-  uint8_t cmd[2];
-  cmd[0] = ((power==enable) ? c_all_off : c_disp_off );
-  cmd[1] = ((power==enable) ? c_disp_on : c_all_on );
+  uint8_t cmd[] = {
+      ((power==enable) ? c_all_off : c_disp_off ),
+      ((power==enable) ? c_disp_on : c_all_on )
+  };
 #else
-  uint8_t cmd[1] = { ((power==enable) ? 0xAF : 0xAE ) }; // Display On, Display Off
+  uint8_t cmd[1] = { ((power==enable) ? c_disp_on : c_disp_off ) };
 #endif
   for(uint8_t i=0; i<sizeof(cmd); i++)
     lcd_write(&cmd[i], 1, modeCmd);
