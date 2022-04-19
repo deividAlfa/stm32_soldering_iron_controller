@@ -20,16 +20,16 @@ static uint8_t inFatalError;
 // DataSz, Delay, Data
 const uint8_t disp_init[] = { // Initialization for ST7565R
     1, 0,   c_disp_off,
-    1, 0,   c_bias_7,
-    1, 0,   c_adc_norm,
-    1, 0,   c_com_norm,
+    1, 0,   c_bias_9,
+    1, 0,   c_adc_rev,
+    1, 0,   c_com_rev,
     1, 0,   c_start_line,
     1, 50,  c_pwr_ctrl | c_pwr_boost,
     1, 50,  c_pwr_ctrl | c_pwr_boost | c_pwr_vreg,
     1, 50,  c_pwr_ctrl | c_pwr_boost | c_pwr_vreg | c_pwr_follow,
     2, 50,  c_boost_ratio, c_boost_234,
     1, 50,  c_res_ratio | 0x07,
-    2, 0,   c_set_volume, 0x16,
+    2, 0,   c_set_volume, 0x3f,
     1, 0,   c_disp_off,
     1, 0,   c_all_on
 };
@@ -228,10 +228,8 @@ void bitbang_write(uint8_t* bf, uint16_t count, uint8_t mode){
 // Hacks clock low time using the slow rise time (i2c pullup resistors) as the delay.
 // Will start failing if the core runs faster than 44-48MHz because of the tight timing.
 void i2cBegin(uint8_t mode){
-  uint8_t b[] = { OLED_ADDRESS, mode };
-  for(uint8_t i=0; i<2; i++){
-      clock_byte(b[i]);
-  }
+  clock_byte(OLED_ADDRESS);
+  clock_byte(mode);
 }
 
 void i2cStart(void){                                      // Start condition, SDA transition to low with SCL high
@@ -257,52 +255,46 @@ void i2cStop(void){                                       // Stop condition, SCL
 // Send data
 void lcd_write(uint8_t *data, uint16_t count, uint8_t mode){
   while(oled.status==oled_busy){;}                          // Wait for DMA to finish
-
 #if defined OLED_SPI
-  #ifdef USE_CS
-  Oled_Clear_CS();
-  #endif
-
-  #ifdef OLED_DEVICE
   if (mode==modeData)
     Oled_Set_DC();
   else
     Oled_Clear_DC();
-  if(HAL_SPI_Transmit(oled.device, data, count, HAL_MAX_DELAY) != HAL_OK){
-    if(!inFatalError)
-      Error_Handler();
-    else
-      buttonReset();          // We're already on ErrorHandler, can't do anymore!
-  }
-  #else
-  bitbang_write(data, count, mode);
-  #endif
-
-  #ifdef USE_CS
-  Oled_Set_CS();
-  #endif
-
-
-#elif defined OLED_I2C
+#ifdef USE_CS
+  Oled_Clear_CS();
+#endif
+#endif
 #if defined I2C_TRY_HW || !defined OLED_DEVICE
   if(oled.use_sw){
     bitbang_write(data, count, mode);
   }
-#endif
-#if defined OLED_DEVICE
-#if defined I2C_TRY_HW
   else{
 #endif
-    if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, mode, 1, data, count, HAL_MAX_DELAY)!=HAL_OK){
-      if(!inFatalError)
-        Error_Handler();
+#ifdef OLED_DEVICE
+    for(uint8_t t=0;;){                                                 // Weird bug workaround, sometimes HAL returns BUSY here.
+#ifdef OLED_SPI
+      if(HAL_SPI_Transmit(oled.device, data, count, HAL_MAX_DELAY)==HAL_OK)
+#elif defined OLED_I2C
+      if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, mode, 1, data, count, HAL_MAX_DELAY)==HAL_OK)
+#endif
+        break;                                                          // Success, break loop
       else
-        buttonReset();          // We're already on ErrorHandler, can't do anymore!
+        display_dma_abort();                                            // Failure, reset display handler
+      if(++t>5){                                                         // Max 5 tries
+        if(!inFatalError)
+          Error_Handler();
+        else
+          buttonReset();          // We're already on ErrorHandler, can't do anymore!
+      }
     }
-#if defined I2C_TRY_HW
+#if defined I2C_TRY_HW || !defined OLED_DEVICE
   }
 #endif
+#else
+  bitbang_write(data, count, mode);
 #endif
+#if defined OLED_SPI && defined USE_CS
+  Oled_Clear_CS();
 #endif
 }
 
@@ -331,8 +323,9 @@ void update_display( void ){
 }
 
 void setOledRow(uint8_t row){
-  uint8_t cmd[] = { 0xB0|row, systemSettings.settings.OledOffset, 0x10 };
-  lcd_write(cmd, sizeof(cmd), modeCmd);
+  uint8_t cmd[] = { c_page | row, c_col_H, c_col_L | systemSettings.settings.OledOffset };
+  for(uint8_t i=0; i<sizeof(cmd); i++)
+    lcd_write(&cmd[i], 1, modeCmd);
 }
 
 void setOledPower(uint8_t power){
@@ -469,7 +462,7 @@ void display_dma_abort(void){
     __HAL_UNLOCK(oled.device);
     HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 100);  // Wait for DMA to finish
   }
-  oled.status=oled_busy;  // Force oled idle status
+  oled.status=oled_idle;  // Force oled idle status
 }
 
 
@@ -503,36 +496,15 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
       oled.status=oled_idle;
       return;                                           // Return without re-triggering DMA.
     }
-
-    uint8_t cmd[3]={
-        0xB0|oled.row,
-        systemSettings.settings.OledOffset,
-        0x10
-    };
+    oled.status=oled_idle;                             // Unblock to allow sending data from regular function
+    setOledRow(oled.row);
+    oled.status=oled_busy;                             // Block again
 
 #ifdef OLED_SPI
 #ifdef USE_CS
     Oled_Clear_CS();
 #endif
-    Oled_Clear_DC();
-#endif
-
-    for(uint8_t t=0;;){                                                 // Weird bug workaround, sometimes HAL returns BUSY here.
-#ifdef OLED_SPI
-      if(HAL_SPI_Transmit(oled.device, cmd, sizeof(cmd), 50)==HAL_OK)
-#elif defined OLED_I2C
-      if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, modeCmd, 1, cmd, sizeof(cmd), 50)==HAL_OK)
-#endif
-        break;                                                          // Success, break loop
-      else
-        display_dma_abort();                                            // Failure, reset display handler
-      if(++t>5)                                                         // Max 5 tries
-        Error_Handler();
-    }
-#ifdef OLED_SPI
     Oled_Set_DC();
-#endif
-#ifdef OLED_SPI
     if(HAL_SPI_Transmit_DMA(oled.device, &oled.buffer[128*oled.row], 128)!= HAL_OK)      // Send row data in DMA interrupt mode. Never failed here, so no need to re-try.
 #elif defined OLED_I2C
     if(HAL_I2C_Mem_Write_DMA(oled.device, OLED_ADDRESS, modeData, 1, &oled.buffer[128*oled.row], 128)!=HAL_OK)
@@ -551,7 +523,7 @@ void fatalError(uint8_t type){
  if(lang>(LANGUAGE_COUNT-1))
    lang=lang_english;
 
-#if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
+#if defined OLED_DEVICE
   if(!oled.use_sw)
     display_dma_abort();
 #endif
