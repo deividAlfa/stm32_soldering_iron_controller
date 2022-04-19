@@ -16,7 +16,6 @@ static comboBox_item_t *comboitem_system_debug;
 static void SETTINGS_create(screen_t *scr) {
   widget_t* w;
 
-
   //  [ SETTINGS MAIN SCREEN ]
   //
   newWidget(&w,widget_combo,scr);
@@ -29,6 +28,9 @@ static void SETTINGS_create(screen_t *scr) {
   #endif
   newComboScreen(w, strings[lang].settings_EDIT_TIPS, screen_tip_list, NULL);
   newComboScreen(w, strings[lang].settings_CALIBRATION, screen_calibration, NULL);
+#ifdef ENABLE_ADDONS
+  newComboScreen(w, strings[lang].settings_ADDONS, screen_addons, NULL);
+#endif
   newComboScreen(w, strings[lang].settings_EXIT, screen_main, NULL);
 }
 

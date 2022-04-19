@@ -38,6 +38,12 @@ enum {
               screen_calibration_start,
               screen_calibration_settings,
               screen_calibration_input,
+#ifdef ENABLE_ADDONS
+          screen_addons,
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+          screen_fume_extractor_settings,
+#endif
+#endif
           screen_debug,
     };
 

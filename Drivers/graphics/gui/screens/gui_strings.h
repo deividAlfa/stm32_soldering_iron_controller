@@ -33,6 +33,9 @@ typedef struct{
   char * settings_EDIT_TIPS;
   char * settings_CALIBRATION;
   char * settings_EXIT;
+#ifdef ENABLE_ADDONS
+  char * settings_ADDONS;
+#endif
 
   char * IRON_Max_Temp;
   char * IRON_Min_Temp;

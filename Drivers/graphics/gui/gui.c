@@ -47,6 +47,11 @@ void guiInit(void) {
   oled_addScreen(&Screen_calibration,screen_calibration);
   calibration_screen_setup(&Screen_calibration);
 
+#ifdef ENABLE_ADDONS
+  oled_addScreen(&Screen_addons, screen_addons);
+  addons_screen_setup(&Screen_addons);
+#endif
+
 #ifdef ENABLE_DEBUG_SCREEN
 
   oled_addScreen(&Screen_debug,screen_debug);
