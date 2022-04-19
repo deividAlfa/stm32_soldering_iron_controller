@@ -845,7 +845,7 @@ uint8_t comboBoxDraw(widget_t *w) {
   if(w->parent->refresh < screen_Erase){                    // If screen not erased already
     if(!refresh_slide){                                     // If not updating sliding text
       w->parent->refresh = screen_Erased;                   //
-      FillBuffer(BLACK, fill_dma);                          // Erase fast using dma
+      fillBuffer(BLACK, fill_dma);                          // Erase fast using dma
     }
   }
   if(u8g2.font != combo->font){
@@ -1041,7 +1041,7 @@ uint8_t comboBoxDraw(widget_t *w) {
   }
   if(w->parent->refresh < screen_Erase){        // If screen not erased already
     w->parent->refresh = screen_Erased;
-    FillBuffer(BLACK, fill_dma);                          // Erase fast using dma
+    fillBuffer(BLACK, fill_dma);                          // Erase fast using dma
   }
   if(u8g2.font != combo->font){
     u8g2_SetFont(&u8g2, combo->font);

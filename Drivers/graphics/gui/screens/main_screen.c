@@ -856,7 +856,7 @@ static uint8_t main_screen_draw(screen_t *scr){
   }
   if(refresh){
     scr->refresh=screen_Erased;
-    FillBuffer(BLACK, fill_dma);
+    fillBuffer(BLACK, fill_dma);
   }
 
   u8g2_SetDrawColor(&u8g2, WHITE);

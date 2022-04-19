@@ -30,7 +30,7 @@
 #include "rotary_encoder.h"
 #include "tempsensors.h"
 #include "voltagesensors.h"
-#include "ssd1306.h"
+#include "lcd.h"
 #include "gui.h"
 #include "screen.h"
 #include "myTest.h"
@@ -245,7 +245,7 @@ void Error_Handler(void)
 #ifdef DEBUG_ERROR
   #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
   if(!oled.use_sw){
-    display_abort();
+    display_dma_abort();
   }
   #endif
   setSafeMode(enable);
@@ -298,7 +298,7 @@ void Error_Handler(void)
   #else
   update_display();
   #endif
-  Reset_onError();
+  buttonReset();
 #endif
   while(1){
   }

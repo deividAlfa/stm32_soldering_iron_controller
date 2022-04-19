@@ -12,7 +12,7 @@
 #include "iron.h"
 #include "pid.h"
 #include "settings.h"
-#include "ssd1306.h"
+#include "lcd.h"
 
 #include "widgets.h"
 #include "adc_global.h"

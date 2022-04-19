@@ -14,7 +14,7 @@
 #include <screen_common.h>
 #include <settings.h>
 #include <settings_screen.h>
-#include <ssd1306.h>
+#include <lcd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/_stdint.h>
@@ -513,7 +513,7 @@ static uint8_t pid_debug_Draw(screen_t * scr){
   if(update_draw || scr->refresh==screen_Erased){
     if(update_draw){
       update_draw=0;
-      FillBuffer(BLACK, fill_dma);
+      fillBuffer(BLACK, fill_dma);
       scr->refresh=screen_Erased;
     }
     for(uint8_t x=1; x<(PID_SZ-1); x++){

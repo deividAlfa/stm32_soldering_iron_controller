@@ -9,7 +9,7 @@
 #include "pid.h"
 #include "iron.h"
 #include "gui.h"
-#include "ssd1306.h"
+#include "lcd.h"
 #include "tempsensors.h"
 #include "main.h"
 
@@ -473,7 +473,7 @@ void loadProfile(uint8_t profile){
 
 void Oled_error_init(void){
   setContrast(255);
-  FillBuffer(BLACK,fill_soft);
+  fillBuffer(BLACK,fill_soft);
   u8g2_SetFont(&u8g2,default_font );
   u8g2_SetDrawColor(&u8g2, WHITE);
   u8g2_SetMaxClipWindow(&u8g2);
@@ -484,7 +484,7 @@ void Flash_error(void){
   __disable_irq();
   HAL_FLASH_Lock();
   __enable_irq();
-  FatalError(error_FLASH);
+  fatalError(error_FLASH);
 }
 
 void checksumError(uint8_t mode){
@@ -523,7 +523,7 @@ void Button_reset(void){
     while(!BUTTON_input()){
       HAL_IWDG_Refresh(&hiwdg);
       if((HAL_GetTick()-ResetTimer)>5000){
-        FillBuffer(BLACK,fill_dma);
+        fillBuffer(BLACK,fill_dma);
         putStrAligned("RELEASE", 16, align_center);
         putStrAligned("BUTTON NOW", 32, align_center);
         update_display();

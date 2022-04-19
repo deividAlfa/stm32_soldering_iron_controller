@@ -1,4 +1,4 @@
-#include "ssd1306.h"
+#include "lcd.h"
 #include "settings.h"
 #include "buzzer.h"
 #include "iron.h"
@@ -7,52 +7,51 @@
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "ssd1306.c"
+#define __BASE_FILE__ "lcd.c"
 #endif
 
 oled_t oled;
 
 static uint8_t lastContrast;
 static uint8_t powerStatus;
-static uint8_t faultMode;
-
-// Command size in bytes, data
+static uint8_t inFatalError;
 
 #if defined ST7565
-uint8_t disp_init[] = { // Initialization for ST7565R (Source: u8g2)
-    1, 0xE2,            // soft reset
-    1, 0xAE,            // display off
-    1, 0x40,            // set display start line to 0
-    1, 0xA0 | 1,        // ADC set to reverse
-    1, 0xC8,            // Common output mode
-    1, 0xA6,            // display normal, bit val 0: LCD pixel off.
-    1, 0xA2,            // LCD bias 1/9
-    1, 0x2F,            // all power  control circuits on (regulator, booster and follower)
-    2, 0xF8, 0x00,      // set booster ratio to 4x
-    1, 0x27,            // set V0 voltage resistor ratio to max
-    2, 0x81, 0x07,      // set contrast, contrast value, EA default: 0x016
-    1, 0xAE,            // display off
-    1, 0xA5             // All pixel on (Sleep mode)
+// DataSz, Delay, Data
+const uint8_t disp_init[] = { // Initialization for ST7565R
+    1, 0,   c_disp_off,
+    1, 0,   c_bias_7,
+    1, 0,   c_adc_norm,
+    1, 0,   c_com_norm,
+    1, 0,   c_start_line,
+    1, 50,  c_pwr_ctrl | c_pwr_boost,
+    1, 50,  c_pwr_ctrl | c_pwr_boost | c_pwr_vreg,
+    1, 50,  c_pwr_ctrl | c_pwr_boost | c_pwr_follow,
+    2, 50,  c_boost_ratio, c_boost_234,
+    1, 50,  c_res_ratio | 0x07,
+    2, 0,   c_set_volume, 0x16,
+    1, 0,   c_disp_off,
+    1, 0,   c_all_on
 };
 #elif defined SSD1306
-uint8_t disp_init[] = { // Initialization for SH1106 / SSD1306 / SSD1309
-    1, 0xAE,            // Display Off
-    1, 0xD5,            // Set Display Clock Divide Ratio / Oscillator Frequency
-    1, 0xF0,            // Set max framerate
-    2, 0xA8, 0x3F,      // Set Multiplex Ratio, 0x3F (1/64 Duty)
-    2, 0xD3, 0x00,      // Set Display Offset, 0x00
-    1, 0x40,            // Set Display Start Line
-    2, 0x20, 0x02,      // Set Memory Addressing Mode (0x02)
-    1, 0xA1,            // Set Segment Re-Map
-    1, 0xC8,            // Set COM Output Scan Direction
-    2, 0xDA, 0x12,      // Set COM Pins Hardware Configuration Default => 0x12 (0x10)
-    2, 0x81, 0xFF,      // Init in max contrast
-    2, 0xD9, 0x44,      // Set Pre-Charge Period, 0x44 (4 Display Clocks [Phase 2] / 4 Display Clocks [Phase 1])
-    2, 0xDB, 0x3C,      // Set VCOMH Deselect Level, 0x3C (0.84*VCC)
-    1, 0xA4,            // Set Entire Display Off
-    1, 0xA6,            // Set Inverse Display Off
-    2, 0x8D, 0x14,      // Set Charge Pump comm, Enable charge pump
-    1, 0x33             // Charge pump to 9V
+const uint8_t disp_init[] = { // Initialization for SH1106 / SSD1306 / SSD1309
+    1, 0,   c_disp_off,
+    2, 0,   c_clock_set, 0xF0,              // Set max framerate
+    2, 0,   c_mux_ratio, 0x3F,
+    2, 0,   c_offset, 0x00,
+    1, 0,   c_start_line,
+    2, 0,   c_addr_mode, 0x02,
+    1, 0,   c_remap_on,
+    1, 0,   c_com_rev,
+    2, 0,   c_com_cfg, 0x12,
+    2, 0,   c_contrast, 0xFF,               // Init in max contrast
+    2, 0,   c_precharge, 0x44,              // Set Pre-Charge Period, 0x44 (4 Display Clocks [Phase 2] / 4 Display Clocks [Phase 1])
+    2, 0,   c_vcomh_lvl, 0x3C,              // Set VCOMH Deselect Level, 0x3C (0.84*VCC)
+    1, 0,   c_all_off,
+    1, 0,   c_inv_off,
+    2, 50,  c_pump_1306_set, c_pump_on,     // For SSD1306
+    2, 50,  c_pump_1106_set, c_pump_on,     // For SH1106
+    1, 50,  c_pump_1106_adj | 0x03          // For SH1106, pump to 9V
 };
 #else
 #error "No display defined!"
@@ -257,7 +256,7 @@ void i2cStop(void){                                       // Stop condition, SCL
 
 // Send data
 void lcd_write(uint8_t *data, uint16_t count, uint8_t mode){
-  while(oled.status==oled_busy);                          // Wait for DMA to finish
+  while(oled.status==oled_busy){;}                          // Wait for DMA to finish
 
 #if defined OLED_SPI
   #ifdef USE_CS
@@ -270,10 +269,10 @@ void lcd_write(uint8_t *data, uint16_t count, uint8_t mode){
   else
     Oled_Clear_DC();
   if(HAL_SPI_Transmit(oled.device, data, count, HAL_MAX_DELAY) != HAL_OK){
-    if(!faultMode)
+    if(!inFatalError)
       Error_Handler();
     else
-      Reset_onError();          // We're already on ErrorHandler, can't do anymore!
+      buttonReset();          // We're already on ErrorHandler, can't do anymore!
   }
   #else
   bitbang_write(data, count, mode);
@@ -285,18 +284,20 @@ void lcd_write(uint8_t *data, uint16_t count, uint8_t mode){
 
 
 #elif defined OLED_I2C
+#if defined I2C_TRY_HW || !defined OLED_DEVICE
   if(oled.use_sw){
     bitbang_write(data, count, mode);
   }
+#endif
 #if defined OLED_DEVICE
 #if defined I2C_TRY_HW
   else{
 #endif
     if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, mode, 1, data, count, HAL_MAX_DELAY)!=HAL_OK){
-      if(!faultMode)
+      if(!inFatalError)
         Error_Handler();
       else
-        Reset_onError();          // We're already on ErrorHandler, can't do anymore!
+        buttonReset();          // We're already on ErrorHandler, can't do anymore!
     }
 #if defined I2C_TRY_HW
   }
@@ -335,22 +336,24 @@ void setOledRow(uint8_t row){
 }
 
 void setOledPower(uint8_t power){
-  powerStatus = power;
 #ifdef  ST7565
   uint8_t cmd[2];
-  cmd[0] = ((power==enable) ? 0xA4 : 0xAF );  // All pixel Off, Display On
-  cmd[1] = ((power==enable) ? 0xAE : 0xA5 );  // Display Off, All pixel On
+  cmd[0] = ((power==enable) ? c_all_off : c_disp_off );
+  cmd[1] = ((power==enable) ? c_disp_on : c_all_on );
 #else
   uint8_t cmd[1] = { ((power==enable) ? 0xAF : 0xAE ) }; // Display On, Display Off
 #endif
-  lcd_write(cmd, sizeof(cmd), modeCmd);
+  for(uint8_t i=0; i<sizeof(cmd); i++)
+    lcd_write(&cmd[i], 1, modeCmd);
+
+  powerStatus = power;
 }
 uint8_t getOledPower(void){
   return powerStatus;
 }
 
 void setContrast(uint8_t value) {
-#ifndef  ST7565
+#ifndef  ST7565                                          // TODO disable ST7565 for now
   uint8_t cmd [] = { 0x81, value };
   lcd_write(cmd, sizeof(cmd), modeCmd);
 #endif
@@ -417,10 +420,12 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 #endif
 
   for(uint16_t i=0;i<sizeof(disp_init);){
-    lcd_write(&disp_init[i+1], disp_init[i], modeCmd);
-    i+=disp_init[i]+1;
+    lcd_write((uint8_t *)&disp_init[i+2], disp_init[i], modeCmd);
+    if(disp_init[i+1])
+      HAL_Delay(disp_init[i+1]);
+    i+=disp_init[i]+2;
   }
-  FillBuffer(BLACK,fill_dma); // Clear buffer
+  fillBuffer(BLACK,fill_dma); // Clear buffer
   update_display();           // Update display RAM
   setOledPower(enable);
 }
@@ -433,7 +438,7 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 *       mode:   0 = Use software(fail-safe), 1= Use DMA (normal operation)
 */
 
-void FillBuffer(bool color, bool mode){
+void fillBuffer(bool color, bool mode){
   uint32_t fillVal = ((color==WHITE) ? 0xFFFFFFFF : 0x00000000 );  // Fill color = white : black
   while(oled.status!=oled_idle);              // Don't write to buffer while screen buffer is being transfered
   if(mode==fill_dma){                         // use DMA
@@ -453,7 +458,7 @@ void FillBuffer(bool color, bool mode){
 #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
 
 // Abort DMA transfers and reset status
-void display_abort(void){
+void display_dma_abort(void){
   if(oled.device!=NULL){
 #if defined OLED_SPI
     HAL_SPI_Abort(oled.device);
@@ -463,7 +468,7 @@ void display_abort(void){
     __HAL_UNLOCK(oled.device);
     HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 100);  // Wait for DMA to finish
   }
-  oled.status=oled_idle;                                                      // Force oled idle status
+  oled.status=oled_busy;  // Force oled idle status
 }
 
 
@@ -495,7 +500,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 
       oled.row=0;                                       // Reset row position
       oled.status=oled_idle;
-      return;                                           // Return without retriggering DMA.
+      return;                                           // Return without re-triggering DMA.
     }
 
     uint8_t cmd[3]={
@@ -505,57 +510,33 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
     };
 
 #ifdef OLED_SPI
-
-    #ifdef USE_CS
+#ifdef USE_CS
     Oled_Clear_CS();
-    #endif
-
-    #ifdef USE_DC
-    Oled_Clear_DC();
-
-    #endif
-    uint8_t try =3;
-    while(try){
-      if(HAL_SPI_Transmit(oled.device, cmd, sizeof(cmd), 50)==HAL_OK){      // Send row command in blocking mode
-        break;
-      }
-      else{
-        display_abort();
-        oled.status=oled_busy;
-        try--;
-      }
-    }
-    if(try==0){
-      Error_Handler();
-    }
-
-    #ifdef USE_DC
-    Oled_Set_DC();
-    #endif
-
-    if(HAL_SPI_Transmit_DMA(oled.device, &oled.buffer[128*oled.row], 128)!= HAL_OK){      // Send row data in DMA interrupt mode
-      Error_Handler();
-    }
-
-#elif defined OLED_I2C
-    uint8_t try =3;
-		while(try){
-      if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, modeCmd, 1, cmd, sizeof(cmd), 50)==HAL_OK){
-      	break;
-	    }
-      else{
-        display_abort();
-        oled.status=oled_busy;
-        try--;
-      }
-    }
-    if(try==0){
-      Error_Handler();
-    }
-    if(HAL_I2C_Mem_Write_DMA(oled.device, OLED_ADDRESS, modeData, 1, &oled.buffer[128*oled.row], 128)!=HAL_OK){
-      Error_Handler();
-    }
 #endif
+    Oled_Clear_DC();
+#endif
+
+    for(uint8_t t=0;;){                                                 // Weird bug workaround, sometimes HAL returns BUSY here.
+#ifdef OLED_SPI
+      if(HAL_SPI_Transmit(oled.device, cmd, sizeof(cmd), 50)==HAL_OK)
+#elif defined OLED_I2C
+      if(HAL_I2C_Mem_Write(oled.device, OLED_ADDRESS, modeCmd, 1, cmd, sizeof(cmd), 50)==HAL_OK)
+#endif
+        break;                                                          // Success, break loop
+      else
+        display_dma_abort();                                            // Failure, reset display handler
+      if(++t>5)                                                         // Max 5 tries
+        Error_Handler();
+    }
+#ifdef OLED_SPI
+    Oled_Set_DC();
+#endif
+#ifdef OLED_SPI
+    if(HAL_SPI_Transmit_DMA(oled.device, &oled.buffer[128*oled.row], 128)!= HAL_OK)      // Send row data in DMA interrupt mode. Never failed here, so no need to re-try.
+#elif defined OLED_I2C
+    if(HAL_I2C_Mem_Write_DMA(oled.device, OLED_ADDRESS, modeData, 1, &oled.buffer[128*oled.row], 128)!=HAL_OK)
+#endif
+      Error_Handler();
 
     oled.row++;
   }
@@ -563,18 +544,16 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 
 #endif
 
-void FatalError(uint8_t type){
-  faultMode = 1;
+void fatalError(uint8_t type){
+ inFatalError = 1;
  uint8_t lang = systemSettings.settings.language;
- if(lang>(LANGUAGE_COUNT-1)){
+ if(lang>(LANGUAGE_COUNT-1))
    lang=lang_english;
- }
 
-  #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
-  if(!oled.use_sw){
-    display_abort();
-  }
-  #endif
+#if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
+  if(!oled.use_sw)
+    display_dma_abort();
+#endif
 
   setSafeMode(enable);
   buzzer_fatal_beep();
@@ -622,21 +601,21 @@ void FatalError(uint8_t type){
   putStrAligned(strings[lang].ERROR_SYSTEM_HALTED, 35, align_center);
   putStrAligned(strings[lang].ERROR_BTN_RESET, 50, align_center);
 
-  #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
-  if(!oled.use_sw){
+#if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
+  if(!oled.use_sw)
     update_display_ErrorHandler();
-  }
-  #if defined OLED_I2C && defined I2C_TRY_HW
+
+#if defined OLED_I2C && defined I2C_TRY_HW
   else{
     update_display();
   }
-  #endif
+#endif
 
-  #else
+#else
   update_display();
-  #endif
+#endif
 
-  Reset_onError();
+  buttonReset();
 }
 
 void putStrAligned(char* str, uint8_t y, AlignType align){
@@ -654,7 +633,7 @@ void putStrAligned(char* str, uint8_t y, AlignType align){
     }
   }
 }
-void Reset_onError(void){
+void buttonReset(void){
   __disable_irq();
   while(BUTTON_input()){                    // Wait until the button is pressed
     for(uint16_t i=0;i<50000;i++);          // Small delay

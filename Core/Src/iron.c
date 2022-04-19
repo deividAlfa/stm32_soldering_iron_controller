@@ -11,7 +11,7 @@
 #include "main.h"
 #include "tempsensors.h"
 #include "voltagesensors.h"
-#include "ssd1306.h"
+#include "lcd.h"
 #include "screens.h"
 #include "oled.h"
 
@@ -378,31 +378,31 @@ void runAwayCheck(void){
           case runaway_25:                                                                  // Temp >25°C over setpoint
             if((CurrentTime-Iron.RunawayTimer)>20000){                                      // 20 second limit
               Iron.RunawayStatus=runaway_triggered;
-              FatalError(error_RUNAWAY25);
+              fatalError(error_RUNAWAY25);
             }
             break;
           case runaway_50:                                                                  // Temp >50°C over setpoint
             if((CurrentTime-Iron.RunawayTimer)>10000){                                      // 10 second limit
               Iron.RunawayStatus=runaway_triggered;
-              FatalError(error_RUNAWAY50);
+              fatalError(error_RUNAWAY50);
             }
             break;
           case runaway_75:                                                                  // Temp >75°C over setpoint
             if((CurrentTime-Iron.RunawayTimer)>5000){                                       // 5 second limit
               Iron.RunawayStatus=runaway_triggered;
-              FatalError(error_RUNAWAY75);
+              fatalError(error_RUNAWAY75);
             }
             break;
           case runaway_100:                                                                 // Temp >100°C over setpoint
             if((CurrentTime-Iron.RunawayTimer)>2000){                                       // 2 second limit
               Iron.RunawayStatus=runaway_triggered;
-              FatalError(error_RUNAWAY100);
+              fatalError(error_RUNAWAY100);
             }
             break;
           case runaway_500:                                                                 // Exceed 500ºC!
             if((CurrentTime-Iron.RunawayTimer)>2000){                                       // 2 second limit
               Iron.RunawayStatus=runaway_triggered;
-              FatalError(error_RUNAWAY500);
+              fatalError(error_RUNAWAY500);
             }
             break;
           default:                                                                          // Unknown overrun state

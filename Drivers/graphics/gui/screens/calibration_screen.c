@@ -230,7 +230,7 @@ static uint8_t Cal_draw(screen_t *scr){
   if(error==1){
     error=2;
     Screen_calibration.current_widget->enabled=0;
-    FillBuffer(BLACK,fill_dma);
+    fillBuffer(BLACK,fill_dma);
     scr->refresh=screen_Erased;
     putStrAligned(strings[lang].CAL_Error, 10, align_center);
     putStrAligned(strings[lang].CAL_Aborting, 25, align_center);
@@ -355,7 +355,7 @@ static uint8_t Cal_Start_draw(screen_t *scr){
   if(update_draw){
     update_draw=0;
 
-    FillBuffer(BLACK, fill_dma);
+    fillBuffer(BLACK, fill_dma);
     scr->refresh=screen_Erased;
     u8g2_SetDrawColor(&u8g2, WHITE);
     u8g2_SetFont(&u8g2, u8g2_font_menu);

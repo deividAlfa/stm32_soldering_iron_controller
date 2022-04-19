@@ -23,7 +23,7 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "ssd1306.h"
+#include "lcd.h"
 #include "iron.h"
 /* USER CODE END Includes */
 
@@ -74,7 +74,7 @@ extern TIM_HandleTypeDef htim4;
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
-	FatalError(error_NMI);
+	fatalError(error_NMI);
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
   while (1)
@@ -89,7 +89,7 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-	FatalError(error_HARDFAULT);
+	fatalError(error_HARDFAULT);
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
@@ -105,7 +105,7 @@ void HardFault_Handler(void)
 void MemManage_Handler(void)
 {
   /* USER CODE BEGIN MemoryManagement_IRQn 0 */
-	FatalError(error_MEMMANAGE);
+	fatalError(error_MEMMANAGE);
   /* USER CODE END MemoryManagement_IRQn 0 */
   while (1)
   {
@@ -120,7 +120,7 @@ void MemManage_Handler(void)
 void BusFault_Handler(void)
 {
   /* USER CODE BEGIN BusFault_IRQn 0 */
-	FatalError(error_BUSFAULT);
+	fatalError(error_BUSFAULT);
   /* USER CODE END BusFault_IRQn 0 */
   while (1)
   {
@@ -135,7 +135,7 @@ void BusFault_Handler(void)
 void UsageFault_Handler(void)
 {
   /* USER CODE BEGIN UsageFault_IRQn 0 */
-	FatalError(error_USAGEFAULT);
+	fatalError(error_USAGEFAULT);
   /* USER CODE END UsageFault_IRQn 0 */
   while (1)
   {
