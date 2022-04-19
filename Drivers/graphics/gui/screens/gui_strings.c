@@ -32,9 +32,17 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_EDIT_TIPS = "EDIT TIPS",
       .settings_CALIBRATION = "CALIBRATION",
       .settings_EXIT = "EXIT",
-      #ifdef ENABLE_ADDONS
+#ifdef ENABLE_ADDONS
       .settings_ADDONS = "ADDONS",
-      #endif
+#endif
+
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+      .FUME_EXTRACTOR_Title         = "Fume Ext. Ctl.",
+      .FUME_EXTRACTOR_Mode          = "Mode",
+      .FUME_EXTRACTOR_Modes         = { "Disabled", "Auto", "Alw. On" },
+      .FUME_EXTRACTOR_AfterRun      = "After Run",
+      .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
 
       .IRON_Max_Temp = "Max temp",
       .IRON_Min_Temp = "Min temp",
@@ -178,9 +186,17 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_EDIT_TIPS = "КАРТРИДЖ",
       .settings_CALIBRATION = "КАЛИБРОВКА",
       .settings_EXIT = "ВЫХОД",
-      #ifdef ENABLE_ADDONS
+#ifdef ENABLE_ADDONS
       .settings_ADDONS = "ADDONS",
-      #endif
+#endif
+
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+      .FUME_EXTRACTOR_Title         = "Fume Ext. Ctl.",
+      .FUME_EXTRACTOR_Mode          = "Mode",
+      .FUME_EXTRACTOR_Modes         = { "Disabled", "Auto", "Alw. On" },
+      .FUME_EXTRACTOR_AfterRun      = "After Run",
+      .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
 
       .IRON_Max_Temp = "Максимум",
       .IRON_Min_Temp = "Минимум",
@@ -325,9 +341,17 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_EDIT_TIPS = "SPETSAR",
       .settings_CALIBRATION = "KALIBRERING",
       .settings_EXIT = "AVSLUTA",
-      #ifdef ENABLE_ADDONS
+#ifdef ENABLE_ADDONS
       .settings_ADDONS = "ADDONS",
-      #endif
+#endif
+
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+      .FUME_EXTRACTOR_Title         = "Fume Ext. Ctl.",
+      .FUME_EXTRACTOR_Mode          = "Mode",
+      .FUME_EXTRACTOR_Modes         = { "Disabled", "Auto", "Alw. On" },
+      .FUME_EXTRACTOR_AfterRun      = "After Run",
+      .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
 
       .IRON_Max_Temp = "Max temp",
       .IRON_Min_Temp = "Min temp",
@@ -471,9 +495,17 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_EDIT_TIPS = "LÖTSPITZEN EDIT",
       .settings_CALIBRATION = "KALIBRIERUNG",
       .settings_EXIT = "ENDE",
-      #ifdef ENABLE_ADDONS
+#ifdef ENABLE_ADDONS
       .settings_ADDONS = "ADDONS",
-      #endif
+#endif
+
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+      .FUME_EXTRACTOR_Title         = "Fume Ext. Ctl.",
+      .FUME_EXTRACTOR_Mode          = "Mode",
+      .FUME_EXTRACTOR_Modes         = { "Disabled", "Auto", "Alw. On" },
+      .FUME_EXTRACTOR_AfterRun      = "After Run",
+      .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
 
       .IRON_Max_Temp = "Max Temp",
       .IRON_Min_Temp = "Min Temp",
@@ -617,9 +649,17 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_EDIT_TIPS = "UÇ DÜZENLE",
       .settings_CALIBRATION = "KALİBRASYON",
       .settings_EXIT = "ÇIKIŞ",
-      #ifdef ENABLE_ADDONS
+#ifdef ENABLE_ADDONS
       .settings_ADDONS = "ADDONS",
-      #endif
+#endif
+
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+      .FUME_EXTRACTOR_Title         = "Fume Ext. Ctl.",
+      .FUME_EXTRACTOR_Mode          = "Mode",
+      .FUME_EXTRACTOR_Modes         = { "Disabled", "Auto", "Alw. On" },
+      .FUME_EXTRACTOR_AfterRun      = "After Run",
+      .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
 
       .IRON_Max_Temp = "Max Isı",
       .IRON_Min_Temp = "Min Isı",

@@ -119,6 +119,11 @@ typedef enum{
   error_run                = 1,
   error_resume             = 2,
 
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+  fume_extractor_mode_disabled  = 0,
+  fume_extractor_mode_auto      = 1,
+  fume_extractor_mode_always_on = 2,
+#endif
 }system_types;
 
 
@@ -217,8 +222,8 @@ __attribute__((aligned(4))) typedef struct {
   // to be the same size, thus matching CRC, but in reality its incompatible due to layout change
   uint64_t enabledAddons;
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-  uint8_t fumeExtractorEnabled;
-  uint8_t fumeExtractorAfterrunDelay; // amount of delay in 5 second increments
+  uint8_t fumeExtractorMode;
+  uint8_t fumeExtractorAfterrun; // amount of delay in 5 second increments
 #endif
 }addonSettings_t;
 #endif

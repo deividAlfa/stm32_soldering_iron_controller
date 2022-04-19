@@ -41,7 +41,7 @@ enum {
 #ifdef ENABLE_ADDONS
           screen_addons,
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-          screen_fume_extractor_settings,
+              screen_fume_extractor_settings,
 #endif
 #endif
           screen_debug,

@@ -52,6 +52,11 @@ void guiInit(void) {
   addons_screen_setup(&Screen_addons);
 #endif
 
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+  oled_addScreen(&Screen_fume_extractor_settings, screen_fume_extractor_settings);
+  addons_screen_fume_extractor_setup(&Screen_fume_extractor_settings);
+#endif
+
 #ifdef ENABLE_DEBUG_SCREEN
 
   oled_addScreen(&Screen_debug,screen_debug);

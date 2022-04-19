@@ -37,6 +37,14 @@ typedef struct{
   char * settings_ADDONS;
 #endif
 
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+  char * FUME_EXTRACTOR_Title;
+  char * FUME_EXTRACTOR_Mode;
+  char * FUME_EXTRACTOR_Modes[3];
+  char * FUME_EXTRACTOR_AfterRun;
+  char * FUME_EXTRACTOR_AfterRunUnit;
+#endif
+
   char * IRON_Max_Temp;
   char * IRON_Min_Temp;
   char * IRON_User_Temp;

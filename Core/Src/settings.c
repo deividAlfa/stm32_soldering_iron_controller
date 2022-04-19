@@ -52,8 +52,8 @@ const addonSettings_t defaultAddonSettings = {
 #endif
   ,
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-  .fumeExtractorEnabled       = enable,
-  .fumeExtractorAfterrunDelay = 2,
+  .fumeExtractorMode     = enable,
+  .fumeExtractorAfterrun = 2,
 #endif
 };
 #endif
