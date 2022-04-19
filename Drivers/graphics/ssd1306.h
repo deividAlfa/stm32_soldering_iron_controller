@@ -12,7 +12,12 @@
 #include "main.h"
 #include "widgets.h"
 
-//For checking if SPI DMA is active. Check before drawing the buffer.
+// Display selection
+//#define ST7565
+#define SSD1306
+
+
+// For checking if SPI DMA is active. Check before drawing the buffer.
 typedef enum {
 	oled_idle=0,
 	oled_busy=1,
@@ -36,19 +41,36 @@ typedef enum{
 #define OledWidth	  128
 #define OledHeight	64
 
+#define modeCmd     0x00
+#define modeData    0x40
+
+
+#if !defined OLED_SPI && !defined OLED_I2C
+#error "No display configured in board.h!"
+#elif defined OLED_I2C && !defined OLED_ADDRESS
+#error "No display I2C address configured in board.h!"
+#elif defined OLED_SPI && !defined USE_DC
+#error "Mandatory OLED DC Pin for SPI not configured!"
+#elif (!defined OLED_DEVICE || defined I2C_TRY_HW) && (!defined SW_SCL_Pin || !defined SW_SDA_Pin)
+#error "Current configuration requires definition of display pins "SW_SDA_Pin" and "SW_SCL_Pin""
+#endif
+#if defined I2C_TRY_HW && (!defined HW_SCL_Pin || !defined HW_SDA_Pin)
+#error "Current configuration requires definition of display pins "HW_SDA_Pin" and "HW_SCL_Pin""
+#endif
+
+
+
 // buffer needs to be aligned to 32bit(4byte) boundary, as FillBuffer() uses 32bit transfer for increased speed
 typedef struct{
 	__attribute__((aligned(4))) uint8_t buffer[128*8]; // 128x64 1BPP OLED
 	volatile uint8_t status;
 	volatile uint8_t row;
 	volatile uint8_t use_sw;
-	#if defined OLED_SPI && defined OLED_DEVICE
+#if defined OLED_SPI && defined OLED_DEVICE
 	SPI_HandleTypeDef *device;
-
-	#elif defined OLED_I2C && defined OLED_DEVICE
+#elif defined OLED_I2C && defined OLED_DEVICE
 	I2C_HandleTypeDef *device;
-	#endif
-
+#endif
 	DMA_HandleTypeDef *fillDMA;
 }oled_t;
 
@@ -61,11 +83,11 @@ enum { fill_soft, fill_dma };
 #define Oled_Clear_SCL() 	SW_SCL_GPIO_Port->BRR = SW_SCL_Pin
 
 #elif  defined OLED_I2C
-#define Oled_Set_SCL()    SW_SCL_GPIO_Port->BSRR = SW_SCL_Pin; i2c_Delay_H()							// Rise time needs more time, as it's open drain
-#define Oled_Clear_SCL()  SW_SCL_GPIO_Port->BRR = SW_SCL_Pin; i2c_Delay_L()								// Fall time can be much faster
+#define Oled_Set_SCL()    SW_SCL_GPIO_Port->BSRR = SW_SCL_Pin; bit_delay()							// Rise time needs more time, as it's open drain
+#define Oled_Clear_SCL()  SW_SCL_GPIO_Port->BRR = SW_SCL_Pin; bit_delay()								// Fall time can be much faster
 #endif
 
-#define Oled_Clock()      Oled_Set_SCL(); Oled_Clear_SCL()
+#define Oled_Clock()      Oled_Set_SCL(); Oled_Clear_SCL();
 
 #define Oled_Set_SDA() 		SW_SDA_GPIO_Port->BSRR = SW_SDA_Pin
 #define Oled_Clear_SDA() 	SW_SDA_GPIO_Port->BRR = SW_SDA_Pin
@@ -91,47 +113,29 @@ enum { fill_soft, fill_dma };
 #define WHITE 1
 #define XOR   2
 
-#if !defined OLED_SPI && !defined OLED_I2C
-#error "No display configured in board.h!"
-#elif defined OLED_I2C && !defined OLED_ADDRESS
-#error "No display I2C address configured in board.h!"
-#endif
-
-#if defined OLED_SPI && defined OLED_DEVICE
-void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma);
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *device);
-
-#elif defined OLED_SPI
-void Enable_Soft_SPI(void);
-void ssd1306_init(DMA_HandleTypeDef *dma);
-void oled_send(uint8_t* bf, uint16_t count);
-#endif
-
 #if !defined OLED_DEVICE || (defined OLED_DEVICE && defined I2C_TRY_HW)
-void enable_soft_Oled(void);
-void disable_soft_Oled(void);
-#endif
-
+void enable_soft_mode(void);
+void disable_soft_mode(void);
+void bitbang_write(uint8_t* bf, uint16_t count, uint8_t mode);
+void bit_delay(void);
 #if defined OLED_I2C
-#define i2cData 0x40
-#define i2cCmd  0x00
-
-#if !defined OLED_DEVICE || (defined OLED_DEVICE && defined I2C_TRY_HW)
 void i2cStart(void);
 void i2cStop(void);
 void i2cBegin(uint8_t mode);
-void oled_send(uint8_t* bf, uint16_t count, uint8_t mode);
-void i2c_Delay_L(void);
-void i2c_Delay_H(void);
+#endif
 #endif
 
 #if defined OLED_DEVICE
+#if defined OLED_SPI
+void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma);
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *device);
+#elif defined OLED_I2C
 void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma);
 void i2c_workaround(void);
 void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device);
+#endif
 #else
 void ssd1306_init(DMA_HandleTypeDef *dma);
-#endif
 #endif
 
 void FatalError(uint8_t type);
