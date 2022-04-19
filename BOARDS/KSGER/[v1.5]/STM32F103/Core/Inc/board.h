@@ -95,7 +95,7 @@
 /********************************
  *       Addons                 *
  ********************************/
-#define ENABLE_ADDON_FUME_EXTRACTOR // addon for controlling a fume extractor, must define a gpio output pin "EXTRACTOR" to use
+//#define ENABLE_ADDON_FUME_EXTRACTOR // addon for controlling a fume extractor, must define a gpio output pin "EXTRACTOR" to use
 
 #if defined(ENABLE_ADDON_FUME_EXTRACTOR) // logical or together all the addons
 #define ENABLE_ADDONS
