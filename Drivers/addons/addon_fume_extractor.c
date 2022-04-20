@@ -14,43 +14,46 @@
 
 void handleAddonFumeExtractor()
 {
-  static uint32_t lastActiveTime   = 0u;
-  static bool     afterrunRequired = false;
+  static uint32_t lastActiveTime    = 0u;
+  static bool     extractorRequired = false;
 
-  bool     extractorRequired = false;
   uint32_t currentTimeStamp  = HAL_GetTick();
   uint8_t  currentMode       = getCurrentMode();
 
-  switch (systemSettings.addonSettings.fumeExtractorMode) {
-    case fume_extractor_mode_auto:
-      if((currentMode == mode_run) ||
-           (currentMode == mode_boost))
-        {
-          lastActiveTime = currentTimeStamp;
-          extractorRequired = true;
-          afterrunRequired = true;
-        }
-
-        if(afterrunRequired &&
-           ((lastActiveTime + (5000u * systemSettings.addonSettings.fumeExtractorAfterrun)) < currentTimeStamp))
-        {
-          // iron has not been in the active state for AFTERRUN_IN_SEC of time
-          afterrunRequired = false;
-        }
-
-        HAL_GPIO_WritePin(EXTRACTOR_GPIO_Port, EXTRACTOR_Pin, (extractorRequired || afterrunRequired) ? GPIO_PIN_SET : GPIO_PIN_RESET);
-      break;
-
-    case fume_extractor_mode_always_on:
-      HAL_GPIO_WritePin(EXTRACTOR_GPIO_Port, EXTRACTOR_Pin, GPIO_PIN_SET);
-      break;
-
+  switch (systemSettings.addonSettings.fumeExtractorMode)
+  {
     case fume_extractor_mode_disabled:
     default:
       // addon disabled
+      extractorRequired = false;
       HAL_GPIO_WritePin(EXTRACTOR_GPIO_Port, EXTRACTOR_Pin, GPIO_PIN_RESET);
       break;
+
+    case fume_extractor_mode_auto:
+      if(currentMode >= mode_run)
+      {
+        // if in a mode where extraction is required
+        lastActiveTime = currentTimeStamp;
+        extractorRequired = true;
+      }
+
+      if(extractorRequired &&
+         ((lastActiveTime + (5000u * systemSettings.addonSettings.fumeExtractorAfterrun)) < currentTimeStamp))
+      {
+        // iron has not been in the active state for the configured amount of time, turn it off
+        extractorRequired = false;
+      }
+
+      HAL_GPIO_WritePin(EXTRACTOR_GPIO_Port, EXTRACTOR_Pin, extractorRequired ? GPIO_PIN_SET : GPIO_PIN_RESET);
+      break;
+
+    case fume_extractor_mode_always_on:
+      // extractor is always on
+      extractorRequired = false; // set to false to override after run
+      HAL_GPIO_WritePin(EXTRACTOR_GPIO_Port, EXTRACTOR_Pin, GPIO_PIN_SET);
+      break;
   }
+
 }
 
 #endif
