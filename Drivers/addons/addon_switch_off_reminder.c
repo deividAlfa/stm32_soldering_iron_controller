@@ -17,49 +17,46 @@
 void handleAddonSwitchOffReminder()
 {
   static uint32_t lastActiveTime = 0u;
+  uint32_t const currentTimeStamp = HAL_GetTick();
 
-  if(systemSettings.addonSettings.swOffReminderEnabled)
+  if((systemSettings.addonSettings.swOffReminderEnabled) &&
+     (getCurrentMode() == mode_sleep))
   {
-    uint32_t const currentTimeStamp = HAL_GetTick();
+    uint32_t const elapsedSinceActive                 = currentTimeStamp - lastActiveTime;
+    uint32_t const swOffReminderInactivityDelayInMsec = systemSettings.addonSettings.swOffReminderInactivityDelay * MSEC_IN_SEC;
 
-    if(getCurrentMode() == mode_sleep)
+    if(elapsedSinceActive > swOffReminderInactivityDelayInMsec)
     {
-      uint32_t const elapsedSinceActive                 = currentTimeStamp - lastActiveTime;
-      uint32_t const swOffReminderInactivityDelayInMsec = systemSettings.addonSettings.swOffReminderInactivityDelay * MSEC_IN_SEC;
+      // station is in sleep mode longer than the configured time
+      uint32_t const elapsedSinceTimeout = elapsedSinceActive - swOffReminderInactivityDelayInMsec;
+      uint32_t const beepPeriodInMsec    = systemSettings.addonSettings.swOffReminderPeriod * MSEC_IN_SEC;
 
-      if(elapsedSinceActive > swOffReminderInactivityDelayInMsec)
+      if((elapsedSinceTimeout % beepPeriodInMsec) == 0u)
       {
-        // station is in sleep mode longer than the configured time
-        uint32_t const elapsedSinceTimeout = elapsedSinceActive - swOffReminderInactivityDelayInMsec;
-        uint32_t const beepPeriodInMsec    = systemSettings.addonSettings.swOffReminderPeriod * MSEC_IN_SEC;
-
-        if((elapsedSinceTimeout % beepPeriodInMsec) == 0u)
-        {
-          switch (systemSettings.addonSettings.swOffReminderBeepType) {
-            case switch_off_reminder_short_beep:
-            {
-              buzzer_short_beep();
-              break;
-            }
-            case switch_off_reminder_medium_beep:
-            {
-              buzzer_long_beep();
-              break;
-            }
-            case switch_off_reminder_long_beep:
-            default:
-            {
-              buzzer_fatal_beep();
-              break;
-            }
+        switch (systemSettings.addonSettings.swOffReminderBeepType) {
+          case switch_off_reminder_short_beep:
+          {
+            buzzer_short_beep();
+            break;
+          }
+          case switch_off_reminder_medium_beep:
+          {
+            buzzer_long_beep();
+            break;
+          }
+          case switch_off_reminder_long_beep:
+          default:
+          {
+            buzzer_fatal_beep();
+            break;
           }
         }
       }
     }
-    else
-    {
-      lastActiveTime = currentTimeStamp;
-    }
+  }
+  else
+  {
+    lastActiveTime = currentTimeStamp;
   }
 }
 
