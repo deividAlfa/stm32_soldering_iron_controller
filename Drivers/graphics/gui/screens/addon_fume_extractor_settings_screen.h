@@ -16,5 +16,5 @@ extern screen_t Screen_fume_extractor_settings;
 
 void addons_screen_fume_extractor_setup(screen_t *scr);
 
-#endif /* ENABLE_ADDONS */
+#endif /* ENABLE_ADDON_FUME_EXTRACTOR */
 #endif /* GRAPHICS_GUI_SCREENS_ADDON_FUME_EXTRACTOR_SETTINGS_SCREEN_H_ */

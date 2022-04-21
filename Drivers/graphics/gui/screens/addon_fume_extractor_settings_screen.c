@@ -13,32 +13,36 @@
 
 screen_t Screen_fume_extractor_settings;
 
-static comboBox_item_t *comboitem_fume_extractor_after_run_widget;
+static comboBox_item_t* comboitem_fume_extractor_after_run_widget;
 
 static void* getFumeExtractorMode();
 static void  setFumeExtractorMode(uint32_t *val);
 static void* getAfterRunDelay();
-static void setAfterRunDelay(uint32_t *val);
-static void update_addons_screen_fume_extractor(void);
-static void addons_screen_fume_extractor_create(screen_t *scr);
-static void addons_screen_fume_extractor_init(screen_t *scr);
+static void  setAfterRunDelay(uint32_t *val);
+static void  update_addons_screen_fume_extractor(void);
+static void  addons_screen_fume_extractor_create(screen_t *scr);
+static void  addons_screen_fume_extractor_init(screen_t *scr);
 
-static void* getFumeExtractorMode() {
+static void* getFumeExtractorMode()
+{
   temp = systemSettings.addonSettings.fumeExtractorMode;
   return &temp;
 }
 
-static void setFumeExtractorMode(uint32_t *val) {
-  systemSettings.addonSettings.fumeExtractorMode=*val;
+static void setFumeExtractorMode(uint32_t *val)
+{
+  systemSettings.addonSettings.fumeExtractorMode = *val;
   update_addons_screen_fume_extractor();
 }
 
-static void* getAfterRunDelay() {
+static void* getAfterRunDelay()
+{
   temp = systemSettings.addonSettings.fumeExtractorAfterrun * 5u;
   return &temp;
 }
 
-static void setAfterRunDelay(uint32_t *val) {
+static void setAfterRunDelay(uint32_t *val)
+{
   systemSettings.addonSettings.fumeExtractorAfterrun = (*val) / 5u;
 }
 
@@ -47,7 +51,8 @@ static void update_addons_screen_fume_extractor(void)
   comboitem_fume_extractor_after_run_widget->enabled = systemSettings.addonSettings.fumeExtractorMode == fume_extractor_mode_auto;
 }
 
-static void addons_screen_fume_extractor_create(screen_t *scr){
+static void addons_screen_fume_extractor_create(screen_t *scr)
+{
   widget_t* w;
   editable_widget_t* edit;
 
@@ -58,7 +63,7 @@ static void addons_screen_fume_extractor_create(screen_t *scr){
   edit->inputData.getData       = &getFumeExtractorMode;
   edit->big_step                = 1;
   edit->step                    = 1;
-  edit->setData                 = (void (*)(void *))&setFumeExtractorMode;
+  edit->setData                 = (setterFn)&setFumeExtractorMode;
   edit->options                 = strings[lang].FUME_EXTRACTOR_Modes;
   edit->numberOfOptions         = sizeof(strings[0].FUME_EXTRACTOR_Modes) / sizeof(char*);
 
@@ -69,7 +74,7 @@ static void addons_screen_fume_extractor_create(screen_t *scr){
   edit->inputData.getData       = &getAfterRunDelay;
   edit->big_step                = 30;
   edit->step                    = 5;
-  edit->setData                 = (void (*)(void *))&setAfterRunDelay;
+  edit->setData                 = (setterFn)&setAfterRunDelay;
   edit->max_value               = 600;
   edit->min_value               = 0;
 
@@ -79,7 +84,8 @@ static void addons_screen_fume_extractor_create(screen_t *scr){
   update_addons_screen_fume_extractor();
 }
 
-static void addons_screen_fume_extractor_init(screen_t *scr) {
+static void addons_screen_fume_extractor_init(screen_t *scr)
+{
   default_init(scr);
   comboResetIndex(Screen_fume_extractor_settings.current_widget);
 }

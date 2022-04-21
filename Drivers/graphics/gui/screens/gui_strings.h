@@ -45,6 +45,16 @@ typedef struct{
   char * FUME_EXTRACTOR_AfterRunUnit;
 #endif
 
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+  char * SWITCH_OFF_REMINDER_Title;
+  char * SWITCH_OFF_REMINDER_EnableDisableOption;
+  char * SWITCH_OFF_REMINDER_InactivityDelay;
+  char * SWITCH_OFF_REMINDER_ReminderPeriod;
+  char * SWITCH_OFF_REMINDER_TimeUnit;
+  char * SWITCH_OFF_REMINDER_BeepType;
+  char * SWITCH_OFF_REMINDER_BeepTypes[3];
+#endif
+
   char * IRON_Max_Temp;
   char * IRON_Min_Temp;
   char * IRON_User_Temp;
@@ -74,7 +84,7 @@ typedef struct{
 
   char * SYSTEM_Profile;
   char * SYSTEM_Oled_Offset;
-  char * SYSTEM_Oled_Contrast;
+  char * SYSTEM_Oled_Brightness;
   char * SYSTEM_Oled_Dim;
   char * SYSTEM_Oled_Dim_inSleep;
   char * SYSTEM_Boot;

@@ -33,15 +33,25 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_CALIBRATION = "CALIBRATION",
       .settings_EXIT = "EXIT",
 #ifdef ENABLE_ADDONS
-      .settings_ADDONS = "ADDONS",
+      .settings_ADDONS = "ADDONS/EXTRAS",
 #endif
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-      .FUME_EXTRACTOR_Title         = "Fume Ext. Ctl.",
+      .FUME_EXTRACTOR_Title         = "Fume ext. ctl.",
       .FUME_EXTRACTOR_Mode          = "Mode",
-      .FUME_EXTRACTOR_Modes         = { "Disabled", "Auto", "Alw. On" },
+      .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
       .FUME_EXTRACTOR_AfterRun      = "After Run",
       .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+      .SWITCH_OFF_REMINDER_Title               = "Sw off Reminder",
+      .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
+      .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
+      .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
+      .SWITCH_OFF_REMINDER_TimeUnit            = "m",
+      .SWITCH_OFF_REMINDER_BeepType            = "Beep len.",
+      .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
 #endif
 
       .IRON_Max_Temp = "Max temp",
@@ -72,7 +82,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "Reset limit",
 
       .SYSTEM_Profile = "Profile",
-      .SYSTEM_Oled_Contrast = "Contrast",
+      .SYSTEM_Oled_Brightness = "Brightness",
       .SYSTEM_Oled_Dim = "Dimmer",
       .SYSTEM_Oled_Dim_inSleep = " In sleep",
       .SYSTEM_Oled_Offset = "Offset",
@@ -187,15 +197,25 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_CALIBRATION = "КАЛИБРОВКА",
       .settings_EXIT = "ВЫХОД",
 #ifdef ENABLE_ADDONS
-      .settings_ADDONS = "ADDONS",
+      .settings_ADDONS = "ADDONS/EXTRAS",
 #endif
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-      .FUME_EXTRACTOR_Title         = "Fume Ext. Ctl.",
+      .FUME_EXTRACTOR_Title         = "Fume ext. ctl.",
       .FUME_EXTRACTOR_Mode          = "Mode",
-      .FUME_EXTRACTOR_Modes         = { "Disabled", "Auto", "Alw. On" },
+      .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
       .FUME_EXTRACTOR_AfterRun      = "After Run",
       .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+      .SWITCH_OFF_REMINDER_Title               = "Sw off reminder",
+      .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
+      .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
+      .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
+      .SWITCH_OFF_REMINDER_TimeUnit            = "m",
+      .SWITCH_OFF_REMINDER_BeepType            = "Beep len.",
+      .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
 #endif
 
       .IRON_Max_Temp = "Максимум",
@@ -226,7 +246,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "ПорогСброса",
 
       .SYSTEM_Profile = "Тип",
-      .SYSTEM_Oled_Contrast = "Яркость",
+      .SYSTEM_Oled_Brightness = "Яркость",
       .SYSTEM_Oled_Dim = "Затемнение",
       .SYSTEM_Oled_Dim_inSleep = " Реж.Экрана",
       .SYSTEM_Oled_Offset = "Сдвиг",
@@ -342,15 +362,25 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_CALIBRATION = "KALIBRERING",
       .settings_EXIT = "AVSLUTA",
 #ifdef ENABLE_ADDONS
-      .settings_ADDONS = "ADDONS",
+      .settings_ADDONS = "ADDONS/EXTRAS",
 #endif
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-      .FUME_EXTRACTOR_Title         = "Fume Ext. Ctl.",
+      .FUME_EXTRACTOR_Title         = "Fume ext. ctl.",
       .FUME_EXTRACTOR_Mode          = "Mode",
-      .FUME_EXTRACTOR_Modes         = { "Disabled", "Auto", "Alw. On" },
+      .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
       .FUME_EXTRACTOR_AfterRun      = "After Run",
       .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+      .SWITCH_OFF_REMINDER_Title               = "Sw off reminder",
+      .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
+      .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
+      .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
+      .SWITCH_OFF_REMINDER_TimeUnit            = "m",
+      .SWITCH_OFF_REMINDER_BeepType            = "Beep len.",
+      .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
 #endif
 
       .IRON_Max_Temp = "Max temp",
@@ -381,7 +411,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "Resetgräns",
 
       .SYSTEM_Profile = "Profil",
-      .SYSTEM_Oled_Contrast = "Kontrast",
+      .SYSTEM_Oled_Brightness = "Kontrast",
       .SYSTEM_Oled_Dim = "Dimmer",
       .SYSTEM_Oled_Dim_inSleep = " I sovläge",
       .SYSTEM_Oled_Offset = "Offset",
@@ -496,15 +526,25 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_CALIBRATION = "KALIBRIERUNG",
       .settings_EXIT = "ENDE",
 #ifdef ENABLE_ADDONS
-      .settings_ADDONS = "ADDONS",
+      .settings_ADDONS = "ADDONS/EXTRAS",
 #endif
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-      .FUME_EXTRACTOR_Title         = "Fume Ext. Ctl.",
+      .FUME_EXTRACTOR_Title         = "Fume ext. ctl.",
       .FUME_EXTRACTOR_Mode          = "Mode",
-      .FUME_EXTRACTOR_Modes         = { "Disabled", "Auto", "Alw. On" },
+      .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
       .FUME_EXTRACTOR_AfterRun      = "After Run",
       .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+      .SWITCH_OFF_REMINDER_Title               = "Sw off reminder",
+      .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
+      .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
+      .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
+      .SWITCH_OFF_REMINDER_TimeUnit            = "m",
+      .SWITCH_OFF_REMINDER_BeepType            = "Beep len.",
+      .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
 #endif
 
       .IRON_Max_Temp = "Max Temp",
@@ -535,7 +575,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "Limit Reset",
 
       .SYSTEM_Profile = "Profile",
-      .SYSTEM_Oled_Contrast = "Kontrast",
+      .SYSTEM_Oled_Brightness = "Kontrast",
       .SYSTEM_Oled_Dim = "Dimmer",
       .SYSTEM_Oled_Dim_inSleep = " In sleep",
       .SYSTEM_Oled_Offset = "Versatz",
@@ -650,15 +690,25 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_CALIBRATION = "KALİBRASYON",
       .settings_EXIT = "ÇIKIŞ",
 #ifdef ENABLE_ADDONS
-      .settings_ADDONS = "ADDONS",
+      .settings_ADDONS = "ADDONS/EXTRAS",
 #endif
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-      .FUME_EXTRACTOR_Title         = "Fume Ext. Ctl.",
+      .FUME_EXTRACTOR_Title         = "Fume ext. ctl.",
       .FUME_EXTRACTOR_Mode          = "Mode",
-      .FUME_EXTRACTOR_Modes         = { "Disabled", "Auto", "Alw. On" },
+      .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
       .FUME_EXTRACTOR_AfterRun      = "After Run",
       .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+      .SWITCH_OFF_REMINDER_Title               = "Sw off reminder",
+      .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
+      .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
+      .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
+      .SWITCH_OFF_REMINDER_TimeUnit            = "m",
+      .SWITCH_OFF_REMINDER_BeepType            = "Beep len.",
+      .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
 #endif
 
       .IRON_Max_Temp = "Max Isı",
@@ -689,7 +739,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "Sıfırlandı",
 
       .SYSTEM_Profile = "Profil",
-      .SYSTEM_Oled_Contrast = "kontrast",
+      .SYSTEM_Oled_Brightness = "kontrast",
       .SYSTEM_Oled_Dim = "Karartma",
       .SYSTEM_Oled_Dim_inSleep = " Uykuda",
       .SYSTEM_Oled_Offset = "Dengele",

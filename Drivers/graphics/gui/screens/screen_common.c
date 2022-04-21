@@ -14,7 +14,7 @@ tipData_t backupTip;
 struct{
   int8_t step;
   uint8_t min_reached;
-  uint32_t timer;  
+  uint32_t timer;
   uint32_t stepTimer;
 }dim;
 
@@ -115,15 +115,15 @@ uint8_t checkScreenTimer(uint32_t time){
   }
   return 0;
 }
-void restore_contrast(void){
-  if(getContrast() != systemSettings.settings.contrast){
-    setContrast(systemSettings.settings.contrast);
+void restore_brightness(void){
+  if(getBrightness() != systemSettings.settings.brightness){
+    setBrightness(systemSettings.settings.brightness);
   }
 }
 
 void wakeOledDim(void){
   dim.timer = current_time;
-  if(dim.step<=0 && getContrast()<systemSettings.settings.contrast ){
+  if(dim.step<=0 && getBrightness()<systemSettings.settings.brightness ){
     if(getOledPower()==disable){
       setOledPower(enable);
     }
@@ -133,7 +133,7 @@ void wakeOledDim(void){
 }
 
 void handleOledDim(void){
-  uint16_t contrast=getContrast();
+  uint16_t brightness=getBrightness();
   if(!getOledPower() && getCurrentMode()>mode_sleep){                   // If screen turned off and not in sleep mode, wake it.
     wakeOledDim();                                                   		// (Something woke the station from sleep)
   }
@@ -143,7 +143,7 @@ void handleOledDim(void){
       return;
     }
     // If idle timer expired, start decreasing brightness
-    if(contrast>5 && ((current_time-dim.timer)>systemSettings.settings.dim_Timeout)){
+    if(brightness>5 && ((current_time-dim.timer)>systemSettings.settings.dim_Timeout)){
       dim.step=-5;
     }
     // If min. brightness reached and Oled power is disabled in sleep mode, turn off screen if temp<100ºC or error active
@@ -155,16 +155,16 @@ void handleOledDim(void){
   // Smooth screen brightness dimming
   else if((current_time-dim.stepTimer)>19){
     dim.stepTimer = current_time;
-    contrast+=dim.step;
-    if(contrast>4 && contrast<systemSettings.settings.contrast){
-      setContrast(contrast);
+    brightness+=dim.step;
+    if(brightness>4 && brightness<systemSettings.settings.brightness){
+      setBrightness(brightness);
     }
     else{
       if(dim.step>0){
-        restore_contrast();
+        restore_brightness();
       }
       else{
-        setContrast(1);
+        setBrightness(1);
         dim.min_reached=1;
       }
       dim.timer = current_time;

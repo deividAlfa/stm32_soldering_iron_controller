@@ -124,6 +124,12 @@ typedef enum{
   fume_extractor_mode_auto      = 1,
   fume_extractor_mode_always_on = 2,
 #endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+  switch_off_reminder_short_beep  = 0,
+  switch_off_reminder_medium_beep = 1,
+  switch_off_reminder_long_beep   = 2,
+#endif
 }system_types;
 
 
@@ -192,7 +198,7 @@ __attribute__((aligned(4))) typedef struct{
 
 __attribute__((aligned(4))) typedef struct{
   uint8_t       language;
-  uint8_t       contrast;
+  uint8_t       brightness;
   uint8_t       OledOffset;
   uint8_t       dim_mode;
   uint8_t       dim_inSleep;
@@ -225,6 +231,12 @@ __attribute__((aligned(4))) typedef struct {
   uint8_t fumeExtractorMode;
   uint8_t fumeExtractorAfterrun; // amount of delay in 5 second increments
 #endif
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+  uint8_t swOffReminderEnabled;         // enabled, disabled
+  uint8_t swOffReminderInactivityDelay; // amount of minutes in sleep mode before start beeping,
+  uint8_t swOffReminderBeepType;        // beep type: short, medium, long
+  uint8_t swOffReminderPeriod;          // amount of minutes between reminders
+#endif
 }addonSettings_t;
 #endif
 
@@ -235,8 +247,8 @@ __attribute__((aligned(4))) typedef struct{
   uint32_t        ProfileChecksum;
 #ifdef ENABLE_ADDONS
   addonSettings_t addonSettings;
-#endif
   uint32_t        addonSettingsChecksum;
+#endif
   uint8_t         save_Flag;
   uint8_t         setupMode;
   uint8_t         isSaving;

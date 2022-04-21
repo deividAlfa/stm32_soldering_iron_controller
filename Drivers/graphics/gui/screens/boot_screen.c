@@ -219,7 +219,7 @@ void boot_screen_init(screen_t * scr){
   u8g2_SetDrawColor(&u8g2,WHITE);
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM[0], splashXBM[1], &splashXBM[2]);
   scr->refresh = screen_Erased;
-  setContrast(0);
+  setBrightness(0);
   wakeOledDim();
 }
 

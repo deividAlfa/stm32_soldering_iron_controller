@@ -37,7 +37,7 @@ void myTest(void){
   //#endif
 
   char str[16];
-  setContrast(255);
+  setBrightness(255);
   FillBuffer(BLACK, fill_dma);
   u8g2_SetFont(&u8g2,default_font );
   u8g2_SetDrawColor(&u8g2, WHITE);

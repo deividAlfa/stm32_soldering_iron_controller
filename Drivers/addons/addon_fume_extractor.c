@@ -17,20 +17,22 @@ void handleAddonFumeExtractor()
   static uint32_t lastActiveTime    = 0u;
   static bool     extractorRequired = false;
 
-  uint32_t currentTimeStamp  = HAL_GetTick();
-  uint8_t  currentMode       = getCurrentMode();
-
   switch (systemSettings.addonSettings.fumeExtractorMode)
   {
     case fume_extractor_mode_disabled:
     default:
+    {
       // addon disabled
       extractorRequired = false;
       HAL_GPIO_WritePin(EXTRACTOR_GPIO_Port, EXTRACTOR_Pin, GPIO_PIN_RESET);
       break;
+    }
 
     case fume_extractor_mode_auto:
-      if(currentMode >= mode_run)
+    {
+      uint32_t const currentTimeStamp = HAL_GetTick();
+
+      if(getCurrentMode() >= mode_run)
       {
         // if in a mode where extraction is required
         lastActiveTime = currentTimeStamp;
@@ -46,12 +48,15 @@ void handleAddonFumeExtractor()
 
       HAL_GPIO_WritePin(EXTRACTOR_GPIO_Port, EXTRACTOR_Pin, extractorRequired ? GPIO_PIN_SET : GPIO_PIN_RESET);
       break;
+    }
 
     case fume_extractor_mode_always_on:
+    {
       // extractor is always on
       extractorRequired = false; // set to false to override after run
       HAL_GPIO_WritePin(EXTRACTOR_GPIO_Port, EXTRACTOR_Pin, GPIO_PIN_SET);
       break;
+    }
   }
 
 }

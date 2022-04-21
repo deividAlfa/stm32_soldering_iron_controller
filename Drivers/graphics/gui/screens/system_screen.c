@@ -109,21 +109,21 @@ static void setGuiTempDenoise(uint32_t *val) {
   systemSettings.settings.guiTempDenoise = *val;
 }
 //=========================================================
-static void * getContrast_() {
-  temp = systemSettings.settings.contrast/25;
+static void * getBrightness_() {
+  temp = systemSettings.settings.brightness/25;
   return &temp;
 }
-static void setContrast_(uint32_t *val) {
+static void setBrightness_(uint32_t *val) {
   if(*val==0){
-    systemSettings.settings.contrast=5;
+    systemSettings.settings.brightness=5;
   }
   else if(*val==10){
-    systemSettings.settings.contrast=255;
+    systemSettings.settings.brightness=255;
   }
   else{
-    systemSettings.settings.contrast=*val*25;
+    systemSettings.settings.brightness=*val*25;
   }
-  setContrast(systemSettings.settings.contrast);
+  setBrightness(systemSettings.settings.brightness);
 }
 //=========================================================
 static void * getOledOffset() {
@@ -286,15 +286,15 @@ static void system_create(screen_t *scr){
   edit->options = profileStr;
   edit->numberOfOptions = ProfileSize;
 
-  //  [ Contrast Widget ]
+  //  [ Brightness Widget ]
   //
-  newComboEditable(w, strings[lang].SYSTEM_Oled_Contrast, &edit, NULL);
+  newComboEditable(w, strings[lang].SYSTEM_Oled_Brightness, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=3;
-  dis->getData = &getContrast_;
+  dis->getData = &getBrightness_;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setContrast_;
+  edit->setData = (void (*)(void *))&setBrightness_;
   edit->max_value = 10;
   edit->min_value = 0;
 
@@ -423,7 +423,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setTmpStep;
   edit->max_value = 50;
   edit->min_value = 1;
-  
+
   // [ Temp big step Widget ]
   //
   newComboEditable(w, strings[lang].SYSTEM__Big_Step, &edit, NULL);

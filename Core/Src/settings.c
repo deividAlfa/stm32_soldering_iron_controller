@@ -20,7 +20,7 @@
 
 const settings_t defaultSettings = {
   .version            = (~((uint32_t)SETTINGS_VERSION<<16)&0xFFFF0000) | SETTINGS_VERSION,  // Higher 16bit is 1s complement to make detection stronger against padding/endianness
-  .contrast           = 255,
+  .brightness           = 255,
   .dim_mode           = dim_sleep,
   .dim_Timeout        = 10000,                // ms
   .dim_inSleep        = enable,
@@ -48,12 +48,21 @@ const settings_t defaultSettings = {
 const addonSettings_t defaultAddonSettings = {
     .enabledAddons    = 0
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-                          + 0x1
+                          + 0b1
+#endif
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+                          + 0b10
 #endif
   ,
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-  .fumeExtractorMode     = enable,
+  .fumeExtractorMode     = fume_extractor_mode_auto,
   .fumeExtractorAfterrun = 2,
+#endif
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+  .swOffReminderEnabled          = disable,
+  .swOffReminderInactivityDelay  = 30,
+  .swOffReminderBeepType         = switch_off_reminder_short_beep,
+  .swOffReminderPeriod           = 5,
 #endif
 };
 #endif

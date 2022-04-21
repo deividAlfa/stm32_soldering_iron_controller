@@ -392,13 +392,13 @@ uint8_t getOledPower(void){
   return powerStatus;
 }
 
-void setContrast(uint8_t value) {
-  write_cmd(0x81);                                        // Set Contrast Control
+void setBrightness(uint8_t value) {
+  write_cmd(0x81);                                        // Set Brightness Control
   write_cmd(value);                                       // Default => 0xFF
   lastContrast = value;
 }
 
-uint8_t getContrast(void) {
+uint8_t getBrightness(void) {
   return lastContrast;
 }
 
@@ -495,7 +495,7 @@ void ssd1306_init(DMA_HandleTypeDef *dma){
   write_cmd(0xC0|0x08);     // Set COM Output Scan Direction
   write_cmd(0xDA);          // Set COM Pins Hardware Configuration
   write_cmd(0x02|0x10);     // Default => 0x12 (0x10)
-  setContrast(0xFF);        // Init in max contrast
+  setBrightness(0xFF);        // Init in max contrast
   write_cmd(0xD9);          // Set Pre-Charge Period
   write_cmd(0x44);          // 0x44 (4 Display Clocks [Phase 2] / 4 Display Clocks [Phase 1])
 
@@ -807,7 +807,7 @@ void Reset_onError(void){
 }
 
 void Oled_error_init(void){
-  setContrast(255);
+  setBrightness(255);
   FillBuffer(BLACK,fill_soft);
   u8g2_SetFont(&u8g2,default_font );
   u8g2_SetDrawColor(&u8g2, WHITE);

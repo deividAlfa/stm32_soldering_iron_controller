@@ -29,6 +29,9 @@
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
 #include "addon_fume_extractor_settings_screen.h"
 #endif
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+#include <addon_switch_off_reminder_settings_screen.h>
+#endif
 
 #include "oled.h"
 #include "gui.h"

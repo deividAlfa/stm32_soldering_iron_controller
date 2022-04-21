@@ -37,7 +37,9 @@
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
 #include "addon_fume_extractor.h"
 #endif
-
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+#include "addon_switch_off_reminder.h"
+#endif
 
 /* USER CODE END Includes */
 
@@ -119,7 +121,7 @@ void Init(void){
     ADC_Init(&ADC_DEVICE);
     buzzer_init();
     restoreSettings();
-    setContrast(systemSettings.settings.contrast);
+    setBrightness(systemSettings.settings.brightness);
     ironInit(&READ_TIMER, &PWM_TIMER,PWM_CHANNEL);
     RE_Init((RE_State_t *)&RE1_Data, ENC_L_GPIO_Port, ENC_L_Pin, ENC_R_GPIO_Port, ENC_R_Pin, ENC_SW_GPIO_Port, ENC_SW_Pin);
     oled_init(&RE_Get,&RE1_Data);
@@ -207,6 +209,9 @@ void Program_Handler(void) {
   RE_Process(&RE1_Data);                                              // Handle Encoder
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
   handleAddonFumeExtractor();
+#endif
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+  handleAddonSwitchOffReminder();
 #endif
   if(systemSettings.Profile.WakeInputMode!=mode_stand){
     readWake();
