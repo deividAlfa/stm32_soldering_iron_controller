@@ -115,7 +115,7 @@ void handleIron(void) {
     Iron.CurrentIronPower=0;
     return;
   }
-  
+
   // Controls inactivity timer and enters low power modes
   if(!Iron.calibrating){                                                                      // Don't check timeout when calibrating
     uint32_t mode_time = CurrentTime - Iron.CurrentModeTimer;
@@ -152,12 +152,7 @@ void handleIron(void) {
   #endif
 
   // Update PID
-  if(Iron.DebugMode==enable){                                                               // If in debug mode, use debug setpoint value
-    Iron.Pwm_Out = calculatePID(Iron.Debug_SetTemperature, TIP.last_avg, Iron.Pwm_Max);
-  }
-  else{                                                                                               // Else, use current setpoint value
-    Iron.Pwm_Out = calculatePID(human2adc(Iron.CurrentSetTemperature), TIP.last_avg, Iron.Pwm_Max);
-  }
+  Iron.Pwm_Out = calculatePID(human2adc(Iron.CurrentSetTemperature), TIP.last_avg, Iron.Pwm_Max);
 
   if(!Iron.Pwm_Out){
     Iron.CurrentIronPower = 0;
@@ -171,7 +166,7 @@ void handleIron(void) {
   else{                                                                                       // Iron.Pwm_Out should never be greater than Iron.Pwm_Max
     Error_Handler();
   }
-  
+
   if(Iron.updatePwm){                                                                         // If pending PWM period update, refresh timer
     Iron.updatePwm=0;
     __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer, Iron.Pwm_Period);
@@ -355,7 +350,7 @@ void runAwayCheck(void){
     Error_Handler();
   }
 
-  if(power && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==disable) && (last_TIP_C > setTemp)){
+  if(power && (Iron.RunawayStatus==runaway_ok) && (last_TIP_C > setTemp)){
 
     if(last_TIP_C>500){ Iron.RunawayLevel=runaway_500; }                                    // 500ºC limit
     else{
@@ -592,7 +587,7 @@ void checkIronError(void){
       Iron.Error.Flags &= (FLAG_ACTIVE | FLAG_SAFE_MODE | FLAG_NO_IRON );		    				// Clear other existing errors except safe mode
     }
     Iron.Error.Flags |= Err.Flags;                                                    	// Update Iron errors
-    
+
     Iron.LastErrorTime = CurrentTime;
     if(!Iron.Error.active){
       if(Err.Flags!=FLAG_NO_IRON){                                                      // Avoid alarm if only the tip is removed
@@ -653,25 +648,6 @@ void setSafeMode(bool mode){
 
 bool GetSafeMode() {
   return(Iron.Error.safeMode && Iron.Error.active);
-}
-
-void setDebugTemp(uint16_t value) {
-  __disable_irq();
-  Iron.Debug_SetTemperature = value;
-  __enable_irq();
-}
-
-uint16_t getDebugTemp(void){
-  return Iron.Debug_SetTemperature;
-}
-
-void setDebugMode(uint8_t value) {
-  __disable_irq();
-  Iron.DebugMode = value;
-  __enable_irq();
-}
-uint8_t getDebugMode(void){
-  return Iron.DebugMode;
 }
 
 void setCalibrationMode(uint8_t mode){
