@@ -17,7 +17,10 @@
 void handleAddonSwitchOffReminder()
 {
   static uint32_t lastActiveTime = 0u;
+  static uint32_t lastBeepTime   = 0u;
+
   uint32_t const currentTimeStamp = HAL_GetTick();
+  uint32_t const beepPeriodInMsec = systemSettings.addonSettings.swOffReminderPeriod * MSEC_IN_SEC;
 
   if((systemSettings.addonSettings.swOffReminderEnabled) &&
      (getCurrentMode() == mode_sleep))
@@ -28,11 +31,11 @@ void handleAddonSwitchOffReminder()
     if(elapsedSinceActive > swOffReminderInactivityDelayInMsec)
     {
       // station is in sleep mode longer than the configured time
-      uint32_t const elapsedSinceTimeout = elapsedSinceActive - swOffReminderInactivityDelayInMsec;
-      uint32_t const beepPeriodInMsec    = systemSettings.addonSettings.swOffReminderPeriod * MSEC_IN_SEC;
 
-      if((elapsedSinceTimeout % beepPeriodInMsec) == 0u)
+      if((lastBeepTime + beepPeriodInMsec) <= currentTimeStamp)
       {
+        lastBeepTime = currentTimeStamp;
+
         switch (systemSettings.addonSettings.swOffReminderBeepType) {
           case switch_off_reminder_short_beep:
           {
@@ -57,6 +60,7 @@ void handleAddonSwitchOffReminder()
   else
   {
     lastActiveTime = currentTimeStamp;
+    lastBeepTime   = currentTimeStamp - beepPeriodInMsec;
   }
 }
 
