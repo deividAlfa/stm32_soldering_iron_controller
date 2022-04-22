@@ -10,7 +10,7 @@
 #include "pid.h"
 #include "settings.h"
 
-#define PWM_DETECT_TIME   5                                    // Pulse before reading adc, to detect tip presence. In uS
+#define PWM_DETECT_TIME 5                                    // Pulse before reading adc, to detect tip presence. In uS
 
 typedef void (*setTemperatureReachedCallback)(uint16_t);
 
@@ -55,7 +55,7 @@ typedef struct {
   uint8_t            updatePwm;                            // Flag to indicate PWM need to be updated
   IronError_t        Error;                                // Error flags
   uint8_t            lastMode;                             // Last mode before error condition.
-  uint8_t            boot_complete;                        // Flag set to 1 when boot screen exits (Used for error handlding)
+  uint8_t            boot_complete;                        // Flag set to 1 when boot screen exits (Used for error handling)
 
   uint16_t           Pwm_Period;                           // PWM period
   uint16_t           Pwm_Max;                              // Max PWM output for power limit
@@ -81,6 +81,7 @@ bool IronWake(bool source);
 void resetIronError(void);
 void checkIronError(void);
 bool isIronInError(void);
+IronError_t getIronErrorFlags(void);
 void updatePowerLimit(void);
 void runAwayCheck(void);
 void setSafeMode(bool mode);

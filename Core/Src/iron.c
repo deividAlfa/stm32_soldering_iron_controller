@@ -734,3 +734,8 @@ TIM_HandleTypeDef* getIronPwmTimer(void)
 {
   return Iron.Pwm_Timer;
 }
+
+IronError_t getIronErrorFlags(void)
+{
+  return Iron.Error;
+}

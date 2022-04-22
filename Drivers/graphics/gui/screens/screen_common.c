@@ -24,7 +24,7 @@ plotData_t plot;
 
 // Plot graph data update and drawing timer
 void updatePlot(void){
-  if(Iron.Error.Flags & FLAG_ACTIVE){
+  if(getIronErrorFlags().active){
     return;
   }
 
@@ -147,7 +147,7 @@ void handleOledDim(void){
       dim.step=-5;
     }
     // If min. brightness reached and Oled power is disabled in sleep mode, turn off screen if temp<100ºC or error active
-    else if(dim.min_reached && getCurrentMode()==mode_sleep && systemSettings.settings.dim_inSleep==disable && (last_TIP_C<100 || (Iron.Error.Flags & FLAG_ACTIVE))){
+    else if(dim.min_reached && getCurrentMode()==mode_sleep && systemSettings.settings.dim_inSleep==disable && (last_TIP_C<100 || (getIronErrorFlags().active))){
       setOledPower(disable);
       dim.min_reached=0;
     }

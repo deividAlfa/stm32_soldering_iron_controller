@@ -263,7 +263,7 @@ void blockInput(uint16_t time){
 
 void updateScreenSaver(void){
 #ifdef SCREENSAVER
-  if(!screenSaver.enabled || Iron.CurrentMode!=mode_sleep || (Iron.Error.Flags & FLAG_ACTIVE)){
+  if(!screenSaver.enabled || getCurrentMode() !=mode_sleep || (getIronErrorFlags().active)){
     return;
   }
   if(current_time-screenSaver.timer>50){
@@ -332,15 +332,16 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   updatePlot();
   updateScreenSaver();
 
+  IronError_t const ironErrorFlags = getIronErrorFlags();
 
-  if(Iron.Error.Flags & FLAG_ACTIVE){
+  if(ironErrorFlags.active){
     if(mainScr.shakeActive){
       mainScr.shakeActive=3;
     }
-    if(mainScr.ironStatus!=status_error || mainScr.lastError!=Iron.Error.Flags){  // If error appeared or changed
+    if(mainScr.ironStatus!=status_error || mainScr.lastError != ironErrorFlags.Flags){  // If error appeared or changed
       wakeOledDim();                                                          		// Wake up screen
       mainScr.ironStatus = status_error;
-      mainScr.lastError=Iron.Error.Flags;
+      mainScr.lastError=ironErrorFlags.Flags;
     }
   }
   else if(mainScr.ironStatus != status_ok){                                   // If error is gone
@@ -701,7 +702,7 @@ static uint8_t  drawPlot(uint8_t refresh){
 #define PLOT_X  7
 #define PLOT_Y  12
 
-  plot.enabled &= !(Iron.Error.Flags & FLAG_ACTIVE);
+  plot.enabled &= !(getIronErrorFlags().active);
 
   if(!plot.enabled){ return 0; }
   if(refresh || plot.update){
@@ -756,8 +757,9 @@ static uint8_t  drawError(uint8_t refresh){
     return 0;
   }
 
+  IronError_t const ironErrorFlags = getIronErrorFlags();
 
-  if(Iron.Error.Flags==(FLAG_ACTIVE | FLAG_NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
+  if(ironErrorFlags.Flags == (FLAG_ACTIVE | FLAG_NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
 
     uint8_t xp = (OledWidth-iron[0]-x_mark[0]-5)/2;
     uint8_t update = 0;
@@ -788,7 +790,10 @@ static uint8_t  drawError(uint8_t refresh){
   else if(refresh){
     uint8_t Err_ypos;
 
-    uint8_t err = (uint8_t)Iron.Error.V_low+Iron.Error.safeMode+(Iron.Error.NTC_low|Iron.Error.NTC_high)+Iron.Error.noIron;
+    uint8_t err = (uint8_t)ironErrorFlags.V_low +
+                  (uint8_t)ironErrorFlags.safeMode +
+                  (uint8_t)(ironErrorFlags.NTC_low | ironErrorFlags.NTC_high) +
+                  ironErrorFlags.noIron;
     if(err<4){
       Err_ypos= 12+ ((40-(err*12))/2);
     }
@@ -796,23 +801,23 @@ static uint8_t  drawError(uint8_t refresh){
       Err_ypos=12;
     }
     u8g2_SetFont(&u8g2, u8g2_font_small);
-    if(Iron.Error.V_low){
+    if(ironErrorFlags.V_low){
       putStrAligned(strings[lang].main_error_VoltageLow, Err_ypos, align_center);
       Err_ypos+=12;
     }
-    if(Iron.Error.safeMode){
+    if(ironErrorFlags.safeMode){
       putStrAligned(strings[lang].main_error_failsafe, Err_ypos, align_center);
       Err_ypos+=12;
     }
-    if(Iron.Error.NTC_high){
+    if(ironErrorFlags.NTC_high){
       putStrAligned(strings[lang].main_error_NTC_high, Err_ypos, align_center);
       Err_ypos+=12;
     }
-    else if(Iron.Error.NTC_low){
+    else if(ironErrorFlags.NTC_low){
       putStrAligned(strings[lang].main_error_NTC_low, Err_ypos, align_center);
       Err_ypos+=12;
     }
-    if(Iron.Error.noIron){
+    if(ironErrorFlags.noIron){
       putStrAligned(strings[lang].main_error_noIron_Detected, Err_ypos, align_center);
       Err_ypos+=12;
     }
@@ -838,9 +843,14 @@ static void  drawMisc(uint8_t refresh){
 }
 
 static uint8_t main_screen_draw(screen_t *scr){
-  uint8_t refresh=0,ret=0;
   static uint32_t lastState = 0;
-  uint32_t currentState = (uint32_t)Iron.Error.Flags<<24 | (uint32_t)Iron.CurrentMode<<16 | mainScr.currentMode;    // Simple method to detect changes
+
+  uint8_t refresh= 0u;
+  uint8_t ret    = 0u;
+
+  IronError_t const ironErrorFlags = getIronErrorFlags();
+
+  uint32_t currentState = (uint32_t)ironErrorFlags.Flags<<24 | (uint32_t)Iron.CurrentMode<<16 | mainScr.currentMode;    // Simple method to detect changes
 
   if( lastState!=currentState || Widget_SetPoint->refresh || Widget_IronTemp->refresh || plot.update || screenSaver.update || scr->refresh==screen_Erase
       #ifdef USE_NTC
@@ -871,8 +881,8 @@ static uint8_t main_screen_draw(screen_t *scr){
   ret |= drawPlot(refresh);
   ret |= drawError(refresh);
   ret |= default_screenDraw(scr);
-  if((Iron.Error.Flags&FLAG_ACTIVE) && mainScr.ironStatus!=status_error){
-    return 0;                                                                                // If a new error appeared during the screen draw, skip oled update to avoid random artifacts
+  if(ironErrorFlags.active && mainScr.ironStatus!=status_error){
+    return 0u;                                                                                // If a new error appeared during the screen draw, skip oled update to avoid random artifacts
   }
   return (ret);
 }

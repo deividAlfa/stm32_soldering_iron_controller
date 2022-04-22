@@ -39,7 +39,8 @@ void detectNTC(void){
 int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
 #ifdef USE_NTC
 
-  uint8_t error = (Iron.Error.Flags&(FLAG_ACTIVE | FLAG_NO_IRON))==(FLAG_ACTIVE | FLAG_NO_IRON);
+  IronError_t const ironErrorFlags = getIronErrorFlags();
+  bool error = (ironErrorFlags.active && ironErrorFlags.noIron);
 
   if(new){
     do{                                                                                                 // Detection loop

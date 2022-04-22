@@ -152,7 +152,7 @@ void checkSettings(void){
   }
 
   // Auto save on content change
-  if( (systemSettings.setupMode==enable) || (Iron.calibrating==enable) || (systemSettings.settings.saveSettingsDelay==0) || (Iron.Error.safeMode==enable) || (CurrentTime-lastCheckTime<999)){
+  if( (systemSettings.setupMode==enable) || (Iron.calibrating==enable) || (systemSettings.settings.saveSettingsDelay==0) || (getIronErrorFlags().safeMode) || (CurrentTime-lastCheckTime<999)){
     return;
   }
 

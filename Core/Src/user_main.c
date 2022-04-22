@@ -160,7 +160,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
     if(ADC_Status==ADC_Idle){
       __HAL_TIM_SET_AUTORELOAD(ironReadTimer,systemSettings.Profile.readPeriod-(systemSettings.Profile.readDelay+1)); // load (period-delay) time
 
-      if(systemSettings.settings.activeDetection && !Iron.Error.safeMode){
+      if(systemSettings.settings.activeDetection && !getIronErrorFlags().safeMode){
         configurePWMpin(output_High);                                                   // Force PWM high for a few uS (typically 5-10uS)
         while(__HAL_TIM_GET_COUNTER(ironReadTimer)<(PWM_DETECT_TIME/5));
       }
