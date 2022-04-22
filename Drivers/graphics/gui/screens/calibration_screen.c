@@ -311,7 +311,7 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
     }
   }
 
-  if(GetIronError()){
+  if(isIronInError()){
     error=1;
     return last_scr;
   }
@@ -452,7 +452,7 @@ static void Cal_Settings_OnExit(screen_t *scr) {
 }
 
 static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
-  if(GetIronError()){
+  if(isIronInError()){
     error=1;
     return last_scr;
   }

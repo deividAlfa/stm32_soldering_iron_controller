@@ -446,7 +446,7 @@ void setNoIronValue(uint16_t noiron){
 
 // Change the iron operating mode in stand mode
 void setModefromStand(uint8_t mode){
-  if( GetIronError() ||
+  if( isIronInError() ||
       ((Iron.changeMode==mode) && (Iron.CurrentMode==mode)) ||
       ((Iron.CurrentMode==mode_sleep) && (mode==mode_standby)) ||
       ((Iron.CurrentMode==mode_boost) && (mode==mode_run)) ){
@@ -625,7 +625,7 @@ void checkIronError(void){
 }
 
 
-bool GetIronError(void){
+bool isIronInError(void){
   return Iron.Error.Flags;
 }
 
@@ -723,4 +723,14 @@ void addModeChangedCallback(currentModeChanged callback) {
   else{
     last = s;
   }
+}
+
+TIM_HandleTypeDef* getIronReadTimer(void)
+{
+  return Iron.Read_Timer;
+}
+
+TIM_HandleTypeDef* getIronPwmTimer(void)
+{
+  return Iron.Pwm_Timer;
 }

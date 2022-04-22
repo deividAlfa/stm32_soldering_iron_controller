@@ -224,21 +224,22 @@ void Program_Handler(void) {
  *  Timer working in load preload mode! The value loaded now is loaded on next event. That's why the values are reversed!
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
-  if(_htim == Iron.Read_Timer){
-    __HAL_TIM_CLEAR_FLAG(Iron.Read_Timer,TIM_FLAG_UPDATE);
+  TIM_HandleTypeDef* const ironReadTimer = getIronReadTimer();
+  if(_htim == ironReadTimer){
+    __HAL_TIM_CLEAR_FLAG(ironReadTimer,TIM_FLAG_UPDATE);
 
     if(ADC_Status==ADC_Idle){
-      __HAL_TIM_SET_AUTORELOAD(Iron.Read_Timer,systemSettings.Profile.readPeriod-(systemSettings.Profile.readDelay+1)); // load (period-delay) time
+      __HAL_TIM_SET_AUTORELOAD(ironReadTimer,systemSettings.Profile.readPeriod-(systemSettings.Profile.readDelay+1)); // load (period-delay) time
 
       if(systemSettings.settings.activeDetection && !Iron.Error.safeMode){
         configurePWMpin(output_High);                                                   // Force PWM high for a few uS (typically 5-10uS)
-        while(__HAL_TIM_GET_COUNTER(Iron.Read_Timer)<(PWM_DETECT_TIME/5));
+        while(__HAL_TIM_GET_COUNTER(ironReadTimer)<(PWM_DETECT_TIME/5));
       }
       configurePWMpin(output_Low);                                                      // Force PWM low
       ADC_Status = ADC_Waiting;
     }
     else if(ADC_Status==ADC_Waiting){
-      __HAL_TIM_SET_AUTORELOAD(Iron.Read_Timer,systemSettings.Profile.readDelay);       // Load Delay time
+      __HAL_TIM_SET_AUTORELOAD(ironReadTimer,systemSettings.Profile.readDelay);       // Load Delay time
       ADC_Start_DMA();
     }
   }
