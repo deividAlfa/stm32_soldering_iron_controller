@@ -88,7 +88,6 @@ void setModefromStand(uint8_t mode);
 void setUserTemperature(uint16_t temperature);
 uint16_t getUserTemperature(void);
 uint8_t getCurrentMode(void);
-uint16_t getCurrentTemperature();
 int8_t getCurrentPower();
 void initTimers(void);
 void setPwmMul(uint16_t mult);
@@ -111,12 +110,12 @@ void ironSchedulePwmUpdate(void);
 bool getBootCompleteFlag(void);
 void setBootCompleteFlag(void);
 uint32_t getIronPwmOutValue();
-void setIronTargetTemperature(uint16_t temperature);
 uint16_t getIronTargetTemperature(void);
 uint32_t getIronCurrentModeTimer(void);
 bool isIronTargetTempReached(void);
 bool getIronShakeFlag(void);
 void clearIronShakeFlag(void);
 uint32_t getIronLastShakeTime(void);
+uint16_t getUserSetTemperature();
 
 #endif /* IRON_H_ */

@@ -31,7 +31,7 @@ const settings_t defaultSettings = {
   .tempStep           = 5,                    // 5º steps
   .tempBigStep        = 20,                   // 20º big steps
   .activeDetection    = true,
-  .saveSettingsDelay  = 5,                    // 5s
+  .reserved           = 0,
   .lvp                = 110,                  // 11.0V Low voltage
   .currentProfile     = profile_None,
   .initMode           = mode_run,
@@ -70,20 +70,50 @@ const addonSettings_t defaultAddonSettings = {
 __attribute__((section(".settings"))) flashSettings_t flashSettings;
 systemSettings_t systemSettings;
 
-void saveSettings(uint8_t mode);
-void checksumError(uint8_t mode);
-void Flash_error(void);
-void Button_reset(void);
-void ErrCountDown(uint8_t Start,uint8_t xpos, uint8_t ypos);
-uint32_t ChecksumSettings(settings_t* settings);
-uint32_t ChecksumProfile(profile_t* profile);
-void resetSystemSettings(void);
-void resetCurrentProfile(void);
+static void saveSettings(uint8_t mode);
+static void checksumError(uint8_t mode);
+static void Flash_error(void);
+static void Button_reset(void);
+static void ErrCountDown(uint8_t Start,uint8_t xpos, uint8_t ypos);
+static uint32_t ChecksumSettings(settings_t* settings);
+static uint32_t ChecksumProfile(profile_t* profile);
+static void resetSystemSettings(void);
+static void resetCurrentProfile(void);
 
 #ifdef ENABLE_ADDONS
-void loadAddonSettings(void);
-void resetAddonSettings();
-uint32_t ChecksumAddons(addonSettings_t* addonSettings);
+static void loadAddonSettings(void);
+static void resetAddonSettings();
+static uint32_t ChecksumAddons(addonSettings_t* addonSettings);
+#endif
+
+#ifdef HAS_BATTERY
+
+#define BACKUP_RAM_SIZE_IN_BYTES 20u
+#define NUM_BACKUP_RAM_REGISTERS (BACKUP_RAM_SIZE_IN_BYTES / 2u) // each register holds 2 byte of data in the lower nibble
+
+typedef struct
+{
+  // max (BACKUP_RAM_SIZE_IN_BYTES - 4) byte of data in total
+  uint16_t lastTipTemp;
+} backupRamValues_t;
+
+typedef union
+{
+  __attribute__((aligned(4))) struct
+  {
+    backupRamValues_t values;
+    uint32_t crc;
+  };
+  uint8_t bytes[BACKUP_RAM_SIZE_IN_BYTES];
+} backupRamData_t;
+
+static void loadSettingsFromBackupRam(void);
+static uint32_t ChecksumBackupRam();
+static void readBackupRam();
+static void writeBackupRam();
+
+static backupRamData_t bkpRamData;
+
 #endif
 
 void checkSettings(void){
@@ -152,7 +182,7 @@ void checkSettings(void){
   }
 
   // Auto save on content change
-  if( (systemSettings.setupMode==enable) || (isIronInCalibrationMode()) || (systemSettings.settings.saveSettingsDelay==0) || (getIronErrorFlags().safeMode) || (CurrentTime-lastCheckTime<999)){
+  if( (systemSettings.setupMode==enable) || (isIronInCalibrationMode()) || (getIronErrorFlags().safeMode) || ((CurrentTime-lastCheckTime)<999)){
     return;
   }
 
@@ -178,18 +208,26 @@ void checkSettings(void){
 #endif
     ){
       // If different from the previous calculated checksum (settings are being changed quickly, don't save every time).
-      prevSysChecksum = newSysChecksum;                                                                                     // Store last computed checksum
+      prevSysChecksum = newSysChecksum;                       // Store last computed checksum
       prevTipChecksum = newProfileChecksum;
 #ifdef ENABLE_ADDONS
       prevAddonChecksum = newAddonChecksum;
 #endif
-      lastChangeTime = CurrentTime;                                                                                         // Reset timer (we don't save anything until we pass a certain time without changes)
+      lastChangeTime = CurrentTime;                           // Reset timer (we don't save anything until we pass a certain time without changes)
     }
 
-    else if( !noSave && (CurrentTime-lastChangeTime)>((uint32_t)systemSettings.settings.saveSettingsDelay*1000)){           // If different from the previous calculated checksum, and timer expired (No changes for enough time)
-      saveSettings(save_Settings);                                                                                          // Data was saved (so any pending interrupt knows this)
+    else if( !noSave && ((CurrentTime-lastChangeTime)>5000)){ // If different from the previous calculated checksum, and timer expired (No changes in the last 5 sec)
+      saveSettings(save_Settings);                            // Data was saved (so any pending interrupt knows this)
     }
   }
+
+  #ifdef HAS_BATTERY
+  if(!isIronInCalibrationMode() && scr_index != screen_debug) // don't persist the temperature while calibration is in progress or in the debug screen
+  {
+    bkpRamData.values.lastTipTemp = getUserSetTemperature();
+  }
+  writeBackupRam();
+  #endif
 }
 
 
@@ -201,7 +239,7 @@ void saveSettingsFromMenu(uint8_t mode){
   }
 }
 
-void saveSettings(uint8_t mode){
+static void saveSettings(uint8_t mode){
   #ifdef NOSAVESETTINGS
     return;
   #endif
@@ -366,22 +404,92 @@ void restoreSettings() {
 #ifdef ENABLE_ADDONS
   loadAddonSettings();
 #endif
+
+#ifdef HAS_BATTERY
+  loadSettingsFromBackupRam();
+#endif
 }
 
-uint32_t ChecksumSettings(settings_t* settings){
+#ifdef HAS_BATTERY
+
+void loadSettingsFromBackupRam(void)
+{
+  // assert on backup ram size
+  if(sizeof(backupRamValues_t) + sizeof(uint32_t) > BACKUP_RAM_SIZE_IN_BYTES)
+  {
+    Error_Handler(); // can't put this much data into the backup ram
+  }
+
+  readBackupRam();
+
+  // check crc
+  if(bkpRamData.crc != ChecksumBackupRam())
+  {
+    // restore defaults, show error
+    memset((void*)&bkpRamData,0, sizeof(backupRamData_t));
+    bkpRamData.values.lastTipTemp = systemSettings.Profile.UserSetTemperature;
+    writeBackupRam();
+
+    Oled_error_init();
+    putStrAligned("New/low batt?", 0, align_center);
+    putStrAligned("Forgot last", 16, align_center);
+    putStrAligned("used settings.", 32, align_center);
+    putStrAligned("Restored dflt.", 48, align_left);
+    update_display();
+    ErrCountDown(3,117,50);
+    NVIC_SystemReset();
+  }
+}
+
+void restoreLastSessionSettings(void)
+{
+  // TODO add setting to enable disable temp storage
+  // TODO add last used TIP
+  // TODO add setting to enable disable storing the last used tip, even in case no backup ram (reduce flash wear)
+  setUserTemperature(bkpRamData.values.lastTipTemp);
+}
+
+static void readBackupRam()
+{
+  for(uint8_t i = 0; i < NUM_BACKUP_RAM_REGISTERS; i++)
+  {
+    uint16_t const data = (uint16_t)*(&(BKP->DR1) + i);
+    bkpRamData.bytes[i*2  ] = data;
+    bkpRamData.bytes[i*2+1] = data >> 8u;
+  }
+}
+
+static void writeBackupRam()
+{
+  bkpRamData.crc = ChecksumBackupRam(bkpRamData);
+  for(uint8_t i = 0; i < NUM_BACKUP_RAM_REGISTERS; i++)
+  {
+    *(&(BKP->DR1) + i) = bkpRamData.bytes[i*2] + ((uint32_t)bkpRamData.bytes[i*2+1] << 8u);
+  }
+}
+
+static uint32_t ChecksumBackupRam(){
+  uint32_t checksum;
+  checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)bkpRamData.bytes, sizeof(backupRamValues_t)/sizeof(uint32_t) );
+  return checksum;
+}
+
+#endif
+
+static uint32_t ChecksumSettings(settings_t* settings){
   uint32_t checksum;
   checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)settings, sizeof(settings_t)/sizeof(uint32_t) );
   return checksum;
 }
 
-uint32_t ChecksumProfile(profile_t* profile){
+static uint32_t ChecksumProfile(profile_t* profile){
   uint32_t checksum;
   checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)profile, sizeof(profile_t)/sizeof(uint32_t));
   return checksum;
 }
 
 #ifdef ENABLE_ADDONS
-void loadAddonSettings(void)
+static void loadAddonSettings(void)
 {
   systemSettings.addonSettings = flashSettings.addonSettings;
   systemSettings.addonSettingsChecksum = ChecksumAddons(&(systemSettings.addonSettings));
@@ -392,7 +500,7 @@ void loadAddonSettings(void)
   }
 }
 
-void resetAddonSettings()
+static void resetAddonSettings()
 {
   __disable_irq();
   systemSettings.addonSettings = defaultAddonSettings;
@@ -400,21 +508,21 @@ void resetAddonSettings()
   __enable_irq();
 }
 
-uint32_t ChecksumAddons(addonSettings_t* addonSettings){
+static uint32_t ChecksumAddons(addonSettings_t* addonSettings){
   uint32_t checksum;
   checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)addonSettings, sizeof(addonSettings_t)/sizeof(uint32_t));
   return checksum;
 }
 #endif
 
-void resetSystemSettings(void) {
+static void resetSystemSettings(void) {
   __disable_irq();
   systemSettings.settings = defaultSettings;
   __enable_irq();
 }
 
 
-void resetCurrentProfile(void){
+static void resetCurrentProfile(void){
 #ifdef NOSAVESETTINGS
   systemSettings.settings.currentProfile=profile_T12; /// Force T12 when debugging. TODO this is not tested with the profiles update!
 #endif
@@ -580,14 +688,14 @@ void loadProfile(uint8_t profile){
   __enable_irq();
 }
 
-void Flash_error(void){
+static void Flash_error(void){
   __disable_irq();
   HAL_FLASH_Lock();
   __enable_irq();
   FatalError(error_FLASH);
 }
 
-void checksumError(uint8_t mode){
+static void checksumError(uint8_t mode){
   Oled_error_init();
   putStrAligned("BAD CHECKSUM!", 0, align_center);
   putStrAligned("RESTORING THE", 20, align_center);
@@ -625,7 +733,7 @@ void checksumError(uint8_t mode){
   NVIC_SystemReset();
 }
 
-void Button_reset(void){
+static void Button_reset(void){
   uint16_t ResetTimer= HAL_GetTick();
   if(!BUTTON_input()){
     Oled_error_init();
@@ -660,7 +768,7 @@ bool isCurrentProfileChanged(void)
 }
 
 //Max 99 seconds countdown.
-void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
+static void ErrCountDown(uint8_t Start,uint8_t  xpos, uint8_t ypos){
   uint32_t timErr = 0;
   char str[5];
   uint8_t length;

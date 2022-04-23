@@ -203,7 +203,7 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       dim_mode;
   uint8_t       dim_inSleep;
   uint8_t       currentProfile;
-  uint8_t       saveSettingsDelay;
+  uint8_t       reserved; // TODO
   uint8_t       initMode;
   uint8_t       tempUnit;
   uint8_t       tempStep;
@@ -277,5 +277,11 @@ void restoreSettings();
 void loadProfile(uint8_t profile);
 /** Checks if the current profile in RAM is changed */
 bool isCurrentProfileChanged(void);
+
+#ifdef HAS_BATTERY
+/** Restores settings from the backup ram used in the last session (eg last temp/tip).
+ *  Call this after all the modules  */
+void restoreLastSessionSettings(void);
+#endif
 
 #endif /* SETTINGS_H_ */

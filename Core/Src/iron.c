@@ -762,14 +762,14 @@ uint32_t getIronPwmOutValue()
   return Iron.Pwm_Out;
 }
 
-void setIronTargetTemperature(uint16_t temperature)
-{
-  Iron.TargetTemperature = temperature;
-}
-
 uint16_t getIronTargetTemperature(void)
 {
   return Iron.TargetTemperature;
+}
+
+uint16_t getUserSetTemperature()
+{
+  return Iron.UserSetTemperature;
 }
 
 uint32_t getIronCurrentModeTimer(void)
