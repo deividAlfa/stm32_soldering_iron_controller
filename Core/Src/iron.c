@@ -472,7 +472,15 @@ void setCurrentMode(uint8_t mode){
   CurrentTime=HAL_GetTick();                                                              // Update local time value just in case it's called by handleIron, to avoid drift
   Iron.CurrentModeTimer = CurrentTime;                                                    // Refresh current mode timer
   if(mode==mode_standby){
-    Iron.TargetTemperature = systemSettings.Profile.standbyTemperature;               // Set standby temp
+    if(Iron.UserSetTemperature < systemSettings.Profile.standbyTemperature)
+    {
+      // if the user set temp is smaller than the standby temp, don't heat up the iron in standby
+      Iron.TargetTemperature = Iron.UserSetTemperature;               // Set standby temp
+    }
+    else
+    {
+      Iron.TargetTemperature = systemSettings.Profile.standbyTemperature;               // Set standby temp
+    }
   }
   else if(mode==mode_boost){
     Iron.TargetTemperature = Iron.UserSetTemperature+systemSettings.Profile.boostTemperature;
