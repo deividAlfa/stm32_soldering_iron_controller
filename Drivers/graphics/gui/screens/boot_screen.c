@@ -187,7 +187,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
         if(!systemSettings.setupMode){                                                                // If not in setup mode
           ADC_Reset_measures();                                                                       // Reset the averages, show current values to avoid filtering delay at startup
           resetIronError();                                                                           // Force timeout of any error (This won't clear errors if still detected)
-          Iron.boot_complete=1;
+          setBootCompleteFlag();
           return screen_main;                                                                         // Go to main screen
         }
         widgetEnable(Widget_lang);                                                                    // In setup mode, enable widgets

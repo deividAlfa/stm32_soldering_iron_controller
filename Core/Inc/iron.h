@@ -55,12 +55,12 @@ typedef struct {
   uint8_t            updatePwm;                            // Flag to indicate PWM need to be updated
   IronError_t        Error;                                // Error flags
   uint8_t            lastMode;                             // Last mode before error condition.
-  uint8_t            boot_complete;                        // Flag set to 1 when boot screen exits (Used for error handling)
+  bool               boot_complete;                        // Flag set to 1 when boot screen exits (Used for error handling)
 
   uint16_t           Pwm_Period;                           // PWM period
   uint16_t           Pwm_Max;                              // Max PWM output for power limit
   int16_t            UserSetTemperature;                   // Run mode user setpoint
-  int16_t            CurrentSetTemperature;                // Actual set temperature (Setpoint)
+  int16_t            TargetTemperature;                    // Actual set (target) temperature (Setpoint)
 
   uint32_t           Pwm_Out;                              // Last calculated PWM value
   uint32_t           LastModeChangeTime;                   // Last time the mode was changed (To provide debouncing)
@@ -72,9 +72,6 @@ typedef struct {
   TIM_HandleTypeDef* Read_Timer;                          // Pointer to the Read timer
   TIM_HandleTypeDef* Pwm_Timer;                           // Pointer to the PWM timer
 }iron_t;
-
-
-extern volatile iron_t Iron;
 
 void readWake(void);
 bool IronWake(bool source);
@@ -105,10 +102,21 @@ void handleIron(void);
 void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32_t pwmchannel);
 uint8_t getIronOn();
 void setCalibrationMode(uint8_t mode);
-uint8_t getCalibrationMode(void);
+bool isIronInCalibrationMode(void);
 void configurePWMpin(uint8_t mode);
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim);
 TIM_HandleTypeDef* getIronReadTimer(void);
 TIM_HandleTypeDef* getIronPwmTimer(void);
+void ironSchedulePwmUpdate(void);
+bool getBootCompleteFlag(void);
+void setBootCompleteFlag(void);
+uint32_t getIronPwmOutValue();
+void setIronTargetTemperature(uint16_t temperature);
+uint16_t getIronTargetTemperature(void);
+uint32_t getIronCurrentModeTimer(void);
+bool isIronTargetTempReached(void);
+bool getIronShakeFlag(void);
+void clearIronShakeFlag(void);
+uint32_t getIronLastShakeTime(void);
 
 #endif /* IRON_H_ */

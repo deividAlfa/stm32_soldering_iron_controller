@@ -159,7 +159,7 @@ uint8_t checkMainScreenModeTimer(uint32_t time){
 
 // Checks elapsed time since the current iron mode was set
 uint8_t checkIronModeTimer(uint32_t time){
-  if((current_time-Iron.CurrentModeTimer)>time){
+  if((current_time-getIronCurrentModeTimer())>time){
     return 1;
   }
   return 0;
@@ -178,8 +178,10 @@ static void * main_screen_getIronTemp() {
   if(mainScr.updateReadings){
     mainScr.lastTip=readTipTemperatureCompensated(old_reading, read_average, systemSettings.settings.tempUnit);
     if(getCurrentMode()>mode_sleep){
-      if(Iron.temperatureReached && abs(mainScr.lastTip-Iron.CurrentSetTemperature)<systemSettings.settings.guiTempDenoise){                       // Lock numeric display if within limits
-        mainScr.lastTip = Iron.CurrentSetTemperature;
+      uint16_t const targetTemp = getIronTargetTemperature();
+      // Lock numeric display if within limits
+      if(isIronTargetTempReached() && abs(mainScr.lastTip-targetTemp)<systemSettings.settings.guiTempDenoise){
+        mainScr.lastTip = targetTemp;
       }
     }
   }
@@ -326,7 +328,8 @@ int8_t switchScreenMode(void){
 }
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
-  uint8_t current_mode = getCurrentMode();
+  uint8_t const currentIronMode = getCurrentMode();
+
   mainScr.updateReadings=update_GUI_Timer();
   updateIronPower();
   updatePlot();
@@ -363,32 +366,30 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     wakeOledDim();                                                          // But  wake up screen
   }
 
-  if(systemSettings.settings.dim_mode!=dim_always && current_mode>mode_standby){  // If dim not enabled in all modes
+  if(systemSettings.settings.dim_mode!=dim_always && currentIronMode>mode_standby){  // If dim not enabled in all modes
     wakeOledDim();																															// Refresh timeout if running
   }
 
   handleOledDim();
 
   // Handle shake wake icon drawing and timeout
-  if( !mainScr.shakeActive && Iron.shakeActive){
-    Iron.shakeActive=0;
+  if( !mainScr.shakeActive && getIronShakeFlag()){
+    clearIronShakeFlag();
     mainScr.shakeActive=1;
   }
-  else if(mainScr.shakeActive==2 && (current_time-Iron.lastShakeTime)>150){
+  else if((mainScr.shakeActive == 2) && ((current_time- getIronLastShakeTime()) > 150)){
     mainScr.shakeActive=3; // Clear
   }
 
-
   // Handle main screen
   switch(mainScr.currentMode){
-
-
     case main_irontemp:
 
       if(mainScr.ironStatus!=status_ok){                // When the screen goes to error state
         mainScr.setMode=main_error;                     // Set error screen
         break;
       }
+
       switch((uint8_t)input){
 
         case LongClick:
@@ -399,7 +400,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;
 
         case Rotate_Decrement_while_click:
-          if(Iron.CurrentMode>mode_standby){
+          if(currentIronMode > mode_standby){
             setCurrentMode(mode_standby);
           }
           else{
@@ -409,12 +410,12 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         case Rotate_Increment:
         case Rotate_Decrement:
-          if((Iron.CurrentMode!=mode_run && checkIronModeTimer(250)) || Iron.CurrentMode==mode_run){  // To avoid unwanted mode changing, ignore rotation if not in run mode and set <250ms ago
-            if(Iron.CurrentMode==mode_boost){
+          if((currentIronMode!=mode_run && checkIronModeTimer(250)) || currentIronMode==mode_run){  // To avoid unwanted mode changing, ignore rotation if not in run mode and set <250ms ago
+            if(currentIronMode==mode_boost){
               setCurrentMode(mode_run);
               break;
             }
-            else if(current_mode!=mode_run){
+            else if(currentIronMode!=mode_run){
               IronWake(wakeButton);
               if(getCurrentMode()==mode_run){                                 // If mode changed, don't process the click
                 break;
@@ -439,11 +440,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;
 
         case Click:
-          if(Iron.CurrentMode==mode_boost){
+          if(currentIronMode==mode_boost){
             setCurrentMode(mode_run);
             break;
           }
-          if(Iron.CurrentMode!=mode_run){
+          if(currentIronMode!=mode_run){
             IronWake(wakeButton);
             if(getCurrentMode()==mode_run){                                 // If mode changed, don't process the click
               break;
@@ -461,7 +462,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             if(checkMainScreenModeTimer(1000)){                             // If more than 1 second since last rotation, disable boost flag
               mainScr.boost_enable=0;
             }
-            if(mainScr.boost_enable && current_mode==mode_run){             // If boost flag enabled and iron running
+            if(mainScr.boost_enable && currentIronMode==mode_run){             // If boost flag enabled and iron running
               mainScr.boost_enable=0;                                       // Clear flag
               setCurrentMode(mode_boost);                                   // Set boost mode
             }
@@ -559,7 +560,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       switch((uint8_t)input){
         case LongClick:
         case Click:
-          if(mainScr.ironStatus != status_error && current_mode==mode_run && !checkMainScreenModeTimer(1000)){
+          if(mainScr.ironStatus != status_error && currentIronMode==mode_run && !checkMainScreenModeTimer(1000)){
             setCurrentMode(mode_boost);
           }
           mainScr.setMode=main_irontemp;
@@ -652,7 +653,7 @@ static void  drawMode(uint8_t refresh){
       else{
         c='F';
       }
-      sprintf(SetTemp,"%u\260%c", Iron.CurrentSetTemperature,c);
+      sprintf(SetTemp,"%u\260%c", getIronTargetTemperature(),c);
       u8g2_DrawUTF8(&u8g2, 43, 0, SetTemp);
       break;
     }
@@ -707,8 +708,8 @@ static uint8_t  drawPlot(uint8_t refresh){
   if(!plot.enabled){ return 0; }
   if(refresh || plot.update){
     int16_t ref;
-    if(Iron.CurrentMode!=mode_sleep){
-      ref=Iron.CurrentSetTemperature;
+    if(getCurrentMode() != mode_sleep){
+      ref=getIronTargetTemperature();
       if(systemSettings.settings.tempUnit==mode_Farenheit){
         ref = TempConversion(ref, mode_Celsius, 0);
       }
@@ -850,7 +851,7 @@ static uint8_t main_screen_draw(screen_t *scr){
 
   IronError_t const ironErrorFlags = getIronErrorFlags();
 
-  uint32_t currentState = (uint32_t)ironErrorFlags.Flags<<24 | (uint32_t)Iron.CurrentMode<<16 | mainScr.currentMode;    // Simple method to detect changes
+  uint32_t currentState = (uint32_t)ironErrorFlags.Flags<<24 | (uint32_t)getCurrentMode()<<16 | mainScr.currentMode;    // Simple method to detect changes
 
   if( lastState!=currentState || Widget_SetPoint->refresh || Widget_IronTemp->refresh || plot.update || screenSaver.update || scr->refresh==screen_Erase
       #ifdef USE_NTC
@@ -890,7 +891,7 @@ static uint8_t main_screen_draw(screen_t *scr){
 static void main_screen_init(screen_t *scr) {
   editable_widget_t *edit;
   default_init(scr);
-  Iron.shakeActive = 0;
+  clearIronShakeFlag();
   mainScr.shakeActive = 0;
   plot.timeStep = (systemSettings.Profile.readPeriod+1)/200;                                                         // Update at the same rate as the system pwm
 

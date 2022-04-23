@@ -146,7 +146,7 @@ static void * get_ERR() {
 static void * get_PWM() {
   static int32_t value;
   if(update){
-    value=Iron.Pwm_Out;
+    value=getIronPwmOutValue();
   }
   temp=value;
   return &temp;

@@ -152,7 +152,7 @@ void checkSettings(void){
   }
 
   // Auto save on content change
-  if( (systemSettings.setupMode==enable) || (Iron.calibrating==enable) || (systemSettings.settings.saveSettingsDelay==0) || (getIronErrorFlags().safeMode) || (CurrentTime-lastCheckTime<999)){
+  if( (systemSettings.setupMode==enable) || (isIronInCalibrationMode()) || (systemSettings.settings.saveSettingsDelay==0) || (getIronErrorFlags().safeMode) || (CurrentTime-lastCheckTime<999)){
     return;
   }
 
@@ -569,8 +569,7 @@ void loadProfile(uint8_t profile){
     setUserTemperature(systemSettings.Profile.UserSetTemperature);
     setCurrentTip(systemSettings.Profile.currentTip);
     TIP.filter=systemSettings.Profile.tipFilter;
-    Iron.updatePwm=1;
-
+    ironSchedulePwmUpdate();
   }
   else{
     Error_Handler();
