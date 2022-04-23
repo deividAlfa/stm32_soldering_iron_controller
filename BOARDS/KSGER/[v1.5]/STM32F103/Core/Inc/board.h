@@ -111,6 +111,8 @@
 //#define NOSAVESETTINGS                                      // Don't use flash to save or load settings. Always use defaults (for debugging purposes)
 //#define SWO_PRINT                                           // To enable printing through SWO
 
+// Define if the board has a battery. Adds "remember set temp" feature.
+//#define HAS_BATTERY
 
 #ifdef USE_NTC
 
