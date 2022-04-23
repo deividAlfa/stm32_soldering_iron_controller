@@ -254,7 +254,7 @@ void restoreSettings() {
   resetSystemSettings();                                              // TODO not tested with the new profile system
   systemSettings.settings.currentProfile = profile_T12;
   resetCurrentProfile();
-  setupPID(systemSettings.Profile.tip[0].PID;);
+  loadProfile(systemSettings.settings.currentProfile);
   __enable_irq();
   return;
 #endif
@@ -306,9 +306,6 @@ void resetSystemSettings(void) {
 
 
 void resetCurrentProfile(void){
-#ifdef NOSAVESETTINGS
-  systemSettings.settings.currentProfile=profile_T12; /// Force T12 when debugging. TODO this is not tested with the profiles update!
-#endif
     if(systemSettings.settings.currentProfile==profile_T12){
     systemSettings.Profile.ID = profile_T12;
     for(uint8_t x = 0; x < TipSize; x++) {
@@ -431,10 +428,14 @@ void loadProfile(uint8_t profile){
   __disable_irq();
   HAL_IWDG_Refresh(&hiwdg);
   systemSettings.settings.currentProfile=profile;
+
+#ifdef NOSAVESETTINGS
+  resetCurrentProfile();                                                        // Load default data
+#else
   if(profile==profile_None){                                                    // If profile not initialized yet, use T12 values until the system is configured
     systemSettings.settings.currentProfile=profile_T12;                         // Force T12 profile
     __disable_irq();
-    resetCurrentProfile();                                                      // Load data
+    resetCurrentProfile();                                                      // Load default data
     __enable_irq();
     systemSettings.settings.currentProfile=profile_None;                        // Revert to none to trigger setup screen
   }
@@ -449,26 +450,24 @@ void loadProfile(uint8_t profile){
       systemSettings.Profile = flashSettings.Profile[profile];
       systemSettings.ProfileChecksum = flashSettings.ProfileChecksum[profile];
     }
-
     // Calculate data checksum and compare with stored checksum, also ensure the stored ID is the same as the requested profile
     if( (profile!=systemSettings.Profile.ID) || (systemSettings.ProfileChecksum != ChecksumProfile(&systemSettings.Profile)) ){
       __enable_irq();
       checksumError(reset_Profile);
       __disable_irq();
     }
-    setSystemTempUnit(systemSettings.settings.tempUnit);                        // Ensure the profile uses the same temperature unit as the system
-    setUserTemperature(systemSettings.Profile.UserSetTemperature);
-    setCurrentTip(systemSettings.Profile.currentTip);
-    TIP.filter=systemSettings.Profile.tipFilter;
-    Iron.updatePwm=1;
-
+#endif
+#ifndef NOSAVESETTINGS
   }
   else{
     Error_Handler();
   }
-  if(systemSettings.settings.tempUnit != systemSettings.Profile.tempUnit){
-    setSystemTempUnit(systemSettings.settings.tempUnit);
-  }
+#endif
+  setSystemTempUnit(systemSettings.settings.tempUnit);                        // Ensure the profile uses the same temperature unit as the system
+  setUserTemperature(systemSettings.Profile.UserSetTemperature);
+  setCurrentTip(systemSettings.Profile.currentTip);
+  TIP.filter=systemSettings.Profile.tipFilter;
+  Iron.updatePwm=1;
   __enable_irq();
 }
 

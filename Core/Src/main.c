@@ -136,8 +136,9 @@ int main(void)
 
   #if defined DEBUG && !defined STM32F072xB
     DebugOpts();          // Enable debug options in Debug build
-    DWT->CTRL |= 1 ; // enable the counter
-    DWT->CYCCNT = 0; // reset the counter
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; // Enable DWT
+    DWT->CYCCNT = 0;                                // Clear counter
+    DWT->CTRL = DWT_CTRL_CYCCNTENA_Msk;             // Enable counter
     // Now CPU cycles can be read in DWT->CYCCNT;
   #endif
   /* USER CODE END 1 */

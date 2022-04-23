@@ -213,16 +213,15 @@ void ssd1306_init(DMA_HandleTypeDef *dma);
 #endif
 
 void fatalError(uint8_t type);
-void write_data(uint8_t* data, uint16_t count);
-void write_cmd(uint8_t cmd);
+void lcd_write(uint8_t* data, uint16_t count, uint8_t mode);
 void pset(uint8_t x, uint8_t y, bool c);
 void update_display(void);
 void display_dma_abort(void);
 void update_display_ErrorHandler(void);
+void setOledRow(uint8_t row);
 void setOledPower(uint8_t power);
 uint8_t getOledPower(void);
 void setContrast(uint8_t value);
-void setOledRow(uint8_t row);
 uint8_t getContrast(void);
 void fillBuffer(bool color, bool mode);
 void putStrAligned(char* str, uint8_t y, AlignType align);
@@ -256,6 +255,10 @@ void buttonReset(void);
 
 #if defined I2C_TRY_HW && !defined OLED_DEVICE
 #error "I2C_TRY_HW defined, but OLED_DEVICE is missing!"
+#endif
+
+#if defined OLED_I2C && defined ST7565
+#error "ST7565 cannot operate in I2C mode!"
 #endif
 
 #endif /* GRAPHICS_SSD1306_H_ */
