@@ -100,6 +100,12 @@ typedef struct{
   char * SYSTEM_Gui_Time;
   char * SYSTEM_DEBUG;
   char * SYSTEM_RESET_MENU;
+  char * SYSTEM_Remember;
+  char * SYSTEM_RememberLastProfile;
+  char * SYSTEM_RememberLastTip;
+#ifdef HAS_BATTERY
+  char * SYSTEM_RememberLastTemp;
+#endif
 
   char * NTC_Enable_NTC;
   char * NTC_Pull;
@@ -179,7 +185,7 @@ typedef struct{
 
 extern const strings_t strings[LANGUAGE_COUNT];
 extern char * tempUnit[2];
-extern char *profileStr[ProfileSize];
+extern char *profileStr[NUM_PROFILES];
 extern char *Langs[LANGUAGE_COUNT];
 
 #endif /* GRAPHICS_GUI_STRINGS_H_ */

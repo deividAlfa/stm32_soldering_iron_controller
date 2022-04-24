@@ -24,7 +24,7 @@ slide_t screenSaver = {
     .yAdd = 1,
 };
 
-static char *tipNames[TipSize];
+static char *tipNames[NUM_TIPS];
 enum mode{  main_none=0, main_irontemp, main_error, main_setpoint, main_tipselect };
 enum{ status_ok=0x20, status_error };
 enum { temp_numeric, temp_graph };
@@ -988,7 +988,7 @@ void main_screen_setup(screen_t *scr) {
   scr->processInput = &main_screenProcessInput;
   scr->create = &main_screen_create;
 
-  for(int x = 0; x < TipSize; x++) {
+  for(int x = 0; x < NUM_TIPS; x++) {
     tipNames[x] = systemSettings.Profile.tip[x].name;
   }
 }

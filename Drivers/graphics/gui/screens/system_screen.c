@@ -242,15 +242,41 @@ static void setShakeWakeMode(uint32_t *val) {
   systemSettings.settings.shakeWakeMode = *val;
 }
 //=========================================================
+static void * getRememberLastProfile() {
+  temp = systemSettings.settings.rememberLastProfile;
+  return &temp;
+}
+static void setRememberLastProfile(uint32_t *val) {
+  systemSettings.settings.rememberLastProfile = *val;
+}
+//=========================================================
+static void * getRememberLastTip() {
+  temp = systemSettings.settings.rememberLastTip;
+  return &temp;
+}
+static void setRememberLastTip(uint32_t *val) {
+  systemSettings.settings.rememberLastTip = *val;
+}
+//=========================================================
+#ifdef HAS_BATTERY
+static void * getRememberLastTemp() {
+  temp = systemSettings.settings.rememberLastTemp;
+  return &temp;
+}
+static void setRememberLastTemp(uint32_t *val) {
+  systemSettings.settings.rememberLastTemp = *val;
+}
+#endif
+//=========================================================
 static void system_onEnter(screen_t *scr){
   if(scr==&Screen_settings){
     comboResetIndex(Screen_system.current_widget);
-    profile=systemSettings.settings.currentProfile;
+    profile=systemSettings.currentProfile;
   }
 }
 
 static void system_onExit(screen_t *scr){
-  if(profile!=systemSettings.settings.currentProfile){
+  if(profile!=systemSettings.currentProfile){
     loadProfile(profile);
   }
 }
@@ -259,6 +285,7 @@ static void system_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
+  comboBox_item_t* combo;
 
   current_lang = lang;
 
@@ -284,7 +311,7 @@ static void system_create(screen_t *scr){
   edit->step = 1;
   edit->setData = (void (*)(void *))&setProfile;
   edit->options = profileStr;
-  edit->numberOfOptions = ProfileSize;
+  edit->numberOfOptions = NUM_PROFILES;
 
   //  [ Brightness Widget ]
   //
@@ -487,6 +514,43 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setGuiUpd_ms;
   edit->max_value = 250;
   edit->min_value = 20;
+
+  //  [ Remember text Widget ]
+  //
+  newComboScreen(w, strings[lang].SYSTEM_Remember, -1, &combo);
+  combo->dispAlign = align_left;
+
+  //  [ Remember last used profile Widget ]
+  //
+  newComboMultiOption(w, strings[lang].SYSTEM_RememberLastProfile, &edit, NULL);
+  edit->inputData.getData = &getRememberLastProfile;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (setterFn)&setRememberLastProfile;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
+
+  //  [ Remember last used tip Widget ]
+  //
+  newComboMultiOption(w, strings[lang].SYSTEM_RememberLastTip, &edit, NULL);
+  edit->inputData.getData = &getRememberLastTip;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (setterFn)&setRememberLastTip;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
+
+#ifdef HAS_BATTERY
+  //  [ Remember last temp tip Widget ]
+  //
+  newComboMultiOption(w, strings[lang].SYSTEM_RememberLastTemp, &edit, NULL);
+  edit->inputData.getData = &getRememberLastTemp;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (setterFn)&setRememberLastTemp;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
+#endif
 
 #ifdef ENABLE_DEBUG_SCREEN
   //  [ Debug enable Widget ]

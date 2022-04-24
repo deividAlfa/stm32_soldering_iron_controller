@@ -19,29 +19,32 @@
 #endif
 
 const settings_t defaultSettings = {
-  .version            = (~((uint32_t)SETTINGS_VERSION<<16)&0xFFFF0000) | SETTINGS_VERSION,  // Higher 16bit is 1s complement to make detection stronger against padding/endianness
-  .brightness           = 255,
-  .dim_mode           = dim_sleep,
-  .dim_Timeout        = 10000,                // ms
-  .dim_inSleep        = enable,
-  .OledOffset         = OLED_OFFSET,
-  .guiUpdateDelay     = 200,                  //ms
-  .guiTempDenoise     = 5,                    // ±5°C
-  .tempUnit           = mode_Celsius,
-  .tempStep           = 5,                    // 5º steps
-  .tempBigStep        = 20,                   // 20º big steps
-  .activeDetection    = true,
-  .reserved           = 0,
-  .lvp                = 110,                  // 11.0V Low voltage
-  .currentProfile     = profile_None,
-  .initMode           = mode_run,
-  .buzzerMode         = disable,
-  .buttonWakeMode     = wake_all,
-  .shakeWakeMode      = wake_all,
-  .EncoderMode        = RE_Mode_Forward,
-  .debugEnabled       = disable,
-  .language           = lang_english,
-  .state              = initialized,
+  .version             = (~((uint32_t)SETTINGS_VERSION<<16)&0xFFFF0000) | SETTINGS_VERSION,  // Higher 16bit is 1s complement to make detection stronger against padding/endianness
+  .brightness          = 255,
+  .dim_mode            = dim_sleep,
+  .dim_Timeout         = 10000,                // ms
+  .dim_inSleep         = enable,
+  .OledOffset          = OLED_OFFSET,
+  .guiUpdateDelay      = 200,                  //ms
+  .guiTempDenoise      = 5,                    // ±5°C
+  .tempUnit            = mode_Celsius,
+  .tempStep            = 5,                    // 5º steps
+  .tempBigStep         = 20,                   // 20º big steps
+  .activeDetection     = true,
+  .rememberLastProfile = true,
+  .rememberLastTemp    = false,
+  .rememberLastTip     = true,
+  .reserved            = 0,
+  .lvp                 = 110,                  // 11.0V Low voltage
+  .bootProfile         = profile_None,
+  .initMode            = mode_run,
+  .buzzerMode          = disable,
+  .buttonWakeMode      = wake_all,
+  .shakeWakeMode       = wake_all,
+  .EncoderMode         = RE_Mode_Forward,
+  .debugEnabled        = disable,
+  .language            = lang_english,
+  .state               = initialized,
 };
 
 #ifdef ENABLE_ADDONS
@@ -94,7 +97,9 @@ static uint32_t ChecksumAddons(addonSettings_t* addonSettings);
 typedef struct
 {
   // max (BACKUP_RAM_SIZE_IN_BYTES - 4) byte of data in total
-  uint16_t lastTipTemp;
+  uint16_t lastTipTemp[NUM_PROFILES];
+  uint8_t  lastSelTip[NUM_PROFILES];
+  uint8_t  lastProfile;
 } backupRamValues_t;
 
 typedef union
@@ -149,7 +154,7 @@ void checkSettings(void){
         saveSettings(keepProfiles);
         break;
       case reset_Profiles:
-        systemSettings.settings.currentProfile=profile_None;
+        systemSettings.currentProfile=profile_None;
         saveSettings(wipeProfiles);
         break;
       case reset_Profile:
@@ -160,9 +165,9 @@ void checkSettings(void){
         break;
       case reset_Settings:
       {
-        uint8_t currentProfile=systemSettings.settings.currentProfile;
+        uint8_t currentProfile=systemSettings.currentProfile;
         resetSystemSettings();
-        systemSettings.settings.currentProfile=currentProfile;
+        systemSettings.currentProfile=currentProfile;
         saveSettings(keepProfiles);
         break;
       }
@@ -222,9 +227,11 @@ void checkSettings(void){
   }
 
   #ifdef HAS_BATTERY
+  // TODO
+  bkpRamData.values.lastProfile = systemSettings.currentProfile;
   if(!isIronInCalibrationMode() && scr_index != screen_debug) // don't persist the temperature while calibration is in progress or in the debug screen
   {
-    bkpRamData.values.lastTipTemp = getUserSetTemperature();
+    bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserSetTemperature();
   }
   writeBackupRam();
   #endif
@@ -246,7 +253,7 @@ static void saveSettings(uint8_t mode){
 
   uint32_t error=0;
   uint32_t *dest = (uint32_t*)&flashSettings;
-  uint8_t profile = systemSettings.settings.currentProfile;
+  uint8_t profile = systemSettings.currentProfile;
   flashSettings_t *flashBuffer=_malloc(sizeof(flashSettings_t));
   uint32_t *src = &*(uint32_t*)flashBuffer;
 
@@ -264,18 +271,25 @@ static void saveSettings(uint8_t mode){
     Error_Handler();
   }
 
+#ifndef HAS_BATTERY
+  if(systemSettings.settings.rememberLastProfile)
+  {
+    systemSettings.settings.bootProfile = systemSettings.currentProfile;
+  }
+#endif
+
   systemSettings.settingsChecksum = ChecksumSettings(&systemSettings.settings);
   flashBuffer->settingsChecksum = systemSettings.settingsChecksum;
   flashBuffer->settings = systemSettings.settings;
 
-  if((mode==keepProfiles) && (systemSettings.settings.currentProfile<=profile_C210) && (systemSettings.Profile.ID == profile )){
+  if((mode==keepProfiles) && (profile<=profile_C210) && (systemSettings.Profile.ID == profile )){
     systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
     flashBuffer->ProfileChecksum[profile] = systemSettings.ProfileChecksum;
     flashBuffer->Profile[profile] = systemSettings.Profile;
   }
   else{
     mode = wipeProfiles;
-    for(uint8_t x=0;x<ProfileSize;x++){
+    for(uint8_t x=0;x<NUM_PROFILES;x++){
       flashBuffer->Profile[x].state = 0xFF;
       flashBuffer->ProfileChecksum[x] = 0xFFFFFFFF;
       memset(&flashBuffer->Profile[x],0xFF,sizeof(profile_t));
@@ -335,7 +349,7 @@ static void saveSettings(uint8_t mode){
     uint32_t ProfileFlash  = ChecksumProfile(&flashSettings.Profile[profile]);
     uint32_t ProfileRam    = ChecksumProfile(&systemSettings.Profile);
 
-    if((ProfileFlash != ProfileRam) ||  (flashSettings.settings.currentProfile != profile)){
+    if(ProfileFlash != ProfileRam){
       Flash_error();
     }
   }
@@ -399,7 +413,7 @@ void restoreSettings() {
     checksumError(reset_All);
   }
 
-  loadProfile(systemSettings.settings.currentProfile);
+  loadProfile(systemSettings.settings.bootProfile); // assume the boot profile
 
 #ifdef ENABLE_ADDONS
   loadAddonSettings();
@@ -407,6 +421,10 @@ void restoreSettings() {
 
 #ifdef HAS_BATTERY
   loadSettingsFromBackupRam();
+  if(systemSettings.settings.rememberLastProfile)
+  {
+    loadProfile(bkpRamData.values.lastProfile);
+  }
 #endif
 }
 
@@ -427,7 +445,16 @@ void loadSettingsFromBackupRam(void)
   {
     // restore defaults, show error
     memset((void*)&bkpRamData,0, sizeof(backupRamData_t));
-    bkpRamData.values.lastTipTemp = systemSettings.Profile.UserSetTemperature;
+    for(uint8_t i = 0; i < NUM_PROFILES; i++)
+    {
+      bkpRamData.values.lastTipTemp[i] = flashSettings.Profile[i].UserSetTemperature;
+      if(bkpRamData.values.lastTipTemp[i] == UINT16_MAX) // just a sanity check to handle uninitialized data
+      {
+        bkpRamData.values.lastTipTemp[i] = 0u;
+      }
+      bkpRamData.values.lastSelTip[i] = 0u;
+    }
+    bkpRamData.values.lastProfile = 0u;
     writeBackupRam();
 
     Oled_error_init();
@@ -443,10 +470,14 @@ void loadSettingsFromBackupRam(void)
 
 void restoreLastSessionSettings(void)
 {
-  // TODO add setting to enable disable temp storage
-  // TODO add last used TIP
-  // TODO add setting to enable disable storing the last used tip, even in case no backup ram (reduce flash wear)
-  setUserTemperature(bkpRamData.values.lastTipTemp);
+  if(systemSettings.settings.rememberLastTemp)
+  {
+    setUserTemperature(bkpRamData.values.lastTipTemp[systemSettings.currentProfile]);
+  }
+  if(systemSettings.settings.rememberLastTip)
+  {
+    // TODO
+  }
 }
 
 static void readBackupRam()
@@ -526,9 +557,9 @@ static void resetCurrentProfile(void){
 #ifdef NOSAVESETTINGS
   systemSettings.settings.currentProfile=profile_T12; /// Force T12 when debugging. TODO this is not tested with the profiles update!
 #endif
-    if(systemSettings.settings.currentProfile==profile_T12){
+    if(systemSettings.currentProfile==profile_T12){
     systemSettings.Profile.ID = profile_T12;
-    for(uint8_t x = 0; x < TipSize; x++) {
+    for(uint8_t x = 0; x < NUM_TIPS; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = T12_Cal250;
       systemSettings.Profile.tip[x].calADC_At_400   = T12_Cal400;     // These values are way lower, but better to be safe than sorry
       systemSettings.Profile.tip[x].PID.Kp          = 7500;           // val = /1.000.000
@@ -548,9 +579,9 @@ static void resetCurrentProfile(void){
     systemSettings.Profile.Cal400_default           = T12_Cal400;
   }
 
-  else if(systemSettings.settings.currentProfile==profile_C245){
+  else if(systemSettings.currentProfile==profile_C245){
     systemSettings.Profile.ID = profile_C245;
-    for(uint8_t x = 0; x < TipSize; x++) {
+    for(uint8_t x = 0; x < NUM_TIPS; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = C245_Cal250;
       systemSettings.Profile.tip[x].calADC_At_400   = C245_Cal400;
       systemSettings.Profile.tip[x].PID.Kp          = 1800;
@@ -570,9 +601,9 @@ static void resetCurrentProfile(void){
     systemSettings.Profile.Cal400_default           = C245_Cal400;
   }
 
-  else if(systemSettings.settings.currentProfile==profile_C210){
+  else if(systemSettings.currentProfile==profile_C210){
     systemSettings.Profile.ID = profile_C210;
-    for(uint8_t x = 0; x < TipSize; x++) {
+    for(uint8_t x = 0; x < NUM_TIPS; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = C210_Cal250;
       systemSettings.Profile.tip[x].calADC_At_400   = C210_Cal400;
       systemSettings.Profile.tip[x].PID.Kp          = 1800;
@@ -647,13 +678,13 @@ void loadProfile(uint8_t profile){
   while(ADC_Status!=ADC_Idle);
   __disable_irq();
   HAL_IWDG_Refresh(&hiwdg);
-  systemSettings.settings.currentProfile=profile;
+  systemSettings.currentProfile=profile;
   if(profile==profile_None){                                                    // If profile not initialized yet, use T12 values until the system is configured
-    systemSettings.settings.currentProfile=profile_T12;                         // Force T12 profile
+    systemSettings.currentProfile=profile_T12;                         // Force T12 profile
     __disable_irq();
     resetCurrentProfile();                                                      // Load data
     __enable_irq();
-    systemSettings.settings.currentProfile=profile_None;                        // Revert to none to trigger setup screen
+    systemSettings.currentProfile=profile_None;                        // Revert to none to trigger setup screen
   }
   else if(profile<=profile_C210){                                               // If valid profile
     if(flashSettings.Profile[profile].state!=initialized){                      // If flash profile not initialized

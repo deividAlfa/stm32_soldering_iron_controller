@@ -15,8 +15,8 @@
 #define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
 #define SETTINGS_VERSION  16                                        // Change this if you change the settings/profile struct to prevent getting out of sync
 #define LANGUAGE_COUNT    5                                         // Number of languages
-#define ProfileSize       3                                         // Number of profiles
-#define TipSize           20                                        // Number of tips for each profile
+#define NUM_PROFILES      3                                         // Number of profiles
+#define NUM_TIPS          20                                        // Number of tips for each profile
 #define TipCharSize       5                                         // String size for each tip name (Including null termination)
 #define _BLANK_TIP        "    "                                    // Empty tip name, 4 spaces. Defined here for quick updating if TipCharSize is modified.
 
@@ -189,7 +189,7 @@ __attribute__((aligned(4))) typedef struct{
   uint16_t      calADC_At_0;
   uint16_t      Cal250_default;
   uint16_t      Cal400_default;
-  tipData_t     tip[TipSize];
+  tipData_t     tip[NUM_TIPS];
   uint32_t      errorTimeout;
   uint32_t      boostTimeout;
   uint32_t      sleepTimeout;
@@ -202,8 +202,13 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       OledOffset;
   uint8_t       dim_mode;
   uint8_t       dim_inSleep;
-  uint8_t       currentProfile;
-  uint8_t       reserved; // TODO
+  uint8_t       bootProfile;
+  __attribute__((packed)) struct {
+    uint8_t rememberLastProfile : 1;
+    uint8_t rememberLastTemp    : 1;
+    uint8_t rememberLastTip     : 1;
+    uint8_t reserved            : 5;
+  };
   uint8_t       initMode;
   uint8_t       tempUnit;
   uint8_t       tempStep;
@@ -252,11 +257,12 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t         save_Flag;
   uint8_t         setupMode;
   uint8_t         isSaving;
+  uint8_t         currentProfile;
 }systemSettings_t;
 
 __attribute__((aligned(4))) typedef struct{
-  profile_t       Profile[ProfileSize];
-  uint32_t        ProfileChecksum[ProfileSize];
+  profile_t       Profile[NUM_PROFILES];
+  uint32_t        ProfileChecksum[NUM_PROFILES];
   settings_t      settings;
   uint32_t        settingsChecksum;
 #ifdef ENABLE_ADDONS
@@ -283,5 +289,8 @@ bool isCurrentProfileChanged(void);
  *  Call this after all the modules  */
 void restoreLastSessionSettings(void);
 #endif
+
+uint8_t getCurrentProfileIdx(void);
+void    setCurrentProfileIdx(uint8_t idx);
 
 #endif /* SETTINGS_H_ */

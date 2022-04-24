@@ -99,6 +99,12 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Gui time",
       .SYSTEM_DEBUG = "DEBUG",
       .SYSTEM_RESET_MENU = "RESET MENU",
+      .SYSTEM_Remember = "Remember last",
+      .SYSTEM_RememberLastProfile = " Profile",
+      .SYSTEM_RememberLastTip = " Sel. tip",
+#ifdef HAS_BATTERY
+      .SYSTEM_RememberLastTemp = " Set temp",
+#endif
 
       .NTC_Enable_NTC = "Enable NTC",
       .NTC_Pull = "Pull",
@@ -263,6 +269,11 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Отрисовка",
       .SYSTEM_DEBUG = "Отладка",
       .SYSTEM_RESET_MENU = "МЕНЮ СБРОСА",
+      .SYSTEM_RememberLastProfile = "Rem Profile",
+      .SYSTEM_RememberLastTip = "Rem Tip",
+#ifdef HAS_BATTERY
+      .SYSTEM_RememberLastTemp = "Rem Temp",
+#endif
 
       .NTC_Enable_NTC = "Внешний NTC",
       .NTC_Pull = "Подтяжка",
@@ -428,6 +439,11 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Gui-tid",
       .SYSTEM_DEBUG = "DEBUG",
       .SYSTEM_RESET_MENU = "ÅTERST. MENY",
+      .SYSTEM_RememberLastProfile = "Rem Profile",
+      .SYSTEM_RememberLastTip = "Rem Tip",
+#ifdef HAS_BATTERY
+      .SYSTEM_RememberLastTemp = "Rem Temp",
+#endif
 
       .NTC_Enable_NTC = "Aktivera NTC",
       .NTC_Pull = "Pull",
@@ -592,6 +608,11 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Gui Zeit",
       .SYSTEM_DEBUG = "DEBUG",
       .SYSTEM_RESET_MENU = "RESET MENÜ",
+      .SYSTEM_RememberLastProfile = "Rem Profile",
+      .SYSTEM_RememberLastTip = "Rem Tip",
+#ifdef HAS_BATTERY
+      .SYSTEM_RememberLastTemp = "Rem Temp",
+#endif
 
       .NTC_Enable_NTC = "NTC Anschalt",
       .NTC_Pull = "Pull",
@@ -756,6 +777,11 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Gui zamanı",
       .SYSTEM_DEBUG = "Geliştirici",
       .SYSTEM_RESET_MENU = "MENÜ SIFIRLA",
+      .SYSTEM_RememberLastProfile = "Rem Profile",
+      .SYSTEM_RememberLastTip = "Rem Tip",
+#ifdef HAS_BATTERY
+      .SYSTEM_RememberLastTemp = "Rem Temp",
+#endif
 
       .NTC_Enable_NTC = "NTC Etkin",
       .NTC_Pull = "Çek",
@@ -834,7 +860,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
 
 char * tempUnit[2] =    { "\260C", "\260F" };
-char * profileStr[ProfileSize] = { "T12", "C245", "C210" };
+char * profileStr[NUM_PROFILES] = { "T12", "C245", "C210" };
 char * Langs[LANGUAGE_COUNT] = {
                                    [lang_english] = "EN",
                                    [lang_russian] = "RU",

@@ -146,7 +146,7 @@ static int tip_delete(widget_t *w, RE_Rotation_t input) {
   }
   __enable_irq();
 
-  for(uint8_t x = systemSettings.Profile.currentNumberOfTips; x < TipSize;x++) {                                // Fill the unused tips with blank names
+  for(uint8_t x = systemSettings.Profile.currentNumberOfTips; x < NUM_TIPS;x++) {                                // Fill the unused tips with blank names
     strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
   }
                                                                                                                 // Skip tip settings (As tip is now deleted)
@@ -225,7 +225,7 @@ static void tip_settings_onEnter(screen_t *scr){
   else{
     backupTip = systemSettings.Profile.tip[Selected_Tip];                                                       // Copy selected tip
     comboitem_tip_settings_delete->enabled = (systemSettings.Profile.currentNumberOfTips>1);                    // If more than 1 tip in the system, enable delete
-    comboitem_tip_settings_copy->enabled = (systemSettings.Profile.currentNumberOfTips<TipSize);                // If tip slots available, enable copy button
+    comboitem_tip_settings_copy->enabled = (systemSettings.Profile.currentNumberOfTips<NUM_TIPS);                // If tip slots available, enable copy button
   }
 }
 

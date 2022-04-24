@@ -210,7 +210,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 
 void boot_screen_init(screen_t * scr){
   default_init(scr);
-  profile=systemSettings.settings.currentProfile;
+  profile=systemSettings.currentProfile;
   if( (systemSettings.settings.state!=initialized) || (profile>profile_C210) ){
     profile=profile_T12;
     setSafeMode(enable);
@@ -248,7 +248,7 @@ void boot_screen_create(screen_t *scr){
   edit->selectable.tab = 0;
   edit->setData = (void (*)(void *))&setProfile;
   edit->options = profileStr;
-  edit->numberOfOptions = ProfileSize;
+  edit->numberOfOptions = NUM_PROFILES;
   w->posX = 74;
   w->posY = 16;
   w->width = 44;
