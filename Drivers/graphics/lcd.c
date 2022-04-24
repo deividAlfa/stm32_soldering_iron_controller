@@ -340,10 +340,8 @@ uint8_t getOledPower(void){
 }
 
 void setContrast(uint8_t value) {
-#ifndef  ST7565                                          // TODO disable ST7565 for now
   uint8_t cmd [] = { 0x81, value };
   lcd_write(cmd, sizeof(cmd), modeCmd);
-#endif
   lastContrast = value;
 }
 

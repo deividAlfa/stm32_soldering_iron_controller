@@ -12,10 +12,10 @@
 screen_t Screen_system;
 screen_t Screen_system_ntc;
 
-
+#ifndef ST7565
 static comboBox_item_t *comboitem_system_Dim_Timeout;
 static comboBox_item_t *comboitem_system_Dim_PowerOff;
-
+#endif
 static comboBox_item_t *comboitem_system_ButtonWakeMode;
 static comboBox_item_t *comboitem_system_ShakeWakeMode;
 static comboBox_item_t *comboitem_system_BootMode;
@@ -26,14 +26,15 @@ static editable_widget_t *editable_system_bigTempStep;
 static editable_widget_t *editable_system_GuiTempDenoise;
 
 void update_System_menu(void){
-  bool mode = (systemSettings.settings.dim_mode>dim_off);
-  comboitem_system_Dim_PowerOff->enabled = mode;
-  comboitem_system_Dim_Timeout->enabled = mode;
-
-  mode = (systemSettings.Profile.WakeInputMode==mode_shake);
+  bool mode = (systemSettings.Profile.WakeInputMode==mode_shake);
   comboitem_system_BootMode->enabled        = mode;
   comboitem_system_ShakeWakeMode->enabled   = mode;
   comboitem_system_ButtonWakeMode->enabled  = mode;
+#ifndef ST7565
+  mode = (systemSettings.settings.dim_mode>dim_off);
+  comboitem_system_Dim_PowerOff->enabled = mode;
+  comboitem_system_Dim_Timeout->enabled = mode;
+#endif
 }
 
 void updateTemperatureUnit(void){
