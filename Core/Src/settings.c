@@ -20,7 +20,11 @@
 
 const settings_t defaultSettings = {
   .version            = (~((uint32_t)SETTINGS_VERSION<<16)&0xFFFF0000) | SETTINGS_VERSION,  // Higher 16bit is 1s complement to make detection stronger against padding/endianness
+#ifdef ST7565
+  .contrast           = 0x16,
+#else
   .contrast           = 255,
+#endif
   .dim_mode           = dim_sleep,
   .dim_Timeout        = 10000,                // ms
   .dim_inSleep        = enable,

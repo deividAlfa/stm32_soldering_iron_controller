@@ -110,10 +110,17 @@ static void setGuiTempDenoise(uint32_t *val) {
 }
 //=========================================================
 static void * getContrast_() {
+#ifdef ST7565
+  temp = systemSettings.settings.contrast;
+#else
   temp = systemSettings.settings.contrast/25;
+#endif
   return &temp;
 }
 static void setContrast_(uint32_t *val) {
+#ifdef ST7565
+  systemSettings.settings.contrast=*val;
+#else
   if(*val==0){
     systemSettings.settings.contrast=5;
   }
@@ -123,6 +130,7 @@ static void setContrast_(uint32_t *val) {
   else{
     systemSettings.settings.contrast=*val*25;
   }
+#endif
   setContrast(systemSettings.settings.contrast);
 }
 //=========================================================
@@ -133,6 +141,7 @@ static void * getOledOffset() {
 static void setOledOffset(uint32_t *val) {
   systemSettings.settings.OledOffset= *val;
 }
+#ifndef ST7565
 //=========================================================
 static void * getdimMode() {
   temp = systemSettings.settings.dim_mode;
@@ -158,6 +167,7 @@ static void * getDimTurnOff() {
 static void setDimTurnOff(uint32_t *val) {
   systemSettings.settings.dim_inSleep = *val;
 }
+#endif
 //=========================================================
 static void * getActiveDetection() {
   temp = systemSettings.settings.activeDetection;
@@ -295,7 +305,11 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setContrast_;
+#ifdef ST7565
+  edit->max_value = 0x3f;
+#else
   edit->max_value = 10;
+#endif
   edit->min_value = 0;
 
   //  [ Oled Offset Widget ]
@@ -309,7 +323,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setOledOffset;
   edit->max_value = 15;
   edit->min_value = 0;
-
+#ifndef ST7565
   //  [ Oled dimming Widget ]
   //
   newComboMultiOption(w, strings[lang].SYSTEM_Oled_Dim, &edit, NULL);
@@ -344,7 +358,7 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setDimTurnOff;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
-
+#endif
   //  [ Boot mode Widget ]
   //
   newComboMultiOption(w, strings[lang].SYSTEM_Boot, &edit, &comboitem_system_BootMode);

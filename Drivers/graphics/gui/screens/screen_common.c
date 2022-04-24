@@ -116,12 +116,15 @@ uint8_t checkScreenTimer(uint32_t time){
   return 0;
 }
 void restore_contrast(void){
+#ifndef ST7565
   if(getContrast() != systemSettings.settings.contrast){
     setContrast(systemSettings.settings.contrast);
   }
+#endif
 }
 
 void wakeOledDim(void){
+#ifndef ST7565
   dim.timer = current_time;
   if(dim.step<=0 && getContrast()<systemSettings.settings.contrast ){
     if(getOledPower()==disable){
@@ -130,9 +133,11 @@ void wakeOledDim(void){
     dim.step=10;
     dim.min_reached=0;
   }
+#endif
 }
 
 void handleOledDim(void){
+#ifndef ST7565
   uint16_t contrast=getContrast();
   if(!getOledPower() && getCurrentMode()>mode_sleep){                   // If screen turned off and not in sleep mode, wake it.
     wakeOledDim();                                                   		// (Something woke the station from sleep)
@@ -171,5 +176,6 @@ void handleOledDim(void){
       dim.step=0;
     }
   }
+#endif
 }
 
