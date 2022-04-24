@@ -218,7 +218,13 @@ int16_t readTipTemperatureCompensated(bool new, bool mode, bool tempUnit){
 }
 
 void setCurrentTip(uint8_t tip) {
-  systemSettings.Profile.currentTip = tip;
+
+  if(tip >= systemSettings.Profile.currentNumberOfTips) // sanity check
+  {
+    tip = 0u;
+  }
+
+  systemSettings.currentTip = tip;
   currentTipData = &systemSettings.Profile.tip[tip];
   setupPID(&currentTipData->PID);
 }

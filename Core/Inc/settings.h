@@ -169,7 +169,7 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       impedance;
   uint8_t       tempUnit;
   uint8_t       currentNumberOfTips;
-  uint8_t       currentTip;
+  uint8_t       defaultTip;
   uint8_t       pwmMul;
   uint8_t       errorResumeMode;
   uint8_t       shakeFiltering;
@@ -258,6 +258,7 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t         setupMode;
   uint8_t         isSaving;
   uint8_t         currentProfile;
+  uint8_t         currentTip;
 }systemSettings_t;
 
 __attribute__((aligned(4))) typedef struct{

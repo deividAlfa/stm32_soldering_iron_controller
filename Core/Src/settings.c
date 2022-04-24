@@ -147,6 +147,17 @@ void checkSettings(void){
                     scr_index == screen_tip_settings ||
                     scr_index == screen_debug);
 
+#ifndef HAS_BATTERY
+  if(systemSettings.settings.rememberLastProfile)
+  {
+    systemSettings.settings.bootProfile = systemSettings.currentProfile;
+  }
+  if(systemSettings.settings.rememberLastTip)
+  {
+    systemSettings.Profile.defaultTip = systemSettings.currentTip;
+  }
+#endif
+
   // Save from menu
   if(systemSettings.save_Flag && !noSave){
     switch(systemSettings.save_Flag){
@@ -229,10 +240,12 @@ void checkSettings(void){
   #ifdef HAS_BATTERY
   // TODO
   bkpRamData.values.lastProfile = systemSettings.currentProfile;
+  //bkpRamData.values.lastSelTip[systemSettings.currentProfile] =
   if(!isIronInCalibrationMode() && scr_index != screen_debug) // don't persist the temperature while calibration is in progress or in the debug screen
   {
     bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserSetTemperature();
   }
+  bkpRamData.values.lastSelTip[systemSettings.currentProfile] = systemSettings.currentTip;
   writeBackupRam();
   #endif
 }
@@ -270,13 +283,6 @@ static void saveSettings(uint8_t mode){
   if( (systemSettings.settings.state!=initialized) || (systemSettings.Profile.state!=initialized) ){
     Error_Handler();
   }
-
-#ifndef HAS_BATTERY
-  if(systemSettings.settings.rememberLastProfile)
-  {
-    systemSettings.settings.bootProfile = systemSettings.currentProfile;
-  }
-#endif
 
   systemSettings.settingsChecksum = ChecksumSettings(&systemSettings.settings);
   flashBuffer->settingsChecksum = systemSettings.settingsChecksum;
@@ -425,6 +431,11 @@ void restoreSettings() {
   {
     loadProfile(bkpRamData.values.lastProfile);
   }
+  if(systemSettings.settings.rememberLastTip)
+  {
+    setCurrentTip(bkpRamData.values.lastSelTip[systemSettings.currentProfile]);
+    ironSchedulePwmUpdate();
+  }
 #endif
 }
 
@@ -454,7 +465,7 @@ void loadSettingsFromBackupRam(void)
       }
       bkpRamData.values.lastSelTip[i] = 0u;
     }
-    bkpRamData.values.lastProfile = 0u;
+    bkpRamData.values.lastProfile = systemSettings.settings.bootProfile;
     writeBackupRam();
 
     Oled_error_init();
@@ -473,10 +484,6 @@ void restoreLastSessionSettings(void)
   if(systemSettings.settings.rememberLastTemp)
   {
     setUserTemperature(bkpRamData.values.lastTipTemp[systemSettings.currentProfile]);
-  }
-  if(systemSettings.settings.rememberLastTip)
-  {
-    // TODO
   }
 }
 
@@ -571,7 +578,7 @@ static void resetCurrentProfile(void){
     }
     strcpy(systemSettings.Profile.tip[0].name, "BC3 ");               // Put some generic name
     systemSettings.Profile.currentNumberOfTips      = 1;
-    systemSettings.Profile.currentTip               = 0;
+    systemSettings.Profile.defaultTip               = 0;
     systemSettings.Profile.impedance                = 80;             // 8.0 Ohms
     systemSettings.Profile.power                    = 80;             // 80W
     systemSettings.Profile.noIronValue              = 4000;
@@ -593,7 +600,7 @@ static void resetCurrentProfile(void){
     }
     strcpy(systemSettings.Profile.tip[0].name, "C245");
     systemSettings.Profile.currentNumberOfTips      = 1;
-    systemSettings.Profile.currentTip               = 0;
+    systemSettings.Profile.defaultTip               = 0;
     systemSettings.Profile.impedance                = 26;
     systemSettings.Profile.power                    = 150;
     systemSettings.Profile.noIronValue              = 4000;
@@ -615,7 +622,7 @@ static void resetCurrentProfile(void){
     }
     strcpy(systemSettings.Profile.tip[0].name, "C210");
     systemSettings.Profile.currentNumberOfTips      = 1;
-    systemSettings.Profile.currentTip             = 0;
+    systemSettings.Profile.defaultTip             = 0;
     systemSettings.Profile.power                  = 80;
     systemSettings.Profile.impedance              = 21;
     systemSettings.Profile.noIronValue            = 1200;
@@ -706,7 +713,7 @@ void loadProfile(uint8_t profile){
     }
     setSystemTempUnit(systemSettings.settings.tempUnit);                        // Ensure the profile uses the same temperature unit as the system
     setUserTemperature(systemSettings.Profile.UserSetTemperature);
-    setCurrentTip(systemSettings.Profile.currentTip);
+    setCurrentTip(systemSettings.Profile.defaultTip);
     TIP.filter=systemSettings.Profile.tipFilter;
     ironSchedulePwmUpdate();
   }

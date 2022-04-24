@@ -138,15 +138,15 @@ static int tip_delete(widget_t *w, RE_Rotation_t input) {
     systemSettings.Profile.tip[x] = systemSettings.Profile.tip[x+1];
   }
   systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
-  if(Selected_Tip<=systemSettings.Profile.currentTip){                                                          // If deleted tip is lower or equal than current used tip
-    if(systemSettings.Profile.currentTip){                                                                      // Move one position back if possible
-      systemSettings.Profile.currentTip--;
+  if(Selected_Tip<=systemSettings.currentTip){                                                                  // If deleted tip is lower or equal than current used tip
+    if(systemSettings.currentTip){                                                                              // Move one position back if possible
+      systemSettings.currentTip--;
     }
-    setCurrentTip(systemSettings.Profile.currentTip);                                                           // Reload tip settings
+    setCurrentTip(systemSettings.currentTip);                                                                   // Reload tip settings
   }
   __enable_irq();
 
-  for(uint8_t x = systemSettings.Profile.currentNumberOfTips; x < NUM_TIPS;x++) {                                // Fill the unused tips with blank names
+  for(uint8_t x = systemSettings.Profile.currentNumberOfTips; x < NUM_TIPS;x++) {                               // Fill the unused tips with blank names
     strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
   }
                                                                                                                 // Skip tip settings (As tip is now deleted)

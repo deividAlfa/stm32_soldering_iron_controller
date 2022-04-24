@@ -518,7 +518,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       }
       switch((uint8_t)input){
         case LongClick:
-          Selected_Tip = systemSettings.Profile.currentTip;
+          Selected_Tip = systemSettings.currentTip;
           return screen_tip_settings;
 
         case Click:
@@ -533,7 +533,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         default:
         {
-          uint8_t tip = systemSettings.Profile.currentTip;
+          uint8_t tip = systemSettings.currentTip;
           if(input==Rotate_Increment_while_click || input==Rotate_Increment){
             if(++tip >= systemSettings.Profile.currentNumberOfTips){
               tip=0;
@@ -544,7 +544,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
               tip = systemSettings.Profile.currentNumberOfTips-1;
             }
           }
-          if(tip!=systemSettings.Profile.currentTip){
+          if(tip!=systemSettings.currentTip){
             __disable_irq();
             setCurrentTip(tip);
             __enable_irq();
@@ -834,11 +834,11 @@ static void  drawMisc(uint8_t refresh){
 
   u8g2_SetFont(&u8g2, u8g2_font_small);
   if(mainScr.currentMode==main_tipselect){
-    uint8_t len = u8g2_GetUTF8Width(&u8g2, tipNames[systemSettings.Profile.currentTip])+4;   // Draw edit frame
+    uint8_t len = u8g2_GetUTF8Width(&u8g2, tipNames[systemSettings.currentTip])+4;   // Draw edit frame
     u8g2_DrawRBox(&u8g2, 0, 54, len, 10, 2);
     u8g2_SetDrawColor(&u8g2, BLACK);
   }
-  u8g2_DrawUTF8(&u8g2, 2, 54, tipNames[systemSettings.Profile.currentTip]);                  // Draw tip name
+  u8g2_DrawUTF8(&u8g2, 2, 54, tipNames[systemSettings.currentTip]);                  // Draw tip name
   u8g2_SetDrawColor(&u8g2, WHITE);
   return;
 }
