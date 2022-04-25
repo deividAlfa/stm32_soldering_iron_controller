@@ -37,7 +37,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #endif
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-      .FUME_EXTRACTOR_Title         = "Fume ext. ctl.",
+      .FUME_EXTRACTOR_Title         = "FUME EXT. CTL.",
       .FUME_EXTRACTOR_Mode          = "Mode",
       .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
       .FUME_EXTRACTOR_AfterRun      = "After Run",
@@ -45,7 +45,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #endif
 
 #ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
-      .SWITCH_OFF_REMINDER_Title               = "Sw off Reminder",
+      .SWITCH_OFF_REMINDER_Title               = "SW OFF REMINDER",
       .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
       .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
       .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",

@@ -127,6 +127,7 @@ static int tip_save(widget_t *w, RE_Rotation_t input) {
   __enable_irq();
   if(Selected_Tip==systemSettings.Profile.currentNumberOfTips){                                                 // If new tip
     systemSettings.Profile.currentNumberOfTips++;                                                               // Increase number of tips in the system
+    setCurrentTip(Selected_Tip);                                                                                // Activate the newly copied tip, its highly likely that the user want's to calibrate it.
   }
   sortTips();
   return last_scr;
