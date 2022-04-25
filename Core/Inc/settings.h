@@ -190,10 +190,10 @@ __attribute__((aligned(4))) typedef struct{
   uint16_t      Cal250_default;
   uint16_t      Cal400_default;
   tipData_t     tip[NUM_TIPS];
-  uint32_t      errorTimeout;
-  uint32_t      boostTimeout;
-  uint32_t      sleepTimeout;
-  uint32_t      standbyTimeout;
+  uint32_t      errorTimeout;   // todo reduce size?
+  uint32_t      boostTimeout;   // todo reduce size?
+  uint32_t      sleepTimeout;   // todo reduce size?
+  uint32_t      standbyTimeout; // todo reduce size?
 }profile_t;
 
 __attribute__((aligned(4))) typedef struct{
@@ -260,17 +260,6 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t         currentProfile;
   uint8_t         currentTip;
 }systemSettings_t;
-
-__attribute__((aligned(4))) typedef struct{
-  profile_t       Profile[NUM_PROFILES];
-  uint32_t        ProfileChecksum[NUM_PROFILES];
-  settings_t      settings;
-  uint32_t        settingsChecksum;
-#ifdef ENABLE_ADDONS
-  addonSettings_t addonSettings;
-  uint32_t        addonSettingsChecksum;
-#endif
-}flashSettings_t;
 
 extern systemSettings_t systemSettings;
 

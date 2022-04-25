@@ -70,7 +70,28 @@ const addonSettings_t defaultAddonSettings = {
 };
 #endif
 
-__attribute__((section(".settings"))) flashSettings_t flashSettings;
+__attribute__((aligned(4))) typedef struct{
+  settings_t      settings;
+  uint32_t        settingsChecksum;
+} flashSettingsSettings_t;
+__attribute__((section(".globalSettings"))) flashSettingsSettings_t flashGlobalSettings;
+
+__attribute__((aligned(4))) typedef struct{
+  profile_t       Profile[NUM_PROFILES];
+  uint32_t        ProfileChecksum[NUM_PROFILES];
+} flashSettingsProfiles_t;
+__attribute__((section(".profileSettings"))) flashSettingsProfiles_t flashProfilesSettings;
+
+#ifdef ENABLE_ADDONS
+__attribute__((aligned(4))) typedef struct{
+  addonSettings_t addonSettings;
+  uint32_t        addonSettingsChecksum;
+} flashSettingsAddons_t;
+__attribute__((section(".addonSettings"))) flashSettingsAddons_t flashAddonSettings;
+#endif
+
+
+
 systemSettings_t systemSettings;
 
 static void saveSettings(uint8_t mode);
@@ -120,6 +141,11 @@ static void writeBackupRam();
 static backupRamData_t bkpRamData;
 
 #endif
+
+extern int  __SETTINGS_SECTION_START; /* defined by the linker, only its address which is the target value */
+#define SETTINGS_SECTION_START ((uint32_t)&__SETTINGS_SECTION_START)
+extern int  __SETTINGS_SECTION_LENGTH; /* defined by the linker, only its address which is the target value */
+#define SETTINGS_SECTION_LENGTH ((uint32_t)&__SETTINGS_SECTION_LENGTH)
 
 void checkSettings(void){
 
@@ -257,20 +283,84 @@ void saveSettingsFromMenu(uint8_t mode){
   }
 }
 
+static void eraseFlashPages(uint32_t pageAddress, uint32_t numPages)
+{
+  uint32_t error = 0;
+  FLASH_EraseInitTypeDef erase = {0};
+
+  __disable_irq();
+  configurePWMpin(output_Low);
+
+  HAL_FLASH_Unlock();
+
+  erase.NbPages     = numPages;
+  erase.PageAddress = pageAddress;
+  erase.TypeErase   = FLASH_TYPEERASE_PAGES;
+
+  HAL_IWDG_Refresh(&hiwdg);
+  if((HAL_FLASHEx_Erase(&erase, &error)!=HAL_OK) || (error!=0xFFFFFFFF)){
+    Flash_error();
+  }
+  HAL_FLASH_Lock();
+  __enable_irq();
+
+  // Ensure flash was erased
+  for (uint32_t i = 0u; i < (numPages * FLASH_PAGE_SIZE / sizeof(int32_t)); i++) {
+    if( *((uint32_t*)(pageAddress + i)) != 0xFFFFFFFF){
+      Flash_error();
+    }
+  }
+}
+
+static void writeFlash(uint32_t* src, uint32_t len, uint32_t dstAddr)
+{
+  uint32_t const numWordsToWrite = (len + sizeof(uint32_t) - 1u) / sizeof(uint32_t);
+  uint32_t* srcData = src;
+
+  __disable_irq();
+  HAL_FLASH_Unlock();
+  __enable_irq();
+
+  // written = number of 32-bit values written
+  for(uint32_t written=0; written < numWordsToWrite; written++){
+    __disable_irq();
+    if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, dstAddr, *srcData ) != HAL_OK)
+    {
+      Flash_error();
+    }
+    dstAddr += sizeof(uint32_t); // increase pointers
+    srcData++;
+    __enable_irq();
+  }
+
+  __disable_irq();
+  HAL_FLASH_Lock();
+  __enable_irq();
+}
+
 static void saveSettings(uint8_t mode){
-  #ifdef NOSAVESETTINGS
-    return;
-  #endif
+#ifdef NOSAVESETTINGS
+  return;
+#else
 
-  uint32_t error=0;
-  uint32_t *dest = (uint32_t*)&flashSettings;
-  uint8_t profile = systemSettings.currentProfile;
-  flashSettings_t *flashBuffer=_malloc(sizeof(flashSettings_t));
-  uint32_t *src = &*(uint32_t*)flashBuffer;
+  uint8_t const profile = systemSettings.currentProfile;
 
-  if(!flashBuffer){ Error_Handler(); }
+  flashSettingsProfiles_t* flashBufferProfiles = _malloc(sizeof(flashSettingsProfiles_t));
+  flashSettingsSettings_t* flashBufferSettings = _malloc(sizeof(flashSettingsSettings_t));
+#ifdef ENABLE_ADDONS
+  flashSettingsAddons_t*   flashBufferAddons   = _malloc(sizeof(flashSettingsAddons_t));
+#endif
 
-  *flashBuffer = flashSettings;                                     // Backup current flash data before erasing
+  // check if malloc succeeded or not
+  if(    (flashBufferProfiles == NULL)
+      || (flashBufferSettings == NULL)
+#ifdef ENABLE_ADDONS
+      || (flashBufferAddons   == NULL)
+#endif
+  )
+  { Error_Handler(); }
+
+  *flashBufferProfiles = flashProfilesSettings; // Save current profiles into the temp buffer
 
   while(ADC_Status != ADC_Idle);
   __disable_irq();
@@ -283,74 +373,39 @@ static void saveSettings(uint8_t mode){
   }
 
   systemSettings.settingsChecksum = ChecksumSettings(&systemSettings.settings);
-  flashBuffer->settingsChecksum = systemSettings.settingsChecksum;
-  flashBuffer->settings = systemSettings.settings;
+  flashBufferSettings->settingsChecksum = systemSettings.settingsChecksum;
+  flashBufferSettings->settings = systemSettings.settings;
+
+#ifdef ENABLE_ADDONS
+  systemSettings.addonSettingsChecksum =  ChecksumAddons(&flashBufferAddons->addonSettings);
+  flashBufferAddons->addonSettingsChecksum = systemSettings.addonSettingsChecksum;
+  flashBufferAddons->addonSettings = systemSettings.addonSettings;
+#endif
 
   if((mode==keepProfiles) && (profile<=profile_C210) && (systemSettings.Profile.ID == profile )){
     systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
-    flashBuffer->ProfileChecksum[profile] = systemSettings.ProfileChecksum;
-    flashBuffer->Profile[profile] = systemSettings.Profile;
+    flashBufferProfiles->ProfileChecksum[profile] = systemSettings.ProfileChecksum;
+    flashBufferProfiles->Profile[profile] = systemSettings.Profile;
   }
   else{
     mode = wipeProfiles;
     for(uint8_t x=0;x<NUM_PROFILES;x++){
-      flashBuffer->Profile[x].state = 0xFF;
-      flashBuffer->ProfileChecksum[x] = 0xFFFFFFFF;
-      memset(&flashBuffer->Profile[x],0xFF,sizeof(profile_t));
+      flashBufferProfiles->Profile[x].state = 0xFF;
+      flashBufferProfiles->ProfileChecksum[x] = 0xFFFFFFFF;
+      memset(&flashBufferProfiles->Profile[x],0xFF,sizeof(profile_t));
     }
   }
 
+  eraseFlashPages(SETTINGS_SECTION_START, (SETTINGS_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);
+
+  writeFlash((uint32_t*)flashBufferProfiles, sizeof(flashSettingsProfiles_t), (uint32_t)&flashProfilesSettings);
+  writeFlash((uint32_t*)flashBufferSettings, sizeof(flashSettingsSettings_t), (uint32_t)&flashGlobalSettings);
 #ifdef ENABLE_ADDONS
-  flashBuffer->addonSettings = systemSettings.addonSettings;
-  systemSettings.addonSettingsChecksum =  ChecksumAddons(&flashBuffer->addonSettings);
-  flashBuffer->addonSettingsChecksum = systemSettings.addonSettingsChecksum;
+  writeFlash((uint32_t*)flashBufferAddons, sizeof(flashSettingsAddons_t), (uint32_t)&flashAddonSettings);
 #endif
 
-  __disable_irq();
-  HAL_FLASH_Unlock();
-
-  FLASH_EraseInitTypeDef erase;
-  erase.NbPages = (sizeof(flashSettings_t)+FLASH_PAGE_SIZE-1)/FLASH_PAGE_SIZE;
-  erase.PageAddress = (uint32_t)dest;
-  erase.TypeErase = FLASH_TYPEERASE_PAGES;
-
-  HAL_IWDG_Refresh(&hiwdg);
-  if((HAL_FLASHEx_Erase(&erase, &error)!=HAL_OK) || (error!=0xFFFFFFFF)){
-    Flash_error();
-  }
-  HAL_FLASH_Lock();
-  __enable_irq();
-
-  // Ensure flash was erased
-  for (uint16_t i = 0; i < sizeof(flashSettings_t)/(sizeof(uint32_t)); i++) {
-    if( *dest++ != 0xFFFFFFFF){
-      Flash_error();
-    }
-  }
-  dest = (uint32_t*)&flashSettings;
-
-  __disable_irq();
-  HAL_FLASH_Unlock();
-  __enable_irq();
-
-  // Store settings
-  // written = number of 16-bit values written
-  for(uint16_t written=0; written < (sizeof(flashSettings_t)/4); written++){
-    __disable_irq();
-    if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)dest, *src ) != HAL_OK){
-      Flash_error();
-    }
-    dest++;                // increase pointers
-    src++;
-    __enable_irq();
-  }
-
-  __disable_irq();
-  HAL_FLASH_Lock();
-  __enable_irq();
-
   if(mode==keepProfiles){
-    uint32_t ProfileFlash  = ChecksumProfile(&flashSettings.Profile[profile]);
+    uint32_t ProfileFlash  = ChecksumProfile(&flashProfilesSettings.Profile[profile]);
     uint32_t ProfileRam    = ChecksumProfile(&systemSettings.Profile);
 
     if(ProfileFlash != ProfileRam){
@@ -359,26 +414,31 @@ static void saveSettings(uint8_t mode){
   }
 
   // Check flash and system settings have same checksum
-  uint32_t SettingsFlash  = ChecksumSettings(&flashSettings.settings);
+  uint32_t SettingsFlash  = ChecksumSettings(&flashGlobalSettings.settings);
   uint32_t SettingsRam  = ChecksumSettings(&systemSettings.settings);
   if(SettingsFlash != SettingsRam){
     Flash_error();
   }
 
-
 #ifdef ENABLE_ADDONS
   // Verify addon crc
-  uint32_t addonsFlashCrc  = ChecksumAddons(&flashSettings.addonSettings);
+  uint32_t addonsFlashCrc  = ChecksumAddons(&flashAddonSettings.addonSettings);
   uint32_t addonsRamCrc  = ChecksumAddons(&systemSettings.addonSettings);
   if(addonsFlashCrc != addonsRamCrc){
     Flash_error();
   }
 #endif
 
-  _free(flashBuffer);
+#ifdef ENABLE_ADDONS
+  _free(flashBufferAddons);
+#endif
+  _free(flashBufferSettings);
+  _free(flashBufferProfiles);
   __disable_irq();
   systemSettings.isSaving = 0;
   __enable_irq();
+
+#endif
 }
 
 void restoreSettings() {
@@ -392,7 +452,7 @@ void restoreSettings() {
   return;
 #endif
 
-  if(flashSettings.settings.state != initialized){
+  if(flashGlobalSettings.settings.state != initialized){
     resetSystemSettings();
 #ifdef ENABLE_ADDONS
     resetAddonSettings();
@@ -403,13 +463,13 @@ void restoreSettings() {
     Button_reset();
   }
 
-  if(flashSettings.settings.version!=defaultSettings.version){    // Silent reset if version mismatch
+  if(flashGlobalSettings.settings.version!=defaultSettings.version){    // Silent reset if version mismatch
     resetSystemSettings();
     saveSettings(wipeProfiles);
   }
   else{
-    systemSettings.settings = flashSettings.settings;
-    systemSettings.settingsChecksum = flashSettings.settingsChecksum;
+    systemSettings.settings = flashGlobalSettings.settings;
+    systemSettings.settingsChecksum = flashGlobalSettings.settingsChecksum;
   }
 
 
@@ -456,7 +516,7 @@ void loadSettingsFromBackupRam(void)
     memset((void*)&bkpRamData,0, sizeof(backupRamData_t));
     for(uint8_t i = 0; i < NUM_PROFILES; i++)
     {
-      bkpRamData.values.lastTipTemp[i] = flashSettings.Profile[i].defaultTemperature;
+      bkpRamData.values.lastTipTemp[i] = flashProfilesSettings.Profile[i].defaultTemperature;
       if(bkpRamData.values.lastTipTemp[i] == UINT16_MAX) // just a sanity check to handle uninitialized data
       {
         bkpRamData.values.lastTipTemp[i] = 0u;
@@ -527,10 +587,10 @@ static uint32_t ChecksumProfile(profile_t* profile){
 #ifdef ENABLE_ADDONS
 static void loadAddonSettings(void)
 {
-  systemSettings.addonSettings = flashSettings.addonSettings;
+  systemSettings.addonSettings = flashAddonSettings.addonSettings;
   systemSettings.addonSettingsChecksum = ChecksumAddons(&(systemSettings.addonSettings));
   if((systemSettings.addonSettings.enabledAddons != defaultAddonSettings.enabledAddons) || // list of addons changed
-      (systemSettings.addonSettingsChecksum != flashSettings.addonSettingsChecksum))       // crc mismatch
+      (systemSettings.addonSettingsChecksum != flashAddonSettings.addonSettingsChecksum))       // crc mismatch
   {
     checksumError(reset_Addons);
   }
@@ -692,15 +752,15 @@ void loadProfile(uint8_t profile){
     systemSettings.currentProfile=profile_None;                        // Revert to none to trigger setup screen
   }
   else if(profile<=profile_C210){                                               // If valid profile
-    if(flashSettings.Profile[profile].state!=initialized){                      // If flash profile not initialized
+    if(flashProfilesSettings.Profile[profile].state!=initialized){                      // If flash profile not initialized
       __disable_irq();
       resetCurrentProfile();                                                    // Load defaults
       __enable_irq();
       systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
     }
     else{
-      systemSettings.Profile = flashSettings.Profile[profile];
-      systemSettings.ProfileChecksum = flashSettings.ProfileChecksum[profile];
+      systemSettings.Profile = flashProfilesSettings.Profile[profile];
+      systemSettings.ProfileChecksum = flashProfilesSettings.ProfileChecksum[profile];
     }
 
     // Calculate data checksum and compare with stored checksum, also ensure the stored ID is the same as the requested profile
