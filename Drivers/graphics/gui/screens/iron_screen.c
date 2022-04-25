@@ -164,17 +164,17 @@ static void * getStandbyTemp() {
   return &temp;
 }
 //=========================================================
-static void setUserTemp(uint32_t *val) {
+static void setDefaultTemp(uint32_t *val) {
   if(*val > systemSettings.Profile.MaxSetTemperature){
     *val = systemSettings.Profile.MaxSetTemperature;
   }
   else if(*val < systemSettings.Profile.MinSetTemperature){
     *val = systemSettings.Profile.MinSetTemperature;
   }
-  systemSettings.Profile.UserSetTemperature = *val;
+  systemSettings.Profile.defaultTemperature = *val;
 }
-static void * getUserTemp() {
-  temp = systemSettings.Profile.UserSetTemperature;
+static void * getDefaultTemp() {
+  temp = systemSettings.Profile.defaultTemperature;
   return &temp;
 }
 //=========================================================
@@ -616,14 +616,14 @@ static void iron_create(screen_t *scr){
 
   //  [ user Temp Widget ]
   //
-  newComboEditable(w, strings[lang].IRON_User_Temp, &edit, NULL);
+  newComboEditable(w, strings[lang].IRON_Default_Temp, &edit, NULL);
   editable_IRON_UserTemp=edit;
   dis=&edit->inputData;
   dis->reservedChars=5;
-  dis->getData = &getUserTemp;
+  dis->getData = &getDefaultTemp;
   edit->big_step = 10;
   edit->step = 5;
-  edit->setData = (void (*)(void *))&setUserTemp;
+  edit->setData = (void (*)(void *))&setDefaultTemp;
 
   //  [ Stby Time Widget ]
   //
@@ -966,13 +966,13 @@ void updateTempValues()
   editable_IRON_MinTemp->max_value = systemSettings.Profile.MaxSetTemperature - 1;
   editable_IRON_MaxTemp->min_value = systemSettings.Profile.MinSetTemperature + 1;
 
-  if(systemSettings.Profile.UserSetTemperature > systemSettings.Profile.MaxSetTemperature)
+  if(systemSettings.Profile.defaultTemperature > systemSettings.Profile.MaxSetTemperature)
   {
-    systemSettings.Profile.UserSetTemperature = systemSettings.Profile.MaxSetTemperature;
+    systemSettings.Profile.defaultTemperature = systemSettings.Profile.MaxSetTemperature;
   }
-  else if(systemSettings.Profile.UserSetTemperature < systemSettings.Profile.MinSetTemperature)
+  else if(systemSettings.Profile.defaultTemperature < systemSettings.Profile.MinSetTemperature)
   {
-    systemSettings.Profile.UserSetTemperature = systemSettings.Profile.MinSetTemperature;
+    systemSettings.Profile.defaultTemperature = systemSettings.Profile.MinSetTemperature;
   }
 }
 

@@ -456,7 +456,7 @@ void loadSettingsFromBackupRam(void)
     memset((void*)&bkpRamData,0, sizeof(backupRamData_t));
     for(uint8_t i = 0; i < NUM_PROFILES; i++)
     {
-      bkpRamData.values.lastTipTemp[i] = flashSettings.Profile[i].UserSetTemperature;
+      bkpRamData.values.lastTipTemp[i] = flashSettings.Profile[i].defaultTemperature;
       if(bkpRamData.values.lastTipTemp[i] == UINT16_MAX) // just a sanity check to handle uninitialized data
       {
         bkpRamData.values.lastTipTemp[i] = 0u;
@@ -664,7 +664,7 @@ static void resetCurrentProfile(void){
   systemSettings.Profile.sleepTimeout               = (uint32_t)5*60000;      // ms
   systemSettings.Profile.standbyTimeout             = (uint32_t)5*60000;
   systemSettings.Profile.standbyTemperature         = 180;
-  systemSettings.Profile.UserSetTemperature         = 180;
+  systemSettings.Profile.defaultTemperature         = 180;
   systemSettings.Profile.MaxSetTemperature          = 450;
   systemSettings.Profile.MinSetTemperature          = 180;
   systemSettings.Profile.boostTimeout               = 60000;                  // ms
@@ -710,7 +710,7 @@ void loadProfile(uint8_t profile){
       __disable_irq();
     }
     setSystemTempUnit(systemSettings.settings.tempUnit);                        // Ensure the profile uses the same temperature unit as the system
-    setUserTemperature(systemSettings.Profile.UserSetTemperature);
+    setUserTemperature(systemSettings.Profile.defaultTemperature);
     setCurrentTip(systemSettings.Profile.defaultTip);
     TIP.filter=systemSettings.Profile.tipFilter;
     ironSchedulePwmUpdate();

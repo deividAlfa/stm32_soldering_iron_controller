@@ -178,7 +178,7 @@ __attribute__((aligned(4))) typedef struct{
   filter_t      tipFilter;
   ntc_data_t    ntc;
   uint16_t      standbyTemperature;
-  uint16_t      UserSetTemperature;
+  uint16_t      defaultTemperature;
   uint16_t      MaxSetTemperature;
   uint16_t      MinSetTemperature;
   uint16_t      boostTemperature;

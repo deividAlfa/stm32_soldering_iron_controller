@@ -211,7 +211,7 @@ void setSystemTempUnit(bool unit){
   if(systemSettings.Profile.tempUnit != unit){
     systemSettings.Profile.tempUnit = unit;
     Iron.UserSetTemperature = round_10(TempConversion(Iron.UserSetTemperature,unit,0));                                         // User temp is loaded from the profile, thus it uses the same unit
-    systemSettings.Profile.UserSetTemperature = round_10(TempConversion(systemSettings.Profile.UserSetTemperature,unit,0));
+    systemSettings.Profile.defaultTemperature = round_10(TempConversion(systemSettings.Profile.defaultTemperature,unit,0));
     systemSettings.Profile.standbyTemperature = round_10(TempConversion(systemSettings.Profile.standbyTemperature,unit,0));
     systemSettings.Profile.MaxSetTemperature = round_10(TempConversion(systemSettings.Profile.MaxSetTemperature,unit,0));
     systemSettings.Profile.MinSetTemperature = round_10(TempConversion(systemSettings.Profile.MinSetTemperature,unit,0));

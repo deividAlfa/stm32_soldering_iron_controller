@@ -56,7 +56,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "Max temp",
       .IRON_Min_Temp = "Min temp",
-      .IRON_User_Temp = "Dflt. temp",
+      .IRON_Default_Temp = "Dflt. temp",
       .IRON_Standby = "Standby",
       .IRON_Sleep = "Sleep",
       .IRON_Boost = "Boost",
@@ -207,7 +207,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #endif
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-      .FUME_EXTRACTOR_Title         = "Fume ext. ctl.",
+      .FUME_EXTRACTOR_Title         = "FUME EXT. CTL.",
       .FUME_EXTRACTOR_Mode          = "Mode",
       .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
       .FUME_EXTRACTOR_AfterRun      = "After Run",
@@ -215,7 +215,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #endif
 
 #ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
-      .SWITCH_OFF_REMINDER_Title               = "Sw off reminder",
+      .SWITCH_OFF_REMINDER_Title               = "SW OFF REMINDER",
       .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
       .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
       .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
@@ -226,7 +226,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "Максимум",
       .IRON_Min_Temp = "Минимум",
-      .IRON_User_Temp = "Стартовая",
+      .IRON_Default_Temp = "Стартовая",
       .IRON_Standby = "СОН",
       .IRON_Sleep = "ВЫКЛ",
       .IRON_Boost = "Буст",
@@ -378,7 +378,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #endif
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-      .FUME_EXTRACTOR_Title         = "Fume ext. ctl.",
+      .FUME_EXTRACTOR_Title         = "FUME EXT. CTL.",
       .FUME_EXTRACTOR_Mode          = "Mode",
       .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
       .FUME_EXTRACTOR_AfterRun      = "After Run",
@@ -386,7 +386,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #endif
 
 #ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
-      .SWITCH_OFF_REMINDER_Title               = "Sw off reminder",
+      .SWITCH_OFF_REMINDER_Title               = "SW OFF REMINDER",
       .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
       .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
       .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
@@ -397,7 +397,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "Max temp",
       .IRON_Min_Temp = "Min temp",
-      .IRON_User_Temp = "Starttemp",
+      .IRON_Default_Temp = "Starttemp",
       .IRON_Standby = "Standby",
       .IRON_Sleep = "Sovläge",
       .IRON_Boost = "Boost",
@@ -548,7 +548,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #endif
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-      .FUME_EXTRACTOR_Title         = "Fume ext. ctl.",
+      .FUME_EXTRACTOR_Title         = "FUME EXT. CTL.",
       .FUME_EXTRACTOR_Mode          = "Mode",
       .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
       .FUME_EXTRACTOR_AfterRun      = "After Run",
@@ -556,7 +556,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #endif
 
 #ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
-      .SWITCH_OFF_REMINDER_Title               = "Sw off reminder",
+      .SWITCH_OFF_REMINDER_Title               = "SW OFF REMINDER",
       .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
       .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
       .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
@@ -567,7 +567,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "Max Temp",
       .IRON_Min_Temp = "Min Temp",
-      .IRON_User_Temp = "Usr Temp",
+      .IRON_Default_Temp = "Usr Temp",
       .IRON_Standby = "Standby",
       .IRON_Sleep = "Sleep",
       .IRON_Boost = "Boost",
@@ -718,7 +718,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #endif
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-      .FUME_EXTRACTOR_Title         = "Fume ext. ctl.",
+      .FUME_EXTRACTOR_Title         = "FUME EXT. CTL.",
       .FUME_EXTRACTOR_Mode          = "Mode",
       .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
       .FUME_EXTRACTOR_AfterRun      = "After Run",
@@ -726,7 +726,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #endif
 
 #ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
-      .SWITCH_OFF_REMINDER_Title               = "Sw off reminder",
+      .SWITCH_OFF_REMINDER_Title               = "SW OFF REMINDER",
       .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
       .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
       .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
@@ -737,7 +737,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "Max Isı",
       .IRON_Min_Temp = "Min Isı",
-      .IRON_User_Temp = "İlk Isı",
+      .IRON_Default_Temp = "İlk Isı",
       .IRON_Standby = "Bekleme",
       .IRON_Sleep = "Uyku",
       .IRON_Boost = "Darbe",
