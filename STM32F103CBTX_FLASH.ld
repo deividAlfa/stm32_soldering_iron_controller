@@ -69,7 +69,7 @@ SECTIONS
     . = ALIGN(4);
     KEEP(*(.addonSettings))/* .settings sections */
   } >ADDON_SETTINGS
-  
+
   /* The startup code into "FLASH" Rom type memory */
   .isr_vector :
   {
