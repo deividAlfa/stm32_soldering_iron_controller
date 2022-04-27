@@ -13,13 +13,17 @@
 * [Additional Documentation](#docs)
 * [Pending or non working features](#pending)
 
+
 <!-- /MarkdownTOC -->
+
+ If you liked the firmware, you can send me a beer with [PAYPAL](https://www.paypal.me/davidalfistas) 🙂<br>
 
 --- 
 
 Video of operation here: (Project in active development, the features will change continuously)<br>
 
-[![IMAGE ALT TEXT](https://img.youtube.com/vi/j0HQq4aRiXw/0.jpg)](https://www.youtube.com/watch?v=j0HQq4aRiXw "STM32 T12 custom firmware")
+[![IMAGE ALT TEXT](https://img.youtube.com/vi/j0HQq4aRiXw/0.jpg)](https://www.youtube.com/watch?v=j0HQq4aRiXw "STM32 T12 custom firmware")<br><br>
+
 
 ---
 
@@ -148,10 +152,6 @@ There're some options to fix this:<br>
 After fully reading the documentation, if you still have problems or doubts, please ask in the EEVblog thread:<br>
 https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle.<br>
 
-### Donations
-If you liked the firmware, you can send me a beer with [PAYPAL](https://www.paypal.me/davidalfistas)<br>
-(Gin tonics, coffees and steaks are also accepted 🙂 )<br>
-
 ---
 
 <a id="build"></a>     
@@ -159,13 +159,11 @@ If you liked the firmware, you can send me a beer with [PAYPAL](https://www.payp
 
 Video of building steps:<br>
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/8oeGVSSxudk/0.jpg)](https://www.youtube.com/watch?v=8oeGVSSxudk "Firmware build")<br><br>
-There're some helpers in the root of the project that will copy the required files for your controller (_KSGER_v2.bat, _Quicko_F072.bat...).<br>
-Additionally, there's an automated build script (_Automated_Build.bat) that will build all profiles. The compiled binaries will be placed in their respective BOARDS/... folders.<br><br>
 
-If you use an existing project template and modify it, the changes must be reflected in /Core/Inc/board.h.<br>
-All the project code takes the data from there. The file it's pretty much self-explaining.<br>
-So, any changes you make in CubeMX, ex. use PWM timer6 intead timer2, or SPI1 instead SPI2...all that should be configured in their respective define.<br>
-As long as the GPIO names are called the same way, no further changes are needed.<br>
+There's a new automated build script for Windows (_Building_script.bat) that allows a simple and fast way of copying and building the desired profile.<br>
+With it, all you need is to have CubeIDE installed in C:\ST... (It's the default installation folder), it will search and execute the tools without requiring any user intervention.<br>
+Just open it, choose your profile, and if you want to build it or not.<br>
+The compiled binaries will be placed in their respective BOARDS/... folders.<br><br>
 
 If you want to build your own, clone or download the source.<br>
 The source is stripped from ST own libraries and unnecesary stuff, only includes the very basic code owning to the project.<br>
@@ -224,7 +222,12 @@ Run the included script "Clean_Profile.bat", or manually delete these files:<br>
     /Core/Src/system_stm32*
     /Core/Startup/*
 
-And then copy the board profile files overwriting any existing files.<br>
+And then copy the board profile files overwriting any existing files.<br><br>
+
+If you use an existing project template and modify it, the changes must be reflected in /Core/Inc/board.h.<br>
+All the project code takes the data from there. The file it's pretty much self-explaining.<br>
+So, any changes you make in CubeMX, ex. use PWM timer6 intead timer2, or SPI1 instead SPI2...all that should be configured in their respective define.<br>
+As long as the GPIO names are called the same way, no further changes are needed.<br>
  
 ---
 
