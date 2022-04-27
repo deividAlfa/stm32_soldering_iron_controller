@@ -5,8 +5,8 @@
  *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
-#ifndef GRAPHICS_GUI_BOOT_H_
-#define GRAPHICS_GUI_BOOT_H_
+#ifndef _GUI_BOOT_SCREEN_H_
+#define _GUI_BOOT_SCREEN_H_
 #include "screen.h"
 
 extern screen_t Screen_boot;

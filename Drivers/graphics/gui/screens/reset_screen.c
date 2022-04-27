@@ -134,7 +134,7 @@ static void reset_confirmation_create(screen_t *scr){
   ((button_widget_t*)w->content)->font= u8g2_font_menu;
   w->posY = 48;
   w->width = 65;
-  w->posX = OledWidth - w->width -1;
+  w->posX = displayWidth - w->width -1;
 }
 
 

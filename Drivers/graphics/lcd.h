@@ -12,14 +12,10 @@
 #include "main.h"
 #include "widgets.h"
 
-/*    Display selection    */
-//#define ST7565
-#define SSD1306
-
 
 /*    Display size          */
-#define OledWidth   128
-#define OledHeight  64
+#define displayWidth   128
+#define displayHeight  64
 
 /*    Display command set   */
 #if defined ST7565
@@ -37,8 +33,8 @@ typedef enum{
   c_pwr_boost     = 0x04,
   c_pwr_vreg      = 0x02,
   c_pwr_follow    = 0x01,
-  c_adc_norm      = 0xA0,
-  c_adc_rev       = 0xA1,
+  c_remap_off     = 0xA0,
+  c_remap_on      = 0xA1,
   c_bias_9        = 0xA2,
   c_bias_7        = 0xA3,
   c_all_off       = 0xA4,
@@ -140,9 +136,9 @@ typedef struct{
 	volatile uint8_t status;
 	volatile uint8_t row;
 	volatile uint8_t use_sw;
-#if defined OLED_SPI && defined OLED_DEVICE
+#if defined DISPLAY_SPI && defined DISPLAY_DEVICE
 	SPI_HandleTypeDef *device;
-#elif defined OLED_I2C && defined OLED_DEVICE
+#elif defined DISPLAY_I2C && defined DISPLAY_DEVICE
 	I2C_HandleTypeDef *device;
 #endif
 	DMA_HandleTypeDef *fillDMA;
@@ -152,11 +148,11 @@ extern oled_t oled;
 
 enum { fill_soft, fill_dma };
 
-#if defined OLED_SPI
+#if defined DISPLAY_SPI
 #define Oled_Set_SCL() 		SW_SCL_GPIO_Port->BSRR = SW_SCL_Pin
 #define Oled_Clear_SCL() 	SW_SCL_GPIO_Port->BRR = SW_SCL_Pin
 
-#elif  defined OLED_I2C
+#elif  defined DISPLAY_I2C
 #define Oled_Set_SCL()    SW_SCL_GPIO_Port->BSRR = SW_SCL_Pin; bit_delay()							// Rise time needs more time, as it's open drain
 #define Oled_Clear_SCL()  SW_SCL_GPIO_Port->BRR = SW_SCL_Pin; bit_delay()								// Fall time can be much faster
 #endif
@@ -169,41 +165,41 @@ enum { fill_soft, fill_dma };
 #define Oled_Bit(n)      if(!(n))Oled_Clear_SDA();else Oled_Set_SDA(); Oled_Clock()				// Testing !n compiles faster code than testing n
 
 #ifdef USE_CS
-#define Oled_Set_CS() 		OLED_CS_GPIO_Port->BSRR = OLED_CS_Pin
-#define Oled_Clear_CS() 	OLED_CS_GPIO_Port->BRR = OLED_CS_Pin
+#define Oled_Set_CS() 		DISPLAY_CS_GPIO_Port->BSRR = DISPLAY_CS_Pin
+#define Oled_Clear_CS() 	DISPLAY_CS_GPIO_Port->BRR = DISPLAY_CS_Pin
 #endif
 
 #ifdef USE_DC
-#define Oled_Set_DC() 		OLED_DC_GPIO_Port->BSRR = OLED_DC_Pin
-#define Oled_Clear_DC() 	OLED_DC_GPIO_Port->BRR = OLED_DC_Pin
+#define Oled_Set_DC() 		DISPLAY_DC_GPIO_Port->BSRR = DISPLAY_DC_Pin
+#define Oled_Clear_DC() 	DISPLAY_DC_GPIO_Port->BRR = DISPLAY_DC_Pin
 #endif
 
 #ifdef USE_RST
-#define Oled_Set_RES() 		OLED_RST_GPIO_Port->BSRR = OLED_RST_Pin
-#define Oled_Clear_RES() 	OLED_RST_GPIO_Port->BRR = OLED_RST_Pin
+#define Oled_Set_RES() 		DISPLAY_RST_GPIO_Port->BSRR = DISPLAY_RST_Pin
+#define Oled_Clear_RES() 	DISPLAY_RST_GPIO_Port->BRR = DISPLAY_RST_Pin
 #endif
 
 #define BLACK 0
 #define WHITE 1
 #define XOR   2
 
-#if !defined OLED_DEVICE || (defined OLED_DEVICE && defined I2C_TRY_HW)
+#if !defined DISPLAY_DEVICE || (defined DISPLAY_DEVICE && defined I2C_TRY_HW)
 void enable_soft_mode(void);
 void disable_soft_mode(void);
 void bitbang_write(uint8_t* bf, uint16_t count, uint8_t mode);
 void bit_delay(void);
-#if defined OLED_I2C
+#if defined DISPLAY_I2C
 void i2cStart(void);
 void i2cStop(void);
 void i2cBegin(uint8_t mode);
 #endif
 #endif
 
-#if defined OLED_DEVICE
-#if defined OLED_SPI
+#if defined DISPLAY_DEVICE
+#if defined DISPLAY_SPI
 void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma);
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *device);
-#elif defined OLED_I2C
+#elif defined DISPLAY_I2C
 void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma);
 void i2c_workaround(void);
 void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device);
@@ -218,11 +214,16 @@ void pset(uint8_t x, uint8_t y, bool c);
 void update_display(void);
 void display_dma_abort(void);
 void update_display_ErrorHandler(void);
-void setOledRow(uint8_t row);
-void setOledPower(uint8_t power);
-uint8_t getOledPower(void);
-void setContrast(uint8_t value);
-uint8_t getContrast(void);
+void setDisplayRow(uint8_t row);
+void setDisplayPower(uint8_t power);
+uint8_t getDisplayPower(void);
+void setDisplayContrast(uint8_t value);
+void setDisplayXflip(uint8_t f);
+void setDisplayYflip(uint8_t f);
+#ifdef ST7565
+void setDisplayResRatio(uint8_t r);
+#endif
+uint8_t getDisplayContrast(void);
 void fillBuffer(bool color, bool mode);
 void putStrAligned(char* str, uint8_t y, AlignType align);
 void buttonReset(void);
@@ -233,19 +234,19 @@ void buttonReset(void);
 #error "No FILL_DMA handler defined!"
 #endif
 
-#if !defined OLED_SPI && !defined OLED_I2C
+#if !defined DISPLAY_SPI && !defined DISPLAY_I2C
 #error "No display configured in board.h!"
 #endif
 
-#if defined OLED_I2C && !defined OLED_ADDRESS
+#if defined DISPLAY_I2C && !defined DISPLAY_ADDRESS
 #error "No display I2C address configured in board.h!"
 #endif
 
-#if defined OLED_SPI && !defined USE_DC
-#error "Mandatory OLED DC Pin for SPI not configured!"
+#if defined DISPLAY_SPI && !defined USE_DC
+#error "Mandatory DISPLAY_DC Pin for SPI not configured!"
 #endif
 
-#if (!defined OLED_DEVICE || defined I2C_TRY_HW) && (!defined SW_SCL_Pin || !defined SW_SDA_Pin)
+#if (!defined DISPLAY_DEVICE || defined I2C_TRY_HW) && (!defined SW_SCL_Pin || !defined SW_SDA_Pin)
 #error "Current configuration requires definition of display pins "SW_SDA_Pin" and "SW_SCL_Pin""
 #endif
 
@@ -253,11 +254,11 @@ void buttonReset(void);
 #error "Current configuration requires definition of display pins "HW_SDA_Pin" and "HW_SCL_Pin""
 #endif
 
-#if defined I2C_TRY_HW && !defined OLED_DEVICE
-#error "I2C_TRY_HW defined, but OLED_DEVICE is missing!"
+#if defined I2C_TRY_HW && !defined DISPLAY_DEVICE
+#error "I2C_TRY_HW defined, but DISPLAY_DEVICE is missing!"
 #endif
 
-#if defined OLED_I2C && defined ST7565
+#if defined DISPLAY_I2C && defined ST7565
 #error "ST7565 cannot operate in I2C mode!"
 #endif
 

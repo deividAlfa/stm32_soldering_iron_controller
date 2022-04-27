@@ -5,8 +5,8 @@
  *      Author: David
  */
 
-#ifndef GRAPHICS_GUI_SCREENS_SCREEN_COMMON_H_
-#define GRAPHICS_GUI_SCREENS_SCREEN_COMMON_H_
+#ifndef _GUI_COMMON_H_
+#define _GUI_COMMON_H_
 
 
 #include "settings.h"

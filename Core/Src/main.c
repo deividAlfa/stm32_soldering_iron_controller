@@ -106,9 +106,9 @@ void malloc_fragmentation_fix(void){
 
 
 void Init(void){
-#if (defined OLED_SPI || defined OLED_I2C) && defined OLED_DEVICE
-  ssd1306_init(&OLED_DEVICE, &FILL_DMA);
-#elif defined OLED_SPI || defined OLED_I2C
+#if (defined DISPLAY_SPI || defined DISPLAY_I2C) && defined DISPLAY_DEVICE
+  ssd1306_init(&DISPLAY_DEVICE, &FILL_DMA);
+#elif defined DISPLAY_SPI || defined DISPLAY_I2C
   ssd1306_init(&FILL_DMA);
 #endif
 
@@ -244,7 +244,7 @@ void Error_Handler(void)
   /* User can add his own implementation to report the HAL error return state */
 
 #ifdef DEBUG_ERROR
-  #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
+  #if (defined DISPLAY_I2C || defined DISPLAY_SPI) && defined DISPLAY_DEVICE
   if(!oled.use_sw){
     display_dma_abort();
   }
@@ -265,10 +265,10 @@ void Error_Handler(void)
     strOut[outPos] = file[inPos];                            // Copy char
     strOut[outPos+1] = 0;                                    // Set out string null terminator
     uint8_t currentWidth = u8g2_GetStrWidth(&u8g2, strOut);  // Get width
-    if(currentWidth<OledWidth){                              // If less than oled width, increase input string pos
+    if(currentWidth<displayWidth){                              // If less than oled width, increase input string pos
       inPos++;
     }
-    if( (currentWidth>OledWidth) || (strOut[outPos]==0) ){  // If width bigger than oled width or current char null(We reached end of input string)
+    if( (currentWidth>displayWidth) || (strOut[outPos]==0) ){  // If width bigger than oled width or current char null(We reached end of input string)
       char current = strOut[outPos];                        // Store current char
       strOut[outPos]=0;                                     // Set current out char to null
       u8g2_DrawStr(&u8g2, 0, ypos, strOut);                 // Draw string
@@ -283,7 +283,7 @@ void Error_Handler(void)
     }
   };
 
-  #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
+  #if (defined DISPLAY_I2C || defined DISPLAY_SPI) && defined DISPLAY_DEVICE
 
   #ifdef I2C_TRY_HW
   if(oled.use_sw){

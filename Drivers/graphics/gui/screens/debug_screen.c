@@ -529,9 +529,9 @@ static uint8_t pid_debug_Draw(screen_t * scr){
         prev=pos-1;
       }
       u8g2_SetDrawColor(&u8g2, WHITE);
-      u8g2_DrawLine(&u8g2, x+(OledWidth-PID_SZ), 20-pidPlot->p[prev], x+(OledWidth-PID_SZ+1), 20-pidPlot->p[pos]);
-      u8g2_DrawLine(&u8g2, x+(OledWidth-PID_SZ), 42-pidPlot->i[prev], x+(OledWidth-PID_SZ+1), 42-pidPlot->i[pos]);
-      u8g2_DrawLine(&u8g2, x+(OledWidth-PID_SZ), 63-pidPlot->d[prev], x+(OledWidth-PID_SZ+1), 63-pidPlot->d[pos]);
+      u8g2_DrawLine(&u8g2, x+(displayWidth-PID_SZ), 20-pidPlot->p[prev], x+(displayWidth-PID_SZ+1), 20-pidPlot->p[pos]);
+      u8g2_DrawLine(&u8g2, x+(displayWidth-PID_SZ), 42-pidPlot->i[prev], x+(displayWidth-PID_SZ+1), 42-pidPlot->i[pos]);
+      u8g2_DrawLine(&u8g2, x+(displayWidth-PID_SZ), 63-pidPlot->d[prev], x+(displayWidth-PID_SZ+1), 63-pidPlot->d[pos]);
     }
   }
   return (default_screenDraw(scr));

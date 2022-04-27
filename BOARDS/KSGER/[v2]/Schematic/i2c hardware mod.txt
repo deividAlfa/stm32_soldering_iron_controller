@@ -1,4 +1,4 @@
 This was tested, howewever the performance was slower because the hardware tightly follows the i2c specifications.
 Software i2c makes a lot of hacks to squeeze the best performance, and it's about 50% faster.
 So this mod is disabled by default.
-Can be implemented by enabling i2c2 module, adjusting OLED_DEVICE and enabling I2C_TRY_HW in board.h
+Can be implemented by enabling i2c2 module, adjusting DISPLAY_DEVICE and enabling I2C_TRY_HW in board.h

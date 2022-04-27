@@ -5,8 +5,8 @@
  *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
-#ifndef GRAPHICS_GUI_CALIBRATION_SCREEN_H_
-#define GRAPHICS_GUI_CALIBRATION_SCREEN_H_
+#ifndef _GUI_CALIBRATION_SCREEN_H_
+#define _GUI_CALIBRATION_SCREEN_H_
 #include "screen.h"
 
 typedef enum { cal_250=0, cal_400=1, cal_0=2, cal_input_250=10, cal_input_400=11, cal_finished=20, cal_failed=21, cal_needsAdjust=22 }state_t;

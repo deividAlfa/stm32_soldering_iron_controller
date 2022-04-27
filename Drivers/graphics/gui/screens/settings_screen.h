@@ -5,8 +5,8 @@
  *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
-#ifndef SETTINGS_GUI_DEBUG_SCREEN_H_
-#define SETTINGS_GUI_DEBUG_SCREEN_H_
+#ifndef _GUI_SETTINGS_SCREEN_H_
+#define _GUI_SETTINGS_SCREEN_H_
 
 #include "screen.h"
 

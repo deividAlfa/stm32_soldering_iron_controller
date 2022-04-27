@@ -19,17 +19,20 @@
 #endif
 
 const settings_t defaultSettings = {
-  .version            = (~((uint32_t)SETTINGS_VERSION<<16)&0xFFFF0000) | SETTINGS_VERSION,  // Higher 16bit is 1s complement to make detection stronger against padding/endianness
+  .version            = (~((uint32_t)SETTINGS_VERSION<<16)&0xFFFF0000) | SETTINGS_VERSION,  // Higher 16bit is 1s complement to make detection stronger
 #ifdef ST7565
-  .contrast           = 0x16,
+  .contrast           = 0x2A,
 #else
   .contrast           = 255,
 #endif
   .dim_mode           = dim_sleep,
   .dim_Timeout        = 10000,                // ms
   .dim_inSleep        = enable,
-  .OledOffset         = OLED_OFFSET,
-  .guiUpdateDelay     = 200,                  //ms
+  .displayOffset      = DISPLAY_OFFSET,
+  .displayXflip       = 1,
+  .displayYflip       = 1,
+  .displayResRatio    = 5,                    // For ST7565 only
+  .guiUpdateDelay     = 200,                  // ms
   .guiTempDenoise     = 5,                    // ±5°C
   .tempUnit           = mode_Celsius,
   .tempStep           = 5,                    // 5º steps
@@ -38,7 +41,7 @@ const settings_t defaultSettings = {
   .saveSettingsDelay  = 5,                    // 5s
   .lvp                = 110,                  // 11.0V Low voltage
   .currentProfile     = profile_None,
-  .initMode           = mode_run,
+  .initMode           = mode_sleep,           // Safer to boot in sleep mode by default!
   .buzzerMode         = disable,
   .buttonWakeMode     = wake_all,
   .shakeWakeMode      = wake_all,
@@ -287,7 +290,13 @@ void restoreSettings() {
 
   loadProfile(systemSettings.settings.currentProfile);
 
-  setContrast(systemSettings.settings.contrast);
+  setDisplayContrast(systemSettings.settings.contrast);
+  setDisplayXflip(systemSettings.settings.displayXflip);
+  setDisplayYflip(systemSettings.settings.displayYflip);
+#ifdef ST7565
+  setDisplayResRatio(systemSettings.settings.displayResRatio);
+#endif
+
 }
 
 uint32_t ChecksumSettings(settings_t* settings){
@@ -315,10 +324,10 @@ void resetCurrentProfile(void){
     for(uint8_t x = 0; x < TipSize; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = T12_Cal250;
       systemSettings.Profile.tip[x].calADC_At_400   = T12_Cal400;     // These values are way lower, but better to be safe than sorry
-      systemSettings.Profile.tip[x].PID.Kp          = 7500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 4800;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kp          = 4450;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 12000;          // val = /1.000.000
       systemSettings.Profile.tip[x].PID.Kd          = 1200;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 85;             // val = /100
+      systemSettings.Profile.tip[x].PID.maxI        = 75;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);         // Empty name
     }
@@ -337,10 +346,10 @@ void resetCurrentProfile(void){
     for(uint8_t x = 0; x < TipSize; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = C245_Cal250;
       systemSettings.Profile.tip[x].calADC_At_400   = C245_Cal400;
-      systemSettings.Profile.tip[x].PID.Kp          = 1800;
-      systemSettings.Profile.tip[x].PID.Ki          = 500;
-      systemSettings.Profile.tip[x].PID.Kd          = 200;
-      systemSettings.Profile.tip[x].PID.maxI        = 85;
+      systemSettings.Profile.tip[x].PID.Kp          = 4450;
+      systemSettings.Profile.tip[x].PID.Ki          = 12000;
+      systemSettings.Profile.tip[x].PID.Kd          = 1200;
+      systemSettings.Profile.tip[x].PID.maxI        = 75;
       systemSettings.Profile.tip[x].PID.minI        = 0;
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
     }
@@ -359,10 +368,10 @@ void resetCurrentProfile(void){
     for(uint8_t x = 0; x < TipSize; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = C210_Cal250;
       systemSettings.Profile.tip[x].calADC_At_400   = C210_Cal400;
-      systemSettings.Profile.tip[x].PID.Kp          = 1800;
-      systemSettings.Profile.tip[x].PID.Ki          = 500;
-      systemSettings.Profile.tip[x].PID.Kd          = 200;
-      systemSettings.Profile.tip[x].PID.maxI        = 85;
+      systemSettings.Profile.tip[x].PID.Kp          = 4450;
+      systemSettings.Profile.tip[x].PID.Ki          = 12000;
+      systemSettings.Profile.tip[x].PID.Kd          = 1200;
+      systemSettings.Profile.tip[x].PID.maxI        = 75;
       systemSettings.Profile.tip[x].PID.minI        = 0;
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
     }
@@ -379,9 +388,9 @@ void resetCurrentProfile(void){
     Error_Handler();  // We shouldn't get here!
   }
   systemSettings.Profile.calADC_At_0                = 0;
-  systemSettings.Profile.tipFilter.coefficient      = 90;   // % of old data (more %, more filtering)
+  systemSettings.Profile.tipFilter.coefficient      = 75;   // % of old data (more %, more filtering)
   systemSettings.Profile.tipFilter.threshold        = 50;
-  systemSettings.Profile.tipFilter.min              = 65;   // Don't go below x% when decreasing after exceeding threshold limits
+  systemSettings.Profile.tipFilter.min              = 50;   // Don't go below x% when decreasing after exceeding threshold limits
   systemSettings.Profile.tipFilter.count_limit      = 0;
   systemSettings.Profile.tipFilter.step             = -3;   // -5% less everytime the reading diff exceeds threshold_limit and the counter is greater than count_limit
   systemSettings.Profile.tipFilter.reset_threshold  = 600;  // Any diff over 500 reset the filter (Tip removed or connected)
@@ -412,7 +421,7 @@ void resetCurrentProfile(void){
   systemSettings.Profile.sleepTimeout               = (uint32_t)5*60000;      // ms
   systemSettings.Profile.standbyTimeout             = (uint32_t)5*60000;
   systemSettings.Profile.standbyTemperature         = 180;
-  systemSettings.Profile.UserSetTemperature         = 180;
+  systemSettings.Profile.UserSetTemperature         = 320;
   systemSettings.Profile.MaxSetTemperature          = 450;
   systemSettings.Profile.MinSetTemperature          = 180;
   systemSettings.Profile.boostTimeout               = 60000;                  // ms
@@ -476,12 +485,12 @@ void loadProfile(uint8_t profile){
 }
 
 void Oled_error_init(void){
-  setContrast(255);
+  setDisplayContrast(defaultSettings.contrast);
   fillBuffer(BLACK,fill_soft);
   u8g2_SetFont(&u8g2,default_font );
   u8g2_SetDrawColor(&u8g2, WHITE);
   u8g2_SetMaxClipWindow(&u8g2);
-  systemSettings.settings.OledOffset = OLED_OFFSET;
+  systemSettings.settings.displayOffset = defaultSettings.displayOffset;
 }
 
 void Flash_error(void){

@@ -403,7 +403,7 @@ static void Cal_Start_create(screen_t *scr) {
   newWidget(&w,widget_button,scr);
   Widget_Cal_Button=w;
   w->width = 65;
-  w->posX = OledWidth - w->width - 1;
+  w->posX = displayWidth - w->width - 1;
   w->posY = 48;
   ((button_widget_t*)w->content)->displayString=strings[lang]._CANCEL;
   ((button_widget_t*)w->content)->selectable.tab=0;

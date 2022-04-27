@@ -5,8 +5,8 @@
  *      Author: David
  */
 
-#ifndef GRAPHICS_GUI_STRINGS_H_
-#define GRAPHICS_GUI_STRINGS_H_
+#ifndef _GUI_STRINGS_H_
+#define _GUI_STRINGS_H_
 
 
 #include "settings.h"
@@ -62,10 +62,6 @@ typedef struct{
   char * FILTER_Reset_limit;
 
   char * SYSTEM_Profile;
-  char * SYSTEM_Oled_Offset;
-  char * SYSTEM_Oled_Contrast;
-  char * SYSTEM_Oled_Dim;
-  char * SYSTEM_Oled_Dim_inSleep;
   char * SYSTEM_Boot;
   char * SYSTEM_Button_Wake;
   char * SYSTEM_Shake_Wake;
@@ -79,6 +75,15 @@ typedef struct{
   char * SYSTEM_Gui_Time;
   char * SYSTEM_DEBUG;
   char * SYSTEM_RESET_MENU;
+  char * SYSTEM_DISPLAY_MENU;
+
+  char * DISPLAY_Offset;
+  char * DISPLAY_Contrast;
+  char * DISPLAY_Xflip;
+  char * DISPLAY_Yflip;
+  char * DISPLAY_Ratio;
+  char * DISPLAY_Dim;
+  char * DISPLAY_Dim_inSleep;
 
   char * NTC_Enable_NTC;
   char * NTC_Pull;

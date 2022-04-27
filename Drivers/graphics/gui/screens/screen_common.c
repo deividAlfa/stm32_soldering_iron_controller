@@ -117,8 +117,8 @@ uint8_t checkScreenTimer(uint32_t time){
 }
 void restore_contrast(void){
 #ifndef ST7565
-  if(getContrast() != systemSettings.settings.contrast){
-    setContrast(systemSettings.settings.contrast);
+  if(getDisplayContrast() != systemSettings.settings.contrast){
+    setDisplayContrast(systemSettings.settings.contrast);
   }
 #endif
 }
@@ -126,9 +126,9 @@ void restore_contrast(void){
 void wakeOledDim(void){
 #ifndef ST7565
   dim.timer = current_time;
-  if(dim.step<=0 && getContrast()<systemSettings.settings.contrast ){
-    if(getOledPower()==disable){
-      setOledPower(enable);
+  if(dim.step<=0 && getDisplayContrast()<systemSettings.settings.contrast ){
+    if(getDisplayPower()==disable){
+      setDisplayPower(enable);
     }
     dim.step=10;
     dim.min_reached=0;
@@ -138,8 +138,8 @@ void wakeOledDim(void){
 
 void handleOledDim(void){
 #ifndef ST7565
-  uint16_t contrast=getContrast();
-  if(!getOledPower() && getCurrentMode()>mode_sleep){                   // If screen turned off and not in sleep mode, wake it.
+  uint16_t contrast=getDisplayContrast();
+  if(!getDisplayPower() && getCurrentMode()>mode_sleep){                   // If screen turned off and not in sleep mode, wake it.
     wakeOledDim();                                                   		// (Something woke the station from sleep)
   }
 
@@ -153,7 +153,7 @@ void handleOledDim(void){
     }
     // If min. brightness reached and Oled power is disabled in sleep mode, turn off screen if temp<100ºC or error active
     else if(dim.min_reached && getCurrentMode()==mode_sleep && systemSettings.settings.dim_inSleep==disable && (last_TIP_C<100 || (Iron.Error.Flags & FLAG_ACTIVE))){
-      setOledPower(disable);
+      setDisplayPower(disable);
       dim.min_reached=0;
     }
   }
@@ -162,14 +162,14 @@ void handleOledDim(void){
     dim.stepTimer = current_time;
     contrast+=dim.step;
     if(contrast>4 && contrast<systemSettings.settings.contrast){
-      setContrast(contrast);
+      setDisplayContrast(contrast);
     }
     else{
       if(dim.step>0){
         restore_contrast();
       }
       else{
-        setContrast(1);
+        setDisplayContrast(1);
         dim.min_reached=1;
       }
       dim.timer = current_time;

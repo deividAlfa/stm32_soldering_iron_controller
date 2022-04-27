@@ -5,8 +5,8 @@
  *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
-#ifndef GRAPHICS_GUI_OLED_H_
-#define GRAPHICS_GUI_OLED_H_
+#ifndef GRAPHICS_GUI_DISPLAY_H_
+#define GRAPHICS_GUI_DISPLAY_H_
 
 #include "screen.h"
 extern screen_t *current_screen;
@@ -24,4 +24,4 @@ void oled_init(RE_Rotation_t (*Rotation)(RE_State_t*), RE_State_t *State);
 void oled_processInput(void);
 void oled_update(void);
 void oled_handle(void);
-#endif /* GRAPHICS_GUI_OLED_H_ */
+#endif /* GRAPHICS_GUI_DISPLAY_H_ */
