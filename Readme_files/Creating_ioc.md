@@ -23,9 +23,9 @@ If you make a new .ioc file, ex. for a different MCU, follow this guide:<br>
         
 **OLED**<br>
 
-    * Oled CS:      GPIO Output, name: OLED_CS, no pull
-    * Oled DC:      GPIO Output, name: OLED_DC, no pull
-    * Oled RESET:   GPIO Output, name: OLED_RST, no pull
+    * Oled CS:      GPIO Output, name: DISPLAY_CS, no pull
+    * Oled DC:      GPIO Output, name: DISPLAY_DC, no pull
+    * Oled RESET:   GPIO Output, name: DISPLAY_RST, no pull
 
 
 **SOFTWARE SPI/I2C** (If used)<br>
