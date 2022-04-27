@@ -99,7 +99,7 @@ for %%M in (%MODELS%) do (
     IF %PROFILE%==%%M (SET CURRENT=%%M)
     CALL :BUILD
 )
-IF %BUILD%=="y" echo [32mBuild complete![0m
+IF %BUILD%=="y" echo [32mBuild complete![0m && echo Binaries placed in their respective BOARDS folder (STM32SolderingStation.bin)
 goto :DONE
 
 :BUILD
