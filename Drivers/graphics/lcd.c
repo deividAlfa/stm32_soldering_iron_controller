@@ -29,8 +29,8 @@ const uint8_t disp_init[] = { // Initialization for ST7565R
     1, c_bias_9,
     1, c_pwr_ctrl | c_pwr_boost | c_pwr_vreg | c_pwr_follow,
     2, c_boost_ratio, c_boost_234,
-    1, c_res_ratio | 0x05,
-    2, c_set_volume, 0x2A,
+    1, c_res_ratio | 5,
+    2, c_set_volume, 34,
     1, c_all_on,
 };
 #elif defined SSD1306
