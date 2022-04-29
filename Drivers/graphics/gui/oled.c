@@ -20,7 +20,7 @@ RE_Rotation_t (*RE_GetData)(RE_State_t*);
 RE_Rotation_t RE_Rotation;
 
 
-void oled_addScreen(screen_t *screen, uint8_t index){
+void oled_addScreen(screen_t *screen, screens_t index){
   screen->processInput = &default_screenProcessInput;
   screen->init = &default_init;
   screen->draw = &default_screenDraw;
