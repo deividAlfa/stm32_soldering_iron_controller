@@ -30,7 +30,7 @@ static uint8_t update, update_draw, zero_state;
 screen_t Screen_calibration;
 screen_t Screen_calibration_start;
 screen_t Screen_calibration_settings;
-static char zeroStr[32];
+static char zeroStr[16];
 static widget_t *Widget_Cal_Button;
 static widget_t *Widget_Cal_Measured;
 
