@@ -89,10 +89,10 @@ int _write(int32_t file, uint8_t *ptr, int32_t len)
 struct mallinfo mi;
 uint32_t max_allocated;
 #endif
-// Allocate max possible ram, then release it. This fill the malloc pool and avoids internal fragmentation due (ST's?) poor malloc implementation.
+// Allocate max possible ram, then release it. This fills the heap pool and avoids internal fragmentation due (ST's?) poor malloc implementation.
 void malloc_fragmentation_fix(void){
   uint32_t *ptr = NULL;
-  uint32_t try=17408;
+  uint32_t try=20480;                   // Current ram usage is ~5KB, so we should have have another 5/15KB free, depending on the stm32 used.
   while(!ptr && try){
     ptr = _malloc(try);
     try-=16;
