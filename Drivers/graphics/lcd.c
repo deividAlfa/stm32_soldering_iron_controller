@@ -505,6 +505,10 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 #endif
 
   if(device == oled.device){
+
+    if(oled.status!=oled_busy)        // We should get there only with busy flag.
+      Error_Handler();                // Additional check to ensure DMA/ISR doesn't make anything weird
+
     if(HAL_DMA_GetState(oled.device->hdmatx)!=HAL_DMA_STATE_READY){           // If DMA busy
       HAL_DMA_PollForTransfer(oled.device->hdmatx, HAL_DMA_FULL_TRANSFER, 10);
     }
@@ -523,6 +527,8 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
       for(uint8_t i=0; i<sizeof(cmd); i++)
         _lcd_write(&cmd[i], 1, modeCmd);
     }
+
+    oled.status=oled_busy;        // Can be resetted if _lcd_write calls display_dma_abort, so always set this value
 
 #ifdef DISPLAY_SPI
 #ifdef USE_CS
