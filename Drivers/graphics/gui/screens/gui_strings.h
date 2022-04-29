@@ -162,8 +162,8 @@ typedef struct{
 }strings_t;
 
 extern const strings_t strings[LANGUAGE_COUNT];
-extern char * tempUnit[2];
-extern char *profileStr[ProfileSize];
-extern char *Langs[LANGUAGE_COUNT];
+extern char * const tempUnit[2];
+extern char * const profileStr[ProfileSize];
+extern char * const Langs[LANGUAGE_COUNT];
 
 #endif /* GRAPHICS_GUI_STRINGS_H_ */
