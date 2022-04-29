@@ -21,7 +21,7 @@
 const settings_t defaultSettings = {
   .version            = (~((uint32_t)SETTINGS_VERSION<<16)&0xFFFF0000) | SETTINGS_VERSION,  // Higher 16bit is 1s complement to make detection stronger
 #ifdef ST7565
-  .contrast           = 0x2A,
+  .contrast           = 34,
 #else
   .contrast           = 255,
 #endif
@@ -72,14 +72,15 @@ void checkSettings(void){
   uint32_t CurrentTime = HAL_GetTick();
   uint8_t scr_index=current_screen->index;
 
-  // Disable saving when screens that use a lot of ram are active.
-  // Change detection will be active, but saving will postponed until exiting the screen. This is done to ensure compatibility with 10KB RAM devices
-  uint8_t noSave = (scr_index==screen_iron || scr_index==screen_system || scr_index==screen_tip_settings || scr_index==screen_debug );
+  // Ti reduce heap usage, only allow saving in smaller screens.
+  // Change detection will be active, but saving will postponed upon returnign to a smaller screen.
+  // This is done to ensure compatibility with 10KB RAM devices yet allowing the firmware to grow unconstrained
+  uint8_t allowSave = (scr_index==screen_main || scr_index==screen_settings || scr_index==screen_calibration || scr_index==screen_reset_confirmation );
 
 
 
   // Save from menu
-  if(systemSettings.save_Flag && !noSave){
+  if(systemSettings.save_Flag && allowSave){
     switch(systemSettings.save_Flag){
       case save_Settings:
         saveSettings(keepProfiles);
@@ -110,7 +111,7 @@ void checkSettings(void){
       default:
         Error_Handler();
     }
-    if(systemSettings.save_Flag>=reset_Profiles){
+    if(systemSettings.save_Flag>=reset_Profiles){       // If save flag indicates any resetting mode, reboot
       NVIC_SystemReset();
     }
     systemSettings.save_Flag=0;
@@ -134,17 +135,18 @@ void checkSettings(void){
       lastChangeTime = CurrentTime;                                                                                         // Reset timer (we don't save anything until we pass a certain time without changes)
     }
 
-    else if( !noSave && (CurrentTime-lastChangeTime)>((uint32_t)systemSettings.settings.saveSettingsDelay*1000)){           // If different from the previous calculated checksum, and timer expired (No changes for enough time)
+    else if(allowSave && (CurrentTime-lastChangeTime)>((uint32_t)systemSettings.settings.saveSettingsDelay*1000)){           // If different from the previous calculated checksum, and timer expired (No changes for enough time)
       saveSettings(save_Settings);                                                                                          // Data was saved (so any pending interrupt knows this)
     }
   }
 }
 
 
-//This is done to avoid huge stack build up. Trigger a save using checkSettings with a flag instead direct call from menu.
+//This is done to avoid huge stack build up. Trigger saving using checkSettings with a flag instead direct call from menu.
+// Thus, the flags stays after the screen exits. The code handling settings saving decides when it's ok to store them.
 void saveSettingsFromMenu(uint8_t mode){
   systemSettings.save_Flag=mode;
-  if(mode>=reset_Profiles){
+  if(mode>=reset_Profiles){           // Force safe mode (disable iron power) in any resetting mode, the station will reboot when done.
     setSafeMode(enable);
   }
 }
