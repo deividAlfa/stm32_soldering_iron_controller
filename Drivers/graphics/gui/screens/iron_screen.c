@@ -842,6 +842,8 @@ static void iron_create(screen_t *scr){
   //  [ BACK button ]
   //
   newComboScreen(w, strings[lang]._BACK, screen_settings, NULL);
+
+  update_Iron_menu();
 }
 
 static void iron_advFilter_onEnter(screen_t *scr){
