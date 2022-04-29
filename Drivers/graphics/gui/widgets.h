@@ -149,7 +149,7 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 int comboBoxProcessInput(widget_t* w, RE_Rotation_t, RE_State_t *);
 uint8_t comboBoxDraw(widget_t *w);
 void newComboScreen(widget_t *w, char *label, uint8_t actionScreen, comboBox_item_t **newItem);
-void newComboEditable( widget_t *combo, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem);
+void newComboEditable(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem);
 void newComboMultiOption(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem);
 void newComboAction(widget_t *w, char *label, int (*action)(widget_t *w, RE_Rotation_t input), comboBox_item_t **newItem);
 void comboResetIndex(widget_t *w);

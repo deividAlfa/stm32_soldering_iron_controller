@@ -1518,7 +1518,7 @@ void newComboScreen(widget_t *w, char *label, uint8_t actionScreen, comboBox_ite
 }
 
 // Only allows Editable or multioption widgets
-void newComboEditable( widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem){
+void newComboEditable(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem){
   comboBox_item_t *item = _malloc(sizeof(comboBox_item_t));
   editable_widget_t *edit = _malloc(sizeof(editable_widget_t));
   if(!item || !w || !label || !edit ){
