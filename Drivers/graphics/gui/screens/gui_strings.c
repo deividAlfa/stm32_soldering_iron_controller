@@ -77,12 +77,12 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 
       .DISPLAY_Contrast = "Contrast",
+      .DISPLAY_Offset = "Offset",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
       .DISPLAY_Ratio = "Ratio",
       .DISPLAY_Dim = "Dimmer",
       .DISPLAY_Dim_inSleep = " In sleep",
-      .DISPLAY_Offset = "Offset",
 
       .NTC_Enable_NTC = "Enable NTC",
       .NTC_Pull = "Pull",
@@ -225,12 +225,13 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 
       .DISPLAY_Contrast = "Яркость",
-      .DISPLAY_Xflip = "X flip",
-      .DISPLAY_Yflip = "Y flip",
-      .DISPLAY_Ratio = "Ratio",
+      .DISPLAY_Offset = "Сдвиг",
+      .DISPLAY_Xflip = "X Зерк.",
+      .DISPLAY_Yflip = "Y Зерк.",
+      .DISPLAY_Ratio = "Усиление",
       .DISPLAY_Dim = "Затемнение",
       .DISPLAY_Dim_inSleep = " Реж.Экрана",
-      .DISPLAY_Offset = "Сдвиг",
+
 
       .NTC_Enable_NTC = "Внешний NTC",
       .NTC_Pull = "Подтяжка",
@@ -374,12 +375,12 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 
       .DISPLAY_Contrast = "Kontrast",
+      .DISPLAY_Offset = "Offset",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
       .DISPLAY_Ratio = "Ratio",
       .DISPLAY_Dim = "Dimmer",
       .DISPLAY_Dim_inSleep = " I sovläge",
-      .DISPLAY_Offset = "Offset",
 
       .NTC_Enable_NTC = "Aktivera NTC",
       .NTC_Pull = "Pull",
@@ -522,12 +523,12 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 
       .DISPLAY_Contrast = "Kontrast",
+      .DISPLAY_Offset = "Versatz",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
       .DISPLAY_Ratio = "Ratio",
       .DISPLAY_Dim = "Dimmer",
       .DISPLAY_Dim_inSleep = " In sleep",
-      .DISPLAY_Offset = "Versatz",
 
       .NTC_Enable_NTC = "NTC Anschalt",
       .NTC_Pull = "Pull",
@@ -670,12 +671,12 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 
       .DISPLAY_Contrast = "kontrast",
+      .DISPLAY_Offset = "Dengele",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
       .DISPLAY_Ratio = "Ratio",
       .DISPLAY_Dim = "Karartma",
       .DISPLAY_Dim_inSleep = " Uykuda",
-      .DISPLAY_Offset = "Dengele",
 
       .NTC_Enable_NTC = "NTC Etkin",
       .NTC_Pull = "Çek",

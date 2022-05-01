@@ -77,8 +77,8 @@ typedef struct{
   char * SYSTEM_RESET_MENU;
   char * SYSTEM_DISPLAY_MENU;
 
-  char * DISPLAY_Offset;
   char * DISPLAY_Contrast;
+  char * DISPLAY_Offset;
   char * DISPLAY_Xflip;
   char * DISPLAY_Yflip;
   char * DISPLAY_Ratio;
