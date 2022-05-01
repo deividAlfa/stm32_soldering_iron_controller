@@ -50,7 +50,7 @@ const uint8_t disp_init[] = { // Initialization for SH1106 / SSD1306 / SSD1309
     1, c_all_off,
     1, c_inv_off,
     2, c_pump_1306_set, c_pump_on,     // For SSD1306
-    2, c_pump_1106_set, c_pump_on,     // For SH1106
+    //2, c_pump_1106_set, c_pump_on,     // For SH1106 -- Disabled, caused issues with ssd1309, sh1106 seems to work without it */
     1, c_pump_1106_adj | 0x03          // For SH1106, pump to 9V
 };
 #else
@@ -142,7 +142,7 @@ void enable_soft_mode(void){
 #endif
 }
 
-void disable_soft_i2c(void){
+void disable_soft_mode(void){
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
 #if defined SW_SCL_Pin && defined SW_SDA_Pin
@@ -194,8 +194,7 @@ void clock_byte(uint8_t b){
     Oled_Bit(b & 0x01);
   }
 #if (defined DISPLAY_I2C)
-  Oled_Set_SDA();
-  Oled_Clock();                     // Ack Nack pulse (we don't read it)
+  Oled_Bit(1);                                // Ack Nack pulse (we don't read it)
 #endif
 }
 
@@ -439,8 +438,6 @@ void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
     lcd_write((uint8_t*)&disp_init[i+1], disp_init[i], modeCmd);
     i+= disp_init[i]+1;
   }
-
-
   fillBuffer(BLACK,fill_dma); // Clear buffer
   update_display();           // Update display RAM
   setDisplayPower(enable);
