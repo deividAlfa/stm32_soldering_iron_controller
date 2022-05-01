@@ -30,8 +30,12 @@ const settings_t defaultSettings = {
   .dim_inSleep        = enable,
   .displayOffset      = DISPLAY_OFFSET,
   .displayXflip       = 1,
+#ifdef SSD1306
   .displayYflip       = 1,
+#elif defined ST7565
+  .displayYflip       = 0,
   .displayResRatio    = 5,                    // For ST7565 only
+#endif
   .guiUpdateDelay     = 200,                  // ms
   .guiTempDenoise     = 5,                    // ±5°C
   .tempUnit           = mode_Celsius,
@@ -72,10 +76,10 @@ void checkSettings(void){
   uint32_t CurrentTime = HAL_GetTick();
   uint8_t scr_index=current_screen->index;
 
-  // Ti reduce heap usage, only allow saving in smaller screens.
-  // Change detection will be active, but saving will postponed upon returnign to a smaller screen.
-  // This is done to ensure compatibility with 10KB RAM devices yet allowing the firmware to grow unconstrained
-  uint8_t allowSave = (scr_index==screen_main || scr_index==screen_settings || scr_index==screen_calibration || scr_index==screen_reset_confirmation );
+  // To reduce heap usage, only allow saving in smaller screens.
+  // Content change detection will be still active, but saving will postponed upon returning to a smaller screen.
+  // This is done to ensure compatibility with 10KB RAM devices yet allowing the firmware to grow unconstrained by ram usage
+  uint8_t allowSave = (scr_index==screen_boot|| scr_index==screen_main || scr_index==screen_settings || scr_index==screen_calibration || scr_index==screen_reset_confirmation );
 
 
 
