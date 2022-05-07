@@ -52,7 +52,6 @@ typedef struct {
   uint8_t             updateStandMode;                      // Flag to indicate the stand mode must be changed
   uint8_t             shakeActive;                          // Flag to indicate handle movement
   uint8_t             temperatureReached;                   // Flag for temperature calibration
-  uint8_t             DebugMode;                            // Flag to indicate Debug is enabled
   uint8_t             updatePwm;                            // Flag to indicate PWM need to be updated
   IronError_t         Error;                                // Error flags
   uint8_t             lastMode;                             // Last mode before error condition.
@@ -62,7 +61,6 @@ typedef struct {
   uint16_t            Pwm_Max;                              // Max PWM output for power limit
   int16_t             UserSetTemperature;                   // Run mode user setpoint
   int16_t             CurrentSetTemperature;                // Actual set temperature (Setpoint)
-  int16_t             Debug_SetTemperature;                 // Debug mode temperature
 
   uint32_t            Pwm_Out;                              // Last calculated PWM value
   uint32_t            LastModeChangeTime;                   // Last time the mode was changed (To provide debouncing)
@@ -104,10 +102,6 @@ void addModeChangedCallback(currentModeChanged callback);
 void handleIron(void);
 void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32_t pwmchannel);
 uint8_t getIronOn();
-void setDebugTemp(uint16_t value);
-uint16_t getDebugTemp(void);
-void setDebugMode(uint8_t value);
-uint8_t getDebugMode(void);
 void setCalibrationMode(uint8_t mode);
 uint8_t getCalibrationMode(void);
 void configurePWMpin(uint8_t mode);

@@ -152,12 +152,7 @@ void handleIron(void) {
   #endif
 
   // Update PID
-  if(Iron.DebugMode==enable){                                                               // If in debug mode, use debug setpoint value
-    Iron.Pwm_Out = calculatePID(Iron.Debug_SetTemperature, TIP.last_avg, Iron.Pwm_Max);
-  }
-  else{                                                                                               // Else, use current setpoint value
-    Iron.Pwm_Out = calculatePID(human2adc(Iron.CurrentSetTemperature), TIP.last_avg, Iron.Pwm_Max);
-  }
+  Iron.Pwm_Out = calculatePID(human2adc(Iron.CurrentSetTemperature), TIP.last_avg, Iron.Pwm_Max);
 
   if(!Iron.Pwm_Out){
     Iron.CurrentIronPower = 0;
@@ -355,7 +350,7 @@ void runAwayCheck(void){
     Error_Handler();
   }
 
-  if(power && (Iron.RunawayStatus==runaway_ok)  && (Iron.DebugMode==disable) && (last_TIP_C > setTemp)){
+  if(power && (Iron.RunawayStatus==runaway_ok) && (last_TIP_C > setTemp)){
 
     if(last_TIP_C>500){ Iron.RunawayLevel=runaway_500; }                                    // 500ºC limit
     else{
@@ -653,25 +648,6 @@ void setSafeMode(bool mode){
 
 bool GetSafeMode() {
   return(Iron.Error.safeMode && Iron.Error.active);
-}
-
-void setDebugTemp(uint16_t value) {
-  __disable_irq();
-  Iron.Debug_SetTemperature = value;
-  __enable_irq();
-}
-
-uint16_t getDebugTemp(void){
-  return Iron.Debug_SetTemperature;
-}
-
-void setDebugMode(uint8_t value) {
-  __disable_irq();
-  Iron.DebugMode = value;
-  __enable_irq();
-}
-uint8_t getDebugMode(void){
-  return Iron.DebugMode;
 }
 
 void setCalibrationMode(uint8_t mode){
