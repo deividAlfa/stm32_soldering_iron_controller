@@ -115,12 +115,7 @@ static void setDimTurnOff(uint32_t *val) {
 
 //=========================================================
 static void display_onEnter(screen_t *scr){
-  if(scr==&Screen_settings){
-    comboResetIndex(Screen_display.current_widget);
-  }
-}
-
-static void display_onExit(screen_t *scr){
+  comboResetIndex(Screen_display.current_widget);
 }
 
 static void display_create(screen_t *scr){
@@ -240,7 +235,6 @@ static void display_create(screen_t *scr){
 void display_screen_setup(screen_t *scr){
 
   scr->onEnter = &display_onEnter;
-  scr->onExit = &display_onExit;
   scr->processInput=&autoReturn_ProcessInput;
   scr->create = &display_create;
 }
