@@ -17,7 +17,7 @@ static bool backupTempUnit;
 static char* state_tempstr[2] = { "250\260C", "400\260C" };
 static uint16_t measured_temps[2];
 static uint16_t adcAtTemp[2];
-static uint16_t adcCal[2];
+static int16_t adcCal[2];
 static uint16_t calAdjust[3];
 static uint16_t backup_calADC_At_0;
 static state_t current_state;
@@ -55,7 +55,7 @@ static uint8_t processCalibration(void) {
   }
   adcCal[cal_250] = map(state_temps[cal_250], 0, measured_temps[cal_250], systemSettings.Profile.calADC_At_0, adcAtTemp[cal_250]);
   adcCal[cal_400] = map(state_temps[cal_400], measured_temps[cal_250], measured_temps[cal_400], adcAtTemp[cal_250], adcAtTemp[cal_400]);
-  if(adcCal[cal_250]>4090 || adcCal[cal_400]>4090 || adcCal[cal_400]<adcCal[cal_250]){    // Check that values are valid and don't exceed ADC range
+  if(adcCal[cal_250]>4090 || adcCal[cal_250]<0 || adcCal[cal_400]>4090 || adcCal[cal_400]<0 || adcCal[cal_400]<adcCal[cal_250]){    // Check that values are valid and don't exceed ADC range
     return 1;
   }
   return 0;
