@@ -7,7 +7,6 @@
 
 #include "system_screen.h"
 #include "screen_common.h"
-#include "tempsensors.h"
 
 screen_t Screen_system;
 screen_t Screen_system_ntc;

@@ -5,23 +5,8 @@
  *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
-
-#include <adc_global.h>
-#include <iron.h>
-#include <oled.h>
-#include <pid.h>
-#include <rotary_encoder.h>
-#include <screen_common.h>
-#include <settings.h>
-#include <settings_screen.h>
-#include <lcd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/_stdint.h>
-#include <tempsensors.h>
-#include <u8g2.h>
-#include <widgets.h>
 #include "debug_screen.h"
+#include "screen_common.h"
 
 #ifdef ENABLE_DEBUG_SCREEN
 
