@@ -9,7 +9,7 @@
 #include "pid.h"
 #include "iron.h"
 #include "gui.h"
-#include "lcd.h"
+#include "display.h"
 #include "tempsensors.h"
 #include "main.h"
 

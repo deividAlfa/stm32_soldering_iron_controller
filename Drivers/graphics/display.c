@@ -1,4 +1,4 @@
-#include "lcd.h"
+#include "display.h"
 #include "settings.h"
 #include "buzzer.h"
 #include "iron.h"
@@ -23,7 +23,7 @@ static void _lcd_write(uint8_t *data, uint16_t count, uint8_t mode);
 const uint8_t disp_init[] = { // Initialization for ST7565R
     1, c_disp_off,
     1, c_start_line,
-    1, c_remap_on,
+    1, c_remap_off,
     1, c_com_rev,
     1, c_inv_off,
     1, c_bias_9,
@@ -334,7 +334,6 @@ void setDisplayRow(uint8_t row){
   uint8_t cmd[] = { c_page | row, c_col_H, c_col_L | systemSettings.settings.displayOffset };
   for(uint8_t i=0; i<sizeof(cmd); i++)
       lcd_write(&cmd[i], 1, modeCmd);     // Normal
-
 }
 
 void setDisplayPower(uint8_t power){
@@ -381,14 +380,14 @@ uint8_t getDisplayContrast(void) {
 }
 
 #if !defined DISPLAY_DEVICE
-void ssd1306_init(DMA_HandleTypeDef *dma){
+void lcd_init(DMA_HandleTypeDef *dma){
   enable_soft_mode();
   oled.use_sw=1;
 #elif defined DISPLAY_SPI && defined DISPLAY_DEVICE
-void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma){
+void lcd_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma){
   oled.device  = device;
 #elif defined DISPLAY_I2C && defined DISPLAY_DEVICE
-void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
+void lcd_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
   oled.device  = device;
   i2c_workaround();
 #endif

@@ -197,15 +197,15 @@ void i2cBegin(uint8_t mode);
 
 #if defined DISPLAY_DEVICE
 #if defined DISPLAY_SPI
-void ssd1306_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma);
+void lcd_init(SPI_HandleTypeDef *device,DMA_HandleTypeDef *dma);
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *device);
 #elif defined DISPLAY_I2C
-void ssd1306_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma);
+void lcd_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma);
 void i2c_workaround(void);
 void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device);
 #endif
 #else
-void ssd1306_init(DMA_HandleTypeDef *dma);
+void lcd_init(DMA_HandleTypeDef *dma);
 #endif
 
 void fatalError(uint8_t type);

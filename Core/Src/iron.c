@@ -11,7 +11,7 @@
 #include "main.h"
 #include "tempsensors.h"
 #include "voltagesensors.h"
-#include "lcd.h"
+#include "display.h"
 #include "screens.h"
 #include "oled.h"
 

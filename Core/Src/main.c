@@ -30,7 +30,7 @@
 #include "rotary_encoder.h"
 #include "tempsensors.h"
 #include "voltagesensors.h"
-#include "lcd.h"
+#include "display.h"
 #include "gui.h"
 #include "screen.h"
 #include "myTest.h"
@@ -107,9 +107,9 @@ void malloc_fragmentation_fix(void){
 
 void Init(void){
 #if (defined DISPLAY_SPI || defined DISPLAY_I2C) && defined DISPLAY_DEVICE
-  ssd1306_init(&DISPLAY_DEVICE, &FILL_DMA);
+  lcd_init(&DISPLAY_DEVICE, &FILL_DMA);
 #elif defined DISPLAY_SPI || defined DISPLAY_I2C
-  ssd1306_init(&FILL_DMA);
+  lcd_init(&FILL_DMA);
 #endif
 
     guiInit();

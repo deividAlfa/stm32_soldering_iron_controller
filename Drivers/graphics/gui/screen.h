@@ -12,7 +12,7 @@
 #include "iron.h"
 #include "pid.h"
 #include "settings.h"
-#include "lcd.h"
+#include "display.h"
 
 #include "widgets.h"
 #include "adc_global.h"

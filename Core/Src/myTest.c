@@ -10,7 +10,7 @@
 #include "main.h"
 #include "board.h"
 #include "iron.h"
-#include "lcd.h"
+#include "display.h"
 #include "gui.h"
 
 #ifdef RUN_MY_TEST
