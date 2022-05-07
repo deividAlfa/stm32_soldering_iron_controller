@@ -45,6 +45,7 @@ typedef struct {
   uint8_t             CurrentIronPower;                     // Last output power
   uint8_t             CurrentMode;                          // Actual working mode (Standby, Sleep, Normal, Boost)
   uint8_t             changeMode;                           // change working mode to (Standby, Sleep, Normal, Boost)
+  uint8_t             resetRunawayHistory;                  // Flag to indicate it must reset the history (When temp is changed)
   uint8_t             RunawayLevel;                         // Runaway actual level
   uint8_t             prevRunawayLevel;                     // Runaway previous level
   uint8_t             RunawayStatus;                        // Runaway triggered flag

@@ -329,21 +329,27 @@ void runAwayCheck(void){
   if(systemSettings.setupMode==enable || (Iron.Error.safeMode && Iron.Error.active)){
     return;
   }
-  if(pid.reset){
-    for(uint8_t t=0; t<RUNAWAY_SZ; t++){                                                      // Clear power history if pid was resetted
-       prev_power[t]=0;
+  if(Iron.resetRunawayHistory){
+    if(Iron.resetRunawayHistory==1){                                                            // Clear power history if temperature was changed
+      for(uint8_t t=0; t<RUNAWAY_SZ; t++)
+         prev_power[t]=0;
     }
+    else if(++Iron.resetRunawayHistory>2)                                                      // Ignore power monitoring for 3 PWM cycles
+      Iron.resetRunawayHistory=0;
   }
+
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     setTemp = TempConversion(setTemp, mode_Celsius, 0);
   }
-  prev_power[pos]=Iron.CurrentIronPower;                                                      // Circular buffer
-  if(++pos>RUNAWAY_SZ-1){ pos=0; }
-
-  for(uint8_t t=0; t<RUNAWAY_SZ; t++){
-    power += prev_power[t];
+  if(!Iron.resetRunawayHistory){                                                                // Ignore power if flag is set
+    prev_power[pos]=Iron.CurrentIronPower;                                                      // Circular buffer
+    if(++pos>RUNAWAY_SZ-1)
+      pos=0;
+    for(uint8_t t=0; t<RUNAWAY_SZ; t++)
+      power += prev_power[t];
+    power /= RUNAWAY_SZ;
   }
-  power /= RUNAWAY_SZ;
+
 
   // If by any means the PWM output is higher than max calculated, generate error
   if((Iron.Pwm_Out > (Iron.Pwm_Period+1)) || (Iron.Pwm_Out != __HAL_TIM_GET_COMPARE(Iron.Pwm_Timer,Iron.Pwm_Channel))){
@@ -484,7 +490,6 @@ void setCurrentMode(uint8_t mode){
   }
   if(Iron.CurrentMode != mode){                                                           // If current mode is different
     Iron.CurrentMode = mode;
-    resetPID();
     if(!Iron.calibrating){
       buzzer_long_beep();
       modeChanged(mode);
@@ -667,7 +672,6 @@ uint8_t getCalibrationMode(void){
 void setUserTemperature(uint16_t temperature) {
   __disable_irq();
   Iron.UserSetTemperature = temperature;
-  resetPID();
   if(Iron.CurrentMode==mode_run){
     Iron.temperatureReached = 0;
     Iron.CurrentSetTemperature = temperature;
