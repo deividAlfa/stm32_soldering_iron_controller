@@ -25,33 +25,42 @@ void setupPID(pid_values_t* p) {
 int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t base) {
   float dt = (float)(HAL_GetTick() - pid.lastTime)/1000;
   float error = setpoint - measurement;
-
-  pid.proportional = pid.Kp * error;                                            // Proportional term
-                                                                 // Else, normal PID calculation
-  pid.integrator = pid.integrator + (pid.Ki*(error*dt));                      // Integral
-
-  if (pid.integrator > pid.limMaxInt) {                                       // Integrator clamping
-    pid.integrator = pid.limMaxInt;
+  pid.proportional = pid.Kp * error;                                          // Proportional term
+#if defined PID_RESET_CYCLES && PID_RESET_CYCLES>0
+  if(pid.reset && ++pid.reset>(PID_RESET_CYCLES-1))                               // If pid resetted, only use proportional for few cycles to avoid spikes
+      pid.reset = 0;
+  if(!pid.reset){                                                               // Normal PID calculation
+#endif
+    pid.integrator = pid.integrator + (pid.Ki*(error*dt));                      // Integral
+    if (pid.integrator > pid.limMaxInt)                                         // Integrator clamping
+      pid.integrator = pid.limMaxInt;
+    else if (pid.integrator < pid.limMinInt)
+      pid.integrator = pid.limMinInt;
+    pid.derivative = pid.Kd*((error-pid.prevError)/dt);
+    pid.out = pid.proportional + pid.integrator + pid.derivative;               // Compute output
+#if defined PID_RESET_CYCLES && PID_RESET_CYCLES>0
   }
-  else if (pid.integrator < pid.limMinInt) {
-    pid.integrator = pid.limMinInt;
-  }
-  pid.derivative = pid.Kd*((error-pid.prevError)/dt);
-
-  pid.out = pid.proportional + pid.integrator + pid.derivative;               // Compute output
-
-  if(pid.out > pid.limMax){                                                     // Apply limits
+  else
+    pid.out = pid.proportional;                                                 // Reset PID mode, only proportional
+#endif
+  if(pid.out > pid.limMax)                                                      // Apply limits
       pid.out = pid.limMax;
-  } else if (pid.out < pid.limMin) {
+  else if (pid.out < pid.limMin)
       pid.out = pid.limMin;
-  }
-
   pid.prevMeasurement = measurement;                                            // Store data for later use
   pid.lastTime = HAL_GetTick();
   pid.prevError = error;
   return (pid.out*base);
 }
 
+void resetPID(void){
+#if defined PID_RESET_CYCLES && PID_RESET_CYCLES>0
+  pid.reset = 1;
+#endif
+  pid.proportional=0;
+  pid.integrator=0;
+  pid.derivative=0; // Clear these mainly for debugging purposes
+}
 
 float getPID_D() {
   return pid.derivative;

@@ -10,6 +10,7 @@
 
 #include "main.h"
 
+#define PID_RESET_CYCLES 1
 typedef struct pid_values {
   uint16_t  Kp;
   uint16_t  Ki;
@@ -19,6 +20,7 @@ typedef struct pid_values {
 } pid_values_t;
 
 typedef struct {
+  uint8_t   reset;
   uint32_t  lastTime;
   int32_t   lastMeasurement;
   int32_t   lastSetpoint;
@@ -53,6 +55,7 @@ extern PIDController_t pid;
 
 void setupPID(pid_values_t* p);
 int32_t calculatePID(int32_t setpoint, int32_t measurement, int32_t base);
+void resetPID();
 float getPID_P();
 float getPID_I();
 float getPID_D();

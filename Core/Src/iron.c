@@ -316,38 +316,40 @@ void configurePWMpin(uint8_t mode){
 }
 
 
-// Check iron runaway
-// Number of old power values stored to compute the average power.
-#define RUNAWAY_SZ  3
+void resetRunAway(void){
+#if defined RUNAWAY_RESET_CYCLES && RUNAWAY_RESET_CYCLES>0
+  Iron.resetRunawayHistory=1;
+#endif
+}
 
 void runAwayCheck(void){
   uint32_t CurrentTime = HAL_GetTick();
   uint16_t setTemp = Iron.CurrentSetTemperature;
-  static uint8_t pos, prev_power[RUNAWAY_SZ];
+  static uint8_t pos, prev_power[RUNAWAY_DEPTH];
   uint8_t power = 0;
 
   if(systemSettings.setupMode==enable || (Iron.Error.safeMode && Iron.Error.active)){
     return;
   }
+#if defined RUNAWAY_RESET_CYCLES && RUNAWAY_RESET_CYCLES>0
   if(Iron.resetRunawayHistory){
-    if(Iron.resetRunawayHistory==1){                                                            // Clear power history if temperature was changed
-      for(uint8_t t=0; t<RUNAWAY_SZ; t++)
+    if(Iron.resetRunawayHistory==1)                                                             // Clear power history only once
+      for(uint8_t t=0; t<RUNAWAY_DEPTH; t++)
          prev_power[t]=0;
-    }
-    else if(++Iron.resetRunawayHistory>2)                                                      // Ignore power monitoring for 3 PWM cycles
+    if(++Iron.resetRunawayHistory>(RUNAWAY_RESET_CYCLES-1))                                         // Clear flag
       Iron.resetRunawayHistory=0;
   }
-
+#endif
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     setTemp = TempConversion(setTemp, mode_Celsius, 0);
   }
   if(!Iron.resetRunawayHistory){                                                                // Ignore power if flag is set
     prev_power[pos]=Iron.CurrentIronPower;                                                      // Circular buffer
-    if(++pos>RUNAWAY_SZ-1)
+    if(++pos>RUNAWAY_DEPTH-1)
       pos=0;
-    for(uint8_t t=0; t<RUNAWAY_SZ; t++)
+    for(uint8_t t=0; t<RUNAWAY_DEPTH; t++)
       power += prev_power[t];
-    power /= RUNAWAY_SZ;
+    power /= RUNAWAY_DEPTH;
   }
 
 
@@ -490,6 +492,8 @@ void setCurrentMode(uint8_t mode){
   }
   if(Iron.CurrentMode != mode){                                                           // If current mode is different
     Iron.CurrentMode = mode;
+    resetPID();
+    resetRunAway();
     if(!Iron.calibrating){
       buzzer_long_beep();
       modeChanged(mode);
@@ -673,6 +677,8 @@ void setUserTemperature(uint16_t temperature) {
   __disable_irq();
   Iron.UserSetTemperature = temperature;
   if(Iron.CurrentMode==mode_run){
+    resetPID();
+    resetRunAway();
     Iron.temperatureReached = 0;
     Iron.CurrentSetTemperature = temperature;
   }
