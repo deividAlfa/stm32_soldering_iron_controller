@@ -147,24 +147,20 @@ static void * get_PWR() {
 }
 //=========================================================
 static uint8_t scalePlot(int32_t val){
-  val+=10;
-  if(val>20){
+  if(val>20)
     val=20;
-  }
-  else if(val<0){
+  else if(val<0)
     val=0;
-  }
   return (uint8_t)val;
 }
 
 void updatePIDplot(void){
   if(update){
-    pidPlot->p[pidPlot->index] = scalePlot(getPID_P()* 10);
-    pidPlot->i[pidPlot->index] = scalePlot(getPID_I()* pidPlot->i_scale);
-    pidPlot->d[pidPlot->index] = scalePlot(getPID_D()* 10);
-    if(++pidPlot->index>(PID_SZ-1)){
+    pidPlot->p[pidPlot->index] = scalePlot((getPID_P()*10)+10);
+    pidPlot->i[pidPlot->index] = scalePlot(getPID_I()*pidPlot->i_scale);
+    pidPlot->d[pidPlot->index] = scalePlot((getPID_D()*10)+10);
+    if(++pidPlot->index>(PID_SZ-1))
       pidPlot->index=0;
-    }
   }
 }
 
