@@ -330,10 +330,10 @@ void resetCurrentProfile(void){
     for(uint8_t x = 0; x < TipSize; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = T12_Cal250;
       systemSettings.Profile.tip[x].calADC_At_400   = T12_Cal400;     // These values are way lower, but better to be safe than sorry
-      systemSettings.Profile.tip[x].PID.Kp          = 4450;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 12000;          // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 1200;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 75;             // val = /100
+      systemSettings.Profile.tip[x].PID.Kp          = 4000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 5500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 700;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);         // Empty name
     }
@@ -352,10 +352,10 @@ void resetCurrentProfile(void){
     for(uint8_t x = 0; x < TipSize; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = C245_Cal250;
       systemSettings.Profile.tip[x].calADC_At_400   = C245_Cal400;
-      systemSettings.Profile.tip[x].PID.Kp          = 4450;
-      systemSettings.Profile.tip[x].PID.Ki          = 12000;
-      systemSettings.Profile.tip[x].PID.Kd          = 1200;
-      systemSettings.Profile.tip[x].PID.maxI        = 75;
+      systemSettings.Profile.tip[x].PID.Kp          = 4000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 5500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 700;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
     }
@@ -374,10 +374,10 @@ void resetCurrentProfile(void){
     for(uint8_t x = 0; x < TipSize; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = C210_Cal250;
       systemSettings.Profile.tip[x].calADC_At_400   = C210_Cal400;
-      systemSettings.Profile.tip[x].PID.Kp          = 4450;
-      systemSettings.Profile.tip[x].PID.Ki          = 12000;
-      systemSettings.Profile.tip[x].PID.Kd          = 1200;
-      systemSettings.Profile.tip[x].PID.maxI        = 75;
+      systemSettings.Profile.tip[x].PID.Kp          = 4000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 5500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 700;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
     }
