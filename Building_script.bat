@@ -15,8 +15,9 @@ SET MODELS=    "BOARDS\KSGER\[v1.5]\STM32F103_SSD1306";^
                "BOARDS\Quicko\STM32F072_SSD1306";^
                "BOARDS\Quicko\STM32F072_ST7565"
 SET PROFILE=""
-SET BUILD="n"
-
+SET RUN_CUBEMX="n"
+SET COMPILE="n"
+cls
 echo.
 echo     STM32 Soldering firmware automated builder.
 echo.
@@ -35,22 +36,34 @@ echo     [A]   Build all
 echo     [Q]   Quit
 echo.
 CHOICE /C 123456789AQ /N /M "Please select your building target:"
-IF "%ERRORLEVEL%"=="1" SET PROFILE="BOARDS\KSGER\[v1.5]\STM32F103_SSD1306" && GOTO :ASKBUILD
-IF "%ERRORLEVEL%"=="2" SET PROFILE="BOARDS\KSGER\[v1.5]\STM32F103_ST7565" && GOTO :ASKBUILD
-IF "%ERRORLEVEL%"=="3" SET PROFILE="BOARDS\KSGER\[v2]\STM32F101_SSD1306" && GOTO :ASKBUILD
-IF "%ERRORLEVEL%"=="4" SET PROFILE="BOARDS\KSGER\[v3]\STM32F101_SSD1306" && GOTO :ASKBUILD
-IF "%ERRORLEVEL%"=="5" SET PROFILE="BOARDS\KSGER\[v3]\STM32F101_ST7565" && GOTO :ASKBUILD
-IF "%ERRORLEVEL%"=="6" SET PROFILE="BOARDS\Quicko\STM32F072_SSD1306" && GOTO :ASKBUILD
-IF "%ERRORLEVEL%"=="7" SET PROFILE="BOARDS\Quicko\STM32F072_ST7565" && GOTO :ASKBUILD
-IF "%ERRORLEVEL%"=="8" SET PROFILE="BOARDS\Quicko\STM32F103_SSD1306" && GOTO :ASKBUILD
-IF "%ERRORLEVEL%"=="9" SET PROFILE="BOARDS\Quicko\STM32F103_ST7565" && GOTO :ASKBUILD
-IF "%ERRORLEVEL%"=="10" SET PROFILE="" && SET BUILD="y" && GOTO :TOOLS
+cls
+IF "%ERRORLEVEL%"=="1" SET PROFILE="BOARDS\KSGER\[v1.5]\STM32F103_SSD1306" && GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="2" SET PROFILE="BOARDS\KSGER\[v1.5]\STM32F103_ST7565" && GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="3" SET PROFILE="BOARDS\KSGER\[v2]\STM32F101_SSD1306" && GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="4" SET PROFILE="BOARDS\KSGER\[v3]\STM32F101_SSD1306" && GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="5" SET PROFILE="BOARDS\KSGER\[v3]\STM32F101_ST7565" && GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="6" SET PROFILE="BOARDS\Quicko\STM32F072_SSD1306" && GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="7" SET PROFILE="BOARDS\Quicko\STM32F072_ST7565" && GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="8" SET PROFILE="BOARDS\Quicko\STM32F103_SSD1306" && GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="9" SET PROFILE="BOARDS\Quicko\STM32F103_ST7565" && GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="10" SET PROFILE="" && SET RUN_CUBEMX="y" && SET COMPILE="y" && GOTO :TOOLS
 IF "%ERRORLEVEL%"=="11" GOTO :END
 
-:ASKBUILD
-CHOICE /M "Build? (Choosing No will just copy the files)"
-IF "%ERRORLEVEL%"=="1" SET BUILD="y" && GOTO :TOOLS
-IF "%ERRORLEVEL%"=="2" SET BUILD="n" && GOTO :ONLYCOPY
+:ASKCUBEMX
+echo.
+echo     Run options
+echo.
+echo     [1]   Only copy files
+echo     [2]   Copy files and run CubeMX
+echo     [3]   Copy files, run CubeMX and compile
+echo     [Q]   Quit
+echo.
+CHOICE /C 123Q /N /M "Please select an option:"
+cls
+IF "%ERRORLEVEL%"=="1" GOTO :ONLYCOPY
+IF "%ERRORLEVEL%"=="2" SET RUN_CUBEMX="y" && GOTO :TOOLS
+IF "%ERRORLEVEL%"=="3" SET RUN_CUBEMX="y" && SET COMPILE="y" && GOTO :TOOLS
+IF "%ERRORLEVEL%"=="4" GOTO :END
 
 REM ##################  [TRY FINDING THE TOOLS IF INVALID PATHS DETECTED]  ##################
 :TOOLS
@@ -99,7 +112,7 @@ for %%M in (%MODELS%) do (
     IF %PROFILE%==%%M (SET CURRENT=%%M)
     CALL :BUILD
 )
-IF %BUILD%=="y" echo [32mBuild complete![0m && echo Binaries placed in their respective BOARDS folder (STM32SolderingStation.bin)
+IF %COMPILE%=="y" echo [32mBuild complete![0m && echo Binaries placed in their respective BOARDS folder (STM32SolderingStation.bin)
 goto :DONE
 
 :BUILD
@@ -109,7 +122,7 @@ echo [93mProfile: %CURRENT%[0m
 del Core\Inc\board.h Core\Inc\*stm32*.* Core\Src\*stm32*.* Core\Startup\*.s .cproject .project *.ioc *.bin /Q 2>nul >nul
 xcopy /e /k /h /i /s /q /y %CURRENT% >nul
 
-IF %BUILD%=="n" ( EXIT /B )
+IF %RUN_CUBEMX%=="n" ( EXIT /B )
 
 echo [94mRunning CubeMX...[0m
 start /w /min "CubeMX" java -jar "%MX%" -q cubemx_script 2>nul >nul
@@ -118,6 +131,8 @@ IF %ERRORLEVEL% NEQ 0 (
   echo [91mCubeMX error![0m
   goto :DONE
 )       
+
+IF %COMPILE%=="n" ( EXIT /B )
 
 echo [94mCompiling...[0m
 start /w /min "CubeIDE" %IDE% --launcher.suppressErrors -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import %cd% -build STM32SolderingStation/Release 2>nul >nul
