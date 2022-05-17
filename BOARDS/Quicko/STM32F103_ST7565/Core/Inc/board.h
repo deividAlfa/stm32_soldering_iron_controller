@@ -93,6 +93,17 @@
 #define BUZZER_OFF          HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET)
 #define BUZZER_TOGGLE       HAL_GPIO_TogglePin(BUZZER_GPIO_Port, BUZZER_Pin)
 
+/********************************
+ *       Addons/Extras    *
+ ********************************/
+//#define ENABLE_ADDON_FUME_EXTRACTOR      // addon for controlling a fume extractor, must define a gpio output pin "EXTRACTOR" to use
+//#define ENABLE_ADDON_SWITCH_OFF_REMINDER // addon to beep periodically in sleep mode
+
+// logical or together all the addons
+#if defined(ENABLE_ADDON_FUME_EXTRACTOR)      || \
+    defined(ENABLE_ADDON_SWITCH_OFF_REMINDER)
+#define ENABLE_ADDONS
+#endif
 
 /********************************
  *       Misc    *
@@ -100,6 +111,8 @@
 //#define NOSAVESETTINGS                                      // Don't use flash to save or load settings. Always use defaults (for debugging purposes)
 //#define SWO_PRINT                                           // To enable printing through SWO
 
+// Define if the board has a battery. Adds "remember set temp" feature.
+//#define HAS_BATTERY
 
 #ifdef USE_NTC
 
