@@ -7,6 +7,8 @@ Currently, these are the available languages:
 - **English**<br>
 - **Russian**<br>
 - **Swedish**<br>
+- **German**<br>
+- **Turkish**<br>
 
 You can select between the following profiles:
 - **Hakko T12** (T15 Series in North America & EU) This is the handle normally used with these controllers.<br>
@@ -61,16 +63,16 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
 - **Sleep/Standby modes**<br>
   You can manually enter lower power modes by clicking and rotating counter-clockwise.<br>
   The sequence would be [run/boost mode]->[standby mode]->[sleep mode].<br>
-  If button wake is enabled, any encoder activity will resume normal mode. Othwerwise only the display brightness will be restored.<br>
-  To wake up you can make a click (If button wake is enabled) or move the handle (If shake wake is enabled or in stand mode).<br>  
+  If button wake is enabled, encoder activity will resume normal mode, otherwise only the display brightness will be restored.<br>
+  Wake-up rouces are the enconder (If enabled) or handle wake input sensor (If shake wake is enabled or in stand mode).<br>
+  The encoder only resumes normal mode when adjusting the setpoint or clicking in the temperature screen (Not when selecting tips or navigating in the menu)<br>
 - **Boost mode**<br>
   Rotate the encoder to show up the setpoint adjustment and click within 1 second to trigger boost mode.<br>
-  If more than 1 second has passed, clicking won't trigger boost mode.<br>
-  Clicking or rotating the encoder will return to normal mode.<br>
+  If more than 1 second has passed, boost mode won't be triggered, this is to prevent accidental triggering when adjusting the temperature.<br>
+  While boost mode is enabled, clicking or rotating the encoder will return to normal mode.<br>
 - **Tip selection**<br>
-  Click and rotate clockwise to show the tip selection. The bottom left corner will be highlighted.<br>
-  Rotate to change the selected tip, click again to return, or long-click enter the tip settings.<br>
-  It will return to normal mode after 5 seconds of inactivity.<br>
+  Click and rotate clockwise to show the tip selection. The tip name label will be highlighted.<br>
+  Rotate to change the selected tip, click or wait 2 seconds to select and return to normal mode. Long-click to enter the tip settings.<br>
 - **System menu**<br>
   A long click will enter the system menu (Except while in tip selection/setpoint adjustment).<br>
 
@@ -113,18 +115,33 @@ Temperature applied in standby mode.<br>
 If there is no soldering activity for this period, the controller will "sleep" and stop providing power to the tip.<br>
 This helps increase tip lifetime reduce power waste. Activity (e.g. shaking the handle for a T12) will wake it up and heating will resume.<br>
 This timer cannot be disabled.<br>
+  - **Boost time**<br>
+Boost mode run time before resuming normal mode.<br>
+  - **Boost increase**<br>
+Temperature increase applied in boost mode. It's added to the current temperature and limited to system maximum temperature.<br>
+  - **Wake mode**<br>
+WAKE input working mode (__SHAKE__ or __STAND__).<br>
+SHAKE uses a motion sensor present in T12 handles, the station will keep working while motion is detected.<br>
+STAND uses the same input, but disconnected from the handle. Must be shorted to gnd when the handle is in the stand.<br>
+(Stand mode operation operation: Shorted to gnd = sleep/standby, open = run ).<br>
+  - **Wake Filter**<br>
+Filters the wake input to make it less sensitive, so it doesn't get waken by any little noise or slight movement.<br>
+This option is disabled in stand wake mode.<br>
+  - **Stand mode**<br>
+Sets the mode that will be applied when the handle is put in the stand (__STANDBY__ or __SLEEP__).<br>
+This option is disabled in shake wake mode.<br>
   - **Power**<br>
 The maximum power which will be delivered to the tip.<br>
 The limit is done by adjusting the maximum PWM duty cycle based on the power supply voltage and the heater resistance.<br>
   - **Heater (resistance)**<br>
 The resistance of the tip's heating element in ohms, used for the power limitation. There is normally no need to change this from the default.<br>
   - **ADC Time**<br>
-Sets the ADC reading period. The controller stops disables the PWM and runs the ADC. Default 200 ms.<br>
+Sets the ADC reading period. The controller disables the power and runs the ADC at this frequency. Default 200 ms.<br>
 It also sets the base PWM frequency. The PWM multiplier uses this base.<br>
   - **(ADC) Delay**<br>
-When the temperature going to be measured, the PWM is disabled.<br>
-This delay is needed to have a clean reading of the thermocouple. If the delay is too low, it will read switching noise and be very unstable.<br>
-If you get random spikes in the temperature reading, try increasing this value. 20mS is usually more than enough.<br>
+After turning off the power, a small delay is required to get a clean signal before the ADC reads the temperature.
+If the delay is too low, it will read switching noise and be very unstable.<br>
+If you get random spikes in the temperature, try increasing this value. 20mS is usually more than enough.<br>
 There are other factors that could cause unstability, like poor circuit design, power supply noise or bad quality parts.<br>
 Default 20 ms.<br>
 <pre>
@@ -137,11 +154,12 @@ Sets the PWM period, using the formula ADC Time/multiplier.<br>
 Default: x1.<br>
   - **No iron**<br>
 Sets the ADC reading threshold that detects when there's no iron present.<br>
-When the iron is not inserted, usually the measured temperature will read at or close to maximum ADC range(4095).<br>
+When the iron is not inserted, usually the reading will be close to the maximum ADC range(4095).<br>
 Values >4095 will disable "no iron" detection.<br>
 Default 4000, max 4096.<br>
   - **Error timeout**<br>
 Time to wait after an error has gone before resuming normal operation.<br>
+This is also useful to provide additional time when inserting a new tip, so the power is delayed.<br>
   - **Error resume**<br>
 Set the mode the station will be set after errors are no longer present: Sleep, Run, Last mode.<br>
   - **FILTER SETTINGS**<br>
@@ -162,6 +180,22 @@ This is the minimum filtering coefficient that the system will be allowed to use
     - **Reset limit**<br>
 Exceeding this limit will instantly reset the filter and use the current reading.<br>
 This is used for huge differences, usually when the tip is removed or plugged in, to allow instant response from the system.<br>
+  - **NTC MENU**<br>
+Adjust NTC settings:<br>
+    - **Pull mode**<br>
+Adjust as your circuit: Pull up or pull down.<br>
+    - **Pull resistance**<br>
+    - **NTC Detect** : Enables or disables automatic switching between 2 NTC values (typically 10K and 100K).<br>
+        
+    	OFF: Fixed NTC values:<br>
+        - **NTC resistance**<br>
+      	- **NTC beta coefficient**<br>
+      	
+    	ON: Two NTC values:<br>
+      	- **Higher NTC value**<br>
+      	- **Higher NTC Beta**<br>
+      	- **Lower NTC value**<br>
+      	- **Lower NTC Beta**<br>
     - **Back**<br>
 Return to iron menu.<br>
   - **Back**<br>
@@ -247,22 +281,29 @@ Reset the current profile (iron/tips) to default.<br>
 Reset all profiles to default.<br>
     - **All**<br>
 Reset everything.<br>
-  - **NTC MENU**<br>
-Adjust NTC settings:<br>
-    - **Pull mode**<br>
-Adjust as your circuit: Pull up or pull down.<br>
-    - **Pull resistance**<br>
-    - **NTC Detect** : Enables or disables automatic switching between 2 NTC values (typically 10K and 100K).<br>
-        
-    	OFF: Fixed NTC values:<br>
-        - **NTC resistance**<br>
-      	- **NTC beta coefficient**<br>
-      	
-    	ON: Two NTC values:<br>
-      	- **Higher NTC value**<br>
-      	- **Higher NTC Beta**<br>
-      	- **Lower NTC value**<br>
-      	- **Lower NTC Beta**<br>
+  - **DISPLAY**<br>
+Adjust the display settings:<br>
+    - **Contrast**<br>
+Screen Contrast/brightness.<br>
+    - **Offset**<br>
+This adjustment will modify the horizontal position.<br>
+Some screens have different internal layout, shifting the picture position, this will fix it.<br>
+    - **X flip**<br>
+Toggles screen horizontal flip.<br>
+    - **Y flip**<br>
+Toggles screen vertical flip.<br>
+    - **Dimmer**<br>
+Fades the display after a timeout.
+	    - OFF: Never dim the screen.<br>
+    	- SLP: Dim only in low power modes (Standby, Sleep, Error).<br>
+    	- ALL: Dim also in run mode.<br>
+    - **Dimmer Delay**<br>
+Sets the dimmer timeout. This option is disabled when the dimmer is set to OFF.<br>
+    - **Dimmer, in sleep mode**<br>
+Allows to turn off the screen in sleep or error modes. This option is disabled when the dimmer is set to OFF.<br>
+For safety reasons,the screen will only turn off when the iron temperature is below 100°C.<br>
+    	- OFF: In sleep mode, the screen turns off after dimming.<br>
+    	- ON: The screen stays on at low brightness.<br>
   - **SW:**<br>
 Displays the current software version. Actually, it's the build date.<br>
   - **HW:**<br>
@@ -288,6 +329,8 @@ Calibration values are not meant for doing manual calibrations, only to restore 
 Use calibration for optimal results.<br>
   - **TIP NAME**<br>
 Shows the tip name, click on it to edit the name.<br>
+Keep clicking to switch to the next characters, it will exit editing mode when clicking in the last character.<br>
+Additionally, you can navigate to any position using rotate-while-pressing method.<br>
   - **PID Kp**<br> 
 The proportional term, changes the PWM duty cycle based on how far the measured temperature is from the desired temperature.<br>
   - **PID Ki**<br>
@@ -300,10 +343,8 @@ The integral accumulator higher limit.<br>
 The integral accumulator lower limit. As the system can't do anything to actively cool down the tip, it's usually set to 0.<br>
   - **Cal250**<br>
 The stored value for 250ºC calibration.<br>
-  - **Cal350**<br>
-The stored value for 350ºC calibration.<br>
-  - **Cal450**<br>
-The stored value for 450ºC calibration.<br>
+  - **Cal400**<br>
+The stored value for 400ºC calibration.<br>
   - **SAVE**<br>
 Save the tip settings.<br>
 This option will be disabled if the tip name is empty or already exists.<br>

@@ -23,9 +23,8 @@ extern CRC_HandleTypeDef hcrc;
 //#define DISABLE_OUTPUT                // Enable to fully disable the tip power (Ex. for debugging)
 #define DEBUG_ERROR                   // Enable to show file/line error messages
 
-#ifdef DEBUG
-extern struct mallinfo mi;
-#define DEBUG_ALLOC                   // Enable alloc debugging in debug builds
+#ifdef DEBUG                          // By default, enable heap debugging in debug builds
+#define DEBUG_ALLOC                   // Watch "mi" and "max_allocated" variables!
 #endif
 
 /*
@@ -33,7 +32,8 @@ extern struct mallinfo mi;
  * max_allocated will hold the max used memory at any time
  */
 #ifdef DEBUG_ALLOC
-extern uint32_t max_allocated;
+extern uint32_t        max_allocated;
+extern struct mallinfo mi;
 #define dbg_mem() mi=mallinfo();                  \
                   if(mi.uordblks>max_allocated){  \
                     max_allocated=mi.uordblks;    \

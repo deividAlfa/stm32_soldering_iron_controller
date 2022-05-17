@@ -234,7 +234,7 @@ tipData_t *getCurrentTip() {
 }
 
 // Translate the human readable t into internal value
-uint16_t human2adc(int16_t t) {
+int16_t human2adc(int16_t t) {
   t = t*10;
   // If using Farenheit, convert to Celsius
   if(systemSettings.settings.tempUnit==mode_Farenheit){
@@ -243,7 +243,6 @@ uint16_t human2adc(int16_t t) {
   int16_t temp = t;
   t -= last_NTC_C;
 
-  if (t < 0){ return 0; }                                 // If requested temp below min, return 0
   if(t< state_temps[cal_250]){
     temp = map(t, 0, state_temps[cal_250], systemSettings.Profile.calADC_At_0, currentTipData->calADC_At_250);
   }
@@ -251,7 +250,7 @@ uint16_t human2adc(int16_t t) {
     temp = map(t, state_temps[cal_250], state_temps[cal_400], currentTipData->calADC_At_250, currentTipData->calADC_At_400);
   }
 
-  int16_t tH = adc2Human_x10(temp,0,mode_Celsius);                // Find +0.5ºC to provide better reading stability
+  int16_t tH = adc2Human_x10(temp,0,mode_Celsius);
   if (tH < (t)) {
     while(tH < (t)){
       tH = adc2Human_x10(++temp,0,mode_Celsius);
@@ -262,14 +261,15 @@ uint16_t human2adc(int16_t t) {
       tH = adc2Human_x10(--temp,0,mode_Celsius);
     }
   }
-  if(temp>4090 || temp<0){                                                // Safety check to avoid exceeding ADC range
-    temp=0;
+
+  if(temp>4090){                                                // Safety check to avoid exceeding ADC range
+    temp=4090;
   }
   return temp;
 }
 
 // Translate temperature from internal units to the human readable value
-int16_t adc2Human_x10(uint16_t adc_value,bool correction, bool tempUnit) {
+int16_t adc2Human_x10(int16_t adc_value,bool correction, bool tempUnit) {
   int16_t temp;
   if(adc_value<currentTipData->calADC_At_250){
     temp = map(adc_value, systemSettings.Profile.calADC_At_0, currentTipData->calADC_At_250, 0, state_temps[cal_250]);
@@ -287,8 +287,6 @@ int16_t adc2Human_x10(uint16_t adc_value,bool correction, bool tempUnit) {
 int32_t map(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max) {
   uint32_t ret;
   ret = (((x - in_min) * (out_max - out_min)) + ((in_max - in_min)/2)) / (in_max - in_min) + out_min;
-  if (ret < 0)
-    ret = 0;
   return ret;
 }
 

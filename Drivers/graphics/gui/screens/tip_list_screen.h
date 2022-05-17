@@ -5,8 +5,8 @@
  *      Author: David
  */
 
-#ifndef GRAPHICS_GUI_TIPLIST_SCREEN_H_
-#define GRAPHICS_GUI_TIPLIST_SCREEN_H_
+#ifndef _GUI_TIPLIST_SCREEN_H_
+#define _GUI_TIPLIST_SCREEN_H_
 
 #include "screen.h"
 

@@ -272,10 +272,10 @@ void updateScreenSaver(void){
     screenSaver.timer=current_time;
     screenSaver.x+=screenSaver.xAdd;
     screenSaver.y+=screenSaver.yAdd;
-    if(screenSaver.x<-(ScrSaverXBM[0]+10) || screenSaver.x>(OledWidth+10)){
+    if(screenSaver.x<-(ScrSaverXBM[0]+10) || screenSaver.x>(displayWidth+10)){
       screenSaver.xAdd = -screenSaver.xAdd;
     }
-    if(screenSaver.y<-(ScrSaverXBM[1]+10) || screenSaver.y>(OledHeight+10)){
+    if(screenSaver.y<-(ScrSaverXBM[1]+10) || screenSaver.y>(displayHeight+10)){
       screenSaver.yAdd = -screenSaver.yAdd;
     }
     screenSaver.update=1;
@@ -360,7 +360,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
   if(input!=Rotate_Nothing){
     resetScreenTimer();                                                     // Reset screen idle timer
-    if(getOledPower()==disable){                                            // If oled off, block user action
+    if(getDisplayPower()==disable){                                            // If oled off, block user action
       input=Rotate_Nothing;
     }
     wakeOledDim();                                                          // But  wake up screen
@@ -607,13 +607,13 @@ static uint8_t  drawIcons(uint8_t refresh){
 
   if(mainScr.shakeActive==1 || (mainScr.shakeActive==2 && refresh) ){ //1 = needs drawing, 2 = already drawn
     mainScr.shakeActive=2;
-    u8g2_DrawXBMP(&u8g2, 49, OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1], &shakeXBM[2]);
+    u8g2_DrawXBMP(&u8g2, 49, displayHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1], &shakeXBM[2]);
     return 1;
   }
   else if(mainScr.shakeActive==3){                                    // 3 = needs clearing
     mainScr.shakeActive=0;
     u8g2_SetDrawColor(&u8g2,BLACK);
-    u8g2_DrawBox(&u8g2, 49, OledHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1]);
+    u8g2_DrawBox(&u8g2, 49, displayHeight-shakeXBM[1], shakeXBM[0], shakeXBM[1]);
     u8g2_SetDrawColor(&u8g2,WHITE);
     return 1;
   }
@@ -627,7 +627,7 @@ static uint8_t  drawScreenSaver(uint8_t refresh){
     return 0;
   }
   screenSaver.update=0;
-  if(screenSaver.x>(-ScrSaverXBM[0]) ||screenSaver.x<OledWidth || screenSaver.y>(-ScrSaverXBM[1]) || screenSaver.y<OledHeight ){
+  if(screenSaver.x>(-ScrSaverXBM[0]) ||screenSaver.x<displayWidth || screenSaver.y>(-ScrSaverXBM[1]) || screenSaver.y<displayHeight ){
     u8g2_SetDrawColor(&u8g2, WHITE);
     u8g2_DrawXBMP(&u8g2, screenSaver.x, screenSaver.y, ScrSaverXBM[0], ScrSaverXBM[1], &ScrSaverXBM[2]);
     return 1;
@@ -687,13 +687,13 @@ static uint8_t  drawPowerBar(uint8_t refresh){
   if(update){                          // Update every 10mS or if screen was erased
     if(!refresh){                           // If screen not erased
       u8g2_SetDrawColor(&u8g2,BLACK);                               // Draw a black square to wipe old widget data
-      u8g2_DrawBox(&u8g2, OledWidth-PWR_BAR_WIDTH-2 , OledHeight-7, PWR_BAR_WIDTH, 5);
+      u8g2_DrawBox(&u8g2, displayWidth-PWR_BAR_WIDTH-2 , displayHeight-7, PWR_BAR_WIDTH, 5);
       u8g2_SetDrawColor(&u8g2,WHITE);
     }
     else{
-      u8g2_DrawRFrame(&u8g2, OledWidth-PWR_BAR_WIDTH-4, OledHeight-9, PWR_BAR_WIDTH+4, 9, 2);
+      u8g2_DrawRFrame(&u8g2, displayWidth-PWR_BAR_WIDTH-4, displayHeight-9, PWR_BAR_WIDTH+4, 9, 2);
     }
-    u8g2_DrawBox(&u8g2, OledWidth-PWR_BAR_WIDTH-2, OledHeight-7, mainScr.lastPwr, 5);
+    u8g2_DrawBox(&u8g2, displayWidth-PWR_BAR_WIDTH-2, displayHeight-7, mainScr.lastPwr, 5);
     return 1;
   }
   return 0;
@@ -762,11 +762,11 @@ static uint8_t  drawError(uint8_t refresh){
 
   if(ironErrorFlags.Flags == (FLAG_ACTIVE | FLAG_NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
 
-    uint8_t xp = (OledWidth-iron[0]-x_mark[0]-5)/2;
+    uint8_t xp = (displayWidth-iron[0]-x_mark[0]-5)/2;
     uint8_t update = 0;
 
     if(refresh){
-      u8g2_DrawXBM(&u8g2, xp, (OledHeight-iron[1])/2, iron[0], iron[1], &iron[2]);
+      u8g2_DrawXBM(&u8g2, xp, (displayHeight-iron[1])/2, iron[0], iron[1], &iron[2]);
       update = 1;
     }
 
@@ -779,11 +779,11 @@ static uint8_t  drawError(uint8_t refresh){
     if(update){
       if(x_mark_state){
         u8g2_SetDrawColor(&u8g2, BLACK);
-        u8g2_DrawBox(&u8g2, xp+iron[0]+5, (OledHeight-x_mark[1])/2, x_mark[0], x_mark[1]);
+        u8g2_DrawBox(&u8g2, xp+iron[0]+5, (displayHeight-x_mark[1])/2, x_mark[0], x_mark[1]);
         u8g2_SetDrawColor(&u8g2, WHITE);
       }
       else{
-        u8g2_DrawXBM(&u8g2, xp+iron[0]+5, (OledHeight-x_mark[1])/2, x_mark[0], x_mark[1], &x_mark[2]);
+        u8g2_DrawXBM(&u8g2, xp+iron[0]+5, (displayHeight-x_mark[1])/2, x_mark[0], x_mark[1], &x_mark[2]);
       }
     }
     return update;
@@ -867,7 +867,7 @@ static uint8_t main_screen_draw(screen_t *scr){
   }
   if(refresh){
     scr->refresh=screen_Erased;
-    FillBuffer(BLACK, fill_dma);
+    fillBuffer(BLACK, fill_dma);
   }
 
   u8g2_SetDrawColor(&u8g2, WHITE);

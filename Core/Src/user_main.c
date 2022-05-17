@@ -16,7 +16,7 @@
 #include "rotary_encoder.h"
 #include "tempsensors.h"
 #include "voltagesensors.h"
-#include "ssd1306.h"
+#include "display.h"
 #include "gui.h"
 #include "screen.h"
 #include "myTest.h"
@@ -65,10 +65,10 @@ struct mallinfo mi;
 uint32_t max_allocated;
 #endif
 
-// Allocate max possible ram, then release it. This fill the malloc pool and avoids internal fragmentation due (ST's?) poor malloc implementation.
+// Allocate max possible ram, then release it. This fill the heap pool and avoids internal fragmentation due (ST's?) poor malloc implementation.
 void malloc_fragmentation_fix(void){
   uint32_t *ptr = NULL;
-  uint32_t try=17408;
+  uint32_t try=20480; // Current ram usage is ~5KB, so we should have have another 5/15KB free, depending on the stm32 used.
   while(!ptr && try){
     ptr = _malloc(try);
     try-=16;
@@ -85,8 +85,9 @@ void initBeforeMCUConfiguration(void)
 
   #if defined DEBUG && !defined STM32F072xB
     DebugOpts();          // Enable debug options in Debug build
-    DWT->CTRL |= 1 ; // enable the counter
-    DWT->CYCCNT = 0; // reset the counter
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; // Enable DWT
+    DWT->CYCCNT = 0;                                // Clear counter
+    DWT->CTRL = DWT_CTRL_CYCCNTENA_Msk;             // Enable counter
     // Now CPU cycles can be read in DWT->CYCCNT;
   #endif
 }
@@ -105,17 +106,22 @@ void InitAfterMCUConfiguration(void){
  BKP->CR       = 0u;                                    // disable tamper pin, just to be sure
 #endif
 
-  #if (defined OLED_SPI || defined OLED_I2C) && defined OLED_DEVICE
-  ssd1306_init(&OLED_DEVICE, &FILL_DMA);
-#elif defined OLED_SPI || defined OLED_I2C
-  ssd1306_init(&FILL_DMA);
+#if (defined DISPLAY_SPI || defined DISPLAY_I2C) && defined DISPLAY_DEVICE
+  lcd_init(&DISPLAY_DEVICE, &FILL_DMA);
+#elif defined DISPLAY_SPI || defined DISPLAY_I2C
+  lcd_init(&FILL_DMA);
 #endif
 
     guiInit();
     ADC_Init(&ADC_DEVICE);
     buzzer_init();
     restoreSettings();
-    setBrightness(systemSettings.settings.brightness);
+    setDisplayContrast(systemSettings.settings.contrast);
+    setDisplayXflip(systemSettings.settings.displayXflip);
+    setDisplayYflip(systemSettings.settings.displayYflip);
+#ifdef ST7565
+    setDisplayResRatio(systemSettings.settings.displayResRatio);
+#endif
     ironInit(&READ_TIMER, &PWM_TIMER,PWM_CHANNEL);
     RE_Init((RE_State_t *)&RE1_Data, ENC_L_GPIO_Port, ENC_L_Pin, ENC_R_GPIO_Port, ENC_R_Pin, ENC_SW_GPIO_Port, ENC_SW_Pin);
     oled_init(&RE_Get,&RE1_Data);
@@ -186,9 +192,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
 void CrashErrorHandler(char * file, int line)
 {
 #ifdef DEBUG_ERROR
-  #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
+  #if (defined DISPLAY_I2C || defined DISPLAY_SPI) && defined DISPLAY_DEVICE
   if(!oled.use_sw){
-    display_abort();
+    display_dma_abort();
   }
   #endif
   setSafeMode(enable);
@@ -207,10 +213,10 @@ void CrashErrorHandler(char * file, int line)
     strOut[outPos] = file[inPos];                            // Copy char
     strOut[outPos+1] = 0;                                    // Set out string null terminator
     uint8_t currentWidth = u8g2_GetStrWidth(&u8g2, strOut);  // Get width
-    if(currentWidth<OledWidth){                              // If less than oled width, increase input string pos
+    if(currentWidth<displayWidth){                              // If less than oled width, increase input string pos
       inPos++;
     }
-    if( (currentWidth>OledWidth) || (strOut[outPos]==0) ){  // If width bigger than oled width or current char null(We reached end of input string)
+    if( (currentWidth>displayWidth) || (strOut[outPos]==0) ){  // If width bigger than oled width or current char null(We reached end of input string)
       char current = strOut[outPos];                        // Store current char
       strOut[outPos]=0;                                     // Set current out char to null
       u8g2_DrawStr(&u8g2, 0, ypos, strOut);                 // Draw string
@@ -225,7 +231,7 @@ void CrashErrorHandler(char * file, int line)
     }
   };
 
-  #if (defined OLED_I2C || defined OLED_SPI) && defined OLED_DEVICE
+  #if (defined DISPLAY_I2C || defined DISPLAY_SPI) && defined DISPLAY_DEVICE
 
   #ifdef I2C_TRY_HW
   if(oled.use_sw){
@@ -241,7 +247,7 @@ void CrashErrorHandler(char * file, int line)
   #else
   update_display();
   #endif
-  Reset_onError();
+  buttonReset();
 #endif
   while(1){
   }

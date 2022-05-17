@@ -141,7 +141,7 @@ void draw_boot_strings(void){
   u8g2_SetFont(&u8g2, u8g2_font_menu );
   u8g2_SetDrawColor(&u8g2, WHITE);
   putStrAligned(strings[lang].boot_firstBoot, 0, align_center);
-  u8g2_DrawHLine(&u8g2, 0, 13, OledWidth);
+  u8g2_DrawHLine(&u8g2, 0, 13, displayWidth);
   u8g2_DrawUTF8(&u8g2, 0, 18, strings[lang].boot_Profile);
   u8g2_DrawUTF8(&u8g2, 0, 34, strings[lang]._Language);
 }
@@ -219,8 +219,10 @@ void boot_screen_init(screen_t * scr){
   u8g2_SetDrawColor(&u8g2,WHITE);
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM[0], splashXBM[1], &splashXBM[2]);
   scr->refresh = screen_Erased;
-  setBrightness(0);
+#ifndef ST7565
+  setDisplayBrightnessOrContrast(0);
   wakeOledDim();
+#endif
 }
 
 
@@ -285,7 +287,7 @@ void boot_screen_create(screen_t *scr){
   button->action = &SaveSetup;
   w->posY = 48;
   w->width = 60;
-  w->posX = (OledWidth-1) - w->width;
+  w->posX = (displayWidth-1) - w->width;
   w->enabled=0;
 }
 

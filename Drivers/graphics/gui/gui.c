@@ -29,6 +29,9 @@ void guiInit(void) {
   oled_addScreen(&Screen_settings,screen_settings);
   settings_screen_setup(&Screen_settings);
 
+  oled_addScreen(&Screen_display,screen_display);
+  display_screen_setup(&Screen_display);
+
   oled_addScreen(&Screen_iron,screen_iron);
   iron_screen_setup(&Screen_iron);
 

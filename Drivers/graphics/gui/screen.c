@@ -56,7 +56,7 @@ uint8_t default_screenDraw(screen_t *scr) {
   if(scr->widgets) {
     if(scr->refresh==screen_Erase){
       scr->refresh=screen_Erased;
-      FillBuffer(BLACK,fill_dma);
+      fillBuffer(BLACK,fill_dma);
     }
     ret = (scr->refresh==screen_Erased);       // Set return value if screen was erased to force update.
 

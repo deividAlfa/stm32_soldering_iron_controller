@@ -84,7 +84,7 @@ static void reset_create(screen_t *scr){
 
 static void reset_confirmation_init(screen_t *scr){
   default_init(scr);
-  //FillBuffer(BLACK, fill_dma);                              // Manually clear the screen
+  //fillBuffer(BLACK, fill_dma);                              // Manually clear the screen
   //Screen_reset_confirmation.refresh=screen_Erased;          // Set to already cleared so it doesn't get erased automatically
 
   u8g2_SetFont(&u8g2,u8g2_font_menu);
@@ -134,7 +134,7 @@ static void reset_confirmation_create(screen_t *scr){
   ((button_widget_t*)w->content)->font= u8g2_font_menu;
   w->posY = 48;
   w->width = 65;
-  w->posX = OledWidth - w->width -1;
+  w->posX = displayWidth - w->width -1;
 }
 
 

@@ -5,23 +5,8 @@
  *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
-
-#include <adc_global.h>
-#include <iron.h>
-#include <oled.h>
-#include <pid.h>
-#include <rotary_encoder.h>
-#include <screen_common.h>
-#include <settings.h>
-#include <settings_screen.h>
-#include <ssd1306.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/_stdint.h>
-#include <tempsensors.h>
-#include <u8g2.h>
-#include <widgets.h>
 #include "debug_screen.h"
+#include "screen_common.h"
 
 #ifdef ENABLE_DEBUG_SCREEN
 
@@ -162,24 +147,20 @@ static void * get_PWR() {
 }
 //=========================================================
 static uint8_t scalePlot(int32_t val){
-  val+=10;
-  if(val>20){
+  if(val>20)
     val=20;
-  }
-  else if(val<0){
+  else if(val<0)
     val=0;
-  }
   return (uint8_t)val;
 }
 
 void updatePIDplot(void){
   if(update){
-    pidPlot->p[pidPlot->index] = scalePlot(getPID_P()* 10);
-    pidPlot->i[pidPlot->index] = scalePlot(getPID_I()* pidPlot->i_scale);
-    pidPlot->d[pidPlot->index] = scalePlot(getPID_D()* 10);
-    if(++pidPlot->index>(PID_SZ-1)){
+    pidPlot->p[pidPlot->index] = scalePlot((getPID_P()*10)+10);
+    pidPlot->i[pidPlot->index] = scalePlot(getPID_I()*pidPlot->i_scale);
+    pidPlot->d[pidPlot->index] = scalePlot((getPID_D()*10)+10);
+    if(++pidPlot->index>(PID_SZ-1))
       pidPlot->index=0;
-    }
   }
 }
 
@@ -513,7 +494,7 @@ static uint8_t pid_debug_Draw(screen_t * scr){
   if(update_draw || scr->refresh==screen_Erased){
     if(update_draw){
       update_draw=0;
-      FillBuffer(BLACK, fill_dma);
+      fillBuffer(BLACK, fill_dma);
       scr->refresh=screen_Erased;
     }
     for(uint8_t x=1; x<(PID_SZ-1); x++){
@@ -529,9 +510,9 @@ static uint8_t pid_debug_Draw(screen_t * scr){
         prev=pos-1;
       }
       u8g2_SetDrawColor(&u8g2, WHITE);
-      u8g2_DrawLine(&u8g2, x+(OledWidth-PID_SZ), 20-pidPlot->p[prev], x+(OledWidth-PID_SZ+1), 20-pidPlot->p[pos]);
-      u8g2_DrawLine(&u8g2, x+(OledWidth-PID_SZ), 42-pidPlot->i[prev], x+(OledWidth-PID_SZ+1), 42-pidPlot->i[pos]);
-      u8g2_DrawLine(&u8g2, x+(OledWidth-PID_SZ), 63-pidPlot->d[prev], x+(OledWidth-PID_SZ+1), 63-pidPlot->d[pos]);
+      u8g2_DrawLine(&u8g2, x+(displayWidth-PID_SZ), 20-pidPlot->p[prev], x+(displayWidth-PID_SZ+1), 20-pidPlot->p[pos]);
+      u8g2_DrawLine(&u8g2, x+(displayWidth-PID_SZ), 42-pidPlot->i[prev], x+(displayWidth-PID_SZ+1), 42-pidPlot->i[pos]);
+      u8g2_DrawLine(&u8g2, x+(displayWidth-PID_SZ), 63-pidPlot->d[prev], x+(displayWidth-PID_SZ+1), 63-pidPlot->d[pos]);
     }
   }
   return (default_screenDraw(scr));

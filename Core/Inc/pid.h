@@ -10,6 +10,7 @@
 
 #include "main.h"
 
+#define PID_RESET_CYCLES 0                     // If pid resetted, only use proportional for few cycles to reduce spikes
 typedef struct pid_values {
   uint16_t  Kp;
   uint16_t  Ki;

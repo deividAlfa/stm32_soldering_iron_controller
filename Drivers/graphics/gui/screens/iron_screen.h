@@ -5,8 +5,9 @@
  *      Author: David
  */
 
-#ifndef GRAPHICS_GUI_IRON_SCREEN_H_
-#define GRAPHICS_GUI_IRON_SCREEN_H_
+#ifndef _GUI_IRON_SCREEN_H_
+#define _GUI_IRON_SCREEN_H_
+
 #include "screen.h"
 
 

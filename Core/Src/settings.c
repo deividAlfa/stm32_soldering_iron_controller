@@ -9,6 +9,7 @@
 #include "pid.h"
 #include "iron.h"
 #include "gui.h"
+#include "display.h"
 #include "tempsensors.h"
 #include "main.h"
 #include "ssd1306.h"
@@ -19,32 +20,43 @@
 #endif
 
 const settings_t defaultSettings = {
-  .version             = (~((uint32_t)SETTINGS_VERSION<<16)&0xFFFF0000) | SETTINGS_VERSION,  // Higher 16bit is 1s complement to make detection stronger against padding/endianness
-  .brightness          = 255,
-  .dim_mode            = dim_sleep,
-  .dim_Timeout         = 10000,                // ms
-  .dim_inSleep         = enable,
-  .OledOffset          = OLED_OFFSET,
-  .guiUpdateDelay      = 200,                  //ms
-  .guiTempDenoise      = 5,                    // ±5°C
-  .tempUnit            = mode_Celsius,
-  .tempStep            = 5,                    // 5º steps
-  .tempBigStep         = 20,                   // 20º big steps
-  .activeDetection     = true,
-  .rememberLastProfile = true,
-  .rememberLastTemp    = false,
-  .rememberLastTip     = true,
-  .reserved            = 0,
-  .lvp                 = 110,                  // 11.0V Low voltage
-  .bootProfile         = profile_None,
-  .initMode            = mode_run,
-  .buzzerMode          = disable,
-  .buttonWakeMode      = wake_all,
-  .shakeWakeMode       = wake_all,
-  .EncoderMode         = RE_Mode_Forward,
-  .debugEnabled        = disable,
-  .language            = lang_english,
-  .state               = initialized,
+  .version              = (~((uint32_t)SETTINGS_VERSION<<16)&0xFFFF0000) | SETTINGS_VERSION,  // Higher 16bit is 1s complement to make detection stronger
+#ifdef ST7565
+  .brightnessOrContrast = 34,
+#else
+  .brightnessOrContrast = 255,
+#endif
+  .dim_mode             = dim_sleep,
+  .dim_Timeout          = 10000,                // ms
+  .dim_inSleep          = enable,
+  .displayOffset        = DISPLAY_OFFSET,
+  .displayXflip         = 1,
+#ifdef SSD1306
+  .displayYflip         = 1,
+#elif defined ST7565
+  .displayYflip         = 0,
+  .displayResRatio      = 5,                    // For ST7565 only
+#endif
+  .guiUpdateDelay       = 200,                  // ms
+  .guiTempDenoise       = 5,                    // ±5°C
+  .tempUnit             = mode_Celsius,
+  .tempStep             = 5,                    // 5º steps
+  .tempBigStep          = 20,                   // 20º big steps
+  .activeDetection      = true,
+  .rememberLastProfile  = true,
+  .rememberLastTemp     = false,
+  .rememberLastTip      = true,
+  .reserved             = 0,
+  .lvp                  = 110,                  // 11.0V Low voltage
+  .bootProfile          = profile_None,
+  .initMode             = mode_sleep,           // Safer to boot in sleep mode by default!
+  .buzzerMode           = disable,
+  .buttonWakeMode       = wake_all,
+  .shakeWakeMode        = wake_all,
+  .EncoderMode          = RE_Mode_Forward,
+  .debugEnabled         = disable,
+  .language             = lang_english,
+  .state                = initialized,
 };
 
 #ifdef ENABLE_ADDONS
@@ -166,12 +178,14 @@ void checkSettings(void){
   uint32_t CurrentTime = HAL_GetTick();
   uint8_t scr_index=current_screen->index;
 
-  // Disable saving when screens that use a lot of ram are active.
-  // Change detection will be active, but saving will postponed until exiting the screen. This is done to ensure compatibility with 10KB RAM devices
-  uint8_t noSave = (scr_index == screen_iron         ||
-                    scr_index == screen_system       ||
-                    scr_index == screen_tip_settings ||
-                    scr_index == screen_debug);
+  // To reduce heap usage, only allow saving in smaller screens.
+  // Content change detection will be still active, but saving will postponed upon returning to a smaller screen.
+  // This is done to ensure compatibility with 10KB RAM devices yet allowing the firmware to grow unconstrained by ram usage
+  uint8_t allowSave = (scr_index == screen_boot              ||
+                       scr_index == screen_main              ||
+                       scr_index == screen_settings          ||
+                       scr_index == screen_calibration       ||
+                       scr_index == screen_reset_confirmation);
 
 #ifndef HAS_BATTERY
   if(systemSettings.settings.rememberLastProfile)
@@ -185,7 +199,7 @@ void checkSettings(void){
 #endif
 
   // Save from menu
-  if(systemSettings.save_Flag && !noSave){
+  if(systemSettings.save_Flag && allowSave){
     switch(systemSettings.save_Flag){
       case save_Settings:
         saveSettings(keepProfiles);
@@ -216,7 +230,7 @@ void checkSettings(void){
       default:
         Error_Handler();
     }
-    if(systemSettings.save_Flag>=reset_Profiles){
+    if(systemSettings.save_Flag>=reset_Profiles){       // If save flag indicates any resetting mode, reboot
       NVIC_SystemReset();
     }
     systemSettings.save_Flag=0;
@@ -258,8 +272,8 @@ void checkSettings(void){
       lastChangeTime = CurrentTime;                           // Reset timer (we don't save anything until we pass a certain time without changes)
     }
 
-    else if( !noSave && ((CurrentTime-lastChangeTime)>5000)){ // If different from the previous calculated checksum, and timer expired (No changes in the last 5 sec)
-      saveSettings(save_Settings);                            // Data was saved (so any pending interrupt knows this)
+    else if(allowSave && ((CurrentTime-lastChangeTime)>5000)){ // If different from the previous calculated checksum, and timer expired (No changes in the last 5 sec)
+      saveSettings(save_Settings);                             // Data was saved (so any pending interrupt knows this)
     }
   }
 
@@ -275,10 +289,11 @@ void checkSettings(void){
 }
 
 
-//This is done to avoid huge stack build up. Trigger a save using checkSettings with a flag instead direct call from menu.
+//This is done to avoid huge stack build up. Trigger saving using checkSettings with a flag instead direct call from menu.
+// Thus, the flags stays after the screen exits. The code handling settings saving decides when it's ok to store them.
 void saveSettingsFromMenu(uint8_t mode){
   systemSettings.save_Flag=mode;
-  if(mode>=reset_Profiles){
+  if(mode>=reset_Profiles){           // Force safe mode (disable iron power) in any resetting mode, the station will reboot when done.
     setSafeMode(enable);
   }
 }
@@ -447,7 +462,7 @@ void restoreSettings() {
   resetSystemSettings();                                              // TODO not tested with the new profile system
   systemSettings.settings.currentProfile = profile_T12;
   resetCurrentProfile();
-  setupPID(systemSettings.Profile.tip[0].PID;);
+  loadProfile(systemSettings.settings.currentProfile);
   __enable_irq();
   return;
 #endif
@@ -619,18 +634,15 @@ static void resetSystemSettings(void) {
 
 
 static void resetCurrentProfile(void){
-#ifdef NOSAVESETTINGS
-  systemSettings.settings.currentProfile=profile_T12; /// Force T12 when debugging. TODO this is not tested with the profiles update!
-#endif
     if(systemSettings.currentProfile==profile_T12){
     systemSettings.Profile.ID = profile_T12;
     for(uint8_t x = 0; x < NUM_TIPS; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = T12_Cal250;
       systemSettings.Profile.tip[x].calADC_At_400   = T12_Cal400;     // These values are way lower, but better to be safe than sorry
-      systemSettings.Profile.tip[x].PID.Kp          = 7500;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Ki          = 4800;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.Kd          = 1200;           // val = /1.000.000
-      systemSettings.Profile.tip[x].PID.maxI        = 85;             // val = /100
+      systemSettings.Profile.tip[x].PID.Kp          = 4000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 5500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 700;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);         // Empty name
     }
@@ -649,10 +661,10 @@ static void resetCurrentProfile(void){
     for(uint8_t x = 0; x < NUM_TIPS; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = C245_Cal250;
       systemSettings.Profile.tip[x].calADC_At_400   = C245_Cal400;
-      systemSettings.Profile.tip[x].PID.Kp          = 1800;
-      systemSettings.Profile.tip[x].PID.Ki          = 500;
-      systemSettings.Profile.tip[x].PID.Kd          = 200;
-      systemSettings.Profile.tip[x].PID.maxI        = 85;
+      systemSettings.Profile.tip[x].PID.Kp          = 4000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 5500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 700;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
     }
@@ -671,10 +683,10 @@ static void resetCurrentProfile(void){
     for(uint8_t x = 0; x < NUM_TIPS; x++) {
       systemSettings.Profile.tip[x].calADC_At_250   = C210_Cal250;
       systemSettings.Profile.tip[x].calADC_At_400   = C210_Cal400;
-      systemSettings.Profile.tip[x].PID.Kp          = 1800;
-      systemSettings.Profile.tip[x].PID.Ki          = 500;
-      systemSettings.Profile.tip[x].PID.Kd          = 200;
-      systemSettings.Profile.tip[x].PID.maxI        = 85;
+      systemSettings.Profile.tip[x].PID.Kp          = 4000;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Ki          = 5500;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.Kd          = 700;           // val = /1.000.000
+      systemSettings.Profile.tip[x].PID.maxI        = 70;             // val = /100
       systemSettings.Profile.tip[x].PID.minI        = 0;
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
     }
@@ -691,9 +703,9 @@ static void resetCurrentProfile(void){
     Error_Handler();  // We shouldn't get here!
   }
   systemSettings.Profile.calADC_At_0                = 0;
-  systemSettings.Profile.tipFilter.coefficient      = 90;   // % of old data (more %, more filtering)
+  systemSettings.Profile.tipFilter.coefficient      = 75;   // % of old data (more %, more filtering)
   systemSettings.Profile.tipFilter.threshold        = 50;
-  systemSettings.Profile.tipFilter.min              = 65;   // Don't go below x% when decreasing after exceeding threshold limits
+  systemSettings.Profile.tipFilter.min              = 50;   // Don't go below x% when decreasing after exceeding threshold limits
   systemSettings.Profile.tipFilter.count_limit      = 0;
   systemSettings.Profile.tipFilter.step             = -3;   // -5% less everytime the reading diff exceeds threshold_limit and the counter is greater than count_limit
   systemSettings.Profile.tipFilter.reset_threshold  = 600;  // Any diff over 500 reset the filter (Tip removed or connected)
@@ -724,7 +736,7 @@ static void resetCurrentProfile(void){
   systemSettings.Profile.sleepTimeout               = (uint32_t)5*60000;      // ms
   systemSettings.Profile.standbyTimeout             = (uint32_t)5*60000;
   systemSettings.Profile.standbyTemperature         = 180;
-  systemSettings.Profile.defaultTemperature         = 180;
+  systemSettings.Profile.defaultTemperature         = 320;
   systemSettings.Profile.MaxSetTemperature          = 450;
   systemSettings.Profile.MinSetTemperature          = 180;
   systemSettings.Profile.boostTimeout               = 60000;                  // ms
@@ -747,7 +759,7 @@ void loadProfile(uint8_t profile){
   if(profile==profile_None){                                                    // If profile not initialized yet, use T12 values until the system is configured
     systemSettings.currentProfile=profile_T12;                         // Force T12 profile
     __disable_irq();
-    resetCurrentProfile();                                                      // Load data
+    resetCurrentProfile();                                                      // Load default data
     __enable_irq();
     systemSettings.currentProfile=profile_None;                        // Revert to none to trigger setup screen
   }
@@ -762,25 +774,21 @@ void loadProfile(uint8_t profile){
       systemSettings.Profile = flashProfilesSettings.Profile[profile];
       systemSettings.ProfileChecksum = flashProfilesSettings.ProfileChecksum[profile];
     }
-
     // Calculate data checksum and compare with stored checksum, also ensure the stored ID is the same as the requested profile
     if( (profile!=systemSettings.Profile.ID) || (systemSettings.ProfileChecksum != ChecksumProfile(&systemSettings.Profile)) ){
-      __enable_irq();
-      checksumError(reset_Profile);
       __disable_irq();
+      checksumError(reset_Profile);
+      __enable_irq();
     }
-    setSystemTempUnit(systemSettings.settings.tempUnit);                        // Ensure the profile uses the same temperature unit as the system
-    setUserTemperature(systemSettings.Profile.defaultTemperature);
-    setCurrentTip(systemSettings.Profile.defaultTip);
-    TIP.filter=systemSettings.Profile.tipFilter;
-    ironSchedulePwmUpdate();
   }
   else{
     Error_Handler();
   }
-  if(systemSettings.settings.tempUnit != systemSettings.Profile.tempUnit){
-    setSystemTempUnit(systemSettings.settings.tempUnit);
-  }
+  setSystemTempUnit(systemSettings.settings.tempUnit);                        // Ensure the profile uses the same temperature unit as the system
+  setUserTemperature(systemSettings.Profile.defaultTemperature);
+  setCurrentTip(systemSettings.Profile.defaultTip);
+  TIP.filter=systemSettings.Profile.tipFilter;
+  ironSchedulePwmUpdate();
   __enable_irq();
 }
 
@@ -788,7 +796,7 @@ static void Flash_error(void){
   __disable_irq();
   HAL_FLASH_Lock();
   __enable_irq();
-  FatalError(error_FLASH);
+  fatalError(error_FLASH);
 }
 
 static void checksumError(uint8_t mode){
@@ -840,7 +848,7 @@ static void Button_reset(void){
     while(!BUTTON_input()){
       HAL_IWDG_Refresh(&hiwdg);
       if((HAL_GetTick()-ResetTimer)>5000){
-        FillBuffer(BLACK,fill_dma);
+        fillBuffer(BLACK,fill_dma);
         putStrAligned("RELEASE", 16, align_center);
         putStrAligned("BUTTON NOW", 32, align_center);
         update_display();

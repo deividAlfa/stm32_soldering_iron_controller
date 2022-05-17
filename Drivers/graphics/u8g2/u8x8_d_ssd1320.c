@@ -335,43 +335,6 @@ static const u8x8_display_info_t u8x8_d_ssd1320_cs1_160x132_display_info =
 };
 
 
-/* the following sequence will work, but requires contrast to be very high */
-static const uint8_t u8x8_d_ssd1320_cs1_160x132_init_seq[] = {
-    
-    U8X8_DLY(1),
-    U8X8_START_TRANSFER(),    /* enable chip, delay is part of the transfer start */
-    U8X8_DLY(1),
-    
-    U8X8_C(0xae),		          /* display off */
-    U8X8_CA(0xd5, 0xC2),			/* set display clock divide ratio/oscillator frequency (set clock as 80 frames/sec)  */  
-    U8X8_CA(0xa8, 0x83),			/* multiplex ratio 1/132 Duty  */  
-    U8X8_CA(0xa2, 0x00),			/* display start line */  
-
-    U8X8_C(0xa0),	                /* Set Segment Re-Map: column address 0 mapped to SEG0  CS1 */ 
-    // U8X8_C(0xa1),	                /* Set Segment Re-Map: column address 0 mapped to SEG0  CS2 */ 
-
-    U8X8_C(0xc8),	             /* Set COM Output Scan Direction: normal mode CS1 */
-    // U8X8_C(0xc0),			        /* Set COM Output Scan Direction: normal mode CS2 */
-  
-    U8X8_CA(0xd3, 0x0e),        /* CS1 */
-    // U8X8_CA(0xd3, 0x92),        /* CS2 */
-    
-    U8X8_CA(0xda, 0x12),	    /* Set SEG Pins Hardware Configuration:  */  
-    U8X8_CA(0x81, 0x5a),			/* contrast */  
-    U8X8_CA(0xd9, 0x22),			/* Set Phase Length */  
-    U8X8_CA(0xdb, 0x30),		  /* VCOMH Deselect Level */
-    U8X8_CA(0xad, 0x10),			/* Internal IREF Enable */  
-    U8X8_CA(0x20, 0x00),	    /* Memory Addressing Mode: Horizontal */  
-    U8X8_CA(0x8d, 0x01),			/* disable internal charge pump 1 */  
-    U8X8_CA(0xac, 0x00),			/* disable internal charge pump 2 */  
-    U8X8_C(0xa4),		        	/* display on */  
-    U8X8_C(0xa6),		          /* normal display */
-
-    U8X8_DLY(1),					/* delay 2ms */
-
-    U8X8_END_TRANSFER(),             	/* disable chip */
-    U8X8_END()             			/* end of sequence */
-};
 
 /*
 OLED_WR_Byte(0xae,OLED_CMD);//Display OFF

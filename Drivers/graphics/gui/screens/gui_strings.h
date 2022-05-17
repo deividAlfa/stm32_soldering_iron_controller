@@ -5,8 +5,8 @@
  *      Author: David
  */
 
-#ifndef GRAPHICS_GUI_STRINGS_H_
-#define GRAPHICS_GUI_STRINGS_H_
+#ifndef _GUI_STRINGS_H_
+#define _GUI_STRINGS_H_
 
 
 #include "settings.h"
@@ -83,10 +83,6 @@ typedef struct{
   char * FILTER_Reset_limit;
 
   char * SYSTEM_Profile;
-  char * SYSTEM_Oled_Offset;
-  char * SYSTEM_Oled_Brightness;
-  char * SYSTEM_Oled_Dim;
-  char * SYSTEM_Oled_Dim_inSleep;
   char * SYSTEM_Boot;
   char * SYSTEM_Button_Wake;
   char * SYSTEM_Shake_Wake;
@@ -106,6 +102,16 @@ typedef struct{
 #ifdef HAS_BATTERY
   char * SYSTEM_RememberLastTemp;
 #endif
+
+  char * SYSTEM_DISPLAY_MENU;
+
+  char * DISPLAY_BrightnessOrContrast;
+  char * DISPLAY_Offset;
+  char * DISPLAY_Xflip;
+  char * DISPLAY_Yflip;
+  char * DISPLAY_Ratio;
+  char * DISPLAY_Dim;
+  char * DISPLAY_Dim_inSleep;
 
   char * NTC_Enable_NTC;
   char * NTC_Pull;
@@ -184,8 +190,8 @@ typedef struct{
 }strings_t;
 
 extern const strings_t strings[LANGUAGE_COUNT];
-extern char * tempUnit[2];
-extern char *profileStr[NUM_PROFILES];
-extern char *Langs[LANGUAGE_COUNT];
+extern char * const tempUnit[2];
+extern char * const profileStr[NUM_PROFILES];
+extern char * const Langs[LANGUAGE_COUNT];
 
 #endif /* GRAPHICS_GUI_STRINGS_H_ */

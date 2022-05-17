@@ -82,10 +82,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "Reset limit",
 
       .SYSTEM_Profile = "Profile",
-      .SYSTEM_Oled_Brightness = "Brightness",
-      .SYSTEM_Oled_Dim = "Dimmer",
-      .SYSTEM_Oled_Dim_inSleep = " In sleep",
-      .SYSTEM_Oled_Offset = "Offset",
       .SYSTEM_Boot = "Boot",
       .SYSTEM_Button_Wake = "Btn wake",
       .SYSTEM_Shake_Wake = "Shake wake",
@@ -105,6 +101,19 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #ifdef HAS_BATTERY
       .SYSTEM_RememberLastTemp = " Set temp",
 #endif
+
+      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+#ifndef ST756
+      .DISPLAY_BrightnessOrContrast = "Brightness",
+#else
+      .DISPLAY_BrightnessOrContrast = "Contrast",
+#endif
+      .DISPLAY_Offset = "Offset",
+      .DISPLAY_Xflip = "X flip",
+      .DISPLAY_Yflip = "Y flip",
+      .DISPLAY_Ratio = "Ratio",
+      .DISPLAY_Dim = "Dimmer",
+      .DISPLAY_Dim_inSleep = " In sleep",
 
       .NTC_Enable_NTC = "Enable NTC",
       .NTC_Pull = "Pull",
@@ -252,10 +261,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "ПорогСброса",
 
       .SYSTEM_Profile = "Тип",
-      .SYSTEM_Oled_Brightness = "Яркость",
-      .SYSTEM_Oled_Dim = "Затемнение",
-      .SYSTEM_Oled_Dim_inSleep = " Реж.Экрана",
-      .SYSTEM_Oled_Offset = "Сдвиг",
       .SYSTEM_Boot = "Старт с",
       .SYSTEM_Button_Wake = "Кнопка раб.",
       .SYSTEM_Shake_Wake = "Датчик раб.",
@@ -275,6 +280,20 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #ifdef HAS_BATTERY
       .SYSTEM_RememberLastTemp = " Set temp",
 #endif
+
+      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+#ifndef ST756
+      .DISPLAY_BrightnessOrContrast = "Brightness",
+#else
+      .DISPLAY_BrightnessOrContrast = "Яркость",
+#endif
+      .DISPLAY_Offset = "Сдвиг",
+      .DISPLAY_Xflip = "X Зерк.",
+      .DISPLAY_Yflip = "Y Зерк.",
+      .DISPLAY_Ratio = "Усиление",
+      .DISPLAY_Dim = "Затемнение",
+      .DISPLAY_Dim_inSleep = " Реж.Экрана",
+
 
       .NTC_Enable_NTC = "Внешний NTC",
       .NTC_Pull = "Подтяжка",
@@ -423,10 +442,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "Resetgräns",
 
       .SYSTEM_Profile = "Profil",
-      .SYSTEM_Oled_Brightness = "Kontrast",
-      .SYSTEM_Oled_Dim = "Dimmer",
-      .SYSTEM_Oled_Dim_inSleep = " I sovläge",
-      .SYSTEM_Oled_Offset = "Offset",
       .SYSTEM_Boot = "Startläge",
       .SYSTEM_Button_Wake = "Knappväck",
       .SYSTEM_Shake_Wake = "Skakväck",
@@ -446,6 +461,19 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #ifdef HAS_BATTERY
       .SYSTEM_RememberLastTemp = " Set temp",
 #endif
+
+      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+#ifndef ST756
+      .DISPLAY_BrightnessOrContrast = "Brightness",
+#else
+      .DISPLAY_BrightnessOrContrast = "Kontrast",
+#endif
+      .DISPLAY_Offset = "Offset",
+      .DISPLAY_Xflip = "X flip",
+      .DISPLAY_Yflip = "Y flip",
+      .DISPLAY_Ratio = "Ratio",
+      .DISPLAY_Dim = "Dimmer",
+      .DISPLAY_Dim_inSleep = " I sovläge",
 
       .NTC_Enable_NTC = "Aktivera NTC",
       .NTC_Pull = "Pull",
@@ -593,10 +621,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "Limit Reset",
 
       .SYSTEM_Profile = "Profile",
-      .SYSTEM_Oled_Brightness = "Kontrast",
-      .SYSTEM_Oled_Dim = "Dimmer",
-      .SYSTEM_Oled_Dim_inSleep = " In sleep",
-      .SYSTEM_Oled_Offset = "Versatz",
       .SYSTEM_Boot = "Boot",
       .SYSTEM_Button_Wake = "Taster",
       .SYSTEM_Shake_Wake = "Bewegung",
@@ -616,6 +640,19 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #ifdef HAS_BATTERY
       .SYSTEM_RememberLastTemp = " Set temp",
 #endif
+
+      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+#ifndef ST756
+      .DISPLAY_BrightnessOrContrast = "Brightness",
+#else
+      .DISPLAY_BrightnessOrContrast = "Kontrast",
+#endif
+      .DISPLAY_Offset = "Versatz",
+      .DISPLAY_Xflip = "X flip",
+      .DISPLAY_Yflip = "Y flip",
+      .DISPLAY_Ratio = "Ratio",
+      .DISPLAY_Dim = "Dimmer",
+      .DISPLAY_Dim_inSleep = " In sleep",
 
       .NTC_Enable_NTC = "NTC Anschalt",
       .NTC_Pull = "Pull",
@@ -763,10 +800,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Reset_limit = "Sıfırlandı",
 
       .SYSTEM_Profile = "Profil",
-      .SYSTEM_Oled_Brightness = "kontrast",
-      .SYSTEM_Oled_Dim = "Karartma",
-      .SYSTEM_Oled_Dim_inSleep = " Uykuda",
-      .SYSTEM_Oled_Offset = "Dengele",
       .SYSTEM_Boot = "Başlangıç",
       .SYSTEM_Button_Wake = "Düme Uyan",
       .SYSTEM_Shake_Wake = "Salla Uyan",
@@ -786,6 +819,20 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #ifdef HAS_BATTERY
       .SYSTEM_RememberLastTemp = " Set temp",
 #endif
+      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+
+#ifndef ST756
+      .DISPLAY_BrightnessOrContrast = "Brightness",
+#else
+      .DISPLAY_BrightnessOrContrast = "kontrast",
+#endif
+      .DISPLAY_Contrast = "",
+      .DISPLAY_Offset = "Dengele",
+      .DISPLAY_Xflip = "X flip",
+      .DISPLAY_Yflip = "Y flip",
+      .DISPLAY_Ratio = "Ratio",
+      .DISPLAY_Dim = "Karartma",
+      .DISPLAY_Dim_inSleep = " Uykuda",
 
       .NTC_Enable_NTC = "NTC Etkin",
       .NTC_Pull = "Çek",
@@ -863,12 +910,12 @@ const strings_t strings[LANGUAGE_COUNT] = {
 };
 
 
-char * tempUnit[2] =    { "\260C", "\260F" };
-char * profileStr[NUM_PROFILES] = { "T12", "C245", "C210" };
-char * Langs[LANGUAGE_COUNT] = {
-                                   [lang_english] = "EN",
-                                   [lang_russian] = "RU",
-                                   [lang_swedish] = "SWE",
-                                   [lang_german]  = "GER",
-                                   [lang_turkish] = "TR",
-                               };
+char * const tempUnit[2]              = { "\260C", "\260F" };
+char * const profileStr[NUM_PROFILES] = { "T12", "C245", "C210" };
+char * const Langs[LANGUAGE_COUNT]    = {
+                                            [lang_english] = "EN",
+                                            [lang_russian] = "RU",
+                                            [lang_swedish] = "SWE",
+                                            [lang_german]  = "GER",
+                                            [lang_turkish] = "TR",
+                                        };

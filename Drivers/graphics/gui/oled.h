@@ -5,8 +5,8 @@
  *      Author: David    Original work by Jose Barros (PTDreamer), 2017
  */
 
-#ifndef GRAPHICS_GUI_OLED_H_
-#define GRAPHICS_GUI_OLED_H_
+#ifndef GRAPHICS_GUI_DISPLAY_H_
+#define GRAPHICS_GUI_DISPLAY_H_
 
 #include "screen.h"
 extern screen_t *current_screen;
@@ -18,10 +18,10 @@ void oled_destroy_screen(screen_t *scr);
 void oled_backup_comboStatus(screen_t *scr);
 void oled_restore_comboStatus(screen_t *scr);
 
-void oled_addScreen(screen_t *screen, uint8_t index);
+void oled_addScreen(screen_t *screen, screens_t index);
 void oled_draw(void);
 void oled_init(RE_Rotation_t (*Rotation)(RE_State_t*), RE_State_t *State);
 void oled_processInput(void);
 void oled_update(void);
 void oled_handle(void);
-#endif /* GRAPHICS_GUI_OLED_H_ */
+#endif /* GRAPHICS_GUI_DISPLAY_H_ */

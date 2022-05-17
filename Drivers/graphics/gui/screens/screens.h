@@ -5,8 +5,8 @@
  *      Author: David
  */
 
-#ifndef GRAPHICS_GUI_SCREENS_SCREENS_H_
-#define GRAPHICS_GUI_SCREENS_SCREENS_H_
+#ifndef _GUI_SCREENS_H_
+#define _GUI_SCREENS_H_
 
 
 #define ENABLE_DEBUG_SCREEN
@@ -18,6 +18,7 @@
 #include "boot_screen.h"
 #include "main_screen.h"
 #include "settings_screen.h"
+#include "display_screen.h"
 #include "iron_screen.h"
 #include "system_screen.h"
 #include "reset_screen.h"
