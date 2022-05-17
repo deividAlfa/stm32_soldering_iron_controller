@@ -220,7 +220,7 @@ void boot_screen_init(screen_t * scr){
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM[0], splashXBM[1], &splashXBM[2]);
   scr->refresh = screen_Erased;
 #ifndef ST7565
-  setDisplayBrightnessOrContrast(0);
+  setDisplayContrastOrBrightness(0);
   wakeOledDim();
 #endif
 }

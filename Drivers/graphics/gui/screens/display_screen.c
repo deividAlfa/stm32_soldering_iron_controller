@@ -25,11 +25,11 @@ void update_display_menu(void){
 }
 
 //=========================================================
-static void * getDisplayContrast_() {
+static void * getDisplayContrastOrBrightness_() {
 #ifdef ST7565
-  temp = systemSettings.settings.contrast;
+  temp = systemSettings.settings.contrastOrBrightness;
 #else
-  temp = systemSettings.settings.contrast/25;
+  temp = systemSettings.settings.contrastOrBrightness/25;
 #endif
   return &temp;
 }
@@ -38,16 +38,16 @@ static void setDisplayContrast_(uint32_t *val) {
   systemSettings.settings.contrast=*val;
 #else
   if(*val==0){
-    systemSettings.settings.contrast=5;
+    systemSettings.settings.contrastOrBrightness=5;
   }
   else if(*val==10){
-    systemSettings.settings.contrast=255;
+    systemSettings.settings.contrastOrBrightness=255;
   }
   else{
-    systemSettings.settings.contrast=*val*25;
+    systemSettings.settings.contrastOrBrightness=*val*25;
   }
 #endif
-  setDisplayContrast(systemSettings.settings.contrast);
+  setDisplayContrastOrBrightness(systemSettings.settings.contrastOrBrightness);
 }
 //=========================================================
 static void * getdisplayOffset() {
@@ -130,10 +130,10 @@ static void display_create(screen_t *scr){
 
   //  [ Contrast Widget ]
   //
-  newComboEditable(w, strings[lang].DISPLAY_Contrast, &edit, NULL);
+  newComboEditable(w, strings[lang].DISPLAY_ContrastOrBrightness, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=3;
-  dis->getData = &getDisplayContrast_;
+  dis->getData = &getDisplayContrastOrBrightness_;
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setDisplayContrast_;

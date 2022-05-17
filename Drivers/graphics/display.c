@@ -647,13 +647,13 @@ void buttonReset(void){
 
 void Oled_error_init(void){
 #ifdef ST7565
-  setBrightness(34);
+  setDisplayContrastOrBrightness(34);
 #else
-  setBrightness(255);
+  setDisplayContrastOrBrightness(255);
 #endif
-  FillBuffer(BLACK,fill_soft);
+  fillBuffer(BLACK,fill_soft);
   u8g2_SetFont(&u8g2,default_font );
   u8g2_SetDrawColor(&u8g2, WHITE);
   u8g2_SetMaxClipWindow(&u8g2);
-  systemSettings.settings.displayOffset = defaultSettings.displayOffset;
+  systemSettings.settings.displayOffset = DISPLAY_OFFSET;
 }

@@ -115,10 +115,10 @@ uint8_t checkScreenTimer(uint32_t time){
   }
   return 0;
 }
-void restore_contrast(void){
+void restore_contrastOrBrightness(void){
 #ifndef ST7565
-  if(getDisplayBrightnessOrContrast() != systemSettings.settings.brightness){
-    setDisplayBrightnessOrContrast(systemSettings.settings.brightness);
+  if(getDisplayContrastOrBrightness() != systemSettings.settings.contrastOrBrightness){
+    setDisplayContrastOrBrightness(systemSettings.settings.contrastOrBrightness);
   }
 #endif
 }
@@ -126,7 +126,7 @@ void restore_contrast(void){
 void wakeOledDim(void){
 #ifndef ST7565
   dim.timer = current_time;
-  if(dim.step<=0 && getDisplayBrightnessOrContrast()<systemSettings.settings.brightness ){
+  if(dim.step<=0 && getDisplayContrastOrBrightness()<systemSettings.settings.contrastOrBrightness ){
     if(getDisplayPower()==disable){
       setDisplayPower(enable);
     }
@@ -138,7 +138,7 @@ void wakeOledDim(void){
 
 void handleOledDim(void){
 #ifndef ST7565
-  uint16_t brightness=getDisplayBrightnessOrContrast();
+  uint16_t brightness=getDisplayContrastOrBrightness();
   if(!getDisplayPower() && getCurrentMode()>mode_sleep){                   // If screen turned off and not in sleep mode, wake it.
     wakeOledDim();                                                   		// (Something woke the station from sleep)
   }
@@ -161,15 +161,15 @@ void handleOledDim(void){
   else if((current_time-dim.stepTimer)>19){
     dim.stepTimer = current_time;
     brightness+=dim.step;
-    if(brightness>4 && brightness<systemSettings.settings.brightness){
-      setDisplayBrightnessOrContrast(brightness);
+    if(brightness>4 && brightness<systemSettings.settings.contrastOrBrightness){
+      setDisplayContrastOrBrightness(brightness);
     }
     else{
       if(dim.step>0){
-        restore_brightness();
+        restore_contrastOrBrightness();
       }
       else{
-        setDisplayBrightnessOrContrast(1);
+        setDisplayContrastOrBrightness(1);
         dim.min_reached=1;
       }
       dim.timer = current_time;

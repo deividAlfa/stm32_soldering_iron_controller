@@ -37,12 +37,12 @@ extern DMA_HandleTypeDef FILL_DMA;
 extern TIM_HandleTypeDef PWM_TIMER;
 extern TIM_HandleTypeDef READ_TIMER;
 
-#if defined(OLED_SPI) && defined(OLED_DEVICE)
-extern SPI_HandleTypeDef OLED_DEVICE;
+#if defined(DISPLAY_SPI) && defined(DISPLAY_DEVICE)
+extern SPI_HandleTypeDef DISPLAY_DEVICE;
 #endif
-#if defined(OLED_I2C) && defined(OLED_DEVICE)
+#if defined(DISPLAY_I2C) && defined(DISPLAY_DEVICE)
 #error fix the code, copy i2c device handle type here
-extern I2C??? OLED_DEVICE;
+extern I2C??? DISPLAY_DEVICE;
 #endif
 
 #if defined DEBUG_PWM && defined SWO_PRINT
@@ -116,7 +116,7 @@ void InitAfterMCUConfiguration(void){
     ADC_Init(&ADC_DEVICE);
     buzzer_init();
     restoreSettings();
-    setDisplayContrast(systemSettings.settings.contrast);
+    setDisplayContrastOrBrightness(systemSettings.settings.contrastOrBrightness);
     setDisplayXflip(systemSettings.settings.displayXflip);
     setDisplayYflip(systemSettings.settings.displayYflip);
 #ifdef ST7565
@@ -177,7 +177,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
 
       if(systemSettings.settings.activeDetection && !getIronErrorFlags().safeMode){
         configurePWMpin(output_High);                                                   // Force PWM high for a few uS (typically 5-10uS)
-        while(__HAL_TIM_GET_COUNTER(ironReadTimer)<(PWM_DETECT_TIME/5));
+        while(__HAL_TIM_GET_COUNTER(ironReadTimer)<(TIP_DETECT_TIME/5));
       }
       configurePWMpin(output_Low);                                                      // Force PWM low
       ADC_Status = ADC_Waiting;

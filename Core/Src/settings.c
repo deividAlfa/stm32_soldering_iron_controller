@@ -12,7 +12,6 @@
 #include "display.h"
 #include "tempsensors.h"
 #include "main.h"
-#include "ssd1306.h"
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
@@ -22,9 +21,9 @@
 const settings_t defaultSettings = {
   .version              = (~((uint32_t)SETTINGS_VERSION<<16)&0xFFFF0000) | SETTINGS_VERSION,  // Higher 16bit is 1s complement to make detection stronger
 #ifdef ST7565
-  .brightnessOrContrast = 34,
+  .contrastOrBrightness = 34,
 #else
-  .brightnessOrContrast = 255,
+  .contrastOrBrightness = 255,
 #endif
   .dim_mode             = dim_sleep,
   .dim_Timeout          = 10000,                // ms

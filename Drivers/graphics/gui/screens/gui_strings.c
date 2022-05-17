@@ -104,9 +104,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 #ifndef ST756
-      .DISPLAY_BrightnessOrContrast = "Brightness",
+      .DISPLAY_ContrastOrBrightness = "Brightness",
 #else
-      .DISPLAY_BrightnessOrContrast = "Contrast",
+      .DISPLAY_ContrastOrBrightness = "Contrast",
 #endif
       .DISPLAY_Offset = "Offset",
       .DISPLAY_Xflip = "X flip",
@@ -283,9 +283,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 #ifndef ST756
-      .DISPLAY_BrightnessOrContrast = "Brightness",
+      .DISPLAY_ContrastOrBrightness = "Brightness",
 #else
-      .DISPLAY_BrightnessOrContrast = "Яркость",
+      .DISPLAY_ContrastOrBrightness = "Яркость",
 #endif
       .DISPLAY_Offset = "Сдвиг",
       .DISPLAY_Xflip = "X Зерк.",
@@ -464,9 +464,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 #ifndef ST756
-      .DISPLAY_BrightnessOrContrast = "Brightness",
+      .DISPLAY_ContrastOrBrightness = "Brightness",
 #else
-      .DISPLAY_BrightnessOrContrast = "Kontrast",
+      .DISPLAY_ContrastOrBrightness = "Kontrast",
 #endif
       .DISPLAY_Offset = "Offset",
       .DISPLAY_Xflip = "X flip",
@@ -643,9 +643,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 #ifndef ST756
-      .DISPLAY_BrightnessOrContrast = "Brightness",
+      .DISPLAY_ContrastOrBrightness = "Brightness",
 #else
-      .DISPLAY_BrightnessOrContrast = "Kontrast",
+      .DISPLAY_ContrastOrBrightness = "Kontrast",
 #endif
       .DISPLAY_Offset = "Versatz",
       .DISPLAY_Xflip = "X flip",
@@ -822,11 +822,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 
 #ifndef ST756
-      .DISPLAY_BrightnessOrContrast = "Brightness",
+      .DISPLAY_ContrastOrBrightness = "Brightness",
 #else
-      .DISPLAY_BrightnessOrContrast = "kontrast",
+      .DISPLAY_ContrastOrBrightness = "kontrast",
 #endif
-      .DISPLAY_Contrast = "",
       .DISPLAY_Offset = "Dengele",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
