@@ -45,7 +45,6 @@ const settings_t defaultSettings = {
   .rememberLastProfile  = true,
   .rememberLastTemp     = false,
   .rememberLastTip      = true,
-  .reserved             = 0,
   .lvp                  = 110,                  // 11.0V Low voltage
   .bootProfile          = profile_None,
   .initMode             = mode_sleep,           // Safer to boot in sleep mode by default!
@@ -391,7 +390,7 @@ static void saveSettings(uint8_t mode){
   flashBufferSettings->settings = systemSettings.settings;
 
 #ifdef ENABLE_ADDONS
-  systemSettings.addonSettingsChecksum =  ChecksumAddons(&flashBufferAddons->addonSettings);
+  systemSettings.addonSettingsChecksum = ChecksumAddons(&(systemSettings.addonSettings));
   flashBufferAddons->addonSettingsChecksum = systemSettings.addonSettingsChecksum;
   flashBufferAddons->addonSettings = systemSettings.addonSettings;
 #endif

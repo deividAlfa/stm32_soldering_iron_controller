@@ -35,7 +35,7 @@ static void * getDisplayContrastOrBrightness_() {
 }
 static void setDisplayContrast_(uint32_t *val) {
 #ifdef ST7565
-  systemSettings.settings.contrast=*val;
+  systemSettings.settings.contrastOrBrightness=*val;
 #else
   if(*val==0){
     systemSettings.settings.contrastOrBrightness=5;

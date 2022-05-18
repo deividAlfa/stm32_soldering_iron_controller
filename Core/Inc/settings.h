@@ -13,7 +13,7 @@
 #include "board.h"
 
 #define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
-#define SETTINGS_VERSION  17                                        // Change this if you change the settings/profile struct to prevent getting out of sync
+#define SETTINGS_VERSION  18                                        // Change this if you change the settings/profile struct to prevent getting out of sync
 #define LANGUAGE_COUNT    5                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
 #define NUM_TIPS          20                                        // Number of tips for each profile
@@ -175,16 +175,16 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       shakeFiltering;
   uint8_t       WakeInputMode;
   uint8_t       StandMode;
-  uint8_t       reserved_u8_001;
-  uint8_t       reserved_u8_002;
-  uint8_t       reserved_u8_003;
-  uint8_t       reserved_u8_004;
-  uint8_t       reserved_u8_005;
-  uint8_t       reserved_u8_006;
-  uint8_t       reserved_u8_007;
-  uint8_t       reserved_u8_008;
-  uint8_t       reserved_u8_009;
-  uint8_t       reserved_u8_010;
+  uint8_t       : 8; // reserved
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
   filter_t      tipFilter;
   ntc_data_t    ntc;
   uint16_t      standbyTemperature;
@@ -199,31 +199,39 @@ __attribute__((aligned(4))) typedef struct{
   uint16_t      calADC_At_0;
   uint16_t      Cal250_default;
   uint16_t      Cal400_default;
-  uint16_t      reserved_u16_001;
-  uint16_t      reserved_u16_002;
-  uint16_t      reserved_u16_003;
-  uint16_t      reserved_u16_004;
-  uint16_t      reserved_u16_005;
+  uint16_t      : 16; // reserved
+  uint16_t      : 16;
+  uint16_t      : 16;
+  uint16_t      : 16;
+  uint16_t      : 16;
   tipData_t     tip[NUM_TIPS];
   uint32_t      errorTimeout;   // todo reduce size?
   uint32_t      boostTimeout;   // todo reduce size?
   uint32_t      sleepTimeout;   // todo reduce size?
   uint32_t      standbyTimeout; // todo reduce size?
-  uint32_t      reserved_u32_001;
-  uint32_t      reserved_u32_002;
-  uint32_t      reserved_u32_003;
-  uint32_t      reserved_u32_004;
-  uint32_t      reserved_u32_005;
+  uint32_t      : 32; // reserved
+  uint32_t      : 32;
+  uint32_t      : 32;
+  uint32_t      : 32;
+  uint32_t      : 32;
 }profile_t;
 
 __attribute__((aligned(4))) typedef struct{
+  uint32_t      version;            // Used to track if a reset is needed on firmware upgrade
   uint8_t       state;              // Always 0xFF if flash is erased
   uint8_t       language;
   uint8_t       contrastOrBrightness;
   uint8_t       displayOffset;
-  uint8_t       displayXflip;
-  uint8_t       displayYflip;
-  uint8_t       displayResRatio;
+  __attribute__((packed)) struct {
+    uint8_t       displayXflip : 1;
+    uint8_t       displayYflip : 1;
+#ifdef SSD1306
+    uint8_t       : 6; // reserved
+#elif defined(ST7565)
+    uint8_t       : 2; // reserved
+    uint8_t       displayResRatio : 4;
+#endif
+  };
   uint8_t       dim_mode;
   uint8_t       dim_inSleep;
   uint8_t       bootProfile;
@@ -231,7 +239,7 @@ __attribute__((aligned(4))) typedef struct{
     uint8_t rememberLastProfile : 1;
     uint8_t rememberLastTemp    : 1;
     uint8_t rememberLastTip     : 1;
-    uint8_t reserved            : 5;
+    uint8_t     : 5; // unused
   };
   uint8_t       initMode;
   uint8_t       tempUnit;
@@ -245,29 +253,28 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       EncoderMode;
   uint8_t       lvp;
   uint8_t       debugEnabled;
-  uint8_t       reserved_u8_001;
-  uint8_t       reserved_u8_002;
-  uint8_t       reserved_u8_003;
-  uint8_t       reserved_u8_004;
-  uint8_t       reserved_u8_005;
-  uint8_t       reserved_u8_006;
-  uint8_t       reserved_u8_007;
-  uint8_t       reserved_u8_008;
-  uint8_t       reserved_u8_009;
-  uint8_t       reserved_u8_010;
+  uint8_t       : 8; // reserved
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
+  uint8_t       : 8;
   uint16_t      guiUpdateDelay;
-  uint16_t      reserved_u16_001;
-  uint16_t      reserved_u16_002;
-  uint16_t      reserved_u16_003;
-  uint16_t      reserved_u16_004;
-  uint16_t      reserved_u16_005;
+  uint16_t      : 16; // reserved
+  uint16_t      : 16;
+  uint16_t      : 16;
+  uint16_t      : 16;
+  uint16_t      : 16;
   uint32_t      dim_Timeout;
-  uint32_t      reserved_u32_001;
-  uint32_t      reserved_u32_002;
-  uint32_t      reserved_u32_003;
-  uint32_t      reserved_u32_004;
-  uint32_t      reserved_u32_005;
-  uint32_t      version;            // Used to track if a reset is needed on firmware upgrade
+  uint32_t      : 32; // reserved
+  uint32_t      : 32;
+  uint32_t      : 32;
+  uint32_t      : 32;
+  uint32_t      : 32;
 }settings_t;
 
 #ifdef ENABLE_ADDONS
