@@ -100,8 +100,6 @@ __attribute__((aligned(4))) typedef struct{
 __attribute__((section(".addonSettings"))) flashSettingsAddons_t flashAddonSettings;
 #endif
 
-
-
 systemSettings_t systemSettings;
 
 static void saveSettings(uint8_t mode);

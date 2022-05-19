@@ -319,7 +319,7 @@ void checkSettings(void);
 void saveSettingsFromMenu(uint8_t mode);
 /** Loads the settings from flash on boot. */
 void restoreSettings();
-/** Load the profile at the given index into RAM */
+/** Load/change to the profile with the given index */
 void loadProfile(uint8_t profile);
 /** Checks if the current profile in RAM is changed */
 bool isCurrentProfileChanged(void);
@@ -329,8 +329,5 @@ bool isCurrentProfileChanged(void);
  *  Call this after all the modules  */
 void restoreLastSessionSettings(void);
 #endif
-
-uint8_t getCurrentProfileIdx(void);
-void    setCurrentProfileIdx(uint8_t idx);
 
 #endif /* SETTINGS_H_ */

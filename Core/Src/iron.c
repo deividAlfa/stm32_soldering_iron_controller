@@ -20,6 +20,40 @@
 #define __BASE_FILE__ "iron.c"
 #endif
 
+typedef struct {
+  uint8_t             Pwm_Channel;                          // PWM channel
+  uint8_t             CurrentIronPower;                     // Last output power
+  uint8_t             CurrentMode;                          // Actual working mode (Standby, Sleep, Normal, Boost)
+  uint8_t             changeMode;                           // change working mode to (Standby, Sleep, Normal, Boost)
+  uint8_t             resetRunawayHistory;                  // Flag to indicate it must reset the history (When temp is changed)
+  uint8_t             RunawayLevel;                         // Runaway actual level
+  uint8_t             prevRunawayLevel;                     // Runaway previous level
+  uint8_t             RunawayStatus;                        // Runaway triggered flag
+  uint8_t             calibrating;                          // Flag to indicate calibration state (don't save temperature settings)
+  uint8_t             updateStandMode;                      // Flag to indicate the stand mode must be changed
+  uint8_t             shakeActive;                          // Flag to indicate handle movement
+  uint8_t             temperatureReached;                   // Flag for temperature calibration
+  uint8_t             updatePwm;                            // Flag to indicate PWM need to be updated
+  IronError_t         Error;                                // Error flags
+  uint8_t             lastMode;                             // Last mode before error condition.
+  uint8_t             boot_complete;                        // Flag set to 1 when boot screen exits (Used for error handlding)
+
+  uint16_t            Pwm_Period;                           // PWM period
+  uint16_t            Pwm_Max;                              // Max PWM output for power limit
+  int16_t             UserSetTemperature;                   // Run mode user setpoint
+  int16_t             TargetTemperature;                    // Actual set (target) temperature (Setpoint)
+
+  uint32_t           Pwm_Out;                              // Last calculated PWM value
+  uint32_t           LastModeChangeTime;                   // Last time the mode was changed (To provide debouncing)
+  uint32_t           LastErrorTime;                        // last time iron error was detected
+  uint32_t           lastShakeTime;                        // last time iron handle was moved (In shake mode)
+  uint32_t           CurrentModeTimer;                     // Time since actual mode was set
+  uint32_t           RunawayTimer;                         // Runaway timer
+
+  TIM_HandleTypeDef* Read_Timer;                          // Pointer to the Read timer
+  TIM_HandleTypeDef* Pwm_Timer;                           // Pointer to the PWM timer
+}iron_t;
+
 static volatile uint32_t CurrentTime;
 static volatile iron_t Iron;
 
@@ -38,8 +72,6 @@ struct currentModeChangedCallbackStruct_t {
 static currentModeChangedCallbackStruct_t *currentModeChangedCallbacks = NULL;
 static setTemperatureReachedCallbackStruct_t *temperatureReachedCallbacks = NULL;
 
-
-
 static void temperatureReached(uint16_t temp) {
   setTemperatureReachedCallbackStruct_t *s = temperatureReachedCallbacks;
   while(s) {
@@ -57,7 +89,6 @@ static void modeChanged(uint8_t newMode) {
     s = s->next;
   }
 }
-
 
 void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32_t pwmchannel) {
   Iron.Pwm_Timer      = pwmtimer;
