@@ -135,7 +135,7 @@ int main(void)
 
 
   #if defined DEBUG && !defined STM32F072xB
-    DebugOpts();          // Enable debug options in Debug build
+    DebugOpts();                                    // Enable debug options in Debug build
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; // Enable DWT
     DWT->CYCCNT = 0;                                // Clear counter
     DWT->CTRL = DWT_CTRL_CYCCNTENA_Msk;             // Enable counter
@@ -221,7 +221,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
 
       if(systemSettings.settings.activeDetection && !Iron.Error.safeMode){
         configurePWMpin(output_High);                                                   // Force PWM high for a few uS (typically 5-10uS)
-        while(__HAL_TIM_GET_COUNTER(Iron.Read_Timer)<(PWM_DETECT_TIME/5));
+        while(__HAL_TIM_GET_COUNTER(Iron.Read_Timer)<(TIP_DETECT_TIME/5));
       }
       configurePWMpin(output_Low);                                                      // Force PWM low
       ADC_Status = ADC_Waiting;
