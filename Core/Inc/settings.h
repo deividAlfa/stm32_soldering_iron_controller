@@ -16,7 +16,7 @@
 #define SETTINGS_VERSION  18                                        // Change this if you change the settings/profile struct to prevent getting out of sync
 #define LANGUAGE_COUNT    5                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
-#define NUM_TIPS          20                                        // Number of tips for each profile
+#define NUM_TIPS          40                                        // Number of tips for each profile
 #define TipCharSize       5                                         // String size for each tip name (Including null termination)
 #define _BLANK_TIP        "    "                                    // Empty tip name, 4 spaces. Defined here for quick updating if TipCharSize is modified.
 
