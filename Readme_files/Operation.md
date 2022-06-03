@@ -84,14 +84,28 @@ Long-clicking will have the same effect.<br>
 In most menus, rotate anti-clockwise while pushing the button to quickly return to previous screen.<br>
 
 ### IRON
-Iron settings control the operation of the handle/tips.<br>
-This options are profile-specific, in other words, each profile (T12, C245, C210) have their own copy of these settings.<br>
+Iron settings control the operation of the handle/tips. The settings here apply only for the currently selected profile. In other words, each profile has its own dataset. Switching between profiles can be done in the **System menu** <br>
   - **Max temperature**<br>
 Upper adjustable temperature limit.<br>
   - **Min temperature**<br>
 Lower adjustable temperature limit.<br>
-  - **User temperature**<br>
-Temperature applied at boot. To reduce flash wear, setpoint adjustment is not saved!<br>
+  - **Dflt. temperature**<br>
+Default temperature applied at boot. If the board has no batter backup (or disabled) the last temperature is not saved (to reduce flash wear), the station starts up with the one set here. If the board has a backup battery and the *remember last set temp* is enabled, then this setting is ignored expect when the battery fails.<br>
+  - **Boost time**<br>
+Boost mode run time before resuming normal mode.<br>
+  - **Boost temperature**<br>
+Temperature offset applied in boost mode. It's added to the current temperature and limited to system maximum temperature.<br>
+  - **Wake mode**<br>
+How to detect activity. SHAKE or STAND.<br>
+SHAKE uses a motion sensor present in T12 handles, shake or hold the handle tip up to wake.<br>
+STAND uses the same input, but disconnected from the handle. Must be shorted to gnd when the handle is in the stand.<br>
+(Stand mode operation operation: Shorted to gnd = sleep/standby, open = run ).<br>
+  - **Filter**<br>
+Filters the wake input to make it less sensitive, so it doesn't get waken by any little noise or slight  movement.<br>
+This option is disabled in stand mode.<br>
+  - **Stand mode**<br>
+Sets the mode that will be applied when the handle is put in the stand (__STANDBY__ or __SLEEP__).<br>
+This option is disabled in shake input mode.<br>
   - **Standby time**<br>
 If there is no soldering activity for this period, the controller will reduce the temperature to extend the tip life and reduce power waste.<br>
 Setting this option to 0 will disable standby mode, the station will switch to sleep state.<br>
@@ -190,10 +204,27 @@ Return to system menu.<br>
 ---
 
 ### SYSTEM
-General settings for the controller.<br>
+General global settings for the controller.<br>
   - **Language**<br>
 Sets the display language.<br>
   - **Profile**<br>
+Sets which iron profile (__T12__, __C210__, __C245__) to use. Each profile has its own dataset (including the list of tips). <br>
+  - **Brightness**<br>
+Screen brightness.<br>
+  - **Offset**<br>
+Screen offset. This can accomodate the different screens which the controllers have come with. Use it to center the display on the screen.<br>
+  - **Dimmer**<br>
+Fades the display after a timeout.
+	- OFF: Never dim the screen.<br>
+	- SLP: Dim only in low power modes (Standby, Sleep, Error).<br>
+	- ALL: Dim also in run mode.<br>
+  - **Dimmer Delay**<br>
+Sets the dimmer timeout. This option is disabled when the dimmer is set to OFF.<br>
+  - **Dimmer, in sleep mode**<br>
+Allows to turn off the screen in sleep or error modes. This option is disabled if the dimmer is set to OFF.<br>
+For safety reasons,the screen will only turn off when the iron temperature is below 100°C.<br>
+	- OFF: In sleep mode, the screen turns off after dimming.<br>
+	- ON: The screen stays on at low brightness.<br>
   - **Boot**<br>
 Operation mode when powered on (__RUN__, __STANDBY__ or __SLEEP__).<br>
 This option is disabled in stand mode.<br>
@@ -234,6 +265,10 @@ If the display readings were updated at the same speed, it would be impossible t
 This setting defines the time in mS where the main screen readings are updated (voltage, temperatures).<br>
 The effective update rate will be limited by the ADC read frequency.<br> 
 Use a higher setting for less "flickery" display (more steady values).<br>
+  - **Remember last profile/tip/temp**<br>
+If set to *ON* the station will remember the last used profile/tip/temp between power cycles. Enabling these increases flash wear if the board has no backup battery. Saving the last used temperature is only available if the board has a battery.<br>
+If set to *OFF*, the station will default back to the last saved profile or selected tip and the default temperature on the next power cycle. If you want to change the default, set the given *remember* option to *ON*, make your change in the other menus (profile or select a different tip), exit to the main screen, wait 10 second (the controller writes the settings in the background), then switch the *remember* option to *OFF* again.<br>
+Keeping the last used temperature is only available with a backup battery. The last used temperature and tip is profile specific. If you don't change the profile and tip that often, you can leave these settings *ON*, but if you change the tip/profile frequently it is recommended to switch it *OFF*. The controller has a minimum guaranteed 10000 write cycles to the flash.
   - **DEBUG**<br>
 Enable debugging menu.<br>
   - **RESET MENU**<br>
@@ -313,6 +348,7 @@ The stored value for 400ºC calibration.<br>
   - **SAVE**<br>
 Save the tip settings.<br>
 This option will be disabled if the tip name is empty or already exists.<br>
+If this is a new tip then it is automatically selected as the active one.<br>
   - **COPY**<br>
 Copy this tip into a new slot.<br>
 This option will be disabled if already copying the tip or when there are no free slots left.<br>
@@ -359,6 +395,35 @@ Return to calibration menu saving changes.<br>
 Return to calibration menu discarding changes.<br>
   - **BACK**<br>
 Return to system menu.<br>
+
+---
+
+### ADDONS/EXTRAS (if any addon is enabled during build)
+This menu will provide the list of settings related to the addons/extras. Each of these has to be enabled in the board configuration. These settings applies to all profiles.
+
+#### Fume extractor control
+This addon provides automatic switch on/off for a connected fume extractor. To enable this addon define the *ENABLE_ADDON_FUME_EXTRACTOR* macro in the *board.h* file and in the MCU configuration create a digital output pin named "EXTRACTOR". A high level will be present if the extractor needs to operate.
+  - **Mode**<br>
+    - *OFF*  - The extractor is never switched on. <br>
+    - *AUTO* - Enable the extractor if the iron is not in *sleep* or *standby*.<br>
+    - *ON*   - The extractor is always switched on when the station is powered.<br>
+  - **After Run** (only in *AUTO* mode)<br>
+Keep the extractor on after leaving the *run* mode (entering *standby*) for the given amount of time.<br>
+  - **BACK**<br>
+Return to the addons screen.<br>
+
+#### Switch off reminder
+This addon provides a reminder to switch off the station (remove power) if its left in the *sleep* state for longer than the set amount of time. To enable this addon define the *ENABLE_ADDON_SWITCH_OFF_REMINDER* macro in the *board.h* file.
+  - **Reminder**<br>
+Enable/disable the reminder.<br>
+  - **Delay**<br>
+Start beeping if the station is in sleep mode longer than this amount of time.<br>
+  - **Period**<br>
+Repeat the reminder after this amount of minutes.<br>
+  - **Beep len.**<br>
+Length of the beep.<br>
+  - **BACK**<br>
+Return to the addons screen.<br>
 
 ---
 

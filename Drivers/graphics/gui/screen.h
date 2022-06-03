@@ -39,6 +39,15 @@ typedef enum {
               screen_calibration_start,
               screen_calibration_settings,
               screen_calibration_input,
+#ifdef ENABLE_ADDONS
+          screen_addons,
+#endif
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+              screen_fume_extractor_settings,
+#endif
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+              screen_switch_off_reminder_settings,
+#endif
           screen_debug,
 }screens_t;
 
@@ -63,8 +72,6 @@ struct screen_t
   uint8_t backup_combo_scroll;
   uint8_t backup_combo_index;
 };
-
-
 
 widget_t *screen_tabToWidget(screen_t * scr, uint8_t tab);
 void screen_addWidget(widget_t *widget, screen_t *scr);

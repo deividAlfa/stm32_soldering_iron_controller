@@ -33,6 +33,8 @@ static comboBox_item_t *comboitem_Detect_low_res_beta;
 
 filter_t bak_f;
 
+void updateTempValues();
+
 #ifdef USE_NTC
 ntc_data_t backup_ntc;
 
@@ -162,17 +164,17 @@ static void * getStandbyTemp() {
   return &temp;
 }
 //=========================================================
-static void setUserTemp(uint32_t *val) {
+static void setDefaultTemp(uint32_t *val) {
   if(*val > systemSettings.Profile.MaxSetTemperature){
     *val = systemSettings.Profile.MaxSetTemperature;
   }
   else if(*val < systemSettings.Profile.MinSetTemperature){
     *val = systemSettings.Profile.MinSetTemperature;
   }
-  systemSettings.Profile.UserSetTemperature = *val;
+  systemSettings.Profile.defaultTemperature = *val;
 }
-static void * getUserTemp() {
-  temp = systemSettings.Profile.UserSetTemperature;
+static void * getDefaultTemp() {
+  temp = systemSettings.Profile.defaultTemperature;
   return &temp;
 }
 //=========================================================
@@ -211,33 +213,20 @@ static void _setReadPeriod(uint32_t *val) {
 //=========================================================
 static void * getMaxTemp() {
   temp=systemSettings.Profile.MaxSetTemperature;
-  editable_IRON_MinTemp->max_value = temp-1;
-  editable_IRON_MaxTemp->min_value = systemSettings.Profile.MinSetTemperature+1;
-  if(systemSettings.Profile.standbyTemperature>temp){
-    systemSettings.Profile.standbyTemperature = temp;
-  }
-  if(systemSettings.Profile.UserSetTemperature>temp){
-    systemSettings.Profile.UserSetTemperature = temp;
-    Iron.CurrentSetTemperature=temp;
-  }
   return &temp;
 }
 static void setMaxTemp(uint32_t *val) {
   systemSettings.Profile.MaxSetTemperature=*val;
+  updateTempValues();
 }
 //=========================================================
 static void * getMinTemp() {
   temp=systemSettings.Profile.MinSetTemperature;
-  editable_IRON_MaxTemp->min_value = temp+1;
-  editable_IRON_MinTemp->max_value = systemSettings.Profile.MaxSetTemperature-1;
-  if(systemSettings.Profile.UserSetTemperature<temp){
-    systemSettings.Profile.UserSetTemperature = temp;
-    Iron.CurrentSetTemperature=temp;
-  }
   return &temp;
 }
 static void setMinTemp(uint32_t *val) {
   systemSettings.Profile.MinSetTemperature=*val;
+  updateTempValues();
 }
 //=========================================================
 static void * geterrorDelay() {
@@ -327,6 +316,18 @@ static void iron_onEnter(screen_t *scr){
   }
 }
 
+static void iron_onExit(screen_t *scr){
+  uint16_t const userTemp = getUserTemperature();
+  if(userTemp > systemSettings.Profile.MaxSetTemperature)
+  {
+    setUserTemperature(systemSettings.Profile.MaxSetTemperature);
+  }
+  else if (userTemp < systemSettings.Profile.MinSetTemperature)
+  {
+    setUserTemperature(systemSettings.Profile.MinSetTemperature);
+  }
+}
+
 int filter_Save(widget_t *w, RE_Rotation_t input){
   __disable_irq();
   systemSettings.Profile.tipFilter = bak_f;
@@ -337,7 +338,6 @@ int filter_Save(widget_t *w, RE_Rotation_t input){
 
 
 #ifdef USE_NTC
-
 
 static void set_enable_NTC(uint32_t *val) {
   backup_ntc.enabled = *val;
@@ -616,14 +616,14 @@ static void iron_create(screen_t *scr){
 
   //  [ user Temp Widget ]
   //
-  newComboEditable(w, strings[lang].IRON_User_Temp, &edit, NULL);
+  newComboEditable(w, strings[lang].IRON_Default_Temp, &edit, NULL);
   editable_IRON_UserTemp=edit;
   dis=&edit->inputData;
   dis->reservedChars=5;
-  dis->getData = &getUserTemp;
+  dis->getData = &getDefaultTemp;
   edit->big_step = 10;
   edit->step = 5;
-  edit->setData = (void (*)(void *))&setUserTemp;
+  edit->setData = (void (*)(void *))&setDefaultTemp;
 
   //  [ Stby Time Widget ]
   //
@@ -843,6 +843,7 @@ static void iron_create(screen_t *scr){
   //
   newComboScreen(w, strings[lang]._BACK, screen_settings, NULL);
 
+  updateTempValues();
   update_Iron_menu();
 }
 
@@ -943,6 +944,7 @@ void iron_screen_setup(screen_t *scr){
   scr->onEnter = &iron_onEnter;
   scr->processInput = &autoReturn_ProcessInput;
   scr->create = &iron_create;
+  scr->onExit = &iron_onExit;
 
   sc = &Screen_advFilter;
   oled_addScreen(&Screen_advFilter, screen_advFilter);
@@ -958,5 +960,20 @@ void iron_screen_setup(screen_t *scr){
   sc->create = &system_ntc_create;
   #endif
 
+}
+
+void updateTempValues()
+{
+  editable_IRON_MinTemp->max_value = systemSettings.Profile.MaxSetTemperature - 1;
+  editable_IRON_MaxTemp->min_value = systemSettings.Profile.MinSetTemperature + 1;
+
+  if(systemSettings.Profile.defaultTemperature > systemSettings.Profile.MaxSetTemperature)
+  {
+    systemSettings.Profile.defaultTemperature = systemSettings.Profile.MaxSetTemperature;
+  }
+  else if(systemSettings.Profile.defaultTemperature < systemSettings.Profile.MinSetTemperature)
+  {
+    systemSettings.Profile.defaultTemperature = systemSettings.Profile.MinSetTemperature;
+  }
 }
 

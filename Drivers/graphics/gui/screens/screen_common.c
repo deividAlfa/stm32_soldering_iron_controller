@@ -14,7 +14,7 @@ tipData_t backupTip;
 struct{
   int8_t step;
   uint8_t min_reached;
-  uint32_t timer;  
+  uint32_t timer;
   uint32_t stepTimer;
 }dim;
 
@@ -24,7 +24,7 @@ plotData_t plot;
 
 // Plot graph data update and drawing timer
 void updatePlot(void){
-  if(Iron.Error.Flags & FLAG_ACTIVE){
+  if(getIronErrorFlags().active){
     return;
   }
 
@@ -115,10 +115,10 @@ uint8_t checkScreenTimer(uint32_t time){
   }
   return 0;
 }
-void restore_contrast(void){
+void restore_contrastOrBrightness(void){
 #ifndef ST7565
-  if(getDisplayContrast() != systemSettings.settings.contrast){
-    setDisplayContrast(systemSettings.settings.contrast);
+  if(getDisplayContrastOrBrightness() != systemSettings.settings.contrastOrBrightness){
+    setDisplayContrastOrBrightness(systemSettings.settings.contrastOrBrightness);
   }
 #endif
 }
@@ -126,7 +126,7 @@ void restore_contrast(void){
 void wakeOledDim(void){
 #ifndef ST7565
   dim.timer = current_time;
-  if(dim.step<=0 && getDisplayContrast()<systemSettings.settings.contrast ){
+  if(dim.step<=0 && getDisplayContrastOrBrightness()<systemSettings.settings.contrastOrBrightness ){
     if(getDisplayPower()==disable){
       setDisplayPower(enable);
     }
@@ -138,7 +138,7 @@ void wakeOledDim(void){
 
 void handleOledDim(void){
 #ifndef ST7565
-  uint16_t contrast=getDisplayContrast();
+  uint16_t brightness=getDisplayContrastOrBrightness();
   if(!getDisplayPower() && getCurrentMode()>mode_sleep){                   // If screen turned off and not in sleep mode, wake it.
     wakeOledDim();                                                   		// (Something woke the station from sleep)
   }
@@ -148,11 +148,11 @@ void handleOledDim(void){
       return;
     }
     // If idle timer expired, start decreasing brightness
-    if(contrast>5 && ((current_time-dim.timer)>systemSettings.settings.dim_Timeout)){
+    if(brightness>5 && ((current_time-dim.timer)>systemSettings.settings.dim_Timeout)){
       dim.step=-5;
     }
     // If min. brightness reached and Oled power is disabled in sleep mode, turn off screen if temp<100ºC or error active
-    else if(dim.min_reached && getCurrentMode()==mode_sleep && systemSettings.settings.dim_inSleep==disable && (last_TIP_C<100 || (Iron.Error.Flags & FLAG_ACTIVE))){
+    else if(dim.min_reached && getCurrentMode()==mode_sleep && systemSettings.settings.dim_inSleep==disable && (last_TIP_C<100 || (getIronErrorFlags().active))){
       setDisplayPower(disable);
       dim.min_reached=0;
     }
@@ -160,16 +160,16 @@ void handleOledDim(void){
   // Smooth screen brightness dimming
   else if((current_time-dim.stepTimer)>19){
     dim.stepTimer = current_time;
-    contrast+=dim.step;
-    if(contrast>4 && contrast<systemSettings.settings.contrast){
-      setDisplayContrast(contrast);
+    brightness+=dim.step;
+    if(brightness>4 && brightness<systemSettings.settings.contrastOrBrightness){
+      setDisplayContrastOrBrightness(brightness);
     }
     else{
       if(dim.step>0){
-        restore_contrast();
+        restore_contrastOrBrightness();
       }
       else{
-        setDisplayContrast(1);
+        setDisplayContrastOrBrightness(1);
         dim.min_reached=1;
       }
       dim.timer = current_time;

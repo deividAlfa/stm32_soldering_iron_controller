@@ -208,6 +208,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device);
 void lcd_init(DMA_HandleTypeDef *dma);
 #endif
 
+void Oled_error_init(void);
 void fatalError(uint8_t type);
 void lcd_write(uint8_t* data, uint16_t count, uint8_t mode);
 void pset(uint8_t x, uint8_t y, bool c);
@@ -217,13 +218,13 @@ void update_display_ErrorHandler(void);
 void setDisplayRow(uint8_t row);
 void setDisplayPower(uint8_t power);
 uint8_t getDisplayPower(void);
-void setDisplayContrast(uint8_t value);
+void setDisplayContrastOrBrightness(uint8_t value);
 void setDisplayXflip(uint8_t f);
 void setDisplayYflip(uint8_t f);
 #ifdef ST7565
 void setDisplayResRatio(uint8_t r);
 #endif
-uint8_t getDisplayContrast(void);
+uint8_t getDisplayContrastOrBrightness(void);
 void fillBuffer(bool color, bool mode);
 void putStrAligned(char* str, uint8_t y, AlignType align);
 void buttonReset(void);

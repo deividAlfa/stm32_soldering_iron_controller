@@ -39,7 +39,8 @@ void detectNTC(void){
 int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
 #ifdef USE_NTC
 
-  uint8_t error = (Iron.Error.Flags&(FLAG_ACTIVE | FLAG_NO_IRON))==(FLAG_ACTIVE | FLAG_NO_IRON);
+  IronError_t const ironErrorFlags = getIronErrorFlags();
+  bool error = (ironErrorFlags.active && ironErrorFlags.noIron);
 
   if(new){
     do{                                                                                                 // Detection loop
@@ -217,7 +218,13 @@ int16_t readTipTemperatureCompensated(bool new, bool mode, bool tempUnit){
 }
 
 void setCurrentTip(uint8_t tip) {
-  systemSettings.Profile.currentTip = tip;
+
+  if(tip >= systemSettings.Profile.currentNumberOfTips) // sanity check
+  {
+    tip = 0u;
+  }
+
+  systemSettings.currentTip = tip;
   currentTipData = &systemSettings.Profile.tip[tip];
   setupPID(&currentTipData->PID);
 }

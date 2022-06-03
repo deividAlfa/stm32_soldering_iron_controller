@@ -369,13 +369,13 @@ void setDisplayResRatio(uint8_t r){
 }
 #endif
 
-void setDisplayContrast(uint8_t value) {
+void setDisplayContrastOrBrightness(uint8_t value) {
   uint8_t cmd [] = { 0x81, value };
   lcd_write(cmd, sizeof(cmd), modeCmd);
   lastContrast = value;
 }
 
-uint8_t getDisplayContrast(void) {
+uint8_t getDisplayContrastOrBrightness(void) {
   return lastContrast;
 }
 
@@ -643,4 +643,17 @@ void buttonReset(void){
     HAL_IWDG_Refresh(&hiwdg);               // Clear watchdog
   }
   NVIC_SystemReset();                       // Reset system
+}
+
+void Oled_error_init(void){
+#ifdef ST7565
+  setDisplayContrastOrBrightness(34);
+#else
+  setDisplayContrastOrBrightness(255);
+#endif
+  fillBuffer(BLACK,fill_soft);
+  u8g2_SetFont(&u8g2,default_font );
+  u8g2_SetDrawColor(&u8g2, WHITE);
+  u8g2_SetMaxClipWindow(&u8g2);
+  systemSettings.settings.displayOffset = DISPLAY_OFFSET;
 }

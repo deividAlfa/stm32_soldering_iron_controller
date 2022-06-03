@@ -33,10 +33,31 @@ typedef struct{
   char * settings_EDIT_TIPS;
   char * settings_CALIBRATION;
   char * settings_EXIT;
+#ifdef ENABLE_ADDONS
+  char * settings_ADDONS;
+#endif
+
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+  char * FUME_EXTRACTOR_Title;
+  char * FUME_EXTRACTOR_Mode;
+  char * FUME_EXTRACTOR_Modes[3];
+  char * FUME_EXTRACTOR_AfterRun;
+  char * FUME_EXTRACTOR_AfterRunUnit;
+#endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+  char * SWITCH_OFF_REMINDER_Title;
+  char * SWITCH_OFF_REMINDER_EnableDisableOption;
+  char * SWITCH_OFF_REMINDER_InactivityDelay;
+  char * SWITCH_OFF_REMINDER_ReminderPeriod;
+  char * SWITCH_OFF_REMINDER_TimeUnit;
+  char * SWITCH_OFF_REMINDER_BeepType;
+  char * SWITCH_OFF_REMINDER_BeepTypes[3];
+#endif
 
   char * IRON_Max_Temp;
   char * IRON_Min_Temp;
-  char * IRON_User_Temp;
+  char * IRON_Default_Temp;
   char * IRON_Standby;
   char * IRON_Sleep;
   char * IRON_Boost;
@@ -75,9 +96,16 @@ typedef struct{
   char * SYSTEM_Gui_Time;
   char * SYSTEM_DEBUG;
   char * SYSTEM_RESET_MENU;
+  char * SYSTEM_Remember;
+  char * SYSTEM_RememberLastProfile;
+  char * SYSTEM_RememberLastTip;
+#ifdef HAS_BATTERY
+  char * SYSTEM_RememberLastTemp;
+#endif
+
   char * SYSTEM_DISPLAY_MENU;
 
-  char * DISPLAY_Contrast;
+  char * DISPLAY_ContrastOrBrightness;
   char * DISPLAY_Offset;
   char * DISPLAY_Xflip;
   char * DISPLAY_Yflip;
@@ -163,7 +191,7 @@ typedef struct{
 
 extern const strings_t strings[LANGUAGE_COUNT];
 extern char * const tempUnit[2];
-extern char * const profileStr[ProfileSize];
+extern char * const profileStr[NUM_PROFILES];
 extern char * const Langs[LANGUAGE_COUNT];
 
 #endif /* GRAPHICS_GUI_STRINGS_H_ */

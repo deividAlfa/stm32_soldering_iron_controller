@@ -20,8 +20,43 @@
 #define __BASE_FILE__ "iron.c"
 #endif
 
+typedef struct {
+  uint8_t             Pwm_Channel;                          // PWM channel
+  uint8_t             CurrentIronPower;                     // Last output power
+  uint8_t             CurrentMode;                          // Actual working mode (Standby, Sleep, Normal, Boost)
+  uint8_t             changeMode;                           // change working mode to (Standby, Sleep, Normal, Boost)
+  uint8_t             resetRunawayHistory;                  // Flag to indicate it must reset the history (When temp is changed)
+  uint8_t             RunawayLevel;                         // Runaway actual level
+  uint8_t             prevRunawayLevel;                     // Runaway previous level
+  uint8_t             RunawayStatus;                        // Runaway triggered flag
+  uint8_t             calibrating;                          // Flag to indicate calibration state (don't save temperature settings)
+  uint8_t             updateStandMode;                      // Flag to indicate the stand mode must be changed
+  uint8_t             shakeActive;                          // Flag to indicate handle movement
+  uint8_t             temperatureReached;                   // Flag for temperature calibration
+  uint8_t             updatePwm;                            // Flag to indicate PWM need to be updated
+  IronError_t         Error;                                // Error flags
+  uint8_t             lastMode;                             // Last mode before error condition.
+  uint8_t             boot_complete;                        // Flag set to 1 when boot screen exits (Used for error handlding)
+
+  uint16_t            Pwm_Period;                           // PWM period
+  uint16_t            Pwm_Max;                              // Max PWM output for power limit
+  int16_t             UserSetTemperature;                   // Run mode user setpoint
+  int16_t             TargetTemperature;                    // Actual set (target) temperature (Setpoint)
+
+  uint32_t           Pwm_Out;                              // Last calculated PWM value
+  uint32_t           LastModeChangeTime;                   // Last time the mode was changed (To provide debouncing)
+  uint32_t           LastErrorTime;                        // last time iron error was detected
+  uint32_t           lastShakeTime;                        // last time iron handle was moved (In shake mode)
+  uint32_t           CurrentModeTimer;                     // Time since actual mode was set
+  uint32_t           RunawayTimer;                         // Runaway timer
+
+  TIM_HandleTypeDef* Read_Timer;                          // Pointer to the Read timer
+  TIM_HandleTypeDef* Pwm_Timer;                           // Pointer to the PWM timer
+}iron_t;
+
 static volatile uint32_t CurrentTime;
-volatile iron_t Iron;
+static volatile iron_t Iron;
+
 typedef struct setTemperatureReachedCallbackStruct_t setTemperatureReachedCallbackStruct_t;
 
 struct setTemperatureReachedCallbackStruct_t {
@@ -36,8 +71,6 @@ struct currentModeChangedCallbackStruct_t {
 };
 static currentModeChangedCallbackStruct_t *currentModeChangedCallbacks = NULL;
 static setTemperatureReachedCallbackStruct_t *temperatureReachedCallbacks = NULL;
-
-
 
 static void temperatureReached(uint16_t temp) {
   setTemperatureReachedCallbackStruct_t *s = temperatureReachedCallbacks;
@@ -57,10 +90,9 @@ static void modeChanged(uint8_t newMode) {
   }
 }
 
-
 void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32_t pwmchannel) {
   Iron.Pwm_Timer      = pwmtimer;
-  Iron.Read_Timer    = delaytimer;
+  Iron.Read_Timer     = delaytimer;
   Iron.Pwm_Channel    = pwmchannel;
   Iron.Error.Flags    = FLAG_NOERROR;
 
@@ -86,7 +118,7 @@ void handleIron(void) {
   CurrentTime = HAL_GetTick();
   if(!Iron.Error.safeMode){
     if( (systemSettings.setupMode==enable) || systemSettings.settings.state!=initialized || systemSettings.Profile.state!=initialized ||
-        (systemSettings.Profile.ID != systemSettings.settings.currentProfile) || (systemSettings.settings.currentProfile>profile_C210)){
+        (systemSettings.Profile.ID != systemSettings.currentProfile) || (systemSettings.currentProfile>profile_C210)){
 
       setSafeMode(enable);
     }
@@ -115,7 +147,7 @@ void handleIron(void) {
     Iron.CurrentIronPower=0;
     return;
   }
-  
+
   // Controls inactivity timer and enters low power modes
   if(!Iron.calibrating){                                                                      // Don't check timeout when calibrating
     uint32_t mode_time = CurrentTime - Iron.CurrentModeTimer;
@@ -152,7 +184,7 @@ void handleIron(void) {
   #endif
 
   // Update PID
-  Iron.Pwm_Out = calculatePID(human2adc(Iron.CurrentSetTemperature), TIP.last_avg, Iron.Pwm_Max);
+  Iron.Pwm_Out = calculatePID(human2adc(Iron.TargetTemperature), TIP.last_avg, Iron.Pwm_Max);
 
   if(!Iron.Pwm_Out){
     Iron.CurrentIronPower = 0;
@@ -166,7 +198,7 @@ void handleIron(void) {
   else{                                                                                       // Iron.Pwm_Out should never be greater than Iron.Pwm_Max
     Error_Handler();
   }
-  
+
   if(Iron.updatePwm){                                                                         // If pending PWM period update, refresh timer
     Iron.updatePwm=0;
     __HAL_TIM_SET_AUTORELOAD(Iron.Pwm_Timer, Iron.Pwm_Period);
@@ -174,7 +206,7 @@ void handleIron(void) {
   __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, Iron.Pwm_Out);                      // Load new calculated PWM Duty
 
   // For calibration process. Add +-5ºC detection margin
-  int16_t setTemp = Iron.CurrentSetTemperature;
+  int16_t setTemp = Iron.TargetTemperature;
   if(systemSettings.settings.tempUnit==mode_Farenheit){
     setTemp = TempConversion(setTemp, mode_Celsius, 0);
   }
@@ -183,7 +215,7 @@ void handleIron(void) {
       reachedTime=CurrentTime;
     }
     else if(CurrentTime-reachedTime>1000){                                                    // Wait 1s for stable readings
-      temperatureReached( Iron.CurrentSetTemperature);
+      temperatureReached( Iron.TargetTemperature);
       Iron.temperatureReached = 1;
     }
   }
@@ -210,7 +242,7 @@ void setSystemTempUnit(bool unit){
   if(systemSettings.Profile.tempUnit != unit){
     systemSettings.Profile.tempUnit = unit;
     Iron.UserSetTemperature = round_10(TempConversion(Iron.UserSetTemperature,unit,0));                                         // User temp is loaded from the profile, thus it uses the same unit
-    systemSettings.Profile.UserSetTemperature = round_10(TempConversion(systemSettings.Profile.UserSetTemperature,unit,0));
+    systemSettings.Profile.defaultTemperature = round_10(TempConversion(systemSettings.Profile.defaultTemperature,unit,0));
     systemSettings.Profile.standbyTemperature = round_10(TempConversion(systemSettings.Profile.standbyTemperature,unit,0));
     systemSettings.Profile.MaxSetTemperature = round_10(TempConversion(systemSettings.Profile.MaxSetTemperature,unit,0));
     systemSettings.Profile.MinSetTemperature = round_10(TempConversion(systemSettings.Profile.MinSetTemperature,unit,0));
@@ -324,7 +356,7 @@ void resetRunAway(void){
 
 void runAwayCheck(void){
   uint32_t CurrentTime = HAL_GetTick();
-  uint16_t setTemp = Iron.CurrentSetTemperature;
+  uint16_t setTemp = Iron.TargetTemperature;
   static uint8_t pos, prev_power[RUNAWAY_DEPTH];
   uint8_t power = 0;
 
@@ -454,7 +486,7 @@ void setNoIronValue(uint16_t noiron){
 
 // Change the iron operating mode in stand mode
 void setModefromStand(uint8_t mode){
-  if( GetIronError() ||
+  if( isIronInError() ||
       ((Iron.changeMode==mode) && (Iron.CurrentMode==mode)) ||
       ((Iron.CurrentMode==mode_sleep) && (mode==mode_standby)) ||
       ((Iron.CurrentMode==mode_boost) && (mode==mode_run)) ){
@@ -479,16 +511,24 @@ void setCurrentMode(uint8_t mode){
   CurrentTime=HAL_GetTick();                                                              // Update local time value just in case it's called by handleIron, to avoid drift
   Iron.CurrentModeTimer = CurrentTime;                                                    // Refresh current mode timer
   if(mode==mode_standby){
-    Iron.CurrentSetTemperature = systemSettings.Profile.standbyTemperature;               // Set standby temp
+    if(Iron.UserSetTemperature < systemSettings.Profile.standbyTemperature)
+    {
+      // if the user set temp is smaller than the standby temp, don't heat up the iron in standby
+      Iron.TargetTemperature = Iron.UserSetTemperature;               // Set standby temp
+    }
+    else
+    {
+      Iron.TargetTemperature = systemSettings.Profile.standbyTemperature;               // Set standby temp
+    }
   }
   else if(mode==mode_boost){
-    Iron.CurrentSetTemperature = Iron.UserSetTemperature+systemSettings.Profile.boostTemperature;
-    if(Iron.CurrentSetTemperature>systemSettings.Profile.MaxSetTemperature){
-      Iron.CurrentSetTemperature=systemSettings.Profile.MaxSetTemperature;
+    Iron.TargetTemperature = Iron.UserSetTemperature+systemSettings.Profile.boostTemperature;
+    if(Iron.TargetTemperature>systemSettings.Profile.MaxSetTemperature){
+      Iron.TargetTemperature=systemSettings.Profile.MaxSetTemperature;
     }
   }
   else{
-    Iron.CurrentSetTemperature = Iron.UserSetTemperature;                                 // Set user temp (sleep mode ignores this)
+    Iron.TargetTemperature = Iron.UserSetTemperature;                                 // Set user temp (sleep mode ignores this)
   }
   if(Iron.CurrentMode != mode){                                                           // If current mode is different
     Iron.CurrentMode = mode;
@@ -596,7 +636,7 @@ void checkIronError(void){
       Iron.Error.Flags &= (FLAG_ACTIVE | FLAG_SAFE_MODE | FLAG_NO_IRON );		    				// Clear other existing errors except safe mode
     }
     Iron.Error.Flags |= Err.Flags;                                                    	// Update Iron errors
-    
+
     Iron.LastErrorTime = CurrentTime;
     if(!Iron.Error.active){
       if(Err.Flags!=FLAG_NO_IRON){                                                      // Avoid alarm if only the tip is removed
@@ -634,7 +674,7 @@ void checkIronError(void){
 }
 
 
-bool GetIronError(void){
+bool isIronInError(void){
   return Iron.Error.Flags;
 }
 
@@ -670,9 +710,10 @@ void setCalibrationMode(uint8_t mode){
   __enable_irq();
 }
 
-uint8_t getCalibrationMode(void){
+bool isIronInCalibrationMode(void){
   return Iron.calibrating;
 }
+
 void setUserTemperature(uint16_t temperature) {
   __disable_irq();
   Iron.UserSetTemperature = temperature;
@@ -680,7 +721,7 @@ void setUserTemperature(uint16_t temperature) {
     resetPID();
     resetRunAway();
     Iron.temperatureReached = 0;
-    Iron.CurrentSetTemperature = temperature;
+    Iron.TargetTemperature = temperature;
   }
   __enable_irq();
 }
@@ -733,4 +774,74 @@ void addModeChangedCallback(currentModeChanged callback) {
   else{
     last = s;
   }
+}
+
+TIM_HandleTypeDef* getIronReadTimer(void)
+{
+  return Iron.Read_Timer;
+}
+
+TIM_HandleTypeDef* getIronPwmTimer(void)
+{
+  return Iron.Pwm_Timer;
+}
+
+IronError_t getIronErrorFlags(void)
+{
+  return Iron.Error;
+}
+
+void ironSchedulePwmUpdate(void)
+{
+  Iron.updatePwm = true;
+}
+
+bool getBootCompleteFlag(void)
+{
+  return Iron.boot_complete;
+}
+
+void setBootCompleteFlag(void)
+{
+  Iron.boot_complete = true;
+}
+
+uint32_t getIronPwmOutValue()
+{
+  return Iron.Pwm_Out;
+}
+
+uint16_t getIronTargetTemperature(void)
+{
+  return Iron.TargetTemperature;
+}
+
+uint16_t getUserSetTemperature()
+{
+  return Iron.UserSetTemperature;
+}
+
+uint32_t getIronCurrentModeTimer(void)
+{
+  return Iron.CurrentModeTimer;
+}
+
+bool isIronTargetTempReached(void)
+{
+  return Iron.temperatureReached;
+}
+
+bool getIronShakeFlag(void)
+{
+  return Iron.shakeActive;
+}
+
+void clearIronShakeFlag(void)
+{
+  Iron.shakeActive = false;
+}
+
+uint32_t getIronLastShakeTime(void)
+{
+  return Iron.lastShakeTime;
 }

@@ -50,6 +50,21 @@ void guiInit(void) {
   oled_addScreen(&Screen_calibration,screen_calibration);
   calibration_screen_setup(&Screen_calibration);
 
+#ifdef ENABLE_ADDONS
+  oled_addScreen(&Screen_addons, screen_addons);
+  addons_screen_setup(&Screen_addons);
+#endif
+
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+  oled_addScreen(&Screen_fume_extractor_settings, screen_fume_extractor_settings);
+  addons_screen_fume_extractor_setup(&Screen_fume_extractor_settings);
+#endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+  oled_addScreen(&Screen_switch_off_reminder_settings, screen_switch_off_reminder_settings);
+  addons_screen_switch_off_reminder_setup(&Screen_switch_off_reminder_settings);
+#endif
+
 #ifdef ENABLE_DEBUG_SCREEN
 
   oled_addScreen(&Screen_debug,screen_debug);

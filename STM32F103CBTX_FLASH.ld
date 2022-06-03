@@ -36,23 +36,40 @@ _Min_Stack_Size = 0x400 ;	/* required amount of stack */
 /* Memories definition */
 MEMORY
 {
-  RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
-  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH =124K
-  SETTINGS    (rx)    : ORIGIN = 0x801F000,   LENGTH = 4K
+  RAM              (xrw) : ORIGIN = 0x20000000, LENGTH = 20K
+  FLASH            (rx)  : ORIGIN = 0x8000000,  LENGTH = 124K
+  /* areas for storing the settings, keep the start and the end on page boundaries and continuous */
+  PROFILE_SETTINGS (rx)  : ORIGIN = 0x801F800,  LENGTH = 3840
+  GLOBAL_SETTINGS  (rx)  : ORIGIN = ORIGIN(PROFILE_SETTINGS) + LENGTH(PROFILE_SETTINGS),  LENGTH = 128
+  ADDON_SETTINGS   (rx)  : ORIGIN = ORIGIN(GLOBAL_SETTINGS)  + LENGTH(GLOBAL_SETTINGS) ,  LENGTH = 128
 }
+
+/* Start address and size of the settings area */
+__SETTINGS_SECTION_START  = ORIGIN(PROFILE_SETTINGS);
+__SETTINGS_SECTION_LENGTH = LENGTH(PROFILE_SETTINGS) + LENGTH(GLOBAL_SETTINGS) + LENGTH(ADDON_SETTINGS);
 
 /* Sections */
 SECTIONS
 {
-
-  /* Firmware settings storage section */  
-  .settings (NOLOAD) :
+  /* Firmware settings storage section(s) */  
+  .profileSettings (NOLOAD) :
   {
     . = ALIGN(4);
-    KEEP(*(.settings))/* .settings sections */
-  } >SETTINGS
+    KEEP(*(.profileSettings))/* .settings sections */
+  } > PROFILE_SETTINGS
   
-  
+  .globalSettings (NOLOAD) :
+  {
+    . = ALIGN(4);
+    KEEP(*(.globalSettings))/* .settings sections */
+  } > GLOBAL_SETTINGS
+
+  .addonSettings (NOLOAD) :
+  {
+    . = ALIGN(4);
+    KEEP(*(.addonSettings))/* .settings sections */
+  } >ADDON_SETTINGS
+
   /* The startup code into "FLASH" Rom type memory */
   .isr_vector :
   {

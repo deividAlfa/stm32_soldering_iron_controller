@@ -15,6 +15,7 @@
 #include "oled.h"
 #include "gui.h"
 
+typedef void (*setterFn)(void*);
 
 typedef struct{
   uint8_t enabled;

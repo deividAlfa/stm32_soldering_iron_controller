@@ -311,7 +311,7 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
     }
   }
 
-  if(GetIronError()){
+  if(isIronInError()){
     error=1;
     return last_scr;
   }
@@ -362,7 +362,7 @@ static uint8_t Cal_Start_draw(screen_t *scr){
 
     if(current_state<cal_finished){
       uint8_t s = current_state;
-      u8g2_DrawUTF8(&u8g2, 0, 50, systemSettings.Profile.tip[systemSettings.Profile.currentTip].name);  // Draw current tip name
+      u8g2_DrawUTF8(&u8g2, 0, 50, systemSettings.Profile.tip[systemSettings.currentTip].name);  // Draw current tip name
       u8g2_DrawUTF8(&u8g2, 8, 6, strings[lang].CAL_Step);            // Draw current cal state
 
       if(current_state<cal_input_250){
@@ -452,7 +452,7 @@ static void Cal_Settings_OnExit(screen_t *scr) {
 }
 
 static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
-  if(GetIronError()){
+  if(isIronInError()){
     error=1;
     return last_scr;
   }

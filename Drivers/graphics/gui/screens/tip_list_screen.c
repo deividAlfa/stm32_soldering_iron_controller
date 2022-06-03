@@ -48,7 +48,7 @@ static void tip_list_create(screen_t *scr){
   for(int x = 0; x < systemSettings.Profile.currentNumberOfTips; x++) {
     newComboAction(w, systemSettings.Profile.tip[x].name, &editTip, &i);
   }
-  if(systemSettings.Profile.currentNumberOfTips < TipSize){
+  if(systemSettings.Profile.currentNumberOfTips < NUM_TIPS){
     newComboAction(w, strings[lang]._ADD_NEW, &addNewTip, &comboitem_tip_list_addNewTip);
   }
   newComboScreen(w, strings[lang]._BACK, screen_settings, &comboitem_tip_list_back);

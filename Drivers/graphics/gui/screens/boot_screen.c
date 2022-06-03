@@ -187,7 +187,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
         if(!systemSettings.setupMode){                                                                // If not in setup mode
           ADC_Reset_measures();                                                                       // Reset the averages, show current values to avoid filtering delay at startup
           resetIronError();                                                                           // Force timeout of any error (This won't clear errors if still detected)
-          Iron.boot_complete=1;
+          setBootCompleteFlag();
           return screen_main;                                                                         // Go to main screen
         }
         widgetEnable(Widget_lang);                                                                    // In setup mode, enable widgets
@@ -210,7 +210,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 
 void boot_screen_init(screen_t * scr){
   default_init(scr);
-  profile=systemSettings.settings.currentProfile;
+  profile=systemSettings.currentProfile;
   if( (systemSettings.settings.state!=initialized) || (profile>profile_C210) ){
     profile=profile_T12;
     setSafeMode(enable);
@@ -220,7 +220,7 @@ void boot_screen_init(screen_t * scr){
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM[0], splashXBM[1], &splashXBM[2]);
   scr->refresh = screen_Erased;
 #ifndef ST7565
-  setDisplayContrast(0);
+  setDisplayContrastOrBrightness(0);
   wakeOledDim();
 #endif
 }
@@ -250,7 +250,7 @@ void boot_screen_create(screen_t *scr){
   edit->selectable.tab = 0;
   edit->setData = (void (*)(void *))&setProfile;
   edit->options = profileStr;
-  edit->numberOfOptions = ProfileSize;
+  edit->numberOfOptions = NUM_PROFILES;
   w->posX = 74;
   w->posY = 16;
   w->width = 44;

@@ -32,10 +32,31 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_EDIT_TIPS = "EDIT TIPS",
       .settings_CALIBRATION = "CALIBRATION",
       .settings_EXIT = "EXIT",
+#ifdef ENABLE_ADDONS
+      .settings_ADDONS = "ADDONS/EXTRAS",
+#endif
+
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+      .FUME_EXTRACTOR_Title         = "FUME EXT. CTL.",
+      .FUME_EXTRACTOR_Mode          = "Mode",
+      .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
+      .FUME_EXTRACTOR_AfterRun      = "After Run",
+      .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+      .SWITCH_OFF_REMINDER_Title               = "SW OFF REMINDER",
+      .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
+      .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
+      .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
+      .SWITCH_OFF_REMINDER_TimeUnit            = "m",
+      .SWITCH_OFF_REMINDER_BeepType            = "Beep len.",
+      .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
+#endif
 
       .IRON_Max_Temp = "Max temp",
       .IRON_Min_Temp = "Min temp",
-      .IRON_User_Temp = "User temp",
+      .IRON_Default_Temp = "Dflt. temp",
       .IRON_Standby = "Standby",
       .IRON_Sleep = "Sleep",
       .IRON_Boost = "Boost",
@@ -74,9 +95,19 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Gui time",
       .SYSTEM_DEBUG = "DEBUG",
       .SYSTEM_RESET_MENU = "RESET MENU",
-      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+      .SYSTEM_Remember = "Remember last",
+      .SYSTEM_RememberLastProfile = " Profile",
+      .SYSTEM_RememberLastTip = " Sel. tip",
+#ifdef HAS_BATTERY
+      .SYSTEM_RememberLastTemp = " Set temp",
+#endif
 
-      .DISPLAY_Contrast = "Contrast",
+      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+#ifndef ST756
+      .DISPLAY_ContrastOrBrightness = "Brightness",
+#else
+      .DISPLAY_ContrastOrBrightness = "Contrast",
+#endif
       .DISPLAY_Offset = "Offset",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
@@ -180,10 +211,31 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_EDIT_TIPS = "КАРТРИДЖ",
       .settings_CALIBRATION = "КАЛИБРОВКА",
       .settings_EXIT = "ВЫХОД",
+#ifdef ENABLE_ADDONS
+      .settings_ADDONS = "ADDONS/EXTRAS",
+#endif
+
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+      .FUME_EXTRACTOR_Title         = "FUME EXT. CTL.",
+      .FUME_EXTRACTOR_Mode          = "Mode",
+      .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
+      .FUME_EXTRACTOR_AfterRun      = "After Run",
+      .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+      .SWITCH_OFF_REMINDER_Title               = "SW OFF REMINDER",
+      .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
+      .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
+      .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
+      .SWITCH_OFF_REMINDER_TimeUnit            = "m",
+      .SWITCH_OFF_REMINDER_BeepType            = "Beep len.",
+      .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
+#endif
 
       .IRON_Max_Temp = "Максимум",
       .IRON_Min_Temp = "Минимум",
-      .IRON_User_Temp = "Стартовая",
+      .IRON_Default_Temp = "Стартовая",
       .IRON_Standby = "СОН",
       .IRON_Sleep = "ВЫКЛ",
       .IRON_Boost = "Буст",
@@ -222,9 +274,19 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Отрисовка",
       .SYSTEM_DEBUG = "Отладка",
       .SYSTEM_RESET_MENU = "МЕНЮ СБРОСА",
-      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+      .SYSTEM_Remember = "Remember last",
+      .SYSTEM_RememberLastProfile = " Profile",
+      .SYSTEM_RememberLastTip = " Sel. tip",
+#ifdef HAS_BATTERY
+      .SYSTEM_RememberLastTemp = " Set temp",
+#endif
 
-      .DISPLAY_Contrast = "Яркость",
+      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+#ifndef ST756
+      .DISPLAY_ContrastOrBrightness = "Brightness",
+#else
+      .DISPLAY_ContrastOrBrightness = "Яркость",
+#endif
       .DISPLAY_Offset = "Сдвиг",
       .DISPLAY_Xflip = "X Зерк.",
       .DISPLAY_Yflip = "Y Зерк.",
@@ -330,10 +392,31 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_EDIT_TIPS = "SPETSAR",
       .settings_CALIBRATION = "KALIBRERING",
       .settings_EXIT = "AVSLUTA",
+#ifdef ENABLE_ADDONS
+      .settings_ADDONS = "ADDONS/EXTRAS",
+#endif
+
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+      .FUME_EXTRACTOR_Title         = "FUME EXT. CTL.",
+      .FUME_EXTRACTOR_Mode          = "Mode",
+      .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
+      .FUME_EXTRACTOR_AfterRun      = "After Run",
+      .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+      .SWITCH_OFF_REMINDER_Title               = "SW OFF REMINDER",
+      .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
+      .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
+      .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
+      .SWITCH_OFF_REMINDER_TimeUnit            = "m",
+      .SWITCH_OFF_REMINDER_BeepType            = "Beep len.",
+      .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
+#endif
 
       .IRON_Max_Temp = "Max temp",
       .IRON_Min_Temp = "Min temp",
-      .IRON_User_Temp = "Starttemp",
+      .IRON_Default_Temp = "Starttemp",
       .IRON_Standby = "Standby",
       .IRON_Sleep = "Sovläge",
       .IRON_Boost = "Boost",
@@ -372,9 +455,19 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Gui-tid",
       .SYSTEM_DEBUG = "DEBUG",
       .SYSTEM_RESET_MENU = "ÅTERST. MENY",
-      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+      .SYSTEM_Remember = "Remember last",
+      .SYSTEM_RememberLastProfile = " Profile",
+      .SYSTEM_RememberLastTip = " Sel. tip",
+#ifdef HAS_BATTERY
+      .SYSTEM_RememberLastTemp = " Set temp",
+#endif
 
-      .DISPLAY_Contrast = "Kontrast",
+      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+#ifndef ST756
+      .DISPLAY_ContrastOrBrightness = "Brightness",
+#else
+      .DISPLAY_ContrastOrBrightness = "Kontrast",
+#endif
       .DISPLAY_Offset = "Offset",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
@@ -478,10 +571,31 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_EDIT_TIPS = "LÖTSPITZEN EDIT",
       .settings_CALIBRATION = "KALIBRIERUNG",
       .settings_EXIT = "ENDE",
+#ifdef ENABLE_ADDONS
+      .settings_ADDONS = "ADDONS/EXTRAS",
+#endif
+
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+      .FUME_EXTRACTOR_Title         = "FUME EXT. CTL.",
+      .FUME_EXTRACTOR_Mode          = "Mode",
+      .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
+      .FUME_EXTRACTOR_AfterRun      = "After Run",
+      .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+      .SWITCH_OFF_REMINDER_Title               = "SW OFF REMINDER",
+      .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
+      .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
+      .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
+      .SWITCH_OFF_REMINDER_TimeUnit            = "m",
+      .SWITCH_OFF_REMINDER_BeepType            = "Beep len.",
+      .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
+#endif
 
       .IRON_Max_Temp = "Max Temp",
       .IRON_Min_Temp = "Min Temp",
-      .IRON_User_Temp = "Usr Temp",
+      .IRON_Default_Temp = "Usr Temp",
       .IRON_Standby = "Standby",
       .IRON_Sleep = "Sleep",
       .IRON_Boost = "Boost",
@@ -520,9 +634,19 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Gui Zeit",
       .SYSTEM_DEBUG = "DEBUG",
       .SYSTEM_RESET_MENU = "RESET MENÜ",
-      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+      .SYSTEM_Remember = "Remember last",
+      .SYSTEM_RememberLastProfile = " Profile",
+      .SYSTEM_RememberLastTip = " Sel. tip",
+#ifdef HAS_BATTERY
+      .SYSTEM_RememberLastTemp = " Set temp",
+#endif
 
-      .DISPLAY_Contrast = "Kontrast",
+      .SYSTEM_DISPLAY_MENU = "DISPLAY",
+#ifndef ST756
+      .DISPLAY_ContrastOrBrightness = "Brightness",
+#else
+      .DISPLAY_ContrastOrBrightness = "Kontrast",
+#endif
       .DISPLAY_Offset = "Versatz",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
@@ -626,10 +750,31 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .settings_EDIT_TIPS = "UÇ DÜZENLE",
       .settings_CALIBRATION = "KALİBRASYON",
       .settings_EXIT = "ÇIKIŞ",
+#ifdef ENABLE_ADDONS
+      .settings_ADDONS = "ADDONS/EXTRAS",
+#endif
+
+#ifdef ENABLE_ADDON_FUME_EXTRACTOR
+      .FUME_EXTRACTOR_Title         = "FUME EXT. CTL.",
+      .FUME_EXTRACTOR_Mode          = "Mode",
+      .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
+      .FUME_EXTRACTOR_AfterRun      = "After Run",
+      .FUME_EXTRACTOR_AfterRunUnit  = "s",
+#endif
+
+#ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+      .SWITCH_OFF_REMINDER_Title               = "SW OFF REMINDER",
+      .SWITCH_OFF_REMINDER_EnableDisableOption = "Reminder",
+      .SWITCH_OFF_REMINDER_InactivityDelay     = "Delay",
+      .SWITCH_OFF_REMINDER_ReminderPeriod     = "Period",
+      .SWITCH_OFF_REMINDER_TimeUnit            = "m",
+      .SWITCH_OFF_REMINDER_BeepType            = "Beep len.",
+      .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
+#endif
 
       .IRON_Max_Temp = "Max Isı",
       .IRON_Min_Temp = "Min Isı",
-      .IRON_User_Temp = "İlk Isı",
+      .IRON_Default_Temp = "İlk Isı",
       .IRON_Standby = "Bekleme",
       .IRON_Sleep = "Uyku",
       .IRON_Boost = "Darbe",
@@ -668,9 +813,19 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Gui zamanı",
       .SYSTEM_DEBUG = "Geliştirici",
       .SYSTEM_RESET_MENU = "MENÜ SIFIRLA",
+      .SYSTEM_Remember = "Remember last",
+      .SYSTEM_RememberLastProfile = " Profile",
+      .SYSTEM_RememberLastTip = " Sel. tip",
+#ifdef HAS_BATTERY
+      .SYSTEM_RememberLastTemp = " Set temp",
+#endif
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 
-      .DISPLAY_Contrast = "kontrast",
+#ifndef ST756
+      .DISPLAY_ContrastOrBrightness = "Brightness",
+#else
+      .DISPLAY_ContrastOrBrightness = "kontrast",
+#endif
       .DISPLAY_Offset = "Dengele",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
@@ -754,12 +909,12 @@ const strings_t strings[LANGUAGE_COUNT] = {
 };
 
 
-char * const tempUnit[2] =    { "\260C", "\260F" };
-char * const profileStr[ProfileSize] = { "T12", "C245", "C210" };
-char * const Langs[LANGUAGE_COUNT] = {
-                                   [lang_english] = "EN",
-                                   [lang_russian] = "RU",
-                                   [lang_swedish] = "SWE",
-                                   [lang_german]  = "GER",
-                                   [lang_turkish] = "TR",
-                               };
+char * const tempUnit[2]              = { "\260C", "\260F" };
+char * const profileStr[NUM_PROFILES] = { "T12", "C245", "C210" };
+char * const Langs[LANGUAGE_COUNT]    = {
+                                            [lang_english] = "EN",
+                                            [lang_russian] = "RU",
+                                            [lang_swedish] = "SWE",
+                                            [lang_german]  = "GER",
+                                            [lang_turkish] = "TR",
+                                        };

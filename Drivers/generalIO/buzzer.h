@@ -8,8 +8,8 @@
 #ifndef GENERALIO_BUZZER_H_
 #define GENERALIO_BUZZER_H_
 
-#define SHORT_BEEP    (uint16_t)  10
-#define LONG_BEEP     (uint16_t)  30
+#define SHORT_BEEP    (uint16_t)  50
+#define LONG_BEEP     (uint16_t)  300
 #define FATAL_BEEP    (uint16_t)  2000
 #define ALARM_PERIOD  (uint16_t)  2000
 #define ALARM_HIGH    (uint16_t)  10
