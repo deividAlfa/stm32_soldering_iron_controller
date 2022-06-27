@@ -544,10 +544,11 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 #endif
 
 void fatalError(uint8_t type){
- inFatalError = 1;
- uint8_t lang = systemSettings.settings.language;
- if(lang>(LANGUAGE_COUNT-1))
-  lang=lang_english;
+  inFatalError = 1;
+  uint8_t lang = systemSettings.settings.language;
+  if(lang>(LANGUAGE_COUNT-1)){
+    lang=lang_english;
+  }
   Oled_error_init();
   switch(type){
     case error_FLASH:
