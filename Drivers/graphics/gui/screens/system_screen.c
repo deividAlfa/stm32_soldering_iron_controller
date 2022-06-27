@@ -28,7 +28,7 @@ void update_System_menu(void){
 }
 
 void updateTemperatureUnit(void){
-  if(systemSettings.settings.tempUnit==mode_Farenheit){
+  if(getSystemTempUnit()==mode_Farenheit){
     editable_system_TempStep->inputData.endString="\260F";
     editable_system_bigTempStep->inputData.endString="\260F";
     editable_system_GuiTempDenoise->inputData.endString="\260F";
@@ -65,7 +65,7 @@ int hwAction(widget_t *w, RE_Rotation_t input){
 }
 
 static void * getTmpUnit() {
-  temp = systemSettings.settings.tempUnit;
+  temp = getSystemTempUnit();
   return &temp;
 }
 static void setTmpUnit(uint32_t *val) {
