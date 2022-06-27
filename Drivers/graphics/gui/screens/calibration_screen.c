@@ -277,7 +277,7 @@ static void Cal_create(screen_t *scr) {
 
 static void Cal_Start_init(screen_t *scr) {
   default_init(scr);
-  backupTempUnit=systemSettings.settings.tempUnit;
+  backupTempUnit=getSystemTempUnit();
   setSystemTempUnit(mode_Celsius);
   backup_tip();
 

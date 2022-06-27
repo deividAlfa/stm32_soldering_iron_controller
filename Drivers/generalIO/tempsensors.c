@@ -165,13 +165,15 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
 
 // Read tip temperature
 int16_t readTipTemperatureCompensated(bool new, bool mode, bool tempUnit){
+  if(systemSettings.setupMode==enable)
+      return 0;
+
   int16_t temp, temp_Raw;
-  if(systemSettings.setupMode==enable){
-    return 0;
-  }
+  bool systemUnit = getSystemTempUnit();
+
   if(new){
-    temp = (adc2Human_x10(TIP.last_avg,1,systemSettings.settings.tempUnit)+5)/10;
-    temp_Raw = (adc2Human_x10(TIP.last_raw,1,systemSettings.settings.tempUnit)+5)/10;
+    temp = (adc2Human_x10(TIP.last_avg,1,systemUnit)+5)/10;
+    temp_Raw = (adc2Human_x10(TIP.last_raw,1,systemUnit)+5)/10;
 
     // Limit output values
     if(temp>999){
@@ -186,7 +188,7 @@ int16_t readTipTemperatureCompensated(bool new, bool mode, bool tempUnit){
     else if(temp_Raw<0){
       temp_Raw = 0;
     }
-    if(systemSettings.settings.tempUnit==mode_Celsius){
+    if(systemUnit==mode_Celsius){
       last_TIP_C = temp;
       last_TIP_C_Raw = temp_Raw;
       last_TIP_F = TempConversion(last_TIP_C,mode_Farenheit,0);
@@ -237,7 +239,7 @@ tipData_t *getCurrentTip() {
 int16_t human2adc(int16_t t) {
   t = t*10;
   // If using Farenheit, convert to Celsius
-  if(systemSettings.settings.tempUnit==mode_Farenheit){
+  if(getSystemTempUnit()==mode_Farenheit){
     t = TempConversion(t,mode_Celsius,1);
   }
   int16_t temp = t;

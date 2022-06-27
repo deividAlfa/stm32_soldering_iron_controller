@@ -297,7 +297,7 @@ static void setShakeFiltering(uint32_t *val) {
 
 static void iron_onEnter(screen_t *scr){
   update_Iron_menu();
-  if(systemSettings.settings.tempUnit==mode_Farenheit){
+  if(getSystemTempUnit()==mode_Farenheit){
     editable_IRON_MaxTemp->inputData.endString="\260F";
     editable_IRON_MinTemp->inputData.endString="\260F";
     editable_IRON_StandbyTemp->inputData.endString="\260F";
@@ -584,6 +584,7 @@ static void iron_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
+  uint16_t maxTemp = (getSystemTempUnit()==mode_Celsius ? 480 : 900);
 
   //  [ IRON COMBO ]
   //
@@ -598,7 +599,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getMaxTemp;
   edit->big_step = 10;
   edit->step = 5;
-  edit->max_value = 480;
+  edit->max_value = maxTemp;
   edit->setData = (void (*)(void *))&setMaxTemp;
 
   //  [ Min Temp Widget ]
@@ -610,7 +611,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getMinTemp;
   edit->big_step = 10;
   edit->step = 5;
-  edit->max_value = 480;
+  edit->max_value = maxTemp;
   edit->min_value = 50;
   edit->setData = (void (*)(void *))&setMinTemp;
 

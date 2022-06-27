@@ -176,7 +176,7 @@ static void * getTemp() {
 
 static void * main_screen_getIronTemp() {
   if(mainScr.updateReadings){
-    mainScr.lastTip=readTipTemperatureCompensated(old_reading, read_average, systemSettings.settings.tempUnit);
+    mainScr.lastTip=readTipTemperatureCompensated(old_reading, read_average, getSystemTempUnit());
     if(getCurrentMode()>mode_sleep){
       uint16_t const targetTemp = getIronTargetTemperature();
       // Lock numeric display if within limits
@@ -202,7 +202,7 @@ static void * main_screen_getVin() {
 #ifdef USE_NTC
 static void * main_screen_getAmbTemp() {
   if(mainScr.updateReadings){
-    if(systemSettings.settings.tempUnit==mode_Celsius){
+    if(getSystemTempUnit()==mode_Celsius){
       mainScr.lastAmb = last_NTC_C;
     }
     else{
@@ -242,7 +242,7 @@ static void setMainWidget(widget_t* w){
 // Main screen functions
 //-------------------------------------------------------------------------------------------------------------------------------
 static void setMainScrTempUnit(void) {
-  if(systemSettings.settings.tempUnit==mode_Farenheit){
+  if(getSystemTempUnit()==mode_Farenheit){
     ((displayOnly_widget_t*)Widget_IronTemp->content)->endString="\260F";      // \260 = ASCII dec. 176(°) in octal representation
     #ifdef USE_NTC
     ((displayOnly_widget_t*)Widget_AmbTemp->content)->endString="\260F";
@@ -645,9 +645,9 @@ static void  drawMode(uint8_t refresh){
 
     case mode_run:
     {
-      char SetTemp[6];
+      char SetTemp[8];
       char c;
-      if(systemSettings.settings.tempUnit==mode_Celsius){
+      if(getSystemTempUnit()==mode_Celsius){
         c='C';
       }
       else{
@@ -710,7 +710,7 @@ static uint8_t  drawPlot(uint8_t refresh){
     int16_t ref;
     if(getCurrentMode() != mode_sleep){
       ref=getIronTargetTemperature();
-      if(systemSettings.settings.tempUnit==mode_Farenheit){
+      if(getSystemTempUnit()==mode_Farenheit){
         ref = TempConversion(ref, mode_Celsius, 0);
       }
     }

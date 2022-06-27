@@ -56,7 +56,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "Max temp",
       .IRON_Min_Temp = "Min temp",
-      .IRON_Default_Temp = "Dflt. temp",
+      .IRON_Default_Temp = "Def temp",
       .IRON_Standby = "Standby",
       .IRON_Sleep = "Sleep",
       .IRON_Boost = "Boost",

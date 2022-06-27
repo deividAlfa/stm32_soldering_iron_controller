@@ -63,6 +63,7 @@ void setReadDelay(uint16_t delay);
 void setReadPeriod(uint16_t period);
 void setNoIronValue(uint16_t noiron);
 void setSystemTempUnit(bool unit);
+bool getSystemTempUnit(void);
 void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback);
 void addModeChangedCallback(currentModeChanged callback);
 void handleIron(void);

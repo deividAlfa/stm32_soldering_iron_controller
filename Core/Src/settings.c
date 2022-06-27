@@ -780,7 +780,7 @@ void loadProfile(uint8_t profile){
   else{
     Error_Handler();
   }
-  setSystemTempUnit(systemSettings.settings.tempUnit);                        // Ensure the profile uses the same temperature unit as the system
+  setSystemTempUnit(getSystemTempUnit());                        // Ensure the profile uses the same temperature unit as the system
   setUserTemperature(systemSettings.Profile.defaultTemperature);
   setCurrentTip(systemSettings.Profile.defaultTip);
   TIP.filter=systemSettings.Profile.tipFilter;

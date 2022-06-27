@@ -207,7 +207,7 @@ void handleIron(void) {
 
   // For calibration process. Add +-5ºC detection margin
   int16_t setTemp = Iron.TargetTemperature;
-  if(systemSettings.settings.tempUnit==mode_Farenheit){
+  if(getSystemTempUnit()==mode_Farenheit){
     setTemp = TempConversion(setTemp, mode_Celsius, 0);
   }
   if( !Iron.temperatureReached && abs(setTemp-last_TIP_C)<5){                                 // Allow +-5° margin for noisier stations
@@ -253,6 +253,9 @@ void setSystemTempUnit(bool unit){
   }
   __enable_irq();
   setCurrentMode(Iron.CurrentMode);     // Reload temps
+}
+bool getSystemTempUnit(void){
+  return systemSettings.settings.tempUnit;
 }
 
 // This function inits the timers and sets the prescaler settings depending on the system core clock
@@ -372,7 +375,7 @@ void runAwayCheck(void){
       Iron.resetRunawayHistory=0;
   }
 #endif
-  if(systemSettings.settings.tempUnit==mode_Farenheit){
+  if(getSystemTempUnit()==mode_Farenheit){
     setTemp = TempConversion(setTemp, mode_Celsius, 0);
   }
   if(!Iron.resetRunawayHistory){                                                                // Ignore power if flag is set
