@@ -312,6 +312,7 @@ __attribute__((aligned(4))) typedef struct{
 }systemSettings_t;
 
 extern systemSettings_t systemSettings;
+extern const settings_t defaultSettings;
 
 /** Cyclic task to save the settings if needed. */
 void checkSettings(void);
