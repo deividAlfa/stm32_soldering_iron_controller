@@ -205,9 +205,7 @@ void checkSettings(void){
         saveSettings(wipeProfiles);
         break;
       case reset_Profile:
-        __disable_irq();
         resetCurrentProfile();
-        __enable_irq();
         saveSettings(keepProfiles);
         break;
       case reset_Settings:
@@ -455,7 +453,7 @@ static void saveSettings(uint8_t mode){
 void restoreSettings() {
 #ifdef NOSAVESETTINGS                                                 // Stop erasing the flash while in debug mode
   __disable_irq();
-  resetSystemSettings();                                              // TODO not tested with the new profile system
+  resetSystemSettings();
   systemSettings.settings.currentProfile = profile_T12;
   resetCurrentProfile();
   loadProfile(systemSettings.settings.currentProfile);
@@ -630,6 +628,7 @@ static void resetSystemSettings(void) {
 
 
 static void resetCurrentProfile(void){
+  __disable_irq();
     if(systemSettings.currentProfile==profile_T12){
     systemSettings.Profile.ID = profile_T12;
     for(uint8_t x = 0; x < NUM_TIPS; x++) {
@@ -754,16 +753,12 @@ void loadProfile(uint8_t profile){
   systemSettings.currentProfile=profile;
   if(profile==profile_None){                                                    // If profile not initialized yet, use T12 values until the system is configured
     systemSettings.currentProfile=profile_T12;                         // Force T12 profile
-    __disable_irq();
     resetCurrentProfile();                                                      // Load default data
-    __enable_irq();
     systemSettings.currentProfile=profile_None;                        // Revert to none to trigger setup screen
   }
   else if(profile<=profile_C210){                                               // If valid profile
     if(flashProfilesSettings.Profile[profile].state!=initialized){                      // If flash profile not initialized
-      __disable_irq();
       resetCurrentProfile();                                                    // Load defaults
-      __enable_irq();
       systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
     }
     else{
@@ -772,9 +767,7 @@ void loadProfile(uint8_t profile){
     }
     // Calculate data checksum and compare with stored checksum, also ensure the stored ID is the same as the requested profile
     if( (profile!=systemSettings.Profile.ID) || (systemSettings.ProfileChecksum != ChecksumProfile(&systemSettings.Profile)) ){
-      __disable_irq();
       checksumError(reset_Profile);
-      __enable_irq();
     }
   }
   else{
@@ -814,9 +807,7 @@ static void checksumError(uint8_t mode){
   update_display();
   ErrCountDown(3,117,50);
   if(mode == reset_Profile){
-    __disable_irq();
     resetCurrentProfile();
-    __enable_irq();
     saveSettings(keepProfiles);
   }
 #ifdef ENABLE_ADDONS

@@ -192,15 +192,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
 void CrashErrorHandler(char * file, int line)
 {
 #ifdef DEBUG_ERROR
-  #if (defined DISPLAY_I2C || defined DISPLAY_SPI) && defined DISPLAY_DEVICE
-  if(!oled.use_sw){
-    display_dma_abort();
-  }
-  #endif
-  setSafeMode(enable);
-  buzzer_fatal_beep();
-  Oled_error_init();
 
+  Oled_error_init();
+  
   char strOut[16];
   uint8_t outPos=0;
   uint8_t inPos=0;

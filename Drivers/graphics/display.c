@@ -547,15 +547,7 @@ void fatalError(uint8_t type){
  inFatalError = 1;
  uint8_t lang = systemSettings.settings.language;
  if(lang>(LANGUAGE_COUNT-1))
-   lang=lang_english;
-
-#if defined DISPLAY_DEVICE
-  if(!oled.use_sw)
-    display_dma_abort();
-#endif
-
-  setSafeMode(enable);
-  buzzer_fatal_beep();
+  lang=lang_english;
   Oled_error_init();
   switch(type){
     case error_FLASH:
@@ -646,11 +638,13 @@ void buttonReset(void){
 }
 
 void Oled_error_init(void){
-#ifdef ST7565
-  setDisplayContrastOrBrightness(34);
-#else
-  setDisplayContrastOrBrightness(255);
-#endif
+  setSafeMode(enable);
+#if defined DISPLAY_DEVICE
+  if(!oled.use_sw)
+    display_dma_abort();
+#endif  
+  buzzer_fatal_beep();
+  setDisplayContrastOrBrightness(defaultSettings.contrastOrBrightness);
   fillBuffer(BLACK,fill_soft);
   u8g2_SetFont(&u8g2,default_font );
   u8g2_SetDrawColor(&u8g2, WHITE);
