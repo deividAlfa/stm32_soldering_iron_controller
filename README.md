@@ -49,11 +49,16 @@ The actual requirements are 10KB RAM and 64KB **(\*)** flash.<br>
 **(\*)** To date, I have found zero issues. Original KSGER firmware also does this.<br>
 **(\*)** ST-Link checks the written data, and the firmware uses checksums to protect the settings, any error will be detected.<br>
 
-**CLONES** Some controllers began to put stm32 clones due the chip shortage. CKS32 works well, but CH32F doesn't! Avoid the CH32F, the ADC makes strange things.<br>
+**CLONES** Some controllers began to put stm32 clones due the chip shortage.<br>
+CKS32 works well, but MM32 and CH32 doesn't!<br>
+The CH32 almost works but the ADC makes strange things.<br>
+The MM32 is cortex-M0, but KSGER originally used STM32F10x (Cortex-M3), that's what this firmware uses, so it won't work at all.<br>
+If your board came with MM32 or CH32, replace it with a STM32F101/102/103.<br>
+
 
 The [BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder has the board code profile, schematics and/or board pictures for quickly identify your hardware.<br>
 Currently supported controllers (Click to download the latest build):<br>
-* **Quicko T12-072** : For STM32F072 variant.
+* **Quicko T12-072** : For STM32F072 variant. Current build is broken for this model, use [this one](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/9f4b7f9565344e30a6ce1394d28350f82089488b/BOARDS/Quicko/STM32F072_SSD1306/STM32SolderingStation.bin).<br>
 * **Quicko T12-103** For STM32F103 variant.
 * **KSGER v1.5** : Profile for STM32F103 (There are no other known CPUs used in this board).
 * **KSGER v2.x**, **JCD T12**, **T12-955** : Profile compatible with all STM32F101/2/3xx models.
