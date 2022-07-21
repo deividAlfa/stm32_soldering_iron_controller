@@ -11,7 +11,7 @@ Then connection is as follows.<br>
 **Connect VDD only if not being powered by station power supply!**<br>
 <img src="/Readme_files/stlink_connection.jpg?raw=true"><br>
 
-## Programming with **STM32 ST-LINK Utility **
+## Programming with STM32 ST-LINK Utility
 
 Download the binary **STM32SolderingStation.bin** for your station (Listed in the Readme), also found in [BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder, and flash it using ST-Link.<br>
 
