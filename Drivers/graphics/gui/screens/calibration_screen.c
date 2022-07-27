@@ -10,7 +10,7 @@
 
 #define CAL_TIMEOUT 300000                                          // Inactivity timeout in milliseconds
 
-enum { zero_disabled, zero_sampling, zero_capture };
+typedef enum { zero_disabled, zero_sampling, zero_capture }zero_state_t;
 const  int16_t state_temps[2] = { 2500, 4000 };                     // Temp *10 for better accuracy
 static uint8_t error;
 static bool backupTempUnit;
@@ -26,11 +26,12 @@ static int32_t measuredTemp;
 static uint8_t processCalibration(void);
 static void setCalState(state_t s);
 static tipData_t *Currtip;
-static uint8_t update, update_draw, zero_state;
+static uint8_t update, update_draw;
+static zero_state_t zero_state;
 screen_t Screen_calibration;
 screen_t Screen_calibration_start;
 screen_t Screen_calibration_settings;
-static char zeroStr[16];
+static char zeroStr[32];
 static widget_t *Widget_Cal_Button;
 static widget_t *Widget_Cal_Measured;
 
