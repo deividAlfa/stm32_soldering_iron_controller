@@ -61,7 +61,7 @@ Currently supported controllers (Click to download the latest build):<br>
 * **Quicko T12-072** : For STM32F072 variant. Current build is broken for this model, use [this one](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/9f4b7f9565344e30a6ce1394d28350f82089488b/BOARDS/Quicko/STM32F072_SSD1306/STM32SolderingStation.bin).<br>
 * **Quicko T12-103** For STM32F103 variant.
 * **KSGER v1.5** : Profile for STM32F103 (There are no other known CPUs used in this board).
-* **KSGER v2.x**, **JCD T12**, **T12-955** : Profile compatible with all STM32F101/2/3xx models.
+* **KSGER v2.x**, **JCD T12**, **T12-955**, **Handskit** : Profile compatible with all STM32F101/2/3xx models.
 * **KSGER v3.x**, **T12-958** : Profile compatible with all STM32F101/2/3xx models.
 
 For KSGER v2/v3: As long as use the correct firmware, any STM32 variant (101/102/103/C8/R8/CB/RB) will work.<br>
