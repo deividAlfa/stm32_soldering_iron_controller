@@ -145,6 +145,8 @@ typedef struct{
 }oled_t;
 
 extern oled_t oled;
+extern volatile uint32_t hardFault_args[9];
+extern volatile uint32_t r4, r5, r6;
 
 enum { fill_soft, fill_dma };
 

@@ -128,7 +128,7 @@ g_pfnVectors:
   .word _estack
   .word Reset_Handler
   .word NMI_Handler
-  .word HardFault_Handler
+  .word HardFault_Handler_
   .word MemManage_Handler
   .word BusFault_Handler
   .word UsageFault_Handler
