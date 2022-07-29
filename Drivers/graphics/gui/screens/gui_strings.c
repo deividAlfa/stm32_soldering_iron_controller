@@ -189,6 +189,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .errMode =     { "SLP", "RUN", "LAST" },
     },
 
+#ifdef USE_LANG_RUSSIAN
     [lang_russian] = {
       .boot_firstBoot = "Выберите",
       .boot_Profile = "Тип",
@@ -369,7 +370,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .errMode =     { "ВЫКЛ", "ПУСК", "ПРЕД" },
 
     },
+#endif
 
+#ifdef USE_LANG_SWEDISH
     [lang_swedish] = {
       .boot_firstBoot = "Första Start!",
       .boot_Profile = "Profil",
@@ -548,7 +551,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .dimMode =     { "AV", "SOV", "ALLA" },
       .errMode =     { "SOV", "KÖR", "FRG" },
     },
+#endif
 
+#ifdef USE_LANG_GERMAN
     [lang_german] = {
       .boot_firstBoot = "Erster Start",
       .boot_Profile = "Profile",
@@ -727,7 +732,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .dimMode =     { "OFF", "SLP", "ALL" },
       .errMode =     { "SLP", "RUN", "LAST" },
     },
+#endif
 
+#ifdef USE_LANG_TURKISH
     [lang_turkish] = {
       .boot_firstBoot = "İlk Önyükleme!",
       .boot_Profile = "Profil",
@@ -906,6 +913,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .dimMode =     { "KPLI", "UYKU", "TÜM" },
       .errMode =     { "UYKU", "ÇLS", "SON" },
     },
+#endif
 };
 
 
@@ -913,8 +921,17 @@ char * const tempUnit[2]              = { "\260C", "\260F" };
 char * const profileStr[NUM_PROFILES] = { "T12", "C245", "C210" };
 char * const Langs[LANGUAGE_COUNT]    = {
                                             [lang_english] = "EN",
+
+#ifdef USE_LANG_RUSSIAN
                                             [lang_russian] = "RU",
+#endif
+#ifdef USE_LANG_SWEDISH
                                             [lang_swedish] = "SWE",
+#endif
+#ifdef USE_LANG_GERMAN
                                             [lang_german]  = "GER",
+#endif
+#ifdef USE_LANG_TURKISH
                                             [lang_turkish] = "TR",
+#endif
                                         };

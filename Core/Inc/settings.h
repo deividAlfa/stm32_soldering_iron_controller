@@ -14,11 +14,35 @@
 
 #define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
 #define SETTINGS_VERSION  18                                        // Change this if you change the settings/profile struct to prevent getting out of sync
-#define LANGUAGE_COUNT    5                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
 #define NUM_TIPS          40                                        // Number of tips for each profile
 #define TipCharSize       5                                         // String size for each tip name (Including null termination)
 #define _BLANK_TIP        "    "                                    // Empty tip name, 4 spaces. Defined here for quick updating if TipCharSize is modified.
+
+//#define USE_LANG_RUSSIAN
+//#define USE_LANG_SWEDISH
+//#define USE_LANG_GERMAN
+//#define USE_LANG_TURKISH
+
+// calculate the number of languages
+// use anonymous enum to export constant
+enum {
+	LANGUAGE_COUNT = (
+		1
+#ifdef USE_LANG_RUSSIAN
+		+ 1
+#endif
+#ifdef USE_LANG_SWEDISH
+		+ 1
+#endif
+#ifdef USE_LANG_GERMAN
+		+ 1
+#endif
+#ifdef USE_LANG_TURKISH
+		+ 1
+#endif
+	),
+};
 
 #ifndef PROFILE_VALUES
 
@@ -105,10 +129,18 @@ typedef enum{
   output_High,
 
   lang_english             = 0,
+#ifdef USE_LANG_RUSSIAN
   lang_russian             = 1,
+#endif
+#ifdef USE_LANG_SWEDISH
   lang_swedish             = 2,
+#endif
+#ifdef USE_LANG_GERMAN
   lang_german              = 3,
+#endif
+#ifdef USE_LANG_TURKISH
   lang_turkish             = 4,
+#endif
 
 
   dim_off                  = 0,
