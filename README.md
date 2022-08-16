@@ -156,7 +156,7 @@ There're some options to fix this:<br>
 
 ### Other issues<br>
 After fully reading the documentation, if you still have problems or doubts, please ask in the EEVblog thread:<br>
-https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle.<br>
+https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle/<br>
 
 ---
 
