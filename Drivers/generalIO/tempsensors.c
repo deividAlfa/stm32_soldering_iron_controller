@@ -44,30 +44,28 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
 
   if(new){
     do{                                                                                                 // Detection loop
-      if(systemSettings.Profile.ntc.enabled){                                                            // If NTC enabled
+      if(systemSettings.Profile.ntc.enabled){                                                           // If NTC enabled
         if(error){                                                                                      // If errors (handle removed)
-          ntc_status = _USE_EXTERNAL;                                                                   // Force external NTC mode, clear detected and first pass flag
+          ntc_status = _USE_EXTERNAL;                                                                   // Force external NTC mode, clear detected and first pass flags
         }
         else if (!(ntc_status&_DETECTED)){                                                              // If no errors and not detected yet
           if(!(ntc_status&_FIRST)){                                                                     // If first pass not done
             ntc_status=_FIRST;                                                                          // Set first pass flag, wait for next call to get new readings
           }
           else if(last_NTC_C<-100 || last_NTC_C>900){                                                   // If temp <-10.0ºC or >90.0ºC
-            if(systemSettings.Profile.ntc.detection){                                                     // If NTC detection enabled
+            if(systemSettings.Profile.ntc.detection){                                                   // If NTC Auto-detection is enabled
               if(ntc_status&_USE_EXTERNAL_HIGH){                                                        // If already trying higher values
-                ntc_status = (_DETECTED | _USE_INTERNAL);                                               // NTC invalid, use internal sensor
+                ntc_status = (_DETECTED | _USE_INTERNAL);                                               // Use internal sensor automatically
               }
-              else{                                                                                     // This reading was with lower NTC values
-                //ntc_status |= _USE_EXTERNAL_HIGH;                                                       // Now try with higher ones
-                ntc_status |= _DETECTED;                                                                    // Set detected bit (NTC External/External_high bit remains unchanged)
+              else{                                                                                     // Current reading was made with lower NTC values, giving invalid results
+                ntc_status |= _USE_EXTERNAL_HIGH;                                                       // Now try with the higher values
               }
             }
-            else{                                                                                       // If NTC detection disabled, use internal sensor
-              //ntc_status = (_DETECTED | _USE_INTERNAL);
-              ntc_status |= _DETECTED;                                                                    // Set detected bit (NTC External/External_high bit remains unchanged)
+            else{                                                                                       // NTC detection disabled, set detection flag
+              ntc_status |= _DETECTED;                                                                  // Wrong readings will generate a warning and let the user know the NTC is bad
             }
           }
-          else{                                                                                         // If temp valid
+          else{                                                                                         // If temperature valid
             ntc_status |= _DETECTED;                                                                    // Set detected bit (NTC External/External_high bit remains unchanged)
             break;
           }
@@ -123,7 +121,7 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
         }
         result*=10;
         last_NTC_C = result;
-        if(last_NTC_C < -200){                                                                          // If temperature <-20.0ºC, assume it's wrong
+        if(last_NTC_C < -100){                                                                          // If temperature <-10.0ºC, assume it's wrong
           last_NTC_C = -999;
           last_NTC_F = -999;
         }
