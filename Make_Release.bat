@@ -1,0 +1,26 @@
+set RAR="C:\Program Files\WinRAR\rar.exe"
+
+rd Release /s /q
+md Release
+cd Release
+move "..\BOARDS\KSGER\[v1.5]\STM32F103\SSD1306.bin"	"KSGER_v1_5_SSD1306.bin"
+move "..\BOARDS\KSGER\[v1.5]\STM32F103\ST7565.bin" 	"KSGER_v1_5_ST7565.bin"
+move "..\BOARDS\KSGER\[v2]\STM32F101\SSD1306.bin" 	"KSGER_v2_SSD1306.bin"
+move "..\BOARDS\KSGER\[v3]\STM32F101\SSD1306.bin" 	"KSGER_v3_SSD1306.bin"
+move "..\BOARDS\KSGER\[v3]\STM32F101\ST7565.bin" 	"KSGER_v3_ST7565.bin"
+move "..\BOARDS\Quicko\STM32F072\SSD1306.bin" 		"Quicko_STM32F072_SSD1306.bin"
+move "..\BOARDS\Quicko\STM32F072\ST7565.bin" 		"Quicko_STM32F072_ST7565.bin"
+move "..\BOARDS\Quicko\STM32F103\SSD1306.bin" 		"Quicko_STM32F103_SSD1306.bin"
+move "..\BOARDS\Quicko\STM32F103\ST7565.bin" 		"Quicko_STM32F103_ST7565.bin"
+
+%RAR% a KSGER_v1_5_SSD1306.zip 		KSGER_v1_5_SSD1306.bin
+%RAR% a KSGER_v1_5_ST7565.zip 		KSGER_v1_5_ST7565.bin
+%RAR% a KSGER_v2_SSD1306.zip 			KSGER_v2_SSD1306.bin
+%RAR% a KSGER_v3_SSD1306.zip 			KSGER_v3_SSD1306.bin
+%RAR% a KSGER_v3_ST7565.zip 			KSGER_v3_ST7565.bin
+%RAR% a Quicko_STM32F072_SSD1306.zip 	Quicko_STM32F072_SSD1306.bin
+%RAR% a Quicko_STM32F072_ST7565.zip 	Quicko_STM32F072_ST7565.bin
+%RAR% a Quicko_STM32F103_SSD1306.zip 	Quicko_STM32F103_SSD1306.bin
+%RAR% a Quicko_STM32F103_ST7565.zip 	Quicko_STM32F103_ST7565.bin
+
+TIMEOUT 3 >NUL

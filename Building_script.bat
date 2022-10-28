@@ -5,16 +5,11 @@ REM set IDEPATH="C:\ST\STM32CubeIDE_1.7.0\STM32CubeIDE"
 REM set IDE="%IDEPATH:"=%\stm32cubeide.exe"
 REM set MX="%IDEPATH:"=%\plugins\com.st.stm32cube.common.mx_6.3.0.202107141111\STM32CubeMX.jar"
 
-SET MODELS=    "BOARDS\KSGER\[v1.5]\STM32F103_SSD1306";^
-               "BOARDS\KSGER\[v1.5]\STM32F103_ST7565";^
-               "BOARDS\Quicko\STM32F103_SSD1306";^
-               "BOARDS\Quicko\STM32F103_ST7565";^
-               "BOARDS\KSGER\[v2]\STM32F101_SSD1306";^
-               "BOARDS\KSGER\[v3]\STM32F101_SSD1306";^
-               "BOARDS\KSGER\[v3]\STM32F101_ST7565";^
-               "BOARDS\Quicko\STM32F072_SSD1306";^
-               "BOARDS\Quicko\STM32F072_ST7565"
-SET PROFILE=""
+SET MODELS=    "BOARDS\KSGER\[v1.5]\STM32F103";^
+               "BOARDS\Quicko\STM32F103";^
+               "BOARDS\KSGER\[v2]\STM32F101";^
+               "BOARDS\KSGER\[v3]\STM32F101";^
+               "BOARDS\Quicko\STM32F072"
 SET RUN_CUBEMX="n"
 SET COMPILE="n"
 cls
@@ -23,30 +18,30 @@ echo     STM32 Soldering firmware automated builder.
 echo.
 echo     KEY   PROFILE        DISPLAY
 echo.
-echo     [1]   KSGER v1.5     SSD1306
-echo     [2]   KSGER v1.5     ST7565
-echo     [3]   KSGER v2       SSD1306
-echo     [4]   KSGER v3       SSD1306
-echo     [5]   KSGER v3       ST7565
-echo     [6]   Quicko 072     SSD1306
-echo     [7]   Quicko 072     ST7565
-echo     [8]   Quicko 103     SSD1306
-echo     [9]   Quicko 103     ST7565
+echo     [1]   KSGER v1.5     OLED
+echo     [2]   KSGER v1.5     LCD
+echo     [3]   KSGER v2       OLED
+echo     [4]   KSGER v3       OLED
+echo     [5]   KSGER v3       LCD
+echo     [6]   Quicko 072     OLED
+echo     [7]   Quicko 072     LCD
+echo     [8]   Quicko 103     OLED
+echo     [9]   Quicko 103     LCD
 echo     [A]   Build all
 echo     [Q]   Quit
 echo.
 CHOICE /C 123456789AQ /N /M "Please select your building target:"
 cls
-IF "%ERRORLEVEL%"=="1" SET PROFILE="BOARDS\KSGER\[v1.5]\STM32F103_SSD1306" && GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="2" SET PROFILE="BOARDS\KSGER\[v1.5]\STM32F103_ST7565" && GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="3" SET PROFILE="BOARDS\KSGER\[v2]\STM32F101_SSD1306" && GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="4" SET PROFILE="BOARDS\KSGER\[v3]\STM32F101_SSD1306" && GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="5" SET PROFILE="BOARDS\KSGER\[v3]\STM32F101_ST7565" && GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="6" SET PROFILE="BOARDS\Quicko\STM32F072_SSD1306" && GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="7" SET PROFILE="BOARDS\Quicko\STM32F072_ST7565" && GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="8" SET PROFILE="BOARDS\Quicko\STM32F103_SSD1306" && GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="9" SET PROFILE="BOARDS\Quicko\STM32F103_ST7565" && GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="10" SET PROFILE="" && SET RUN_CUBEMX="y" && SET COMPILE="y" && GOTO :TOOLS
+IF "%ERRORLEVEL%"=="1" SET PROFILE="BOARDS\KSGER\[v1.5]\STM32F103" && SET DISPLAY="SSD1306"&& GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="2" SET PROFILE="BOARDS\KSGER\[v1.5]\STM32F103" && SET DISPLAY="ST7565"&& GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="3" SET PROFILE="BOARDS\KSGER\[v2]\STM32F101" && SET DISPLAY="SSD1306"&& GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="4" SET PROFILE="BOARDS\KSGER\[v3]\STM32F101" && SET DISPLAY="SSD1306"&& GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="5" SET PROFILE="BOARDS\KSGER\[v3]\STM32F101" && SET DISPLAY="ST7565"&& GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="6" SET PROFILE="BOARDS\Quicko\STM32F072" && SET DISPLAY="SSD1306"&& GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="7" SET PROFILE="BOARDS\Quicko\STM32F072" && SET DISPLAY="ST7565"&& GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="8" SET PROFILE="BOARDS\Quicko\STM32F103" && SET DISPLAY="SSD1306"&& GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="9" SET PROFILE="BOARDS\Quicko\STM32F103" && SET DISPLAY="ST7565"&& GOTO :ASKCUBEMX
+IF "%ERRORLEVEL%"=="10" SET PROFILE="" && SET RUN_CUBEMX="y" && SET COMPILE="y" && SET DISPLAY=""&& GOTO :TOOLS
 IF "%ERRORLEVEL%"=="11" GOTO :END
 
 :ASKCUBEMX
@@ -81,7 +76,7 @@ echo.
 for /f "delims=" %%F in ('dir /b /s "C:\ST\STM32CubeIDE" 2^>nul') do (set IDEPATH=%%~F)
 if not defined IDEPATH ( goto :NOTFOUND )
 
-set IDE=%IDEPATH%\stm32cubeide.exe
+set IDE=%IDEPATH%\stm32cubeidec.exe
 if not exist "%IDE%" ( goto :NOTFOUND )
 
 for /f "delims=" %%F in ('dir /b /s "%IDEPATH:"=%\STM32CubeMX.jar" 2^>nul') do (set MX=%%~F)
@@ -112,12 +107,11 @@ for %%M in (%MODELS%) do (
     IF %PROFILE%==%%M (SET CURRENT=%%M)
     CALL :BUILD
 )
-IF %COMPILE%=="y" echo [32mBuild complete![0m && echo Binaries placed in their respective BOARDS folder (STM32SolderingStation.bin)
+IF %COMPILE%=="y" echo [32mBuild complete![0m
 goto :DONE
 
 :BUILD
 IF %CURRENT%=="" ( EXIT /B )
-
 echo [93mProfile: %CURRENT%[0m     
 del Core\Inc\board.h Core\Inc\*stm32*.* Core\Src\*stm32*.* Core\Startup\*.s .cproject .project *.ioc *.bin /Q 2>nul >nul
 xcopy /e /k /h /i /s /q /y %CURRENT% >nul
@@ -126,24 +120,30 @@ IF %RUN_CUBEMX%=="n" ( EXIT /B )
 
 echo [94mRunning CubeMX...[0m
 start /w /min "CubeMX" java -jar "%MX%" -q cubemx_script 2>nul >nul
-
 IF %ERRORLEVEL% NEQ 0 (
-  echo [91mCubeMX error![0m
+  echo [91mCubeMX error![0m : %ERRORLEVEL%
   goto :DONE
 )       
 
 IF %COMPILE%=="n" ( EXIT /B )
 
-echo [94mCompiling...[0m
-start /w /min "CubeIDE" %IDE% --launcher.suppressErrors -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import %cd% -build STM32SolderingStation/Release 2>nul >nul
+set DISP=%DISPLAY%
+:COMPILE
+IF %DISPLAY%=="" (
+  IF %DISP%=="" (SET DISP="SSD1306")
+  IF %DISP%=="SSD1306" (SET DISP="ST7565")  
+)
+echo [94mCompiling...[0m    DISPLAY:%DISP:"=%
+REM echo "start /w /min "CubeIDE" %IDE% --launcher.suppressErrors -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import %cd% -build STM32SolderingStation/%DISP:"=%_Release 2>nul >nul"
+start /w /min "CubeIDE" %IDE% --launcher.suppressErrors -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import %cd% -build STM32SolderingStation/%DISP:"=%_Release 2>nul >nul
 
 IF %ERRORLEVEL% NEQ 0 (
-  echo [91mCompiler error![0m
+  echo [91mCompiler error![0m : %ERRORLEVEL%
   goto :DONE
-)    
-
-copy /Y Release\STM32SolderingStation.bin %CURRENT%\ >nul
-
+)
+move /Y "%DISP:"=%_Release\STM32SolderingStation.bin" "%CURRENT:"=%\%DISP:"=%.bin" 2>nul >nul
+IF %ERRORLEVEL% EQU 0 ( echo                 Binary placed at %CURRENT:"=%\%DISP:"=%.bin )
+IF %DISPLAY%=="" ( IF %DISP%=="SSD1306" ( GOTO :COMPILE ) )
 echo.
 exit /B
 
@@ -151,9 +151,7 @@ REM ##################  [END]  ##################
 :DONE
 echo Cleaning up...
 echo.
-rd EWARM /Q /S 2>nul
-rd Release /Q /S 2>nul
-rd Debug /Q /S 2>nul
+rd *Release EWARM  Application /Q /S 2>nul
 del *.bin /Q 2>nul
 pause
-:END
+EXIT
