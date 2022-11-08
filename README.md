@@ -116,6 +116,9 @@ There have been problems with some board/stations like:<br>
 * Bad Op-Amp
 * Bad 3v3 Regulator
 
+If you're getting "NTC high/low" error even when disabling the NTC in settings, then your STM32 is fake.<br>
+They're relabeling clones (MM32/GD32...) to appear like genuine STM32, in this case replace with a genuine chip.<br>
+
 ### Temperature accuracy
 Buying a cheap high temperature meter is highly recommended!<br>
 These boards can have pretty different readings and tolerances. Even between T12 tips.<br>
@@ -168,6 +171,7 @@ Video of building steps:<br>
 
 There's a new automated build script for Windows (_Building_script.bat) that allows a simple and fast way of copying and building the desired profile.<br>
 With it, all you need is to have CubeIDE installed in C:\ST... (It's the default installation folder), it will search and execute the tools without requiring any user intervention.<br>
+Note: CubeIDE (Current version: 1.10.1) needs Java JDK, but won't work with versions newer than JDK15 [Windows download](https://www.techspot.com/downloads/5552-java-15-jdk.html).<br>
 Just open it, choose your profile, and if you want to build it or not.<br>
 The compiled binaries will be placed in their respective BOARDS/... folders.<br><br>
 
