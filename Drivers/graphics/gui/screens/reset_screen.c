@@ -139,15 +139,13 @@ static void reset_confirmation_create(screen_t *scr){
 
 
 void reset_screen_setup(screen_t *scr){
-  screen_t *sc;
-
   scr->onEnter = &reset_onEnter;
   scr->processInput=&autoReturn_ProcessInput;
   scr->create = &reset_create;
 
-  sc=&Screen_reset_confirmation;
-  oled_addScreen(sc, screen_reset_confirmation);
-  sc->init = &reset_confirmation_init;
-  sc->processInput=&autoReturn_ProcessInput;
-  sc->create = &reset_confirmation_create;
+  scr=&Screen_reset_confirmation;
+  oled_addScreen(scr, screen_reset_confirmation);
+  scr->init = &reset_confirmation_init;
+  scr->processInput=&autoReturn_ProcessInput;
+  scr->create = &reset_confirmation_create;
 }

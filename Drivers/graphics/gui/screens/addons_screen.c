@@ -6,7 +6,6 @@
  */
 
 #include "addons_screen.h"
-#include "gui_strings.h"
 #include "screen_common.h"
 
 #ifdef ENABLE_ADDONS
@@ -30,16 +29,17 @@ static void addon_screen_create(screen_t *scr)
   newComboScreen(w, strings[lang]._BACK, screen_settings, NULL);
 }
 
-static void addon_screen_init(screen_t *scr)
+static void addon_screen_onEnter(screen_t *scr)
 {
-  default_init(scr);
-  comboResetIndex(Screen_addons.current_widget);
+   if(scr==&Screen_settings){					              // Reset index only if coming from settings screen, otherwise keep the last position
+     comboResetIndex(Screen_addons.current_widget);
+   }
 }
 
 void addons_screen_setup(screen_t *scr)
 {
   scr->create       = &addon_screen_create;
-  scr->init         = &addon_screen_init;
+  scr->onEnter      = &addon_screen_onEnter;
   scr->processInput = &autoReturn_ProcessInput;
 }
 

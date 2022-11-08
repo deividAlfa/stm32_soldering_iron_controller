@@ -6,7 +6,6 @@
  */
 
 #include "addon_SWITCH_OFF_REMINDER_settings_screen.h"
-#include "gui_strings.h"
 #include "screen_common.h"
 
 #ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
@@ -134,7 +133,6 @@ static void addons_screen_switch_off_reminder_create(screen_t *scr)
 
 static void addons_screen_switch_off_reminder_init(screen_t *scr)
 {
-  default_init(scr);
   comboResetIndex(Screen_switch_off_reminder_settings.current_widget);
 }
 

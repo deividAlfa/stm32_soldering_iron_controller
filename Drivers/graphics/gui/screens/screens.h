@@ -8,9 +8,6 @@
 #ifndef _GUI_SCREENS_H_
 #define _GUI_SCREENS_H_
 
-
-#define ENABLE_DEBUG_SCREEN
-
 #include "board.h"
 
 #include "tip_list_screen.h"
@@ -31,7 +28,7 @@
 #include "addon_fume_extractor_settings_screen.h"
 #endif
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-#include <addon_switch_off_reminder_settings_screen.h>
+#include "addon_switch_off_reminder_settings_screen.h"
 #endif
 
 #include "oled.h"

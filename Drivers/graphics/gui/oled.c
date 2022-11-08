@@ -21,16 +21,8 @@ RE_Rotation_t RE_Rotation;
 
 
 void oled_addScreen(screen_t *screen, screens_t index){
-  screen->processInput = &default_screenProcessInput;
-  screen->init = &default_init;
-  screen->draw = &default_screenDraw;
-  screen->update = &default_screenUpdate;
-  screen->onEnter = NULL;
-  screen->onExit = NULL;
+  screen_setDefaults(screen);
   screen->index = index;
-  screen->next_screen = NULL;
-  screen->widgets = NULL;
-  screen->current_widget = NULL;
   if(screens == NULL) {
     screens = screen;
   }

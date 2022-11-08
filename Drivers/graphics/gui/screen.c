@@ -119,11 +119,17 @@ void default_init(screen_t *scr) {
 }
 
 void screen_setDefaults(screen_t *scr) {
-  scr->processInput = &default_screenProcessInput;
-  scr->init = &default_init;
-  scr->draw = &default_screenDraw;
-  scr->update = &default_screenUpdate;
-  scr->onEnter = NULL;
-  scr->onExit = NULL;
-  scr->create = NULL;
+    scr->next_screen = NULL;
+    scr->widgets = NULL;
+    scr->current_widget = NULL;
+    scr->init = &default_init;
+    scr->create = NULL;
+    scr->processInput = &default_screenProcessInput;
+    scr->update = &default_screenUpdate;
+    scr->draw = &default_screenDraw;
+    scr->onEnter = NULL;
+    scr->onExit = NULL;
+    scr->refresh = screen_Erase;
+    scr->enabled = true;
+    scr->index = 0;
 }

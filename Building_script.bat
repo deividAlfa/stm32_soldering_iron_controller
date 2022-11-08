@@ -58,7 +58,7 @@ cls
 IF "%ERRORLEVEL%"=="1" GOTO :ONLYCOPY
 IF "%ERRORLEVEL%"=="2" SET RUN_CUBEMX="y" && GOTO :TOOLS
 IF "%ERRORLEVEL%"=="3" SET RUN_CUBEMX="y" && SET COMPILE="y" && GOTO :TOOLS
-IF "%ERRORLEVEL%"=="4" GOTO :END
+IF "%ERRORLEVEL%"=="4" GOTO :DONE
 
 REM ##################  [TRY FINDING THE TOOLS IF INVALID PATHS DETECTED]  ##################
 :TOOLS
@@ -86,7 +86,7 @@ goto :START
 :NOTFOUND
 echo [91mTools not found! Ensure CubeIDE is installed in C:\ST\[0m
 echo [91mElse, edit this script and set the path manually[0m
-goto :END
+goto :DONE
 
 REM ##################  [START]  ##################
 :START
@@ -151,7 +151,7 @@ REM ##################  [END]  ##################
 :DONE
 echo Cleaning up...
 echo.
-rd *Release EWARM  Application /Q /S 2>nul
+rd /Q /S SSD1306_Release ST7565_Release EWARM Application 2>nul
 del *.bin /Q 2>nul
 pause
 EXIT

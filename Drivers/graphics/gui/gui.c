@@ -26,26 +26,31 @@ void guiInit(void) {
   oled_addScreen(&Screen_main,screen_main);
   main_screen_setup(&Screen_main);
 
-  oled_addScreen(&Screen_settings,screen_settings);
-  settings_screen_setup(&Screen_settings);
-
-  oled_addScreen(&Screen_display,screen_display);
-  display_screen_setup(&Screen_display);
-
   oled_addScreen(&Screen_iron,screen_iron);
   iron_screen_setup(&Screen_iron);
 
-  oled_addScreen(&Screen_system,screen_system);
-  system_screen_setup(&Screen_system);
+  oled_addScreen(&Screen_settings,screen_settings);
+  settings_screen_setup(&Screen_settings);
 
   oled_addScreen(&Screen_reset,screen_reset);
   reset_screen_setup(&Screen_reset);
 
-  oled_addScreen(&Screen_tip_list,screen_tip_list);
-  tip_list_screen_setup(&Screen_tip_list);
+  oled_addScreen(&Screen_display,screen_display);
+  display_screen_setup(&Screen_display);
+
+  oled_addScreen(&Screen_system,screen_system);
+  system_screen_setup(&Screen_system);
+
+#ifdef ENABLE_DEBUG_SCREEN
+  oled_addScreen(&Screen_debug,screen_debug);
+  debug_screen_setup(&Screen_debug);
+#endif
 
   oled_addScreen(&Screen_tip_settings, screen_tip_settings);
   tip_settings_screen_setup(&Screen_tip_settings);
+
+  oled_addScreen(&Screen_tip_list,screen_tip_list);
+  tip_list_screen_setup(&Screen_tip_list);
 
   oled_addScreen(&Screen_calibration,screen_calibration);
   calibration_screen_setup(&Screen_calibration);
@@ -53,7 +58,6 @@ void guiInit(void) {
 #ifdef ENABLE_ADDONS
   oled_addScreen(&Screen_addons, screen_addons);
   addons_screen_setup(&Screen_addons);
-#endif
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
   oled_addScreen(&Screen_fume_extractor_settings, screen_fume_extractor_settings);
@@ -64,11 +68,6 @@ void guiInit(void) {
   oled_addScreen(&Screen_switch_off_reminder_settings, screen_switch_off_reminder_settings);
   addons_screen_switch_off_reminder_setup(&Screen_switch_off_reminder_settings);
 #endif
-
-#ifdef ENABLE_DEBUG_SCREEN
-
-  oled_addScreen(&Screen_debug,screen_debug);
-  debug_screen_setup(&Screen_debug);
-
 #endif
+
 }

@@ -20,6 +20,11 @@
 extern IWDG_HandleTypeDef hiwdg;
 extern CRC_HandleTypeDef hcrc;
 
+// logical or together all the addons
+#if defined (ENABLE_ADDON_FUME_EXTRACTOR) || defined (ENABLE_ADDON_SWITCH_OFF_REMINDER)
+#define ENABLE_ADDONS
+#endif
+
 //#define DISABLE_OUTPUT                // Enable to fully disable the tip power (Ex. for debugging)
 #define DEBUG_ERROR                   // Enable to show file/line error messages
 

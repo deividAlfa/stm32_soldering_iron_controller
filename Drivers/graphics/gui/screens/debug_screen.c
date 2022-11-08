@@ -522,21 +522,19 @@ static uint8_t pid_debug_Draw(screen_t * scr){
 // Debug screen setup
 //-------------------------------------------------------------------------------------------------------------------------------
 void debug_screen_setup(screen_t *scr) {
-  screen_t *sc;
-  screen_setDefaults(scr);
   scr->create = &debug_create;
   scr->onEnter = &debug_onEnter;
   scr->onExit = &debug_onExit;
   scr->processInput = &debug_ProcessInput;
   scr->draw = &debug_Draw;
 
-  sc=&Screen_pid_debug;
-  oled_addScreen(sc, screen_pid_debug);
-  sc->processInput=&debug_ProcessInput;
-  sc->onEnter = &debug_onEnter;
-  sc->create=&pid_debug_create;
-  sc->draw=&pid_debug_Draw;
-  sc->onExit = &debug_onExit;
+  scr=&Screen_pid_debug;
+  oled_addScreen(scr, screen_pid_debug);
+  scr->processInput=&debug_ProcessInput;
+  scr->onEnter = &debug_onEnter;
+  scr->create=&pid_debug_create;
+  scr->draw=&pid_debug_Draw;
+  scr->onExit = &debug_onExit;
 }
 
 #endif

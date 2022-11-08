@@ -6,7 +6,6 @@
  */
 
 #include "addon_fume_extractor_settings_screen.h"
-#include "gui_strings.h"
 #include "screen_common.h"
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
@@ -15,13 +14,10 @@ screen_t Screen_fume_extractor_settings;
 
 static comboBox_item_t* comboitem_fume_extractor_after_run_widget;
 
-static void* getFumeExtractorMode();
-static void  setFumeExtractorMode(uint32_t *val);
-static void* getAfterRunDelay();
-static void  setAfterRunDelay(uint32_t *val);
-static void  update_addons_screen_fume_extractor(void);
-static void  addons_screen_fume_extractor_create(screen_t *scr);
-static void  addons_screen_fume_extractor_init(screen_t *scr);
+static void update_addons_screen_fume_extractor(void)
+{
+  comboitem_fume_extractor_after_run_widget->enabled = systemSettings.addonSettings.fumeExtractorMode == fume_extractor_mode_auto;
+}
 
 static void* getFumeExtractorMode()
 {
@@ -46,10 +42,6 @@ static void setAfterRunDelay(uint32_t *val)
   systemSettings.addonSettings.fumeExtractorAfterrun = (*val) / 5u;
 }
 
-static void update_addons_screen_fume_extractor(void)
-{
-  comboitem_fume_extractor_after_run_widget->enabled = systemSettings.addonSettings.fumeExtractorMode == fume_extractor_mode_auto;
-}
 
 static void addons_screen_fume_extractor_create(screen_t *scr)
 {
@@ -86,7 +78,6 @@ static void addons_screen_fume_extractor_create(screen_t *scr)
 
 static void addons_screen_fume_extractor_init(screen_t *scr)
 {
-  default_init(scr);
   comboResetIndex(Screen_fume_extractor_settings.current_widget);
 }
 

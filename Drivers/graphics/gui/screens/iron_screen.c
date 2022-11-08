@@ -941,24 +941,23 @@ static void iron_advFilter_create(screen_t *scr){
 }
 
 void iron_screen_setup(screen_t *scr){
-  screen_t *sc;
   scr->onEnter = &iron_onEnter;
   scr->processInput = &autoReturn_ProcessInput;
   scr->create = &iron_create;
   scr->onExit = &iron_onExit;
 
-  sc = &Screen_advFilter;
-  oled_addScreen(&Screen_advFilter, screen_advFilter);
-  sc->onEnter = &iron_advFilter_onEnter;
-  sc->processInput = &autoReturn_ProcessInput;
-  sc->create = &iron_advFilter_create;
+  scr = &Screen_advFilter;
+  oled_addScreen(scr, screen_advFilter);
+  scr->onEnter = &iron_advFilter_onEnter;
+  scr->processInput = &autoReturn_ProcessInput;
+  scr->create = &iron_advFilter_create;
 
   #ifdef USE_NTC
-  sc=&Screen_system_ntc;
-  oled_addScreen(sc, screen_ntc);
-  sc->onEnter = &system_ntc_onEnter;
-  sc->processInput=&autoReturn_ProcessInput;
-  sc->create = &system_ntc_create;
+  scr=&Screen_system_ntc;
+  oled_addScreen(scr, screen_ntc);
+  scr->onEnter = &system_ntc_onEnter;
+  scr->processInput=&autoReturn_ProcessInput;
+  scr->create = &system_ntc_create;
   #endif
 
 }

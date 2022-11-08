@@ -532,28 +532,26 @@ static void Cal_Settings_create(screen_t *scr){
 // Calibration screens setup
 //-------------------------------------------------------------------------------------------------------------------------------
 void calibration_screen_setup(screen_t *scr) {
-  screen_t *sc;
-  screen_setDefaults(scr);
   scr->processInput = &Cal_ProcessInput;
   scr->draw = &Cal_draw;
   scr->onEnter = &Cal_onEnter;
   scr->onExit = &Cal_onExit;
   scr->create = &Cal_create;
 
-  sc = &Screen_calibration_start;
-  oled_addScreen(sc, screen_calibration_start);
-  sc->processInput = &Cal_Start_ProcessInput;
-  sc->draw = &Cal_Start_draw;
-  sc->onExit = &Cal_Start_OnExit;
-  sc->init = &Cal_Start_init;
-  sc->create = &Cal_Start_create;
+  scr = &Screen_calibration_start;
+  oled_addScreen(scr, screen_calibration_start);
+  scr->processInput = &Cal_Start_ProcessInput;
+  scr->draw = &Cal_Start_draw;
+  scr->onExit = &Cal_Start_OnExit;
+  scr->init = &Cal_Start_init;
+  scr->create = &Cal_Start_create;
 
-  sc = &Screen_calibration_settings;
-  oled_addScreen(sc, screen_calibration_settings);
-  sc->init = &Cal_Settings_init;
-  sc->processInput = &Cal_Settings_ProcessInput;
-  sc->onExit = &Cal_Settings_OnExit;
-  sc->create = &Cal_Settings_create;
+  scr = &Screen_calibration_settings;
+  oled_addScreen(scr, screen_calibration_settings);
+  scr->init = &Cal_Settings_init;
+  scr->processInput = &Cal_Settings_ProcessInput;
+  scr->onExit = &Cal_Settings_OnExit;
+  scr->create = &Cal_Settings_create;
 
   addSetTemperatureReachedCallback(tempReachedCallback);
 }
