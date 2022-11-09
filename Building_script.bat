@@ -1,9 +1,16 @@
 @echo off
 
-REM ##################  [ENABLE THIS LINES TO MANUALLY SET THE TOOL PATHS]  ##################
-REM set IDEPATH="C:\ST\STM32CubeIDE_1.7.0\STM32CubeIDE"
-REM set IDE="%IDEPATH:"=%\stm32cubeide.exe"
-REM set MX="%IDEPATH:"=%\plugins\com.st.stm32cube.common.mx_6.3.0.202107141111\STM32CubeMX.jar"
+:: [Default search path] Installation folder must be named STM32CubeIDE!
+SET SEARCH_PATH="C:\ST"
+
+:: [Java path] You also use absolute path, ex "C:\JDK_19\bin\java.exe"
+SET JAVA_CMD="java.exe"
+
+:: [ENABLE THIS LINES TO MANUALLY SET THE TOOL PATHS]
+:: set IDEPATH="C:\ST\STM32CubeIDE_1.7.0\STM32CubeIDE"
+:: set IDE="%IDEPATH:"=%\stm32cubeide.exe"
+:: set MX="%IDEPATH:"=%\plugins\com.st.stm32cube.common.mx_6.3.0.202107141111\STM32CubeMX.jar"
+
 
 SET MODELS=    "BOARDS\KSGER\[v1.5]\STM32F103";^
                "BOARDS\Quicko\STM32F103";^
@@ -42,7 +49,7 @@ IF "%ERRORLEVEL%"=="7" SET PROFILE="BOARDS\Quicko\STM32F072" && SET DISPLAY="ST7
 IF "%ERRORLEVEL%"=="8" SET PROFILE="BOARDS\Quicko\STM32F103" && SET DISPLAY="SSD1306"&& GOTO :ASKCUBEMX
 IF "%ERRORLEVEL%"=="9" SET PROFILE="BOARDS\Quicko\STM32F103" && SET DISPLAY="ST7565"&& GOTO :ASKCUBEMX
 IF "%ERRORLEVEL%"=="10" SET PROFILE="" && SET RUN_CUBEMX="y" && SET COMPILE="y" && SET DISPLAY=""&& GOTO :TOOLS
-IF "%ERRORLEVEL%"=="11" GOTO :END
+IF "%ERRORLEVEL%"=="11" GOTO :EXIT
 
 :ASKCUBEMX
 echo.
@@ -58,9 +65,9 @@ cls
 IF "%ERRORLEVEL%"=="1" GOTO :ONLYCOPY
 IF "%ERRORLEVEL%"=="2" SET RUN_CUBEMX="y" && GOTO :TOOLS
 IF "%ERRORLEVEL%"=="3" SET RUN_CUBEMX="y" && SET COMPILE="y" && GOTO :TOOLS
-IF "%ERRORLEVEL%"=="4" GOTO :DONE
+IF "%ERRORLEVEL%"=="4" GOTO :EXIT
 
-REM ##################  [TRY FINDING THE TOOLS IF INVALID PATHS DETECTED]  ##################
+:: ##################  [TRY FINDING THE TOOLS IF INVALID PATHS DETECTED]  ##################
 :TOOLS
 if not exist "%IDE%" ( GOTO :DETECT )
 if not exist "%MX%" ( GOTO :DETECT )
@@ -73,7 +80,7 @@ SET MX=
 echo Searching tool paths...
 echo.
 
-for /f "delims=" %%F in ('dir /b /s "C:\ST\STM32CubeIDE" 2^>nul') do (set IDEPATH=%%~F)
+for /f "delims=" %%F in ('dir /b /s %SEARCH_PATH%\STM32CubeIDE 2^>nul') do (set IDEPATH=%%~F)
 if not defined IDEPATH ( goto :NOTFOUND )
 
 set IDE=%IDEPATH%\stm32cubeidec.exe
@@ -88,7 +95,7 @@ echo [91mTools not found! Ensure CubeIDE is installed in C:\ST\[0m
 echo [91mElse, edit this script and set the path manually[0m
 goto :DONE
 
-REM ##################  [START]  ##################
+:: ##################  [START]  ##################
 :START
 
 echo [32mFound CubeIDE at:[0m
@@ -97,13 +104,13 @@ echo.
 echo [32mFound CubeMX at:[0m
 echo %MX:"=%
 echo.
-REM ##################  [BUILD LOOP]  ##################
+:: ##################  [BUILD LOOP]  ##################
 :ONLYCOPY
 for %%M in (%MODELS%) do (
     SET CURRENT=""
-    REM Profile is empty, build all
+    :: Profile is empty, build all
     IF %PROFILE%=="" (SET CURRENT=%%M)
-    REM Profile defined, build only if matching
+    :: Profile defined, build only if matching
     IF %PROFILE%==%%M (SET CURRENT=%%M)
     CALL :BUILD
 )
@@ -115,11 +122,13 @@ IF %CURRENT%=="" ( EXIT /B )
 echo [93mProfile: %CURRENT%[0m     
 del Core\Inc\board.h Core\Inc\*stm32*.* Core\Src\*stm32*.* Core\Startup\*.s .cproject .project *.ioc *.bin /Q 2>nul >nul
 xcopy /e /k /h /i /s /q /y %CURRENT% >nul
-
 IF %RUN_CUBEMX%=="n" ( EXIT /B )
 
+:: Workaround required, CubeMX keeps messing the IOC, changing the project to EWARM, won't work in CubeIDE after generation
+copy /Y STM32SolderingStation.ioc STM32SolderingStation.bak >nul
+
 echo [94mRunning CubeMX...[0m
-start /w /min "CubeMX" java -jar "%MX%" -q cubemx_script 2>nul >nul
+start /w /min "CubeMX" %JAVA_CMD% -jar "%MX%" -q cubemx_script >nul
 IF %ERRORLEVEL% NEQ 0 (
   echo [91mCubeMX error![0m : %ERRORLEVEL%
   goto :DONE
@@ -134,9 +143,7 @@ IF %DISPLAY%=="" (
   IF %DISP%=="SSD1306" (SET DISP="ST7565")  
 )
 echo [94mCompiling...[0m    DISPLAY:%DISP:"=%
-REM echo "start /w /min "CubeIDE" %IDE% --launcher.suppressErrors -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import %cd% -build STM32SolderingStation/%DISP:"=%_Release 2>nul >nul"
 start /w /min "CubeIDE" %IDE% --launcher.suppressErrors -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import %cd% -build STM32SolderingStation/%DISP:"=%_Release 2>nul >nul
-
 IF %ERRORLEVEL% NEQ 0 (
   echo [91mCompiler error![0m : %ERRORLEVEL%
   goto :DONE
@@ -147,11 +154,16 @@ IF %DISPLAY%=="" ( IF %DISP%=="SSD1306" ( GOTO :COMPILE ) )
 echo.
 exit /B
 
-REM ##################  [END]  ##################
 :DONE
 echo Cleaning up...
-echo.
+timeout 1 >nul
+:: Restore unmodified IOC file so it keeps working in CubeIDE
+move /Y STM32SolderingStation.bak STM32SolderingStation.ioc >nul 2>nul
+:: Cleanup
 rd /Q /S SSD1306_Release ST7565_Release EWARM Application 2>nul
-del *.bin /Q 2>nul
+
+
 pause
-EXIT
+
+:EXIT
+exit

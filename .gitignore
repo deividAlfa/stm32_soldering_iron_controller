@@ -15,3 +15,7 @@
 /*.launch
 /Debug
 /Release
+/SSD1306_Release/
+/SSD1306_Debug/
+/ST7565_Release/
+/ST7565_Debug/
