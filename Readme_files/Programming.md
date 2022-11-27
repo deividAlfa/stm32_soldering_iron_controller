@@ -33,7 +33,7 @@ A genuine STM32F101/102/103Cx/Rx should have any of these codes:
 
 ## Programming with STM32 ST-LINK Utility
 
-Download the binary **STM32SolderingStation.bin** for your station from [Releases](https://github.com/deividAlfa/stm32_soldering_iron_controller/releases), and flash it using ST-Link.
+Download the binary for your station from [Releases](https://github.com/deividAlfa/stm32_soldering_iron_controller/releases), and flash it using ST-Link.
 
 ### Coming from original firmware
 
