@@ -51,10 +51,10 @@ In any case, the firmware will check the settings and reset them if not valid.
 
 ### STM32 not recognized error
 Some STM32 have their debug port disabled, in this case the only way to access is connecting `nRST` pin to the ST-Link.<br>
-There're several STM32 clones with a flaw in `nRST` pin, which is wired wrong by design, and won't able to connect.<br>
-Temporaly short `nRST` (STM32 pin 7) to gnd, click "Connect to target" button, wait 1-2 seconds and release `nRST`, now it should recognice it.<br>
-Usually `nRST` is connected to a capacitor, only requiring to short the capacitor as showed in this picture:<br>
-<img src="/Readme_files/stlink_force_rst.jpg?raw=true">
+There're several [ST-Link clones with a flaw in `nRST` pin](https://ziutek.github.io/2018/03/26/stlink.html), which is wired wrong by design, and won't able to connect.<br>
+Temporaly short `nRST` (STM32 pin 7) to `GND`, click "Connect to target" button, wait 1-2 seconds and release the `nRST` short. Now it should recognice it.<br>
+Usually on the controller board `nRST` pin is connected to a capacitor, only requiring to short the capacitor as showed in this picture:<br><br>
+![Temporary short nRST pin (STM32 pin 7) to GND](/Readme_files/stlink_force_rst.jpg)
 
 
 ## Programming with OpenOCD
