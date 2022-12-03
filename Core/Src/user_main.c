@@ -83,13 +83,16 @@ void initBeforeMCUConfiguration(void)
 {
   malloc_fragmentation_fix();
 
-  #if defined DEBUG && !defined STM32F072xB
-    DebugOpts();          // Enable debug options in Debug build
+
+#ifdef DEBUG
+  DebugOpts();                                      // Enable debug options in Debug build
+#if (__CORTEX_M >= 3)                               // Cortex-M0 doesn't have DWT
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; // Enable DWT
     DWT->CYCCNT = 0;                                // Clear counter
     DWT->CTRL = DWT_CTRL_CYCCNTENA_Msk;             // Enable counter
     // Now CPU cycles can be read in DWT->CYCCNT;
-  #endif
+#endif
+#endif
 }
 
 void InitAfterMCUConfiguration(void){
