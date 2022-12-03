@@ -27,7 +27,11 @@ While in normal operation, shake sensor activity will be shown briefly in the bo
 In normal mode, the setpoint is shown in the upper center, otherwise, the current mode will be shown (sleep, standby, boost).<br>
 To operate the menus, rotate to scroll to the desired selection, quick press to select it, rotate to change.<br>
 Quick press again to stop editing the setting.<br>
-While editing the widget, moderate rotation speed will make fine adjustement, a fast rotation will do coarse adjustment (big steps).<br>
+While editing the widget, moderate rotation speed will make fine adjustement, a fast rotation will do coarse adjustment (big steps).<br><br>
+For some actions you might be instructed to issue a Drag rotation.<br>
+This means clicking the button (Helding down) and rotating at the same time.<br>
+The time between pressing and rotating must be short, i.e. don't keep the button down for two seconds before rotating, doesn't need to be blazing fast either, just done in a natural way.<br>
+After a drag-rotation was detected, release the button and use the encoder normally (Don't keep pressing to move, etc).<br>
 
 ---
 
@@ -61,7 +65,7 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
   Rotate the encoder, the setpoint will be shown, continue rotating to adjust it.<br>
   After 1 second of inactivity it will return to normal mode.<br>
 - **Sleep/Standby modes**<br>
-  You can manually enter lower power modes by clicking and rotating counter-clockwise.<br>
+  You can manually enter lower power modes by making a counter-clockwise drag-rotation.<br>
   The sequence would be [run/boost mode]->[standby mode]->[sleep mode].<br>
   If button wake is enabled, encoder activity will resume normal mode, otherwise only the display brightness will be restored.<br>
   Wake-up rouces are the enconder (If enabled) or handle wake input sensor (If shake wake is enabled or in stand mode).<br>
@@ -71,7 +75,7 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
   If more than 1 second has passed, boost mode won't be triggered, this is to prevent accidental triggering when adjusting the temperature.<br>
   While boost mode is enabled, clicking or rotating the encoder will return to normal mode.<br>
 - **Tip selection**<br>
-  Click and rotate clockwise to show the tip selection. The tip name label will be highlighted.<br>
+  Issue a clockwise drag-rotation to show the tip selection. The tip name label will be highlighted.<br>
   Rotate to change the selected tip, click or wait 2 seconds to select and return to normal mode. Long-click to enter the tip settings.<br>
 - **System menu**<br>
   A long click will enter the system menu (Except while in tip selection/setpoint adjustment).<br>
@@ -330,7 +334,7 @@ Use calibration for optimal results.<br>
   - **TIP NAME**<br>
 Shows the tip name, click on it to edit the name.<br>
 Keep clicking to switch to the next characters, it will exit editing mode when clicking in the last character.<br>
-Additionally, you can navigate to any position using rotate-while-pressing method.<br>
+Additionally, you can navigate to any position using drag-rotation method.<br>
   - **PID Kp**<br> 
 The proportional term, changes the PWM duty cycle based on how far the measured temperature is from the desired temperature.<br>
   - **PID Ki**<br>
