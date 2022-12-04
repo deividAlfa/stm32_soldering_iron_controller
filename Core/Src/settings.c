@@ -315,7 +315,7 @@ static void eraseFlashPages(uint32_t pageAddress, uint32_t numPages)
 
   // Ensure flash was erased
   for (uint32_t i = 0u; i < (numPages * FLASH_PAGE_SIZE / sizeof(int32_t)); i++) {
-    if( *((uint32_t*)(pageAddress + i)) != 0xFFFFFFFF){
+    if( *((uint32_t*)pageAddress+i) != 0xFFFFFFFF){
       Flash_error();
     }
   }
