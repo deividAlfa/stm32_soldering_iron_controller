@@ -55,7 +55,7 @@ If your board came with a clone, you can replace it with a STM32F101/102/103, th
 The [BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder has the board profiles and some schematics / pictures for quickly identify your hardware.<br>
 Check [Dreamcat4 T12 controllers](https://github.com/dreamcat4/t12-t245-controllers-docs), did a much better collection with T12 boards schematics and pictures.<br><br>
 Currently supported controllers:
-* **Quicko T12-072**: First gen Quicko, STM32F072 variant. Current firmware is broken, use [this one](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/9f4b7f9565344e30a6ce1394d28350f82089488b/BOARDS/Quicko/STM32F072_SSD1306/STM32SolderingStation.bin).<br>
+* **Quicko T12-072**: First gen Quicko, STM32F072 variant. Compatibility was fixed in v1.04. [Old version](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/9f4b7f9565344e30a6ce1394d28350f82089488b/BOARDS/Quicko/STM32F072_SSD1306/STM32SolderingStation.bin).
 * **Quicko T12-103** First gen Quicko, STM32F103 variant.
 * **KSGER v1.5**: Profile for STM32F103 (There are no other known CPUs used in this board).
 * **KSGER v2**,   **JCD T12**, **T12-955**, **Handskit**: Profile compatible with all STM32F101/2/3xx models.
