@@ -121,6 +121,7 @@ goto :DONE
 IF %CURRENT%=="" ( EXIT /B )
 echo [93mProfile: %CURRENT%[0m     
 del Core\Inc\board.h Core\Inc\*stm32*.* Core\Src\*stm32*.* Core\Startup\*.s .cproject .project *.ioc *.bin /Q 2>nul >nul
+rd /S /Q Drivers\CMSIS Drivers\STM32F0xx_HAL_Driver Drivers\STM32F1xx_HAL_Driver 2>nul >nul
 xcopy /e /k /h /i /s /q /y %CURRENT% >nul
 IF %RUN_CUBEMX%=="n" ( EXIT /B )
 
