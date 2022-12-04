@@ -39,10 +39,7 @@ extern CRC_HandleTypeDef hcrc;
 #ifdef DEBUG_ALLOC
 extern uint32_t        max_allocated;
 extern struct mallinfo mi;
-#define dbg_mem() mi=mallinfo();                  \
-                  if(mi.uordblks>max_allocated){  \
-                    max_allocated=mi.uordblks;    \
-                  }
+#define dbg_mem() mi=mallinfo();if(mi.uordblks>max_allocated)max_allocated=mi.uordblks
 
 #define _malloc(x)    malloc(x); dbg_mem()
 #define _calloc(x,y)  calloc(x,y); dbg_mem()
