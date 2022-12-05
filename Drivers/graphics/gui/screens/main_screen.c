@@ -129,7 +129,7 @@ static struct{
   uint8_t currentMode;                    // Current screen mode (iron_temp, setpoint, tip_select)
   uint8_t displayMode;                    // Iron temp display mode (temp_numeric, temp_graph)
   uint8_t updateReadings;                 // Flag to update power, tip, ambient, voltage widgets
-  uint8_t boost_enable;                   // Flag used only for boost mode while in plot graph display
+  uint8_t boost_allow;                    // Flag used only for boost mode while in plot graph display
   int16_t lastTip;                        // Last stored tip temperature for widget
   #ifdef USE_NTC
   int16_t lastAmb;                        // Last stored ambient temperature for widget
@@ -295,7 +295,7 @@ int8_t switchScreenMode(void){
 
       case main_irontemp:
         widgetDisable(Widget_SetPoint);
-        mainScr.boost_enable=0;
+        mainScr.boost_allow=0;
         if(mainScr.ironStatus!=status_error){
           if(!plot.enabled){
             setMainWidget(Widget_IronTemp);
@@ -322,9 +322,9 @@ int8_t switchScreenMode(void){
     }
     mainScr.currentMode=mainScr.setMode;
     mainScr.setMode=main_none;
-    return 1;                                 // Changed mode
+    return 1;                                                             // Changed mode
   }
-  return 0;                                   // No changes
+  return 0;                                                               // No changes
 }
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
@@ -342,14 +342,14 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       mainScr.shakeActive=3;
     }
     if(mainScr.ironStatus!=status_error || mainScr.lastError != ironErrorFlags.Flags){  // If error appeared or changed
-      wakeOledDim();                                                          		// Wake up screen
+      wakeOledDim();                                                      // Wake up screen
       mainScr.ironStatus = status_error;
       mainScr.lastError=ironErrorFlags.Flags;
     }
   }
-  else if(mainScr.ironStatus != status_ok){                                   // If error is gone
+  else if(mainScr.ironStatus != status_ok){                               // If error is gone
     mainScr.ironStatus = status_ok;
-    wakeOledDim();                                                            // Wake up screen
+    wakeOledDim();                                                        // Wake up screen
   }
 
 
@@ -359,15 +359,15 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   }
 
   if(input!=Rotate_Nothing){
-    resetScreenTimer();                                                     // Reset screen idle timer
-    if(getDisplayPower()==disable){                                            // If oled off, block user action
+    resetScreenTimer();                                                   // Reset screen idle timer
+    if(getDisplayPower()==disable){                                       // If oled off, block user action
       input=Rotate_Nothing;
     }
-    wakeOledDim();                                                          // But  wake up screen
+    wakeOledDim();                                                        // But  wake up screen
   }
 
   if(systemSettings.settings.dim_mode!=dim_always && currentIronMode>mode_standby){  // If dim not enabled in all modes
-    wakeOledDim();																															// Refresh timeout if running
+    wakeOledDim();                                                        // Refresh timeout if running
   }
 
   handleOledDim();
@@ -381,12 +381,28 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     mainScr.shakeActive=3; // Clear
   }
 
+  // If at main temperature screen
+  if(mainScr.currentMode == main_irontemp && (input == Rotate_Increment || input == Rotate_Decrement || input == Click)){
+    if(!checkIronModeTimer(250)){                                         // To avoid unwanted mode changing, ignore action if iron mode was set <250ms ago
+        input = Rotate_Nothing;
+      }
+      else if(currentIronMode==mode_boost){                               // If iron in boost mode, return to normal mode, don't process the input
+        setCurrentMode(mode_run);
+        input = Rotate_Nothing;
+      }
+      else if(currentIronMode!=mode_run){
+        IronWake(wakeButton);
+        if(getCurrentMode()==mode_run){                                   // If iron in low power mode, send wake signal. If mode changed, don't process the input
+          input = Rotate_Nothing;
+        }
+      }
+  }
   // Handle main screen
   switch(mainScr.currentMode){
     case main_irontemp:
 
-      if(mainScr.ironStatus!=status_ok){                // When the screen goes to error state
-        mainScr.setMode=main_error;                     // Set error screen
+      if(mainScr.ironStatus!=status_ok){                                  // When the screen goes to error state
+        mainScr.setMode=main_error;                                       // Set error screen
         break;
       }
 
@@ -410,46 +426,24 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         case Rotate_Increment:
         case Rotate_Decrement:
-          if((currentIronMode!=mode_run && checkIronModeTimer(250)) || currentIronMode==mode_run){  // To avoid unwanted mode changing, ignore rotation if not in run mode and set <250ms ago
-            if(currentIronMode==mode_boost){
-              setCurrentMode(mode_run);
-              break;
+          if(mainScr.displayMode==temp_graph){
+            if(!checkMainScreenModeTimer(500)){                             // If last rotation step happened <500ms ago, disable boost allow flag and modify the setpoint.
+              mainScr.boost_allow=0;                                        // Disable boost allow flag
+              widgetEnable(Widget_SetPoint);                                // Enable the setpoint widget, but don't set it as current widget (Dirty hack), just to be able to process the input
+              default_widgetProcessInput(Widget_SetPoint, input, state);    // If the widget is disabled, the widget process will skip it. It will be disabled before drawing in drawMisc function
             }
-            else if(currentIronMode!=mode_run){
-              IronWake(wakeButton);
-              if(getCurrentMode()==mode_run){                                 // If mode changed, don't process the click
-                break;
-              }
+            else{                                                           // If last step was more than 500ms ago, enable boost flag
+              mainScr.boost_allow=1;                                        // Set boost flag. Click within 1 second to enable boost mode
             }
-            if(mainScr.displayMode==temp_graph){
-              if(!checkMainScreenModeTimer(1000)){                            // If last step happened less than 1 second ago, disable boost flag and modify the setpoint.
-                mainScr.boost_enable=0;                                       // Disable boost flag
-                widgetEnable(Widget_SetPoint);                                // Enable the setpoint widget, but don't set it as current widget (Dirty hack)
-                default_widgetProcessInput(Widget_SetPoint, input, state);    // Just to be able to process the input. If the widget is disabled, the widget process will skip it. It will be disabled before drawing in drawMisc function
-              }
-              else{                                                           // If last step was more than 1 second ago, enable boost flag
-                mainScr.boost_enable=1;                                       // Set boost flag. Click within 1 second to enable boost mode
-              }
-              resetModeTimer();                                               // Reset mode timer
-            }
-            else{
-              mainScr.setMode=main_setpoint;
-            }
+            resetModeTimer();                                               // Reset mode timer
+          }
+          else{
+            mainScr.setMode=main_setpoint;
           }
           return -1;
           break;
 
         case Click:
-          if(currentIronMode==mode_boost){
-            setCurrentMode(mode_run);
-            break;
-          }
-          if(currentIronMode!=mode_run){
-            IronWake(wakeButton);
-            if(getCurrentMode()==mode_run){                                 // If mode changed, don't process the click
-              break;
-            }
-          }
           scr->refresh=screen_Erase;
           if(mainScr.displayMode==temp_numeric){
             mainScr.updateReadings=1;
@@ -459,16 +453,17 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             plot.update=1;
           }
           else if(mainScr.displayMode==temp_graph){
-            if(checkMainScreenModeTimer(1000)){                             // If more than 1 second since last rotation, disable boost flag
-              mainScr.boost_enable=0;
+            if(checkMainScreenModeTimer(1000)){                             // If more than 1 second since last rotation, disable boost allow flag
+              mainScr.boost_allow=0;
             }
-            if(mainScr.boost_enable && currentIronMode==mode_run){             // If boost flag enabled and iron running
-              mainScr.boost_enable=0;                                       // Clear flag
+            if(mainScr.boost_allow && currentIronMode==mode_run){           // If boost flag enabled and iron running
+              mainScr.boost_allow=0;                                        // Clear flag
               setCurrentMode(mode_boost);                                   // Set boost mode
             }
             else{
-              mainScr.updateReadings=1;
               mainScr.displayMode=temp_numeric;                             // Else, switch to numeric display mode
+              mainScr.updateReadings=1;
+              mainScr.boost_allow=0;                                        // Clear flag
               widgetEnable(Widget_IronTemp);
               plot.enabled=0;
             }
@@ -504,7 +499,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 
     case main_tipselect:
-      if(mainScr.ironStatus==status_error){  // If error appears while adjusting tip select, it needs to update now to avoid overlapping problems
+      if(mainScr.ironStatus==status_error){                                 // If error appears while in tip selection, it needs to update now to avoid overlapping problems
         plot.enabled = 0;
         widgetDisable(Widget_IronTemp);
       }
@@ -540,7 +535,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             }
           }
           else if(input==Rotate_Decrement_while_click || input==Rotate_Decrement){
-            if(--tip>=systemSettings.Profile.currentNumberOfTips){    // If underflowed
+            if(--tip>=systemSettings.Profile.currentNumberOfTips){          // If underflowed
               tip = systemSettings.Profile.currentNumberOfTips-1;
             }
           }
