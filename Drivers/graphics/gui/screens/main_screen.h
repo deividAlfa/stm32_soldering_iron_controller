@@ -13,7 +13,7 @@
 
 
 extern screen_t Screen_main;
-
+void updateIronPower(void);
 void main_screen_setup(screen_t *scr);
 
 

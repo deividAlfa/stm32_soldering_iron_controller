@@ -214,7 +214,7 @@ static void * main_screen_getAmbTemp() {
 }
 #endif
 
-static void updateIronPower() {
+void updateIronPower(void) {
 
   static uint32_t stored=0;
   static uint32_t updateTim;

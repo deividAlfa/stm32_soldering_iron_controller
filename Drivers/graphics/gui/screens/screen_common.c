@@ -67,6 +67,7 @@ uint8_t update_GUI_Timer(void){
 
 int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
   updatePlot();
+  updateIronPower();
   wakeOledDim();
   handleOledDim();
   updateScreenTimer(input);
