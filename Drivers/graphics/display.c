@@ -35,9 +35,9 @@ const uint8_t disp_init[] = { // Initialization for ST7565R
     1, c_all_on,
 };
 #elif defined SSD1306
-const uint8_t disp_init[] = { // Initialization for SH1106 / SSD1306 / SSD1309
+const uint8_t disp_init[] = { 						// Initialization for SH1106 / SSD1306 / SSD1309
     1, c_disp_off,
-    2, c_clock_set, 0xF0,              // Set max framerate
+    2, c_clock_set, 0xF0,             		// Set max framerate
     2, c_mux_ratio, 0x3F,
     2, c_offset, 0x00,
     1, c_start_line,
@@ -45,14 +45,14 @@ const uint8_t disp_init[] = { // Initialization for SH1106 / SSD1306 / SSD1309
     1, c_remap_on,
     1, c_com_rev,
     2, c_com_cfg, 0x12,
-    2, c_contrast, 0xFF,               // Init in max contrast
-    2, c_precharge, 0x44,              // Set Pre-Charge Period, 0x44 (4 Display Clocks [Phase 2] / 4 Display Clocks [Phase 1])
-    2, c_vcomh_lvl, 0x3C,              // Set VCOMH Deselect Level, 0x3C (0.84*VCC)
+    2, c_contrast, 0xFF,               		// Init in max contrast
+    2, c_precharge, 0x44,              		// Set Pre-Charge Period, 0x44 (4 Display Clocks [Phase 2] / 4 Display Clocks [Phase 1])
+    2, c_vcomh_lvl, 0x3C,              		// Set VCOMH Deselect Level, 0x3C (0.84*VCC)
     1, c_all_off,
     1, c_inv_off,
-    2, c_pump_1306_set, c_pump_on,     // For SSD1306
-    //2, c_pump_1106_set, c_pump_on,     // For SH1106 -- Disabled, caused issues with ssd1309, sh1106 seems to work without it */
-    1, c_pump_1106_adj | 0x03          // For SH1106, pump to 9V
+    2, c_pump_1306_set, c_pump_1306_on,		// For SSD1306
+    2, c_pump_1106_set, c_pump_1106_on,   // For SH1106
+    1, c_pump_1106_adj | 0x03          		// For SH1106, pump to 9V
 };
 #else
 #error "No display defined!"
@@ -88,8 +88,8 @@ void i2c_workaround(void){
 
 
 #if !defined DISPLAY_DEVICE  || (defined DISPLAY_DEVICE && defined I2C_TRY_HW)
-// This delays are made for 36MHz (Ksger v2 software i2c). If increasing the cpu frequency, also increase the nop count
-__attribute__ ((noinline)) void bit_delay(void){                  // Intended no inline to add further delay and reduce nops
+// This delay is calibrated for 36MHz (Ksger v2 software i2c). If increasing the cpu frequency, also increase the nop count
+__attribute__ ((noinline)) void bit_delay(void){                  // Intended no inline to add further delay
   asm("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop");
 }
 
@@ -338,6 +338,9 @@ void setDisplayRow(uint8_t row){
 }
 
 void setDisplayPower(uint8_t power){
+  if (powerStatus==power){
+    return;
+  }
 #ifdef ST7565
   uint8_t cmd[] = { ((power==enable) ? c_all_off : c_disp_off ),
                     ((power==enable) ? c_disp_on : c_all_on ) };
@@ -360,6 +363,24 @@ void setDisplayXflip(uint8_t f) {
 
 void setDisplayYflip(uint8_t f) {
   uint8_t cmd [] = { ((f==enable) ? c_remap_on : c_remap_off) };
+  lcd_write(cmd, sizeof(cmd), modeCmd);
+}
+
+void setDisplayClk(uint8_t clk){
+  uint8_t cmd [] = { c_clock_set, clk };
+  lcd_write(cmd, sizeof(cmd), modeCmd);
+}
+
+void setDisplayVcom(uint8_t vcom){                // This cmd should be sent with display off
+  uint8_t cmd [] = { c_vcomh_lvl, vcom };
+  uint8_t power = getDisplayPower();
+  setDisplayPower(disable);
+  lcd_write(cmd, sizeof(cmd), modeCmd);
+  setDisplayPower(power);
+}
+
+void setDisplayPrecharge(uint8_t pre){
+  uint8_t cmd [] = { c_precharge, pre };
   lcd_write(cmd, sizeof(cmd), modeCmd);
 }
 

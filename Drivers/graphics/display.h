@@ -225,6 +225,9 @@ uint8_t getDisplayPower(void);
 void setDisplayContrastOrBrightness(uint8_t value);
 void setDisplayXflip(uint8_t f);
 void setDisplayYflip(uint8_t f);
+void setDisplayClk(uint8_t clk);
+void setDisplayVcom(uint8_t vcom);
+void setDisplayPrecharge(uint8_t pre);
 #ifdef ST7565
 void setDisplayResRatio(uint8_t r);
 #endif
