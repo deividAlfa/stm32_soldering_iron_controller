@@ -15,7 +15,7 @@
 //#define COMBO_SLIDE_TEXT                                                    // Testing feature, not enabled by default
 
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
-typedef enum widgetFieldType {field_int32, field_bmp, field_string}widgetFieldType;
+typedef enum widgetFieldType {field_int32, field_hex, field_bmp, field_string}widgetFieldType;
 typedef enum AlignType { align_disabled, align_left, align_center, align_right }AlignType;
 typedef enum widgetFrameType {frame_auto, frame_solid, frame_outline, frame_disabled, frame_combo}widgetFrameType;
 typedef enum widgetType {widget_combo, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button, widget_bmp_button}widgetType;
@@ -150,6 +150,7 @@ int comboBoxProcessInput(widget_t* w, RE_Rotation_t, RE_State_t *);
 uint8_t comboBoxDraw(widget_t *w);
 void newComboScreen(widget_t *w, char *label, uint8_t actionScreen, comboBox_item_t **newItem);
 void newComboEditable(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem);
+void newComboEditableString(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem, char *dispBf);
 void newComboMultiOption(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem);
 void newComboAction(widget_t *w, char *label, int (*action)(widget_t *w, RE_Rotation_t input), comboBox_item_t **newItem);
 void comboResetIndex(widget_t *w);

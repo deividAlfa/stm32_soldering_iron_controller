@@ -1123,18 +1123,17 @@ uint8_t comboBoxDraw(widget_t *w) {
             strcat(dis->displayString, dis->endString);                       // Append endString
           }
           dis->displayString[dis->reservedChars]=0;                           // Ensure last string char is 0
-          len=u8g2_GetUTF8Width(&u8g2,dis->displayString);
         }
-        else if(dis->type==field_string){
+        else if(dis->type==field_string || dis->type==field_hex){
           strncpy(displayString,(char*)dis->getData(),dis->reservedChars+1);
-          len=u8g2_GetUTF8Width(&u8g2,displayString);
         }
+        len=u8g2_GetUTF8Width(&u8g2,displayString);
       }
 
       posY = y * height + w->posY;                                          // Set widget Ypos same as the current combo option
       dis->stringStart = displayWidth-len-5;                                   // Align to the left measuring actual string width
       if(item->type==combo_Editable){
-        if((dis->type==field_string && (sel->state==widget_edit))){
+        if(((dis->type==field_string || dis->type==field_hex) && (sel->state==widget_edit))){
           char str[sizeof(displayString)+1];
           uint8_t start,width;
           strcpy(str,displayString);
@@ -1150,7 +1149,7 @@ uint8_t comboBoxDraw(widget_t *w) {
           u8g2_DrawUTF8(&u8g2,dis->stringStart, posY+2, displayString);
         }
         else{
-          u8g2_DrawUTF8(&u8g2,dis->stringStart, posY+2, dis->displayString);
+          u8g2_DrawUTF8(&u8g2,dis->stringStart, posY+2, displayString);
         }
       }
       else if(item->type==combo_MultiOption){
@@ -1297,7 +1296,7 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
         if((w->type == widget_button)||(w->type == widget_bmp_button)){
           return ((button_widget_t*)w->content)->action(w);
         }
-        if(dis->type == field_string){
+        if(dis->type == field_string || dis->type == field_hex){
           strcpy(dis->displayString, (char*)edit->inputData.getData());
           edit->current_edit = 0;
         }
@@ -1309,9 +1308,9 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
         if(w->refresh==refresh_idle){
           w->refresh = refresh_triggered;
         }
-        if(dis->type == field_string) {
+        if(dis->type == field_string || dis->type == field_hex) {
           ++edit->current_edit;
-          if(edit->current_edit== dis->reservedChars){
+          if(edit->current_edit == dis->reservedChars){
             sel->state = widget_selected;
             sel->previous_state = widget_edit;
             edit->current_edit = 0;
@@ -1359,7 +1358,7 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
         }
         edit->setData(&option);
     }
-    else if(dis->type==field_string){
+    else if(dis->type == field_string || dis->type == field_hex){
       if(input == Rotate_Decrement_while_click ||input == Rotate_Increment_while_click){
         if(input == Rotate_Decrement_while_click){
           if(edit->current_edit==0){
@@ -1379,37 +1378,52 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
         }
         return -1;
       }
-      char current_edit = (char)dis->displayString[edit->current_edit];
-      current_edit += inc;
-
-      switch(current_edit){//     \0, ' ', 0-9, A-Z
-        case '0'-1:
-          current_edit =' ';
-          break;
-
-        case ' '-1:
-          current_edit='Z';
-          break;
-
-        case 'Z'+1:
-          current_edit=' ';
-          break;
-
-        case ' '+1:
-          current_edit = '0';
-          break;
-
-        case '9'+1:
-          current_edit ='A';
-          break;
-        case 'A'-1:
-          current_edit ='9';
-          break;
-        default:
-          break;
+      char *s = (char*)dis->getData();
+      char current_edit = s[edit->current_edit] + inc;
+      if(dis->type == field_string){
+        switch(current_edit){//     \0, ' ', 0-9, A-Z
+          case '0'-1:
+            current_edit =' ';
+            break;
+          case ' '-1:
+            current_edit='Z';
+            break;
+          case 'Z'+1:
+            current_edit=' ';
+            break;
+          case ' '+1:
+            current_edit = '0';
+            break;
+          case '9'+1:
+            current_edit ='A';
+            break;
+          case 'A'-1:
+            current_edit ='9';
+            break;
+          default:
+            break;
+        }
       }
-      dis->displayString[edit->current_edit]=(char)current_edit;
-      edit->setData(dis->displayString);
+      else if(dis->type == field_hex){
+        switch(current_edit){//     \0, ' ', 0-9, A-Z
+          case '0'-1:
+            current_edit ='F';
+            break;
+          case '9'+1:
+            current_edit = 'A';
+            break;
+          case 'A'-1:
+            current_edit = '9';
+            break;
+          case 'F'+1:
+            current_edit ='0';
+            break;
+          default:
+            break;
+        }
+      }
+      s[edit->current_edit]=(char)current_edit;
+      edit->setData(s);
     }
     else if(dis->type==field_int32){
       if(!dis->displayString){                            // If empty
@@ -1514,6 +1528,16 @@ void newComboScreen(widget_t *w, char *label, uint8_t actionScreen, comboBox_ite
   }
   if(newItem){
     *newItem = item;
+  }
+}
+
+// Special case for editable strings, they need their own display buffer
+void newComboEditableString(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem, char *dispBf){
+  editable_widget_t *edit;
+  newComboEditable(w, label, &edit, newItem);
+  edit->inputData.displayString=dispBf;
+  if(newEdit){
+    *newEdit = edit;
   }
 }
 
