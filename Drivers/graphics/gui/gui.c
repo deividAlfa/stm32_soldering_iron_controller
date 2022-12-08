@@ -37,7 +37,10 @@ void guiInit(void) {
 
   oled_addScreen(&Screen_display,screen_display);
   display_screen_setup(&Screen_display);
-
+#ifdef SSD1306
+  oled_addScreen(&Screen_display_adv,screen_display_adv);
+  display_screen_adv_setup(&Screen_display_adv);
+#endif
   oled_addScreen(&Screen_system,screen_system);
   system_screen_setup(&Screen_system);
 

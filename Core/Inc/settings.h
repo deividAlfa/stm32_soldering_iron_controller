@@ -13,7 +13,7 @@
 #include "board.h"
 
 #define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
-#define SETTINGS_VERSION  18                                        // Change this if you change the settings/profile struct to prevent getting out of sync
+#define SETTINGS_VERSION  19                                        // Change this if you change the settings/profile struct to prevent getting out of sync
 #define LANGUAGE_COUNT    6                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
 #define NUM_TIPS          40                                        // Number of tips for each profile
@@ -254,9 +254,15 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       EncoderMode;
   uint8_t       lvp;
   uint8_t       debugEnabled;
+#ifdef SSD1306
+  uint8_t       displayVcom;
+  uint8_t       displayClk;
+  uint8_t       displayPrecharge;
+#else
   uint8_t       : 8; // reserved
   uint8_t       : 8;
   uint8_t       : 8;
+#endif
   uint8_t       : 8;
   uint8_t       : 8;
   uint8_t       : 8;

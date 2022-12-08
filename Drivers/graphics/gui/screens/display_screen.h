@@ -14,4 +14,9 @@
 extern screen_t Screen_display;
 void display_screen_setup(screen_t *scr);
 
+#ifndef ST7565
+extern screen_t Screen_display_adv;
+void display_screen_adv_setup(screen_t *scr);
+#endif
+
 #endif /* SETTINGS_GUI_DEBUG_SCREEN_H_ */

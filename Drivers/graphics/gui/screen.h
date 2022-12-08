@@ -30,6 +30,7 @@ typedef enum {
             screen_ntc,
           screen_system,
               screen_display,
+                screen_display_adv,
               screen_reset,
                 screen_reset_confirmation,
           screen_debug,

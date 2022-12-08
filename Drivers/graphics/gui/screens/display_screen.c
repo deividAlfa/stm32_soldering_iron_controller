@@ -9,10 +9,12 @@
 #include "screen_common.h"
 
 screen_t Screen_display;
-
 #ifndef ST7565
+screen_t Screen_display_adv;
 static comboBox_item_t *comboitem_display_Dim_Timeout;
 static comboBox_item_t *comboitem_display_Dim_PowerOff;
+static char bf[3];
+static uint8_t clk, precharge, vcom;
 #endif
 
 
@@ -75,18 +77,8 @@ static void setdisplayYflip(uint32_t *val) {
   systemSettings.settings.displayYflip= *val;
   setDisplayYflip(systemSettings.settings.displayYflip);
 }
-//=========================================================
-#ifdef ST7565
-static void * getdisplayResRatio() {
-  temp = systemSettings.settings.displayResRatio;
-  return &temp;
-}
-static void setdisplayResRatio(uint32_t *val) {
-  systemSettings.settings.displayResRatio= *val;
-  setDisplayResRatio(systemSettings.settings.displayResRatio);
-}
-//=========================================================
-#else
+
+#ifdef SSD1306
 static void * getdimMode() {
   temp = systemSettings.settings.dim_mode;
   return &temp;
@@ -111,18 +103,34 @@ static void * getDimTurnOff() {
 static void setDimTurnOff(uint32_t *val) {
   systemSettings.settings.dim_inSleep = *val;
 }
+
+#elif defined ST7565
+//=========================================================
+static void * getdisplayResRatio() {
+  temp = systemSettings.settings.displayResRatio;
+  return &temp;
+}
+static void setdisplayResRatio(uint32_t *val) {
+  systemSettings.settings.displayResRatio= *val;
+  setDisplayResRatio(systemSettings.settings.displayResRatio);
+}
+
 #endif
 
-//=========================================================
 static void display_onEnter(screen_t *scr){
+#ifndef ST7565
+  if(scr != &Screen_display_adv){
+    comboResetIndex(Screen_display.current_widget);
+  }
+#else
   comboResetIndex(Screen_display.current_widget);
+#endif
 }
 
 static void display_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
-
 
   //  [ DISPLAY COMBO ]
   //
@@ -226,15 +234,124 @@ static void display_create(screen_t *scr){
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 #endif
+#ifdef SSD1306
+  newComboScreen(w, "ADVANCED", screen_display_adv, NULL);
+#endif
   newComboScreen(w, strings[lang]._BACK, screen_system, NULL);
   update_display_menu();
 }
 
-
-
 void display_screen_setup(screen_t *scr){
-
   scr->onEnter = &display_onEnter;
   scr->processInput=&autoReturn_ProcessInput;
   scr->create = &display_create;
 }
+
+#ifdef SSD1306
+const char *hex = "0123456789ABCDEF";
+static char * int2hex(uint8_t h){
+  bf[0] = hex[h>>4];
+  bf[1] = hex[h&0xF];
+  bf[2] = '\0';
+  return bf;
+}
+static uint8_t hex2int(char *s){
+  uint8_t i;
+  i  = (s[0]-'0'-(s[0]>'9' ? 7 : 0))<<4;
+  i |= s[1]-'0'-(s[1]>'9' ? 7 : 0);
+  return i;
+}
+//=========================================================
+static void * getdisplayClk() {
+  return int2hex(clk);
+}
+static void setdisplayClk(char *s) {
+  clk = hex2int(s);
+  setDisplayClk(clk);
+}
+//=========================================================
+static void * getdisplayVcom() {
+  return int2hex(vcom);
+}
+static void setdisplayVcom(char *s) {
+  vcom = hex2int(s);
+  setDisplayVcom(vcom);
+}
+//=========================================================
+static void * getdisplayPrecharge() {
+  return int2hex(precharge);
+}
+static void setdisplayPrecharge(char *s) {
+  precharge = hex2int(s);
+  setDisplayPrecharge(precharge);
+}
+//=========================================================
+static int display_adv_save(widget_t *w, RE_Rotation_t input) {
+  systemSettings.settings.displayClk = clk;
+  systemSettings.settings.displayPrecharge = precharge;
+  systemSettings.settings.displayVcom = vcom;
+  return last_scr;
+}
+//=========================================================
+static int display_adv_cancel(widget_t *w, RE_Rotation_t input) {
+  setDisplayClk(systemSettings.settings.displayClk);
+  setDisplayPrecharge(systemSettings.settings.displayPrecharge);
+  setDisplayVcom(systemSettings.settings.displayVcom);
+  return last_scr;
+}
+//=========================================================
+static void display_adv_init(screen_t *scr){
+  comboResetIndex(scr->current_widget);
+  clk = systemSettings.settings.displayClk;
+  precharge = systemSettings.settings.displayPrecharge;
+  vcom = systemSettings.settings.displayVcom;
+}
+//=========================================================
+static void display_adv_create(screen_t *scr){
+  widget_t* w;
+  displayOnly_widget_t* dis;
+  editable_widget_t* edit;
+
+  //  [ DISPLAY COMBO ]
+  //
+  newWidget(&w,widget_combo,scr);
+  //  [ Display Clk  Widget ]
+  //
+  newComboEditableString(w, "CLK", &edit, NULL, bf);
+  dis=&edit->inputData;
+  dis->type = field_hex;
+  dis->reservedChars=2;
+  dis->displayString = bf;
+  dis->getData = &getdisplayClk;
+  edit->setData = (void (*)(void *))&setdisplayClk;
+
+  //  [ Display Precharge Widget ]
+  //
+  newComboEditableString(w, "PRE", &edit, NULL, bf);
+  dis=&edit->inputData;;
+  dis->type = field_hex;
+  dis->reservedChars=2;
+  dis->displayString = bf;
+  dis->getData = &getdisplayPrecharge;
+  edit->setData = (void (*)(void *))&setdisplayPrecharge;
+
+  //  [ Display Vcom Widget ]
+  //
+  newComboEditableString(w, "VCOM", &edit, NULL, bf);
+  dis=&edit->inputData;;
+  dis->type = field_hex;
+  dis->reservedChars=2;
+  dis->displayString = bf;
+  dis->getData = &getdisplayVcom;
+  edit->setData = (void (*)(void *))&setdisplayVcom;
+
+  newComboAction(w, strings[lang]._SAVE, &display_adv_save, NULL);
+  newComboAction(w, strings[lang]._CANCEL, &display_adv_cancel, NULL);
+}
+
+void display_screen_adv_setup(screen_t *scr){
+  scr->init = &display_adv_init;
+  scr->processInput=&autoReturn_ProcessInput;
+  scr->create = &display_adv_create;
+}
+#endif

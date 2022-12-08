@@ -31,6 +31,9 @@ const settings_t defaultSettings = {
   .displayOffset        = DISPLAY_OFFSET,
   .displayXflip         = 1,
 #ifdef SSD1306
+  .displayClk           = 0xF0,
+  .displayVcom          = 0x44,
+  .displayPrecharge     = 0x3C,
   .displayYflip         = 1,
 #elif defined ST7565
   .displayYflip         = 0,
