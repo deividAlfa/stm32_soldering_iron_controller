@@ -298,6 +298,7 @@ Refer to the SH1106 / SSD1306 / SSD1309 datasheet for more information about the
         - CLK:  Cmd 0xD5 "Display Clock Divide Ratio/Oscillator Frequency".<br>
         - PRE:  Cmd 0xD9 "Set Pre-charge Period".<br>
         - VCOM: Cmd 0xDB "Set VCOMH Deselect Level".<br>
+        - RESET: Load defaults (You still need to click SAVE to store changes).<br>
         - SAVE: Save changes.<br>
         - CANCEL: Discard changes.<br>
     - **Back**<br>
