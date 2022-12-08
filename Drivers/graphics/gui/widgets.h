@@ -10,9 +10,15 @@
 
 #include "rotary_encoder.h"
 
-#define default_font u8g2_font_menu
+// Don't change these
+#define COMBO_STYLE_VAR     0                   // Highlight only the variable (Will fallback to this value if COMBO_STYLE not defined)
+#define COMBO_STYLE_ALL     1                   // Highlight the entire menu entry
+#define COMBO_STYLE_SLIDE   2                   // Experimental feature, divide screen and slide menu text (Allows larger strings)
 
-//#define COMBO_SLIDE_TEXT                                                    // Testing feature, not enabled by default
+// User-adjustable
+#define DEFAULT_FRAME_R     3                   // Default widget frame radius (round corners). -1=auto(height/2), 0=square, >0=radius
+#define COMBO_STYLE         COMBO_STYLE_VAR     // Use this combo style
+#define DEFAULT_FONT        u8g2_font_menu      // This is the default widget font
 
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
 typedef enum widgetFieldType {field_int32, field_hex, field_bmp, field_string}widgetFieldType;
