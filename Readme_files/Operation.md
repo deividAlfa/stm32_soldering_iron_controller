@@ -191,15 +191,15 @@ Adjust as your circuit: Pull up or pull down.<br>
     - **Pull resistance**<br>
     - **NTC Detect** : Enables or disables automatic switching between 2 NTC values (typically 10K and 100K).<br>
         
-    	OFF: Fixed NTC values:<br>
+        OFF: Fixed NTC values:<br>
         - **NTC resistance**<br>
-      	- **NTC beta coefficient**<br>
-      	
-    	ON: Two NTC values:<br>
-      	- **Higher NTC value**<br>
-      	- **Higher NTC Beta**<br>
-      	- **Lower NTC value**<br>
-      	- **Lower NTC Beta**<br>
+          - **NTC beta coefficient**<br>
+          
+        ON: Two NTC values:<br>
+          - **Higher NTC value**<br>
+          - **Higher NTC Beta**<br>
+          - **Lower NTC value**<br>
+          - **Lower NTC Beta**<br>
     - **Back**<br>
 Return to iron menu.<br>
   - **Back**<br>
@@ -213,22 +213,6 @@ General global settings for the controller.<br>
 Sets the display language.<br>
   - **Profile**<br>
 Sets which iron profile (__T12__, __C210__, __C245__) to use. Each profile has its own dataset (including the list of tips). <br>
-  - **Brightness**<br>
-Screen brightness.<br>
-  - **Offset**<br>
-Screen offset. This can accomodate the different screens which the controllers have come with. Use it to center the display on the screen.<br>
-  - **Dimmer**<br>
-Fades the display after a timeout.
-	- OFF: Never dim the screen.<br>
-	- SLP: Dim only in low power modes (Standby, Sleep, Error).<br>
-	- ALL: Dim also in run mode.<br>
-  - **Dimmer Delay**<br>
-Sets the dimmer timeout. This option is disabled when the dimmer is set to OFF.<br>
-  - **Dimmer, in sleep mode**<br>
-Allows to turn off the screen in sleep or error modes. This option is disabled if the dimmer is set to OFF.<br>
-For safety reasons,the screen will only turn off when the iron temperature is below 100°C.<br>
-	- OFF: In sleep mode, the screen turns off after dimming.<br>
-	- ON: The screen stays on at low brightness.<br>
   - **Boot**<br>
 Operation mode when powered on (__RUN__, __STANDBY__ or __SLEEP__).<br>
 This option is disabled in stand mode.<br>
@@ -243,12 +227,10 @@ This option is disabled when Wake mode is set to Stand.<br>
   - **Encoder**<br>
 Invert the encoder direction.<br>
   - **Buzzer**<br>
-	Buzz/beep when notable conditions occur.<br>
-   	- Changing operating mode (sleep, standby, run, boost)<br>
-   	- Temperature reached after the setpoint was changed<br>
-   	- Alarm when no iron is detected or system error happens<br>
-  - **Active detection**<br>
-Use iron active detection by leaving the PWM slightly on all the time. If your amp has a pullup resistor it can be disabled.<br>
+    Buzz/beep when notable conditions occur.<br>
+       - Changing operating mode (sleep, standby, run, boost)<br>
+       - Temperature reached after the setpoint was changed<br>
+       - Alarm when no iron is detected or system error happens<br>
   - **Temperature unit**<br>
 Sets the system temperature in Celsius or Fahrenheit.<br>
   - **Step**<br>
@@ -262,6 +244,8 @@ A value of 0 will disable the threshold, always showing the real remperature.<br
 This is not applied to the plot graph.<br>
   - **LVP**<br>
 Adjust Low voltage protection.<br>
+  - **Active detection**<br>
+Use iron active detection by leaving the PWM slightly on all the time. If your amp has a pullup resistor it can be disabled.<br>
   - **GUI Time**<br>
 To offer maximum responsiveness, the screen is updated as fastest as possible when the cpu is idling.<br>
 It depends on the MCU used and display interface, it can reach more than 100 fps in DMA SPI mode.<br>
@@ -298,16 +282,26 @@ Toggles screen horizontal flip.<br>
 Toggles screen vertical flip.<br>
     - **Dimmer**<br>
 Fades the display after a timeout.
-	    - OFF: Never dim the screen.<br>
-    	- SLP: Dim only in low power modes (Standby, Sleep, Error).<br>
-    	- ALL: Dim also in run mode.<br>
+        - OFF: Never dim the screen.<br>
+        - SLP: Dim only in low power modes (Standby, Sleep, Error).<br>
+        - ALL: Dim also in run mode.<br>
     - **Dimmer Delay**<br>
 Sets the dimmer timeout. This option is disabled when the dimmer is set to OFF.<br>
     - **Dimmer, in sleep mode**<br>
 Allows to turn off the screen in sleep or error modes. This option is disabled when the dimmer is set to OFF.<br>
 For safety reasons,the screen will only turn off when the iron temperature is below 100°C.<br>
-    	- OFF: In sleep mode, the screen turns off after dimming.<br>
-    	- ON: The screen stays on at low brightness.<br>
+        - OFF: In sleep mode, the screen turns off after dimming.<br>
+        - ON: The screen stays on at low brightness.<br>
+    - **ADVANCED**<br>
+Additional low-level display tweaking.<br>
+Refer to the SH1106 / SSD1306 / SSD1309 datasheet for more information about these commands.<br>
+        - CLK:  Cmd 0xD5 "Display Clock Divide Ratio/Oscillator Frequency".<br>
+        - PRE:  Cmd 0xD9 "Set Pre-charge Period".<br>
+        - VCOM: Cmd 0xDB "Set VCOMH Deselect Level".<br>
+        - SAVE: Save changes.<br>
+        - CANCEL: Discard changes.<br>
+    - **Back**<br>
+Return to settings menu.<br>
   - **SW:**<br>
 Displays the current software version. Actually, it's the build date.<br>
   - **HW:**<br>
@@ -383,22 +377,22 @@ Zero set (Sampling->Captured) -> Cal 250 -> Cal 400 -> Save<br>
 If by any means the 250°C calibration needs to go higher than 400°C value, increase 400°C value carefully and repeat 250°C calibration.<br>
 For best accuracy, always calibrate 250°C if CAL_Zero value was changed, and always calibrate 400°C if 250°C value was changed.<br>
   
-  	- **Zero set**<br>
+      - **Zero set**<br>
 Calibrates the offset of the amplifier. You must have inserted a completely cold tip, or the calibration result will be wrong.<br>
 This widgets has 3 states than change when clicking on it:<br>
-		- Zero set: Shows the current value in the system (No changes).<br>
-		- Sampling: Shows the ADC value in real time.<br>
-		- Captured: Shows the captured value and applies it.<br>
+        - Zero set: Shows the current value in the system (No changes).<br>
+        - Sampling: Shows the ADC value in real time.<br>
+        - Captured: Shows the captured value and applies it.<br>
 To calibrate the zero offset, you must set this mode before moving to the next step.<br>
 Zero set value is applied system-wide, not per-tip calibrated.<br>
 If you already know your tip calibration values, you can adjust only this parameter and save, then restore the tip calibration values.<br>
-	- **Cal 250ºC**<br>
-	- **Cal 400ºC**<br>
+    - **Cal 250ºC**<br>
+    - **Cal 400ºC**<br>
 Adjusts the value for 250/400°C. When editing this widget, the power is enabled and the value applied in real time.<br>
 Move in small steps until the thermometer matches the target temperature
-  	- **SAVE**<br> 
+      - **SAVE**<br> 
 Return to calibration menu saving changes.<br>
- 	 - **CANCEL**<br>
+      - **CANCEL**<br>
 Return to calibration menu discarding changes.<br>
   - **BACK**<br>
 Return to system menu.<br>
