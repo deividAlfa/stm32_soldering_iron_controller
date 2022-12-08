@@ -242,12 +242,11 @@ static void tip_settings_create(screen_t *scr){
 
   //[ TIP label]
   //
-  newComboEditable(w, strings[lang].TIP_SETTINGS_Name, &edit, NULL);
+  newComboEditableString(w, strings[lang].TIP_SETTINGS_Name, &edit, NULL, backupTip.name);
   dis=&edit->inputData;
   dis->reservedChars=TipCharSize-1;
   dis->getData = &getTipName;
   dis->type = field_string;
-  dis->displayString=backupTip.name;
   edit->big_step = 1;
   edit->step = 1;
   edit->selectable.tab = 0;
