@@ -599,7 +599,7 @@ void fatalError(uint8_t type){
       /*
       sprintf(str,"PC: %08lX", SCB->BFAR);
       */
-      u8g2_SetFont(&u8g2, default_font);
+      u8g2_SetFont(&u8g2, u8g2_font_menu);
       break;
     }
     case error_MEMMANAGE:
@@ -693,7 +693,7 @@ void Oled_error_init(void){
   buzzer_fatal_beep();
   setDisplayContrastOrBrightness(defaultSettings.contrastOrBrightness);
   fillBuffer(BLACK,fill_soft);
-  u8g2_SetFont(&u8g2,default_font );
+  u8g2_SetFont(&u8g2,u8g2_font_menu);
   u8g2_SetDrawColor(&u8g2, WHITE);
   u8g2_SetMaxClipWindow(&u8g2);
   systemSettings.settings.displayOffset = DISPLAY_OFFSET;

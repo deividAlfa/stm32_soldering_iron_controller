@@ -39,7 +39,7 @@ void myTest(void){
   char str[16];
   setDisplayContrastOrBrightness(255);
   fillBuffer(BLACK, fill_dma);
-  u8g2_SetFont(&u8g2,default_font );
+  u8g2_SetFont(&u8g2,u8g2_font_menu );
   u8g2_SetDrawColor(&u8g2, WHITE);
   if(oled.use_sw){
     u8g2_DrawUTF8(&u8g2,0,0,"SW Mode");

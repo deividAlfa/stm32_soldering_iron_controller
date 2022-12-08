@@ -232,7 +232,7 @@ static uint8_t Cal_draw(screen_t *scr){
     error=2;
     Screen_calibration.current_widget->enabled=0;
     fillBuffer(BLACK,fill_dma);
-    scr->refresh=screen_Erased;
+    scr->state=screen_Erased;
     putStrAligned(strings[lang].CAL_Error, 10, align_center);
     putStrAligned(strings[lang].CAL_Aborting, 25, align_center);
   }
@@ -250,7 +250,7 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
       resetScreenTimer();                       // Reset screen idle timer
       error=0;
       widgetEnable(Screen_calibration.current_widget);
-      scr->refresh=screen_Erase;
+      scr->state=screen_Erase;
     }
   }
   else{
@@ -357,7 +357,7 @@ static uint8_t Cal_Start_draw(screen_t *scr){
     update_draw=0;
 
     fillBuffer(BLACK, fill_dma);
-    scr->refresh=screen_Erased;
+    scr->state=screen_Erased;
     u8g2_SetDrawColor(&u8g2, WHITE);
     u8g2_SetFont(&u8g2, u8g2_font_menu);
 

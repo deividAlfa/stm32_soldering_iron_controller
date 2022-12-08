@@ -147,7 +147,7 @@ void draw_boot_strings(void){
 }
 
 static uint8_t boot_screen_draw(screen_t *scr){
-  uint8_t refresh = scr->refresh;                 // Save refresh state. If screen set to be erased, default_screenDraw will erase it.
+  uint8_t refresh = scr->state;                   // Save sttate. If screen set to be erased, default_screenDraw will erase it.
   uint8_t ret = default_screenDraw(scr);          // So we need to run screenDraw first and save the return value
 
   if(refresh!=screen_Idle && boot_step==1){       // If screen not idle (erased) and boot_step=1 (Setup screen)
@@ -164,7 +164,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
     oled_destroy_screen(scr);                                                   // Destroy and create the screen
     boot_screen_create(scr);
     scr->current_widget = Widget_lang;
-    scr->refresh = screen_Erase;
+    scr->state = screen_Erase;
     ((editable_widget_t*)Widget_lang->content)->selectable.state=widget_edit;
     widgetEnable(Widget_lang);
     widgetEnable(Widget_profile);
@@ -193,7 +193,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
         widgetEnable(Widget_lang);                                                                    // In setup mode, enable widgets
         widgetEnable(Widget_profile);
         widgetEnable(Widget_ok);
-        scr->refresh = screen_Erase;                                                                  // Force screen wipe to clear the boot logo
+        scr->state = screen_Erase;                                                                  // Force screen wipe to clear the boot logo
         boot_step++;                                                                                  // Increase boot step
       }
       else{
@@ -218,7 +218,7 @@ void boot_screen_init(screen_t * scr){
   }
   u8g2_SetDrawColor(&u8g2,WHITE);
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM[0], splashXBM[1], &splashXBM[2]);
-  scr->refresh = screen_Erased;
+  scr->state = screen_Erased;
 #ifndef ST7565
   setDisplayContrastOrBrightness(0);
   wakeOledDim();

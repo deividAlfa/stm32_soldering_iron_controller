@@ -201,7 +201,7 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 }
 
 static uint8_t debug_Draw(screen_t *scr){
-  if(scr->refresh==screen_Erased){
+  if(scr->state==screen_Erased){
     u8g2_SetFont(&u8g2, u8g2_font_small);
     u8g2_SetDrawColor(&u8g2, WHITE);
     u8g2_DrawUTF8(&u8g2, 0, 0, "P");
@@ -491,11 +491,11 @@ static void pid_debug_create(screen_t *scr){
 }
 
 static uint8_t pid_debug_Draw(screen_t * scr){
-  if(update_draw || scr->refresh==screen_Erased){
+  if(update_draw || scr->state==screen_Erased){
     if(update_draw){
       update_draw=0;
       fillBuffer(BLACK, fill_dma);
-      scr->refresh=screen_Erased;
+      scr->state=screen_Erased;
     }
     for(uint8_t x=1; x<(PID_SZ-1); x++){
       uint8_t pos=pidPlot->index+x;

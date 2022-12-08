@@ -233,7 +233,7 @@ void updateIronPower(void) {
 }
 
 static void setMainWidget(widget_t* w){
-  Screen_main.refresh=screen_Erase;
+  Screen_main.state=screen_Erase;
   Screen_main.current_widget=w;
   widgetEnable(w);
 }
@@ -289,7 +289,7 @@ int8_t switchScreenMode(void){
     resetScreenTimer();
     resetModeTimer();
     plot.enabled = (mainScr.displayMode==temp_graph);
-    Screen_main.refresh=screen_Erase;
+    Screen_main.state=screen_Erase;
     mainScr.updateReadings=1;
     switch(mainScr.setMode){
 
@@ -444,7 +444,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;
 
         case Click:
-          scr->refresh=screen_Erase;
+          scr->state=screen_Erase;
           if(mainScr.displayMode==temp_numeric){
             mainScr.updateReadings=1;
             mainScr.displayMode=temp_graph;
@@ -543,7 +543,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             __disable_irq();
             setCurrentTip(tip);
             __enable_irq();
-            Screen_main.refresh=screen_Erase;
+            Screen_main.state=screen_Erase;
           }
           break;
         }
@@ -848,7 +848,7 @@ static uint8_t main_screen_draw(screen_t *scr){
 
   uint32_t currentState = (uint32_t)ironErrorFlags.Flags<<24 | (uint32_t)getCurrentMode()<<16 | mainScr.currentMode;    // Simple method to detect changes
 
-  if( lastState!=currentState || Widget_SetPoint->refresh || Widget_IronTemp->refresh || plot.update || screenSaver.update || scr->refresh==screen_Erase
+  if( lastState!=currentState || Widget_SetPoint->refresh || Widget_IronTemp->refresh || plot.update || screenSaver.update || scr->state==screen_Erase
       #ifdef USE_NTC
       || Widget_AmbTemp->refresh
       #endif
@@ -861,7 +861,7 @@ static uint8_t main_screen_draw(screen_t *scr){
     refresh=1;
   }
   if(refresh){
-    scr->refresh=screen_Erased;
+    scr->state=screen_Erased;
     fillBuffer(BLACK, fill_dma);
   }
 

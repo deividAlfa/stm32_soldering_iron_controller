@@ -166,7 +166,7 @@ void oled_processInput(void) {
           if(scr->update){
             scr->update(scr);
           }
-          scr->refresh=screen_Erased;
+          scr->state=screen_Erased;
           break;
         }
       }

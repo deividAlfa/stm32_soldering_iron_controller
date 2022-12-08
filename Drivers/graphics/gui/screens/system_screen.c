@@ -468,7 +468,7 @@ int system_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state){
     oled_restore_comboStatus(scr);
     sel->state=widget_edit;
     sel->previous_state=widget_edit;
-    scr->refresh = refresh_triggered;
+    scr->state = refresh_triggered;
   }
   return autoReturn_ProcessInput(scr, input, state);
 }

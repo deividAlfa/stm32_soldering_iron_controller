@@ -54,11 +54,11 @@ uint8_t default_screenDraw(screen_t *scr) {
   widget_t *current_widget = NULL;
   uint8_t ret = 0;
   if(scr->widgets) {
-    if(scr->refresh==screen_Erase){
-      scr->refresh=screen_Erased;
+    if(scr->state==screen_Erase){
+      scr->state=screen_Erased;
       fillBuffer(BLACK,fill_dma);
     }
-    ret = (scr->refresh==screen_Erased);       // Set return value if screen was erased to force update.
+    ret = (scr->state==screen_Erased);       // Set return value if screen was erased to force update.
 
     current_widget = scr->widgets;
     while(current_widget) {
@@ -67,7 +67,7 @@ uint8_t default_screenDraw(screen_t *scr) {
       }
       current_widget = current_widget->next_widget;
     }
-    scr->refresh=screen_Idle;
+    scr->state=screen_Idle;
   }
   return ret;
 }
@@ -129,7 +129,7 @@ void screen_setDefaults(screen_t *scr) {
     scr->draw = &default_screenDraw;
     scr->onEnter = NULL;
     scr->onExit = NULL;
-    scr->refresh = screen_Erase;
+    scr->state = screen_Erase;
     scr->enabled = true;
     scr->index = 0;
 }
