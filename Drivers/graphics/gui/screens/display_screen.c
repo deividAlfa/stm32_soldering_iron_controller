@@ -286,6 +286,17 @@ static void setdisplayPrecharge(char *s) {
   setDisplayPrecharge(precharge);
 }
 //=========================================================
+static int display_adv_reset(widget_t *w, RE_Rotation_t input) {
+  clk = defaultSettings.displayClk;
+  precharge = defaultSettings.displayPrecharge;
+  vcom = defaultSettings.displayVcom;
+  setDisplayClk(clk);
+  setDisplayPrecharge(precharge);
+  setDisplayVcom(vcom);
+  w->refresh = refresh_triggered;
+  return -1;
+}
+//=========================================================
 static int display_adv_save(widget_t *w, RE_Rotation_t input) {
   systemSettings.settings.displayClk = clk;
   systemSettings.settings.displayPrecharge = precharge;
@@ -345,6 +356,7 @@ static void display_adv_create(screen_t *scr){
   dis->getData = &getdisplayVcom;
   edit->setData = (void (*)(void *))&setdisplayVcom;
 
+  newComboAction(w, strings[lang]._RESET, &display_adv_reset, NULL);
   newComboAction(w, strings[lang]._SAVE, &display_adv_save, NULL);
   newComboAction(w, strings[lang]._CANCEL, &display_adv_cancel, NULL);
 }
