@@ -875,7 +875,7 @@ uint8_t comboBoxDraw(widget_t *w) {
       frameY=y * height + w->posY;                                    // Store frame position, drawn at the end
 #if (COMBO_STYLE == COMBO_STYLE_SLIDE)
       offset=slide.offset;
-      if(refresh_slide){                                              // If only refreshing sliding text and this is the matching item
+      if(refresh_slide==1){                                           // If only refreshing sliding text and this is the matching item
         len = slide.len;
         refresh_slide++;                                              // = 2 means update current item label
         u8g2_SetDrawColor(&u8g2, BLACK);
