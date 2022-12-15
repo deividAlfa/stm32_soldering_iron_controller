@@ -20,6 +20,13 @@
 #include "gui.h"
 #include "screen.h"
 #include "myTest.h"
+
+#if (__CORTEX_M >= 3)
+#include "stm32f1xx_it.h"
+#else
+#include "stm32f0xx_it.h"
+#endif
+
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
 #include "addon_fume_extractor.h"
 #endif
@@ -197,6 +204,63 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
     }
   }
 }
+
+
+/* copy hardfault args to known storage before calling the final handler*/
+__attribute__((used)) void HardFault_Handler_cp(unsigned int * hardfault_args, unsigned int _r4, unsigned int _r5, unsigned int _r6){
+  for(uint8_t i=0; i<9; i++){
+    hardFault_args[i]=hardfault_args[i];
+  }
+  r4=_r4;
+  r5=_r5;
+  r6=_r6;
+
+  /*
+  printf ("\n[Hard Fault]\n"); // After Joseph Yiu
+  printf ("r0 = %08X, r1 = %08X, r2 = %08X, r3 = %08X\n", hardfault_args[0], hardfault_args[1], hardfault_args[2], hardfault_args[3]);
+  printf ("r4 = %08X, r5 = %08X, r6 = %08X, sp = %08X\n", r4, r5, r6, (unsigned int)&hardfault_args[8]);
+  printf ("r12= %08X, lr = %08X, pc = %08X, psr= %08X\n", hardfault_args[4], hardfault_args[5], hardfault_args[6], hardfault_args[7]);
+  if (__CORTEX_M >= 3){
+    printf ("bfar=%08X, cfsr=%08X, hfsr=%08X, dfsr=%08X, afsr=%08X\n",
+        *((volatile unsigned int *)(0xE000ED38)),
+        *((volatile unsigned int *)(0xE000ED28)),
+        *((volatile unsigned int *)(0xE000ED2C)),
+        *((volatile unsigned int *)(0xE000ED30)),
+        *((volatile unsigned int *)(0xE000ED3C)) );
+  }
+  */
+  HardFault_Handler();
+}
+
+/* Initial hard fault trap to capture stack data*/
+__attribute__((used)) __attribute__((naked)) void HardFault_Handler_(void){
+  asm(
+#if (__CORTEX_M >=3)
+      "TST     lr, #4                       \n"
+      "ITE     EQ                           \n"
+      "MRSEQ   R0, MSP                      \n" //Read MSP (Main)
+      "MRSNE   R0, PSP                      \n" //Read PSP (Process)
+      "MOV     R1, R4                       \n"
+      "MOV     R2, R5                       \n"
+      "MOV     R3, R6                       \n"
+      "B       HardFault_Handler_cp         \n"
+#else
+      "MOV     R1, LR                       \n"
+      "LDR     R0, =HardFault_Handler_cp    \n"
+      "MOV     LR, R0                       \n"
+      "MOVS    R0, #4                       \n"     // Determine correct stack
+      "TST     R0, R1                       \n"
+      "MRS     R0, MSP                      \n"     // Read MSP (Main)
+      "BEQ     .+6                          \n"     // BEQ 2, MRS R0,PSP 4
+      "MRS     R0, PSP                      \n"     // Read PSP (Process)
+      "MOV     R1, R4                       \n"     // Registers R4-R6, as parameters 2-4 of the function called
+      "MOV     R2, R5                       \n"
+      "MOV     R3, R6                       \n"     // sourcer32@gmail.com
+      "BX      LR                           \n"
+#endif
+  );
+}
+
 
 void CrashErrorHandler(char * file, int line)
 {

@@ -42,7 +42,6 @@
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
- __attribute__((naked)) void HardFault_Handler_(void);
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
