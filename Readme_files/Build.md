@@ -10,7 +10,8 @@ There's a new automated build script for Windows (Building_script.bat) that allo
 With it, all you need is to have CubeIDE installed in C:\ST (It's the default installation folder), it will search and execute the tools without requiring any user intervention.<br>
 Just open it, choose your profile, then select whether you want to only copy the files, run CubeMX (Generate the libraries) and/or compile the firmware.<br>
 After compiling, the binaries will be placed in their respective BOARDS/... folders.<br>
-Note: CubeIDE (Current version: 1.10.1) needs Java JDK, but won't work with versions newer than JDK15 [(Available here)](https://www.techspot.com/downloads/5552-java-15-jdk.html).<br><br>
+<img src="/Readme_files/build_script.png?raw=true"><br><br>
+Note: CubeIDE (Current version: 1.11.1) needs Java JDK, but won't work with versions newer than JDK15 [(Available here)](https://www.techspot.com/downloads/5552-java-15-jdk.html).<br><br>
 
 If you want to build it within CubeIDE, first run Building_script.bat, choose your profile and select Copy files / Run CubeMX.<br>
 Open STM32CUBE IDE, click on Import/Existing project and select the project folder.<br>
