@@ -138,6 +138,8 @@ This option is disabled in shake wake mode.<br>
 Enables or disables Smart Active mode. This functionality tries to detect the load on the tip and resets the timeout automatically.<br> 
 Works only in active modes, Run and Boost.<br>
 Needs stable readings to work properly, might not work as intended with noisy controllers or tips (Specially new tips!).<br>
+When working mode starts, the functionality will be delayed for 10 seconds to give the tip some time to heat up.<br>
+On detection, the shake icon blinks to provide some feeback.<br>
   - **Smart Active Load**<br>
 Adjust the Smart sensitivity. This option is only enabled when Smart is active.<br>
   - **Power**<br>
