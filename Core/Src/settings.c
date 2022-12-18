@@ -276,7 +276,7 @@ void checkSettings(void){
 
   #ifdef HAS_BATTERY
   bkpRamData.values.lastProfile = systemSettings.currentProfile;
-  if(!isIronInCalibrationMode() && scr_index != screen_debug) // don't persist the temperature while calibration is in progress or in the debug screen
+  if(!getIronCalibrationMode() && scr_index != screen_debug) // don't persist the temperature while calibration is in progress or in the debug screen
   {
     bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserSetTemperature();
   }
