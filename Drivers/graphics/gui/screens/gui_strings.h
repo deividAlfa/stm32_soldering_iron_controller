@@ -63,6 +63,8 @@ typedef struct{
   char * IRON_Boost;
   char * IRON_Boost_Add;
   char * IRON_Wake_Mode;
+  char * IRON_smartActiv_Enable;
+  char * IRON_smartActiv_Load;
   char * IRON_Shake_Filtering;
   char * IRON_Stand_Mode;
   char * IRON_Power;

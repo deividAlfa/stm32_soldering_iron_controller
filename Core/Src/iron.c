@@ -38,12 +38,16 @@ typedef struct {
   IronError_t         Error;                                // Error flags
   uint8_t             lastMode;                             // Last mode before error condition.
   uint8_t             boot_complete;                        // Flag set to 1 when boot screen exits (Used for error handling)
+  uint8_t             Load_det_pos;                         // For load detection
 
   uint16_t            Pwm_Period;                           // PWM period
   uint16_t            Pwm_Max;                              // Max PWM output for power limit
   int16_t             UserSetTemperature;                   // Run mode user setpoint
   int16_t             TargetTemperature;                    // Actual set (target) temperature (Setpoint)
 
+  int32_t             Load_det_value;                       // For load detection
+  int32_t             Load_det_bf[16];                      // For load detection
+  uint32_t            Load_det_Time;                        // For load detection
   uint32_t            Pwm_Out;                              // Last calculated PWM value
   uint32_t            LastModeChangeTime;                   // Last time the mode was changed (To provide debouncing)
   uint32_t            LastErrorTime;                        // last time iron error was detected
@@ -143,7 +147,7 @@ void handleIron(void) {
   }
 
   // If sleeping or error, stop here
-  if(!Iron.boot_complete || Iron.CurrentMode==mode_sleep || Iron.Error.active) {                           // For safety, force PWM low everytime
+  if(!Iron.boot_complete || Iron.CurrentMode==mode_sleep || Iron.Error.active) {                // For safety, force PWM low everytime
     Iron.Pwm_Out=0;
     __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, 0);
     Iron.CurrentIronPower=0;
@@ -151,10 +155,19 @@ void handleIron(void) {
   }
 
   // Controls inactivity timer and enters low power modes
-  if(!Iron.calibrating){                                                                      // Don't check timeout when calibrating
+  if(!Iron.calibrating){                                                                        // Don't check timeout when calibrating
     uint32_t mode_time = CurrentTime - Iron.CurrentModeTimer;
 
-    if((Iron.CurrentMode==mode_boost) && (mode_time>systemSettings.Profile.boostTimeout)){    // If boost mode and time expired
+    // Smart wake detection only in active modes, after 10 seconds of entering the current mode
+    if(systemSettings.Profile.smartActiv_Enabled==enable && (Iron.CurrentMode>mode_standby) && (mode_time>9999)){
+      if(Iron.Load_det_value > systemSettings.Profile.smartActiv_Load){                      // Check threshold
+        Iron.CurrentModeTimer = CurrentTime-10000;                                          // Preload the timeout with 10 seconds so smartActiv keeps working
+        Iron.lastWakeSrc = wakeSrc_Smart;
+        Iron.lastShakeTime = CurrentTime;                                                   // Show wake icon
+        Iron.shakeActive = 1;                                                               // TODO:  Remove this in the future?
+      }
+    }
+    if((Iron.CurrentMode==mode_boost) && (mode_time>systemSettings.Profile.boostTimeout)){  // If boost mode and time expired
       setCurrentMode(mode_run);
     }
     else if(Iron.CurrentMode==mode_run){                                                      // If running
@@ -184,7 +197,18 @@ void handleIron(void) {
   updatePowerLimit();                                                                         // Update power limit values
 
   // Update PID
-  Iron.Pwm_Out = calculatePID(human2adc(Iron.TargetTemperature), TIP.last_avg, Iron.Pwm_Max);
+  int32_t target = human2adc(Iron.TargetTemperature);
+  Iron.Pwm_Out = calculatePID(target, TIP.last_avg, Iron.Pwm_Max);
+
+  if((systemSettings.Profile.smartActiv_Enabled==enable) && ((CurrentTime - Iron.Load_det_Time)>199)){   // Sample load every 200ms
+    Iron.Load_det_Time = CurrentTime;
+    Iron.Load_det_bf[Iron.Load_det_pos] = target - TIP.last_avg;
+    if(++Iron.Load_det_pos>15)
+      Iron.Load_det_pos=0;
+    Iron.Load_det_value=0;
+    for(uint8_t i=0; i<16; i++)
+      Iron.Load_det_value += Iron.Load_det_bf[i];
+  }
 
   if(!Iron.Pwm_Out){
     Iron.CurrentIronPower = 0;
@@ -556,13 +580,11 @@ void setCurrentMode(uint8_t mode){
 // Called from program timer if WAKE change is detected
 bool IronWake(wakeSrc_t src){                                                                 // source: handle shake, encoder push button
   static uint32_t last_time;
-  if(Iron.Error.Flags || systemSettings.Profile.WakeInputMode==mode_stand){
-    return 0;
-  }
 
-if(  Iron.CurrentMode<mode_run &&
-      ( (src==wakeSrc_Button && !(systemSettings.settings.buttonWakeMode & wake_standby)) ||
-        (src==wakeSrc_Shake && !(systemSettings.settings.shakeWakeMode & wake_standby))   )){
+  if( (Iron.Error.Flags || systemSettings.Profile.WakeInputMode==mode_stand) ||
+       ( Iron.CurrentMode<mode_run &&
+        ( ( src==wakeSrc_Button && !(systemSettings.settings.buttonWakeMode & wake_standby)) ||
+          (src==wakeSrc_Shake && !(systemSettings.settings.shakeWakeMode & wake_standby))) ) ){
 
     return 0;
   }

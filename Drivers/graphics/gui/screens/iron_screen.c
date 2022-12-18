@@ -14,6 +14,7 @@ screen_t Screen_advFilter;
 static comboBox_item_t *comboItem_advFilter;
 static comboBox_item_t *comboitem_ShakeFiltering;
 static comboBox_item_t *comboitem_StandMode;
+static comboBox_item_t *comboitem_smartActiv_Load;
 static editable_widget_t *editable_IRON_StandbyTemp;
 static editable_widget_t *editable_IRON_BoostTemp;
 static editable_widget_t *editable_IRON_MaxTemp;
@@ -117,9 +118,9 @@ static void * get_reset_threshold() {
 }
 //=========================================================
 void update_Iron_menu(void){
-  bool mode = (systemSettings.Profile.WakeInputMode==mode_shake);
-  comboitem_StandMode->enabled       = !mode;
-  comboitem_ShakeFiltering->enabled  = mode;
+  comboitem_ShakeFiltering->enabled = (systemSettings.Profile.WakeInputMode==mode_shake);
+  comboitem_StandMode->enabled = (systemSettings.Profile.WakeInputMode==mode_stand);
+  comboitem_smartActiv_Load->enabled = (systemSettings.Profile.smartActiv_Enabled==enable);
 }
 //=========================================================
 #ifdef USE_VIN
@@ -284,6 +285,22 @@ static void * getStandMode() {
 }
 static void setStandMode(uint32_t *val) {
   systemSettings.Profile.StandMode = *val;
+}
+//=========================================================
+static void setsmartActivLoadEnable(uint32_t *val) {
+  systemSettings.Profile.smartActiv_Enabled = *val;
+}
+static void * getsmartActivLoadEnable() {
+  temp = systemSettings.Profile.smartActiv_Enabled;
+  return &temp;
+}
+//=========================================================
+static void setsmartActivLoad(uint32_t *val) {
+  systemSettings.Profile.smartActiv_Load = *val;
+}
+static void * getsmartActivLoad() {
+  temp = systemSettings.Profile.smartActiv_Load;
+  return &temp;
 }
 //=========================================================
 static void * getShakeFiltering() {
@@ -722,7 +739,31 @@ static void iron_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setStandMode;
   edit->options = strings[lang].InitMode;
   edit->numberOfOptions = 2;
-  #ifdef USE_VIN
+
+  //  [ smartActiv Enabled Widget ]
+  //
+  newComboMultiOption(w, strings[lang].IRON_smartActiv_Enable,&edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=3;
+  dis->getData = &getsmartActivLoadEnable;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setsmartActivLoadEnable;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
+
+  //  [ smartActiv Load Widget ]
+  //
+  newComboEditable(w, strings[lang].IRON_smartActiv_Load, &edit, &comboitem_smartActiv_Load);
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &getsmartActivLoad;
+  edit->big_step = 5;
+  edit->step = 1;
+  edit->max_value = 50;
+  edit->min_value = 1;
+  edit->setData = (void (*)(void *))&setsmartActivLoad;
+#ifdef USE_VIN
   //  [ Power Widget ]
   //
   newComboEditable(w, strings[lang].IRON_Power, &edit, NULL);
@@ -749,7 +790,7 @@ static void iron_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setTipImpedance;
   edit->max_value = 160;
   edit->min_value = 10;
-  #endif
+#endif
 
   //  [ Read Period Widget ]
   //
