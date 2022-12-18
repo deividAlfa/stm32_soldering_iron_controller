@@ -383,7 +383,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
   // If at main temperature screen
   if(mainScr.currentMode == main_irontemp && (input == Rotate_Increment || input == Rotate_Decrement || input == Click)){
-    if(!checkIronModeTimer(250)){                                         // To avoid unwanted mode changing, ignore action if iron mode was set <250ms ago
+    if(getIronWakeSource()==wakeSrc_Button && !checkIronModeTimer(250)){  // To avoid unwanted mode changing, ignore action if iron mode was set <250ms ago
         input = Rotate_Nothing;
       }
       else if(currentIronMode==mode_boost){                               // If iron in boost mode, return to normal mode, don't process the input
@@ -391,7 +391,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         input = Rotate_Nothing;
       }
       else if(currentIronMode!=mode_run){
-        IronWake(wakeButton);
+        IronWake(wakeSrc_Button);
         if(getCurrentMode()==mode_run){                                   // If iron in low power mode, send wake signal. If mode changed, don't process the input
           input = Rotate_Nothing;
         }
@@ -576,7 +576,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;
       }
       if(input!=Rotate_Nothing){
-        IronWake(wakeButton);
+        IronWake(wakeSrc_Button);
       }
     default:
       break;

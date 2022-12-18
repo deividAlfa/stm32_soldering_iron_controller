@@ -235,7 +235,7 @@ void checkSettings(void){
   }
 
   // Auto save on content change
-  if( (systemSettings.setupMode==enable) || (isIronInCalibrationMode()) || (getIronErrorFlags().safeMode) || ((CurrentTime-lastCheckTime)<999)){
+  if( (systemSettings.setupMode==enable) || (getIronCalibrationMode()) || (getIronErrorFlags().safeMode) || ((CurrentTime-lastCheckTime)<999)){
     return;
   }
 

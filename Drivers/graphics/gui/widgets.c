@@ -82,7 +82,7 @@ displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *w) {
     {
       comboBox_widget_t *combo = (comboBox_widget_t*)w->content;
       if((combo->currentItem) && ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption))){
-        return &((comboBox_widget_t*)w->content)->currentItem->widget->inputData;
+        return &combo->currentItem->widget->inputData;
       }
     }
     default:
@@ -103,14 +103,13 @@ editable_widget_t * extractEditablePartFromWidget(widget_t *w) {
     {
       comboBox_widget_t *combo = (comboBox_widget_t*)w->content;
       if((combo->currentItem) && ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption))){
-        return ((comboBox_widget_t*)w->content)->currentItem->widget;
+        return combo->currentItem->widget;
       }
     }
     default:
       return NULL;
       break;
   }
-  return NULL;
 }
 
 selectable_widget_t * extractSelectablePartFromWidget(widget_t *w) {
@@ -125,21 +124,19 @@ selectable_widget_t * extractSelectablePartFromWidget(widget_t *w) {
       return &((button_widget_t*)w->content)->selectable;
     case widget_combo:
     {
+      comboBox_widget_t *combo = (comboBox_widget_t*)w->content;
       if(callFromCombo){
-        comboBox_widget_t *combo = (comboBox_widget_t*)w->content;
         if((combo->currentItem) && ((combo->currentItem->type==combo_Editable)||(combo->currentItem->type==combo_MultiOption))){
-          return &((comboBox_widget_t*)w->content)->currentItem->widget->selectable;
+          return &combo->currentItem->widget->selectable;
         }
       }
       else{
-        return &((comboBox_widget_t*)w->content)->selectable;
+        return &combo->selectable;
       }
     }
     default:
       return NULL;
-      break;
   }
-  return NULL;
 }
 void widgetDefaultsInit(widget_t *w, widgetType type){
   if(!w || !w->content){ return; }
@@ -1402,7 +1399,6 @@ void newComboEditableString(widget_t *w, char *label, editable_widget_t **newEdi
   }
 }
 
-// Only allows Editable or multioption widgets
 void newComboEditable(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem){
   comboBox_item_t *item = _malloc(sizeof(comboBox_item_t));
   editable_widget_t *edit = _malloc(sizeof(editable_widget_t));
@@ -1440,7 +1436,6 @@ void newComboEditable(widget_t *w, char *label, editable_widget_t **newEdit, com
   }
 }
 
-// Only allows Editable or multioption widgets
 void newComboMultiOption(widget_t *w, char *label, editable_widget_t **newEdit, comboBox_item_t **newItem){
   comboBox_item_t *item = _malloc(sizeof(comboBox_item_t));
   editable_widget_t *edit = _malloc(sizeof(editable_widget_t));

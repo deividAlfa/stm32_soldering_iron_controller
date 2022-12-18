@@ -34,24 +34,25 @@ typedef struct {
   uint8_t             shakeActive;                          // Flag to indicate handle movement
   uint8_t             temperatureReached;                   // Flag for temperature calibration
   uint8_t             updatePwm;                            // Flag to indicate PWM need to be updated
+  uint8_t             lastWakeSrc;                          // Flag to indicate last wake source
   IronError_t         Error;                                // Error flags
   uint8_t             lastMode;                             // Last mode before error condition.
-  uint8_t             boot_complete;                        // Flag set to 1 when boot screen exits (Used for error handlding)
+  uint8_t             boot_complete;                        // Flag set to 1 when boot screen exits (Used for error handling)
 
   uint16_t            Pwm_Period;                           // PWM period
   uint16_t            Pwm_Max;                              // Max PWM output for power limit
   int16_t             UserSetTemperature;                   // Run mode user setpoint
   int16_t             TargetTemperature;                    // Actual set (target) temperature (Setpoint)
 
-  uint32_t           Pwm_Out;                              // Last calculated PWM value
-  uint32_t           LastModeChangeTime;                   // Last time the mode was changed (To provide debouncing)
-  uint32_t           LastErrorTime;                        // last time iron error was detected
-  uint32_t           lastShakeTime;                        // last time iron handle was moved (In shake mode)
-  uint32_t           CurrentModeTimer;                     // Time since actual mode was set
-  uint32_t           RunawayTimer;                         // Runaway timer
+  uint32_t            Pwm_Out;                              // Last calculated PWM value
+  uint32_t            LastModeChangeTime;                   // Last time the mode was changed (To provide debouncing)
+  uint32_t            LastErrorTime;                        // last time iron error was detected
+  uint32_t            lastShakeTime;                        // last time iron handle was moved (In shake mode)
+  uint32_t            CurrentModeTimer;                     // Time since actual mode was set
+  uint32_t            RunawayTimer;                         // Runaway timer
 
-  TIM_HandleTypeDef* Read_Timer;                          // Pointer to the Read timer
-  TIM_HandleTypeDef* Pwm_Timer;                           // Pointer to the PWM timer
+  TIM_HandleTypeDef*  Read_Timer;                          // Pointer to the Read timer
+  TIM_HandleTypeDef*  Pwm_Timer;                           // Pointer to the PWM timer
 }iron_t;
 
 static volatile uint32_t CurrentTime;
@@ -137,6 +138,7 @@ void handleIron(void) {
     else if((CurrentTime-Iron.LastModeChangeTime)>100){                             // Wait 100mS with no changes (de-bouncing)
       Iron.updateStandMode=no_update;
       setCurrentMode(Iron.changeMode);
+      Iron.lastWakeSrc = wakeSrc_Stand;
     }
   }
 
@@ -175,13 +177,11 @@ void handleIron(void) {
   }
 
 
-  if(Iron.updatePwm){                                                                       // If pending PWM period update, refresh Iron Pwm_period
+  if(Iron.updatePwm){                                                                         // If pending PWM period update, refresh Iron Pwm_period
     Iron.Pwm_Period = ((systemSettings.Profile.readPeriod+1)/systemSettings.Profile.pwmMul)-1;
   }
 
-  #ifdef USE_VIN
   updatePowerLimit();                                                                         // Update power limit values
-  #endif
 
   // Update PID
   Iron.Pwm_Out = calculatePID(human2adc(Iron.TargetTemperature), TIP.last_avg, Iron.Pwm_Max);
@@ -328,7 +328,7 @@ void setPwmMul(uint16_t mult){
 
 void configurePWMpin(uint8_t mode){
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-
+#ifndef DISABLE_OUTPUT
   if(mode==output_PWM){
     GPIO_InitStruct.Mode =  GPIO_MODE_AF_PP;
   }
@@ -340,11 +340,13 @@ void configurePWMpin(uint8_t mode){
     PWM_GPIO_Port->BSRR = PWM_Pin;
     GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_PP;
   }
-
   #ifdef PWM_ALT_PIN
   GPIO_InitStruct.Alternate = PWM_ALT_PIN;
   #endif
-
+#else                                                                 // Output disabled with #define switch, set always low.
+  PWM_GPIO_Port->BSRR = PWM_Pin<<16;
+  GPIO_InitStruct.Mode =  GPIO_MODE_OUTPUT_PP;
+#endif
   GPIO_InitStruct.Pin =   PWM_Pin;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(PWM_GPIO_Port, &GPIO_InitStruct);
@@ -456,8 +458,9 @@ void runAwayCheck(void){
 }
 
 // Update PWM max value based on current supply voltage, heater resistance and power limit setting
-#ifdef USE_VIN
+
 void updatePowerLimit(void){
+#ifdef USE_VIN
   uint32_t volts = getSupplyVoltage_v_x10();                                                // Get last voltage reading x10
   volts = (volts*volts)/10;                                                                 // (Vx10 * Vx10)/10 = (V*V)*10 (x10 for fixed point precision)
   if(volts==0){
@@ -477,8 +480,10 @@ void updatePowerLimit(void){
       Iron.Pwm_Max = 1;
     }
   }
-}
+#else
+  Iron.Pwm_Max = Iron.Pwm_Period+1;
 #endif
+}
 
 // Sets no Iron detection threshold
 void setNoIronValue(uint16_t noiron){
@@ -489,7 +494,7 @@ void setNoIronValue(uint16_t noiron){
 
 // Change the iron operating mode in stand mode
 void setModefromStand(uint8_t mode){
-  if( isIronInError() ||
+  if( getIronError() ||
       ((Iron.changeMode==mode) && (Iron.CurrentMode==mode)) ||
       ((Iron.CurrentMode==mode_sleep) && (mode==mode_standby)) ||
       ((Iron.CurrentMode==mode_boost) && (mode==mode_run)) ){
@@ -549,28 +554,20 @@ void setCurrentMode(uint8_t mode){
 }
 
 // Called from program timer if WAKE change is detected
-bool IronWake(bool source){                                                                 // source: handle shake, encoder push button
+bool IronWake(wakeSrc_t src){                                                                 // source: handle shake, encoder push button
   static uint32_t last_time;
   if(Iron.Error.Flags || systemSettings.Profile.WakeInputMode==mode_stand){
     return 0;
   }
 
-  if(Iron.CurrentMode==mode_standby){
-    if( (source==wakeButton && !(systemSettings.settings.buttonWakeMode & wake_standby)) ||
-        (source==wakeInput && !(systemSettings.settings.shakeWakeMode & wake_standby))){
+if(  Iron.CurrentMode<mode_run &&
+      ( (src==wakeSrc_Button && !(systemSettings.settings.buttonWakeMode & wake_standby)) ||
+        (src==wakeSrc_Shake && !(systemSettings.settings.shakeWakeMode & wake_standby))   )){
 
-      return 0;
-    }
-  }
-  else if(Iron.CurrentMode==mode_sleep){
-    if( (source==wakeButton && !(systemSettings.settings.buttonWakeMode & wake_sleep)) ||
-        (source==wakeInput && !(systemSettings.settings.shakeWakeMode & wake_sleep))){
-
-      return 0;
-    }
+    return 0;
   }
 
-  if(systemSettings.Profile.shakeFiltering && source==wakeInput){      // Sensitivity workaround enabled
+  if(systemSettings.Profile.shakeFiltering && src==wakeSrc_Shake){       // Sensitivity workaround enabled
     uint32_t time=(HAL_GetTick()-last_time);
     last_time = HAL_GetTick();
     if(time<100 || time>500){                                           // Ignore changes happening faster than 100mS or slower than 500mS.
@@ -582,6 +579,7 @@ bool IronWake(bool source){                                                     
       setCurrentMode(mode_run);
       __enable_irq();
   }
+  Iron.lastWakeSrc = src;
   return 1;
 }
 
@@ -591,7 +589,7 @@ void readWake(void){
 
     if(last_wake!=now_wake){                                            // If wake sensor input changed
       last_wake=now_wake;
-      if(systemSettings.Profile.WakeInputMode==mode_stand){   // In stand mode
+      if(systemSettings.Profile.WakeInputMode==mode_stand){
         if(now_wake){
           setModefromStand(mode_run);
         }
@@ -599,8 +597,8 @@ void readWake(void){
           setModefromStand(systemSettings.Profile.StandMode);          // Set sleep or standby mode depending on system setting
         }
       }
-      else{
-        if(IronWake(wakeInput)){
+      if(systemSettings.Profile.WakeInputMode==mode_shake){
+        if(IronWake(wakeSrc_Shake)){
           Iron.shakeActive = 1;
           Iron.lastShakeTime = HAL_GetTick();
         }
@@ -675,9 +673,7 @@ void checkIronError(void){
     Iron.Error.Flags=FLAG_NOERROR;
   }
 }
-
-
-bool isIronInError(void){
+bool getIronError(void){
   return Iron.Error.Flags;
 }
 
@@ -698,11 +694,11 @@ void setSafeMode(bool mode){
 }
 
 
-bool GetSafeMode() {
+bool GetSafeMode(void){
   return(Iron.Error.safeMode && Iron.Error.active);
 }
 
-void setCalibrationMode(uint8_t mode){
+void setIronCalibrationMode(uint8_t mode){
   __disable_irq();
   Iron.calibrating = mode;
 
@@ -713,7 +709,7 @@ void setCalibrationMode(uint8_t mode){
   __enable_irq();
 }
 
-bool isIronInCalibrationMode(void){
+bool getIronCalibrationMode(void){
   return Iron.calibrating;
 }
 
@@ -729,15 +725,15 @@ void setUserTemperature(uint16_t temperature) {
   __enable_irq();
 }
 
-uint16_t getUserTemperature() {
+uint16_t getUserTemperature(void){
  return Iron.UserSetTemperature;
 }
 
-uint8_t getCurrentMode() {
+uint8_t getCurrentMode(void){
   return Iron.CurrentMode;
 }
 
-int8_t getCurrentPower() {
+int8_t getCurrentPower(void){
   return Iron.CurrentIronPower;
 }
 
@@ -779,72 +775,61 @@ void addModeChangedCallback(currentModeChanged callback) {
   }
 }
 
-TIM_HandleTypeDef* getIronReadTimer(void)
-{
+TIM_HandleTypeDef* getIronReadTimer(void){
   return Iron.Read_Timer;
 }
 
-TIM_HandleTypeDef* getIronPwmTimer(void)
-{
+TIM_HandleTypeDef* getIronPwmTimer(void){
   return Iron.Pwm_Timer;
 }
 
-IronError_t getIronErrorFlags(void)
-{
+IronError_t getIronErrorFlags(void){
   return Iron.Error;
 }
 
-void ironSchedulePwmUpdate(void)
-{
+void ironSchedulePwmUpdate(void){
   Iron.updatePwm = true;
 }
 
-bool getBootCompleteFlag(void)
-{
+bool getBootCompleteFlag(void){
   return Iron.boot_complete;
 }
 
-void setBootCompleteFlag(void)
-{
+void setBootCompleteFlag(void){
   Iron.boot_complete = true;
 }
 
-uint32_t getIronPwmOutValue()
-{
+uint32_t getIronPwmOutValue(){
   return Iron.Pwm_Out;
 }
 
-uint16_t getIronTargetTemperature(void)
-{
+uint16_t getIronTargetTemperature(void){
   return Iron.TargetTemperature;
 }
 
-uint16_t getUserSetTemperature()
-{
+uint16_t getUserSetTemperature(){
   return Iron.UserSetTemperature;
 }
 
-uint32_t getIronCurrentModeTimer(void)
-{
+uint32_t getIronCurrentModeTimer(void){
   return Iron.CurrentModeTimer;
 }
 
-bool isIronTargetTempReached(void)
-{
+bool isIronTargetTempReached(void){
   return Iron.temperatureReached;
 }
 
-bool getIronShakeFlag(void)
-{
+bool getIronShakeFlag(void){
   return Iron.shakeActive;
 }
-
-void clearIronShakeFlag(void)
-{
+void clearIronShakeFlag(void){
   Iron.shakeActive = false;
 }
 
-uint32_t getIronLastShakeTime(void)
-{
+uint32_t getIronLastShakeTime(void){
   return Iron.lastShakeTime;
+}
+
+wakeSrc_t getIronWakeSource(void){
+  return Iron.lastWakeSrc;
 }

@@ -214,14 +214,14 @@ static void Cal_onEnter(screen_t *scr) {
     Currtip = getCurrentTip();
     comboResetIndex(Screen_calibration.current_widget);
     error=0;
-    setCalibrationMode(enable);
+    setIronCalibrationMode(enable);
   }
 
   setUserTemperature(0);
 }
 static void Cal_onExit(screen_t *scr) {
   if(scr!=&Screen_calibration_start && scr!=&Screen_calibration_settings ){
-    setCalibrationMode(disable);
+    setIronCalibrationMode(disable);
     setCurrentMode(backupMode);
     setUserTemperature(backupTemp);
   }
@@ -306,13 +306,13 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
   else{
     if(checkScreenTimer(CAL_TIMEOUT)){
       setUserTemperature(backupTemp);
-      setCalibrationMode(disable);
+      setIronCalibrationMode(disable);
       setCurrentMode(mode_sleep);
       return screen_main;
     }
   }
 
-  if(isIronInError()){
+  if(getIronError()){
     error=1;
     return last_scr;
   }
@@ -453,7 +453,7 @@ static void Cal_Settings_OnExit(screen_t *scr) {
 }
 
 static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {
-  if(isIronInError()){
+  if(getIronError()){
     error=1;
     return last_scr;
   }
@@ -479,7 +479,7 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
 
   if(checkScreenTimer(CAL_TIMEOUT)){
     setUserTemperature(backupTemp);
-    setCalibrationMode(disable);
+    setIronCalibrationMode(disable);
     setCurrentMode(mode_sleep);
     return screen_main;
   }

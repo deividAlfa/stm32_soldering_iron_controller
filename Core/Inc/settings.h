@@ -40,14 +40,12 @@
 typedef enum{
   mode_shake              = 0,
   mode_stand              = 1,
+  mode_smart              = 2,
 
   wake_off                = 0,
   wake_standby            = 1,
   wake_sleep              = 2,
   wake_all                = 3,
-
-  wakeInput               = 0,
-  wakeButton              = 1,
 
   no_update               = 0,
   needs_update            = 1,

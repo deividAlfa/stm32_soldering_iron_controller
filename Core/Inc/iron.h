@@ -17,6 +17,13 @@
 typedef void (*setTemperatureReachedCallback)(uint16_t);
 typedef void (*currentModeChanged)(uint8_t);
 
+typedef enum{
+  wakeSrc_Shake,
+  wakeSrc_Button,
+  wakeSrc_Stand,
+  wakeSrc_Smart,
+}wakeSrc_t;
+
 typedef union{
   uint8_t Flags;                                            // Flag for errors (wrong iron connection, NTC, internal failure...)
   struct{
@@ -42,10 +49,9 @@ typedef union{
 #define FLAG_ACTIVE       128
 
 void readWake(void);
-bool IronWake(bool source);
+bool IronWake(wakeSrc_t src);
 void resetIronError(void);
 void checkIronError(void);
-bool isIronInError(void);
 IronError_t getIronErrorFlags(void);
 void updatePowerLimit(void);
 void runAwayCheck(void);
@@ -56,7 +62,7 @@ void setModefromStand(uint8_t mode);
 void setUserTemperature(uint16_t temperature);
 uint16_t getUserTemperature(void);
 uint8_t getCurrentMode(void);
-int8_t getCurrentPower();
+int8_t getCurrentPower(void);
 void initTimers(void);
 void setPwmMul(uint16_t mult);
 void setReadDelay(uint16_t delay);
@@ -68,9 +74,7 @@ void addSetTemperatureReachedCallback(setTemperatureReachedCallback callback);
 void addModeChangedCallback(currentModeChanged callback);
 void handleIron(void);
 void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32_t pwmchannel);
-uint8_t getIronOn();
-void setCalibrationMode(uint8_t mode);
-bool isIronInCalibrationMode(void);
+uint8_t getIronOn(void);
 void configurePWMpin(uint8_t mode);
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *_htim);
 TIM_HandleTypeDef* getIronReadTimer(void);
@@ -78,13 +82,17 @@ TIM_HandleTypeDef* getIronPwmTimer(void);
 void ironSchedulePwmUpdate(void);
 bool getBootCompleteFlag(void);
 void setBootCompleteFlag(void);
-uint32_t getIronPwmOutValue();
+bool getIronError(void);
+void setIronCalibrationMode(uint8_t mode);
+bool getIronCalibrationMode(void);
+uint32_t getIronPwmOutValue(void);
 uint16_t getIronTargetTemperature(void);
 uint32_t getIronCurrentModeTimer(void);
 bool isIronTargetTempReached(void);
 bool getIronShakeFlag(void);
 void clearIronShakeFlag(void);
 uint32_t getIronLastShakeTime(void);
-uint16_t getUserSetTemperature();
+wakeSrc_t getIronWakeSource(void);
+uint16_t getUserSetTemperature(void);
 
 #endif /* IRON_H_ */
