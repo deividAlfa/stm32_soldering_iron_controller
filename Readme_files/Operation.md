@@ -134,6 +134,12 @@ This option is disabled in stand wake mode.<br>
   - **Stand mode**<br>
 Sets the mode that will be applied when the handle is put in the stand (__STANDBY__ or __SLEEP__).<br>
 This option is disabled in shake wake mode.<br>
+  - **Smart Active**<br>
+Enables or disables Smart Active mode. This functionality tries to detect the load on the tip and resets the timeout automatically.<br> 
+Works only in active modes, Run and Boost.<br>
+Needs stable readings to work properly, might not work as intended with noisy controllers or tips (Specially new tips!).<br>
+  - **Smart Active Load**<br>
+Adjust the Smart sensitivity. This option is only enabled when Smart is active.<br>
   - **Power**<br>
 The maximum power which will be delivered to the tip.<br>
 The limit is done by adjusting the maximum PWM duty cycle based on the power supply voltage and the heater resistance.<br>
