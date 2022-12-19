@@ -141,7 +141,11 @@ Needs stable readings to work properly, might not work as intended with noisy co
 When working mode starts, the functionality will be delayed for 10 seconds to give the tip some time to heat up.<br>
 On detection, the shake icon blinks to provide some feeback.<br>
   - **Smart Active Load**<br>
-Adjust the Smart sensitivity. This option is only enabled when Smart is active.<br>
+Adjust the Smart sensitivity. The lower the value, the higher the sensitivity.<br>
+The sensitivity will be affected by the tip type, the PID response, the working temperature and the soldering target.<br>
+Lower the value until it triggers randomly without soldering anything, then increase by 1 or 2.<br
+If your soldering station is really well tuned, you might be able to lower it to 1.<br> 
+This option is only enabled when Smart is active.<br>
   - **Power**<br>
 The maximum power which will be delivered to the tip.<br>
 The limit is done by adjusting the maximum PWM duty cycle based on the power supply voltage and the heater resistance.<br>
