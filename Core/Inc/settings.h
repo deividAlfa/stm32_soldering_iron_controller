@@ -173,8 +173,8 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       shakeFiltering;
   uint8_t       WakeInputMode;
   uint8_t       StandMode;
-  uint8_t       smartActiv_Enabled;
-  uint8_t       smartActiv_Load;
+  uint8_t       smartActiveEnabled;
+  uint8_t       smartActiveLoad;
   uint8_t       : 8; // reserved
   uint8_t       : 8;
   uint8_t       : 8;
@@ -203,10 +203,10 @@ __attribute__((aligned(4))) typedef struct{
   uint16_t      : 16;
   uint16_t      : 16;
   tipData_t     tip[NUM_TIPS];
-  uint32_t      errorTimeout;   // todo reduce size?
-  uint32_t      boostTimeout;   // todo reduce size?
-  uint32_t      sleepTimeout;   // todo reduce size?
-  uint32_t      standbyTimeout; // todo reduce size?
+  uint32_t      errorTimeout;
+  uint32_t      boostTimeout;
+  uint32_t      sleepTimeout;
+  uint32_t      standbyTimeout;
   uint32_t      : 32; // reserved
   uint32_t      : 32;
   uint32_t      : 32;

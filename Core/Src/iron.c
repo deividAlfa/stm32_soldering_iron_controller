@@ -159,8 +159,8 @@ void handleIron(void) {
     uint32_t mode_time = CurrentTime - Iron.CurrentModeTimer;
 
     // Smart wake detection only in active modes, after 10 seconds of entering the current mode
-    if(systemSettings.Profile.smartActiv_Enabled==enable && (Iron.CurrentMode>mode_standby) && (mode_time>9999)){
-      if(Iron.Load_det_value > systemSettings.Profile.smartActiv_Load){                      // Check threshold
+    if(systemSettings.Profile.smartActiveEnabled==enable && (Iron.CurrentMode>mode_standby) && (mode_time>9999)){
+      if(Iron.Load_det_value > systemSettings.Profile.smartActiveLoad){                      // Check threshold
         Iron.CurrentModeTimer = CurrentTime-10000;                                          // Preload the timeout with 10 seconds so smartActiv keeps working
         Iron.lastWakeSrc = wakeSrc_Smart;
         Iron.lastShakeTime = CurrentTime;                                                   // Show wake icon
@@ -200,7 +200,7 @@ void handleIron(void) {
   int32_t target = human2adc(Iron.TargetTemperature);
   Iron.Pwm_Out = calculatePID(target, TIP.last_avg, Iron.Pwm_Max);
 
-  if((systemSettings.Profile.smartActiv_Enabled==enable) && ((CurrentTime - Iron.Load_det_Time)>199)){   // Sample load every 200ms
+  if((systemSettings.Profile.smartActiveEnabled==enable) && ((CurrentTime - Iron.Load_det_Time)>199)){   // Sample load every 200ms
     Iron.Load_det_Time = CurrentTime;
     Iron.Load_det_bf[Iron.Load_det_pos] = target - TIP.last_avg;
     if(++Iron.Load_det_pos>15)
