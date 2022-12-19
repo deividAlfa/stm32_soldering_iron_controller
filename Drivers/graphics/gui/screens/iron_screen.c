@@ -289,6 +289,7 @@ static void setStandMode(uint32_t *val) {
 //=========================================================
 static void setsmartActiveEnable(uint32_t *val) {
   systemSettings.Profile.smartActiveEnabled = *val;
+  update_Iron_menu();
 }
 static void * getsmartActiveEnable() {
   temp = systemSettings.Profile.smartActiveEnabled;
