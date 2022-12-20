@@ -160,12 +160,20 @@ void handleIron(void) {
 
     // Smart wake detection only in active modes, after 10 seconds of entering the current mode
     if(systemSettings.Profile.smartActiveEnabled==enable && (Iron.CurrentMode>mode_standby) && (mode_time>9999)){
-      if(Iron.Load_det_value > systemSettings.Profile.smartActiveLoad){                      // Check threshold
-        Iron.CurrentModeTimer = CurrentTime-10000;                                          // Preload the timeout with 10 seconds so smartActiv keeps working
+      if(Iron.Load_det_value > systemSettings.Profile.smartActiveLoad){                       // Check threshold
+        Iron.CurrentModeTimer = CurrentTime-10000;                                            // Preload the timeout with 10 seconds so smartActiv keeps working
         Iron.lastWakeSrc = wakeSrc_Smart;
-        Iron.lastShakeTime = CurrentTime;                                                   // Show wake icon
-        Iron.shakeActive = 1;                                                               // TODO:  Remove this in the future?
+        Iron.lastShakeTime = CurrentTime;
+        Iron.shakeActive = 1;                                                                 // Show wake icon
+        Iron.Load_det_value = 0;
+        for(uint8_t i=0; i<SMARTACTIVE_BFSZ; i++)
+          Iron.Load_det_bf[i] = 0;                                                            // Clear buffer
       }
+      else if(Iron.lastWakeSrc==wakeSrc_Smart && !Iron.shakeActive && mode_time<10600){      // Keep blinking the shake icon for some time after smartActive was triggered
+        Iron.lastShakeTime = CurrentTime;
+        Iron.shakeActive = 1;
+      }
+
     }
     if((Iron.CurrentMode==mode_boost) && (mode_time>systemSettings.Profile.boostTimeout)){  // If boost mode and time expired
       setCurrentMode(mode_run);
