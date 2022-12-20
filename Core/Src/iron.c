@@ -45,8 +45,8 @@ typedef struct {
   int16_t             UserSetTemperature;                   // Run mode user setpoint
   int16_t             TargetTemperature;                    // Actual set (target) temperature (Setpoint)
 
-  int32_t             Load_det_value;                       // For load detection
-  int32_t             Load_det_bf[16];                      // For load detection
+  uint32_t            Load_det_value;                       // For load detection
+  uint32_t            Load_det_bf[SMARTACTIVE_BFSZ];        // For load detection
   uint32_t            Load_det_Time;                        // For load detection
   uint32_t            Pwm_Out;                              // Last calculated PWM value
   uint32_t            LastModeChangeTime;                   // Last time the mode was changed (To provide debouncing)
@@ -202,11 +202,12 @@ void handleIron(void) {
 
   if((systemSettings.Profile.smartActiveEnabled==enable) && ((CurrentTime - Iron.Load_det_Time)>199)){   // Sample load every 200ms
     Iron.Load_det_Time = CurrentTime;
-    Iron.Load_det_bf[Iron.Load_det_pos] = target - TIP.last_avg;
-    if(++Iron.Load_det_pos>15)
+    int32_t err = target - TIP.last_avg;
+    Iron.Load_det_bf[Iron.Load_det_pos] = (err<0 ? 0 : err);    // Taking only the positive errors remove PID overshooting negative errors
+    if(++Iron.Load_det_pos>(SMARTACTIVE_BFSZ-1))                // Makes detection more sensible
       Iron.Load_det_pos=0;
     Iron.Load_det_value=0;
-    for(uint8_t i=0; i<16; i++)
+    for(uint8_t i=0; i<SMARTACTIVE_BFSZ; i++)
       Iron.Load_det_value += Iron.Load_det_bf[i];
   }
 

@@ -13,7 +13,7 @@
 #define TIP_DETECT_TIME         5                           // Pulse before reading adc, to detect tip presence. In uS
 #define RUNAWAY_DEPTH           3                           // History count of power values stored to compute the average power for runaway monitor
 #define RUNAWAY_RESET_CYCLES    3                           // Cycles to bypass runaway check when temperature was changed
-
+#define SMARTACTIVE_BFSZ        32                          // Buffer size for SmartActive (Each element is sampled every 200ms)
 typedef void (*setTemperatureReachedCallback)(uint16_t);
 typedef void (*currentModeChanged)(uint8_t);
 
