@@ -759,9 +759,9 @@ static void iron_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=4;
   dis->getData = &getsmartActiveLoad;
-  edit->big_step = 5;
+  edit->big_step = 10;
   edit->step = 1;
-  edit->max_value = 50;
+  edit->max_value = 500;
   edit->min_value = 1;
   edit->setData = (void (*)(void *))&setsmartActiveLoad;
 #ifdef USE_VIN
