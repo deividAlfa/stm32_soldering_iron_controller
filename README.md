@@ -156,13 +156,16 @@ https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t
 
 ## Translations
 For adding new languages, you have to modify these files:<br>
-* Src/settings.h<br>
-  LANGUAGE_COUNT, lang_english,lang_xxxx in system_types enum<br><br>
-* Drivers/gui/gui_strings.c<br>
-  strings_t strings, Langs[LANGUAGE_COUNT]<br>
+* [`Core/Inc/settings.h`](/Core/Inc/settings.h)<br>
+  - increment the value of `LANGUAGE_COUNT` by one, 
+  - add your language identifier (`lang_xxxx`) in `system_types` enum around row 100.
+* [`Drivers/graphics/gui/screens/gui_strings.c`](/Drivers/graphics/gui/screens/gui_strings.c)<br>
+  - copy the whole `[lang_english] = { … }` section at the bottom of `strings_t` strings,
+  - replace `lang_english` with `lang_xxxx` of the section you just copied and translate,
+  - add your `lang_xxxx` to `Langs` at the bottom of the file.<br>
 
-For adding new characters to the existing fonts symbols, there're some instructions here:<br>
-* [Drivers/graphics/u8g2/tools/font/bdfconv/Notes.txt](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/Drivers/graphics/u8g2/tools/font/bdfconv/Notes.txt)
+For adding new characters to the existing fonts symbols, there're some instructions here:
+* [Drivers/graphics/u8g2/tools/font/bdfconv/Notes.txt](/Drivers/graphics/u8g2/tools/font/bdfconv/Notes.txt)
 
 
 ## Non-working features
