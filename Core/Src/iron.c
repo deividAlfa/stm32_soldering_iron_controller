@@ -590,18 +590,25 @@ void setCurrentMode(uint8_t mode){
 bool IronWake(wakeSrc_t src){                                                                 // source: handle shake, encoder push button
   static uint32_t last_time;
 
-  if( (Iron.Error.Flags || systemSettings.Profile.WakeInputMode==mode_stand) ||
-       ( Iron.CurrentMode<mode_run &&
-        ( ( src==wakeSrc_Button && !(systemSettings.settings.buttonWakeMode & wake_standby)) ||
-          (src==wakeSrc_Shake && !(systemSettings.settings.shakeWakeMode & wake_standby))) ) ){
-
+  if(Iron.Error.Flags || systemSettings.Profile.WakeInputMode==mode_stand){                   // Ignore wake calls when error is present or in stand mode
     return 0;
   }
-
-  if(systemSettings.Profile.shakeFiltering && src==wakeSrc_Shake){       // Sensitivity workaround enabled
+  if(Iron.CurrentMode==mode_standby){                                                         // Check whether current mode is allowed to be waken from the specified source
+    if( (src==wakeSrc_Button && !(systemSettings.settings.buttonWakeMode & wake_standby)) ||
+        (src==wakeSrc_Shake && !(systemSettings.settings.shakeWakeMode & wake_standby))   ){
+      return 0;
+    }
+  }
+  else if(Iron.CurrentMode==mode_sleep){
+    if( (src==wakeSrc_Button && !(systemSettings.settings.buttonWakeMode & wake_sleep)) ||
+        (src==wakeSrc_Shake && !(systemSettings.settings.shakeWakeMode & wake_sleep))   ){
+      return 0;
+    }
+  }
+  if(systemSettings.Profile.shakeFiltering && src==wakeSrc_Shake){                            // Shake filtering enabled ?
     uint32_t time=(HAL_GetTick()-last_time);
     last_time = HAL_GetTick();
-    if(time<100 || time>500){                                           // Ignore changes happening faster than 100mS or slower than 500mS.
+    if(time<100 || time>500){                                                                 // Ignore changes happening faster than 100mS or slower than 500mS.
       return 0;
     }
   }
