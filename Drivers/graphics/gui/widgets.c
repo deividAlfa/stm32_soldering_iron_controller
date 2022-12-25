@@ -210,13 +210,20 @@ void widgetDefaultsInit(widget_t *w, widgetType type){
     case widget_button:
     {
       button_widget_t* button = (button_widget_t*)w->content;
-      button->action = NULL;
-      button->displayString = NULL;
-      button->xbm = NULL;
-      button->last_xbm = NULL;
-      button->font = DEFAULT_FONT;
       button->dispAlign = align_disabled;
       button->textAlign = align_center;
+      button->displayString = NULL;
+      button->font = DEFAULT_FONT;
+      button->action = NULL;
+      break;
+    }
+    case widget_bmp_button:
+    {
+      button_widget_t* button = (button_widget_t*)w->content;
+      button->dispAlign = align_disabled;
+      button->action = NULL;
+      button->xbm = NULL;
+      button->last_xbm = NULL;
       break;
     }
     default:
@@ -382,12 +389,12 @@ void widgetClearField(widget_t* w){
       switch((uint8_t)w->type){
         case widget_bmp:
           bmp = (bmp_widget_t*)w->content;
-          u8g2_DrawBox(&u8g2, w->posX, w->posY, bmp->xbm[0], bmp->xbm[1]);
+          u8g2_DrawBox(&u8g2, w->posX, w->posY, bmp->xbm->width, bmp->xbm->height);
           break;
 
         case widget_bmp_button:
           button = (button_widget_t*)w->content;
-          u8g2_DrawBox(&u8g2, w->posX, w->posY, button->xbm[0]+4, button->xbm[1]+4);
+          u8g2_DrawBox(&u8g2, w->posX, w->posY, button->xbm->width+4, button->xbm->height+4);
           break;
 
         case widget_button:
@@ -663,12 +670,12 @@ uint8_t default_widgetDraw(widget_t *w) {
 
       case widget_bmp:
         u8g2_SetDrawColor(&u8g2, WHITE);
-        u8g2_DrawXBMP(&u8g2, w->posX, w->posY, bmp->xbm[0], bmp->xbm[1], &bmp->xbm[2]);
+        u8g2_DrawXBMP(&u8g2, w->posX, w->posY, bmp->xbm->width, bmp->xbm->height, bmp->xbm->xbm);
         return 1;
 
       case widget_bmp_button:
         u8g2_SetDrawColor(&u8g2, WHITE);
-        u8g2_DrawXBMP(&u8g2, w->posX+2, w->posY+2, button->xbm[0], button->xbm[1], &button->xbm[2]);
+        u8g2_DrawXBMP(&u8g2, w->posX+2, w->posY+2, button->xbm->width, button->xbm->height, button->xbm->xbm);
         break;
 
       case widget_button:
@@ -731,7 +738,7 @@ uint8_t default_widgetDraw(widget_t *w) {
     switch(w->type){
       case widget_bmp_button:
         u8g2_SetDrawColor(&u8g2, frameColor);
-        u8g2_DrawRFrame(&u8g2, w->posX, w->posY, button->xbm[0]+4,  button->xbm[1]+4, 4);
+        u8g2_DrawRFrame(&u8g2, w->posX, w->posY, button->xbm->width+4,  button->xbm->height+4, 4);
         break;
       case widget_editable:
       case widget_button:

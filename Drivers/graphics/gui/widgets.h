@@ -37,6 +37,7 @@ typedef struct displayOnly_widget_t displayOnly_widget_t;
 typedef struct bmp_widget_t bmp_widget_t;
 typedef struct comboBox_widget_t comboBox_widget_t;
 typedef struct comboBox_item_t comboBox_item_t;
+typedef struct xbm_t xbm_t;
 
 struct selectable_widget_t {
   widgetStateType state;
@@ -77,24 +78,24 @@ struct button_widget_t {
   union{
     struct{
       uint8_t stringStart;
-      AlignType dispAlign;
       AlignType textAlign;
       const uint8_t* font;
       char* displayString;
       int32_t last_value;
     };
     struct{
-      const uint8_t* xbm;
-      const uint8_t* last_xbm;
+      const xbm_t* xbm;
+      const xbm_t* last_xbm;
     };
   };
+  AlignType dispAlign;
   int (*action)(widget_t*);
   selectable_widget_t selectable;
 };
 
 struct bmp_widget_t {
-  const uint8_t* xbm;
-  const uint8_t* last_xbm;
+  const xbm_t* xbm;
+  const xbm_t* last_xbm;
 };
 
 struct comboBox_widget_t {
@@ -136,6 +137,11 @@ struct widget_t
   void* content;
 };
 
+struct xbm_t{
+  const uint8_t width;
+  const uint8_t height;
+  const uint8_t * xbm;
+};
 displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *w);
 editable_widget_t * extractEditablePartFromWidget(widget_t *);
 selectable_widget_t * extractSelectablePartFromWidget(widget_t *w);
