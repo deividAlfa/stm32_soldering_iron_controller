@@ -20,6 +20,9 @@ static widget_t *Widget_ok;
 static uint8_t boot_step=0;
 
 // Credits: Jesus Vallejo  https://github.com/jesusvallejo/
+// This is XBM format! Check out u8g2 documentation.
+// Online XBM converters available: https://www.online-utility.org/image/convert/to/XBM
+// Edit the XBM file (It's plain text), paste the contents, adjust width/height
 
 xbm_t splashXBM = {
   .width=128,
