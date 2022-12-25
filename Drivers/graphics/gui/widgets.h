@@ -76,9 +76,11 @@ struct editable_widget_t {
 struct button_widget_t {
   union{
     struct{
-      char* displayString;
       uint8_t stringStart;
+      AlignType dispAlign;
+      AlignType textAlign;
       const uint8_t* font;
+      char* displayString;
       int32_t last_value;
     };
     struct{

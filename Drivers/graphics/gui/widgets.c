@@ -211,6 +211,8 @@ void widgetDefaultsInit(widget_t *w, widgetType type){
       button->xbm = NULL;
       button->last_xbm = NULL;
       button->font = DEFAULT_FONT;
+      button->dispAlign = align_disabled;
+      button->textAlign = align_center;
       break;
     }
     default:
@@ -469,8 +471,8 @@ void widgetAlign(widget_t* w){
     dispAlign = dis->dispAlign;
   }
   else if(w->type == widget_button){
-    textAlign = align_center;
-    dispAlign = align_disabled;
+    textAlign = button->textAlign;
+    dispAlign = button->dispAlign;
   }
   else{
     return;
