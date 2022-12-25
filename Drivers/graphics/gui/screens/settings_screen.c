@@ -18,7 +18,7 @@ static void SETTINGS_create(screen_t *scr) {
 
   //  [ SETTINGS MAIN SCREEN ]
   //
-  newWidget(&w,widget_combo,scr);
+  newWidget(&w,widget_combo,scr, NULL);
 
   newComboScreen(w, strings[lang].settings_IRON, screen_iron, NULL);
   newComboScreen(w, strings[lang].settings_SYSTEM, screen_system, NULL);

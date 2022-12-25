@@ -292,7 +292,7 @@ static void debug_create(screen_t *scr){
 
   //  [ PID P Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
   dis->getData = &get_PID_P;
@@ -305,7 +305,7 @@ static void debug_create(screen_t *scr){
 
   //  [ PID I Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
   dis->getData = &get_PID_I;
@@ -318,7 +318,7 @@ static void debug_create(screen_t *scr){
 
   //  [ PID D Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
   dis->getData = &get_PID_D;
@@ -331,7 +331,7 @@ static void debug_create(screen_t *scr){
 
   //  [ Current temp Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   widget_Temp = w;
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_center;
@@ -344,7 +344,7 @@ static void debug_create(screen_t *scr){
 
   //  [ Setpoint adjust Widget ]
   //
-  newWidget(&w, widget_editable,scr);
+  newWidget(&w, widget_editable,scr,NULL);
   widget_setPoint=w;
   edit=extractEditablePartFromWidget(w);
   dis=extractDisplayPartFromWidget(w);
@@ -362,7 +362,7 @@ static void debug_create(screen_t *scr){
 
   //  [ Average Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
   dis->getData = &get_AVG;
@@ -374,7 +374,7 @@ static void debug_create(screen_t *scr){
 
   //  [ Raw Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
   dis->getData = &get_RAW;
@@ -386,7 +386,7 @@ static void debug_create(screen_t *scr){
 
   //  [ ADC Setpoint Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
   dis->getData = &get_SET;
@@ -398,7 +398,7 @@ static void debug_create(screen_t *scr){
 
   //  [ PID Error Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
   dis->getData = &get_ERR;
@@ -410,7 +410,7 @@ static void debug_create(screen_t *scr){
 
   //  [ PWM value Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
   dis->getData = &get_PWM;
@@ -422,7 +422,7 @@ static void debug_create(screen_t *scr){
 
   //  [ Power % Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
   dis->getData = &get_PWR;
@@ -442,7 +442,7 @@ static void pid_debug_create(screen_t *scr){
 
   //  [ Current temp Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   widget_Temp = w;
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
@@ -455,7 +455,7 @@ static void pid_debug_create(screen_t *scr){
 
   //  [ PID P Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
   dis->getData = &get_PID_P;
@@ -467,7 +467,7 @@ static void pid_debug_create(screen_t *scr){
 
   //  [ PID I Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
   dis->getData = &get_PID_I;
@@ -479,7 +479,7 @@ static void pid_debug_create(screen_t *scr){
 
   //  [ PID D Widget ]
   //
-  newWidget(&w, widget_display,scr);
+  newWidget(&w, widget_display,scr,NULL);
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_right;
   dis->getData = &get_PID_D;

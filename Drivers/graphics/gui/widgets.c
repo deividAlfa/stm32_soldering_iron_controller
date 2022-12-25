@@ -27,7 +27,7 @@ struct{
 #define __BASE_FILE__ "widgets.c"
 #endif
 
-void newWidget(widget_t **new, widgetType type, struct screen_t *scr){
+void newWidget(widget_t **new, widgetType type, struct screen_t *scr, void **content){
   widget_t *w=_malloc(sizeof(widget_t));
   if(!w || !scr) Error_Handler();
   switch(type){
@@ -54,6 +54,10 @@ void newWidget(widget_t **new, widgetType type, struct screen_t *scr){
   if(new){
     *new = w;
   }
+  if(content){
+    *content = w->content;
+  }
+
 }
 
 editable_widget_t *newEditable(widgetType type){

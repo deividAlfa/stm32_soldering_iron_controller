@@ -462,7 +462,7 @@ static void system_ntc_create(screen_t *scr){
 
   //  [ SYSTEM COMBO ]
   //
-  newWidget(&w,widget_combo,scr);
+  newWidget(&w,widget_combo,scr,NULL);
 
   //  [ NTC enabled Widget ]
   //
@@ -606,7 +606,7 @@ static void iron_create(screen_t *scr){
 
   //  [ IRON COMBO ]
   //
-  newWidget(&w,widget_combo, scr);
+  newWidget(&w,widget_combo,scr,NULL);
 
   //  [ Max Temp Widget ]
   //
@@ -901,7 +901,7 @@ static void iron_advFilter_create(screen_t *scr){
 
   //  [ IRON COMBO ]
   //
-  newWidget(&w,widget_combo, scr);
+  newWidget(&w,widget_combo,scr,NULL);
 
   //  [ Low noise filter Widget ]
   //

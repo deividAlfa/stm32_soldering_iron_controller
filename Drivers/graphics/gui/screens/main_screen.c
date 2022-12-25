@@ -908,7 +908,7 @@ static void main_screen_create(screen_t *scr){
 
   //  [ Iron Temp Widget ]
   //
-  newWidget(&w,widget_display,scr);
+  newWidget(&w,widget_display,scr,NULL);
   Widget_IronTemp = w;
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
@@ -922,7 +922,7 @@ static void main_screen_create(screen_t *scr){
 
   //  [ Iron Setpoint Widget ]
   //
-  newWidget(&w,widget_editable,scr);
+  newWidget(&w,widget_editable,scr,NULL);
   Widget_SetPoint=w;
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
@@ -943,7 +943,7 @@ static void main_screen_create(screen_t *scr){
   #ifdef USE_VIN
   //  [ V. Supply Widget ]
   //
-  newWidget(&w,widget_display,scr);
+  newWidget(&w,widget_display,scr,NULL);
   Widget_Voltage=w;
   dis=extractDisplayPartFromWidget(w);
   dis->getData = &main_screen_getVin;
@@ -961,7 +961,7 @@ static void main_screen_create(screen_t *scr){
   #ifdef USE_NTC
   //  [ Ambient Temp Widget ]
   //
-  newWidget(&w,widget_display,scr);
+  newWidget(&w,widget_display,scr,NULL);
   Widget_AmbTemp=w;
   dis=extractDisplayPartFromWidget(w);
   dis->reservedChars=7;

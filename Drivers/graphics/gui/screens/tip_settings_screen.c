@@ -237,7 +237,7 @@ static void tip_settings_create(screen_t *scr){
 
   //  [ TIP settings combo ]
   //
-  newWidget(&w,widget_combo,scr);
+  newWidget(&w,widget_combo,scr,NULL);
   widget_tip_settings = w;
 
   //[ TIP label]

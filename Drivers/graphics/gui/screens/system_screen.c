@@ -232,7 +232,7 @@ static void system_create(screen_t *scr){
 
   //  [ SYSTEM COMBO ]
   //
-  newWidget(&w,widget_combo,scr);
+  newWidget(&w,widget_combo,scr,NULL);
 
   //  [ Language Widget ]
   //

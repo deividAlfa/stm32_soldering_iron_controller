@@ -267,7 +267,7 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
 static void Cal_create(screen_t *scr) {
   widget_t* w;
 
-  newWidget(&w,widget_combo,scr);
+  newWidget(&w,widget_combo,scr, NULL);
   w->posY=10;
 
   newComboScreen(w, strings[lang]._START, screen_calibration_start, NULL);
@@ -400,19 +400,20 @@ static void Cal_Start_create(screen_t *scr) {
   widget_t* w;
   displayOnly_widget_t *dis;
   editable_widget_t* edit;
+  button_widget_t* button;
 
-  newWidget(&w,widget_button,scr);
+  newWidget(&w,widget_button,scr,(void*)&button);
   Widget_Cal_Button=w;
-  w->width = 65;
-  w->posX = displayWidth - w->width - 1;
+  button->font=u8g2_font_menu;
+  button->displayString=strings[lang]._CANCEL;
+  button->selectable.tab=0;
+  button->action = &cancelAction;
+  button->font=u8g2_font_menu;
+  button->dispAlign=align_right;
   w->posY = 48;
-  ((button_widget_t*)w->content)->displayString=strings[lang]._CANCEL;
-  ((button_widget_t*)w->content)->selectable.tab=0;
-  ((button_widget_t*)w->content)->action = &cancelAction;
-  ((button_widget_t*)w->content)->font=u8g2_font_menu;
   w->enabled=0;
 
-  newWidget(&w,widget_editable,scr);
+  newWidget(&w,widget_editable,scr, NULL);
   Widget_Cal_Measured=w;
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
@@ -499,7 +500,7 @@ static void Cal_Settings_create(screen_t *scr){
 
 
   // Combo Start
-  newWidget(&w,widget_combo,scr);
+  newWidget(&w,widget_combo,scr,NULL);
 
   newComboAction(w, zeroStr, &zero_setAction, &Cal_Combo_Adjust_zero);
   Cal_Combo_Adjust_zero->dispAlign=align_left;

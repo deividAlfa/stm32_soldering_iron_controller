@@ -68,7 +68,7 @@ static void reset_create(screen_t *scr){
 
   //  [ RESET OPTIONS COMBO ]
   //
-  newWidget(&w,widget_combo, scr);
+  newWidget(&w,widget_combo,scr,NULL);
 
   newComboAction(w, strings[lang].RESET_Reset_Settings, &doSettingsReset, &item);
   item->dispAlign=align_left;
@@ -112,29 +112,28 @@ static void reset_confirmation_init(screen_t *scr){
 
 
 static void reset_confirmation_create(screen_t *scr){
-  widget_t* w;
+  widget_t *w;
+  button_widget_t *button;
 
   //  [ RESET Button Widget ]
   //
-  newWidget(&w,widget_button,scr);
-  ((button_widget_t*)w->content)->displayString=strings[lang]._RESET;
-  ((button_widget_t*)w->content)->selectable.tab = 1;
-  ((button_widget_t*)w->content)->action = &doReset;
-  ((button_widget_t*)w->content)->font= u8g2_font_menu;
-  w->posX = 0;
+  newWidget(&w,widget_button,scr,(void*)&button);
+  button->displayString=strings[lang]._RESET;
+  button->selectable.tab = 1;
+  button->action = &doReset;
+  button->font=u8g2_font_menu;
+  button->dispAlign=align_left;
   w->posY = 48;
-  w->width = 60;
 
   //  [ CANCEL Button Widget ]
   //
-  newWidget(&w,widget_button,&Screen_reset_confirmation);
-  ((button_widget_t*)w->content)->displayString=strings[lang]._CANCEL;
-  ((button_widget_t*)w->content)->selectable.tab = 0;
-  ((button_widget_t*)w->content)->action = &cancelReset;
-  ((button_widget_t*)w->content)->font= u8g2_font_menu;
+  newWidget(&w,widget_button,&Screen_reset_confirmation,(void*)&button);
+  button->displayString=strings[lang]._CANCEL;
+  button->selectable.tab = 0;
+  button->action = &cancelReset;
+  button->font=u8g2_font_menu;
+  button->dispAlign=align_right;
   w->posY = 48;
-  w->width = 65;
-  w->posX = displayWidth - w->width -1;
 }
 
 

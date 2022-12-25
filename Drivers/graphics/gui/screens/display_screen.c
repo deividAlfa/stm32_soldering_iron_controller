@@ -134,7 +134,7 @@ static void display_create(screen_t *scr){
 
   //  [ DISPLAY COMBO ]
   //
-  newWidget(&w,widget_combo,scr);
+  newWidget(&w,widget_combo,scr,NULL);
 
   //  [ Contrast Widget ]
   //
@@ -325,7 +325,7 @@ static void display_adv_create(screen_t *scr){
 
   //  [ DISPLAY COMBO ]
   //
-  newWidget(&w,widget_combo,scr);
+  newWidget(&w,widget_combo,scr,NULL);
   //  [ Display Clk  Widget ]
   //
   newComboEditableString(w, "CLK", &edit, NULL, bf);

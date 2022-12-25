@@ -230,6 +230,8 @@ void boot_screen_create(screen_t *scr){
   widget_t *w;
   displayOnly_widget_t *dis;
   editable_widget_t *edit;
+  button_widget_t *button;
+
   lang = systemSettings.settings.language;
   if(lang>=LANGUAGE_COUNT){
     lang=lang_english;
@@ -238,7 +240,7 @@ void boot_screen_create(screen_t *scr){
 
   //  [ Profile Select Widget ]
   //
-  newWidget(&w, widget_multi_option, scr);
+  newWidget(&w, widget_multi_option, scr, NULL);
   Widget_profile = w;
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
@@ -258,7 +260,7 @@ void boot_screen_create(screen_t *scr){
 
   //  [ Language Select Widget ]
   //
-  newWidget(&w, widget_multi_option, scr);
+  newWidget(&w, widget_multi_option, scr, NULL);
   Widget_lang = w;
   dis=extractDisplayPartFromWidget(w);
   edit=extractEditablePartFromWidget(w);
@@ -278,16 +280,14 @@ void boot_screen_create(screen_t *scr){
 
   //  [ OK button Widget ]
   //
-  newWidget(&w, widget_button, scr);
+  newWidget(&w, widget_button, scr,(void*)&button);
   Widget_ok = w;
-  button_widget_t* button=Widget_ok->content;
   button->displayString = strings[lang]._SAVE;
   button->font = u8g2_font_menu;
   button->selectable.tab = 2;
   button->action = &SaveSetup;
+  button->dispAlign=align_right;
   w->posY = 48;
-  w->width = 60;
-  w->posX = (displayWidth-1) - w->width;
   w->enabled=0;
 }
 

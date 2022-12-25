@@ -140,7 +140,7 @@ displayOnly_widget_t * extractDisplayPartFromWidget(widget_t *w);
 editable_widget_t * extractEditablePartFromWidget(widget_t *);
 selectable_widget_t * extractSelectablePartFromWidget(widget_t *w);
 
-void newWidget(widget_t **new, widgetType type, struct screen_t *scr);
+void newWidget(widget_t **new, widgetType type, struct screen_t *scr, void ** content);
 editable_widget_t *newEditable(widgetType type);
 comboBox_item_t *newComboItem(void);
 

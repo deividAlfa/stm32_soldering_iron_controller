@@ -44,7 +44,7 @@ static void tip_list_create(screen_t *scr){
   comboBox_item_t *i;
   //  [ IRON TIPS COMBO ]
   //
-  newWidget(&w,widget_combo,scr);
+  newWidget(&w,widget_combo,scr,NULL);
   for(int x = 0; x < systemSettings.Profile.currentNumberOfTips; x++) {
     newComboAction(w, systemSettings.Profile.tip[x].name, &editTip, &i);
   }
