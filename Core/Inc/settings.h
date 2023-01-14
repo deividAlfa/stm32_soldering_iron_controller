@@ -13,7 +13,7 @@
 #include "board.h"
 
 #define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
-#define SETTINGS_VERSION  20                                        // Change this if you change the settings/profile struct to prevent getting out of sync
+#define SETTINGS_VERSION  21                                        // Change this if you change the settings/profile struct to prevent getting out of sync
 #define LANGUAGE_COUNT    7                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
 #define NUM_TIPS          40                                        // Number of tips for each profile
@@ -86,6 +86,8 @@ typedef enum{
   profile_None            = 0xff,
 
   save_Settings           = 1,
+  reboot_after_save       = 0x40,
+  save_settings_reboot    = 0x41,
   reset_Profiles          = 0x80,
   reset_Profile           = 0x81,
   reset_Settings          = 0x82,
@@ -93,6 +95,7 @@ typedef enum{
   reset_Addons            = 0x83,
 #endif
   reset_All               = 0x84,
+  reboot_mask             = 0xBF,
 
   keepProfiles            = 1,
   wipeProfiles            = 0x80,
@@ -231,27 +234,26 @@ __attribute__((aligned(4))) typedef struct{
     uint8_t       displayResRatio : 4;
 #endif
   };
+
+  unsigned      rememberLastProfile :1;
+  unsigned      rememberLastTemp    :1;
+  unsigned      rememberLastTip     :1;
+  unsigned      dim_inSleep         :1;
+  unsigned      EncoderMode         :1;
+  unsigned      debugEnabled        :1;
+  unsigned      activeDetection     :1;
+  unsigned      clone_fix           :1;
   uint8_t       dim_mode;
-  uint8_t       dim_inSleep;
   uint8_t       bootProfile;
-  __attribute__((packed)) struct {
-    uint8_t rememberLastProfile : 1;
-    uint8_t rememberLastTemp    : 1;
-    uint8_t rememberLastTip     : 1;
-    uint8_t     : 5; // unused
-  };
   uint8_t       initMode;
   uint8_t       tempUnit;
   uint8_t       tempStep;
   uint8_t       tempBigStep;
   uint8_t       guiTempDenoise;
-  uint8_t       activeDetection;
   uint8_t       buzzerMode;
   uint8_t       buttonWakeMode;
   uint8_t       shakeWakeMode;
-  uint8_t       EncoderMode;
   uint8_t       lvp;
-  uint8_t       debugEnabled;
 #ifdef SSD1306
   uint8_t       displayVcom;
   uint8_t       displayClk;

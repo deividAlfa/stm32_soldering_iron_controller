@@ -57,6 +57,7 @@ const settings_t defaultSettings = {
   .EncoderMode          = RE_Mode_Forward,
   .debugEnabled         = disable,
   .language             = lang_english,
+  .clone_fix            = disable,
   .state                = initialized,
 };
 
@@ -199,7 +200,7 @@ void checkSettings(void){
 
   // Save from menu
   if(systemSettings.save_Flag && allowSave){
-    switch(systemSettings.save_Flag){
+    switch(systemSettings.save_Flag & reboot_mask){
       case save_Settings:
         saveSettings(keepProfiles);
         break;
@@ -227,7 +228,7 @@ void checkSettings(void){
       default:
         Error_Handler();
     }
-    if(systemSettings.save_Flag>=reset_Profiles){       // If save flag indicates any resetting mode, reboot
+    if(systemSettings.save_Flag>=reboot_after_save){       // If save flag indicates any resetting mode, reboot
       NVIC_SystemReset();
     }
     systemSettings.save_Flag=0;
