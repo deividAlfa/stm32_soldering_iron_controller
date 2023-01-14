@@ -45,10 +45,12 @@ The actual requirements are 10KB RAM and 64KB **(\*)** flash.<br>
 **(\*)** ST-Link checks the written data, and the firmware uses checksums to protect the settings, any error will be detected.
 
 Some controllers are using STM32 clones, sometimes relabeled as genuine STM32, causing problems.<br>
-Check [STM32 Clones](Readme_files/Programming.md#clone-detection) section to find out how to detect a genuine STM32.
+Check [STM32 Clones](Readme_files/Programming.md#clone-detection) section to find out how to detect a genuine STM32.<br>
 - The only known working clone is CKS32.
 - GD32, MM32 and CH32 have issues with the ADC converter.
 - APM32 hasn't been tested yet.
+
+There's a new experimental workaround for clones, try enabling `Clone fix` in [`System menu`](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/Readme_files/Operation.md#system)<br>
 
 If your board came with a clone, you can replace it with a STM32F101/102/103, they're pin-compatible.<br>
 
@@ -108,7 +110,7 @@ There have been problems with some board/stations like:<br>
 * Bad 3v3 regulator
 
 If you're getting "NTC high/low" error even when disabling the NTC in settings, then your STM32 is fake.<br>
-Check Clones in [Compatibility](#compatibility) section.
+Check Clones in [Compatibility](#compatibility) section and `Clone fix` option in [`System menu`](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/Readme_files/Operation.md#system).<br>
 
 
 ### Temperature accuracy
