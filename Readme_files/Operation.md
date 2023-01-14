@@ -272,6 +272,8 @@ If set to *OFF*, the station will default back to the last saved profile or sele
 Keeping the last used temperature is only available with a backup battery. The last used temperature and tip is profile specific. If you don't change the profile and tip that often, you can leave these settings *ON*, but if you change the tip/profile frequently it is recommended to switch it *OFF*. The controller has a minimum guaranteed 10000 write cycles to the flash.
   - **DEBUG**<br>
 Enable debugging menu.<br>
+  - **Clone fix**<br>
+Experimental workaround to fix the ADC readings jumping around in STM32 clones, barely tested (There are lot of clones).<br>
   - **RESET MENU**<br>
 Reset various configuration sections:<br>
     - **Settings**<br>
