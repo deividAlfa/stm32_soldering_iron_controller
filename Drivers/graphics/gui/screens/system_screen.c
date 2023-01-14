@@ -20,6 +20,8 @@ static editable_widget_t *editable_system_TempStep;
 static editable_widget_t *editable_system_bigTempStep;
 static editable_widget_t *editable_system_GuiTempDenoise;
 
+static bool clone_fix;
+
 void update_System_menu(void){
   bool mode = (systemSettings.Profile.WakeInputMode==mode_shake);
   comboitem_system_BootMode->enabled        = mode;
@@ -199,6 +201,14 @@ static void setRememberLastTip(uint32_t *val) {
   systemSettings.settings.rememberLastTip = *val;
 }
 //=========================================================
+static void * getCloneFix() {
+  temp = clone_fix;
+  return &temp;
+}
+static void setCloneFix(uint32_t *val) {
+  clone_fix = *val;
+}
+//=========================================================
 #ifdef HAS_BATTERY
 static void * getRememberLastTemp() {
   temp = systemSettings.settings.rememberLastTemp;
@@ -210,6 +220,7 @@ static void setRememberLastTemp(uint32_t *val) {
 #endif
 //=========================================================
 static void system_onEnter(screen_t *scr){
+  clone_fix = systemSettings.settings.clone_fix;
   if(scr==&Screen_settings){
     comboResetIndex(Screen_system.current_widget);
     profile=systemSettings.currentProfile;
@@ -219,6 +230,10 @@ static void system_onEnter(screen_t *scr){
 static void system_onExit(screen_t *scr){
   if(profile!=systemSettings.currentProfile){
     loadProfile(profile);
+  }
+  if(systemSettings.settings.clone_fix != clone_fix){
+      systemSettings.settings.clone_fix = clone_fix;
+      saveSettingsFromMenu(save_settings_reboot);
   }
 }
 
@@ -447,6 +462,17 @@ static void system_create(screen_t *scr){
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 #endif
+
+  //  [ Clone fix Widget ]
+  //
+  newComboMultiOption(w, "Clone fix", &edit, NULL);
+  edit->inputData.getData = &getCloneFix;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (setterFn)&setCloneFix;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
+
   newComboScreen(w, strings[lang].SYSTEM_RESET_MENU, screen_reset, NULL);
   newComboScreen(w, strings[lang].SYSTEM_DISPLAY_MENU, screen_display, NULL);
   newComboScreen(w, SWSTRING, -1, NULL);
