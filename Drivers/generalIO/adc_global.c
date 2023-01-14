@@ -378,10 +378,6 @@ void handle_ADC_Data(void){
   DoAverage(&INT_TMP);
   #endif
   reset_measures = 0;
-#ifdef CLONE_FIX
-
-#endif
-
 }
 
 
