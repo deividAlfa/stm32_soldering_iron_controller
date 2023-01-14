@@ -90,6 +90,8 @@ uint8_t ADC_Cal(void){
 *  ch2->ch0, ch3->ch1
 *  This fix finds the channel order and compensates thsi issue.
 */
+
+#ifndef STM32F072xB
 void clone_fix(void){
     uint16_t **type[ADC_Num] = {
             (uint16_t**)&TIP.adc_buffer,                        // pointers to ADC buffers pointers
@@ -136,12 +138,17 @@ void clone_fix(void){
         }
     }
 }
+#endif
+
 void ADC_Init(ADC_HandleTypeDef *adc){
   adc_device=adc;
   ADC_ChannelConfTypeDef sConfig = {0};
+
+#ifndef STM32F072xB
   if(systemSettings.settings.clone_fix){
       clone_fix();
   }
+#endif
 
   #ifdef STM32F072xB
     adc_device->Instance->CHSELR &= ~(0x7FFFF);                                             // Disable all regular channels
@@ -242,15 +249,17 @@ void ADC_Start_DMA(){
 
 
 void ADC_Stop_DMA(void){
+#ifndef STM32F072xB                                             // Disable workaround for STM32F0x
   bool clone=systemSettings.settings.clone_fix;
-
   if(clone)
       CLEAR_BIT(adc_device->Instance->CR2, ADC_CR2_CONT);
-
+#endif
   HAL_ADC_Stop_DMA(adc_device);
 
+#ifndef STM32F072xB
   if(clone)
       SET_BIT(adc_device->Instance->CR2, ADC_CR2_CONT);
+#endif
 }
 
 void ADC_Reset_measures(void){
