@@ -215,7 +215,6 @@ void lcd_init(DMA_HandleTypeDef *dma);
 void Oled_error_init(void);
 void fatalError(uint8_t type);
 void lcd_write(uint8_t* data, uint16_t count, uint8_t mode);
-void pset(uint8_t x, uint8_t y, bool c);
 void update_display(void);
 void display_dma_abort(void);
 void update_display_ErrorHandler(void);

@@ -122,9 +122,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-#ifdef RUN_MY_TEST
-  myTest();
-#endif
   while (1)
   {
     /* USER CODE END WHILE */

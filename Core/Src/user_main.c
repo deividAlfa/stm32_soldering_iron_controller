@@ -19,7 +19,7 @@
 #include "display.h"
 #include "gui.h"
 #include "screen.h"
-#include "myTest.h"
+#include "display_test.h"
 
 #if (__CORTEX_M >= 3)
 #include "stm32f1xx_it.h"
@@ -123,9 +123,9 @@ void InitAfterMCUConfiguration(void){
 #endif
 
     guiInit();
-    ADC_Init(&ADC_DEVICE);
     buzzer_init();
     restoreSettings();
+    ADC_Init(&ADC_DEVICE);
     setDisplayContrastOrBrightness(systemSettings.settings.contrastOrBrightness);
     setDisplayXflip(systemSettings.settings.displayXflip);
     setDisplayYflip(systemSettings.settings.displayYflip);
@@ -143,6 +143,9 @@ void InitAfterMCUConfiguration(void){
     oled_init(&RE_Get,&RE1_Data);
 #ifdef HAS_BATTERY
     restoreLastSessionSettings();
+#endif
+#ifdef RUN_DISPLAY_TEST
+    display_test();
 #endif
 }
 

@@ -1,19 +1,19 @@
 /*
- * myTest.c
+ *  display_test.c
  *
  *  Created on: Jul 1, 2021
  *      Author: David
  */
 
 
-#include "myTest.h"
+#include <display_test.h>
 #include "main.h"
 #include "board.h"
 #include "iron.h"
 #include "display.h"
 #include "gui.h"
 
-#ifdef RUN_MY_TEST
+#ifdef RUN_DISPLAY_TEST
 struct{
   uint32_t tim_fps, tim_move;
   uint16_t fps,last_fps, rate, seconds;
@@ -23,7 +23,7 @@ struct{
 
 // This is just a test that draws a bouncing ball and updates the screen as fast as possible
 // To measure display performance
-void myTest(void){
+void display_test(void){
   test.tim_fps = test.tim_move = HAL_GetTick();
   test.rad=12;
   test.x=63+32;
@@ -38,6 +38,8 @@ void myTest(void){
 
   char str[16];
   setDisplayContrastOrBrightness(255);
+  setDisplayVcom(0xff);
+  setDisplayPrecharge(0x0f);
   fillBuffer(BLACK, fill_dma);
   u8g2_SetFont(&u8g2,u8g2_font_menu );
   u8g2_SetDrawColor(&u8g2, WHITE);
