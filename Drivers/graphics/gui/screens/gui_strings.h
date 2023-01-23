@@ -97,6 +97,7 @@ typedef struct{
   char * SYSTEM_LVP;
   char * SYSTEM_Gui_Time;
   char * SYSTEM_DEBUG;
+  char * SYSTEM_CLONE_FIX;
   char * SYSTEM_RESET_MENU;
   char * SYSTEM_Remember;
   char * SYSTEM_RememberLastProfile;
@@ -114,6 +115,7 @@ typedef struct{
   char * DISPLAY_Ratio;
   char * DISPLAY_Dim;
   char * DISPLAY_Dim_inSleep;
+  char * DISPLAY_Advanced;
 
   char * NTC_Enable_NTC;
   char * NTC_Pull;

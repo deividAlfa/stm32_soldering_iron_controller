@@ -235,7 +235,7 @@ static void display_create(screen_t *scr){
   edit->numberOfOptions = 2;
 #endif
 #ifdef SSD1306
-  newComboScreen(w, "ADVANCED", screen_display_adv, NULL);
+  newComboScreen(w, strings[lang].DISPLAY_Advanced, screen_display_adv, NULL);
 #endif
   newComboScreen(w, strings[lang]._BACK, screen_system, NULL);
   update_display_menu();
