@@ -1011,7 +1011,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "低壓保護",
       .SYSTEM_Gui_Time = "顯示頻率",
       .SYSTEM_DEBUG = "偵錯選單",
-      .SYSTEM_CLONE_FIX = "Clone fix",
+      .SYSTEM_CLONE_FIX = "克隆修正",
       .SYSTEM_RESET_MENU = "重設選單",
       .SYSTEM_Remember = "記住最後選擇",
       .SYSTEM_RememberLastProfile = "└烙鐵類型",
@@ -1032,7 +1032,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .DISPLAY_Ratio = "比例",
       .DISPLAY_Dim = "螢幕保護",
       .DISPLAY_Dim_inSleep = "└持續顯示",
-      .DISPLAY_Advanced = "ADVANCED",
+      .DISPLAY_Advanced = "進階設定",
 
       .NTC_Enable_NTC = "啟用 NTC",
       .NTC_Pull = "模式",
