@@ -96,6 +96,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "LVP",
       .SYSTEM_Gui_Time = "Gui time",
       .SYSTEM_DEBUG = "DEBUG",
+      .SYSTEM_CLONE_FIX = "Clone fix",
       .SYSTEM_RESET_MENU = "RESET MENU",
       .SYSTEM_Remember = "Remember last",
       .SYSTEM_RememberLastProfile = " Profile",
@@ -116,6 +117,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .DISPLAY_Ratio = "Ratio",
       .DISPLAY_Dim = "Dimmer",
       .DISPLAY_Dim_inSleep = " In sleep",
+      .DISPLAY_Advanced = "ADVANCED",
 
       .NTC_Enable_NTC = "Enable NTC",
       .NTC_Pull = "Pull",
@@ -277,6 +279,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "ПорогНапр.",
       .SYSTEM_Gui_Time = "Отрисовка",
       .SYSTEM_DEBUG = "Отладка",
+      .SYSTEM_CLONE_FIX = "Clone fix",
       .SYSTEM_RESET_MENU = "МЕНЮ СБРОСА",
       .SYSTEM_Remember = "Remember last",
       .SYSTEM_RememberLastProfile = " Profile",
@@ -297,7 +300,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .DISPLAY_Ratio = "Усиление",
       .DISPLAY_Dim = "Затемнение",
       .DISPLAY_Dim_inSleep = " Реж.Экрана",
-
+      .DISPLAY_Advanced = "ADVANCED",
 
       .NTC_Enable_NTC = "Внешний NTC",
       .NTC_Pull = "Подтяжка",
@@ -371,7 +374,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .InitMode =    { "ВЫКЛ", "СОН", "ПУСК" },
       .dimMode =     { "откл", "СОН", "все" },
       .errMode =     { "ВЫКЛ", "ПУСК", "ПРЕД" },
-
     },
 
     [lang_swedish] = {
@@ -460,6 +462,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "LSS",
       .SYSTEM_Gui_Time = "Gui-tid",
       .SYSTEM_DEBUG = "DEBUG",
+      .SYSTEM_CLONE_FIX = "Clone fix",
       .SYSTEM_RESET_MENU = "ÅTERST. MENY",
       .SYSTEM_Remember = "Remember last",
       .SYSTEM_RememberLastProfile = " Profile",
@@ -480,6 +483,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .DISPLAY_Ratio = "Ratio",
       .DISPLAY_Dim = "Dimmer",
       .DISPLAY_Dim_inSleep = " I sovläge",
+      .DISPLAY_Advanced = "ADVANCED",
 
       .NTC_Enable_NTC = "Aktivera NTC",
       .NTC_Pull = "Pull",
@@ -641,6 +645,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "LVP",
       .SYSTEM_Gui_Time = "Gui Zeit",
       .SYSTEM_DEBUG = "DEBUG",
+      .SYSTEM_CLONE_FIX = "Clone fix",
       .SYSTEM_RESET_MENU = "RESET MENÜ",
       .SYSTEM_Remember = "Remember last",
       .SYSTEM_RememberLastProfile = " Profile",
@@ -661,6 +666,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .DISPLAY_Ratio = "Ratio",
       .DISPLAY_Dim = "Dimmer",
       .DISPLAY_Dim_inSleep = " In sleep",
+      .DISPLAY_Advanced = "ADVANCED",
 
       .NTC_Enable_NTC = "NTC Anschalt",
       .NTC_Pull = "Pull",
@@ -822,6 +828,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "DVK",
       .SYSTEM_Gui_Time = "Gui zamanı",
       .SYSTEM_DEBUG = "Geliştirici",
+      .SYSTEM_CLONE_FIX = "Clone fix",
       .SYSTEM_RESET_MENU = "MENÜ SIFIRLA",
       .SYSTEM_Remember = "Remember last",
       .SYSTEM_RememberLastProfile = " Profile",
@@ -829,8 +836,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #ifdef HAS_BATTERY
       .SYSTEM_RememberLastTemp = " Set temp",
 #endif
-      .SYSTEM_DISPLAY_MENU = "DISPLAY",
 
+      .SYSTEM_DISPLAY_MENU = "DISPLAY",
 #ifndef ST756
       .DISPLAY_ContrastOrBrightness = "Brightness",
 #else
@@ -842,6 +849,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .DISPLAY_Ratio = "Ratio",
       .DISPLAY_Dim = "Karartma",
       .DISPLAY_Dim_inSleep = " Uykuda",
+      .DISPLAY_Advanced = "ADVANCED",
 
       .NTC_Enable_NTC = "NTC Etkin",
       .NTC_Pull = "Çek",
@@ -1003,6 +1011,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "低壓保護",
       .SYSTEM_Gui_Time = "顯示頻率",
       .SYSTEM_DEBUG = "偵錯選單",
+      .SYSTEM_CLONE_FIX = "克隆修正",
       .SYSTEM_RESET_MENU = "重設選單",
       .SYSTEM_Remember = "記住最後選擇",
       .SYSTEM_RememberLastProfile = "└烙鐵類型",
@@ -1023,6 +1032,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .DISPLAY_Ratio = "比例",
       .DISPLAY_Dim = "螢幕保護",
       .DISPLAY_Dim_inSleep = "└持續顯示",
+      .DISPLAY_Advanced = "進階設定",
 
       .NTC_Enable_NTC = "啟用 NTC",
       .NTC_Pull = "模式",
@@ -1184,6 +1194,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_LVP = "Нис.напрж",
       .SYSTEM_Gui_Time = "Опресняв.",
       .SYSTEM_DEBUG = "ГРЕШКИ",
+      .SYSTEM_CLONE_FIX = "Clone fix",
       .SYSTEM_RESET_MENU = "НУЛИРАНЕ",
       .SYSTEM_Remember = "Запазв.послед.",
       .SYSTEM_RememberLastProfile = " Профил",
@@ -1204,6 +1215,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .DISPLAY_Ratio = "Съотношение",
       .DISPLAY_Dim = "Затъмяване",
       .DISPLAY_Dim_inSleep = " При сън",
+      .DISPLAY_Advanced = "ADVANCED",
 
       .NTC_Enable_NTC = "NTC",
       .NTC_Pull = "Pull",

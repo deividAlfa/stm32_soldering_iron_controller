@@ -475,7 +475,7 @@ static void system_create(screen_t *scr){
 #ifndef STM32F072xB
   //  [ Clone fix Widget ]
   //
-  newComboMultiOption(w, "Clone fix", &edit, NULL);
+  newComboMultiOption(w, strings[lang].SYSTEM_CLONE_FIX, &edit, NULL);
   edit->inputData.getData = &getCloneFix;
   edit->big_step = 1;
   edit->step = 1;
