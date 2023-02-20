@@ -16,7 +16,7 @@ static void addon_screen_create(screen_t *scr)
 {
   widget_t* w;
 
-  newWidget(&w,widget_combo,scr);
+  newWidget(&w,widget_combo,scr,NULL);
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
   newComboScreen(w, strings[lang].FUME_EXTRACTOR_Title, screen_fume_extractor_settings, NULL);
