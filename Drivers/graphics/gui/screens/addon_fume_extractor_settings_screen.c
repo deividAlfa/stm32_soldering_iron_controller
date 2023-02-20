@@ -48,7 +48,7 @@ static void addons_screen_fume_extractor_create(screen_t *scr)
   widget_t* w;
   editable_widget_t* edit;
 
-  newWidget(&w,widget_combo,scr);
+  newWidget(&w,widget_combo,scr,NULL);
 
   // Mode
   newComboMultiOption(w, strings[lang].FUME_EXTRACTOR_Mode, &edit, NULL);
