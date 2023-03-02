@@ -139,10 +139,14 @@ void handleIron(void) {
     if(Iron.Error.active || Iron.calibrating){                                      // Ignore changes when error active or calibrating
       Iron.updateStandMode=no_update;
     }
-    else if((CurrentTime-Iron.LastModeChangeTime)>100){                             // Wait 100mS with no changes (de-bouncing)
-      Iron.updateStandMode=no_update;
-      setCurrentMode(Iron.changeMode);
-      Iron.lastWakeSrc = wakeSrc_Stand;
+    else{
+      if ( (Iron.changeMode < mode_run  && (CurrentTime-Iron.LastModeChangeTime) > (!systemSettings.Profile.standDelay ? 100 : (uint32_t)1000*systemSettings.Profile.standDelay )) ||   // Low power mode mode, apply delay from settings, or debouncing if set to 0.
+           (Iron.changeMode >= mode_run && (CurrentTime-Iron.LastModeChangeTime) > 100) ){                                                                                              // Run/boost mode, just do some debouncing.
+
+        Iron.updateStandMode=no_update;
+        setCurrentMode(Iron.changeMode);
+        Iron.lastWakeSrc = wakeSrc_Stand;
+      }
     }
   }
 
@@ -527,19 +531,18 @@ void setNoIronValue(uint16_t noiron){
 
 // Change the iron operating mode in stand mode
 void setModefromStand(uint8_t mode){
-  if( getIronError() ||
-      ((Iron.changeMode==mode) && (Iron.CurrentMode==mode)) ||
-      ((Iron.CurrentMode==mode_sleep) && (mode==mode_standby)) ||
-      ((Iron.CurrentMode==mode_boost) && (mode==mode_run)) ){
+  if( getIronError() ||                                                         // Skip change if:
+      ((Iron.CurrentMode==mode)) ||                                             // Already in desired mode
+      ((Iron.CurrentMode==mode_sleep) && (mode==mode_standby)) ||               // Setting sleep mode while in standby
+      ((Iron.CurrentMode==mode_boost) && (mode==mode_run)) ){                   // Setting run mode while in boost
+
+    asm("nop");
     return;
   }
-  __disable_irq();
-  if(Iron.changeMode!=mode){
-    Iron.changeMode = mode;                                                                 // Update mode
-    Iron.LastModeChangeTime = HAL_GetTick();                                                // Reset debounce timer
-  }
-  Iron.updateStandMode = needs_update;                                                      // Set flag
-  __enable_irq();
+
+  Iron.changeMode = mode;                                                       // Update mode
+  Iron.LastModeChangeTime = HAL_GetTick();                                      // Reset debounce timer
+  Iron.updateStandMode = needs_update;                                          // Set flag
 }
 
 // Set the iron operating mode
@@ -671,10 +674,10 @@ void checkIronError(void){
 
   if(Err.Flags){
 
-    if(Err.noIron){																																			// If no iron flag
-      Iron.Error.Flags &= (FLAG_ACTIVE | FLAG_SAFE_MODE | FLAG_NO_IRON );		    				// Clear other existing errors except safe mode
+    if(Err.noIron){                                                                                                                                         // If no iron flag
+      Iron.Error.Flags &= (FLAG_ACTIVE | FLAG_SAFE_MODE | FLAG_NO_IRON );                           // Clear other existing errors except safe mode
     }
-    Iron.Error.Flags |= Err.Flags;                                                    	// Update Iron errors
+    Iron.Error.Flags |= Err.Flags;                                                      // Update Iron errors
 
     Iron.LastErrorTime = CurrentTime;
     if(!Iron.Error.active){

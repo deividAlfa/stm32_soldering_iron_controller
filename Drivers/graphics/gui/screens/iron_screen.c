@@ -14,6 +14,7 @@ screen_t Screen_advFilter;
 static comboBox_item_t *comboItem_advFilter;
 static comboBox_item_t *comboitem_ShakeFiltering;
 static comboBox_item_t *comboitem_StandMode;
+static comboBox_item_t *comboitem_StandDelay;
 static comboBox_item_t *comboitem_smartActiveLoad;
 static editable_widget_t *editable_IRON_StandbyTemp;
 static editable_widget_t *editable_IRON_BoostTemp;
@@ -120,6 +121,7 @@ static void * get_reset_threshold() {
 void update_Iron_menu(void){
   comboitem_ShakeFiltering->enabled = (systemSettings.Profile.WakeInputMode==mode_shake);
   comboitem_StandMode->enabled = (systemSettings.Profile.WakeInputMode==mode_stand);
+  comboitem_StandDelay->enabled = (systemSettings.Profile.WakeInputMode==mode_stand);
   comboitem_smartActiveLoad->enabled = (systemSettings.Profile.smartActiveEnabled==enable);
 }
 //=========================================================
@@ -285,6 +287,14 @@ static void * getStandMode() {
 }
 static void setStandMode(uint32_t *val) {
   systemSettings.Profile.StandMode = *val;
+}
+//=========================================================
+static void * getStandDelay() {
+  temp = systemSettings.Profile.standDelay;
+  return &temp;
+}
+static void setStandDelay(uint32_t *val) {
+  systemSettings.Profile.standDelay = *val;
 }
 //=========================================================
 static void setsmartActiveEnable(uint32_t *val) {
@@ -741,6 +751,20 @@ static void iron_create(screen_t *scr){
   edit->options = strings[lang].InitMode;
   edit->numberOfOptions = 2;
 
+  //  [ Stand delay Widget ]
+  //
+  newComboEditable(w, strings[lang].__Delay, &edit, &comboitem_StandDelay);
+  dis=&edit->inputData;
+  dis->endString="s";
+  dis=&edit->inputData;
+  dis->reservedChars=4;
+  dis->getData = &getStandDelay;
+  edit->big_step = 10;
+  edit->step = 5;
+  edit->setData = (void (*)(void *))&setStandDelay;
+  edit->max_value = 240;
+  edit->min_value = 0;
+
   //  [ smartActive Enabled Widget ]
   //
   newComboMultiOption(w, strings[lang].IRON_smartActiveEnable,&edit, NULL);
@@ -784,7 +808,7 @@ static void iron_create(screen_t *scr){
   dis=&edit->inputData;
   dis->reservedChars=6;
   dis->number_of_dec=1;
-  dis->endString="Ω";									// Unicode, needs 2 bytes. So "10.0Ω" string uses 6 bytes
+  dis->endString="Ω";                                   // Unicode, needs 2 bytes. So "10.0Ω" string uses 6 bytes
   dis->getData = &getTipImpedance;
   edit->big_step = 10;
   edit->step = 1;

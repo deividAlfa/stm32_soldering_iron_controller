@@ -746,8 +746,9 @@ static void resetCurrentProfile(void){
   systemSettings.Profile.tempUnit                   = mode_Celsius;
   systemSettings.Profile.shakeFiltering             = disable;
   systemSettings.Profile.WakeInputMode              = mode_shake;
-  systemSettings.Profile.smartActiveEnabled          = disable;
-  systemSettings.Profile.smartActiveLoad             = 5;
+  systemSettings.Profile.smartActiveEnabled         = disable;
+  systemSettings.Profile.smartActiveLoad            = 5;
+  systemSettings.Profile.standDelay                 = 0;
   systemSettings.Profile.StandMode                  = mode_sleep;
   systemSettings.Profile.state                      = initialized;
 }
