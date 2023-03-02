@@ -110,6 +110,9 @@ This option is disabled in stand mode.<br>
   - **Stand mode**<br>
 Sets the mode that will be applied when the handle is put in the stand (__STANDBY__ or __SLEEP__).<br>
 This option is disabled in shake input mode.<br>
+  - **(Stand)  Delay**<br>
+Configures the Stand delay, so the station doesn't enter low power mode inmediately when placing the handle.<br>
+This option is only enabled in stand input mode, default setting is 0 (Sleep inmediately).<br>
   - **Standby time**<br>
 If there is no soldering activity for this period, the controller will reduce the temperature to extend the tip life and reduce power waste.<br>
 Setting this option to 0 will disable standby mode, the station will switch to sleep state.<br>
