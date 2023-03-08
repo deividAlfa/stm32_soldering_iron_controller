@@ -532,11 +532,8 @@ void setNoIronValue(uint16_t noiron){
 // Change the iron operating mode in stand mode
 void setModefromStand(uint8_t mode){
   if( getIronError() ||                                                         // Skip change if:
-      ((Iron.CurrentMode==mode)) ||                                             // Already in desired mode
       ((Iron.CurrentMode==mode_sleep) && (mode==mode_standby)) ||               // Setting sleep mode while in standby
       ((Iron.CurrentMode==mode_boost) && (mode==mode_run)) ){                   // Setting run mode while in boost
-
-    asm("nop");
     return;
   }
 
