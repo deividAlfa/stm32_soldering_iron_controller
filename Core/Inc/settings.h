@@ -14,7 +14,7 @@
 
 #define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
 #define SETTINGS_VERSION  22                                        // Change this if you change the settings/profile struct to prevent getting out of sync
-#define LANGUAGE_COUNT    7                                         // Number of languages
+#define LANGUAGE_COUNT    8                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
 #define NUM_TIPS          40                                        // Number of tips for each profile
 #define TipCharSize       5                                         // String size for each tip name (Including null termination)
@@ -111,6 +111,7 @@ typedef enum{
   lang_turkish             = 4,
   lang_tchinese            = 5,
   lang_bulgarian           = 6,
+  lang_spanish             = 7,
 
 
   dim_off                  = 0,
