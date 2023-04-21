@@ -94,7 +94,7 @@
  *       Addons/Extras    *
  ********************************/
 //#define ENABLE_ADDON_FUME_EXTRACTOR      // addon for controlling a fume extractor, must define a gpio output pin "EXTRACTOR" to use
-//#define ENABLE_ADDON_SWITCH_OFF_REMINDER // addon to beep periodically in sleep mode
+#define ENABLE_ADDON_SWITCH_OFF_REMINDER // addon to beep periodically in sleep mode
 
 
 /********************************
