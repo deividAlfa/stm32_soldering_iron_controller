@@ -479,6 +479,7 @@ void restoreSettings() {
   if(flashGlobalSettings.settings.version!=defaultSettings.version){    // Silent reset if version mismatch
     resetSystemSettings();
     saveSettings(wipeProfiles);
+    resetAddonSettings();
   }
   else{
     systemSettings.settings = flashGlobalSettings.settings;
