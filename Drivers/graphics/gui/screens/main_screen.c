@@ -9,7 +9,7 @@
 #include "screen_common.h"
 
 #define SCREENSAVER
-#define PWR_BAR_WIDTH   60
+#define PWR_BAR_WIDTH   32
 #define SCALE_FACTOR    (int)((65536*PWR_BAR_WIDTH*1.005)/100)
 
 //-------------------------------------------------------------------------------------------------------------------------------
