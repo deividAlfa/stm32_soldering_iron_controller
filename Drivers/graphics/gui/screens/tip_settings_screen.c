@@ -122,9 +122,22 @@ static void setCal400(int32_t *val) {
 }
 //=========================================================
 static int tip_save(widget_t *w, RE_Rotation_t input) {
-  __disable_irq();
-  systemSettings.Profile.tip[Selected_Tip] = backupTip;                                                         // Store tip data
-  __enable_irq();
+  uint8_t end=0;
+  for(uint8_t i=0; i<(TipCharSize-1); i++){                                                                     // Clear trailing spaces
+      if (backupTip.name[i] == ' '){                                                                            // Find space, store index
+        if(!end)
+          end = i;
+      }
+      else{
+        end=0;                                                                                                  // Clear index if other char found
+      }
+  }
+  if(end){
+    backupTip.name[end] = 0;                                                                                    // Terminate string
+  }
+
+  memcpy(&systemSettings.Profile.tip[Selected_Tip], &backupTip, sizeof(tipData_t));                             // Store tip data
+
   if(Selected_Tip==systemSettings.Profile.currentNumberOfTips){                                                 // If new tip
     systemSettings.Profile.currentNumberOfTips++;                                                               // Increase number of tips in the system
     setCurrentTip(Selected_Tip);                                                                                // Activate the newly copied tip, its highly likely that the user want's to calibrate it.
@@ -217,7 +230,7 @@ static void tip_settings_onEnter(screen_t *scr){
   comboResetIndex(Screen_tip_settings.current_widget);
   if(newTip){                                                                                                   // If new tip selected
     newTip=0;
-    backupTip = systemSettings.Profile.tip[0];                                                                  // Copy data from first tip in the system
+    memcpy(&backupTip, &systemSettings.Profile.tip[0], sizeof(tipData_t));                                      // Copy data from first tip in the system
     strcpy(backupTip.name, _BLANK_TIP);                                                                         // Set an empty name
     Selected_Tip=systemSettings.Profile.currentNumberOfTips;                                                    // Selected tip is next position
     comboitem_tip_settings_copy->enabled=0;                                                                     // Cannot copy a new tip
@@ -226,7 +239,16 @@ static void tip_settings_onEnter(screen_t *scr){
   else{
     backupTip = systemSettings.Profile.tip[Selected_Tip];                                                       // Copy selected tip
     comboitem_tip_settings_delete->enabled = (systemSettings.Profile.currentNumberOfTips>1);                    // If more than 1 tip in the system, enable delete
-    comboitem_tip_settings_copy->enabled = (systemSettings.Profile.currentNumberOfTips<NUM_TIPS);                // If tip slots available, enable copy button
+    comboitem_tip_settings_copy->enabled = (systemSettings.Profile.currentNumberOfTips<NUM_TIPS);               // If tip slots available, enable copy button
+
+    for(uint8_t i=0; i<(TipCharSize-1); i++){                                                                   // Needs to be done so the string can be edited easily
+      if (!backupTip.name[i]){                                                                                // Find end of string
+        while(i < (TipCharSize-1)){                                                                       // Fill with spaces
+          backupTip.name[i++] = ' ';
+        }
+      }
+    }
+    backupTip.name[TipCharSize-1] = 0;                                                                          // Terminate string
   }
 }
 
