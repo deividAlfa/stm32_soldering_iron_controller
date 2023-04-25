@@ -25,7 +25,7 @@ slide_t screenSaver = {
 };
 
 static char *tipNames[NUM_TIPS];
-enum mode{  main_none=0, main_irontemp, main_error, main_setpoint, main_tipselect };
+enum mode{  main_none=0, main_irontemp, main_error, main_setpoint, main_tipselect,  main_tipselect_auto };
 enum{ status_ok=0x20, status_error };
 enum { temp_numeric, temp_graph };
 xbm_t shakeXBM = {
@@ -160,6 +160,7 @@ static struct{
   #endif
   uint32_t modeTimer;                     // Timer to track current screen mode time
   uint32_t inputBlockTimer;               // Timer to block user input Load current time+blocking time in ms
+  uint32_t lastErrorTimer;                // Timer to track last error time
 }mainScr;
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -336,6 +337,7 @@ int8_t switchScreenMode(void){
         break;
 
       case main_tipselect:
+      case main_tipselect_auto:
         break;
 
       default:
@@ -349,14 +351,14 @@ int8_t switchScreenMode(void){
 }
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
-  uint8_t const currentIronMode = getCurrentMode();
+  uint8_t currentIronMode = getCurrentMode();
 
   mainScr.updateReadings=update_GUI_Timer();
   updateIronPower();
   updatePlot();
   updateScreenSaver();
 
-  IronError_t const ironErrorFlags = getIronErrorFlags();
+  IronError_t ironErrorFlags = getIronErrorFlags();
 
   if(ironErrorFlags.active){
     if(mainScr.shakeActive){
@@ -366,11 +368,17 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       wakeOledDim();                                                      // Wake up screen
       mainScr.ironStatus = status_error;
       mainScr.lastError=ironErrorFlags.Flags;
+      mainScr.lastErrorTimer = getIronLastErrorTime();
     }
   }
   else if(mainScr.ironStatus != status_ok){                               // If error is gone
     mainScr.ironStatus = status_ok;
-    wakeOledDim();                                                        // Wake up screen
+    wakeOledDim();    																										// Wake up screen
+    if( (mainScr.lastError == (FLAG_ACTIVE | FLAG_NO_IRON)) && (current_time - mainScr.lastErrorTimer > 3000) ){		// If last error was no tip and >3 seconds passed, enable automatic tip selection
+      mainScr.setMode = main_tipselect_auto;
+      switchScreenMode();
+      return -1;
+    }
   }
 
 
@@ -520,6 +528,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
 
     case main_tipselect:
+    case main_tipselect_auto:
       if(mainScr.ironStatus==status_error){                                 // If error appears while in tip selection, it needs to update now to avoid overlapping problems
         plot.enabled = 0;
         widgetDisable(Widget_IronTemp);
@@ -541,8 +550,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           mainScr.setMode=main_irontemp;
           break;
 
-        case Rotate_Nothing:
-          if(checkScreenTimer(2000)){
+        case Rotate_Nothing:				// Return after 2 seconds of inactivity, or after 5 seconds if new tip was placed
+          if( (mainScr.currentMode == main_tipselect && checkScreenTimer(2000)) || checkScreenTimer(5000)){
             mainScr.setMode=main_irontemp;
           }
           break;
@@ -561,9 +570,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             }
           }
           if(tip!=systemSettings.currentTip){
-            __disable_irq();
             setCurrentTip(tip);
-            __enable_irq();
             Screen_main.state=screen_Erase;
           }
           break;
@@ -849,8 +856,8 @@ static void  drawMisc(uint8_t refresh){
   Widget_SetPoint->enabled &= (mainScr.currentMode==main_setpoint);                            // Disable setpoint widget if not in setpoint screen
 
   u8g2_SetFont(&u8g2, u8g2_font_small);
-  if(mainScr.currentMode==main_tipselect){
-    uint8_t len = u8g2_GetUTF8Width(&u8g2, tipNames[systemSettings.currentTip])+4;   // Draw edit frame
+  if(mainScr.currentMode==main_tipselect || mainScr.currentMode==main_tipselect_auto){
+    uint8_t len = u8g2_GetUTF8Width(&u8g2, tipNames[systemSettings.currentTip])+4;    // Draw edit frame
     u8g2_DrawRBox(&u8g2, 0, 54, len, 10, 2);
     u8g2_SetDrawColor(&u8g2, BLACK);
   }
