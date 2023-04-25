@@ -645,7 +645,7 @@ static void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.minI        = 0;              // val = /100
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);         // Empty name
     }
-    strcpy(systemSettings.Profile.tip[0].name, "BC3 ");               // Put some generic name
+    strcpy(systemSettings.Profile.tip[0].name, "T12-BC3");               // Put some generic name.
     systemSettings.Profile.currentNumberOfTips      = 1;
     systemSettings.Profile.defaultTip               = 0;
     systemSettings.Profile.impedance                = 80;             // 8.0 Ohms
@@ -667,7 +667,7 @@ static void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.minI        = 0;
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
     }
-    strcpy(systemSettings.Profile.tip[0].name, "C245");
+    strcpy(systemSettings.Profile.tip[0].name, "C245-963");
     systemSettings.Profile.currentNumberOfTips      = 1;
     systemSettings.Profile.defaultTip               = 0;
     systemSettings.Profile.impedance                = 26;
@@ -689,7 +689,7 @@ static void resetCurrentProfile(void){
       systemSettings.Profile.tip[x].PID.minI        = 0;
       strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
     }
-    strcpy(systemSettings.Profile.tip[0].name, "C210");
+    strcpy(systemSettings.Profile.tip[0].name, "C210-018");
     systemSettings.Profile.currentNumberOfTips      = 1;
     systemSettings.Profile.defaultTip             = 0;
     systemSettings.Profile.power                  = 80;

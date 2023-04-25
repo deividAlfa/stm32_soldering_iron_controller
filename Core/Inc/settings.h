@@ -17,8 +17,8 @@
 #define LANGUAGE_COUNT    7                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
 #define NUM_TIPS          40                                        // Number of tips for each profile
-#define TipCharSize       5                                         // String size for each tip name (Including null termination)
-#define _BLANK_TIP        "    "                                    // Empty tip name, 4 spaces. Defined here for quick updating if TipCharSize is modified.
+#define TipCharSize       11                                        // String size for each tip name (Including null termination)
+#define _BLANK_TIP        "          "                              // Empty tip name, containign (TipCharSize-1) spaces. Defined here for quick updating if TipCharSize is modified.
 
 #ifndef PROFILE_VALUES
 
