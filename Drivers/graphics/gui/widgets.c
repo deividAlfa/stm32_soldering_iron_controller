@@ -1252,24 +1252,12 @@ int default_widgetProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
       char *s = (char*)dis->getData();
       char current_edit = s[edit->current_edit] + inc;
       if(dis->type == field_string){
-        switch(current_edit){           // Range is ' ', 0-9, A-Z
-          case '0'-1:
-            current_edit =' ';
-            break;
+        switch(current_edit){           // Range is ASCII 32-126
           case ' '-1:
-            current_edit='Z';
+            current_edit ='~';
             break;
-          case 'Z'+1:
-            current_edit=' ';
-            break;
-          case ' '+1:
-            current_edit = '0';
-            break;
-          case '9'+1:
-            current_edit ='A';
-            break;
-          case 'A'-1:
-            current_edit ='9';
+          case '~'+1:
+            current_edit =' ';
             break;
           default:
             break;
