@@ -550,8 +550,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           mainScr.setMode=main_irontemp;
           break;
 
-        case Rotate_Nothing:				// Return after 2 seconds of inactivity, or after 5 seconds if new tip was placed
-          if( (mainScr.currentMode == main_tipselect && checkScreenTimer(2000)) || checkScreenTimer(5000)){
+        case Rotate_Nothing:				// Return after 2 seconds of inactivity, or after 5 seconds or error appears when a new tip was placed
+          if( (mainScr.currentMode == main_tipselect && checkScreenTimer(2000)) ||
+              (mainScr.currentMode == main_tipselect_auto && (mainScr.ironStatus==status_error || checkScreenTimer(5000)) )){
             mainScr.setMode=main_irontemp;
           }
           break;
