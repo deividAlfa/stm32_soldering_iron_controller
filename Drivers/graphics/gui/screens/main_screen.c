@@ -623,13 +623,13 @@ static uint8_t  drawIcons(uint8_t refresh){
 
   if(mainScr.shakeActive==1 || (mainScr.shakeActive==2 && refresh) ){ //1 = needs drawing, 2 = already drawn
     mainScr.shakeActive=2;
-    u8g2_DrawXBMP(&u8g2, 49, displayHeight-shakeXBM.height, shakeXBM.width, shakeXBM.height, shakeXBM.xbm);
+    u8g2_DrawXBMP(&u8g2, displayWidth-shakeXBM.width-PWR_BAR_WIDTH-9, displayHeight-shakeXBM.height, shakeXBM.width, shakeXBM.height, shakeXBM.xbm);
     return 1;
   }
   else if(mainScr.shakeActive==3){                                    // 3 = needs clearing
     mainScr.shakeActive=0;
     u8g2_SetDrawColor(&u8g2,BLACK);
-    u8g2_DrawBox(&u8g2, 49, displayHeight-shakeXBM.height, shakeXBM.width, shakeXBM.height);
+    u8g2_DrawBox(&u8g2, displayWidth-shakeXBM.width-PWR_BAR_WIDTH-9, displayHeight-shakeXBM.height, shakeXBM.width, shakeXBM.height);
     u8g2_SetDrawColor(&u8g2,WHITE);
     return 1;
   }
