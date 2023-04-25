@@ -527,8 +527,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       break;
 
 
-    case main_tipselect:
     case main_tipselect_auto:
+      if(input!=Rotate_Nothing){
+        mainScr.currentMode = main_tipselect;                               // Set normal tipselect on user input to use small timeout.
+      }
+    case main_tipselect:
       if(mainScr.ironStatus==status_error){                                 // If error appears while in tip selection, it needs to update now to avoid overlapping problems
         plot.enabled = 0;
         widgetDisable(Widget_IronTemp);
