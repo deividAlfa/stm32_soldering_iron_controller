@@ -715,6 +715,10 @@ bool getIronError(void){
   return Iron.Error.Flags;
 }
 
+uint32_t getIronLastErrorTime(void){
+  return Iron.LastErrorTime;
+}
+
 void setSafeMode(bool mode){
   __disable_irq();
   if(mode==disable && Iron.Error.Flags==(FLAG_ACTIVE | FLAG_SAFE_MODE)){                 // If only failsafe was active? (This should only happen because it was on first init screen)

@@ -83,6 +83,7 @@ void ironSchedulePwmUpdate(void);
 bool getBootCompleteFlag(void);
 void setBootCompleteFlag(void);
 bool getIronError(void);
+uint32_t getIronLastErrorTime(void);
 void setIronCalibrationMode(uint8_t mode);
 bool getIronCalibrationMode(void);
 uint32_t getIronPwmOutValue(void);
