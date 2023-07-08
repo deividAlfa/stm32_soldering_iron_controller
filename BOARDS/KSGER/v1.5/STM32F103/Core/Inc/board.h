@@ -72,15 +72,14 @@
 #define PROFILE_VALUES                                        // Enable profile values
 
 #ifdef PROFILE_VALUES
-#define T12_Cal250        1000
-#define T12_Cal400        2000
+#define T12_Cal250        1900
+#define T12_Cal400        2800
 
-#define C210_Cal250       450
-#define C210_Cal400       700
+#define C210_Cal250       800
+#define C210_Cal400       1500
 
-#define C245_Cal250       900
-#define C245_Cal400       1000
-
+#define C245_Cal250       1800
+#define C245_Cal400       2800
 #endif
 
 
