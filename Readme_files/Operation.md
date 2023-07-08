@@ -4,10 +4,12 @@
 When an unconfigured (new or fully reset) controller starts, an initial setup screen will be shown to setup the system language and the tip profile.<br>
 
 Currently, these are the available languages:
+- **Bulgarian**<br>
+- **Chinese**<br>
 - **English**<br>
+- **German**<br>
 - **Russian**<br>
 - **Swedish**<br>
-- **German**<br>
 - **Turkish**<br>
 
 You can select between the following profiles:
@@ -77,6 +79,8 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
 - **Tip selection**<br>
   Issue a clockwise drag-rotation to show the tip selection. The tip name label will be highlighted.<br>
   Rotate to change the selected tip, click or wait 2 seconds to select and return to normal mode. Long-click to enter the tip settings.<br>
+  When inserting a new tip, this setting will be enabled automatically for 5 seconds.<br>
+  To avoid unintended behaviour, at least 3 seconds must pass between tip changes, lower than that will be considered noise or momentary connection break.<br>
 - **System menu**<br>
   A long click will enter the system menu (Except while in tip selection/setpoint adjustment).<br>
 
@@ -148,7 +152,8 @@ On detection, the shake icon blinks to provide some feeback.<br>
 Adjust the Smart sensitivity. The lower the value, the higher the sensitivity.<br>
 The sensitivity will be affected by the tip type, the PID response, the working temperature and the soldering target.<br>
 Lower the value until it triggers randomly without soldering anything, then increase slightly until you don't get any false triggering.<br>
-If your soldering station is really well tuned, you might be able to lower it to 3...4.<br> 
+If your soldering station is really well tuned, you might be able to lower it to 3...4.<br>
+A wrong value here might keep the station working forever, so be careful!<br>
 This option is only enabled when Smart is active.<br>
   - **Power**<br>
 The maximum power which will be delivered to the tip.<br>
