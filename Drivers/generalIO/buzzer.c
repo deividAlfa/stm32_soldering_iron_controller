@@ -10,7 +10,7 @@
 #include "settings.h"
 #include "main.h"
 
-typedef enum {STATE_SB, STATE_LB, STATE_FB, STATE_AL_H,STATE_AL_L, STATE_IDLE} buzzer_state_type;
+typedef enum {STATE_IDLE, STATE_SB, STATE_LB, STATE_FB, STATE_AL_H,STATE_AL_L } buzzer_state_type;
 
 static buzzer_state_type buzzer_state = STATE_IDLE;
 static uint32_t last_time;
@@ -65,6 +65,9 @@ void handle_buzzer() {
   uint32_t delta = HAL_GetTick() - last_time;
   switch (buzzer_state) {
 
+    case STATE_IDLE:
+      break;
+
     case STATE_SB:
       if (delta > SHORT_BEEP) {
         BUZZER_OFF;
@@ -103,8 +106,6 @@ void handle_buzzer() {
       }
       break;
 
-    case STATE_IDLE:
-      break;
 
     default:
       BUZZER_OFF;
