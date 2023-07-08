@@ -252,8 +252,10 @@ void handleIron(void) {
       reachedTime=CurrentTime;
     }
     else if(CurrentTime-reachedTime>1000){                                                    // Wait 1s for stable readings
-      temperatureReached( Iron.TargetTemperature);
       Iron.temperatureReached = 1;
+      if(Iron.CurrentMode > mode_standby){                                                    // Beep when reaching target temperature, but only in run & boost modes
+        temperatureReached( Iron.TargetTemperature);
+      }
     }
   }
   else{
@@ -579,9 +581,7 @@ void setCurrentMode(uint8_t mode){
       buzzer_long_beep();
       modeChanged(mode);
     }
-    if(mode == mode_run){
-      Iron.temperatureReached = 0;
-    }
+    Iron.temperatureReached = 0;                                                    // Reset temperature reached flag
   }
   __enable_irq();
 }
