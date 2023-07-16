@@ -242,7 +242,7 @@ void ADC_Start_DMA(){
   #endif
 
   ADC_Status=ADC_Sampling;
-  if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)ADC_measures, sizeof(ADC_measures)/ sizeof(uint16_t) )!=HAL_OK){  // Start ADC conversion now
+  if(HAL_ADC_Start_DMA(adc_device, (uint32_t*)ADC_measures, sizeof(ADC_measures)/(sizeof(uint16_t)) )!=HAL_OK){  // Start ADC conversion now
     Error_Handler();
   }
 }
