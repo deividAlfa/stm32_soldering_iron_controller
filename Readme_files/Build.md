@@ -1,5 +1,12 @@
 ## Building the firmware
 
+<h3>
+⚠️ Use CubeIDE 1.12.1! ⚠️ <br><br>
+Newer versions (Currently 1.13.0) are causing lots of issues.<br>
+Neither the firmware or the Build script work properly.<br>
+Until the issues are addressed up, keep using 1.12.1.<br><br>
+</h3>
+
 Video of building steps:<br>
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/8oeGVSSxudk/0.jpg)](https://www.youtube.com/watch?v=8oeGVSSxudk "Firmware build")<br><br>
 
