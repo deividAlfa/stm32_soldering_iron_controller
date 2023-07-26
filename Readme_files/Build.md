@@ -7,17 +7,21 @@ Neither the firmware or the Build script work properly.<br>
 Until the issues are addressed up, keep using 1.12.1.<br><br>
 </h3>
 
+
 Video of building steps:<br>
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/8oeGVSSxudk/0.jpg)](https://www.youtube.com/watch?v=8oeGVSSxudk "Firmware build")<br><br>
 
-If you want to build your own, clone or download the source.<br>
-The source is stripped from ST own libraries and unnecesary stuff, only includes the very basic code owning to the project.<br>
+First of all, download and install [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html).<br>
+Clone or download the source from this repository.<br>
+The source is stripped from ST own libraries and unnecessary stuff, only includes the very basic code owning to the project.<br>
 CubeMX will add the STM32 and CMSIS libraries automatically after a code generation.<br><br>
 There's a new automated build script for Windows (Building_script.bat) that allows a simple and fast way of copying and building the desired profile.<br>
 With it, all you need is to have CubeIDE installed in C:\ST (It's the default installation folder), it will search and execute the tools without requiring any user intervention.<br>
+JDK is no longer required, as I recently discovered CubeIDE packs its own.<br>
 Just open it, choose your profile, then select whether you want to only copy the files, run CubeMX (Generate the libraries) and/or compile the firmware.<br>
-After compiling, the binaries will be placed in their respective BOARDS/... folders.<br>
-<img src="/Readme_files/build_script.png?raw=true"><br><br>
+After compiling, the binaries will be placed in their respective BOARDS/... folders.<br><br>
+<img src="/Readme_files/build_script_0.png?raw=true"><br><br>
+<img src="/Readme_files/build_script_1.png?raw=true"><br><br>
 
 If you want to build it within CubeIDE, first run Building_script.bat, choose your profile and select Copy files / Run CubeMX.<br>
 Open STM32CUBE IDE, click on Import/Existing project and select the project folder.<br>
