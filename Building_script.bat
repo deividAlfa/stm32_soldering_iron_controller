@@ -3,13 +3,14 @@
 :: [Default search path] Installation folder must be named STM32CubeIDE!
 SET SEARCH_PATH="C:\ST"
 
-:: [Java path] You also use absolute path, ex "C:\JDK_19\bin\java.exe"
-SET JAVA_CMD="java.exe"
+
 
 :: [ENABLE THIS LINES TO MANUALLY SET THE TOOL PATHS]
 :: set IDEPATH="C:\ST\STM32CubeIDE_1.7.0\STM32CubeIDE"
 :: set IDE="%IDEPATH:"=%\stm32cubeide.exe"
 :: set MX="%IDEPATH:"=%\plugins\com.st.stm32cube.common.mx_6.3.0.202107141111\STM32CubeMX.jar"
+:: [Java path] You also use absolute path, ex "C:\JDK_19\bin\java.exe"
+:: set JAVA_CMD="java.exe"
 
 
 SET MODELS=    "BOARDS\KSGER\v1.5\STM32F103";^
@@ -68,7 +69,9 @@ IF "%ERRORLEVEL%"=="3" SET RUN_CUBEMX="y" && SET COMPILE="y" && GOTO :TOOLS
 IF "%ERRORLEVEL%"=="4" GOTO :EXIT
 
 :: ##################  [TRY FINDING THE TOOLS IF INVALID PATHS DETECTED]  ##################
+
 :TOOLS
+if not exist "%JAVA_CMD%" ( GOTO :DETECT )
 if not exist "%IDE%" ( GOTO :DETECT )
 if not exist "%MX%" ( GOTO :DETECT )
 goto :START
@@ -77,6 +80,7 @@ goto :START
 SET IDEPATH=
 SET IDE=
 SET MX=
+SET JAVA_CMD=
 echo Searching tool paths...
 echo.
 
@@ -85,6 +89,9 @@ if not defined IDEPATH ( goto :NOTFOUND )
 
 set IDE=%IDEPATH%\stm32cubeidec.exe
 if not exist "%IDE%" ( goto :NOTFOUND )
+
+for /f "delims=" %%F in ('dir /b /s "%IDEPATH:"=%\java.exe" 2^>nul') do (set JAVA_CMD=%%~F)
+if not defined JAVA_CMD ( goto :NOTFOUND )
 
 for /f "delims=" %%F in ('dir /b /s "%IDEPATH:"=%\STM32CubeMX.jar" 2^>nul') do (set MX=%%~F)
 if not defined MX ( goto :NOTFOUND )
@@ -100,6 +107,9 @@ goto :DONE
 
 echo [32mFound CubeIDE at:[0m
 echo %IDE:"=%
+echo.
+echo [32mFound Java at:[0m
+echo %JAVA_CMD:"=%
 echo.
 echo [32mFound CubeMX at:[0m
 echo %MX:"=%
