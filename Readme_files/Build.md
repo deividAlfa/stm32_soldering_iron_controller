@@ -23,6 +23,10 @@ After compiling, the binaries will be placed in their respective BOARDS/... fold
 <img src="/Readme_files/build_script_0.png?raw=true"><br><br>
 <img src="/Readme_files/build_script_1.png?raw=true"><br><br>
 
+If the build fails for no reason (No changes were made to the source), or CubeIDE complains about the project already existing the workspace (While it's not), try deleting this folder:<br>
+
+`C:\Users\YOUR_USER\STM32CubeIDE\workspace_1.12.1\.metadata` <br>
+
 If you want to build it within CubeIDE, first run Building_script.bat, choose your profile and select Copy files / Run CubeMX.<br>
 Open STM32CUBE IDE, click on Import/Existing project and select the project folder.<br>
 Disable "Search for nested projects", select only the project at the root of the folder.<br>
@@ -63,11 +67,11 @@ However, when debugging, it's desirable to completely disable optimizations to s
 If you had to enable any level of global optimizations, you can still selectively disable build optimizations for any function, making debugging easier.<br>
 A line of code can be found at the start of main.h:<br>
 
-  __attribute__((optimize("O0")))
+`__attribute__((optimize("O0")))`
 
 Copy that line before a function to disable optimization, like this:<br>
 
-   __attribute__((optimize("O0"))) void ThisFunctionWillNotBeOptimized(...)
+`__attribute__((optimize("O0"))) void ThisFunctionWillNotBeOptimized(...)`
    
 
 If you want to retarget the project, avoid mixing different profile files, run Building_script.bat again so it cleans the project and copies the new files.<br>
