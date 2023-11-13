@@ -9,7 +9,7 @@
 #define _GUI_DEBUG_SCREEN_H_
 
 
-#define ENABLE_DEBUG_SCREEN
+//#define ENABLE_DEBUG_SCREEN
 
 
 #include "screen.h"
