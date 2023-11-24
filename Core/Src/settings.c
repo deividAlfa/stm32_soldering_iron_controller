@@ -25,7 +25,7 @@ const settings_t defaultSettings = {
 #else
   .contrastOrBrightness = 255,
 #endif
-  .dim_mode             = dim_sleep,
+  .dim_mode             = dim_always,
   .dim_Timeout          = 10000,                // ms
   .dim_inSleep          = enable,
   .displayOffset        = DISPLAY_OFFSET,
@@ -731,7 +731,7 @@ static void resetCurrentProfile(void){
   systemSettings.Profile.ntc.enabled                = 0;
   #endif
 
-  systemSettings.Profile.errorTimeout               = 100;                    // ms
+  systemSettings.Profile.errorTimeout               = 500;                    // ms
   systemSettings.Profile.errorResumeMode            = error_resume;
   systemSettings.Profile.sleepTimeout               = (uint32_t)5*60000;      // ms
   systemSettings.Profile.standbyTimeout             = (uint32_t)5*60000;

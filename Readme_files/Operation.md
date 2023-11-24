@@ -56,21 +56,20 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
 ---
 
 ## Main screen<br>
-  - **Temperature display modes**<br>
-  While in run mode, a single click will switch between numeric and graph.<br>
-  If the current mode is sleep/standby/boost, clicking will set run mode instead (If button wake is enabled).<br>
-  Boost mode always exits on clicking, no matter the button configuration.<br>
+  - **Temperature display modes**<br>  
+  Issue a counter-clockwise drag-rotation to switch between numeric and graph display.<br>
   The graph update rate is the same as the ADC reading frequency.<br>
-  The numerical display uses a noise supression filter to show setday values. Once the setpoint was reached, variations in the +-5ºC range will be ignored.<br>    
+  The numerical display uses a noise supression filter to show smooth values. Once the setpoint was reached, variations of +-5ºC will be ignored (Can be adjusted).<br>    
   The plot graph always uses real time readings.<br>
+  
   - **Temperature setpoint adjustment**<br>
   Rotate the encoder, the setpoint will be shown, continue rotating to adjust it.<br>
   After 1 second of inactivity it will return to normal mode.<br>
 - **Sleep/Standby modes**<br>
-  You can manually enter lower power modes by making a counter-clockwise drag-rotation.<br>
+  You can manually enter lower power modes by clicking in the main screen.<br>
   The sequence would be [run/boost mode]->[standby mode]->[sleep mode].<br>
   If button wake is enabled, encoder activity will resume normal mode, otherwise only the display brightness will be restored.<br>
-  Wake-up rouces are the enconder (If enabled) or handle wake input sensor (If shake wake is enabled or in stand mode).<br>
+  Wake-up sources are the enconder (If enabled) or handle wake input sensor (If shake wake is enabled or in stand mode).<br>
   The encoder only resumes normal mode when adjusting the setpoint or clicking in the temperature screen (Not when selecting tips or navigating in the menu)<br>
 - **Boost mode**<br>
   Rotate the encoder to show up the setpoint adjustment and click within 1 second to trigger boost mode.<br>
@@ -506,4 +505,4 @@ A message will appear in the screen. "Hold button to restore defaults".<br>
 Keep pressing the button for another 5 seconds, until the next message appears, "Release button now".<br>
 Release the button, the station will wipe everything and reboot.<br>
 
-If you accidentally pushed the button, just release it before the 5 second timeout to resume the boot process. 
+If you accidentally pushed the button, just release it before the 5 second timeout to resume the boot process.
