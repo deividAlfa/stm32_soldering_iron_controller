@@ -52,12 +52,21 @@ static void setDisplayContrast_(uint32_t *val) {
   setDisplayContrastOrBrightness(systemSettings.settings.contrastOrBrightness);
 }
 //=========================================================
-static void * getdisplayOffset() {
-  temp = systemSettings.settings.displayOffset;
+static void * getdisplayStartColumn() {
+  temp = systemSettings.settings.displayStartColumn;
   return &temp;
 }
-static void setdisplayOffset(uint32_t *val) {
-  systemSettings.settings.displayOffset= *val;
+static void setdisplayStartColumn(uint32_t *val) {
+  systemSettings.settings.displayStartColumn= *val;
+}
+//=========================================================
+static void * getdisplayStartLine() {
+  temp = systemSettings.settings.displayStartLine;
+  return &temp;
+}
+static void setdisplayStartLine(uint32_t *val) {
+  systemSettings.settings.displayStartLine= *val;
+  setDisplayStartLine(systemSettings.settings.displayStartLine);
 }
 //=========================================================
 static void * getdisplayXflip() {
@@ -152,16 +161,28 @@ static void display_create(screen_t *scr){
 #endif
   edit->min_value = 0;
 
-  //  [ Display Offset Widget ]
+  //  [ Display Column Offset Widget ]
   //
-  newComboEditable(w, strings[lang].DISPLAY_Offset, &edit, NULL);
+  newComboEditable(w, strings[lang].DISPLAY_StartColumn, &edit, NULL);
   dis=&edit->inputData;
   dis->reservedChars=2;
-  dis->getData = &getdisplayOffset;
+  dis->getData = &getdisplayStartColumn;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setdisplayOffset;
+  edit->setData = (void (*)(void *))&setdisplayStartColumn;
   edit->max_value = 15;
+  edit->min_value = 0;
+
+  //  [ Display Line Offset Widget ]
+  //
+  newComboEditable(w, strings[lang].DISPLAY_StartLine, &edit, NULL);
+  dis=&edit->inputData;
+  dis->reservedChars=2;
+  dis->getData = &getdisplayStartLine;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setdisplayStartLine;
+  edit->max_value = 63;
   edit->min_value = 0;
 
   //  [ Display X flip Widget ]

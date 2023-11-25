@@ -2,7 +2,7 @@
  * lcd.h
  *
  *  Created on: Jan 12, 2021
- *      Author: David		Original work by Jose Barros (PTDreamer), 2017
+ *      Author: David   Original work by Jose Barros (PTDreamer), 2017
  */
 
 #ifndef GRAPHICS_SSD1306_H_
@@ -108,8 +108,8 @@ typedef enum{
 
 // For checking if SPI DMA is active. Checked before drawing the buffer.
 typedef enum {
-	oled_idle=0,
-	oled_busy=1,
+  oled_idle=0,
+  oled_busy=1,
 } oledStatus_t;
 
 
@@ -118,32 +118,32 @@ typedef enum {
 #define modeData    0x40
 
 typedef enum{
-	error_NMI,
-	error_HARDFAULT,
-	error_MEMMANAGE,
-	error_BUSFAULT,
-	error_USAGEFAULT,
-	error_RUNAWAY25,
-	error_RUNAWAY50,
-	error_RUNAWAY75,
-	error_RUNAWAY100,
-	error_RUNAWAY500,
+  error_NMI,
+  error_HARDFAULT,
+  error_MEMMANAGE,
+  error_BUSFAULT,
+  error_USAGEFAULT,
+  error_RUNAWAY25,
+  error_RUNAWAY50,
+  error_RUNAWAY75,
+  error_RUNAWAY100,
+  error_RUNAWAY500,
   error_FLASH,
 }FatalErrors;
 
 
 // buffer needs to be aligned to 32bit(4byte) boundary, as fillBuffer() uses 32bit transfer for increased speed
 typedef struct{
-	__attribute__((aligned(4))) uint8_t buffer[128*8]; // 128x64 1BPP OLED
-	volatile uint8_t status;
-	volatile uint8_t row;
-	volatile uint8_t use_sw;
+  __attribute__((aligned(4))) uint8_t buffer[128*8]; // 128x64 1BPP OLED
+  volatile uint8_t status;
+  volatile uint8_t row;
+  volatile uint8_t use_sw;
 #if defined DISPLAY_SPI && defined DISPLAY_DEVICE
-	SPI_HandleTypeDef *device;
+  SPI_HandleTypeDef *device;
 #elif defined DISPLAY_I2C && defined DISPLAY_DEVICE
-	I2C_HandleTypeDef *device;
+  I2C_HandleTypeDef *device;
 #endif
-	DMA_HandleTypeDef *fillDMA;
+  DMA_HandleTypeDef *fillDMA;
 }oled_t;
 
 extern oled_t oled;
@@ -153,34 +153,34 @@ extern volatile uint32_t r4, r5, r6;
 enum { fill_soft, fill_dma };
 
 #if defined DISPLAY_SPI
-#define Oled_Set_SCL() 		SW_SCL_GPIO_Port->BSRR = SW_SCL_Pin
-#define Oled_Clear_SCL() 	SW_SCL_GPIO_Port->BRR = SW_SCL_Pin
+#define Oled_Set_SCL()    SW_SCL_GPIO_Port->BSRR = SW_SCL_Pin
+#define Oled_Clear_SCL()  SW_SCL_GPIO_Port->BRR = SW_SCL_Pin
 
 #elif  defined DISPLAY_I2C
-#define Oled_Set_SCL()    SW_SCL_GPIO_Port->BSRR = SW_SCL_Pin; bit_delay()							// Rise time needs more time, as it's open drain
-#define Oled_Clear_SCL()  SW_SCL_GPIO_Port->BRR = SW_SCL_Pin; bit_delay()								// Fall time can be much faster
+#define Oled_Set_SCL()    SW_SCL_GPIO_Port->BSRR = SW_SCL_Pin; bit_delay()              // Rise time needs more time, as it's open drain
+#define Oled_Clear_SCL()  SW_SCL_GPIO_Port->BRR = SW_SCL_Pin; bit_delay()               // Fall time can be much faster
 #endif
 
 #define Oled_Clock()      Oled_Set_SCL(); Oled_Clear_SCL();
 
-#define Oled_Set_SDA() 		SW_SDA_GPIO_Port->BSRR = SW_SDA_Pin
-#define Oled_Clear_SDA() 	SW_SDA_GPIO_Port->BRR = SW_SDA_Pin
+#define Oled_Set_SDA()    SW_SDA_GPIO_Port->BSRR = SW_SDA_Pin
+#define Oled_Clear_SDA()  SW_SDA_GPIO_Port->BRR = SW_SDA_Pin
 
-#define Oled_Bit(n)      if(!(n))Oled_Clear_SDA();else Oled_Set_SDA(); Oled_Clock()				// Testing !n compiles faster code than testing n
+#define Oled_Bit(n)      if(!(n))Oled_Clear_SDA();else Oled_Set_SDA(); Oled_Clock()       // Testing !n compiles faster code than testing n
 
 #ifdef USE_CS
-#define Oled_Set_CS() 		DISPLAY_CS_GPIO_Port->BSRR = DISPLAY_CS_Pin
-#define Oled_Clear_CS() 	DISPLAY_CS_GPIO_Port->BRR = DISPLAY_CS_Pin
+#define Oled_Set_CS()     DISPLAY_CS_GPIO_Port->BSRR = DISPLAY_CS_Pin
+#define Oled_Clear_CS()   DISPLAY_CS_GPIO_Port->BRR = DISPLAY_CS_Pin
 #endif
 
 #ifdef USE_DC
-#define Oled_Set_DC() 		DISPLAY_DC_GPIO_Port->BSRR = DISPLAY_DC_Pin
-#define Oled_Clear_DC() 	DISPLAY_DC_GPIO_Port->BRR = DISPLAY_DC_Pin
+#define Oled_Set_DC()     DISPLAY_DC_GPIO_Port->BSRR = DISPLAY_DC_Pin
+#define Oled_Clear_DC()   DISPLAY_DC_GPIO_Port->BRR = DISPLAY_DC_Pin
 #endif
 
 #ifdef USE_RST
-#define Oled_Set_RES() 		DISPLAY_RST_GPIO_Port->BSRR = DISPLAY_RST_Pin
-#define Oled_Clear_RES() 	DISPLAY_RST_GPIO_Port->BRR = DISPLAY_RST_Pin
+#define Oled_Set_RES()    DISPLAY_RST_GPIO_Port->BSRR = DISPLAY_RST_Pin
+#define Oled_Clear_RES()  DISPLAY_RST_GPIO_Port->BRR = DISPLAY_RST_Pin
 #endif
 
 #define BLACK 0
@@ -231,6 +231,7 @@ void setDisplayPrecharge(uint8_t pre);
 void setDisplayResRatio(uint8_t r);
 #endif
 uint8_t getDisplayContrastOrBrightness(void);
+void setDisplayStartLine(uint8_t value);
 void fillBuffer(bool color, bool mode);
 void putStrAligned(char* str, uint8_t y, AlignType align);
 void buttonReset(void);

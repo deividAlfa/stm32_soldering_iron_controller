@@ -223,7 +223,8 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       state;              // Always 0xFF if flash is erased
   uint8_t       language;
   uint8_t       contrastOrBrightness;
-  uint8_t       displayOffset;
+  uint8_t       displayStartColumn;
+  uint8_t       displayStartLine;
   __attribute__((packed)) struct {
     uint8_t       displayXflip : 1;
     uint8_t       displayYflip : 1;

@@ -111,7 +111,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #else
       .DISPLAY_ContrastOrBrightness = "Contrast",
 #endif
-      .DISPLAY_Offset = "Offset",
+      .DISPLAY_StartColumn = "X",
+      .DISPLAY_StartLine = "Y",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
       .DISPLAY_Ratio = "Ratio",
@@ -293,7 +294,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #else
       .DISPLAY_ContrastOrBrightness = "Контраст",
 #endif
-      .DISPLAY_Offset = "Сдвиг",
+      .DISPLAY_StartColumn = "X",
+      .DISPLAY_StartLine = "Y",
       .DISPLAY_Xflip = "X Зерк.",
       .DISPLAY_Yflip = "Y Зерк.",
       .DISPLAY_Ratio = "Усиление",
@@ -476,7 +478,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #else
       .DISPLAY_ContrastOrBrightness = "Kontrast",
 #endif
-      .DISPLAY_Offset = "Offset",
+      .DISPLAY_StartColumn = "X",
+      .DISPLAY_StartLine = "Y",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
       .DISPLAY_Ratio = "Ratio",
@@ -659,7 +662,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #else
       .DISPLAY_ContrastOrBrightness = "Kontrast",
 #endif
-      .DISPLAY_Offset = "Versatz",
+      .DISPLAY_StartColumn = "X",
+      .DISPLAY_StartLine = "Y",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
       .DISPLAY_Ratio = "Ratio",
@@ -842,7 +846,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #else
       .DISPLAY_ContrastOrBrightness = "kontrast",
 #endif
-      .DISPLAY_Offset = "Dengele",
+      .DISPLAY_StartColumn = "X",
+      .DISPLAY_StartLine = "Y",
       .DISPLAY_Xflip = "X flip",
       .DISPLAY_Yflip = "Y flip",
       .DISPLAY_Ratio = "Ratio",
@@ -1025,7 +1030,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #else
       .DISPLAY_ContrastOrBrightness = "對比度",
 #endif
-      .DISPLAY_Offset = "偏移",
+      .DISPLAY_StartColumn = "X",
+      .DISPLAY_StartLine = "Y",
       .DISPLAY_Xflip = "上下翻轉",
       .DISPLAY_Yflip = "左右翻轉",
       .DISPLAY_Ratio = "比例",
@@ -1208,7 +1214,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #else
       .DISPLAY_ContrastOrBrightness = "Контраст",
 #endif
-      .DISPLAY_Offset = "Отместване",
+      .DISPLAY_StartColumn = "X",
+      .DISPLAY_StartLine = "Y",
       .DISPLAY_Xflip = "Обръщ. X",
       .DISPLAY_Yflip = "Обръщ. Y",
       .DISPLAY_Ratio = "Съотношение",

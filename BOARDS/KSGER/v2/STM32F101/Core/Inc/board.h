@@ -14,16 +14,17 @@
 /********************************
  *       Display Settings    *
  ********************************/
-//#define DISPLAY_SPI                                            // SPI display
-#define DISPLAY_I2C                                              // I2C display
+//#define DISPLAY_SPI                                         // SPI display
+#define DISPLAY_I2C                                           // I2C display
 //#define I2C_TRY_HW                                          // Try I2C HW first, use I2C SW if not detected
-#define DISPLAY_ADDRESS        (0x3c<<1)                         // Only used for I2C
-//#define DISPLAY_DEVICE         hi2c2                           // SPI / I2C handler if used. Enables HW mode, otherwise SW mode is used
-#define FILL_DMA            hdma_memtomem_dma1_channel2       // DMA mem2mem for filling
+#define DISPLAY_ADDRESS       (0x3c<<1)                       // Only used for I2C
+//#define DISPLAY_DEVICE      hi2c2                           // SPI / I2C handler if used. Enables HW mode, otherwise SW mode is used
+#define FILL_DMA              hdma_memtomem_dma1_channel2     // DMA mem2mem for filling
 //#define USE_RST                                             // Reset pin is used
 //#define USE_DC                                              // DC pin is used
 //#define USE_CS                                              // CS pin is used
-#define DISPLAY_OFFSET         2                                 // Display offset
+#define DISPLAY_START_COLUMN  2                               // Display column offset
+#define DISPLAY_START_LINE    0                               // Display line offset
 
 /********************************
  *       PWM Settings        *

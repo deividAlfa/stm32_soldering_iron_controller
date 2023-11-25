@@ -109,7 +109,8 @@ typedef struct{
   char * SYSTEM_DISPLAY_MENU;
 
   char * DISPLAY_ContrastOrBrightness;
-  char * DISPLAY_Offset;
+  char * DISPLAY_StartColumn;
+  char * DISPLAY_StartLine;
   char * DISPLAY_Xflip;
   char * DISPLAY_Yflip;
   char * DISPLAY_Ratio;

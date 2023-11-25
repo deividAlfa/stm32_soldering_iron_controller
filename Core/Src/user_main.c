@@ -126,18 +126,20 @@ void InitAfterMCUConfiguration(void){
     buzzer_init();
     restoreSettings();
     ADC_Init(&ADC_DEVICE);
+    setDisplayPower(disable);
     setDisplayContrastOrBrightness(systemSettings.settings.contrastOrBrightness);
     setDisplayXflip(systemSettings.settings.displayXflip);
     setDisplayYflip(systemSettings.settings.displayYflip);
+    setDisplayStartLine(systemSettings.settings.displayStartLine);
 #ifndef ST7565                                                          // Only for SSD1306
     setDisplayPower(disable);
     setDisplayClk(systemSettings.settings.displayClk);
     setDisplayVcom(systemSettings.settings.displayVcom);
     setDisplayPrecharge(systemSettings.settings.displayPrecharge);
-    setDisplayPower(enable);
 #elif defined ST7565
     setDisplayResRatio(systemSettings.settings.displayResRatio);        // Only for ST7565
 #endif
+    setDisplayPower(enable);
     ironInit(&READ_TIMER, &PWM_TIMER,PWM_CHANNEL);
     RE_Init((RE_State_t *)&RE1_Data, ENC_L_GPIO_Port, ENC_L_Pin, ENC_R_GPIO_Port, ENC_R_Pin, ENC_SW_GPIO_Port, ENC_SW_Pin);
     oled_init(&RE_Get,&RE1_Data);
