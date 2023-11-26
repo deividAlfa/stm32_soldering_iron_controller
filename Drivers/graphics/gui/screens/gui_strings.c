@@ -964,13 +964,13 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #endif
 
 #ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
-      .SWITCH_OFF_REMINDER_Title               = "關機提醒",
-      .SWITCH_OFF_REMINDER_EnableDisableOption = "定時提醒",
-      .SWITCH_OFF_REMINDER_InactivityDelay     = "等待延時",
-      .SWITCH_OFF_REMINDER_ReminderPeriod     = "蜂鳴間隔",
-      .SWITCH_OFF_REMINDER_TimeUnit            = "m",
-      .SWITCH_OFF_REMINDER_BeepType            = "蜂鳴時間",
-      .SWITCH_OFF_REMINDER_BeepTypes           = {"短" ,"中" ,"長"},
+      .SWITCH_OFF_REMINDER_Title                = "關機提醒",
+      .SWITCH_OFF_REMINDER_EnableDisableOption  = "定時提醒",
+      .SWITCH_OFF_REMINDER_InactivityDelay      = "等待延時",
+      .SWITCH_OFF_REMINDER_ReminderPeriod       = "蜂鳴間隔",
+      .SWITCH_OFF_REMINDER_TimeUnit             = "m",
+      .SWITCH_OFF_REMINDER_BeepType             = "蜂鳴時間",
+      .SWITCH_OFF_REMINDER_BeepTypes            = { "短", "中", "長" },
 #endif
 
       .IRON_Max_Temp = "最高溫度",
@@ -1030,8 +1030,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #else
       .DISPLAY_ContrastOrBrightness = "對比度",
 #endif
-      .DISPLAY_StartColumn = "X",
-      .DISPLAY_StartLine = "Y",
+      .DISPLAY_StartColumn = "Ｘ軸起點",
+      .DISPLAY_StartLine = "Ｙ軸起點",
       .DISPLAY_Xflip = "上下翻轉",
       .DISPLAY_Yflip = "左右翻轉",
       .DISPLAY_Ratio = "比例",
