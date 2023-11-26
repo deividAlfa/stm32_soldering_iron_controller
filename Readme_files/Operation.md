@@ -296,9 +296,12 @@ Reset everything.<br>
 Adjust the display settings:<br>
     - **Contrast**<br>
 Screen Contrast/brightness.<br>
-    - **Offset**<br>
+    - **X (Offset)**<br>
 This adjustment will modify the horizontal position.<br>
 Some screens have different internal layout, shifting the picture position, this will fix it.<br>
+    - **Y (Offset)**<br>
+This adjustment will modify the vertical position.<br>
+As the previous setting, some screens have different internal layout, shifting the picture position.<br>
     - **X flip**<br>
 Toggles screen horizontal flip.<br>
     - **Y flip**<br>
