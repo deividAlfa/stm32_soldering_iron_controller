@@ -332,7 +332,7 @@ void update_display( void ){
 }
 
 void setDisplayRow(uint8_t row){
-  uint8_t cmd[] = { c_page | row, c_col_H, c_col_L | systemSettings.settings.displayOffset };
+  uint8_t cmd[] = { c_page | row, c_col_H, c_col_L | systemSettings.settings.displayStartColumn };
   for(uint8_t i=0; i<sizeof(cmd); i++)
       lcd_write(&cmd[i], 1, modeCmd);     // Normal
 }
@@ -401,6 +401,11 @@ uint8_t getDisplayContrastOrBrightness(void) {
   return lastContrast;
 }
 
+void setDisplayStartLine(uint8_t value) {
+  uint8_t cmd [] = { c_start_line | value };
+  lcd_write(cmd, sizeof(cmd), modeCmd);
+}
+
 #if !defined DISPLAY_DEVICE
 void lcd_init(DMA_HandleTypeDef *dma){
   enable_soft_mode();
@@ -435,7 +440,7 @@ void lcd_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 #endif
   HAL_IWDG_Refresh(&hiwdg);                       // Clear watchdog
   HAL_Delay(200);                                 // 200mS wait for internal initialization
-  systemSettings.settings.displayOffset = 2;         // Set by default while system settings are not loaded
+  systemSettings.settings.displayStartColumn = 2;         // Set by default while system settings are not loaded
   HAL_IWDG_Refresh(&hiwdg);                       // Clear watchdog
 
 #if defined DISPLAY_I2C && defined DISPLAY_DEVICE && defined I2C_TRY_HW
@@ -541,7 +546,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
       return;                                           // Return without re-triggering DMA.
     }
     {
-      uint8_t cmd[] = { c_page | oled.row, c_col_H, c_col_L | systemSettings.settings.displayOffset };
+      uint8_t cmd[] = { c_page | oled.row, c_col_H, c_col_L | systemSettings.settings.displayStartColumn };
       for(uint8_t i=0; i<sizeof(cmd); i++)
         _lcd_write(&cmd[i], 1, modeCmd);
     }
@@ -696,5 +701,5 @@ void Oled_error_init(void){
   u8g2_SetFont(&u8g2,u8g2_font_menu);
   u8g2_SetDrawColor(&u8g2, WHITE);
   u8g2_SetMaxClipWindow(&u8g2);
-  systemSettings.settings.displayOffset = DISPLAY_OFFSET;
+  systemSettings.settings.displayStartColumn = DISPLAY_START_COLUMN;
 }

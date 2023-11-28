@@ -13,7 +13,7 @@
 #include "board.h"
 
 #define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
-#define SETTINGS_VERSION  23                                        // Change this if you change the settings/profile struct to prevent getting out of sync
+#define SETTINGS_VERSION  24                                        // Change this if you change the settings/profile struct to prevent getting out of sync
 #define LANGUAGE_COUNT    7                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
 #define NUM_TIPS          35                                        // Number of tips for each profile
@@ -223,7 +223,8 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       state;              // Always 0xFF if flash is erased
   uint8_t       language;
   uint8_t       contrastOrBrightness;
-  uint8_t       displayOffset;
+  uint8_t       displayStartColumn;
+  uint8_t       displayStartLine;
   __attribute__((packed)) struct {
     uint8_t       displayXflip : 1;
     uint8_t       displayYflip : 1;

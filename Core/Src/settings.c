@@ -28,7 +28,8 @@ const settings_t defaultSettings = {
   .dim_mode             = dim_always,
   .dim_Timeout          = 10000,                // ms
   .dim_inSleep          = enable,
-  .displayOffset        = DISPLAY_OFFSET,
+  .displayStartColumn   = DISPLAY_START_COLUMN,
+  .displayStartLine     = DISPLAY_START_LINE,
   .displayXflip         = 1,
 #ifdef SSD1306
   .displayClk           = 0xF0,
