@@ -25,7 +25,8 @@ Third generation KSGER, all boards have a 6-pin OLED connector, this layout is a
 
 #### **Bad LDO design! Read [LDO issues](https://github.com/deividAlfa/stm32_soldering_iron_controller#ksger-self-resetting)**
 <img src="/Readme_files/boards/ksger_v3_1.jpg">
-<br>
+
+#### **Bad LDO design! Read [LDO issues](https://github.com/deividAlfa/stm32_soldering_iron_controller#ksger-self-resetting)**
 <img src="/Readme_files/boards/ksger_v3_2.jpg">
 <br>
 <img src="/Readme_files/boards/ksger_v3_3.jpg">
