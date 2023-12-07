@@ -96,7 +96,7 @@ There are some hacks / vulnerabilities that can be used to backup protected firm
 
 ### Display issues
 If the display has right/left line like this picture: Go to [`System`](Readme_files/Operation.md#system) > `Offset` menu and adjust the value until it's centered.<br>
-<img src="/Readme_files/oled_offset.jpg?raw=true" width="320">
+<img src="/Readme_files/oled_offset.jpg" width="320">
 
 ### Temperature unstability
 By default, never modify any PWM or Delay settings in the [`Iron`](Readme_files/Operation.md#iron) menu. Doing so may cause such issues.<br>
