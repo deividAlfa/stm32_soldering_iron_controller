@@ -9,7 +9,7 @@ Usually the board will have a connector with pins named "G V C D" (GND, VDD, SWC
 If not named, just use a multimeter and check which pins goes where.<br>
 Then connection is as follows.<br>
 **Connect VDD only if not being powered by station power supply!**<br>
-<img src="/Readme_files/stlink_connection.jpg?raw=true">
+<img src="/Readme_files/stlink_connection.jpg">
 
 ## Clone detection
 
@@ -28,7 +28,7 @@ A genuine STM32F101/102/103Cx/Rx should have any of these codes:
 > 20016410<br>
 > 20036410
 
-<img src="/Readme_files/dbgmcu_id.png?raw=true">
+<img src="/Readme_files/dbgmcu_id.png">
 
 
 ## Programming with STM32 ST-LINK Utility
@@ -39,13 +39,13 @@ Download the binary for your station from [Releases](https://github.com/deividAl
 
 Usually the STM32 comes read-protected. Follow this workflow to program it.<br>
 (Click for bigger picture)<br>
-<img src="/Readme_files/st-link_programming.png?raw=true">
+<img src="/Readme_files/st-link_programming.png">
 
 ### Upgrading
 
 Just open and program the new binary.<br>
 Because this firmware stores the settings in the flash, don't make a full chip erase!<br>
-<img src="/Readme_files/upgrade.png?raw=true"><br>
+<img src="/Readme_files/upgrade.png"><br>
 
 In any case, the firmware will check the settings and reset them if not valid.
 
@@ -62,7 +62,7 @@ Usually on the controller board `nRST` pin is connected to a capacitor, only req
 1. Download the binary for your station from [Releases](https://github.com/deividAlfa/stm32_soldering_iron_controller/releases) and rename it to **fw.bin**
 1. Install [OpenOCD](https://openocd.org/)<br>
    If running Ubuntu/Debian install with `$ sudo apt install openocd`<br>
-1. Create a file with the following content or [download it](/ocd-program.cfg?raw=true)
+1. Create a file with the following content or [download it](/ocd-program.cfg)
     ```
     source [find interface/stlink.cfg]
     source [find target/stm32f1x.cfg]
