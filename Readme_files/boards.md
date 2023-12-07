@@ -30,6 +30,9 @@ Third generation KSGER, all boards have a 6-pin OLED connector, this layout is a
 <br>
 <img src="/Readme_files/boards/ksger_v3_3.jpg">
 
+#### **Bad LDO design! Read [LDO issues](https://github.com/deividAlfa/stm32_soldering_iron_controller#ksger-self-resetting)**
+<img src="/Readme_files/boards/ksger_v3_4.jpg">
+
 ## Quicko F072 / F103
 The board is the same for both, only the cpu changes.<br>
 Check whether it has a STM32F072 or STM32F103 and choose the correct firmware accordingly.<br>
