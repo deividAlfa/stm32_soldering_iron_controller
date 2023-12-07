@@ -1,0 +1,36 @@
+# Board database 
+Note: The're no differences between 48 and 64-pin MCUs layouts, they use the same pin names, thus the same firmware applies.<br><br> 
+## Ksger v1
+First generation KSGER, all boards have a 7-pin OLED connector, no other versions seem to exist.<br>
+<br>
+<img src="/Readme_files/boards/ksger_v1.jpg">
+<br>
+## Ksger v2
+Second generation KSGER, all boards have a 4-pin OLED connector, this is the most common layout used by other parties like Quecoo, Quicko, JCD, Handskit...<br>
+<br>
+<img src="/Readme_files/boards/ksger_v2_1.jpg">
+<br>
+<img src="/Readme_files/boards/ksger_v2_2.jpg">
+<br>
+<img src="/Readme_files/boards/ksger_v2_3.jpg">
+<br>
+<img src="/Readme_files/boards/ksger_v2_4.jpg">
+<br>
+<img src="/Readme_files/boards/ksger_v2_5.jpg">
+<br>
+<img src="/Readme_files/boards/ksger_v2_6.jpg">
+
+## Ksger v3
+Third generation KSGER, all boards have a 6-pin OLED connector, this layout is also used in other controllers.<br>
+<br>
+<img src="/Readme_files/boards/ksger_v3_1.jpg">
+<br>
+<img src="/Readme_files/boards/ksger_v3_2.jpg">
+<br>
+<img src="/Readme_files/boards/ksger_v3_3.jpg">
+
+## Quicko F072 / F103)
+Board is the same, only the cpu changes, check whether it has a STM32F072 or STM32F103 and choose the correct firmware accordingly.<br>
+<br>
+<img src="/Readme_files/boards/quicko.jpg">
+<br>
