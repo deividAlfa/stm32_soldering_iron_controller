@@ -6,10 +6,12 @@ First generation KSGER, all boards have a 7-pin OLED connector, no other version
 <img src="/Readme_files/boards/ksger_v1.jpg">
 <br>
 ## Ksger v2
-Second generation KSGER, all boards have a 4-pin OLED connector, this is the most common layout used by other parties like Quecoo, Quicko, JCD, Handskit...<br>
-<br>
+Second generation KSGER, all boards have a 4-pin OLED connector, this is the most common layout used by other parties like Quecoo, Quicko, JCD, Handskit...
+
+#### **Bad LDO design! Read [LDO issues](https://github.com/deividAlfa/stm32_soldering_iron_controller#ksger-self-resetting)**
 <img src="/Readme_files/boards/ksger_v2_1.jpg">
-<br>
+
+#### **Bad LDO design! Read [LDO issues](https://github.com/deividAlfa/stm32_soldering_iron_controller#ksger-self-resetting)**
 <img src="/Readme_files/boards/ksger_v2_2.jpg">
 <br>
 <img src="/Readme_files/boards/ksger_v2_3.jpg">
@@ -17,20 +19,20 @@ Second generation KSGER, all boards have a 4-pin OLED connector, this is the mos
 <img src="/Readme_files/boards/ksger_v2_4.jpg">
 <br>
 <img src="/Readme_files/boards/ksger_v2_5.jpg">
-<br>
-<img src="/Readme_files/boards/ksger_v2_6.jpg">
 
 ## Ksger v3
 Third generation KSGER, all boards have a 6-pin OLED connector, this layout is also used in other controllers.<br>
-<br>
+
+#### **Bad LDO design! Read [LDO issues](https://github.com/deividAlfa/stm32_soldering_iron_controller#ksger-self-resetting)**
 <img src="/Readme_files/boards/ksger_v3_1.jpg">
 <br>
 <img src="/Readme_files/boards/ksger_v3_2.jpg">
 <br>
 <img src="/Readme_files/boards/ksger_v3_3.jpg">
 
-## Quicko F072 / F103)
-Board is the same, only the cpu changes, check whether it has a STM32F072 or STM32F103 and choose the correct firmware accordingly.<br>
+## Quicko F072 / F103
+The board is the same for both, only the cpu changes.<br>
+Check whether it has a STM32F072 or STM32F103 and choose the correct firmware accordingly.<br>
 <br>
 <img src="/Readme_files/boards/quicko.jpg">
 <br>
