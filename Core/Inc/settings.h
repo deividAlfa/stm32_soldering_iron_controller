@@ -13,12 +13,14 @@
 #include "board.h"
 
 #define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
-#define SETTINGS_VERSION  24                                        // Change this if you change the settings/profile struct to prevent getting out of sync
+#define SYSTEM_SETTINGS_VERSION   25                                // Change this if you change the system settings struct to prevent getting out of sync
+#define PROFILE_SETTINGS_VERSION  1                                 // Same, but for profile settings struct
+
 #define LANGUAGE_COUNT    7                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
 #define NUM_TIPS          35                                        // Number of tips for each profile
-#define TIP_LEN           8                                        // String size for each tip name (Including null termination)
-#define _BLANK_TIP        "        "                              // Empty tip name, containing (TIP_LEN) spaces. Defined here for quick updating if TIP_LEN is modified.
+#define TIP_LEN           8                                         // String size for each tip name (Including null termination)
+#define _BLANK_TIP        "        "                                // Empty tip name, containing (TIP_LEN) spaces. Defined here for quick updating if TIP_LEN is modified.
 
 #ifndef PROFILE_VALUES
 
@@ -166,7 +168,7 @@ __attribute__((aligned(4))) typedef struct{
 }ntc_data_t;
 
 __attribute__((aligned(4))) typedef struct{
-  uint8_t       state;                // Always 0xFF if flash is erased
+  uint8_t       version;                // Always 0xFF if flash is erased, used to detect blank flash, or settings version mismatch
   uint8_t       ID;
   uint8_t       impedance;
   uint8_t       tempUnit;
@@ -181,6 +183,7 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       smartActiveLoad;
   uint8_t       standDelay;
   uint8_t       : 8; // reserved
+  uint8_t       : 8;
   uint8_t       : 8;
   uint8_t       : 8;
   uint8_t       : 8;
@@ -205,7 +208,6 @@ __attribute__((aligned(4))) typedef struct{
   uint16_t      : 16;
   uint16_t      : 16;
   uint16_t      : 16;
-  uint16_t      : 16;
   tipData_t     tip[NUM_TIPS];
   uint32_t      errorTimeout;
   uint32_t      boostTimeout;
@@ -215,12 +217,10 @@ __attribute__((aligned(4))) typedef struct{
   uint32_t      : 32;
   uint32_t      : 32;
   uint32_t      : 32;
-  uint32_t      : 32;
 }profile_t;
 
 __attribute__((aligned(4))) typedef struct{
-  uint32_t      version;            // Used to track if a reset is needed on firmware upgrade
-  uint8_t       state;              // Always 0xFF if flash is erased
+  uint8_t      version;                // Always 0xFF if flash is erased, used to detect blank flash, or settings version mismatch
   uint8_t       language;
   uint8_t       contrastOrBrightness;
   uint8_t       displayStartColumn;
@@ -236,14 +236,14 @@ __attribute__((aligned(4))) typedef struct{
 #endif
   };
 
-  unsigned      rememberLastProfile :1;
-  unsigned      rememberLastTemp    :1;
-  unsigned      rememberLastTip     :1;
-  unsigned      dim_inSleep         :1;
-  unsigned      EncoderMode         :1;
-  unsigned      debugEnabled        :1;
-  unsigned      activeDetection     :1;
-  unsigned      clone_fix           :1;
+  uint8_t       rememberLastProfile;
+  uint8_t       rememberLastTemp;
+  uint8_t       rememberLastTip;
+  uint8_t       dim_inSleep;
+  uint8_t       EncoderMode;
+  uint8_t       debugEnabled;
+  uint8_t       activeDetection;
+  uint8_t       clone_fix;
   uint8_t       dim_mode;
   uint8_t       bootProfile;
   uint8_t       initMode;
@@ -255,15 +255,10 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       buttonWakeMode;
   uint8_t       shakeWakeMode;
   uint8_t       lvp;
-#ifdef SSD1306
   uint8_t       displayVcom;
   uint8_t       displayClk;
   uint8_t       displayPrecharge;
-#else
   uint8_t       : 8; // reserved
-  uint8_t       : 8;
-  uint8_t       : 8;
-#endif
   uint8_t       : 8;
   uint8_t       : 8;
   uint8_t       : 8;
@@ -277,8 +272,12 @@ __attribute__((aligned(4))) typedef struct{
   uint16_t      : 16;
   uint16_t      : 16;
   uint16_t      : 16;
+  uint16_t      : 16;
+  uint16_t      : 16;
+  uint16_t      : 16;
   uint32_t      dim_Timeout;
   uint32_t      : 32; // reserved
+  uint32_t      : 32;
   uint32_t      : 32;
   uint32_t      : 32;
   uint32_t      : 32;

@@ -218,7 +218,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 void boot_screen_init(screen_t * scr){
   default_init(scr);
   profile=systemSettings.currentProfile;
-  if( (systemSettings.settings.state!=initialized) || (profile>profile_C210) ){
+  if( (systemSettings.settings.version!=SYSTEM_SETTINGS_VERSION) || (profile>profile_C210) ){
     profile=profile_T12;
     setSafeMode(enable);
     systemSettings.setupMode=enable;

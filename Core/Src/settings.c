@@ -19,7 +19,7 @@
 #endif
 
 const settings_t defaultSettings = {
-  .version              = (~((uint32_t)SETTINGS_VERSION<<16)&0xFFFF0000) | SETTINGS_VERSION,  // Higher 16bit is 1s complement to make detection stronger
+  .version              =  SYSTEM_SETTINGS_VERSION,
 #ifdef ST7565
   .contrastOrBrightness = 34,
 #else
@@ -59,7 +59,6 @@ const settings_t defaultSettings = {
   .debugEnabled         = disable,
   .language             = lang_english,
   .clone_fix            = disable,
-  .state                = initialized,
 };
 
 #ifdef ENABLE_ADDONS
@@ -382,7 +381,7 @@ static void saveSettings(uint8_t mode){
   configurePWMpin(output_Low);
   __enable_irq();
 
-  if( (systemSettings.settings.state!=initialized) || (systemSettings.Profile.state!=initialized) ){
+  if(systemSettings.settings.version!=SYSTEM_SETTINGS_VERSION){
     Error_Handler();
   }
 
@@ -396,15 +395,18 @@ static void saveSettings(uint8_t mode){
   flashBufferAddons->addonSettings = systemSettings.addonSettings;
 #endif
 
-  if((mode==keepProfiles) && (profile<=profile_C210) && (systemSettings.Profile.ID == profile )){
-    systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
-    flashBufferProfiles->ProfileChecksum[profile] = systemSettings.ProfileChecksum;
-    flashBufferProfiles->Profile[profile] = systemSettings.Profile;
+  if(mode==keepProfiles){
+    if((profile<=profile_C210) && (systemSettings.Profile.ID == profile )){
+      systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
+      flashBufferProfiles->ProfileChecksum[profile] = systemSettings.ProfileChecksum;
+      flashBufferProfiles->Profile[profile] = systemSettings.Profile;
+    }
+    // Else unknown profile, probably profile_none (Resetted system settings) leave it untouched, let restoreProfile check it out and reset defaults if necessary.
   }
   else{
     mode = wipeProfiles;
     for(uint8_t x=0;x<NUM_PROFILES;x++){
-      flashBufferProfiles->Profile[x].state = 0xFF;
+      flashBufferProfiles->Profile[x].version = 0xFF;
       flashBufferProfiles->ProfileChecksum[x] = 0xFFFFFFFF;
       memset(&flashBufferProfiles->Profile[x],0xFF,sizeof(profile_t));
     }
@@ -418,12 +420,14 @@ static void saveSettings(uint8_t mode){
   writeFlash((uint32_t*)flashBufferAddons, sizeof(flashSettingsAddons_t), (uint32_t)&flashAddonSettings);
 #endif
 
+  // Check flash and profile settings have same checksum
   if(mode==keepProfiles){
-    uint32_t ProfileFlash  = ChecksumProfile(&flashProfilesSettings.Profile[profile]);
-    uint32_t ProfileRam    = ChecksumProfile(&systemSettings.Profile);
-
-    if(ProfileFlash != ProfileRam){
-      Flash_error();
+    for(uint8_t x=0;x<NUM_PROFILES;x++){
+      uint32_t ProfileFlash  = ChecksumProfile(&flashProfilesSettings.Profile[x]);
+      uint32_t ProfileRam    = ChecksumProfile(&flashBufferProfiles->Profile[x]);
+      if(ProfileFlash != ProfileRam){
+        Flash_error();
+      }
     }
   }
 
@@ -466,27 +470,20 @@ void restoreSettings() {
   return;
 #endif
 
-  if(flashGlobalSettings.settings.state != initialized){
-    resetSystemSettings();
+  if(flashGlobalSettings.settings.version != SYSTEM_SETTINGS_VERSION){            // System settings version mismatch
+    resetSystemSettings();                                                        // Reset current settings
 #ifdef ENABLE_ADDONS
     resetAddonSettings();
 #endif
-    saveSettings(wipeProfiles);
+    loadProfile(systemSettings.settings.bootProfile);
+    saveSettings(keepProfiles);
   }
   else{
     Button_reset();
   }
 
-  if(flashGlobalSettings.settings.version!=defaultSettings.version){    // Silent reset if version mismatch
-    resetSystemSettings();
-    saveSettings(wipeProfiles);
-    resetAddonSettings();
-  }
-  else{
-    systemSettings.settings = flashGlobalSettings.settings;
-    systemSettings.settingsChecksum = flashGlobalSettings.settingsChecksum;
-  }
-
+  systemSettings.settings = flashGlobalSettings.settings;
+  systemSettings.settingsChecksum = flashGlobalSettings.settingsChecksum;
 
   if(ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum){   // Show error message if bad checksum
     checksumError(reset_All);
@@ -752,22 +749,22 @@ static void resetCurrentProfile(void){
   systemSettings.Profile.smartActiveLoad            = 30;
   systemSettings.Profile.standDelay                 = 0;
   systemSettings.Profile.StandMode                  = mode_sleep;
-  systemSettings.Profile.state                      = initialized;
+  systemSettings.Profile.version                    = PROFILE_SETTINGS_VERSION;
 }
 
 void loadProfile(uint8_t profile){
+  uint8_t p = profile;
+  if(profile>profile_C210){
+    profile = profile_T12;                            // If profile not valid, set T12 by default
+  }
+
   while(ADC_Status!=ADC_Idle);
   __disable_irq();
   HAL_IWDG_Refresh(&hiwdg);
   systemSettings.currentProfile=profile;
-  if(profile==profile_None){                                                    // If profile not initialized yet, use T12 values until the system is configured
-    systemSettings.currentProfile=profile_T12;                         // Force T12 profile
-    resetCurrentProfile();                                                      // Load default data
-    systemSettings.currentProfile=profile_None;                        // Revert to none to trigger setup screen
-  }
-  else if(profile<=profile_C210){                                               // If valid profile
-    if(flashProfilesSettings.Profile[profile].state!=initialized){                      // If flash profile not initialized
-      resetCurrentProfile();                                                    // Load defaults
+  if(profile<=profile_C210){                                                                  // If valid profile
+    if(flashProfilesSettings.Profile[profile].version != PROFILE_SETTINGS_VERSION){           // If flash profile not initialized or version mismatch
+      resetCurrentProfile();                                                                  // Load defaults silently
       systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
     }
     else{
@@ -787,6 +784,9 @@ void loadProfile(uint8_t profile){
   setCurrentTip(systemSettings.Profile.defaultTip);
   TIP.filter=systemSettings.Profile.tipFilter;
   ironSchedulePwmUpdate();
+  if(p==profile_None){                                     // If profile not set, revert to profile_none to trigger setup screen
+    systemSettings.currentProfile = p;
+  }
   __enable_irq();
 }
 
