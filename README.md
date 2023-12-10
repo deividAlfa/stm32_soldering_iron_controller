@@ -38,6 +38,10 @@ Video of operation here: (Project in active development, the features will chang
 
 ## Compatibility
 
+Check [Boards readme](Readme_files/boards.md) for quick identification.<br>
+[BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder contains the build profiles and some schematics / pictures.<br>
+Visit [Dreamcat4 T12 controllers](https://github.com/dreamcat4/t12-t245-controllers-docs), for more pictures and schematics.<br>
+**KSGER Combo station is not supported!**<br><br>
 The actual requirements are 10KB RAM and 64KB **(\*)** flash.<br>
 **(\*)** Currently the firmware has surpassed the 64KB limit, and uses the additional undocumented 64KB flash block.<br>
 **(\*)** All 64KB devices have 128KB, with the second 64KB block untested from the factory, so not guaranteed to work.<br>
@@ -54,17 +58,15 @@ There's a new experimental workaround for clones, try enabling `Clone fix` in [`
 
 If your board came with a clone, you can replace it with a STM32F101/102/103, they're pin-compatible.<br>
 
-The [BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder has the board profiles and some schematics / pictures for quickly identify your hardware.<br>
-Check [Dreamcat4 T12 controllers](https://github.com/dreamcat4/t12-t245-controllers-docs), did a much better collection with T12 boards schematics and pictures.<br><br>
 Currently supported controllers:
-* **Quicko T12-072**: First gen Quicko, STM32F072 variant. Compatibility was fixed in v1.04. [Old version](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/9f4b7f9565344e30a6ce1394d28350f82089488b/BOARDS/Quicko/STM32F072_SSD1306/STM32SolderingStation.bin).
-* **Quicko T12-103** First gen Quicko, STM32F103 variant.
+* **Quicko T12-072**: First gen Quicko, STM32F072 variant. Compatibility issues were fixed since v1.04. [Old version](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/9f4b7f9565344e30a6ce1394d28350f82089488b/BOARDS/Quicko/STM32F072_SSD1306/STM32SolderingStation.bin).
+* **Quicko T12-103** First gen Quicko, same board but mounting a STM32F103.
 * **KSGER v1.5**: Profile for STM32F103 (There are no other known CPUs used in this board).
 * **KSGER v2**,   **JCD T12**, **T12-955**, **Handskit**: Profile compatible with all STM32F101/2/3xx models.
 * **KSGER v3**,   **T12-958**: Profile compatible with all STM32F101/2/3xx models.
 
 Don't follow the version reported in the original firmware to identify your board.<br>
-The easiest way to quickly identify your controller version is by looking at the OLED screen connection:
+To this day, the easiest way to quickly identify your controller version is by checking the OLED screen connection:
 - **4 pin** (I2C) = Generic v2 (KSGER/Quecoo/Handskit/etc.)
 - **6 pin** (SPI) = Generic v3
 - **7 pin** (SPI) = Only used by KSGER v1.5 or first gen Quicko, easy to differentiate.
@@ -94,7 +96,7 @@ There are some hacks / vulnerabilities that can be used to backup protected firm
 
 ### Display issues
 If the display has right/left line like this picture: Go to [`System`](Readme_files/Operation.md#system) > `Offset` menu and adjust the value until it's centered.<br>
-<img src="/Readme_files/oled_offset.jpg?raw=true" width="320">
+<img src="/Readme_files/oled_offset.jpg" width="320">
 
 ### Temperature unstability
 By default, never modify any PWM or Delay settings in the [`Iron`](Readme_files/Operation.md#iron) menu. Doing so may cause such issues.<br>

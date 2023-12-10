@@ -42,17 +42,22 @@ U8g2 font structure mix octal and char representation to be as compact as possib
 So when a characters starts with escape(\) the next 1,2,3 numbers will be the octal representation, a single byte.
 But you might also find any other symbol, like spaces, letters, these are a signle character.
 
-The default fonts report too much height and need to be patched manually:
+The default fonts report wrong height and need to be patched manually:
 
 For u8g2_font_menu, replace the 10th byte, in this case \21, with \17
 Original:  "\257\0\3\2\4\4\4\4\5\10\21\0\375\12\375\13\377\1\207\3\42\5' \5\0\210\30!\7\241\214"
 Modified:  "\257\0\3\2\4\4\4\4\5\10\17\0\375\12\375\13\377\1\207\3\42\5' \5\0\210\30!\7\241\214"
-                                     ^
+                                    ^
 
 For u8g2_font_small, replace the 10th byte, in this case \17, with \12.
 Original:  "\257\0\3\2\4\4\2\4\5\11\17\0\375\10\376\10\376\1T\2\274\4k \5\0b\5!\6\201\343"
 Modified:  "\257\0\3\2\4\4\2\4\5\11\12\0\375\10\376\10\376\1T\2\274\4k \5\0b\5!\6\201\343"
-                                     ^
+                                    ^
+
+For u8g2_font_iron_temp, replace the 10th byte, in this case \42 with \45.
+Original:  "\16\0\5\4\5\6\4\6\7 \42\0\377 \367 \365\0\0\0\0\2Q-\11\214@\225\11~`\0"
+Modified:  "\16\0\5\4\5\6\4\6\7 \45\0\377 \367 \365\0\0\0\0\2Q-\11\214@\225\11~`\0"
+                                 ^
 
 Copy the contents of the generated files (not the files), and replace the existing sections at the beginning of Drivers/graphics/gui/u8g2/u8g2_fonts.c
 Then, open Drivers/graphics/gui/u8g2/u8g2.h and update the font size with the new values (ex. const uint8_t u8g2_font_small[2073])
