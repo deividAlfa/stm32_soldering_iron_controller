@@ -38,9 +38,9 @@ Video of operation here: (Project in active development, the features will chang
 
 ## Compatibility
 
-Check [Boards readme](Readme_files/boards.md) for quick identification.<br>
-[BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder contains the build profiles and some schematics / pictures.<br>
-Visit [Dreamcat4 T12 controllers](https://github.com/dreamcat4/t12-t245-controllers-docs), for more pictures and schematics.<br>
+Check [Boards readme](Readme_files/boards.md) for quick board identification.<br>
+Visit [Dreamcat4 T12 controllers](https://github.com/dreamcat4/t12-t245-controllers-docs) for more pictures and schematics.<br>
+[BOARDS](https://github.com/deividAlfa/stm32_soldering_iron_controller/tree/master/BOARDS) folder contains the build profiles.<br>
 **KSGER Combo station is not supported!**<br><br>
 The actual requirements are 10KB RAM and 64KB **(\*)** flash.<br>
 **(\*)** Currently the firmware has surpassed the 64KB limit, and uses the additional undocumented 64KB flash block.<br>
