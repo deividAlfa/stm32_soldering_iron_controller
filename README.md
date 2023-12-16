@@ -103,7 +103,9 @@ Most boards have a battery connector for the RTC, can be used to store the tempe
 - Compile and flash.
 
 ### Display issues
-If the display has right/left line like this picture: Go to [`System`](Readme_files/Operation.md#system) > `Offset` menu and adjust the value until it's centered.<br>
+If the display has right/left line or is vertically shifted:<br>
+- Go to [`System`](Readme_files/Operation.md#system) > `Display` menu.<br>
+- Adjust `X/Y Offsets` until it's centered.<br>
 <img src="/Readme_files/oled_offset.jpg" width="320">
 
 ### Temperature unstability
