@@ -26,6 +26,8 @@ This is the most common layout used by other parties like Quecoo, Quicko, JCD, H
 <img src="/Readme_files/boards/ksger_v2_6.jpg">
 
 <img src="/Readme_files/boards/ksger_v2_7.jpg">
+
+<img src="/Readme_files/boards/ksger_v2_8.jpg">
 <br>
 
 ## Ksger v3
