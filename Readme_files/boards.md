@@ -15,14 +15,13 @@ This is the most common layout used by other parties like Quecoo, Quicko, JCD, H
 
 #### Bad LDO design! Read [LDO issues](https://github.com/deividAlfa/stm32_soldering_iron_controller#ksger-self-resetting)
 <img src="/Readme_files/boards/ksger_v2_2.jpg">
-<br>
+
 <img src="/Readme_files/boards/ksger_v2_3.jpg">
-<br>
+
 <img src="/Readme_files/boards/ksger_v2_4.jpg">
-<br>
+
 <img src="/Readme_files/boards/ksger_v2_5.jpg">
 
-#### Bad LDO design! Read [LDO issues](https://github.com/deividAlfa/stm32_soldering_iron_controller#ksger-self-resetting) (But large regulator, might tolerate the heat)
 <img src="/Readme_files/boards/ksger_v2_6.jpg">
 
 <img src="/Readme_files/boards/ksger_v2_7.jpg">
@@ -38,7 +37,7 @@ Third generation KSGER, all boards have a 6-pin OLED connector, this layout is a
 
 #### Bad LDO design! Read [LDO issues](https://github.com/deividAlfa/stm32_soldering_iron_controller#ksger-self-resetting)
 <img src="/Readme_files/boards/ksger_v3_2.jpg">
-<br>
+
 <img src="/Readme_files/boards/ksger_v3_3.jpg">
 
 #### Bad LDO design! Read [LDO issues](https://github.com/deividAlfa/stm32_soldering_iron_controller#ksger-self-resetting)
