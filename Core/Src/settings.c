@@ -46,9 +46,7 @@ const settings_t defaultSettings = {
   .tempStep             = 5,                    // 5º steps
   .tempBigStep          = 20,                   // 20º big steps
   .activeDetection      = true,
-  .rememberLastProfile  = true,
-  .rememberLastTemp     = false,
-  .rememberLastTip      = true,
+  .hasBattery           = false,
   .lvp                  = 110,                  // 11.0V Low voltage
   .bootProfile          = profile_None,
   .initMode             = mode_sleep,           // Safer to boot in sleep mode by default!
@@ -105,11 +103,10 @@ __attribute__((aligned(4))) typedef struct{
 __attribute__((section(".addonSettings"))) flashSettingsAddons_t flashAddonSettings;
 #endif
 
-#ifndef HAS_BATTERY
 __attribute__((section(".tempSetpoint"))) uint16_t flashTempArray[1024];
 static uint16_t flashTempIndex;
 static uint16_t flashTemp;
-#endif
+
 
 systemSettings_t systemSettings;
 
@@ -122,10 +119,8 @@ static uint32_t ChecksumSettings(settings_t* settings);
 static uint32_t ChecksumProfile(profile_t* profile);
 static void resetSystemSettings(void);
 static void resetCurrentProfile(void);
-#ifndef HAS_BATTERY
 static void flashTempInit(void);
 static void writeflashTemp(uint16_t temperature);
-#endif
 
 #ifdef ENABLE_ADDONS
 static void loadAddonSettings(void);
@@ -133,7 +128,6 @@ static void resetAddonSettings();
 static uint32_t ChecksumAddons(addonSettings_t* addonSettings);
 #endif
 
-#ifdef HAS_BATTERY
 
 #define BACKUP_RAM_SIZE_IN_BYTES 20u
 #define NUM_BACKUP_RAM_REGISTERS (BACKUP_RAM_SIZE_IN_BYTES / 2u) // each register holds 2 byte of data in the lower nibble
@@ -163,7 +157,6 @@ static void writeBackupRam();
 
 static backupRamData_t bkpRamData;
 
-#endif
 
 extern int  __SETTINGS_SECTION_START; /* defined by the linker, only its address which is the target value */
 #define SETTINGS_SECTION_START ((uint32_t)&__SETTINGS_SECTION_START)
@@ -188,9 +181,7 @@ void checkSettings(void){
   return;
   #endif
 
-#ifndef HAS_BATTERY
   static uint16_t prevTemp            = 0u;
-#endif
   static uint32_t prevSysChecksum     = 0u;
   static uint32_t newSysChecksum      = 0u;
   static uint32_t prevTipChecksum     = 0u;
@@ -201,9 +192,8 @@ void checkSettings(void){
 #endif
   static uint32_t lastCheckTime       = 0u;
   static uint32_t lastChangeTime      = 0u;
-#ifndef HAS_BATTERY
   static uint32_t lastTempCheckTime      = 0u;
-#endif
+
   uint32_t CurrentTime = HAL_GetTick();
   uint8_t scr_index=current_screen->index;
 
@@ -216,28 +206,31 @@ void checkSettings(void){
                        scr_index == screen_calibration       ||
                        scr_index == screen_reset_confirmation);
 
-#ifndef HAS_BATTERY
-  if(systemSettings.settings.rememberLastProfile)
-  {
-    systemSettings.settings.bootProfile = systemSettings.currentProfile;
+  if(systemSettings.settings.hasBattery == true) {                                      // If battery enabled, save these settings to RTC SRAM instead
+    bkpRamData.values.lastProfile = systemSettings.currentProfile;
+    if(!getIronCalibrationMode() && scr_index != screen_debug)                          // Don't persist the temperature while calibration is in progress or in the debug screen
+    {
+      bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserSetTemperature();
+    }
+    bkpRamData.values.lastSelTip[systemSettings.currentProfile] = systemSettings.currentTip;
+    writeBackupRam();
   }
-  if(systemSettings.settings.rememberLastTip)
-  {
+  else {                                                                                // No battery, save to flash
+    systemSettings.settings.bootProfile = systemSettings.currentProfile;                // Update current tip / profile
     systemSettings.Profile.defaultTip = systemSettings.currentTip;
-  }
-
-  uint16_t currentTemp = getUserTemperature();                          // Get current temperature
-  if(flashTemp != currentTemp)                                          // Compare with stored in flash
-  {
-    if(prevTemp != currentTemp) {                                       // Store if different to last check
-      prevTemp = currentTemp;
-      lastTempCheckTime = CurrentTime;                                  // Start timeout
+                                                                                        // Special storage area for temperature setpoint
+    uint16_t currentTemp = getUserTemperature();                                        // Get current temperature
+    if(flashTemp != currentTemp)                                                        // Compare with stored in flash
+    {
+      if(prevTemp != currentTemp) {                                                     // Store if different to last check
+        prevTemp = currentTemp;
+        lastTempCheckTime = CurrentTime;                                                // Start timeout
+      }
+      else if((CurrentTime-lastTempCheckTime)>9999) {                                   // Different than flash and timeout is over
+        writeflashTemp(currentTemp);                                                    // Update temperature in flash
+      }
     }
-    else if((CurrentTime-lastTempCheckTime)>9999) {                     // Different than flash and timeout is over
-      writeflashTemp(currentTemp);                                      // Update temperature in flash
-    }
   }
-#endif
 
   // Save from menu
   if(systemSettings.save_Flag && allowSave){
@@ -315,16 +308,6 @@ void checkSettings(void){
       saveSettings(save_Settings);                             // Data was saved (so any pending interrupt knows this)
     }
   }
-
-  #ifdef HAS_BATTERY
-  bkpRamData.values.lastProfile = systemSettings.currentProfile;
-  if(!getIronCalibrationMode() && scr_index != screen_debug) // don't persist the temperature while calibration is in progress or in the debug screen
-  {
-    bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserSetTemperature();
-  }
-  bkpRamData.values.lastSelTip[systemSettings.currentProfile] = systemSettings.currentTip;
-  writeBackupRam();
-  #endif
 }
 
 
@@ -536,23 +519,19 @@ void restoreSettings() {
   loadAddonSettings();
 #endif
 
-#ifdef HAS_BATTERY
-  loadSettingsFromBackupRam();
-  if(systemSettings.settings.rememberLastProfile)
-  {
+  if(systemSettings.settings.hasBattery) {
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN; // power the BKP peripheral
+    PWR->CR      |= PWR_CR_DBP;                            // enable access to the BKP registers
+    BKP->CR       = 0u;                                    // disable tamper pin, just to be sure
+    loadSettingsFromBackupRam();
     loadProfile(bkpRamData.values.lastProfile);
-  }
-  if(systemSettings.settings.rememberLastTip)
-  {
     setCurrentTip(bkpRamData.values.lastSelTip[systemSettings.currentProfile]);
     ironSchedulePwmUpdate();
+    setUserTemperature(bkpRamData.values.lastTipTemp[systemSettings.currentProfile]);
   }
-#else
-  flashTempInit();
-#endif
+  else
+    flashTempInit();
 }
-
-#ifdef HAS_BATTERY
 
 void loadSettingsFromBackupRam(void)
 {
@@ -592,13 +571,6 @@ void loadSettingsFromBackupRam(void)
   }
 }
 
-void restoreLastSessionSettings(void)
-{
-  if(systemSettings.settings.rememberLastTemp)
-  {
-    setUserTemperature(bkpRamData.values.lastTipTemp[systemSettings.currentProfile]);
-  }
-}
 
 static void readBackupRam()
 {
@@ -624,8 +596,6 @@ static uint32_t ChecksumBackupRam(){
   checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)bkpRamData.bytes, sizeof(backupRamValues_t)/sizeof(uint32_t) );
   return checksum;
 }
-
-#else
 
 void flashTempInit(void) //call it only once during init
 {
@@ -668,7 +638,6 @@ void writeflashTemp(uint16_t temperature)
   flashTempIndex++;                                                                                                         // Increase index for next time
 }
 
-#endif
 
 static uint32_t ChecksumSettings(settings_t* settings){
   uint32_t checksum;

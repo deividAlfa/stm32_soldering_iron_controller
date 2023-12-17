@@ -84,7 +84,6 @@ typedef struct{
   char * FILTER__Min;
   char * FILTER_Reset_limit;
 
-  char * SYSTEM_Profile;
   char * SYSTEM_Boot;
   char * SYSTEM_Button_Wake;
   char * SYSTEM_Shake_Wake;
@@ -96,15 +95,10 @@ typedef struct{
   char * SYSTEM_Active_Detection;
   char * SYSTEM_LVP;
   char * SYSTEM_Gui_Time;
+  char * SYSTEM_Battery;
   char * SYSTEM_DEBUG;
   char * SYSTEM_CLONE_FIX;
   char * SYSTEM_RESET_MENU;
-  char * SYSTEM_Remember;
-  char * SYSTEM_RememberLastProfile;
-  char * SYSTEM_RememberLastTip;
-#ifdef HAS_BATTERY
-  char * SYSTEM_RememberLastTemp;
-#endif
 
   char * SYSTEM_DISPLAY_MENU;
 

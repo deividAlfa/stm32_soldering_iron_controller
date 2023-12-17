@@ -83,7 +83,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER__Min = " Min",
       .FILTER_Reset_limit = "Reset limit",
 
-      .SYSTEM_Profile = "Profile",
       .SYSTEM_Boot = "Boot",
       .SYSTEM_Button_Wake = "Btn wake",
       .SYSTEM_Shake_Wake = "Shake wake",
@@ -95,15 +94,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Active_Detection = "Active det.",
       .SYSTEM_LVP = "LVP",
       .SYSTEM_Gui_Time = "Gui time",
+      .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "DEBUG",
       .SYSTEM_CLONE_FIX = "Clone fix",
       .SYSTEM_RESET_MENU = "RESET MENU",
-      .SYSTEM_Remember = "Remember last",
-      .SYSTEM_RememberLastProfile = " Profile",
-      .SYSTEM_RememberLastTip = " Sel. tip",
-#ifdef HAS_BATTERY
-      .SYSTEM_RememberLastTemp = " Set temp",
-#endif
 
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 #ifndef ST756
@@ -266,7 +260,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER__Min = " Минимум",
       .FILTER_Reset_limit = "ПорогСброса",
 
-      .SYSTEM_Profile = "Тип",
       .SYSTEM_Boot = "Запуск с",
       .SYSTEM_Button_Wake = "Кнопка раб.",
       .SYSTEM_Shake_Wake = "Датчик раб.",
@@ -278,15 +271,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Active_Detection = "Проверка",
       .SYSTEM_LVP = "ПорогНапр.",
       .SYSTEM_Gui_Time = "Отрисовка",
+      .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "Отладка",
       .SYSTEM_CLONE_FIX = "ФиксКлонов",
       .SYSTEM_RESET_MENU = "МЕНЮ СБРОСА",
-      .SYSTEM_Remember = "  ЗАПОМИНАТЬ",
-      .SYSTEM_RememberLastProfile = " Профиль",
-      .SYSTEM_RememberLastTip = " Жало",
-#ifdef HAS_BATTERY
-      .SYSTEM_RememberLastTemp = " Температ.",
-#endif
       .SYSTEM_DISPLAY_MENU = "МЕНЮ ЭКРАНА",
 
 #ifndef ST756
@@ -450,7 +438,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER__Min = " Min",
       .FILTER_Reset_limit = "Resetgräns",
 
-      .SYSTEM_Profile = "Profil",
       .SYSTEM_Boot = "Startläge",
       .SYSTEM_Button_Wake = "Knappväck",
       .SYSTEM_Shake_Wake = "Skakväck",
@@ -462,15 +449,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Active_Detection = "Aktiv avk.",
       .SYSTEM_LVP = "LSS",
       .SYSTEM_Gui_Time = "Gui-tid",
+      .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "DEBUG",
       .SYSTEM_CLONE_FIX = "Klon-fix",
       .SYSTEM_RESET_MENU = "ÅTERST. MENY",
-      .SYSTEM_Remember = "Minnesfunkt.",
-      .SYSTEM_RememberLastProfile = " Profil",
-      .SYSTEM_RememberLastTip = " Spetsval",
-#ifdef HAS_BATTERY
-      .SYSTEM_RememberLastTemp = " Temp.inst.",
-#endif
 
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 #ifndef ST756
@@ -634,7 +616,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER__Min = " Min",
       .FILTER_Reset_limit = "Limit Reset",
 
-      .SYSTEM_Profile = "Profile",
       .SYSTEM_Boot = "Boot",
       .SYSTEM_Button_Wake = "Taster",
       .SYSTEM_Shake_Wake = "Bewegung",
@@ -646,15 +627,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Active_Detection = "Aktiv Erkenn.",
       .SYSTEM_LVP = "LVP",
       .SYSTEM_Gui_Time = "Gui Zeit",
+      .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "DEBUG",
       .SYSTEM_CLONE_FIX = "Clone fix",
       .SYSTEM_RESET_MENU = "RESET MENÜ",
-      .SYSTEM_Remember = "Remember last",
-      .SYSTEM_RememberLastProfile = " Profile",
-      .SYSTEM_RememberLastTip = " Sel. tip",
-#ifdef HAS_BATTERY
-      .SYSTEM_RememberLastTemp = " Set temp",
-#endif
 
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 #ifndef ST756
@@ -818,7 +794,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER__Min = " Düşük",
       .FILTER_Reset_limit = "Sıfırlandı",
 
-      .SYSTEM_Profile = "Profil",
       .SYSTEM_Boot = "Başlangıç",
       .SYSTEM_Button_Wake = "Düme Uyan",
       .SYSTEM_Shake_Wake = "Salla Uyan",
@@ -830,15 +805,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Active_Detection = "K.Yazı",
       .SYSTEM_LVP = "DVK",
       .SYSTEM_Gui_Time = "Gui zamanı",
+      .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "Geliştirici",
       .SYSTEM_CLONE_FIX = "Clone fix",
       .SYSTEM_RESET_MENU = "MENÜ SIFIRLA",
-      .SYSTEM_Remember = "Remember last",
-      .SYSTEM_RememberLastProfile = " Profile",
-      .SYSTEM_RememberLastTip = " Sel. tip",
-#ifdef HAS_BATTERY
-      .SYSTEM_RememberLastTemp = " Set temp",
-#endif
 
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
 #ifndef ST756
@@ -1002,7 +972,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER__Min = "└最小值",
       .FILTER_Reset_limit = "重設限制",
 
-      .SYSTEM_Profile = "烙鐵類型",
       .SYSTEM_Boot = "開機進入",
       .SYSTEM_Button_Wake = "按鈕喚醒",
       .SYSTEM_Shake_Wake = "搖晃喚醒",
@@ -1014,15 +983,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Active_Detection = "活動偵測",
       .SYSTEM_LVP = "低壓保護",
       .SYSTEM_Gui_Time = "顯示頻率",
+      .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "偵錯選單",
       .SYSTEM_CLONE_FIX = "克隆修正",
       .SYSTEM_RESET_MENU = "重設選單",
-      .SYSTEM_Remember = "記憶最後使用",
-      .SYSTEM_RememberLastProfile = "└烙鐵類型",
-      .SYSTEM_RememberLastTip = "└烙鐵頭",
-#ifdef HAS_BATTERY
-      .SYSTEM_RememberLastTemp = "└烙鐵溫度",
-#endif
 
       .SYSTEM_DISPLAY_MENU = "螢幕設定",
 #ifndef ST756
@@ -1186,7 +1150,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER__Min = " Мин.",
       .FILTER_Reset_limit = "Нулир.огрнч.",
 
-      .SYSTEM_Profile = "Профил",
       .SYSTEM_Boot = "Старт",
       .SYSTEM_Button_Wake = "Сбжд.бут.",
       .SYSTEM_Shake_Wake =  "Сбжд.двж.",
@@ -1198,15 +1161,10 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Active_Detection = "Проверка",
       .SYSTEM_LVP = "Нис.напрж",
       .SYSTEM_Gui_Time = "Опресняв.",
+      .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "ГРЕШКИ",
       .SYSTEM_CLONE_FIX = "Клониран чип",
       .SYSTEM_RESET_MENU = "НУЛИРАНЕ",
-      .SYSTEM_Remember = "Запазв.послед.",
-      .SYSTEM_RememberLastProfile = " Профил",
-      .SYSTEM_RememberLastTip = " Връх",
-#ifdef HAS_BATTERY
-      .SYSTEM_RememberLastTemp = " t\260",
-#endif
 
       .SYSTEM_DISPLAY_MENU = "ЕКРАН",
 #ifndef ST756
