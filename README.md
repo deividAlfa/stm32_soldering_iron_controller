@@ -94,10 +94,9 @@ Any difference in the pinout will require firmware tuning, although one of the m
 There are some hacks / vulnerabilities that can be used to backup protected firmware, more details here: [STM32 power glitching timing attack](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/tools/software/STM32CubeIDE#option-2-power-glitching-timing-attack
 )
 
-### Temperature setpoint saving
-To prevent flash memory wear, the temperature setpoint is not saved.<br>
-Set the default boot temperature in [`IRON`](Readme_files/Operation.md#iron) / `Def temp`, but if that's not enough for you, there's still a solution.<br>
-Most boards have a battery connector for the RTC, can be used to store the temperature in the RTC SRAM.<br>
+### Battery mod
+Some commonly changed settings (Temperature setpoint, tip/profile selection) can be saved to the RTC SRAM, reducing flash wear.<br>
+The RTC needs a battery connected to STM32's VBAT pin, most boards have a battery connector for this.<br>
 - Install a 3.3V cell battery. Some boards have a resistor connected between VBAT pin and GND, will drain the battery, remove it.<br>
 - Enable `#define HAS_BATTERY` in BOARDS / (Your controller) / STM32F1xx / Core / Inc / board.h. 
 - Compile and flash.
