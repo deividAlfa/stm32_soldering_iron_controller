@@ -4,12 +4,15 @@
 /.cproject
 /.mxproject
 /*.ioc
+/*.bin
+SSD1306.bin
+ST7565.bin
 /Core/Inc/board.h
 /Core/Inc/*stm32*.*
 /Core/Src/*stm32*.*
 /Core/Src/syscalls.c
 /Core/Src/sysmem.c
-/Core/Startup/*.*
+/Core/Startup
 /Drivers/CMSIS
 /Drivers/STM32*
 /*.launch
