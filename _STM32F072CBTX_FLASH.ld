@@ -39,6 +39,7 @@ MEMORY
   RAM              (xrw) : ORIGIN = 0x20000000, LENGTH = 16K
   FLASH            (rx)  : ORIGIN = 0x8000000,  LENGTH = 124K
   /* areas for storing the settings, keep the start and the end on page boundaries and continuous */
+  TEMP_SETPOINT    (rx)  : ORIGIN = 0x801E800,  LENGTH = 2048
   PROFILE_SETTINGS (rx)  : ORIGIN = 0x801F000,  LENGTH = 3840
   GLOBAL_SETTINGS  (rx)  : ORIGIN = ORIGIN(PROFILE_SETTINGS) + LENGTH(PROFILE_SETTINGS),  LENGTH = 128
   ADDON_SETTINGS   (rx)  : ORIGIN = ORIGIN(GLOBAL_SETTINGS)  + LENGTH(GLOBAL_SETTINGS) ,  LENGTH = 128
@@ -47,11 +48,20 @@ MEMORY
 /* Start address and size of the settings area */
 __SETTINGS_SECTION_START  = ORIGIN(PROFILE_SETTINGS);
 __SETTINGS_SECTION_LENGTH = LENGTH(PROFILE_SETTINGS) + LENGTH(GLOBAL_SETTINGS) + LENGTH(ADDON_SETTINGS);
+__TEMP_SETPOINT_SECTION_START  = ORIGIN(TEMP_SETPOINT);
+__TEMP_SETPOINT_SECTION_LENGTH = LENGTH(TEMP_SETPOINT);
 
 /* Sections */
 SECTIONS
 {
   /* Firmware settings storage section(s) */  
+    
+  .tempSetpoint (NOLOAD) :
+  {
+    . = ALIGN(4);
+    KEEP(*(.tempSetpoint))
+  } > TEMP_SETPOINT
+  
   .profileSettings (NOLOAD) :
   {
     . = ALIGN(4);
