@@ -98,8 +98,7 @@ There are some hacks / vulnerabilities that can be used to backup protected firm
 Some commonly changed settings (Temperature setpoint, tip/profile selection) can be saved to the RTC SRAM, reducing flash wear.<br>
 The RTC needs a battery connected to STM32's VBAT pin, most boards have a battery connector for this.<br>
 - Install a 3.3V cell battery. Some boards have a resistor connected between VBAT pin and GND, will drain the battery, remove it.<br>
-- Enable `#define HAS_BATTERY` in BOARDS / (Your controller) / STM32F1xx / Core / Inc / board.h. 
-- Compile and flash.
+- Enable [`SYSTEM`](Readme_files/Operation.md#system) > `Battery´ .
 
 ### Display issues
 If the display has right/left line or is vertically shifted:<br>
