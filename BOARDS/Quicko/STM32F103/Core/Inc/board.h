@@ -18,7 +18,7 @@
 //#define DISPLAY_I2C                                         // I2C display
 //#define I2C_TRY_HW                                          // Try I2C HW first, use I2C SW if not detected
 //#define DISPLAY_ADDRESS     (0x3c<<1)                       // Only used for i2c
-#define DISPLAY_DEVICE        hspi2                           // SPI / I2C handler if used. Enables HW mode, otherwise SW mode is used
+#define DISPLAY_DEVICE        hspi2                           // SPI / I2C handler if used. Enables HW mode, otherwise SW mode is used (DISPLAY_DEVICE must be defined)
 #define FILL_DMA              hdma_memtomem_dma1_channel2     // DMA mem2mem for filling
 #define USE_RST                                               // Reset pin is used
 #define USE_DC                                                // DC pin is used
@@ -104,9 +104,6 @@
  ********************************/
 //#define NOSAVESETTINGS                                      // Don't use flash to save or load settings. Always use defaults (for debugging purposes)
 //#define SWO_PRINT                                           // To enable printing through SWO
-
-// Define if the board has a battery. Adds "remember set temp" feature.
-//#define HAS_BATTERY
 
 
 #ifdef USE_NTC
