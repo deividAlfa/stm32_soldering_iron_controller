@@ -520,9 +520,16 @@ void restoreSettings() {
 #endif
 
   if(systemSettings.settings.hasBattery) {
-    RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN; // power the BKP peripheral
-    PWR->CR      |= PWR_CR_DBP;                            // enable access to the BKP registers
-    BKP->CR       = 0u;                                    // disable tamper pin, just to be sure
+#ifndef STM32F072xB
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN;  // power the BKP peripheral
+    PWR->CR      |= PWR_CR_DBP;                             // enable access to the BKP registers
+    BKP->CR      = 0u;                                      // disable tamper pin, just to be sure
+#else
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;                      // power the BKP peripheral
+    RCC->BDCR    |= RCC_BDCR_RTCEN;
+    PWR->CR      |= PWR_CR_DBP;                             // enable access to the BKP registers
+    RTC->TAFCR   = 0u;                                      // disable tamper pin, just to be sure
+#endif
     loadSettingsFromBackupRam();
     loadProfile(bkpRamData.values.lastProfile);
     setCurrentTip(bkpRamData.values.lastSelTip[systemSettings.currentProfile]);
@@ -574,21 +581,29 @@ void loadSettingsFromBackupRam(void)
 
 static void readBackupRam()
 {
-  for(uint8_t i = 0; i < NUM_BACKUP_RAM_REGISTERS; i++)
+#ifndef STM32F072xB
+  for(uint8_t i = 0; i < NUM_BACKUP_RAM_REGISTERS; i++)                                   // STM32F10x has 16.bit backup registers
   {
     uint16_t const data = (uint16_t)*(&(BKP->DR1) + i);
     bkpRamData.bytes[i*2  ] = data;
     bkpRamData.bytes[i*2+1] = data >> 8u;
   }
+#else
+  memcpy(bkpRamData.bytes, (uint8_t*)&RTC->BKP0R, BACKUP_RAM_SIZE_IN_BYTES);              // STM32F072 has 32bit backup registers
+#endif
 }
 
 static void writeBackupRam()
 {
   bkpRamData.crc = ChecksumBackupRam(bkpRamData);
+#ifndef STM32F072xB
   for(uint8_t i = 0; i < NUM_BACKUP_RAM_REGISTERS; i++)
   {
     *(&(BKP->DR1) + i) = bkpRamData.bytes[i*2] + ((uint32_t)bkpRamData.bytes[i*2+1] << 8u);
   }
+#else
+  memcpy((uint8_t*)&RTC->BKP0R, bkpRamData.bytes, BACKUP_RAM_SIZE_IN_BYTES);
+#endif
 }
 
 static uint32_t ChecksumBackupRam(){
