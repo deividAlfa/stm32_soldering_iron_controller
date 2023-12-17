@@ -25,7 +25,7 @@ slide_t screenSaver = {
 };
 
 static char *tipNames[NUM_TIPS];
-enum mode{  main_none=0, main_irontemp, main_error, main_setpoint, main_tipselect,  main_tipselect_auto };
+enum mode{  main_none=0, main_irontemp, main_error, main_setpoint, main_tipselect,  main_tipselect_auto, main_profileselect };
 enum{ status_ok=0x20, status_error };
 enum { temp_numeric, temp_graph };
 xbm_t shakeXBM = {
@@ -355,6 +355,9 @@ int8_t switchScreenMode(void){
       case main_tipselect_auto:
         break;
 
+      case main_profileselect:
+        break;
+
       default:
         break;
     }
@@ -553,52 +556,115 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         mainScr.currentMode = main_tipselect;                               // Set normal tipselect on user input to use small timeout.
       }
     case main_tipselect:
-      if(mainScr.ironStatus==status_error){                                 // If error appears while in tip selection, it needs to update now to avoid overlapping problems
-        plot.enabled = 0;
-        widgetDisable(Widget_IronTemp);
-      }
-      else{
-        if(mainScr.displayMode==temp_numeric){
-          widgetEnable(Widget_IronTemp);
+      {
+        uint8_t tip = systemSettings.currentTip;
+
+        if(mainScr.ironStatus==status_error){                                 // If error appears while in tip selection, it needs to update now to avoid overlapping problems
+          plot.enabled = 0;
+          widgetDisable(Widget_IronTemp);
         }
         else{
-          plot.enabled=1;
-        }
-      }
-      switch((uint8_t)input){
-        case LongClick:
-          Selected_Tip = systemSettings.currentTip;
-          return screen_tip_settings;
-
-        case Click:
-          mainScr.setMode=main_irontemp;
-          break;
-
-        case Rotate_Nothing:        // Return after 2 seconds of inactivity, or after 5 seconds or error appears when a new tip was placed
-          if( (mainScr.currentMode == main_tipselect && checkScreenTimer(2000)) ||
-              (mainScr.currentMode == main_tipselect_auto && (mainScr.ironStatus==status_error || checkScreenTimer(5000)) )){
-            mainScr.setMode=main_irontemp;
+          if(mainScr.displayMode==temp_numeric){
+            widgetEnable(Widget_IronTemp);
           }
-          break;
+          else{
+            plot.enabled=1;
+          }
+        }
 
-        default:
-        {
-          uint8_t tip = systemSettings.currentTip;
-          if(input==Rotate_Increment_while_click || input==Rotate_Increment){
+        switch((uint8_t)input){
+          case LongClick:
+            Selected_Tip = systemSettings.currentTip;
+            return screen_tip_settings;
+
+          case Click:
+            mainScr.setMode=main_irontemp;
+            break;
+
+          case Rotate_Nothing:        // Return after 2 seconds of inactivity, or after 5 seconds or error appears when a new tip was placed
+            if( (mainScr.currentMode == main_tipselect && checkScreenTimer(2000)) ||
+                (mainScr.currentMode == main_tipselect_auto && (mainScr.ironStatus==status_error || checkScreenTimer(5000)) )){
+              mainScr.setMode=main_irontemp;
+            }
+            break;
+
+          case Rotate_Increment:
             if(++tip >= systemSettings.Profile.currentNumberOfTips){
               tip=0;
             }
-          }
-          else if(input==Rotate_Decrement_while_click || input==Rotate_Decrement){
-            if(--tip>=systemSettings.Profile.currentNumberOfTips){          // If underflowed
+            break;
+
+          case Rotate_Decrement:
+            if(--tip >= systemSettings.Profile.currentNumberOfTips){          // If underflowed
               tip = systemSettings.Profile.currentNumberOfTips-1;
             }
+            break;
+
+          case Rotate_Increment_while_click:
+          case Rotate_Decrement_while_click:
+            mainScr.setMode=main_profileselect;
+            break;
+
+          default:
+            break;
+        }
+        if(tip!=systemSettings.currentTip){
+          setCurrentTip(tip);
+          Screen_main.state=screen_Erase;
+        }
+        break;
+      }
+
+    case  main_profileselect:
+      {
+        uint8_t profile = systemSettings.currentProfile;
+
+        if(mainScr.ironStatus==status_error){                                 // If error appears while in tip selection, it needs to update now to avoid overlapping problems
+          plot.enabled = 0;
+          widgetDisable(Widget_IronTemp);
+        }
+        else{
+          if(mainScr.displayMode==temp_numeric){
+            widgetEnable(Widget_IronTemp);
           }
-          if(tip!=systemSettings.currentTip){
-            setCurrentTip(tip);
-            Screen_main.state=screen_Erase;
+          else{
+            plot.enabled=1;
           }
+        }
+
+        switch((uint8_t)input){
+          case Rotate_Nothing:                                                // Return after 2 seconds of inactivity
+            if(checkScreenTimer(2000)){
+              mainScr.setMode=main_irontemp;
+            }
           break;
+          case Click:
+            mainScr.setMode=main_irontemp;
+            break;
+
+          case Rotate_Increment:
+            if(++profile > profile_C210){
+              profile=profile_T12;
+            }
+            break;
+
+          case Rotate_Decrement:
+            if(--profile >= profile_C210){          // If underflowed
+              profile = profile_C210;
+            }
+            break;
+
+          default:
+            break;
+        }
+
+        if(profile!=systemSettings.currentProfile){
+          if(isCurrentProfileChanged()){         // If there's unsaved profile data
+            saveSettingsFromMenu(save_Settings); // Save settings
+            checkSettings();
+          }
+          loadProfile(profile);
+          Screen_main.state=screen_Erase;
         }
       }
       break;
@@ -890,16 +956,28 @@ static uint8_t  drawError(uint8_t refresh){
 
 static void  drawMisc(uint8_t refresh){
   if(!refresh) return;
+  uint8_t len = 0;
+  char *s = NULL;
 
   Widget_SetPoint->enabled &= (mainScr.currentMode==main_setpoint);                            // Disable setpoint widget if not in setpoint screen
 
   u8g2_SetFont(&u8g2, u8g2_font_small);
   if(mainScr.currentMode==main_tipselect || mainScr.currentMode==main_tipselect_auto){
-    uint8_t len = u8g2_GetUTF8Width(&u8g2, tipNames[systemSettings.currentTip])+4;    // Draw edit frame
-    u8g2_DrawRBox(&u8g2, 0, 54, len, 10, 2);
+
+  }
+  if(mainScr.currentMode==main_profileselect){
+    len = u8g2_GetUTF8Width(&u8g2, profileStr[systemSettings.currentProfile])+4;              // Profile string len
+    s = profileStr[systemSettings.currentProfile];                                            // Profile name
+  }
+  else{
+    len = u8g2_GetUTF8Width(&u8g2, tipNames[systemSettings.currentTip])+4;                    // Tip string len
+    s = tipNames[systemSettings.currentTip];                                                  // Tip name
+  }
+  if(mainScr.currentMode==main_tipselect || mainScr.currentMode==main_tipselect_auto || mainScr.currentMode==main_profileselect){     // Tip / profile selection active
+    u8g2_DrawRBox(&u8g2, 0, 54, len, 10, 2);                                                  // Draw edit frame
     u8g2_SetDrawColor(&u8g2, BLACK);
   }
-  u8g2_DrawUTF8(&u8g2, 2, 54, tipNames[systemSettings.currentTip]);                  // Draw tip name
+  u8g2_DrawUTF8(&u8g2, 2, 54, s);                                                             // Draw tip/profile name
   u8g2_SetDrawColor(&u8g2, WHITE);
   return;
 }
