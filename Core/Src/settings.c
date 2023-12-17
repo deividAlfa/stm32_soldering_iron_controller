@@ -88,6 +88,7 @@ __attribute__((aligned(4))) typedef struct{
   settings_t      settings;
   uint32_t        settingsChecksum;
 } flashSettingsSettings_t;
+
 __attribute__((section(".globalSettings"))) flashSettingsSettings_t flashGlobalSettings;
 
 __attribute__((aligned(4))) typedef struct{
@@ -104,6 +105,12 @@ __attribute__((aligned(4))) typedef struct{
 __attribute__((section(".addonSettings"))) flashSettingsAddons_t flashAddonSettings;
 #endif
 
+#ifndef HAS_BATTERY
+__attribute__((section(".tempSetpoint"))) uint16_t flashTempArray[1024];
+static uint16_t flashTempIndex;
+static uint16_t flashTemp;
+#endif
+
 systemSettings_t systemSettings;
 
 static void saveSettings(uint8_t mode);
@@ -115,6 +122,10 @@ static uint32_t ChecksumSettings(settings_t* settings);
 static uint32_t ChecksumProfile(profile_t* profile);
 static void resetSystemSettings(void);
 static void resetCurrentProfile(void);
+#ifndef HAS_BATTERY
+static void flashTempInit(void);
+static void writeflashTemp(uint16_t temperature);
+#endif
 
 #ifdef ENABLE_ADDONS
 static void loadAddonSettings(void);
@@ -159,22 +170,40 @@ extern int  __SETTINGS_SECTION_START; /* defined by the linker, only its address
 extern int  __SETTINGS_SECTION_LENGTH; /* defined by the linker, only its address which is the target value */
 #define SETTINGS_SECTION_LENGTH ((uint32_t)&__SETTINGS_SECTION_LENGTH)
 
+extern int  __PROFILE_SECTION_START; /* defined by the linker, only its address which is the target value */
+#define PROFILE_SECTION_START ((uint32_t)&__PROFILE_SECTION_START)
+extern int  __PROFILE_SECTION_LENGTH; /* defined by the linker, only its address which is the target value */
+#define PROFILE_SECTION_LENGTH ((uint32_t)&__PROFILE_SECTION_LENGTH)
+
+extern int  __TEMP_SETPOINT_SECTION_START; /* defined by the linker, only its address which is the target value */
+#define TEMP_SETPOINT_SECTION_START ((uint32_t)&__TEMP_SETPOINT_SECTION_START)
+extern int  __TEMP_SETPOINT_SECTION_LENGTH; /* defined by the linker, only its address which is the target value */
+#define TEMP_SETPOINT_SECTION_LENGTH ((uint32_t)&__TEMP_SETPOINT_SECTION_LENGTH)
+
+
+
 void checkSettings(void){
 
   #ifdef NOSAVESETTINGS
   return;
   #endif
 
-  static uint32_t prevSysChecksum    = 0u;
-  static uint32_t newSysChecksum     = 0u;
-  static uint32_t prevTipChecksum    = 0u;
-  static uint32_t newProfileChecksum = 0u;
-#ifdef ENABLE_ADDONS
-  static uint32_t prevAddonChecksum  = 0u;
-  static uint32_t newAddonChecksum   = 0u;
+#ifndef HAS_BATTERY
+  static uint16_t prevTemp            = 0u;
 #endif
-  static uint32_t lastCheckTime=0;
-  static uint32_t lastChangeTime=0;
+  static uint32_t prevSysChecksum     = 0u;
+  static uint32_t newSysChecksum      = 0u;
+  static uint32_t prevTipChecksum     = 0u;
+  static uint32_t newProfileChecksum  = 0u;
+#ifdef ENABLE_ADDONS
+  static uint32_t prevAddonChecksum   = 0u;
+  static uint32_t newAddonChecksum    = 0u;
+#endif
+  static uint32_t lastCheckTime       = 0u;
+  static uint32_t lastChangeTime      = 0u;
+#ifndef HAS_BATTERY
+  static uint32_t lastTempCheckTime      = 0u;
+#endif
   uint32_t CurrentTime = HAL_GetTick();
   uint8_t scr_index=current_screen->index;
 
@@ -195,6 +224,18 @@ void checkSettings(void){
   if(systemSettings.settings.rememberLastTip)
   {
     systemSettings.Profile.defaultTip = systemSettings.currentTip;
+  }
+
+  uint16_t currentTemp = getUserTemperature();                          // Get current temperature
+  if(flashTemp != currentTemp)                                          // Compare with stored in flash
+  {
+    if(prevTemp != currentTemp) {                                       // Store if different to last check
+      prevTemp = currentTemp;
+      lastTempCheckTime = CurrentTime;                                  // Start timeout
+    }
+    else if((CurrentTime-lastTempCheckTime)>9999) {                     // Different than flash and timeout is over
+      writeflashTemp(currentTemp);                                      // Update temperature in flash
+    }
   }
 #endif
 
@@ -506,6 +547,8 @@ void restoreSettings() {
     setCurrentTip(bkpRamData.values.lastSelTip[systemSettings.currentProfile]);
     ironSchedulePwmUpdate();
   }
+#else
+  flashTempInit();
 #endif
 }
 
@@ -580,6 +623,49 @@ static uint32_t ChecksumBackupRam(){
   uint32_t checksum;
   checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)bkpRamData.bytes, sizeof(backupRamValues_t)/sizeof(uint32_t) );
   return checksum;
+}
+
+#else
+
+void flashTempInit(void) //call it only once during init
+{
+  for(uint16_t i=0; i<(sizeof(flashTempArray)/2)-1; i++) {                  // Seek through the array
+    if(flashTempArray[i+1] == 0xFFFF) {                                     // Find first empty slot
+      for(uint16_t n=i+1; n<(sizeof(flashTempArray)/2)-1; n++) {            // Ensure rest of array is erased
+        if(flashTempArray[n] != 0xFFFF) {                                   // Found unexpected data
+          eraseFlashPages(TEMP_SETPOINT_SECTION_START, (TEMP_SETPOINT_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);     // Erase page
+          setUserTemperature(systemSettings.Profile.defaultTemperature);    // Load default temperature
+          return;
+        }
+      }
+      setUserTemperature(flashTempArray[i]);                        // Load temperature from previous slot
+      flashTemp = flashTempArray[i];
+      flashTempIndex = i+1;                                         // Update index
+      return;                                                       // Found, return
+    }
+  }                                                                 // Not found
+  eraseFlashPages(TEMP_SETPOINT_SECTION_START, (TEMP_SETPOINT_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);             // Erase page
+  setUserTemperature(systemSettings.Profile.defaultTemperature);    // Load default temperature
+}
+
+void writeflashTemp(uint16_t temperature)
+{
+  flashTemp = temperature;
+  if(flashTempIndex >= (sizeof(flashTempArray)/2)-1)                // All positions used
+  {
+    flashTempIndex = 0;                                             // Reset index
+    eraseFlashPages(TEMP_SETPOINT_SECTION_START, (TEMP_SETPOINT_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);                // Erase page
+  }
+
+  __disable_irq();
+  HAL_FLASH_Unlock();
+  if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&flashTempArray[flashTempIndex], temperature ) != HAL_OK) {    // Store new temp
+    Flash_error();
+  }
+  HAL_FLASH_Lock();
+  __enable_irq();
+
+  flashTempIndex++;                                                                                                         // Increase index for next time
 }
 
 #endif
