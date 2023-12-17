@@ -519,25 +519,26 @@ void restoreSettings() {
   loadAddonSettings();
 #endif
 
-  if(systemSettings.settings.hasBattery) {
+
+  flashTempInit();                                          // Always init this, no matter if battery is enabled or not
+
 #ifndef STM32F072xB
-    RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN;  // power the BKP peripheral
-    PWR->CR      |= PWR_CR_DBP;                             // enable access to the BKP registers
-    BKP->CR      = 0u;                                      // disable tamper pin, just to be sure
+  RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN;    // power the BKP peripheral
+  PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
+  BKP->CR      = 0u;                                        // disable tamper pin, just to be sure
 #else
-    RCC->APB1ENR |= RCC_APB1ENR_PWREN;                      // power the BKP peripheral
-    RCC->BDCR    |= RCC_BDCR_RTCEN;
-    PWR->CR      |= PWR_CR_DBP;                             // enable access to the BKP registers
-    RTC->TAFCR   = 0u;                                      // disable tamper pin, just to be sure
+  RCC->APB1ENR |= RCC_APB1ENR_PWREN;                        // power the BKP peripheral
+  RCC->BDCR    |= RCC_BDCR_RTCEN;
+  PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
+  RTC->TAFCR   = 0u;                                        // disable tamper pin, just to be sure
 #endif
+  if(systemSettings.settings.hasBattery) {
     loadSettingsFromBackupRam();
     loadProfile(bkpRamData.values.lastProfile);
     setCurrentTip(bkpRamData.values.lastSelTip[systemSettings.currentProfile]);
     ironSchedulePwmUpdate();
     setUserTemperature(bkpRamData.values.lastTipTemp[systemSettings.currentProfile]);
   }
-  else
-    flashTempInit();
 }
 
 void loadSettingsFromBackupRam(void)
