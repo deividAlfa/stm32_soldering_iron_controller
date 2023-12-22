@@ -615,23 +615,37 @@ static uint32_t ChecksumBackupRam(){
 
 void flashTempInit(void) //call it only once during init
 {
-  for(uint16_t i=0; i<(sizeof(flashTempArray)/2)-1; i++) {                  // Seek through the array
-    if(flashTempArray[i+1] == 0xFFFF) {                                     // Find first empty slot
-      for(uint16_t n=i+1; n<(sizeof(flashTempArray)/2)-1; n++) {            // Ensure rest of array is erased
-        if(flashTempArray[n] != 0xFFFF) {                                   // Found unexpected data
-          eraseFlashPages(TEMP_SETPOINT_SECTION_START, (TEMP_SETPOINT_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);     // Erase page
-          setUserTemperature(systemSettings.Profile.defaultTemperature);    // Load default temperature
-          return;
-        }
+  bool setDefault=0;
+  uint16_t i;
+
+  for(i=0; i<(sizeof(flashTempArray)/2)-1 && flashTempArray[i+1] != UINT16_MAX; i++);   // Seek through the array
+
+  if(i<(sizeof(flashTempArray)/2)-1){                                                   // Free slot found
+    for(uint16_t n=i+1; n<(sizeof(flashTempArray)/2)-1; n++) {                          // Ensure rest of array is erased
+      if(flashTempArray[n] != UINT16_MAX){                                              // Found unexpected data
+        setDefault=1;                                                                   // Reset
+        break;
       }
-      setUserTemperature(flashTempArray[i]);                        // Load temperature from previous slot
-      flashTemp = flashTempArray[i];
-      flashTempIndex = i+1;                                         // Update index
-      return;                                                       // Found, return
     }
-  }                                                                 // Not found
-  eraseFlashPages(TEMP_SETPOINT_SECTION_START, (TEMP_SETPOINT_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);             // Erase page
-  setUserTemperature(systemSettings.Profile.defaultTemperature);    // Load default temperature
+  }                                                                                     // No free slot found, reset
+  else{
+    setDefault=1;
+  }
+
+  if(setDefault){
+    eraseFlashPages(TEMP_SETPOINT_SECTION_START, (TEMP_SETPOINT_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);
+    setUserTemperature(systemSettings.Profile.defaultTemperature);                                                        // Load default temperature
+  }
+  else{
+    if(flashTempArray[i] > systemSettings.Profile.MaxSetTemperature || flashTempArray[i] < systemSettings.Profile.MinSetTemperature){  // Check limits
+      setUserTemperature(systemSettings.Profile.defaultTemperature);                                                      // Load default temperature
+    }
+    else{
+      setUserTemperature(flashTempArray[i]);                                                                              // Load temperature from slot
+    }
+    flashTemp = flashTempArray[i];
+    flashTempIndex = i+1;                                                               // Update index
+  }
 }
 
 void writeflashTemp(uint16_t temperature)

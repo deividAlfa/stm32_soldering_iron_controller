@@ -756,12 +756,6 @@ bool getIronCalibrationMode(void){
 }
 
 void setUserTemperature(uint16_t temperature) {
-
-  if(temperature > systemSettings.Profile.MaxSetTemperature)
-    temperature = systemSettings.Profile.MaxSetTemperature;
-  else if (temperature < systemSettings.Profile.MinSetTemperature)
-    temperature = systemSettings.Profile.MinSetTemperature;
-
   __disable_irq();
   Iron.UserSetTemperature = temperature;
   if(Iron.CurrentMode==mode_run){
