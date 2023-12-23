@@ -6,7 +6,9 @@
 /*.ioc
 /*.bin
 SSD1306.bin
+SSD1306.list
 ST7565.bin
+ST7565.list
 /Core/Inc/board.h
 /Core/Inc/*stm32*.*
 /Core/Src/*stm32*.*
