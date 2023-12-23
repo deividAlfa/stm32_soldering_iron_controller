@@ -161,6 +161,7 @@ IF %ERRORLEVEL% NEQ 0 (
   goto :DONE
 )
 move /Y "%DISP:"=%_Release\STM32SolderingStation.bin" "%CURRENT:"=%\%DISP:"=%.bin" 2>nul >nul
+move /Y "%DISP:"=%_Release\STM32SolderingStation.list" "%CURRENT:"=%\%DISP:"=%.list" 2>nul >nul
 IF %ERRORLEVEL% EQU 0 ( echo                 Binary placed at %CURRENT:"=%\%DISP:"=%.bin
 ) ELSE ( echo                 %CURRENT:"=% doesn't contain %DISP:"=% profile ?)
 IF %DISPLAY%=="" ( IF %DISP%=="SSD1306" ( GOTO :COMPILE ) )
