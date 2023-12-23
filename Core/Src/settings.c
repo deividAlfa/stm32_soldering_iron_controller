@@ -669,6 +669,8 @@ void writeflashTemp(uint16_t temperature)
 }
 void resetflashTemp(void){
   eraseFlashPages(TEMP_SETPOINT_SECTION_START, (TEMP_SETPOINT_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);
+  flashTempIndex = 0;
+  flashTemp=0;
 }
 
 
@@ -714,6 +716,7 @@ static uint32_t ChecksumAddons(addonSettings_t* addonSettings){
 static void resetSystemSettings(void) {
   __disable_irq();
   systemSettings.settings = defaultSettings;
+  resetflashTemp();
   __enable_irq();
 }
 
