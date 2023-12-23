@@ -667,6 +667,9 @@ void writeflashTemp(uint16_t temperature)
 
   flashTempIndex++;                                                                                                         // Increase index for next time
 }
+void resetflashTemp(void){
+  eraseFlashPages(TEMP_SETPOINT_SECTION_START, (TEMP_SETPOINT_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);
+}
 
 
 static uint32_t ChecksumSettings(settings_t* settings){
@@ -941,6 +944,7 @@ static void Button_reset(void){
         resetAddonSettings();
 #endif
         saveSettings(wipeProfiles);
+        resetflashTemp();
         NVIC_SystemReset();
       }
     }
