@@ -4,6 +4,7 @@
 
 * [Project details](#project-details)
 * [Compatibility](#compatibility)
+* [Bug reporting](#bug-reporting)
 * [Programming](Readme_files/Programming.md)
 * [Operating instructions](Readme_files/Operation.md)
 * [Frequently asked questions](#frequently-asked-questions)
@@ -77,6 +78,19 @@ There are several compatible/cloned boards in the market that will work fine wit
 T12-951, T12-952, T12-956, T12-959 use STC MCU, not supported by this firmware.
 
 
+## Bug reporting
+If you encounter any error or bug:<br>
+- Ensure your STM32 is genuine, check [STM32 Clones](Readme_files/Programming.md#clone-detection).
+- Throughly read the readme and manual and check if your issue is explained somewhere.
+- If still no solution for it, open a new [`issue`](https://github.com/deividAlfa/stm32_soldering_iron_controller/issues) specifying: 
+  - Firmware version (v.XX) and type (KSGER V2, etc).
+  - If showing a screen with "Error: file xx.c, line n", mention this or attach a picture.
+  - If getting a Hardfault, attach a picture of the data shown on the screen.<br>
+    If you want to check yourself, check the `PC` address shown in the screen and search it in the listing file (.list).<br>
+    This will show where it happened in the program.
+- You might also ask at [Eevblog](https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle/) (English), [4PDA](https://4pda.to/forum/index.php?showtopic=1009098) (Russian), [Radiokot](https://www.radiokot.ru/forum/viewtopic.php?t=178399) (Russian) forums.    
+
+
 ## Frequently asked questions
 
 First, make sure to read the [Operating Instructions](Readme_files/Operation.md)!
@@ -91,16 +105,15 @@ Some KSGER firmwares require an activation code which can be generated [[HERE]](
 Be warned, usually the MCU will be read-protected, so you won't be able to read its contents, only erase it.<br>
 The simplest way to not loose the original firmware is actually to buy a new MCU, replace it, and store the original MCU in a safe place.<br>
 Any difference in the pinout will require firmware tuning, although one of the main proposits of this firmware is easing that.<br>
-There are some hacks / vulnerabilities that can be used to backup protected firmware, more details here: [STM32 power glitching timing attack](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/tools/software/STM32CubeIDE#option-2-power-glitching-timing-attack
-)
+There are some vulnerabilities that can be used to backup protected firmware:
+- [STM32 power glitching timing attack](https://github.com/dreamcat4/t12-t245-controllers-docs/tree/master/tools/software/STM32CubeIDE#option-2-power-glitching-timing-attack).
+- [PicoPwner](https://github.com/CTXz/stm32f1-picopwner/). Tested, works very well.
 
-### Temperature setpoint saving
-To prevent flash memory wear, the temperature setpoint is not saved.<br>
-Set the default boot temperature in [`IRON`](Readme_files/Operation.md#iron) / `Def temp`, but if that's not enough for you, there's still a solution.<br>
-Most boards have a battery connector for the RTC, can be used to store the temperature in the RTC SRAM.<br>
+### Battery mod
+Some commonly changed settings (Temperature setpoint, tip/profile selection) can be saved to the RTC SRAM, reducing flash wear.<br>
+The RTC needs a battery connected to STM32's VBAT pin, most boards have a battery connector for this.<br>
 - Install a 3.3V cell battery. Some boards have a resistor connected between VBAT pin and GND, will drain the battery, remove it.<br>
-- Enable `#define HAS_BATTERY` in BOARDS / (Your controller) / STM32F1xx / Core / Inc / board.h. 
-- Compile and flash.
+- Enable [`SYSTEM`](Readme_files/Operation.md#system) > `Battery`.
 
 ### Display issues
 If the display has right/left line or is vertically shifted:<br>
@@ -149,7 +162,9 @@ Zero calibration can't be manually restored, but it only takes few seconds to ad
 
 ### Cold tip not showing ambient temperature
 Some amplifiers can introduce a small voltage offset that will translate into the cold tip reading 30-50°C higher than ambient temperature.<br>
-To fix that, enter the [`Calibration`](Readme_files/Operation.md#calibration) menu, insert a completely cold tip, enter `Settings`, adjust `Zero set` calibration and save.<br>
+To fix that, follow this order exactly!<br>
+Tip power is removed in Calibration menu, inserting the tip before will heat it up and make cold calibration impossible.<br>
+Enter the [`Calibration`](Readme_files/Operation.md#calibration) menu, **insert a completely cold tip now**, enter `Settings`, adjust `Zero set` calibration and save.<br>
 After that, the offset will be compensated and the cold temperature will be normal.<br>
 It's highly recommended to recalibrate after changing this value.
 
@@ -164,8 +179,10 @@ There're some options to fix this:<br>
 - Use a small DC/DC step-down module to convert 24V to 5V, and feed 5V to the 3.3V LDO (best option, barely makes any heat).
 
 ### Other issues
-After fully reading the documentation, if you still have problems or doubts, please ask in the EEVblog thread:<br>
-https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle/
+After fully reading the documentation, if you still have problems or doubts, there're several forums with threads about this firmare:<br>
+- [Eevblog](https://www.eevblog.com/forum/reviews/stm32-oled-digital-soldering-station-for-t12-handle/) (English).
+- [4PDA](https://4pda.to/forum/index.php?showtopic=1009098) (Russian).
+- [Radiokot](https://www.radiokot.ru/forum/viewtopic.php?t=178399) (Russian).
 
 
 ## Translations

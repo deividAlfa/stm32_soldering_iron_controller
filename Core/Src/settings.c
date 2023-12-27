@@ -46,9 +46,7 @@ const settings_t defaultSettings = {
   .tempStep             = 5,                    // 5º steps
   .tempBigStep          = 20,                   // 20º big steps
   .activeDetection      = true,
-  .rememberLastProfile  = true,
-  .rememberLastTemp     = false,
-  .rememberLastTip      = true,
+  .hasBattery           = false,
   .lvp                  = 110,                  // 11.0V Low voltage
   .bootProfile          = profile_None,
   .initMode             = mode_sleep,           // Safer to boot in sleep mode by default!
@@ -88,6 +86,7 @@ __attribute__((aligned(4))) typedef struct{
   settings_t      settings;
   uint32_t        settingsChecksum;
 } flashSettingsSettings_t;
+
 __attribute__((section(".globalSettings"))) flashSettingsSettings_t flashGlobalSettings;
 
 __attribute__((aligned(4))) typedef struct{
@@ -104,6 +103,11 @@ __attribute__((aligned(4))) typedef struct{
 __attribute__((section(".addonSettings"))) flashSettingsAddons_t flashAddonSettings;
 #endif
 
+__attribute__((section(".tempSetpoint"))) uint16_t flashTempArray[1024];
+static uint16_t flashTempIndex;
+static uint16_t flashTemp;
+
+
 systemSettings_t systemSettings;
 
 static void saveSettings(uint8_t mode);
@@ -115,6 +119,8 @@ static uint32_t ChecksumSettings(settings_t* settings);
 static uint32_t ChecksumProfile(profile_t* profile);
 static void resetSystemSettings(void);
 static void resetCurrentProfile(void);
+static void flashTempInit(void);
+static void writeflashTemp(uint16_t temperature);
 
 #ifdef ENABLE_ADDONS
 static void loadAddonSettings(void);
@@ -122,7 +128,6 @@ static void resetAddonSettings();
 static uint32_t ChecksumAddons(addonSettings_t* addonSettings);
 #endif
 
-#ifdef HAS_BATTERY
 
 #define BACKUP_RAM_SIZE_IN_BYTES 20u
 #define NUM_BACKUP_RAM_REGISTERS (BACKUP_RAM_SIZE_IN_BYTES / 2u) // each register holds 2 byte of data in the lower nibble
@@ -152,12 +157,23 @@ static void writeBackupRam();
 
 static backupRamData_t bkpRamData;
 
-#endif
 
 extern int  __SETTINGS_SECTION_START; /* defined by the linker, only its address which is the target value */
 #define SETTINGS_SECTION_START ((uint32_t)&__SETTINGS_SECTION_START)
 extern int  __SETTINGS_SECTION_LENGTH; /* defined by the linker, only its address which is the target value */
 #define SETTINGS_SECTION_LENGTH ((uint32_t)&__SETTINGS_SECTION_LENGTH)
+
+extern int  __PROFILE_SECTION_START; /* defined by the linker, only its address which is the target value */
+#define PROFILE_SECTION_START ((uint32_t)&__PROFILE_SECTION_START)
+extern int  __PROFILE_SECTION_LENGTH; /* defined by the linker, only its address which is the target value */
+#define PROFILE_SECTION_LENGTH ((uint32_t)&__PROFILE_SECTION_LENGTH)
+
+extern int  __TEMP_SETPOINT_SECTION_START; /* defined by the linker, only its address which is the target value */
+#define TEMP_SETPOINT_SECTION_START ((uint32_t)&__TEMP_SETPOINT_SECTION_START)
+extern int  __TEMP_SETPOINT_SECTION_LENGTH; /* defined by the linker, only its address which is the target value */
+#define TEMP_SETPOINT_SECTION_LENGTH ((uint32_t)&__TEMP_SETPOINT_SECTION_LENGTH)
+
+
 
 void checkSettings(void){
 
@@ -165,16 +181,19 @@ void checkSettings(void){
   return;
   #endif
 
-  static uint32_t prevSysChecksum    = 0u;
-  static uint32_t newSysChecksum     = 0u;
-  static uint32_t prevTipChecksum    = 0u;
-  static uint32_t newProfileChecksum = 0u;
+  static uint16_t prevTemp            = 0u;
+  static uint32_t prevSysChecksum     = 0u;
+  static uint32_t newSysChecksum      = 0u;
+  static uint32_t prevTipChecksum     = 0u;
+  static uint32_t newProfileChecksum  = 0u;
 #ifdef ENABLE_ADDONS
-  static uint32_t prevAddonChecksum  = 0u;
-  static uint32_t newAddonChecksum   = 0u;
+  static uint32_t prevAddonChecksum   = 0u;
+  static uint32_t newAddonChecksum    = 0u;
 #endif
-  static uint32_t lastCheckTime=0;
-  static uint32_t lastChangeTime=0;
+  static uint32_t lastCheckTime       = 0u;
+  static uint32_t lastChangeTime      = 0u;
+  static uint32_t lastTempCheckTime      = 0u;
+
   uint32_t CurrentTime = HAL_GetTick();
   uint8_t scr_index=current_screen->index;
 
@@ -187,16 +206,31 @@ void checkSettings(void){
                        scr_index == screen_calibration       ||
                        scr_index == screen_reset_confirmation);
 
-#ifndef HAS_BATTERY
-  if(systemSettings.settings.rememberLastProfile)
-  {
-    systemSettings.settings.bootProfile = systemSettings.currentProfile;
+  if(systemSettings.settings.hasBattery == true) {                                      // If battery enabled, save these settings to RTC SRAM instead
+    bkpRamData.values.lastProfile = systemSettings.currentProfile;
+    if(!getIronCalibrationMode() && scr_index != screen_debug)                          // Don't persist the temperature while calibration is in progress or in the debug screen
+    {
+      bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserSetTemperature();
+    }
+    bkpRamData.values.lastSelTip[systemSettings.currentProfile] = systemSettings.currentTip;
+    writeBackupRam();
   }
-  if(systemSettings.settings.rememberLastTip)
-  {
+  else {                                                                                // No battery, save to flash
+    systemSettings.settings.bootProfile = systemSettings.currentProfile;                // Update current tip / profile
     systemSettings.Profile.defaultTip = systemSettings.currentTip;
+                                                                                        // Special storage area for temperature setpoint
+    uint16_t currentTemp = getUserTemperature();                                        // Get current temperature
+    if(flashTemp != currentTemp)                                                        // Compare with stored in flash
+    {
+      if(prevTemp != currentTemp) {                                                     // Store if different to last check
+        prevTemp = currentTemp;
+        lastTempCheckTime = CurrentTime;                                                // Start timeout
+      }
+      else if((CurrentTime-lastTempCheckTime)>9999) {                                   // Different than flash and timeout is over
+        writeflashTemp(currentTemp);                                                    // Update temperature in flash
+      }
+    }
   }
-#endif
 
   // Save from menu
   if(systemSettings.save_Flag && allowSave){
@@ -274,16 +308,6 @@ void checkSettings(void){
       saveSettings(save_Settings);                             // Data was saved (so any pending interrupt knows this)
     }
   }
-
-  #ifdef HAS_BATTERY
-  bkpRamData.values.lastProfile = systemSettings.currentProfile;
-  if(!getIronCalibrationMode() && scr_index != screen_debug) // don't persist the temperature while calibration is in progress or in the debug screen
-  {
-    bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserSetTemperature();
-  }
-  bkpRamData.values.lastSelTip[systemSettings.currentProfile] = systemSettings.currentTip;
-  writeBackupRam();
-  #endif
 }
 
 
@@ -495,21 +519,27 @@ void restoreSettings() {
   loadAddonSettings();
 #endif
 
-#ifdef HAS_BATTERY
-  loadSettingsFromBackupRam();
-  if(systemSettings.settings.rememberLastProfile)
-  {
+
+  flashTempInit();                                          // Always init this, no matter if battery is enabled or not
+
+#ifndef STM32F072xB
+  RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN;    // power the BKP peripheral
+  PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
+  BKP->CR      = 0u;                                        // disable tamper pin, just to be sure
+#else
+  RCC->APB1ENR |= RCC_APB1ENR_PWREN;                        // power the BKP peripheral
+  RCC->BDCR    |= RCC_BDCR_RTCEN;
+  PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
+  RTC->TAFCR   = 0u;                                        // disable tamper pin, just to be sure
+#endif
+  if(systemSettings.settings.hasBattery) {
+    loadSettingsFromBackupRam();
     loadProfile(bkpRamData.values.lastProfile);
-  }
-  if(systemSettings.settings.rememberLastTip)
-  {
     setCurrentTip(bkpRamData.values.lastSelTip[systemSettings.currentProfile]);
     ironSchedulePwmUpdate();
+    setUserTemperature(bkpRamData.values.lastTipTemp[systemSettings.currentProfile]);
   }
-#endif
 }
-
-#ifdef HAS_BATTERY
 
 void loadSettingsFromBackupRam(void)
 {
@@ -549,31 +579,32 @@ void loadSettingsFromBackupRam(void)
   }
 }
 
-void restoreLastSessionSettings(void)
-{
-  if(systemSettings.settings.rememberLastTemp)
-  {
-    setUserTemperature(bkpRamData.values.lastTipTemp[systemSettings.currentProfile]);
-  }
-}
 
 static void readBackupRam()
 {
-  for(uint8_t i = 0; i < NUM_BACKUP_RAM_REGISTERS; i++)
+#ifndef STM32F072xB
+  for(uint8_t i = 0; i < NUM_BACKUP_RAM_REGISTERS; i++)                                   // STM32F10x has 16.bit backup registers
   {
     uint16_t const data = (uint16_t)*(&(BKP->DR1) + i);
     bkpRamData.bytes[i*2  ] = data;
     bkpRamData.bytes[i*2+1] = data >> 8u;
   }
+#else
+  memcpy(bkpRamData.bytes, (uint8_t*)&RTC->BKP0R, BACKUP_RAM_SIZE_IN_BYTES);              // STM32F072 has 32bit backup registers
+#endif
 }
 
 static void writeBackupRam()
 {
   bkpRamData.crc = ChecksumBackupRam(bkpRamData);
+#ifndef STM32F072xB
   for(uint8_t i = 0; i < NUM_BACKUP_RAM_REGISTERS; i++)
   {
     *(&(BKP->DR1) + i) = bkpRamData.bytes[i*2] + ((uint32_t)bkpRamData.bytes[i*2+1] << 8u);
   }
+#else
+  memcpy((uint8_t*)&RTC->BKP0R, bkpRamData.bytes, BACKUP_RAM_SIZE_IN_BYTES);
+#endif
 }
 
 static uint32_t ChecksumBackupRam(){
@@ -582,7 +613,66 @@ static uint32_t ChecksumBackupRam(){
   return checksum;
 }
 
-#endif
+void flashTempInit(void) //call it only once during init
+{
+  bool setDefault=0;
+  uint16_t i;
+
+  for(i=0; i<(sizeof(flashTempArray)/2)-1 && flashTempArray[i+1] != UINT16_MAX; i++);   // Seek through the array
+
+  if(i<(sizeof(flashTempArray)/2)-1){                                                   // Free slot found
+    for(uint16_t n=i+1; n<(sizeof(flashTempArray)/2)-1; n++) {                          // Ensure rest of array is erased
+      if(flashTempArray[n] != UINT16_MAX){                                              // Found unexpected data
+        setDefault=1;                                                                   // Reset
+        break;
+      }
+    }
+  }                                                                                     // No free slot found, reset
+  else{
+    setDefault=1;
+  }
+
+  if(setDefault){
+    eraseFlashPages(TEMP_SETPOINT_SECTION_START, (TEMP_SETPOINT_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);
+    setUserTemperature(systemSettings.Profile.defaultTemperature);                                                        // Load default temperature
+  }
+  else{
+    if(flashTempArray[i] > systemSettings.Profile.MaxSetTemperature || flashTempArray[i] < systemSettings.Profile.MinSetTemperature){  // Check limits
+      setUserTemperature(systemSettings.Profile.defaultTemperature);                                                      // Load default temperature
+    }
+    else{
+      setUserTemperature(flashTempArray[i]);                                                                              // Load temperature from slot
+    }
+    flashTemp = flashTempArray[i];
+    flashTempIndex = i+1;                                                               // Update index
+  }
+}
+
+void writeflashTemp(uint16_t temperature)
+{
+  flashTemp = temperature;
+  if(flashTempIndex >= (sizeof(flashTempArray)/2)-1)                // All positions used
+  {
+    flashTempIndex = 0;                                             // Reset index
+    eraseFlashPages(TEMP_SETPOINT_SECTION_START, (TEMP_SETPOINT_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);                // Erase page
+  }
+
+  __disable_irq();
+  HAL_FLASH_Unlock();
+  if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&flashTempArray[flashTempIndex], temperature ) != HAL_OK) {    // Store new temp
+    Flash_error();
+  }
+  HAL_FLASH_Lock();
+  __enable_irq();
+
+  flashTempIndex++;                                                                                                         // Increase index for next time
+}
+void resetflashTemp(void){
+  eraseFlashPages(TEMP_SETPOINT_SECTION_START, (TEMP_SETPOINT_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);
+  flashTempIndex = 0;
+  flashTemp=0;
+}
+
 
 static uint32_t ChecksumSettings(settings_t* settings){
   uint32_t checksum;
@@ -626,6 +716,7 @@ static uint32_t ChecksumAddons(addonSettings_t* addonSettings){
 static void resetSystemSettings(void) {
   __disable_irq();
   systemSettings.settings = defaultSettings;
+  resetflashTemp();
   __enable_irq();
 }
 
@@ -856,6 +947,7 @@ static void Button_reset(void){
         resetAddonSettings();
 #endif
         saveSettings(wipeProfiles);
+        resetflashTemp();
         NVIC_SystemReset();
       }
     }

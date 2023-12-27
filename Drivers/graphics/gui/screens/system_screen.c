@@ -153,15 +153,6 @@ static void setInitMode(uint32_t *val) {
   systemSettings.settings.initMode = *val;
 }
 //=========================================================
-static void * getProfile() {
-  temp = profile;
-  return &temp;
-}
-
-static void setProfile(uint32_t *val) {
-  profile=*val;
-}
-//=========================================================
 static void * getLanguage() {
   temp = systemSettings.settings.language;
   return &temp;
@@ -187,22 +178,6 @@ static void setShakeWakeMode(uint32_t *val) {
   systemSettings.settings.shakeWakeMode = *val;
 }
 //=========================================================
-static void * getRememberLastProfile() {
-  temp = systemSettings.settings.rememberLastProfile;
-  return &temp;
-}
-static void setRememberLastProfile(uint32_t *val) {
-  systemSettings.settings.rememberLastProfile = *val;
-}
-//=========================================================
-static void * getRememberLastTip() {
-  temp = systemSettings.settings.rememberLastTip;
-  return &temp;
-}
-static void setRememberLastTip(uint32_t *val) {
-  systemSettings.settings.rememberLastTip = *val;
-}
-//=========================================================
 #ifndef STM32F072xB
 static void * getCloneFix() {
   temp = clone_fix;
@@ -213,15 +188,13 @@ static void setCloneFix(uint32_t *val) {
 }
 #endif
 //=========================================================
-#ifdef HAS_BATTERY
-static void * getRememberLastTemp() {
-  temp = systemSettings.settings.rememberLastTemp;
+static void * getHasBattery() {
+  temp = systemSettings.settings.hasBattery;
   return &temp;
 }
-static void setRememberLastTemp(uint32_t *val) {
-  systemSettings.settings.rememberLastTemp = *val;
+static void setHasBattery(uint32_t *val) {
+  systemSettings.settings.hasBattery = * val;
 }
-#endif
 //=========================================================
 static void system_onEnter(screen_t *scr){
 #ifndef STM32F072xB
@@ -250,7 +223,6 @@ static void system_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
-  comboBox_item_t* combo;
 
   current_lang = lang;
 
@@ -267,16 +239,6 @@ static void system_create(screen_t *scr){
   edit->setData = (void (*)(void *))&setLanguage;
   edit->options = Langs;
   edit->numberOfOptions = LANGUAGE_COUNT;
-
-  //  [ Profile Widget ]
-  //
-  newComboMultiOption(w, strings[lang].SYSTEM_Profile, &edit, NULL);
-  edit->inputData.getData = &getProfile;
-  edit->big_step = 1;
-  edit->step = 1;
-  edit->setData = (void (*)(void *))&setProfile;
-  edit->options = profileStr;
-  edit->numberOfOptions = NUM_PROFILES;
 
   //  [ Boot mode Widget ]
   //
@@ -421,42 +383,16 @@ static void system_create(screen_t *scr){
   edit->max_value = 250;
   edit->min_value = 20;
 
-  //  [ Remember text Widget ]
+  //  [ Battery Widget ]
   //
-  newComboScreen(w, strings[lang].SYSTEM_Remember, -1, &combo);
-  combo->dispAlign = align_left;
-
-  //  [ Remember last used profile Widget ]
-  //
-  newComboMultiOption(w, strings[lang].SYSTEM_RememberLastProfile, &edit, NULL);
-  edit->inputData.getData = &getRememberLastProfile;
+  newComboMultiOption(w, strings[lang].SYSTEM_Battery,&edit, NULL);
+  dis=&edit->inputData;
+  dis->getData = &getHasBattery;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (setterFn)&setRememberLastProfile;
+  edit->setData = (void (*)(void *))&setHasBattery;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
-
-  //  [ Remember last used tip Widget ]
-  //
-  newComboMultiOption(w, strings[lang].SYSTEM_RememberLastTip, &edit, NULL);
-  edit->inputData.getData = &getRememberLastTip;
-  edit->big_step = 1;
-  edit->step = 1;
-  edit->setData = (setterFn)&setRememberLastTip;
-  edit->options = strings[lang].OffOn;
-  edit->numberOfOptions = 2;
-
-#ifdef HAS_BATTERY
-  //  [ Remember last temp tip Widget ]
-  //
-  newComboMultiOption(w, strings[lang].SYSTEM_RememberLastTemp, &edit, NULL);
-  edit->inputData.getData = &getRememberLastTemp;
-  edit->big_step = 1;
-  edit->step = 1;
-  edit->setData = (setterFn)&setRememberLastTemp;
-  edit->options = strings[lang].OffOn;
-  edit->numberOfOptions = 2;
-#endif
 
 #ifdef ENABLE_DEBUG_SCREEN
   //  [ Debug enable Widget ]

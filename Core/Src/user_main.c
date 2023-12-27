@@ -110,12 +110,6 @@ void InitAfterMCUConfiguration(void){
     HAL_IWDG_Refresh(&hiwdg);
   }
 
-#ifdef HAS_BATTERY
- RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN; // power the BKP peripheral
- PWR->CR      |= PWR_CR_DBP;                            // enable access to the BKP registers
- BKP->CR       = 0u;                                    // disable tamper pin, just to be sure
-#endif
-
 #if (defined DISPLAY_SPI || defined DISPLAY_I2C) && defined DISPLAY_DEVICE
   lcd_init(&DISPLAY_DEVICE, &FILL_DMA);
 #elif defined DISPLAY_SPI || defined DISPLAY_I2C
@@ -143,9 +137,7 @@ void InitAfterMCUConfiguration(void){
     ironInit(&READ_TIMER, &PWM_TIMER,PWM_CHANNEL);
     RE_Init((RE_State_t *)&RE1_Data, ENC_L_GPIO_Port, ENC_L_Pin, ENC_R_GPIO_Port, ENC_R_Pin, ENC_SW_GPIO_Port, ENC_SW_Pin);
     oled_init(&RE_Get,&RE1_Data);
-#ifdef HAS_BATTERY
-    restoreLastSessionSettings();
-#endif
+
 #ifdef RUN_DISPLAY_TEST
     display_test();
 #endif
