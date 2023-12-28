@@ -245,7 +245,7 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       activeDetection;
   uint8_t       clone_fix;
   uint8_t       dim_mode;
-  uint8_t       bootProfile;
+  uint8_t       :8;
   uint8_t       initMode;
   uint8_t       tempUnit;
   uint8_t       tempStep;
