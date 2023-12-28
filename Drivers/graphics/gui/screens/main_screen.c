@@ -781,6 +781,7 @@ static void  drawMode(uint8_t refresh){
       break;
 
     case mode_boost:
+    case mode_coldboost:
       u8g2_DrawUTF8(&u8g2, strings[lang].main_mode_Boost_xpos, 0, strings[lang].main_mode_Boost);
 
     default:

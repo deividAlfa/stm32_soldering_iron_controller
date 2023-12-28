@@ -13,7 +13,7 @@
 #include "board.h"
 
 #define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
-#define SYSTEM_SETTINGS_VERSION   25                                // Change this if you change the system settings struct to prevent getting out of sync
+#define SYSTEM_SETTINGS_VERSION   26                                // Change this if you change the system settings struct to prevent getting out of sync
 #define PROFILE_SETTINGS_VERSION  1                                 // Same, but for profile settings struct
 
 #define LANGUAGE_COUNT    7                                         // Number of languages
@@ -79,6 +79,7 @@ typedef enum{
   mode_standby            = 1,
   mode_run                = 2,
   mode_boost              = 3,
+  mode_coldboost          = 4,
 
   initialized             = 0,
 
@@ -235,17 +236,19 @@ __attribute__((aligned(4))) typedef struct{
     uint8_t       displayResRatio : 4;
 #endif
   };
-
-  uint8_t       :8;
+#if (SYSTEM_SETTINGS_VERSION == 27)             // Future version
+#warning Clean this up!
+#endif
+  uint8_t       :8;                             // TODO: old rememberLastProfile (Delete when settings version change)
   uint8_t       hasBattery;
-  uint8_t       :8;
+  uint8_t       :8;                             // TODO: old rememberLastTip (Delete when settings version change)
   uint8_t       dim_inSleep;
   uint8_t       EncoderMode;
   uint8_t       debugEnabled;
   uint8_t       activeDetection;
   uint8_t       clone_fix;
   uint8_t       dim_mode;
-  uint8_t       :8;
+  uint8_t       coldBoost;
   uint8_t       initMode;
   uint8_t       tempUnit;
   uint8_t       tempStep;

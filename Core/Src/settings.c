@@ -47,6 +47,7 @@ const settings_t defaultSettings = {
   .tempBigStep          = 20,                   // 20º big steps
   .activeDetection      = true,
   .hasBattery           = false,
+  .coldBoost            = true,
   .lvp                  = 110,                  // 11.0V Low voltage
   .initMode             = mode_sleep,           // Safer to boot in sleep mode by default!
   .buzzerMode           = disable,
@@ -345,7 +346,7 @@ void checkSettings(void){
     }
 
     else if(allowSave && ((CurrentTime-lastChangeTime)>5000)){ // If different from the previous calculated checksum, and timer expired (No changes in the last 5 sec)
-      saveSettings(save_Settings);                             // Data was saved (so any pending interrupt knows this)
+      saveSettings(keepProfiles);                              // Data was saved (so any pending interrupt knows this)
     }
   }
 }
@@ -534,6 +535,14 @@ void restoreSettings() {
   __enable_irq();
   return;
 #endif
+
+#if (SYSTEM_SETTINGS_VERSION == 27)             // Future version
+#warning Remove this workaround!
+#endif
+  if(flashGlobalSettings.settings.version == 25){                                 // Upgrade settings version from 25 to 26 without erasing everything.
+    systemSettings.settings.coldBoost = true;                                     // TODO: Remove this when settings version is updated
+    flashGlobalSettings.settings.version = SYSTEM_SETTINGS_VERSION;               // Update version
+  }
 
   if(flashGlobalSettings.settings.version != SYSTEM_SETTINGS_VERSION){            // System settings version mismatch
     resetSystemSettings();                                                        // Reset current settings
@@ -985,8 +994,8 @@ void loadProfile(uint8_t profile){
   if(profile<=profile_C210){                                                                  // If valid profile
     if(flashProfilesSettings.Profile[profile].version != PROFILE_SETTINGS_VERSION){           // If flash profile not initialized or version mismatch
       resetCurrentProfile();                                                                  // Load defaults silently
-      systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
-    }
+      systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);              // Compute checksum, this avoids data saving from trigger.
+    }                                                                                         // There's no need to store defaults. Will be updated once the user makes any change.
     else{
       systemSettings.Profile = flashProfilesSettings.Profile[profile];
       systemSettings.ProfileChecksum = flashProfilesSettings.ProfileChecksum[profile];

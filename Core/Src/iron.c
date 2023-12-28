@@ -179,7 +179,10 @@ void handleIron(void) {
       }
 
     }
-    if((Iron.CurrentMode==mode_boost) && (mode_time>systemSettings.Profile.boostTimeout)){  // If boost mode and time expired
+    if((Iron.CurrentMode==mode_coldboost) && (mode_time>12000)){                              // If cold boost mode and time expired
+      setCurrentMode(mode_run);
+    }
+    else if((Iron.CurrentMode==mode_boost) && (mode_time>systemSettings.Profile.boostTimeout)){    // If boost mode and time expired
       setCurrentMode(mode_run);
     }
     else if(Iron.CurrentMode==mode_run){                                                      // If running
@@ -553,6 +556,13 @@ void setCurrentMode(uint8_t mode){
   __disable_irq();
   CurrentTime=HAL_GetTick();                                                              // Update local time value just in case it's called by handleIron, to avoid drift
   Iron.CurrentModeTimer = CurrentTime;                                                    // Refresh current mode timer
+
+  if(systemSettings.settings.coldBoost){
+    int16_t diff = (systemSettings.Profile.tempUnit == mode_Farenheit) ? 200 : 100;
+    int16_t tipTemp = (systemSettings.Profile.tempUnit == mode_Farenheit) ? last_TIP_F : last_TIP_C;
+    if(mode==mode_run && getCurrentMode() < mode_run && (Iron.UserSetTemperature - tipTemp)>diff)
+      mode=mode_coldboost;
+  }
   if(mode==mode_standby){
     if(Iron.UserSetTemperature < systemSettings.Profile.standbyTemperature)
     {
@@ -566,6 +576,12 @@ void setCurrentMode(uint8_t mode){
   }
   else if(mode==mode_boost){
     Iron.TargetTemperature = Iron.UserSetTemperature+systemSettings.Profile.boostTemperature;
+    if(Iron.TargetTemperature>systemSettings.Profile.MaxSetTemperature){
+      Iron.TargetTemperature=systemSettings.Profile.MaxSetTemperature;
+    }
+  }
+  else if(mode==mode_coldboost){
+    Iron.TargetTemperature = Iron.UserSetTemperature+50;
     if(Iron.TargetTemperature>systemSettings.Profile.MaxSetTemperature){
       Iron.TargetTemperature=systemSettings.Profile.MaxSetTemperature;
     }
