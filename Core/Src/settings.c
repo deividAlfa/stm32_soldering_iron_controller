@@ -231,6 +231,8 @@ void checkSettings(void){
     }
     bkpRamData.values.lastSelTip[systemSettings.currentProfile] = systemSettings.currentTip;
     writeBackupRam();
+
+    flashTip[systemSettings.currentProfile] = systemSettings.currentTip;                // This will keep track of the tips just in case the battery option is disabled from the menu.
   }
   else {
     uint16_t currentTemp = getUserTemperature();
