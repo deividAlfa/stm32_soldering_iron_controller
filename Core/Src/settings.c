@@ -297,6 +297,7 @@ void checkSettings(void){
       }
       case reset_All:
         resetSystemSettings();
+        systemSettings.settings.version = 0xFF;       // To trigger setup screen
         saveSettings(wipeProfiles);
         break;
 
@@ -310,7 +311,7 @@ void checkSettings(void){
     return;
   }
 
-  // Auto save on content change
+  // Don't save in these conditions
   if( (systemSettings.setupMode==enable) || (getIronCalibrationMode()) || (getIronErrorFlags().safeMode) || ((CurrentTime-lastCheckTime)<999)){
     return;
   }
@@ -447,10 +448,6 @@ static void saveSettings(uint8_t mode){
   configurePWMpin(output_Low);
   __enable_irq();
 
-  if(systemSettings.settings.version!=SYSTEM_SETTINGS_VERSION){
-    Error_Handler();
-  }
-
   systemSettings.settingsChecksum = ChecksumSettings(&systemSettings.settings);
   flashBufferSettings->settingsChecksum = systemSettings.settingsChecksum;
   flashBufferSettings->settings = systemSettings.settings;
@@ -526,6 +523,7 @@ static void saveSettings(uint8_t mode){
 }
 
 void restoreSettings() {
+  bool setup=0;
 #ifdef NOSAVESETTINGS                                                 // Stop erasing the flash while in debug mode
   __disable_irq();
   resetSystemSettings();
@@ -548,6 +546,8 @@ void restoreSettings() {
     resetSystemSettings();                                                        // Reset current settings
 #ifdef ENABLE_ADDONS
     resetAddonSettings();
+    if(flashGlobalSettings.settings.version == 0xFF)                              // 0xFF = erased flash, trigger setup mode
+      setup=1;
 #endif
   }
   else{
@@ -563,8 +563,6 @@ void restoreSettings() {
   loadAddonSettings();
 #endif
 
-  flashTempSettingsInit();                                  // Always init this, no matter if battery is enabled or not
-
 #ifndef STM32F072xB
   RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN;    // power the BKP peripheral
   PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
@@ -575,9 +573,14 @@ void restoreSettings() {
   PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
   RTC->TAFCR   = 0u;                                        // disable tamper pin, just to be sure
 #endif
+
+  flashTempSettingsInit();                                  // Always init this, no matter if battery is enabled or not
+
   if(systemSettings.settings.hasBattery) {
     loadSettingsFromBackupRam();
   }
+  if(setup)                                                 // Force profile none to trigger setup screen
+    systemSettings.currentProfile = profile_None;
 }
 
 void loadSettingsFromBackupRam(void)
@@ -1087,6 +1090,7 @@ static void Button_reset(void){
           HAL_IWDG_Refresh(&hiwdg);
         }
         resetSystemSettings();
+        systemSettings.settings.version = 0xFF;       // To trigger setup screen
 #ifdef ENABLE_ADDONS
         resetAddonSettings();
 #endif
