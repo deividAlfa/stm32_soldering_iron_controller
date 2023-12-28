@@ -540,7 +540,6 @@ void restoreSettings() {
 #ifdef ENABLE_ADDONS
     resetAddonSettings();
 #endif
-    saveSettings(keepProfiles);
   }
   else{
     Button_reset();
