@@ -268,6 +268,9 @@ This is not applied to the plot graph.<br>
 Adjust Low voltage protection.<br>
   - **Active detection**<br>
 Use iron active detection by leaving the PWM slightly on all the time. If your amp has a pullup resistor it can be disabled.<br>
+  - **Cold boost**<br>
+Sets Boost mode for 12 seconds when the system goes into run mode if the tip is >100ºC colder than the target temperature.<br>
+The heat needs some time to spread to the tip metal body, this speeds up the heating.<br>
   - **GUI Time**<br>
 To offer maximum responsiveness, the screen is updated as fastest as possible when the cpu is idling.<br>
 It depends on the MCU used and display interface, it can reach more than 100 fps in DMA SPI mode.<br>
