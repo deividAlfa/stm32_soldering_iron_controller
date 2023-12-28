@@ -581,7 +581,7 @@ void setCurrentMode(uint8_t mode){
     }
   }
   else if(mode==mode_coldboost){
-    Iron.TargetTemperature = Iron.UserSetTemperature+50;
+    Iron.TargetTemperature = Iron.UserSetTemperature + (systemSettings.Profile.tempUnit == mode_Farenheit ? 100 : 50);
     if(Iron.TargetTemperature>systemSettings.Profile.MaxSetTemperature){
       Iron.TargetTemperature=systemSettings.Profile.MaxSetTemperature;
     }
