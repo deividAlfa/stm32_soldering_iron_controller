@@ -579,8 +579,10 @@ void restoreSettings() {
   if(systemSettings.settings.hasBattery) {
     loadSettingsFromBackupRam();
   }
-  if(setup)                                                 // Force profile none to trigger setup screen
-    systemSettings.currentProfile = profile_None;
+  if(setup){
+    systemSettings.setupMode = enable;                      // Load setup state for boot screen
+    setSafeMode(enable);
+  }
 }
 
 void loadSettingsFromBackupRam(void)

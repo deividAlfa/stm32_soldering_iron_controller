@@ -218,11 +218,6 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 void boot_screen_init(screen_t * scr){
   default_init(scr);
   profile=systemSettings.currentProfile;
-  if( (systemSettings.settings.version!=SYSTEM_SETTINGS_VERSION) || (profile>profile_C210) ){
-    profile=profile_T12;
-    setSafeMode(enable);
-    systemSettings.setupMode=enable;
-  }
   u8g2_SetDrawColor(&u8g2,WHITE);
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM.width, splashXBM.height, splashXBM.xbm);
   scr->state = screen_Erased;
