@@ -557,7 +557,7 @@ void setCurrentMode(uint8_t mode){
   CurrentTime=HAL_GetTick();                                                              // Update local time value just in case it's called by handleIron, to avoid drift
   Iron.CurrentModeTimer = CurrentTime;                                                    // Refresh current mode timer
 
-  if(systemSettings.settings.coldBoost){
+  if(!getIronCalibrationMode() && systemSettings.settings.coldBoost){
     int16_t diff = (systemSettings.Profile.tempUnit == mode_Farenheit) ? 200 : 100;
     int16_t tipTemp = (systemSettings.Profile.tempUnit == mode_Farenheit) ? last_TIP_F : last_TIP_C;
     if(mode==mode_run && getCurrentMode() < mode_run && (Iron.UserSetTemperature - tipTemp)>diff)
