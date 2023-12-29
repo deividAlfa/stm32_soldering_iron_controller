@@ -663,6 +663,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             saveSettingsFromMenu(save_Settings); // Save settings
             checkSettings();
           }
+          updateTempData(force_update);
           loadProfile(profile);
           Screen_main.state=screen_Erase;
         }

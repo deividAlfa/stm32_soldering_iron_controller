@@ -124,6 +124,8 @@ typedef enum{
   error_run                = 1,
   error_resume             = 2,
 
+  normal_update            = 0,
+  force_update             = 1,
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
   fume_extractor_mode_disabled  = 0,
   fume_extractor_mode_auto      = 1,
@@ -326,6 +328,8 @@ extern const settings_t defaultSettings;
 
 /** Cyclic task to save the settings if needed. */
 void checkSettings(void);
+/** Cyclic task to save the current temperature/tip/profile if needed. */
+void updateTempData(bool force);
 /** Sets a flag to save the settings in the background task. */
 void saveSettingsFromMenu(uint8_t mode);
 /** Loads the settings from flash on boot. */

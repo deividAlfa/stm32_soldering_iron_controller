@@ -190,40 +190,14 @@ extern int  __TEMP_SETTINGS_SECTION_LENGTH; /* defined by the linker, only its a
 #define TEMP_SETTINGS_SECTION_LENGTH ((uint32_t)&__TEMP_SETTINGS_SECTION_LENGTH)
 
 
-
-void checkSettings(void){
-
-  #ifdef NOSAVESETTINGS
-  return;
-  #endif
-
+void updateTempData(bool force){
   static uint8_t prevTip[NUM_PROFILES];
   static uint8_t prevProfile;
   static uint16_t prevTemp;
-  static uint32_t prevSysChecksum;
-  static uint32_t newSysChecksum;
-  static uint32_t prevTipChecksum;
-  static uint32_t newProfileChecksum;
-#ifdef ENABLE_ADDONS
-  static uint32_t prevAddonChecksum;
-  static uint32_t newAddonChecksum;
-#endif
-  static uint32_t lastCheckTime;
-  static uint32_t lastChangeTime;
   static uint32_t lastTempCheckTime;
 
   uint32_t CurrentTime = HAL_GetTick();
   uint8_t scr_index=current_screen->index;
-
-  // To reduce heap usage, only allow saving in smaller screens.
-  // Content change detection will be still active, but saving will postponed upon returning to a smaller screen.
-  // This is done to ensure compatibility with 10KB RAM devices yet allowing the firmware to grow unconstrained by ram usage
-  uint8_t allowSave = (scr_index == screen_boot              ||
-                       scr_index == screen_main              ||
-                       scr_index == screen_settings          ||
-                       scr_index == screen_calibration       ||
-                       scr_index == screen_reset_confirmation);
-
 
   if(!getIronCalibrationMode() && scr_index != screen_debug){                               // Don't update while calibration is in progress or in the debug screen
                                                                                             // Always update the data, whether the batery option is enabled or not
@@ -245,33 +219,66 @@ void checkSettings(void){
           prevTemp = currentTemp;
           lastTempCheckTime = CurrentTime;                                                // Start timeout
         }
-        else if((CurrentTime-lastTempCheckTime)>4999) {                                   // Different than flash and timeout is over
+        else if(force || (CurrentTime-lastTempCheckTime)>4999) {                          // Different than flash and timeout is over
           flashTemp = currentTemp;
           flashTempWrite();                                                               // Update temperature in flash
         }
       }
       if(flashTip[currentProfile] != currentTip) {
-        if(prevTip[currentProfile] != currentTip) {                                     // Store if different to last check
+        if(prevTip[currentProfile] != currentTip) {                                       // Store if different to last check
           prevTip[currentProfile] = currentTip;
           lastTempCheckTime = CurrentTime;                                                // Start timeout
         }
-        else if((CurrentTime-lastTempCheckTime)>4999) {                                   // Different than flash and timeout is over
+        else if(force || (CurrentTime-lastTempCheckTime)>4999) {                          // Different than flash and timeout is over
           flashTip[currentProfile] = currentTip;
           flashTipWrite();                                                                // Update tip data in flash
         }
       }
       if(flashProfile != currentProfile) {
-        if(prevProfile != currentProfile) {                                     // Store if different to last check
+        if(prevProfile != currentProfile) {                                               // Store if different to last check
           prevProfile = currentProfile;
           lastTempCheckTime = CurrentTime;                                                // Start timeout
         }
-        else if((CurrentTime-lastTempCheckTime)>4999) {                                   // Different than flash and timeout is over
+        else if(force || (CurrentTime-lastTempCheckTime)>4999) {                          // Different than flash and timeout is over
           flashProfile = currentProfile;
-          flashProfileWrite();                                                                // Update tip data in flash
+          flashProfileWrite();                                                            // Update tip data in flash
         }
       }
     }
   }
+}
+
+void checkSettings(void){
+
+  #ifdef NOSAVESETTINGS
+  return;
+  #endif
+
+  static uint32_t prevSysChecksum;
+  static uint32_t newSysChecksum;
+  static uint32_t prevTipChecksum;
+  static uint32_t newProfileChecksum;
+#ifdef ENABLE_ADDONS
+  static uint32_t prevAddonChecksum;
+  static uint32_t newAddonChecksum;
+#endif
+  static uint32_t lastCheckTime;
+  static uint32_t lastChangeTime;
+
+  uint32_t CurrentTime = HAL_GetTick();
+  uint8_t scr_index=current_screen->index;
+
+  // To reduce heap usage, only allow saving in smaller screens.
+  // Content change detection will be still active, but saving will postponed upon returning to a smaller screen.
+  // This is done to ensure compatibility with 10KB RAM devices yet allowing the firmware to grow unconstrained by ram usage
+  uint8_t allowSave = (scr_index == screen_boot              ||
+                       scr_index == screen_main              ||
+                       scr_index == screen_settings          ||
+                       scr_index == screen_calibration       ||
+                       scr_index == screen_reset_confirmation);
+
+
+  updateTempData(normal_update);
 
   // Save from menu
   if(systemSettings.save_Flag && allowSave){
