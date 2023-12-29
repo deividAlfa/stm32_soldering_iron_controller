@@ -270,7 +270,8 @@ Adjust Low voltage protection.<br>
 Use iron active detection by leaving the PWM slightly on all the time. If your amp has a pullup resistor it can be disabled.<br>
   - **Cold boost**<br>
 When entering run mode, if the tip is at least 100ºC colder than the target temperature, boosts +50ºC for 12 seconds.<br>
-The heat needs some time to spread over the tip metal body, this speeds up the heating.<br>
+This is meant to speed up heating on cheap iron tips, where the heat needs some time to spread over the tip metal body.<br>
+Genuine T12 / JBC tips shouldn't need this.<br>
   - **GUI Time**<br>
 To offer maximum responsiveness, the screen is updated as fastest as possible when the cpu is idling.<br>
 It depends on the MCU used and display interface, it can reach more than 100 fps in DMA SPI mode.<br>
