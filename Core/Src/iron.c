@@ -38,6 +38,8 @@ typedef struct {
   IronError_t         Error;                                // Error flags
   uint8_t             lastMode;                             // Last mode before error condition.
   uint8_t             boot_complete;                        // Flag set to 1 when boot screen exits (Used for error handling)
+  uint8_t             boot_loaded;                          // Flag set to 1 when the initial boot profile was loaded
+  uint8_t             err_resumed;                          // Flag set to 1 when the iron was resumed after a system error
   uint8_t             Load_det_pos;                         // For load detection
 
   uint16_t            Pwm_Period;                           // PWM period
@@ -678,55 +680,55 @@ void checkIronError(void){
   Err.safeMode = Iron.Error.safeMode;
 
   if(!Iron.Error.noIron){                                                               // Bypass other errors when no iron detected
-      Err.NTC_high =  (last_NTC_C > 800);
-      Err.NTC_low =  (last_NTC_C < -200);
+      Err.NTC_high =  (last_NTC_C > 800);                                               // As the NTC is often connected in the handle
+      Err.NTC_low =  (last_NTC_C < -200);                                               // This way only the "No iron" image is shown.
       #ifdef USE_VIN
       Err.V_low = (getSupplyVoltage_v_x10() < systemSettings.settings.lvp);
       #endif
   }
 
-  if(Err.Flags){
-
-    if(Err.noIron){                                                                                                                                         // If no iron flag
-      Iron.Error.Flags &= (FLAG_ACTIVE | FLAG_SAFE_MODE | FLAG_NO_IRON );                           // Clear other existing errors except safe mode
-    }
-    Iron.Error.Flags |= Err.Flags;                                                      // Update Iron errors
-
-    Iron.LastErrorTime = CurrentTime;
-    if(!Iron.Error.active){
-      if(Err.Flags!=FLAG_NO_IRON){                                                      // Avoid alarm if only the tip is removed
-        buzzer_alarm_start();
-      }
-      Iron.lastMode = Iron.CurrentMode;
-      Iron.Error.active = 1;
-      setCurrentMode(mode_sleep);
-      configurePWMpin(output_Low);
+  if(Err.Flags){                                                                        // Errors detected
+    if(Err.noIron)                                                                      // If no iron Detected
+      Iron.Error.Flags &= (FLAG_ACTIVE | FLAG_SAFE_MODE | FLAG_NO_IRON );               // Clear other existing errors, but keep safe mode, no iron and active flags.
+    Iron.Error.Flags |= Err.Flags;                                                      // Update stored Iron errors
+    Iron.LastErrorTime = CurrentTime;                                                   // Update error time
+    if(!Iron.Error.active){                                                             // Active flag wasnt set, this is a first occurring error
+      if(Err.Flags!=FLAG_NO_IRON)                                                       // Avoid alarm if only the tip is removed
+        buzzer_alarm_start();                                                           // Start alarm
+      Iron.lastMode = Iron.CurrentMode;                                                 // Save current mode
+      Iron.Error.active = 1;                                                            // Set active flag
+      setCurrentMode(mode_sleep);                                                       // Set sleep mode
+      configurePWMpin(output_Low);                                                      // Force pin low to completely remove the power
     }
   }
   else if (Iron.Error.active && !Err.Flags){                                            // If global flag set, but no errors
     if((CurrentTime-Iron.LastErrorTime)>systemSettings.Profile.errorTimeout){           // Check if enough time has passed
-      Iron.Error.Flags = 0;
-      buzzer_alarm_stop();
-      if(Iron.boot_complete){                                                           // If error happened after booting, set resume mode
-        if(systemSettings.Profile.errorResumeMode==error_sleep){
-          setCurrentMode(mode_sleep);
-        }
-        else if(systemSettings.Profile.errorResumeMode==error_run){
-          setCurrentMode(mode_run);
-        }
-        else{
-          setCurrentMode(Iron.lastMode);
-        }
-      }
-      else{                                                                             // If error before booting, set init mode
-        setCurrentMode(systemSettings.settings.initMode);
-      }
+      buzzer_alarm_stop();                                                              // Stop alarm
+      Iron.Error.Flags = FLAG_NOERROR;                                                  // Clear error flags
+      Iron.err_resumed=0;                                                               // Clear resume flag so the mode is is restored
     }
   }
-  else{
-    Iron.Error.Flags=FLAG_NOERROR;
+  if(!Iron.err_resumed && !Iron.Error.active){                                          // Resume after error
+
+    if(!Iron.boot_loaded && (current_time > systemSettings.Profile.errorTimeout+3000))  // If the system stays in error state for more than 3 seconds after boot, assume it's a problem
+      Iron.boot_loaded=1;
+
+    Iron.err_resumed = 1;                                                               // Set resume flag
+    if(!Iron.boot_loaded){                                                              // Boot profile not loaded, use boot mode
+      Iron.boot_loaded=1;
+      setCurrentMode(systemSettings.settings.initMode);
+    }
+    else{                                                                               // Already initialized boot mode, this error happened later
+      if(systemSettings.Profile.errorResumeMode==error_sleep)                           // Load mode defined in errorResumeMode
+        setCurrentMode(mode_sleep);
+      else if(systemSettings.Profile.errorResumeMode==error_run)
+        setCurrentMode(mode_run);
+      else
+        setCurrentMode(Iron.lastMode);
+    }
   }
 }
+
 bool getIronError(void){
   return Iron.Error.Flags;
 }
