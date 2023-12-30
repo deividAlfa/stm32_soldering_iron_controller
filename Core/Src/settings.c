@@ -556,9 +556,10 @@ void restoreSettings() {
 
   flashTempSettingsInit();                                  // Always init this, no matter if battery is enabled or not
 
-  if(systemSettings.settings.hasBattery) {
+  if(systemSettings.settings.hasBattery)
     loadSettingsFromBackupRam();
-  }
+
+  loadProfile(systemSettings.currentProfile);
 
 #if (SYSTEM_SETTINGS_VERSION == 27)             // Future version
 #warning Remove this workaround!
@@ -631,7 +632,7 @@ void loadSettingsFromBackupRam(void)
     update_display();
     ErrCountDown(3,117,50);
   }
-  loadProfile(bkpRamData.values.lastProfile);
+  systemSettings.currentProfile = bkpRamData.values.lastProfile;
   ironSchedulePwmUpdate();
   setUserTemperature(bkpRamData.values.lastTipTemp[systemSettings.currentProfile]);
 }
@@ -731,8 +732,8 @@ void flashTempSettingsInit(void) //call it only once during init
       flashTipIndex[n] =  0xFF;
     flashTemp = 0xFFFF;
     flashProfile = 0xFF;
-
-    loadProfile(profile_T12);
+    systemSettings.currentProfile = profile_T12;
+    systemSettings.currentTip = 0;
     setUserTemperature(systemSettings.Profile.defaultTemperature);
   }
   else{
@@ -741,8 +742,7 @@ void flashTempSettingsInit(void) //call it only once during init
     if(profile > profile_C210)
       profile = profile_T12;
 
-    /* Load profile (Will also load the tip) */
-    loadProfile(profile);
+    systemSettings.currentProfile = profile;
 
     /* Load temperature */
     if( temp > systemSettings.Profile.MaxSetTemperature || temp < systemSettings.Profile.MinSetTemperature)   // Check limits
@@ -755,7 +755,6 @@ void flashTempSettingsInit(void) //call it only once during init
     if(temp_settings.profile[flashProfileIndex] != UINT16_MAX) flashProfileIndex++;
     for(uint8_t n=0; n<NUM_PROFILES; n++)
       if(temp_settings.tip[n][flashTipIndex[n]] != UINT16_MAX) flashTipIndex[n]++;
-
   }
 }
 
