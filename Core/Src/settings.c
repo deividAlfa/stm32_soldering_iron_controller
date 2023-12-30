@@ -179,11 +179,6 @@ extern int  __SETTINGS_SECTION_START; /* defined by the linker, only its address
 extern int  __SETTINGS_SECTION_LENGTH; /* defined by the linker, only its address which is the target value */
 #define SETTINGS_SECTION_LENGTH ((uint32_t)&__SETTINGS_SECTION_LENGTH)
 
-extern int  __PROFILE_SECTION_START; /* defined by the linker, only its address which is the target value */
-#define PROFILE_SECTION_START ((uint32_t)&__PROFILE_SECTION_START)
-extern int  __PROFILE_SECTION_LENGTH; /* defined by the linker, only its address which is the target value */
-#define PROFILE_SECTION_LENGTH ((uint32_t)&__PROFILE_SECTION_LENGTH)
-
 extern int  __TEMP_SETTINGS_SECTION_START; /* defined by the linker, only its address which is the target value */
 #define TEMP_SETTINGS_SECTION_START ((uint32_t)&__TEMP_SETTINGS_SECTION_START)
 extern int  __TEMP_SETTINGS_SECTION_LENGTH; /* defined by the linker, only its address which is the target value */
