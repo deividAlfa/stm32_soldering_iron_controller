@@ -134,13 +134,13 @@ void oled_processInput(void) {
       if(scr->index == ret) {
         last_scr = current_screen->index;
 
-        if(current_screen->onExit){
-          current_screen->onExit(scr);
-        }
-
         if(current_screen->create){                     // If "create" exists,it means it's a dynamic screen
           oled_backup_comboStatus(current_screen);      // Save combo position
           oled_destroy_screen(current_screen);          // Destroy exiting screen
+        }
+
+        if(current_screen->onExit){
+          current_screen->onExit(scr);
         }
 
         if(scr->create){                                // Create entering screen
