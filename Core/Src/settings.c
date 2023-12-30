@@ -253,7 +253,7 @@ void checkSettings(void){
   #ifdef NOSAVESETTINGS
   return;
   #endif
-
+  static uint8_t  save_flags;
   static uint32_t prevSysChecksum;
   static uint32_t newSysChecksum;
   static uint32_t prevTipChecksum;
@@ -282,38 +282,11 @@ void checkSettings(void){
 
   // Save from menu
   if(systemSettings.save_Flag && allowSave){
-    switch(systemSettings.save_Flag & reboot_mask){
-      case save_Settings:
-        saveSettings(keepProfiles);
-        break;
-      case reset_Profiles:
-        systemSettings.currentProfile=profile_None;
-        saveSettings(wipeProfiles);
-        break;
-      case reset_Profile:
-        resetCurrentProfile();
-        saveSettings(keepProfiles);
-        break;
-      case reset_Settings:
-      {
-        uint8_t currentProfile=systemSettings.currentProfile;
-        resetSystemSettings();
-        systemSettings.currentProfile=currentProfile;
-        saveSettings(keepProfiles);
-        break;
-      }
-      case reset_All:
-        resetSystemSettings();
-        systemSettings.settings.version = 0xFF;       // To trigger setup screen
-        saveSettings(wipeProfiles);
-        break;
+    saveSettings(systemSettings.save_Flag);
 
-      default:
-        Error_Handler();
-    }
-    if(systemSettings.save_Flag>=reboot_after_save){       // If save flag indicates any resetting mode, reboot
+    if(systemSettings.reboot_Flag)
       NVIC_SystemReset();
-    }
+
     systemSettings.save_Flag=0;
     return;
   }
@@ -336,25 +309,28 @@ void checkSettings(void){
 #ifdef ENABLE_ADDONS
      || (systemSettings.addonSettingsChecksum != newAddonChecksum  )
 #endif
-  ){
-
-    if(    (prevSysChecksum != newSysChecksum)
-        || (prevTipChecksum != newProfileChecksum)
-#ifdef ENABLE_ADDONS
-        || (prevAddonChecksum != newAddonChecksum)
-#endif
     ){
-      // If different from the previous calculated checksum (settings are being changed quickly, don't save every time).
-      prevSysChecksum = newSysChecksum;                       // Store last computed checksum
-      prevTipChecksum = newProfileChecksum;
-#ifdef ENABLE_ADDONS
-      prevAddonChecksum = newAddonChecksum;
-#endif
+
+    if(prevSysChecksum != newSysChecksum){                    // If different from the previous calculated checksum (settings are being changed quickly, don't save every time).
+      prevSysChecksum = newSysChecksum;
+      save_flags |= save_Settings;
       lastChangeTime = CurrentTime;                           // Reset timer (we don't save anything until we pass a certain time without changes)
     }
-
+    if(prevTipChecksum != newProfileChecksum){
+      prevTipChecksum = newProfileChecksum;
+      save_flags |= save_Profile;
+      lastChangeTime = CurrentTime;
+    }
+#ifdef ENABLE_ADDONS
+    if(prevAddonChecksum != newAddonChecksum){
+      prevAddonChecksum = newAddonChecksum;
+      save_flags |= save_Addons;
+      lastChangeTime = CurrentTime;
+    }
+#endif
     else if(allowSave && ((CurrentTime-lastChangeTime)>5000)){ // If different from the previous calculated checksum, and timer expired (No changes in the last 5 sec)
-      saveSettings(keepProfiles);                              // Data was saved (so any pending interrupt knows this)
+      saveSettings(save_flags);
+      save_flags = 0;
     }
   }
 }
@@ -362,11 +338,11 @@ void checkSettings(void){
 
 //This is done to avoid huge stack build up. Trigger saving using checkSettings with a flag instead direct call from menu.
 // Thus, the flags stays after the screen exits. The code handling settings saving decides when it's ok to store them.
-void saveSettingsFromMenu(uint8_t mode){
-  systemSettings.save_Flag=mode;
-  if(mode>=reset_Profiles){           // Force safe mode (disable iron power) in any resetting mode, the station will reboot when done.
+void saveSettingsFromMenu(uint8_t save_mode, uint8_t reboot_mode){
+  systemSettings.save_Flag=save_mode;
+  systemSettings.reboot_Flag=reboot_mode;
+  if(reboot_mode  == do_reboot)                                        // Force safe mode (disable iron power) if rebooting.
     setSafeMode(enable);
-  }
 }
 
 static void eraseFlashPages(uint32_t pageAddress, uint32_t numPages)
@@ -374,10 +350,12 @@ static void eraseFlashPages(uint32_t pageAddress, uint32_t numPages)
   uint32_t error = 0;
   FLASH_EraseInitTypeDef erase = {0};
 
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   configurePWMpin(output_Low);
 
   HAL_FLASH_Unlock();
+  __set_PRIMASK(_irq);
 
   erase.NbPages     = numPages;
   erase.PageAddress = pageAddress;
@@ -388,9 +366,7 @@ static void eraseFlashPages(uint32_t pageAddress, uint32_t numPages)
     Flash_error();
   }
   HAL_FLASH_Lock();
-  __enable_irq();
 
-  HAL_IWDG_Refresh(&hiwdg);
   // Ensure flash was erased
   for (uint32_t i = 0u; i < (numPages * FLASH_PAGE_SIZE / sizeof(int32_t)); i++) {
     if( *((uint32_t*)pageAddress+i) != 0xFFFFFFFF){
@@ -404,25 +380,21 @@ static void writeFlash(uint32_t* src, uint32_t len, uint32_t dstAddr)
   uint32_t const numWordsToWrite = (len + sizeof(uint32_t) - 1u) / sizeof(uint32_t);
   uint32_t* srcData = src;
 
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   HAL_FLASH_Unlock();
-  __enable_irq();
+  __set_PRIMASK(_irq);
 
   // written = number of 32-bit values written
   for(uint32_t written=0; written < numWordsToWrite; written++){
-    __disable_irq();
     if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, dstAddr, *srcData ) != HAL_OK)
     {
       Flash_error();
     }
     dstAddr += sizeof(uint32_t); // increase pointers
     srcData++;
-    __enable_irq();
   }
-
-  __disable_irq();
   HAL_FLASH_Lock();
-  __enable_irq();
 }
 
 static void saveSettings(uint8_t mode){
@@ -430,7 +402,17 @@ static void saveSettings(uint8_t mode){
   return;
 #else
 
-  uint8_t const profile = systemSettings.currentProfile;
+  uint32_t _irq = __get_PRIMASK();
+
+  if( ((mode & save_Settings) && (mode & reset_Settings)) ||        // Sanity check
+      ((mode & save_Profile) && (mode & reset_Profile))   ||
+      ((mode & save_Profile) && (mode & reset_Profiles))  ||
+      ((mode & save_Addons) && (mode & reset_Addons))     ){
+
+    Error_Handler();
+  }
+
+  uint8_t profile = systemSettings.currentProfile;
 
   flashSettingsProfiles_t* flashBufferProfiles = _malloc(sizeof(flashSettingsProfiles_t));
   flashSettingsSettings_t* flashBufferSettings = _malloc(sizeof(flashSettingsSettings_t));
@@ -447,74 +429,94 @@ static void saveSettings(uint8_t mode){
   )
   { Error_Handler(); }
 
-  *flashBufferProfiles = flashProfilesSettings; // Save current profiles into the temp buffer
-
   while(ADC_Status != ADC_Idle);
   __disable_irq();
   systemSettings.isSaving = 1;
   configurePWMpin(output_Low);
-  __enable_irq();
-
-  systemSettings.settingsChecksum = ChecksumSettings(&systemSettings.settings);
-  flashBufferSettings->settingsChecksum = systemSettings.settingsChecksum;
-  flashBufferSettings->settings = systemSettings.settings;
+  __set_PRIMASK(_irq);
 
 #ifdef ENABLE_ADDONS
-  systemSettings.addonSettingsChecksum = ChecksumAddons(&(systemSettings.addonSettings));
-  flashBufferAddons->addonSettingsChecksum = systemSettings.addonSettingsChecksum;
-  flashBufferAddons->addonSettings = systemSettings.addonSettings;
-#endif
-
-  if(mode==keepProfiles){
-    if((profile<=profile_C210) && (systemSettings.Profile.ID == profile )){
-      systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
-      flashBufferProfiles->ProfileChecksum[profile] = systemSettings.ProfileChecksum;
-      flashBufferProfiles->Profile[profile] = systemSettings.Profile;
-    }
-    // Else unknown profile, probably profile_none (Resetted system settings) leave it untouched, let restoreProfile check it out and reset defaults if necessary.
+  if(mode & reset_Addons){
+    resetAddonSettings();
+  }
+  if(mode & (save_Addons | reset_Addons)){                                                                         // Save current addons
+    systemSettings.addonSettingsChecksum = ChecksumAddons(&(systemSettings.addonSettings));
+    flashBufferAddons->addonSettingsChecksum = systemSettings.addonSettingsChecksum;
+    flashBufferAddons->addonSettings = systemSettings.addonSettings;
   }
   else{
-    mode = wipeProfiles;
-    for(uint8_t x=0;x<NUM_PROFILES;x++){
-      flashBufferProfiles->Profile[x].version = 0xFF;
-      flashBufferProfiles->ProfileChecksum[x] = 0xFFFFFFFF;
-      memset(&flashBufferProfiles->Profile[x],0xFF,sizeof(profile_t));
+    *flashBufferAddons = flashAddonSettings;                                                      // Keep current addons
+  }
+#endif
+  if(mode & reset_Settings){                                                                      // Reset settings
+    resetSystemSettings();
+    if(mode == reset_All)
+      systemSettings.settings.version = 0xFF;                                                     // To trigger setup screen
+  }
+  if(mode & (save_Settings | reset_Settings)){                                                    // Save current settings
+    systemSettings.settingsChecksum = ChecksumSettings(&systemSettings.settings);
+    flashBufferSettings->settingsChecksum = systemSettings.settingsChecksum;
+    flashBufferSettings->settings = systemSettings.settings;
+  }
+  else{                                                                                           // Keep existing settings
+    *flashBufferSettings = flashGlobalSettings;
+  }
+
+  if(mode & reset_Profiles){                                                                      // Reset all profiles to default
+    for(uint8_t i=profile_T12; i<=profile_C210; i++){
+      systemSettings.currentProfile = i;
+      resetCurrentProfile();
+      systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
+      flashBufferProfiles->ProfileChecksum[i] = systemSettings.ProfileChecksum;
+      flashBufferProfiles->Profile[i] = systemSettings.Profile;
+    }
+    systemSettings.currentProfile = profile;
+  }
+  else{
+    *flashBufferProfiles = flashProfilesSettings;                                                 // Save flash profiles into temp buffer
+
+    if(mode & reset_Profile){                                                                     // Reset current profile
+      resetCurrentProfile();
+    }
+    if(mode & (save_Profile | reset_Profile)){                                                    // Save current profile
+      if((profile<=profile_C210) && (systemSettings.Profile.ID == profile )){
+        systemSettings.ProfileChecksum = ChecksumProfile(&systemSettings.Profile);
+        flashBufferProfiles->ProfileChecksum[profile] = systemSettings.ProfileChecksum;
+        flashBufferProfiles->Profile[profile] = systemSettings.Profile;
+      }
+      else
+        Error_Handler();
     }
   }
 
   eraseFlashPages(SETTINGS_SECTION_START, (SETTINGS_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);
-
   writeFlash((uint32_t*)flashBufferProfiles, sizeof(flashSettingsProfiles_t), (uint32_t)&flashProfilesSettings);
   writeFlash((uint32_t*)flashBufferSettings, sizeof(flashSettingsSettings_t), (uint32_t)&flashGlobalSettings);
 #ifdef ENABLE_ADDONS
   writeFlash((uint32_t*)flashBufferAddons, sizeof(flashSettingsAddons_t), (uint32_t)&flashAddonSettings);
 #endif
+  uint32_t flashChecksum, ramChecksum;
 
-  // Check flash and profile settings have same checksum
-  if(mode==keepProfiles){
-    for(uint8_t x=0;x<NUM_PROFILES;x++){
-      uint32_t ProfileFlash  = ChecksumProfile(&flashProfilesSettings.Profile[x]);
-      uint32_t ProfileRam    = ChecksumProfile(&flashBufferProfiles->Profile[x]);
-      if(ProfileFlash != ProfileRam){
-        Flash_error();
-      }
-    }
+  // Check flash and profile have same checksum
+  for(uint8_t x=0;x<NUM_PROFILES;x++){
+    flashChecksum = ChecksumProfile(&flashProfilesSettings.Profile[x]);
+    ramChecksum   = ChecksumProfile(&flashBufferProfiles->Profile[x]);
+    if(flashChecksum != ramChecksum)
+      Flash_error();
   }
 
-  // Check flash and system settings have same checksum
-  uint32_t SettingsFlash  = ChecksumSettings(&flashGlobalSettings.settings);
-  uint32_t SettingsRam  = ChecksumSettings(&systemSettings.settings);
-  if(SettingsFlash != SettingsRam){
+  // Check flash and settings buffer have same checksum
+  flashChecksum   = ChecksumSettings(&flashGlobalSettings.settings);
+  ramChecksum     = ChecksumSettings(&flashBufferSettings->settings);
+  if(flashChecksum != ramChecksum)
     Flash_error();
-  }
 
 #ifdef ENABLE_ADDONS
   // Verify addon crc
-  uint32_t addonsFlashCrc  = ChecksumAddons(&flashAddonSettings.addonSettings);
-  uint32_t addonsRamCrc  = ChecksumAddons(&systemSettings.addonSettings);
-  if(addonsFlashCrc != addonsRamCrc){
+  flashChecksum   = ChecksumAddons(&flashAddonSettings.addonSettings);
+  ramChecksum     = ChecksumAddons(&flashBufferAddons->addonSettings);
+  if(flashChecksum != ramChecksum)
     Flash_error();
-  }
 #endif
 
 #ifdef ENABLE_ADDONS
@@ -522,9 +524,7 @@ static void saveSettings(uint8_t mode){
 #endif
   _free(flashBufferSettings);
   _free(flashBufferProfiles);
-  __disable_irq();
   systemSettings.isSaving = 0;
-  __enable_irq();
 
 #endif
 }
@@ -532,18 +532,38 @@ static void saveSettings(uint8_t mode){
 void restoreSettings() {
   bool setup=0;
 #ifdef NOSAVESETTINGS                                                 // Stop erasing the flash while in debug mode
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   resetSystemSettings();
   systemSettings.settings.currentProfile = profile_T12;
   resetCurrentProfile();
   loadProfile(systemSettings.settings.currentProfile);
-  __enable_irq();
+  __set_PRIMASK(_irq);
   return;
 #endif
+
+
+#ifndef STM32F072xB
+  RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN;    // power the BKP peripheral
+  PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
+  BKP->CR      = 0u;                                        // disable tamper pin, just to be sure
+#else
+  RCC->APB1ENR |= RCC_APB1ENR_PWREN;                        // power the BKP peripheral
+  RCC->BDCR    |= RCC_BDCR_RTCEN;
+  PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
+  RTC->TAFCR   = 0u;                                        // disable tamper pin, just to be sure
+#endif
+
+  flashTempSettingsInit();                                  // Always init this, no matter if battery is enabled or not
+
+  if(systemSettings.settings.hasBattery) {
+    loadSettingsFromBackupRam();
+  }
 
 #if (SYSTEM_SETTINGS_VERSION == 27)             // Future version
 #warning Remove this workaround!
 #endif
+
   if(flashGlobalSettings.settings.version == 25){                                 // Upgrade settings version from 25 to 26 without erasing everything.
     systemSettings.settings.coldBoost = true;                                     // TODO: Remove this when settings version is updated
     flashGlobalSettings.settings.version = SYSTEM_SETTINGS_VERSION;               // Update version
@@ -570,22 +590,6 @@ void restoreSettings() {
   loadAddonSettings();
 #endif
 
-#ifndef STM32F072xB
-  RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN;    // power the BKP peripheral
-  PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
-  BKP->CR      = 0u;                                        // disable tamper pin, just to be sure
-#else
-  RCC->APB1ENR |= RCC_APB1ENR_PWREN;                        // power the BKP peripheral
-  RCC->BDCR    |= RCC_BDCR_RTCEN;
-  PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
-  RTC->TAFCR   = 0u;                                        // disable tamper pin, just to be sure
-#endif
-
-  flashTempSettingsInit();                                  // Always init this, no matter if battery is enabled or not
-
-  if(systemSettings.settings.hasBattery) {
-    loadSettingsFromBackupRam();
-  }
   if(setup){
     systemSettings.setupMode = enable;                      // Load setup state for boot screen
     setSafeMode(enable);
@@ -764,12 +768,14 @@ void flashTempWrite(void)
     flashProfileWrite();
   }
   HAL_IWDG_Refresh(&hiwdg);
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   HAL_FLASH_Unlock();
+  __set_PRIMASK(_irq);
   if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&temp_settings.temperature[flashTempIndex], flashTemp) != HAL_OK) {    // Store new temp
     Flash_error();
   }
-  __enable_irq();
+  HAL_FLASH_Lock();
   flashTempIndex++;                                                                                                         // Increase index for next time
 }
 
@@ -783,13 +789,14 @@ void flashProfileWrite(void)
   }
 
   HAL_IWDG_Refresh(&hiwdg);
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   HAL_FLASH_Unlock();
+  __set_PRIMASK(_irq);
   if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&temp_settings.profile[flashProfileIndex], flashProfile) != HAL_OK) {        // Store new tip/profile data
     Flash_error();
   }
   HAL_FLASH_Lock();
-  __enable_irq();
   flashProfileIndex++;                                                                                                         // Increase index for next time
 }
 
@@ -803,13 +810,14 @@ void flashTipWrite(void)
     flashProfileWrite();
   }
   HAL_IWDG_Refresh(&hiwdg);
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   HAL_FLASH_Unlock();
+  __set_PRIMASK(_irq);
   if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&temp_settings.tip[p][flashTipIndex[p]], flashTip[p]) != HAL_OK) {        // Store new tip/profile data
     Flash_error();
   }
   HAL_FLASH_Lock();
-  __enable_irq();
   flashTipIndex[p]++;                                                                                                         // Increase index for next time
 }
 
@@ -853,10 +861,11 @@ static void loadAddonSettings(void)
 
 static void resetAddonSettings()
 {
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   systemSettings.addonSettings = defaultAddonSettings;
   systemSettings.addonSettingsChecksum = 0u;
-  __enable_irq();
+  __set_PRIMASK(_irq);
 }
 
 static uint32_t ChecksumAddons(addonSettings_t* addonSettings){
@@ -867,14 +876,16 @@ static uint32_t ChecksumAddons(addonSettings_t* addonSettings){
 #endif
 
 static void resetSystemSettings(void) {
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   systemSettings.settings = defaultSettings;
   flashTempSettingsReset();
-  __enable_irq();
+  __set_PRIMASK(_irq);
 }
 
 
 static void resetCurrentProfile(void){
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
     if(systemSettings.currentProfile==profile_T12){
     systemSettings.Profile.ID = profile_T12;
@@ -991,6 +1002,7 @@ static void resetCurrentProfile(void){
   systemSettings.Profile.standDelay                 = 0;
   systemSettings.Profile.StandMode                  = mode_sleep;
   systemSettings.Profile.version                    = PROFILE_SETTINGS_VERSION;
+  __set_PRIMASK(_irq);
 }
 
 void loadProfile(uint8_t profile){
@@ -1000,6 +1012,7 @@ void loadProfile(uint8_t profile){
   }
 
   while(ADC_Status!=ADC_Idle);
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   HAL_IWDG_Refresh(&hiwdg);
   systemSettings.currentProfile=profile;
@@ -1034,13 +1047,11 @@ void loadProfile(uint8_t profile){
   if(p==profile_None){                                     // If profile not set, revert to profile_none to trigger setup screen
     systemSettings.currentProfile = p;
   }
-  __enable_irq();
+  __set_PRIMASK(_irq);
 }
 
 static void Flash_error(void){
-  __disable_irq();
   HAL_FLASH_Lock();
-  __enable_irq();
   fatalError(error_FLASH);
 }
 
@@ -1060,23 +1071,9 @@ static void checksumError(uint8_t mode){
   else{
     putStrAligned("SYSTEM", 36, align_center);
   }
-  update_display();
+  update_display_ErrorHandler();
   ErrCountDown(3,117,50);
-  if(mode == reset_Profile){
-    resetCurrentProfile();
-    saveSettings(keepProfiles);
-  }
-#ifdef ENABLE_ADDONS
-  else if(mode == reset_Addons)
-  {
-    resetAddonSettings();
-    saveSettings(keepProfiles);
-  }
-#endif
-  else{
-    resetSystemSettings();
-    saveSettings(wipeProfiles);
-  }
+  saveSettings(mode);
   NVIC_SystemReset();
 }
 
@@ -1098,13 +1095,7 @@ static void Button_reset(void){
         while(!BUTTON_input()){
           HAL_IWDG_Refresh(&hiwdg);
         }
-        resetSystemSettings();
-        systemSettings.settings.version = 0xFF;       // To trigger setup screen
-#ifdef ENABLE_ADDONS
-        resetAddonSettings();
-#endif
-        saveSettings(wipeProfiles);
-        flashTempSettingsReset();
+        saveSettings(reset_All);
         NVIC_SystemReset();
       }
     }
