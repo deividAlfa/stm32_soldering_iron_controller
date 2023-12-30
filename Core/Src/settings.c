@@ -1074,7 +1074,7 @@ static void checksumError(uint8_t mode){
   else{
     putStrAligned("SYSTEM", 36, align_center);
   }
-  update_display_ErrorHandler();
+  update_display();
   ErrCountDown(3,117,50);
   saveSettings(mode);
   NVIC_SystemReset();
