@@ -570,11 +570,11 @@ void restoreSettings() {
   }
 
   if(flashGlobalSettings.settings.version != SYSTEM_SETTINGS_VERSION){            // System settings version mismatch
+    if(flashGlobalSettings.settings.version == 0xFF)                              // 0xFF = erased flash, trigger setup mode
+      setup=1;
     resetSystemSettings();                                                        // Reset current settings
 #ifdef ENABLE_ADDONS
     resetAddonSettings();
-    if(flashGlobalSettings.settings.version == 0xFF)                              // 0xFF = erased flash, trigger setup mode
-      setup=1;
 #endif
   }
   else{
