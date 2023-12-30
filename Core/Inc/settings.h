@@ -89,43 +89,43 @@ typedef enum{
   profile_None            = 0xff,
 
   save_Settings           = 1,
-  reboot_after_save       = 0x40,
-  save_settings_reboot    = 0x41,
-  reset_Profiles          = 0x80,
-  reset_Profile           = 0x81,
-  reset_Settings          = 0x82,
-#ifdef ENABLE_ADDONS
-  reset_Addons            = 0x83,
-#endif
-  reset_All               = 0x84,
-  reboot_mask             = 0xBF,
+  save_Profile            = 2,
+//save_Profiles           = 4,          // This is never used, only one profile is used at a time
+  save_Addons             = 8,
+  save_All                = save_Settings | save_Profile |  save_Addons,
 
-  keepProfiles            = 1,
-  wipeProfiles            = 0x80,
+  reset_Settings          = 0x10,
+  reset_Profile           = 0x20,
+  reset_Profiles          = 0x40,
+  reset_Addons            = 0x80,
+  reset_All               = reset_Settings | reset_Profile |  reset_Addons,
+
+  no_reboot               = 0,
+  do_reboot               = 1,
 
   output_PWM,
   output_Low,
   output_High,
 
-  lang_english             = 0,
-  lang_russian             = 1,
-  lang_swedish             = 2,
-  lang_german              = 3,
-  lang_turkish             = 4,
-  lang_tchinese            = 5,
-  lang_bulgarian           = 6,
+  lang_english            = 0,
+  lang_russian            = 1,
+  lang_swedish            = 2,
+  lang_german             = 3,
+  lang_turkish            = 4,
+  lang_tchinese           = 5,
+  lang_bulgarian          = 6,
 
 
-  dim_off                  = 0,
-  dim_sleep                = 1,
-  dim_always               = 2,
+  dim_off                 = 0,
+  dim_sleep               = 1,
+  dim_always              = 2,
 
-  error_sleep              = 0,
-  error_run                = 1,
-  error_resume             = 2,
+  error_sleep             = 0,
+  error_run               = 1,
+  error_resume            = 2,
 
-  normal_update            = 0,
-  force_update             = 1,
+  normal_update           = 0,
+  force_update            = 1,
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
   fume_extractor_mode_disabled  = 0,
   fume_extractor_mode_auto      = 1,
@@ -317,6 +317,7 @@ __attribute__((aligned(4))) typedef struct{
   uint32_t        addonSettingsChecksum;
 #endif
   uint8_t         save_Flag;
+  uint8_t         reboot_Flag;
   uint8_t         setupMode;
   uint8_t         isSaving;
   uint8_t         currentProfile;
@@ -331,7 +332,9 @@ void checkSettings(void);
 /** Cyclic task to save the current temperature/tip/profile if needed. */
 void updateTempData(bool force);
 /** Sets a flag to save the settings in the background task. */
-void saveSettingsFromMenu(uint8_t mode);
+void saveSettingsFromMenu(uint8_t save_mode, uint8_t reboot_mode);
+/** Reads the save flag. */
+uint8_t getSaveFlag(void);
 /** Loads the settings from flash on boot. */
 void restoreSettings();
 /** Load/change to the profile with the given index */

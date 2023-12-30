@@ -40,7 +40,7 @@ static void SETTINGS_OnEnter(screen_t *scr) {
     comboResetIndex(Screen_settings.current_widget);
   }
   if(isCurrentProfileChanged()){         // If there's unsaved profile data
-    saveSettingsFromMenu(save_Settings); // Save settings
+    saveSettingsFromMenu(save_All, no_reboot);
   }
 }
 

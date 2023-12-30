@@ -10,47 +10,29 @@
 
 screen_t Screen_reset;
 screen_t Screen_reset_confirmation;
-
-typedef enum resStatus_t{ reset_settings, reset_profile, reset_profiles, reset_all }resStatus_t;
-resStatus_t resStatus;
-
+uint8_t resStatus;
 
 static int cancelReset(widget_t *w) {
   return last_scr;
 }
 static int doReset(widget_t *w) {
-  switch(resStatus){
-    case reset_settings:
-      saveSettingsFromMenu(reset_Settings);
-      break;
-    case reset_profile:
-      saveSettingsFromMenu(reset_Profile);
-      break;
-    case reset_profiles:
-      saveSettingsFromMenu(reset_Profiles);
-      break;
-    case reset_all:
-      saveSettingsFromMenu(reset_All);
-      break;
-    default:
-      return screen_main;
-    }
-    return -1;
+  saveSettingsFromMenu(resStatus, do_reboot);
+  return -1;
 }
 static int doSettingsReset(widget_t *w, RE_Rotation_t input) {
-  resStatus=reset_settings;
+  resStatus=reset_Settings;
   return screen_reset_confirmation;
 }
 static int doProfileReset(widget_t *w, RE_Rotation_t input) {
-  resStatus=reset_profile;
+  resStatus=reset_Profile;
   return screen_reset_confirmation;
 }
 static int doProfilesReset(widget_t *w, RE_Rotation_t input) {
-  resStatus=reset_profiles;
+  resStatus=reset_Profiles;
   return screen_reset_confirmation;
 }
 static int doFactoryReset(widget_t *w, RE_Rotation_t input) {
-  resStatus=reset_all;
+  resStatus=reset_All;
   return screen_reset_confirmation;
 }
 
@@ -84,26 +66,23 @@ static void reset_create(screen_t *scr){
 
 static void reset_confirmation_init(screen_t *scr){
   default_init(scr);
-  //fillBuffer(BLACK, fill_dma);                              // Manually clear the screen
-  //Screen_reset_confirmation.refresh=screen_Erased;          // Set to already cleared so it doesn't get erased automatically
-
   u8g2_SetFont(&u8g2,u8g2_font_menu);
   u8g2_SetDrawColor(&u8g2, WHITE);
 
   switch(resStatus){
-  case 0:
+  case reset_Settings:
     putStrAligned(strings[lang].RESET_Reset_msg_settings_1, 0, align_center);
     putStrAligned(strings[lang].RESET_Reset_msg_settings_2, 16, align_center);
     break;
-  case 1:
+  case reset_Profile:
     putStrAligned(strings[lang].RESET_Reset_msg_profile_1, 0 , align_center);
     putStrAligned(strings[lang].RESET_Reset_msg_profile_2, 16, align_center);
     break;
-  case 2:
+  case reset_Profiles:
     putStrAligned(strings[lang].RESET_Reset_msg_profiles_1,0 , align_center);
     putStrAligned(strings[lang].RESET_Reset_msg_profiles_2, 16, align_center);
     break;
-  case 3:
+  case reset_All:
     putStrAligned(strings[lang].RESET_Reset_msg_all_1, 0, align_center);
     putStrAligned(strings[lang].RESET_Reset_msg_all_2, 16, align_center);
     break;

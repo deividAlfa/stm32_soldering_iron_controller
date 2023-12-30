@@ -222,7 +222,7 @@ static void system_onExit(screen_t *scr){
 #ifndef STM32F072xB
   if(systemSettings.settings.clone_fix != clone_fix){
       systemSettings.settings.clone_fix = clone_fix;
-      saveSettingsFromMenu(save_settings_reboot);
+      saveSettingsFromMenu(save_All, do_reboot);
   }
 #endif
 }

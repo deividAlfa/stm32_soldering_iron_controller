@@ -27,6 +27,7 @@ void sortTips(void){
 
   strcpy (current, getCurrentTip()->name);                                                        // Copy tip name being used in the system
 
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   for(uint8_t j=0; j<systemSettings.Profile.currentNumberOfTips; j++){                            // Sort alphabetically
     min = j;                                                                                      // Min is start position
@@ -48,7 +49,7 @@ void sortTips(void){
       break;
     }
   }
-  __enable_irq();
+  __set_PRIMASK(_irq);
 }
 
 //=========================================================
@@ -147,6 +148,7 @@ static int tip_save(widget_t *w, RE_Rotation_t input) {
 }
 //=========================================================
 static int tip_delete(widget_t *w, RE_Rotation_t input) {
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   for(uint8_t x = Selected_Tip; x <systemSettings.Profile.currentNumberOfTips-1;x++) {                          // Overwrite selected tip and move the rest one position backwards
     systemSettings.Profile.tip[x] = systemSettings.Profile.tip[x+1];
@@ -158,7 +160,7 @@ static int tip_delete(widget_t *w, RE_Rotation_t input) {
     }
     setCurrentTip(systemSettings.currentTip);                                                                   // Reload tip settings
   }
-  __enable_irq();
+  __set_PRIMASK(_irq);
 
   for(uint8_t x = systemSettings.Profile.currentNumberOfTips; x < NUM_TIPS;x++) {                               // Fill the unused tips with blank names
     strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
@@ -212,9 +214,9 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
     }
     else{
       for(uint8_t x = 0; x < systemSettings.Profile.currentNumberOfTips-1; x++) {                                 // Compare tip names with current edit
-        if(x==Selected_Tip)																																												// Skip tip being edited
+        if(x==Selected_Tip)                                                                                       // Skip tip being edited
           continue;
-        if( (strcmp(backupTip.name, systemSettings.Profile.tip[x].name) == 0) ){               										// If match is found
+        if( (strcmp(backupTip.name, systemSettings.Profile.tip[x].name) == 0) ){                                  // If match is found
           enable=0;                                                                                               // Disable save button
           break;
         }

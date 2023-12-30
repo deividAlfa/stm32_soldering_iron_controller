@@ -40,9 +40,10 @@ static comboBox_item_t *Cal_Combo_Adjust_C250;
 static comboBox_item_t *Cal_Combo_Adjust_C400;
 
 static void restore_tip(void){
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
    *Currtip = backupTip;
-   __enable_irq();
+   __set_PRIMASK(_irq);
 }
 static void backup_tip(void){
   backupTip = *Currtip ;
@@ -85,10 +86,7 @@ static void setCal250(int32_t *val) {
     temp=calAdjust[cal_400]-10;
   }
   calAdjust[cal_250] = temp;
-
-  __disable_irq();
   Currtip->calADC_At_250 = calAdjust[cal_250];
-  __enable_irq();
 }
 static int Cal250_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
   int ret = default_widgetProcessInput(w, input, state);
@@ -112,9 +110,7 @@ static void setCal400(int32_t *val) {
     temp=calAdjust[cal_250]+10;
   }
   calAdjust[cal_400] = temp;
-  __disable_irq();
   Currtip->calADC_At_400 = calAdjust[cal_400];
-  __enable_irq();
 }
 static int Cal400_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
   int ret = default_widgetProcessInput(w, input, state);
@@ -133,13 +129,11 @@ static int Cal_Settings_SaveAction(widget_t *w, RE_Rotation_t input) {
       systemSettings.Profile.Cal400_default != calAdjust[cal_400] ||
       backup_calADC_At_0 != calAdjust[cal_0] ){
 
-    __disable_irq();
     systemSettings.Profile.Cal250_default = calAdjust[cal_250];
     systemSettings.Profile.Cal400_default = calAdjust[cal_400];
     backup_calADC_At_0 = calAdjust[cal_0];                               // backup_calADC_At_0 is transferred to profile on screen exiting
-    __enable_irq();
 
-    saveSettingsFromMenu(save_Settings);
+    saveSettingsFromMenu(save_Profile, no_reboot);
   }
   return last_scr;
 }
@@ -152,14 +146,10 @@ static int zero_setAction(widget_t* w, RE_Rotation_t input) {
   if(input==Click){
     if(++zero_state>zero_capture){
       zero_state=zero_disabled;
-      __disable_irq();
       systemSettings.Profile.calADC_At_0 = calAdjust[cal_0] = backup_calADC_At_0;   // Apply zero value in real time
-      __enable_irq();
     }
     else if(zero_state==zero_capture){
-      __disable_irq();
       systemSettings.Profile.calADC_At_0 = calAdjust[cal_0] = TIP.last_avg;
-      __enable_irq();
     }
     update=1;
   }
@@ -281,12 +271,8 @@ static void Cal_Start_init(screen_t *scr) {
   backupTempUnit=getSystemTempUnit();
   setSystemTempUnit(mode_Celsius);
   backup_tip();
-
-  __disable_irq();
   Currtip->calADC_At_250 = systemSettings.Profile.Cal250_default;
   Currtip->calADC_At_400 = systemSettings.Profile.Cal400_default;
-  __enable_irq();
-
   setCalState(cal_250);
 }
 
@@ -441,11 +427,8 @@ static void Cal_Settings_init(screen_t *scr) {
   calAdjust[cal_0] = systemSettings.Profile.calADC_At_0;
   backup_calADC_At_0 = systemSettings.Profile.calADC_At_0;
   backup_tip();
-
-  __disable_irq();
   Currtip->calADC_At_250 = calAdjust[cal_250];
   Currtip->calADC_At_400 = calAdjust[cal_400];
-  __enable_irq();
 }
 
 static void Cal_Settings_OnExit(screen_t *scr) {

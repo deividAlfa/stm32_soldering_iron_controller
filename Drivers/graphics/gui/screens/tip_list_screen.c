@@ -31,9 +31,7 @@ int tip_list_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state
   comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
   if(input==LongClick){
     if( item!=comboitem_tip_list_addNewTip && item!=comboitem_tip_list_back){                                   // If long click over a tip
-      __disable_irq();
       setCurrentTip(comboItemToIndex(scr->current_widget, item));                                               // Set tip
-      __enable_irq();
       return screen_main;                                                                                       // Exit to main screen
     }
   }

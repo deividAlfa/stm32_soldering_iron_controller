@@ -282,6 +282,7 @@ uint16_t round_10(uint16_t input){
 // Changes the system temperature unit
 void setSystemTempUnit(bool unit){
 
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   if(systemSettings.Profile.tempUnit != unit){
     systemSettings.Profile.tempUnit = unit;
@@ -295,7 +296,7 @@ void setSystemTempUnit(bool unit){
   if(systemSettings.settings.tempUnit != unit){
     systemSettings.settings.tempUnit = unit;
   }
-  __enable_irq();
+  __set_PRIMASK(_irq);
   setCurrentMode(Iron.CurrentMode);     // Reload temps
 }
 bool getSystemTempUnit(void){
@@ -350,24 +351,24 @@ void initTimers(void){
 }
 
 void setReadDelay(uint16_t delay){
-  __disable_irq();
  systemSettings.Profile.readDelay=delay;
-  __enable_irq();
 }
 
 
 void setReadPeriod(uint16_t period){
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
  systemSettings.Profile.readPeriod=period;
  Iron.updatePwm=1;
-  __enable_irq();
+  __set_PRIMASK(_irq);
 }
 
 void setPwmMul(uint16_t mult){
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   systemSettings.Profile.pwmMul=mult;
   Iron.updatePwm=1;
-  __enable_irq();
+  __set_PRIMASK(_irq);
 }
 
 void configurePWMpin(uint8_t mode){
@@ -531,9 +532,7 @@ void updatePowerLimit(void){
 
 // Sets no Iron detection threshold
 void setNoIronValue(uint16_t noiron){
-  __disable_irq();
   systemSettings.Profile.noIronValue=noiron;
-  __enable_irq();
 }
 
 // Change the iron operating mode in stand mode
@@ -555,6 +554,7 @@ void setCurrentMode(uint8_t mode){
     mode=mode_sleep;                                                                      // If error active, override with sleep mode
   }
 
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   CurrentTime=HAL_GetTick();                                                              // Update local time value just in case it's called by handleIron, to avoid drift
   Iron.CurrentModeTimer = CurrentTime;                                                    // Refresh current mode timer
@@ -601,7 +601,7 @@ void setCurrentMode(uint8_t mode){
     }
     Iron.temperatureReached = 0;                                                    // Reset temperature reached flag
   }
-  __enable_irq();
+  __set_PRIMASK(_irq);
 }
 
 // Called from program timer if WAKE change is detected
@@ -630,11 +630,8 @@ bool IronWake(wakeSrc_t src){                                                   
       return 0;
     }
   }
-  if(Iron.CurrentMode<mode_boost){
-      __disable_irq();
+  if(Iron.CurrentMode<mode_boost)
       setCurrentMode(mode_run);
-      __enable_irq();
-  }
   Iron.lastWakeSrc = src;
   return 1;
 }
@@ -663,11 +660,12 @@ void readWake(void){
 }
 
 void resetIronError(void){
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   Iron.Error.Flags &= (FLAG_ACTIVE | FLAG_SAFE_MODE | FLAG_NO_IRON);           // Clear all errors except active, safe mode and no iron
   Iron.LastErrorTime += (systemSettings.Profile.errorTimeout+2);               // Bypass timeout
   checkIronError();                                                            // Refresh Errors
-  __enable_irq();
+  __set_PRIMASK(_irq);
 }
 
 // Checks for non critical iron errors (Errors that can be cleared)
@@ -738,6 +736,7 @@ uint32_t getIronLastErrorTime(void){
 }
 
 void setSafeMode(bool mode){
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   if(mode==disable && Iron.Error.Flags==(FLAG_ACTIVE | FLAG_SAFE_MODE)){                 // If only failsafe was active? (This should only happen because it was on first init screen)
     Iron.Error.Flags = FLAG_NOERROR;
@@ -750,7 +749,7 @@ void setSafeMode(bool mode){
     Iron.Error.safeMode=mode;
     checkIronError();
   }
-  __enable_irq();
+  __set_PRIMASK(_irq);
 }
 
 
@@ -759,14 +758,10 @@ bool GetSafeMode(void){
 }
 
 void setIronCalibrationMode(uint8_t mode){
-  __disable_irq();
   Iron.calibrating = mode;
-
   if(mode==enable){
     setCurrentMode(mode_run);
   }
-
-  __enable_irq();
 }
 
 bool getIronCalibrationMode(void){
@@ -774,6 +769,7 @@ bool getIronCalibrationMode(void){
 }
 
 void setUserTemperature(uint16_t temperature) {
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   Iron.UserSetTemperature = temperature;
   if(Iron.CurrentMode==mode_run){
@@ -782,7 +778,7 @@ void setUserTemperature(uint16_t temperature) {
     Iron.temperatureReached = 0;
     Iron.TargetTemperature = temperature;
   }
-  __enable_irq();
+  __set_PRIMASK(_irq);
 }
 
 uint16_t getUserTemperature(void){

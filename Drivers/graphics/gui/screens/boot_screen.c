@@ -139,7 +139,7 @@ static void setLanguage(uint32_t *val) {
 
 static int SaveSetup(widget_t* w) {
   loadProfile(profile);
-  saveSettingsFromMenu(save_Settings);
+  saveSettingsFromMenu(save_All, no_reboot);
   boot_step++;
   return -1;
 }

@@ -223,10 +223,12 @@ void setCurrentTip(uint8_t tip) {
   {
     tip = 0u;
   }
-
+  uint32_t _irq = __get_PRIMASK();
+  __disable_irq();
   systemSettings.currentTip = tip;
   currentTipData = &systemSettings.Profile.tip[tip];
   setupPID(&currentTipData->PID);
+  __set_PRIMASK(_irq);
 }
 
 tipData_t *getCurrentTip() {
