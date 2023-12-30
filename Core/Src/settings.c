@@ -600,8 +600,10 @@ void flashTempSettingsInit(void) //call it only once during init
         break;
       }
     }
-    flashTempIndex = i;
-    flashTemp = temp_settings.temperature[i];
+    if(!setDefault){
+      flashTempIndex = i;
+      flashTemp = temp_settings.temperature[i];
+    }
   }                                                                                                           // No free slot found, reset
   else
     setDefault=1;
@@ -615,8 +617,10 @@ void flashTempSettingsInit(void) //call it only once during init
           break;
         }
       }
-      flashProfileIndex = i;
-      flashProfile=temp_settings.profile[i];
+      if(!setDefault){
+        flashProfileIndex = i;
+        flashProfile=temp_settings.profile[i];
+      }
     }
     else
       setDefault=1;
@@ -632,8 +636,10 @@ void flashTempSettingsInit(void) //call it only once during init
             break;
           }
         }
-        flashTipIndex[n] = i;
-        flashTip[n] = temp_settings.tip[n][i];
+        if(!setDefault){
+          flashTipIndex[n] = i;
+          flashTip[n] = temp_settings.tip[n][i];
+        }
       }
       else
         setDefault=1;
@@ -970,9 +976,7 @@ void loadProfile(uint8_t profile){
 
 void setCurrentTip(uint8_t tip) {
   if(tip >= systemSettings.Profile.currentNumberOfTips) // sanity check
-  {
     tip = 0u;
-  }
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   systemSettings.currentTip = tip;
