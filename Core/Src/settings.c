@@ -118,7 +118,7 @@ static uint8_t flashTipIndex[NUM_PROFILES];
 static uint8_t flashTip[NUM_PROFILES];
 static uint8_t flashProfileIndex;
 static uint8_t flashProfile;
-
+static tipData_t *currentTipData;
 
 systemSettings_t systemSettings;
 
@@ -967,6 +967,24 @@ void loadProfile(uint8_t profile){
   }
   __set_PRIMASK(_irq);
 }
+
+void setCurrentTip(uint8_t tip) {
+  if(tip >= systemSettings.Profile.currentNumberOfTips) // sanity check
+  {
+    tip = 0u;
+  }
+  uint32_t _irq = __get_PRIMASK();
+  __disable_irq();
+  systemSettings.currentTip = tip;
+  currentTipData = &systemSettings.Profile.tip[tip];
+  setupPID(&currentTipData->PID);
+  __set_PRIMASK(_irq);
+}
+
+tipData_t *getCurrentTip(void) {
+  return currentTipData;
+}
+
 
 static void Flash_error(void){
   HAL_FLASH_Lock();

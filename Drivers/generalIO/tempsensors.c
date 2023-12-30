@@ -12,8 +12,8 @@
 uint8_t use_int_temp;
 #endif
 
-static tipData_t *currentTipData;
 volatile int16_t last_TIP_C, last_TIP_F, last_TIP_F_Raw, last_TIP_C_Raw;
+
 #ifdef USE_NTC
 volatile int16_t last_NTC_C=-999, last_NTC_F=-999;
 #else
@@ -217,26 +217,9 @@ int16_t readTipTemperatureCompensated(bool new, bool mode, bool tempUnit){
   }
 }
 
-void setCurrentTip(uint8_t tip) {
-
-  if(tip >= systemSettings.Profile.currentNumberOfTips) // sanity check
-  {
-    tip = 0u;
-  }
-  uint32_t _irq = __get_PRIMASK();
-  __disable_irq();
-  systemSettings.currentTip = tip;
-  currentTipData = &systemSettings.Profile.tip[tip];
-  setupPID(&currentTipData->PID);
-  __set_PRIMASK(_irq);
-}
-
-tipData_t *getCurrentTip() {
-  return currentTipData;
-}
-
 // Translate the human readable t into internal value
 int16_t human2adc(int16_t t) {
+  tipData_t *currentTipData = getCurrentTip();
   t = t*10;
   // If using Farenheit, convert to Celsius
   if(getSystemTempUnit()==mode_Farenheit){
@@ -273,6 +256,8 @@ int16_t human2adc(int16_t t) {
 // Translate temperature from internal units to the human readable value
 int16_t adc2Human_x10(int16_t adc_value,bool correction, bool tempUnit) {
   int16_t temp;
+  tipData_t *currentTipData = getCurrentTip();
+
   if(adc_value<currentTipData->calADC_At_250){
     temp = map(adc_value, systemSettings.Profile.calADC_At_0, currentTipData->calADC_At_250, 0, state_temps[cal_250]);
   }

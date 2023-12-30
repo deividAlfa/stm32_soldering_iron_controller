@@ -335,6 +335,9 @@ uint8_t getSaveFlag(void);
 void restoreSettings();
 /** Load/change to the profile with the given index */
 void loadProfile(uint8_t profile);
+void setCurrentTip(uint8_t tip);
+tipData_t *getCurrentTip(void);
+
 /** Checks if the current system settings in RAM were changed */
 bool isSystemSettingsChanged(void);
 /** Checks if the current profile in RAM is changed */
