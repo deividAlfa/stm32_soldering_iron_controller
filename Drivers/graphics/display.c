@@ -7,7 +7,7 @@
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "lcd.c"
+#define __BASE_FILE__ "display.c"
 #endif
 
 oled_t oled;
@@ -702,4 +702,5 @@ void Oled_error_init(void){
   u8g2_SetDrawColor(&u8g2, WHITE);
   u8g2_SetMaxClipWindow(&u8g2);
   systemSettings.settings.displayStartColumn = DISPLAY_START_COLUMN;
+  __enable_irq();
 }
