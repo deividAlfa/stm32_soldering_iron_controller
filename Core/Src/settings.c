@@ -562,7 +562,7 @@ void restoreSettings() {
     systemSettings.settings = flashGlobalSettings.settings;
     systemSettings.settingsChecksum = flashGlobalSettings.settingsChecksum;
     if(ChecksumSettings(&systemSettings.settings)!=systemSettings.settingsChecksum){   // Show error message if bad checksum
-      checksumError(reset_All);
+      checksumError(reset_Settings);
     }
   }
 
