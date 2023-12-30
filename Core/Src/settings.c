@@ -849,6 +849,10 @@ static uint32_t ChecksumProfile(profile_t* profile){
 #ifdef ENABLE_ADDONS
 static void loadAddonSettings(void)
 {
+  if((flashAddonSettings.addonSettings.enabledAddons == 0xffffffffffffffffU) && (flashAddonSettings.addonSettingsChecksum == 0xffffffffU)){     // Assume flash is erased, restore defaults silently
+    resetAddonSettings();
+    return;
+  }
   systemSettings.addonSettings = flashAddonSettings.addonSettings;
   systemSettings.addonSettingsChecksum = ChecksumAddons(&(systemSettings.addonSettings));
   if((systemSettings.addonSettings.enabledAddons != defaultAddonSettings.enabledAddons) || // list of addons changed
