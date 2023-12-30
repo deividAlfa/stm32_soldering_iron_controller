@@ -641,19 +641,10 @@ void fatalError(uint8_t type){
     putStrAligned(strings[lang].ERROR_BTN_RESET, 50, align_center);
 
 #if (defined DISPLAY_I2C || defined DISPLAY_SPI) && defined DISPLAY_DEVICE
-  if(!oled.use_sw)
-    update_display_ErrorHandler();
-
-#if defined DISPLAY_I2C && defined I2C_TRY_HW
-  else{
-    update_display();
-  }
-#endif
-
+  update_display_ErrorHandler();                                                      // If hardware is used, we can't use interrupts here, use special software update mode
 #else
   update_display();
 #endif
-
   buttonReset();
 }
 
