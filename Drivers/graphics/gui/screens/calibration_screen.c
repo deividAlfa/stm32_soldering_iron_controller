@@ -160,6 +160,7 @@ static void setCalState(state_t s) {
   current_state = s;
 
   if(current_state <= cal_400) {
+    setCurrentMode(mode_run);
     setUserTemperature(state_temps[s]/10);
     widgetDisable(Widget_Cal_Measured);
     widgetEnable(Widget_Cal_Button);
