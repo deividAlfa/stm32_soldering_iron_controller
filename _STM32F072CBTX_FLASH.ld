@@ -30,14 +30,14 @@ ENTRY(Reset_Handler)
 /* Highest address of the user mode stack */
 _estack = ORIGIN(RAM) + LENGTH(RAM);	/* end of "RAM" Ram type memory */
 
-_Min_Heap_Size = 0xC00 ;	/* required amount of heap  */
+_Min_Heap_Size = 0xC80 ;	/* required amount of heap  */
 _Min_Stack_Size = 0x400 ;	/* required amount of stack */
 
 /* Memories definition */
 MEMORY
 {
   RAM              (xrw) : ORIGIN = 0x20000000, LENGTH = 16K
-  FLASH            (rx)  : ORIGIN = 0x8000000,  LENGTH = 124K
+  FLASH            (rx)  : ORIGIN = 0x8000000,  LENGTH = 122K
   /* areas for storing the settings, keep the start and the end on page boundaries and continuous */
   TEMP_SETTINGS    (rx)  : ORIGIN = 0x801E800,  LENGTH = 2048
   PROFILE_SETTINGS (rx)  : ORIGIN = 0x801F000,  LENGTH = 3840
