@@ -38,11 +38,11 @@ MEMORY
 {
   RAM              (xrw) : ORIGIN = 0x20000000, LENGTH = 20K
   FLASH            (rx)  : ORIGIN = 0x8000000,  LENGTH = 122K
-  /* areas for storing the settings, keep the start and the end on page boundaries and continuous */  
-  TEMP_SETTINGS    (rx)  : ORIGIN = 0x801E800,  LENGTH = 2048
-  PROFILE_SETTINGS (rx)  : ORIGIN = 0x801F000,  LENGTH = 3840
+  /* areas for storing the settings, keep the start and the end on page boundaries and continuous */
+  TEMP_SETTINGS    (rx)  : ORIGIN = ORIGIN(FLASH) + LENGTH(FLASH),                        LENGTH = 2048
+  PROFILE_SETTINGS (rx)  : ORIGIN = ORIGIN(TEMP_SETTINGS) + LENGTH(TEMP_SETTINGS),        LENGTH = 3840
   GLOBAL_SETTINGS  (rx)  : ORIGIN = ORIGIN(PROFILE_SETTINGS) + LENGTH(PROFILE_SETTINGS),  LENGTH = 128
-  ADDON_SETTINGS   (rx)  : ORIGIN = ORIGIN(GLOBAL_SETTINGS)  + LENGTH(GLOBAL_SETTINGS) ,  LENGTH = 128  
+  ADDON_SETTINGS   (rx)  : ORIGIN = ORIGIN(GLOBAL_SETTINGS)  + LENGTH(GLOBAL_SETTINGS),   LENGTH = 128
 }
 
 /* Start address and size of the settings area */
