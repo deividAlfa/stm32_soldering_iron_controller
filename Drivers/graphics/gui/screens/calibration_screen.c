@@ -132,8 +132,7 @@ static int Cal_Settings_SaveAction(widget_t *w, RE_Rotation_t input) {
     systemSettings.Profile.Cal250_default = calAdjust[cal_250];
     systemSettings.Profile.Cal400_default = calAdjust[cal_400];
     backup_calADC_At_0 = calAdjust[cal_0];                               // backup_calADC_At_0 is transferred to profile on screen exiting
-
-    saveSettingsFromMenu(save_Profile, no_reboot);
+    current_state = cal_save;
   }
   return last_scr;
 }
@@ -287,6 +286,8 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
 
   if(current_state>=cal_finished){
     if(checkScreenTimer(15000) || input==Click){
+      if(current_state==cal_finished)
+        current_state=cal_save;
       return last_scr;
     }
   }
@@ -335,6 +336,9 @@ static void Cal_Start_OnExit(screen_t *scr) {
   tempReady = 0;
   setSystemTempUnit(backupTempUnit);
   restore_tip();
+  if(current_state==cal_save){
+    saveSettings(save_All, no_reboot);              // Save now we have all heap free
+  }
 }
 
 static uint8_t Cal_Start_draw(screen_t *scr){
@@ -435,6 +439,9 @@ static void Cal_Settings_init(screen_t *scr) {
 static void Cal_Settings_OnExit(screen_t *scr) {
   restore_tip();
   systemSettings.Profile.calADC_At_0 = backup_calADC_At_0;
+  if(current_state==cal_save){
+    saveSettings(save_All, no_reboot);              // Save now we have all heap free
+  }
 }
 
 static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {

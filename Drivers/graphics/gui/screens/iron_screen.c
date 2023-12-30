@@ -345,7 +345,7 @@ static void iron_onEnter(screen_t *scr){
 }
 
 static void iron_onExit(screen_t *scr){
-  uint16_t const userTemp = getUserTemperature();
+  uint16_t userTemp = getUserTemperature();
   if(userTemp > systemSettings.Profile.MaxSetTemperature)
   {
     setUserTemperature(systemSettings.Profile.MaxSetTemperature);
@@ -353,6 +353,9 @@ static void iron_onExit(screen_t *scr){
   else if (userTemp < systemSettings.Profile.MinSetTemperature)
   {
     setUserTemperature(systemSettings.Profile.MinSetTemperature);
+  }
+  if(isCurrentProfileChanged()){
+    saveSettings(save_All, no_reboot);              // Save now we have all heap free
   }
 }
 

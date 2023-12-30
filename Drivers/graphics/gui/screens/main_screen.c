@@ -659,10 +659,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         }
 
         if(profile!=systemSettings.currentProfile){
-          if(isCurrentProfileChanged()){              // If there's unsaved profile data
-            saveSettingsFromMenu(save_All, no_reboot);           // Save settings
-            checkSettings();
-          }
+          if(isCurrentProfileChanged())                        // If there's unsaved profile data
+            Error_Handler();                                   // We shouldn't have anything unsaved here
           updateTempData(force_update);
           loadProfile(profile);
           Screen_main.state=screen_Erase;

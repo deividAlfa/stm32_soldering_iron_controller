@@ -81,9 +81,16 @@ static void addons_screen_fume_extractor_init(screen_t *scr)
   comboResetIndex(Screen_fume_extractor_settings.current_widget);
 }
 
+static void addons_screen_fume_extractor_onExit(screen_t *scr)
+{
+  if(isAddonSettingsChanged()){
+    saveSettings(save_All, no_reboot);              // Save now we have all heap free
+  }
+}
 void addons_screen_fume_extractor_setup(screen_t *scr)
 {
   scr->create       = &addons_screen_fume_extractor_create;
+  scr->onExit       = &addons_screen_fume_extractor_onExit;
   scr->init         = &addons_screen_fume_extractor_init;
   scr->processInput = &autoReturn_ProcessInput;
 }

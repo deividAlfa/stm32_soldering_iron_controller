@@ -228,6 +228,11 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
   return ret;
 }
 
+static void tip_settings_onExit(screen_t *scr){
+  if(isCurrentProfileChanged()){
+    saveSettings(save_All, no_reboot);              // Save now we have all heap free
+  }
+}
 static void tip_settings_onEnter(screen_t *scr){
   comboResetIndex(Screen_tip_settings.current_widget);
   if(newTip){                                                                                                   // If new tip selected
@@ -376,6 +381,7 @@ static void tip_settings_create(screen_t *scr){
 
 void tip_settings_screen_setup(screen_t *scr){
   scr->onEnter = &tip_settings_onEnter;
+  scr->onExit = &tip_settings_onExit;
   scr->create = &tip_settings_create;
   scr->processInput=&tip_settings_processInput;
 }

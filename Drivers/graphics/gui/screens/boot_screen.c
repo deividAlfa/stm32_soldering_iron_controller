@@ -218,6 +218,12 @@ void boot_screen_init(screen_t * scr){
 #endif
 }
 
+void boot_screen_onExit(screen_t *scr){
+  if(setup_step==2){
+    loadProfile(profile);
+    saveSettings(save_All, no_reboot);              // Save now we have all heap free
+  }
+}
 
 void boot_screen_create(screen_t *scr){
   widget_t *w;
@@ -290,4 +296,5 @@ void boot_screen_setup(screen_t *scr) {
   scr->processInput = &boot_screen_processInput;
   scr->init = &boot_screen_init;
   scr->create = &boot_screen_create;
+  scr->onExit = &boot_screen_onExit;
 }

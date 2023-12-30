@@ -122,7 +122,7 @@ static uint8_t flashProfile;
 
 systemSettings_t systemSettings;
 
-static void saveSettings(uint8_t mode);
+static void storeSettings(uint8_t mode);
 static void checksumError(uint8_t mode);
 static void Flash_error(void);
 static void Button_reset(void);
@@ -203,7 +203,7 @@ void updateTempData(bool force){
                                                                                             // Always update the data, whether the batery option is enabled or not
     bkpRamData.values.lastSelTip[systemSettings.currentProfile] = systemSettings.currentTip;
     bkpRamData.values.lastProfile = systemSettings.currentProfile;
-    bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserSetTemperature();
+    bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserTemperature();
 
     if(systemSettings.settings.hasBattery == true){
       flashTip[systemSettings.currentProfile] = systemSettings.currentTip;                // This will keep track of tips in the flash variables just in case the battery option was enabled in the menu and later disabled.
@@ -248,101 +248,16 @@ void updateTempData(bool force){
   }
 }
 
-void checkSettings(void){
-
-  #ifdef NOSAVESETTINGS
-  return;
-  #endif
-  static uint8_t  save_flags;
-  static uint32_t prevSysChecksum;
-  static uint32_t newSysChecksum;
-  static uint32_t prevTipChecksum;
-  static uint32_t newProfileChecksum;
-#ifdef ENABLE_ADDONS
-  static uint32_t prevAddonChecksum;
-  static uint32_t newAddonChecksum;
-#endif
-  static uint32_t lastCheckTime;
-  static uint32_t lastChangeTime;
-
-  uint32_t CurrentTime = HAL_GetTick();
-  uint8_t scr_index=current_screen->index;
-
-  // To reduce heap usage, only allow saving in smaller screens.
-  // Content change detection will be still active, but saving will postponed upon returning to a smaller screen.
-  // This is done to ensure compatibility with 10KB RAM devices yet allowing the firmware to grow unconstrained by ram usage
-  uint8_t allowSave = (scr_index == screen_boot              ||
-                       scr_index == screen_main              ||
-                       scr_index == screen_settings          ||
-                       scr_index == screen_calibration       ||
-                       scr_index == screen_reset_confirmation);
-
-
-  updateTempData(normal_update);
-
-  // Save from menu
-  if(systemSettings.save_Flag && allowSave){
-    saveSettings(systemSettings.save_Flag);
-
-    if(systemSettings.reboot_Flag)
-      NVIC_SystemReset();
-
-    systemSettings.save_Flag=0;
-    return;
-  }
-
-  // Don't save in these conditions
-  if( (systemSettings.setupMode==enable) || (getIronCalibrationMode()) || (getIronErrorFlags().safeMode) || ((CurrentTime-lastCheckTime)<999)){
-    return;
-  }
-
-  lastCheckTime = CurrentTime;                                          // Store current time
-  newSysChecksum     = ChecksumSettings(&systemSettings.settings);      // Calculate system checksum
-  newProfileChecksum = ChecksumProfile(&systemSettings.Profile);        // Calculate profile checksum
-#ifdef ENABLE_ADDONS
-  newAddonChecksum   = ChecksumAddons(&(systemSettings.addonSettings)); // Calculate the addon checksum
-#endif
-
-  // If anything was changed (Checksum mismatch)
-  if(   (systemSettings.settingsChecksum      != newSysChecksum    )
-     || (systemSettings.ProfileChecksum       != newProfileChecksum)
-#ifdef ENABLE_ADDONS
-     || (systemSettings.addonSettingsChecksum != newAddonChecksum  )
-#endif
-    ){
-
-    if(prevSysChecksum != newSysChecksum){                    // If different from the previous calculated checksum (settings are being changed quickly, don't save every time).
-      prevSysChecksum = newSysChecksum;
-      save_flags |= save_Settings;
-      lastChangeTime = CurrentTime;                           // Reset timer (we don't save anything until we pass a certain time without changes)
-    }
-    if(prevTipChecksum != newProfileChecksum){
-      prevTipChecksum = newProfileChecksum;
-      save_flags |= save_Profile;
-      lastChangeTime = CurrentTime;
-    }
-#ifdef ENABLE_ADDONS
-    if(prevAddonChecksum != newAddonChecksum){
-      prevAddonChecksum = newAddonChecksum;
-      save_flags |= save_Addons;
-      lastChangeTime = CurrentTime;
-    }
-#endif
-    else if(allowSave && ((CurrentTime-lastChangeTime)>5000)){ // If different from the previous calculated checksum, and timer expired (No changes in the last 5 sec)
-      saveSettings(save_flags);
-      save_flags = 0;
-    }
-  }
-}
-
-
 //This is done to avoid huge stack build up. Trigger saving using checkSettings with a flag instead direct call from menu.
 // Thus, the flags stays after the screen exits. The code handling settings saving decides when it's ok to store them.
-void saveSettingsFromMenu(uint8_t save_mode, uint8_t reboot_mode){
-  systemSettings.save_Flag=save_mode;
-  systemSettings.reboot_Flag=reboot_mode;
+void saveSettings(uint8_t save_mode, uint8_t reboot_mode){
   if(reboot_mode  == do_reboot)                                        // Force safe mode (disable iron power) if rebooting.
     setSafeMode(enable);
+
+  storeSettings(save_mode);
+
+  if(reboot_mode  == do_reboot)
+    NVIC_SystemReset();
 }
 
 static void eraseFlashPages(uint32_t pageAddress, uint32_t numPages)
@@ -377,7 +292,7 @@ static void eraseFlashPages(uint32_t pageAddress, uint32_t numPages)
 
 static void writeFlash(uint32_t* src, uint32_t len, uint32_t dstAddr)
 {
-  uint32_t const numWordsToWrite = (len + sizeof(uint32_t) - 1u) / sizeof(uint32_t);
+  uint32_t numWordsToWrite = (len + sizeof(uint32_t) - 1u) / sizeof(uint32_t);
   uint32_t* srcData = src;
 
   uint32_t _irq = __get_PRIMASK();
@@ -397,10 +312,15 @@ static void writeFlash(uint32_t* src, uint32_t len, uint32_t dstAddr)
   HAL_FLASH_Lock();
 }
 
-static void saveSettings(uint8_t mode){
+static void storeSettings(uint8_t mode){
 #ifdef NOSAVESETTINGS
   return;
 #else
+#ifndef DEBUG
+  struct mallinfo mi = mallinfo();
+#endif
+  if(mi.uordblks > 128)                   // Check that the heap usage is low
+    Error_Handler();                      // We got there from a working screen (Heap must be free)
 
   uint32_t _irq = __get_PRIMASK();
 
@@ -643,7 +563,7 @@ static void readBackupRam()
 #ifndef STM32F072xB
   for(uint8_t i = 0; i < NUM_BACKUP_RAM_REGISTERS; i++)                                   // STM32F10x has 16.bit backup registers
   {
-    uint16_t const data = (uint16_t)*(&(BKP->DR1) + i);
+    uint16_t data = (uint16_t)*(&(BKP->DR1) + i);
     bkpRamData.bytes[i*2  ] = data;
     bkpRamData.bytes[i*2+1] = data >> 8u;
   }
@@ -1076,8 +996,7 @@ static void checksumError(uint8_t mode){
   }
   update_display();
   ErrCountDown(3,117,50);
-  saveSettings(mode);
-  NVIC_SystemReset();
+  saveSettings(mode, do_reboot);
 }
 
 static void Button_reset(void){
@@ -1098,16 +1017,20 @@ static void Button_reset(void){
         while(!BUTTON_input()){
           HAL_IWDG_Refresh(&hiwdg);
         }
-        saveSettings(reset_All);
-        NVIC_SystemReset();
+        saveSettings(reset_All, do_reboot);
       }
     }
   }
 }
 
-bool isCurrentProfileChanged(void)
-{
+bool isCurrentProfileChanged(void) {
   return ChecksumProfile(&systemSettings.Profile) != systemSettings.ProfileChecksum;
+}
+bool isSystemSettingsChanged(void) {
+  return ChecksumSettings(&systemSettings.settings) != systemSettings.settingsChecksum;
+}
+bool isAddonSettingsChanged(void) {
+  return ChecksumAddons(&systemSettings.addonSettings) != systemSettings.addonSettingsChecksum;
 }
 
 //Max 99 seconds countdown.

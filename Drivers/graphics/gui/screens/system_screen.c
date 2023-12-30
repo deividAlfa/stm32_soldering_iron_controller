@@ -220,9 +220,13 @@ static void system_onExit(screen_t *scr){
     loadProfile(profile);
   }
 #ifndef STM32F072xB
-  if(systemSettings.settings.clone_fix != clone_fix){
+  if(isSystemSettingsChanged()){
+    if(systemSettings.settings.clone_fix != clone_fix){       // Clone fix needs rebooting
       systemSettings.settings.clone_fix = clone_fix;
-      saveSettingsFromMenu(save_All, do_reboot);
+      saveSettings(save_All, do_reboot);
+    }
+    else
+      saveSettings(save_All, no_reboot);              // Other settings changed, not requiring rebooting
   }
 #endif
 }

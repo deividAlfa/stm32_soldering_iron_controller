@@ -316,8 +316,6 @@ __attribute__((aligned(4))) typedef struct{
   addonSettings_t addonSettings;
   uint32_t        addonSettingsChecksum;
 #endif
-  uint8_t         save_Flag;
-  uint8_t         reboot_Flag;
   uint8_t         setupMode;
   uint8_t         isSaving;
   uint8_t         currentProfile;
@@ -327,20 +325,22 @@ __attribute__((aligned(4))) typedef struct{
 extern systemSettings_t systemSettings;
 extern const settings_t defaultSettings;
 
-/** Cyclic task to save the settings if needed. */
-void checkSettings(void);
 /** Cyclic task to save the current temperature/tip/profile if needed. */
 void updateTempData(bool force);
-/** Sets a flag to save the settings in the background task. */
-void saveSettingsFromMenu(uint8_t save_mode, uint8_t reboot_mode);
+/** Save the settings to flash. */
+void saveSettings(uint8_t save_mode, uint8_t reboot_mode);
 /** Reads the save flag. */
 uint8_t getSaveFlag(void);
 /** Loads the settings from flash on boot. */
 void restoreSettings();
 /** Load/change to the profile with the given index */
 void loadProfile(uint8_t profile);
+/** Checks if the current system settings in RAM were changed */
+bool isSystemSettingsChanged(void);
 /** Checks if the current profile in RAM is changed */
 bool isCurrentProfileChanged(void);
+/** Checks if the current addons settings in RAM were changed */
+bool isAddonSettingsChanged(void);
 
 /** Restores settings from the backup ram used in the last session (eg last temp/tip).
  *  Call this after all the modules  */

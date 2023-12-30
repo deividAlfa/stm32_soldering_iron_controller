@@ -157,8 +157,6 @@ void mainCycle(void)
 
   }
 #endif
-
-  checkSettings(); // Check if settings were modified
   oled_handle();   // Handle oled drawing
 }
 
@@ -181,7 +179,7 @@ void Program_Handler(void) {
  *  Timer working in load preload mode! The value loaded now is loaded on next event. That's why the values are reversed!
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
-  TIM_HandleTypeDef* const ironReadTimer = getIronReadTimer();
+  TIM_HandleTypeDef* ironReadTimer = getIronReadTimer();
   if(_htim == ironReadTimer){
     __HAL_TIM_CLEAR_FLAG(ironReadTimer,TIM_FLAG_UPDATE);
 

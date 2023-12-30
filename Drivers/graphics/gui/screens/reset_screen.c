@@ -10,14 +10,14 @@
 
 screen_t Screen_reset;
 screen_t Screen_reset_confirmation;
-uint8_t resStatus;
+static uint8_t resStatus, perform_reset;
 
 static int cancelReset(widget_t *w) {
+  perform_reset =1;
   return last_scr;
 }
 static int doReset(widget_t *w) {
-  saveSettingsFromMenu(resStatus, do_reboot);
-  return -1;
+  return screen_main;
 }
 static int doSettingsReset(widget_t *w, RE_Rotation_t input) {
   resStatus=reset_Settings;
@@ -115,6 +115,10 @@ static void reset_confirmation_create(screen_t *scr){
   w->posY = 48;
 }
 
+static void reset_confirmation_onExit(screen_t *scr){
+  if(perform_reset)
+    saveSettings(resStatus, do_reboot);                 // If we have pending save/reset, save now we have all heap free
+}
 
 void reset_screen_setup(screen_t *scr){
   scr->onEnter = &reset_onEnter;
@@ -124,6 +128,7 @@ void reset_screen_setup(screen_t *scr){
   scr=&Screen_reset_confirmation;
   oled_addScreen(scr, screen_reset_confirmation);
   scr->init = &reset_confirmation_init;
+  scr->onExit = &reset_confirmation_onExit;
   scr->processInput=&autoReturn_ProcessInput;
   scr->create = &reset_confirmation_create;
 }
