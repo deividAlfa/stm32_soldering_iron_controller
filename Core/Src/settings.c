@@ -308,9 +308,6 @@ static void writeFlash(uint32_t* src, uint32_t len, uint32_t dstAddr)
 }
 
 static void storeSettings(uint8_t mode){
-#ifdef NOSAVESETTINGS
-  return;
-#else
 #ifndef DEBUG
   struct mallinfo mi = mallinfo();
 #endif
@@ -446,18 +443,6 @@ static void storeSettings(uint8_t mode){
 
 void restoreSettings() {
   bool setup=0;
-#ifdef NOSAVESETTINGS                                                 // Stop erasing the flash while in debug mode
-  uint32_t _irq = __get_PRIMASK();
-  __disable_irq();
-  resetSystemSettings();
-  systemSettings.settings.currentProfile = profile_T12;
-  resetCurrentProfile();
-  loadProfile(systemSettings.settings.currentProfile);
-  __set_PRIMASK(_irq);
-  return;
-#endif
-
-
 #ifndef STM32F072xB
   RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN;    // power the BKP peripheral
   PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
