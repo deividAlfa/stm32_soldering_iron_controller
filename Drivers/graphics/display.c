@@ -687,7 +687,7 @@ void Oled_error_init(void){
     display_dma_abort();
 #endif  
   buzzer_fatal_beep();
-  setDisplayContrastOrBrightness(defaultSettings.contrastOrBrightness);
+  setDisplayContrastOrBrightness(defaultSystemSettings.contrastOrBrightness);
   fillBuffer(BLACK,fill_soft);
   u8g2_SetFont(&u8g2,u8g2_font_menu);
   u8g2_SetDrawColor(&u8g2, WHITE);

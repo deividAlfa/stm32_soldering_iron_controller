@@ -16,9 +16,8 @@ static comboBox_item_t *comboitem_system_debug;
 static void SETTINGS_create(screen_t *scr) {
   widget_t* w;
 
-  if(isCurrentProfileChanged()){         // If there's unsaved profile data
+  if(isCurrentProfileChanged())           // Unlikely, but if there's unsaved profile data, save before creating the screen
     saveSettings(save_All, no_reboot);
-  }
 
   //  [ SETTINGS MAIN SCREEN ]
   //

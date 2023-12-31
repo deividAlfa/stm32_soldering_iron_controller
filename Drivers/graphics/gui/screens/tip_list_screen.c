@@ -44,7 +44,7 @@ static void tip_list_create(screen_t *scr){
   //
   newWidget(&w,widget_combo,scr,NULL);
   for(int x = 0; x < systemSettings.Profile.currentNumberOfTips; x++) {
-    newComboAction(w, systemSettings.Profile.tip[x].name, &editTip, &i);
+    newComboAction(w, flashProfilesSettings.Profile[systemSettings.currentProfile].tip[x].name, &editTip, &i);
   }
   if(systemSettings.Profile.currentNumberOfTips < NUM_TIPS){
     newComboAction(w, strings[lang]._ADD_NEW, &addNewTip, &comboitem_tip_list_addNewTip);

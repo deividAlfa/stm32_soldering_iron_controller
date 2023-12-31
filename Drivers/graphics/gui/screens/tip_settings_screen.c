@@ -19,39 +19,27 @@ static comboBox_item_t *comboitem_tip_settings_copy;
 static comboBox_item_t *comboitem_tip_settings_delete;
 static editable_widget_t *editable_tip_settings_cal250;
 static editable_widget_t *editable_tip_settings_cal400;
+static uint8_t tip_save_flag;
+static uint8_t tip_different;
 
 //=========================================================
-void sortTips(void){
-  uint8_t min;
-  char current[TIP_LEN+1];
-
-  strcpy (current, getCurrentTip()->name);                                                        // Copy tip name being used in the system
-
-  uint32_t _irq = __get_PRIMASK();
-  __disable_irq();
-  for(uint8_t j=0; j<systemSettings.Profile.currentNumberOfTips; j++){                            // Sort alphabetically
-    min = j;                                                                                      // Min is start position
-    for(uint8_t i=j+1; i<systemSettings.Profile.currentNumberOfTips; i++){
-      if(strcmp(systemSettings.Profile.tip[min].name, systemSettings.Profile.tip[i].name) > 0){   // If Tip[Min] > Tip[i]
-        min = i;                                                                                  // Update min
-      }
+static void Flash_to_Edit(char* s){                             // [TIPNAME\0                ]
+  uint8_t i = 0;
+  while(i<TIP_LEN && s[i]){ i++; }                              // Find end of string
+  while(i<TIP_LEN){ s[i++]=' '; }                               // Fill with spaces
+  s[TIP_LEN] = 0;                                               // Terminate string
+}                                                               // [TIPNAME                \0]
+//=========================================================
+static void Edit_to_Flash(char* s){                             // [TIPNAME                \0]
+  uint8_t end=0;
+  for(uint8_t i=0; i<TIP_LEN; i++){                             // Clear trailing spaces
+    if(s[i]==' '){                                              // Find space, store index
+      if(!end){end=i;}
     }
-    if(min!=j){                                                                                   // If j is not the min
-      backupTip = systemSettings.Profile.tip[j];                                                  // Swap j and min
-      systemSettings.Profile.tip[j] = systemSettings.Profile.tip[min];
-      systemSettings.Profile.tip[min] = backupTip;
-    }
+    else{end=0;}                                                // Clear index if other char found
   }
-
-  for(uint8_t i=0; i<systemSettings.Profile.currentNumberOfTips; i++){                            // Find the same tip after sorting
-    if(strcmp(current, systemSettings.Profile.tip[i].name) == 0){                                 // If matching name
-      setCurrentTip(i);                                                                           // Reload tip (This will also reload the new tip settings)
-      break;
-    }
-  }
-  __set_PRIMASK(_irq);
-}
-
+  if(end){s[end]=0;}                                            // Terminate string
+}                                                               // [TIPNAME\0                ]
 //=========================================================
 static void *getTipName() {
   return backupTip.name;
@@ -123,55 +111,39 @@ static void setCal400(int32_t *val) {
 }
 //=========================================================
 static int tip_save(widget_t *w, RE_Rotation_t input) {
-  uint8_t end=0;
-  for(uint8_t i=0; i<TIP_LEN; i++){                                                                             // Clear trailing spaces
-      if (backupTip.name[i] == ' '){                                                                            // Find space, store index
-        if(!end)
-          end = i;
-      }
-      else{
-        end=0;                                                                                                  // Clear index if other char found
-      }
-  }
-  if(end){
-    backupTip.name[end] = 0;                                                                                    // Terminate string
-  }
-// TODO Hard Fault here when TIP_LEN >9!
-  systemSettings.Profile.tip[Selected_Tip] = backupTip;                                                         // Store tip data
+  Edit_to_Flash(backupTip.name);
+
+// TODO: Last time we got Hard Fault here when TIP_LEN >9! 
 
   if(Selected_Tip==systemSettings.Profile.currentNumberOfTips){                                                 // If new tip
-    systemSettings.Profile.currentNumberOfTips++;                                                               // Increase number of tips in the system
-    setCurrentTip(Selected_Tip);                                                                                // Activate the newly copied tip, its highly likely that the user want's to calibrate it.
+    systemSettings.tipUpdateMode=mode_AddTip;                                                                   // Set flag for saveSettings
+    tip_save_flag = 1;
   }
-  sortTips();
+  else{
+    uint8_t *new=(uint8_t*)&backupTip, *current=(uint8_t*)&systemSettings.currentTipData;
+    for(uint16_t i=0;i<sizeof(tipData_t);i++){                                                                  // Compare new and current tip data
+      if(new[i] != current[i]){
+        systemSettings.tipUpdateIndex=Selected_Tip;                                                                 // Store tip to be saved
+        systemSettings.tipUpdateMode=mode_SaveTip;                                                              // Set save flag if different
+        tip_save_flag = 1;
+        break;
+      }
+    }
+  }                                                                                     // Se flag for screen exit function
   return last_scr;
 }
 //=========================================================
 static int tip_delete(widget_t *w, RE_Rotation_t input) {
-  uint32_t _irq = __get_PRIMASK();
-  __disable_irq();
-  for(uint8_t x = Selected_Tip; x <systemSettings.Profile.currentNumberOfTips-1;x++) {                          // Overwrite selected tip and move the rest one position backwards
-    systemSettings.Profile.tip[x] = systemSettings.Profile.tip[x+1];
-  }
-  systemSettings.Profile.currentNumberOfTips--;                                                                 // Decrease the number of tips in the system
-  if(Selected_Tip<=systemSettings.currentTip){                                                                  // If deleted tip is lower or equal than current used tip
-    if(systemSettings.currentTip){                                                                              // Move one position back if possible
-      systemSettings.currentTip--;
-    }
-    setCurrentTip(systemSettings.currentTip);                                                                   // Reload tip settings
-  }
-  __set_PRIMASK(_irq);
-
-  for(uint8_t x = systemSettings.Profile.currentNumberOfTips; x < NUM_TIPS;x++) {                               // Fill the unused tips with blank names
-    strcpy(systemSettings.Profile.tip[x].name, _BLANK_TIP);
-  }
-                                                                                                                // Skip tip settings (As tip is now deleted)
-  return last_scr;                                                                                              // And return to main screen or system menu screen
+  systemSettings.tipUpdateMode=mode_DeleteTip;                                                                  // Set flag for saveSettings
+  systemSettings.tipUpdateIndex=Selected_Tip;                                                                   // Store tip to be deleted
+  tip_save_flag = 1;                                                                                            // Se flag for screen exit function
+  return last_scr;                                                                                              // Return to main screen or system menu screen
 }
 //=========================================================
 static int tip_copy(widget_t *w, RE_Rotation_t input) {
   Selected_Tip = systemSettings.Profile.currentNumberOfTips;                                                    // Select next available slot
-  strcpy(backupTip.name, _BLANK_TIP);                                                                           // Copy empty name (But keep the settings from the tip we're copying from)
+  if(!tip_different)                                                                                            // Keep name it was already edited
+    strcpy(backupTip.name, _BLANK_TIP);                                                                         // Else, copy empty name (But keep the settings from the tip we're copying from)
   comboitem_tip_settings_save->enabled=0;                                                                       // Disable save, will be enabled when the name is modified
   comboitem_tip_settings_copy->enabled=0;                                                                       // Cannot copy a new tip
   comboitem_tip_settings_delete->enabled=0;                                                                     // Cannot delete a new tip
@@ -213,13 +185,19 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
       enable=0;                                                                                                   // If empty, disable save button
     }
     else{
-      for(uint8_t x = 0; x < systemSettings.Profile.currentNumberOfTips-1; x++) {                                 // Compare tip names with current edit
-        if(x==Selected_Tip)                                                                                       // Skip tip being edited
-          continue;
-        if( (strcmp(backupTip.name, systemSettings.Profile.tip[x].name) == 0) ){                                  // If match is found
-          enable=0;                                                                                               // Disable save button
+      for(uint8_t i = 0; i < systemSettings.Profile.currentNumberOfTips; i++) {                                   // Seek through all tips
+        char flashTip[TIP_LEN];                                                                                   // Flash tip is null-terminated, but editor field is tabbed with spaces
+        strcpy(flashTip, flashProfilesSettings.Profile[systemSettings.currentProfile].tip[i].name);               // Copy tip name from flash
+        Flash_to_Edit(flashTip);                                                                                  // Convert to editor format (Fill with spaces)
+        if(strcmp(backupTip.name, flashTip) == 0){  // Compare names with other tips                              // Compare
+          if(i==Selected_Tip)                                                                                     // If same name as tip being edited, clear flag
+            tip_different=0;
+          else
+            enable=0;                                                                                             // If match is found with a different tip, disable save button
           break;
         }
+        else if(i==Selected_Tip)                                                                                  // If different name than tip being edited, set flag
+          tip_different=1;
       }
     }
     comboitem_tip_settings_save->enabled=enable;
@@ -229,33 +207,28 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
 }
 
 static void tip_settings_onExit(screen_t *scr){
-  if(isCurrentProfileChanged()){
-    saveSettings(save_All, no_reboot);              // Save now we have all heap free
+  if(tip_save_flag){
+    systemSettings.currentTipData = backupTip;                                                                  // Store modified tip data
+    saveSettings(save_Tip, no_reboot);                                                                          // Save now we have all heap free
   }
 }
 static void tip_settings_onEnter(screen_t *scr){
+  tip_save_flag = 0;
+  tip_different = 0;
   comboResetIndex(Screen_tip_settings.current_widget);
   if(newTip){                                                                                                   // If new tip selected
     newTip=0;
-    backupTip = systemSettings.Profile.tip[0];                                                                  // Copy data from first tip in the system
+    backupTip = flashProfilesSettings.Profile[systemSettings.currentProfile].tip[0];                            // Copy data from first tip in the system
     strcpy(backupTip.name, _BLANK_TIP);                                                                         // Set an empty name
     Selected_Tip=systemSettings.Profile.currentNumberOfTips;                                                    // Selected tip is next position
     comboitem_tip_settings_copy->enabled=0;                                                                     // Cannot copy a new tip
     comboitem_tip_settings_delete->enabled=0;                                                                   // Cannot delete a new tip
   }
   else{
-    backupTip = systemSettings.Profile.tip[Selected_Tip];                                                       // Copy selected tip
+    backupTip = systemSettings.currentTipData;                                                                             // Copy current tip
     comboitem_tip_settings_delete->enabled = (systemSettings.Profile.currentNumberOfTips>1);                    // If more than 1 tip in the system, enable delete
     comboitem_tip_settings_copy->enabled = (systemSettings.Profile.currentNumberOfTips<NUM_TIPS);               // If tip slots available, enable copy button
-
-    for(uint8_t i=0; i<TIP_LEN; i++){                                                                   // Needs to be done so the string can be edited easily
-      if (!backupTip.name[i]){                                                                                // Find end of string
-        while(i < TIP_LEN){                                                                       // Fill with spaces
-          backupTip.name[i++] = ' ';
-        }
-      }
-    }
-    backupTip.name[TIP_LEN] = 0;                                                                          // Terminate string
+    Flash_to_Edit(backupTip.name);
   }
 }
 

@@ -354,7 +354,7 @@ static uint8_t Cal_Start_draw(screen_t *scr){
 
     if(current_state<cal_finished){
       uint8_t s = current_state;
-      u8g2_DrawUTF8(&u8g2, 0, 50, systemSettings.Profile.tip[systemSettings.currentTip].name);  // Draw current tip name
+      u8g2_DrawUTF8(&u8g2, 0, 50, systemSettings.currentTipData.name);  // Draw current tip name
       u8g2_DrawUTF8(&u8g2, 8, 6, strings[lang].CAL_Step);            // Draw current cal state
 
       if(current_state<cal_input_250){

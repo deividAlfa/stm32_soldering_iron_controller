@@ -215,10 +215,7 @@ static void system_onEnter(screen_t *scr){
   }
 }
 
-static void system_onExit(screen_t *scr){
-  if(profile!=systemSettings.currentProfile){
-    loadProfile(profile);
-  }
+static void system_onExit(screen_t *scr){                     // Save when exiting the screen, we have freed up all the screen memory
 #ifndef STM32F072xB
   if(isSystemSettingsChanged()){
     if(systemSettings.settings.clone_fix != clone_fix){       // Clone fix needs rebooting

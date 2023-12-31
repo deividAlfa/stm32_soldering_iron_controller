@@ -138,8 +138,7 @@ static void setLanguage(uint32_t *val) {
 //=========================================================
 
 static int SaveSetup(widget_t* w) {
-  systemSettings.setupMode=0;
-  return -1;
+  return screen_main;
 }
 //=========================================================
 void draw_boot_strings(void){
@@ -181,16 +180,9 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 
   handleOledDim();
   if(checkScreenTimer(SPLASH_TIMEOUT)){                                                           // After splash timeout
-    if(!systemSettings.setupMode){                                                                // If not in setup mode
-      ADC_Reset_measures();                                                                       // Reset the averages, show current values to avoid filtering delay at startup
-      resetIronError();                                                                           // Force timeout of any error (This won't clear errors if still detected)
-      setBootCompleteFlag();
-      if(setup_step==1){                                                                          // We were in setup mode
-        setup_step++;                                                                             // Set setup=2 to save settings on exit
-        setSafeMode(disable);                                                                     // Disable safe mode before exit
-      }
+    if(!systemSettings.setupMode)                                                                 // If not in setup mode
       return screen_main;                                                                         // Go to main screen
-    }
+
     else if(setup_step==0){                                                                       // 0=initial, 1=in setup screen, 2=save setup and exit
       widgetEnable(Widget_lang);                                                                  // In setup mode, enable widgets
       widgetEnable(Widget_profile);
@@ -219,10 +211,15 @@ void boot_screen_init(screen_t * scr){
 }
 
 void boot_screen_onExit(screen_t *scr){
-  if(setup_step==2){
-    loadProfile(profile);
-    saveSettings(save_All, no_reboot);              // Save now we have all heap free
+  ADC_Reset_measures();                                   // Reset the averages, show current values to avoid filtering delay at startup
+  if(systemSettings.setupMode){
+    saveSettings(save_Settings, no_reboot);               // Save now we have all heap free. All other flash settings (Profile, tips, addons) will be checked and set to default if wrong
+    setCurrentTip(systemSettings.currentTip);             // Load tip
+    systemSettings.setupMode=0;
   }
+  setSafeMode(disable);                                   // Disable safe mode before exit
+  resetIronError();                                       // Force timeout of any error (This won't clear errors if still detected)
+  setBootCompleteFlag();
 }
 
 void boot_screen_create(screen_t *scr){
