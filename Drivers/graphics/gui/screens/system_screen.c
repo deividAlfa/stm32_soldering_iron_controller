@@ -218,6 +218,10 @@ static void system_onEnter(screen_t *scr){
 static void system_onExit(screen_t *scr){                     // Save when exiting the screen, we have freed up all the screen memory
 #ifndef STM32F072xB
   if(isSystemSettingsChanged()){
+
+    if(systemSettings.settings.hasBattery != flashGlobalSettings.settings.hasBattery)           //
+      updateTempData(force_update);
+
     if(systemSettings.settings.clone_fix != clone_fix){       // Clone fix needs rebooting
       systemSettings.settings.clone_fix = clone_fix;
       saveSettings(save_All, do_reboot);

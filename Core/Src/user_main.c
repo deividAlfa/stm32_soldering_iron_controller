@@ -158,6 +158,7 @@ void mainCycle(void)
   }
 #endif
   oled_handle();   // Handle oled drawing
+  updateTempData(normal_update);
 }
 
 // Called from SysTick IRQ every 1mS

@@ -214,12 +214,12 @@ void boot_screen_onExit(screen_t *scr){
   ADC_Reset_measures();                                   // Reset the averages, show current values to avoid filtering delay at startup
   if(systemSettings.setupMode){
     saveSettings(save_Settings, no_reboot);               // Save now we have all heap free. All other flash settings (Profile, tips, addons) will be checked and set to default if wrong
-    setCurrentTip(systemSettings.currentTip);             // Load tip
-    systemSettings.setupMode=0;
+    loadProfile(profile);                                 // Now flash is initialized and we can properly load a profile
+    systemSettings.setupMode=0;                           // Disable setup mode
   }
   setSafeMode(disable);                                   // Disable safe mode before exit
   resetIronError();                                       // Force timeout of any error (This won't clear errors if still detected)
-  setBootCompleteFlag();
+  setBootCompleteFlag();                                  // This is for checkIronError, will load the boot state when this flag is set.
 }
 
 void boot_screen_create(screen_t *scr){

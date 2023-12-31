@@ -165,7 +165,6 @@ static void resetProfile(profile_t * data, uint8_t profile);
 static void resetProfileSettings(profile_settings_t * data, uint8_t profile);
 static void sortTips(profile_t * data, uint8_t profile);
 static void flashTempSettingsErase(void);
-static void flashTempSettingsReset(void);
 static void flashTempSettingsInit(void);
 static void flashTempWrite(void);
 static void flashTipWrite(void);
@@ -200,9 +199,9 @@ typedef union
 } backupRamData_t;
 
 static void loadSettingsFromBackupRam(void);
-static uint32_t ChecksumBackupRam();
-static void readBackupRam();
-static void writeBackupRam();
+static uint32_t ChecksumBackupRam(void);
+static void readBackupRam(void);
+static void writeBackupRam(void);
 
 static backupRamData_t bkpRamData;
 
@@ -227,50 +226,49 @@ void updateTempData(bool force){
   uint32_t CurrentTime = HAL_GetTick();
   uint8_t scr_index=current_screen->index;
 
-  if(!getIronCalibrationMode() && scr_index != screen_debug){                               // Don't update while calibration is in progress or in the debug screen
+  if(getIronCalibrationMode() || systemSettings.setupMode || scr_index == screen_debug)                                 // Don't update while calibration is in progress or in the debug screen
+    return;
                                                                                             // Always update the data, whether the batery option is enabled or not
-    bkpRamData.values.lastSelTip[systemSettings.currentProfile] = systemSettings.currentTip;
-    bkpRamData.values.lastProfile = systemSettings.currentProfile;
-    bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserTemperature();
+  bkpRamData.values.lastSelTip[systemSettings.currentProfile] = systemSettings.currentTip;
+  bkpRamData.values.lastProfile = systemSettings.currentProfile;
+  bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserTemperature();
 
-    if(systemSettings.settings.hasBattery == true){
-      flashTip[systemSettings.currentProfile] = systemSettings.currentTip;                // This will keep track of tips in the flash variables just in case the battery option was enabled in the menu and later disabled.
-      writeBackupRam();
+  if(systemSettings.settings.hasBattery == true){
+    writeBackupRam();
+  }
+  else {
+    uint16_t currentTemp = getUserTemperature();
+    uint8_t currentTip = systemSettings.currentTip;
+    uint8_t currentProfile = systemSettings.currentProfile;
+
+    if(flashTemp != currentTemp) {                                                // Compare with stored in flash
+      if(prevTemp != currentTemp) {                                                     // Store if different to last check
+        prevTemp = currentTemp;
+        lastTempCheckTime = CurrentTime;                                                // Start timeout
+      }
+      else if(force || (CurrentTime-lastTempCheckTime)>4999) {                          // Different than flash and timeout is over
+        flashTemp = currentTemp;
+        flashTempWrite();                                                               // Update temperature in flash
+      }
     }
-    else {
-      uint16_t currentTemp = getUserTemperature();
-      uint8_t currentTip = systemSettings.currentTip;
-      uint8_t currentProfile = systemSettings.currentProfile;
-
-      if(flashTemp != currentTemp) {                                                      // Compare with stored in flash
-        if(prevTemp != currentTemp) {                                                     // Store if different to last check
-          prevTemp = currentTemp;
-          lastTempCheckTime = CurrentTime;                                                // Start timeout
-        }
-        else if(force || (CurrentTime-lastTempCheckTime)>4999) {                          // Different than flash and timeout is over
-          flashTemp = currentTemp;
-          flashTempWrite();                                                               // Update temperature in flash
-        }
+    if(flashTip[currentProfile] != currentTip) {
+      if(prevTip[currentProfile] != currentTip) {                                       // Store if different to last check
+        prevTip[currentProfile] = currentTip;
+        lastTempCheckTime = CurrentTime;                                                // Start timeout
       }
-      if(flashTip[currentProfile] != currentTip) {
-        if(prevTip[currentProfile] != currentTip) {                                       // Store if different to last check
-          prevTip[currentProfile] = currentTip;
-          lastTempCheckTime = CurrentTime;                                                // Start timeout
-        }
-        else if(force || (CurrentTime-lastTempCheckTime)>4999) {                          // Different than flash and timeout is over
-          flashTip[currentProfile] = currentTip;
-          flashTipWrite();                                                                // Update tip data in flash
-        }
+      else if(force || (CurrentTime-lastTempCheckTime)>4999) {                          // Different than flash and timeout is over
+        flashTip[currentProfile] = currentTip;
+        flashTipWrite();                                                                // Update tip data in flash
       }
-      if(flashProfile != currentProfile) {
-        if(prevProfile != currentProfile) {                                               // Store if different to last check
-          prevProfile = currentProfile;
-          lastTempCheckTime = CurrentTime;                                                // Start timeout
-        }
-        else if(force || (CurrentTime-lastTempCheckTime)>4999) {                          // Different than flash and timeout is over
-          flashProfile = currentProfile;
-          flashProfileWrite();                                                            // Update tip data in flash
-        }
+    }
+    if(flashProfile != currentProfile) {
+      if(prevProfile != currentProfile) {                                               // Store if different to last check
+        prevProfile = currentProfile;
+        lastTempCheckTime = CurrentTime;                                                // Start timeout
+      }
+      else if(force || (CurrentTime-lastTempCheckTime)>4999) {                          // Different than flash and timeout is over
+        flashProfile = currentProfile;
+        flashProfileWrite();                                                            // Update tip data in flash
       }
     }
   }
@@ -412,8 +410,10 @@ static void storeSettings(uint8_t mode){
   }
   if(mode & reset_Settings){                                                                              // Reset settings
     resetSystemSettings(&flashBufferSettings->settings);                                                  // Load defaults
-    if(mode == reset_All)
+    if(mode == reset_All){
       flashBufferSettings->settings.version = 0xFF;                                                       // To trigger setup screen
+      flashTempSettingsErase();
+    }
   }
   else if(mode & save_Settings){                                                                          // Save current settings
     flashBufferSettings->settings = systemSettings.settings;
@@ -531,20 +531,26 @@ void restoreSettings(void) {
   RTC->TAFCR   = 0u;                                        // disable tamper pin, just to be sure
 #endif
 
-  flashTempSettingsInit();                                  // Always init this, no matter if battery is enabled or not
-
-  if(systemSettings.settings.hasBattery)
-    loadSettingsFromBackupRam();
-
-  if(setup){
-    systemSettings.setupMode = enable;                          // Load setup state for boot screen
-    setSafeMode(enable);
-    resetSystemSettings(&systemSettings.settings);              // Load good data for the initial setup screen.
-    resetAddonSettings(&systemSettings.addonSettings);
-    resetProfileSettings(&systemSettings.Profile, profile_T12);
+  if(setup){                                                                                              // Setup mode, so flash data is not initialized
+    systemSettings.setupMode = enable;                                                                    // Load setup state for boot screen
+    setSafeMode(enable);                                                                                  // Safe mode just in case
+    resetSystemSettings(&systemSettings.settings);                                                        // Load default system settings
+    resetAddonSettings(&systemSettings.addonSettings);                                                    // Load default addon settings
+    resetProfileSettings(&systemSettings.Profile, profile_T12);                                           // Load default profile settings
+    flashTempSettingsInit();                                                                              // Always init this to set default/safe values at boot. Initializes flashTemp index
+    loadSettingsFromBackupRam();                                                                          // Also read backup ram. loadProfile wil take the correct values depending on hasBattery variable.
+    systemSettings.currentProfile = profile_T12;                                                          // Force profile T12, we can't call loadProfile, there's nothing in flash, let boot screen finish it
   }
   else{
     Button_reset();
+    if(flashGlobalSettings.settings.version != SYSTEM_SETTINGS_VERSION)                                   // System settings version mismatch
+      reset |= reset_Settings;                                                                            // Reset silently
+    else if(ChecksumSystemSettings(&flashGlobalSettings.settings) != flashGlobalSettings.settingsChecksum){   // Show error message if bad checksum
+      checksumError(reset_Settings);
+      reset |= reset_Settings;
+    }
+    else
+      systemSettings.settings = flashGlobalSettings.settings;                                             // Load settings
 
 #ifdef ENABLE_ADDONS
     reset |= loadAddonSettings();
@@ -558,24 +564,20 @@ void restoreSettings(void) {
       }
       reset |= reset_Profile;
     }
-    else
-      loadProfile(systemSettings.currentProfile);
-
-    if(flashGlobalSettings.settings.version != SYSTEM_SETTINGS_VERSION)                                   // System settings version mismatch
-      reset |= reset_Settings;                                                                            // Reset silently
-    else if(ChecksumSystemSettings(&flashGlobalSettings.settings) != flashGlobalSettings.settingsChecksum){   // Show error message if bad checksum
-      checksumError(reset_Settings);
-      reset |= reset_Settings;
+    else{
+      flashTempSettingsInit();                              // These initialize systemSettings.currentProfile, depending on the variable hasBattery
+      loadSettingsFromBackupRam();                          //
+      loadProfile(systemSettings.currentProfile);           // loadProfile will restore lastTemp and lastTip from the correct source (Flash or backup SRAM).
     }
-    else
-      systemSettings.settings = flashGlobalSettings.settings;                                             // Load settings
   }
   if(!setup && reset)                                               // If not in setup mode and we have bad data
     saveSettings(perform_scanFix, do_reboot);                       // Store settings with no arguments, this will check and reset any bad setting
 }                                                                   // Otherwise, everything be resetted when exiting the boot screen
 
-void loadSettingsFromBackupRam(void)
-{
+void loadSettingsFromBackupRam(void) {
+  if(systemSettings.settings.hasBattery == 0)
+    return;
+
   // assert on backup ram size
   if(sizeof(backupRamValues_t) + sizeof(uint32_t) > BACKUP_RAM_SIZE_IN_BYTES)
   {
@@ -583,15 +585,14 @@ void loadSettingsFromBackupRam(void)
   }
 
   readBackupRam();
-
   // check crc
-  if(bkpRamData.crc != ChecksumBackupRam())
+  if(bkpRamData.crc != ChecksumBackupRam() || bkpRamData.values.lastProfile > profile_C210  )
   {
     // restore defaults, show error
     memset((void*)&bkpRamData,0, sizeof(backupRamData_t));
     for(uint8_t i = 0; i < NUM_PROFILES; i++)
     {
-      bkpRamData.values.lastTipTemp[i] = flashProfilesSettings.Profile[i].settings.defaultTemperature;
+      bkpRamData.values.lastTipTemp[i] = 0;               // To be resetted by loadProfile on loading
       if(bkpRamData.values.lastTipTemp[i] == UINT16_MAX) // just a sanity check to handle uninitialized data
       {
         bkpRamData.values.lastTipTemp[i] = 0u;
@@ -610,8 +611,6 @@ void loadSettingsFromBackupRam(void)
     ErrCountDown(3,117,50);
   }
   systemSettings.currentProfile = bkpRamData.values.lastProfile;
-  ironSchedulePwmUpdate();
-  setUserTemperature(bkpRamData.values.lastTipTemp[systemSettings.currentProfile]);
 }
 
 
@@ -631,7 +630,7 @@ static void readBackupRam()
 
 static void writeBackupRam()
 {
-  bkpRamData.crc = ChecksumBackupRam(bkpRamData);
+  bkpRamData.crc = ChecksumBackupRam();
 #ifndef STM32F072xB
   for(uint8_t i = 0; i < NUM_BACKUP_RAM_REGISTERS; i++)
   {
@@ -708,32 +707,11 @@ void flashTempSettingsInit(void) //call it only once during init
     }
   }
 
-  if(setDefault){
-    flashTempSettingsErase();
-
-    for(uint8_t n=0; n<NUM_PROFILES; n++)           // Reset buffered values to trigger flash udpate
-      flashTipIndex[n] =  0xFF;
-    flashTemp = 0xFFFF;
-    flashProfile = 0xFF;
+  if(setDefault){                                                                           // Profile not initialized yet, so we have to wait
+    flashTempSettingsErase();                                                               // This will be detected later in loadProfile
     systemSettings.currentProfile = profile_T12;
-    systemSettings.currentTip = 0;
-    setUserTemperature(systemSettings.Profile.defaultTemperature);
   }
   else{
-    uint8_t profile = temp_settings.profile[flashProfileIndex];
-    uint16_t temp = temp_settings.temperature[flashTempIndex];
-    if(profile > profile_C210)
-      profile = profile_T12;
-
-    systemSettings.currentProfile = profile;
-
-    /* Load temperature */
-    if( temp > systemSettings.Profile.MaxSetTemperature || temp < systemSettings.Profile.MinSetTemperature)   // Check limits
-      setUserTemperature(systemSettings.Profile.defaultTemperature);
-    else
-      setUserTemperature(temp);                                                                   // Load temperature from slot
-
-
     if(temp_settings.temperature[flashTempIndex] != UINT16_MAX) flashTempIndex++;                                             // Increase index if current slot is not empty (Only required when flash is completely erased)
     if(temp_settings.profile[flashProfileIndex] != UINT16_MAX) flashProfileIndex++;
     for(uint8_t n=0; n<NUM_PROFILES; n++)
@@ -809,11 +787,8 @@ void flashTempSettingsErase(void){
   flashProfileIndex = 0;
   for(uint8_t i=0; i<NUM_PROFILES;i++)
     flashTipIndex[i] = 0;
-}
-
-void flashTempSettingsReset(void){
-  flashTempSettingsErase();
-  flashTemp=0;
+  flashTemp=0xFFFF;
+  flashProfile=0xFF;
 }
 
 static uint32_t ChecksumSystemSettings(settings_t* settings){                                                       // Check system settings block
@@ -878,7 +853,6 @@ static void resetSystemSettings(settings_t * data) {
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   *data = defaultSystemSettings;
-  flashTempSettingsReset();
   __set_PRIMASK(_irq);
 }
 
@@ -1004,14 +978,38 @@ uint8_t loadProfile(uint8_t profile){
     Error_Handler();
   }
   setSystemTempUnit(getSystemTempUnit());                        // Ensure the profile uses the same temperature unit as the system
-  setUserTemperature(systemSettings.Profile.defaultTemperature);
 
-  if(systemSettings.settings.hasBattery)
-    systemSettings.currentTip = bkpRamData.values.lastSelTip[profile];
-  else
-    systemSettings.currentTip = flashTip[profile];
+  if(systemSettings.settings.hasBattery){
+    if((bkpRamData.values.lastTipTemp[profile] < systemSettings.Profile.MinSetTemperature) || (bkpRamData.values.lastTipTemp[profile] > systemSettings.Profile.MaxSetTemperature)){
+      bkpRamData.values.lastTipTemp[profile] = systemSettings.Profile.defaultTemperature;
+    }
+    setUserTemperature(bkpRamData.values.lastTipTemp[profile]);
 
-  setCurrentTip(systemSettings.currentTip);
+    if(bkpRamData.values.lastSelTip[profile] >= systemSettings.Profile.currentNumberOfTips)
+      setCurrentTip(0);
+    else
+      setCurrentTip(bkpRamData.values.lastSelTip[profile]);
+    writeBackupRam();
+  }
+  else{
+    if((flashProfile==0xFF) || (flashTemp==0xFFFF)){                              // flashTemp not initialized, load defaults now the profile was loaded
+      setUserTemperature(systemSettings.Profile.defaultTemperature);
+      setCurrentTip(flashTip[profile]);
+      updateTempData(force_update);                                               // Force save now
+    }
+    else{
+      if((flashTemp < systemSettings.Profile.MinSetTemperature) || (flashTemp > systemSettings.Profile.MaxSetTemperature))
+        setUserTemperature(systemSettings.Profile.defaultTemperature);            // Stored value out of limits, set default
+      else
+        setUserTemperature(flashTemp);                                            // Load stored value
+
+      if(flashTip[profile] >= systemSettings.Profile.currentNumberOfTips)         // Bad tip index, load first tip
+        setCurrentTip(0);
+      else
+        setCurrentTip(flashTip[profile]);
+    }
+  }
+  systemSettings.currentProfile = profile;
   TIP.filter=systemSettings.Profile.tipFilter;
   ironSchedulePwmUpdate();
   __set_PRIMASK(_irq);
