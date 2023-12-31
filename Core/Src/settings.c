@@ -228,20 +228,21 @@ void updateTempData(bool force){
 
   if(getIronCalibrationMode() || systemSettings.setupMode || scr_index == screen_debug)                                 // Don't update while calibration is in progress or in the debug screen
     return;
-                                                                                            // Always update the data, whether the batery option is enabled or not
+                                                                                                                        // Always update the data, whether the batery option is enabled or not
   bkpRamData.values.lastSelTip[systemSettings.currentProfile] = systemSettings.currentTip;
   bkpRamData.values.lastProfile = systemSettings.currentProfile;
   bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserTemperature();
 
   if(systemSettings.settings.hasBattery == true){
+    flashTip[systemSettings.currentProfile] = systemSettings.currentTip;                                                // Keep track of tips in the flash variables if the battery option is disabled later, updateTempData will be forced to save the flash data
     writeBackupRam();
   }
-  else {
+  else if (force){                                                                      // No battery or forced
     uint16_t currentTemp = getUserTemperature();
     uint8_t currentTip = systemSettings.currentTip;
     uint8_t currentProfile = systemSettings.currentProfile;
 
-    if(flashTemp != currentTemp) {                                                // Compare with stored in flash
+    if(flashTemp != currentTemp) {                                                      // Compare with stored in flash
       if(prevTemp != currentTemp) {                                                     // Store if different to last check
         prevTemp = currentTemp;
         lastTempCheckTime = CurrentTime;                                                // Start timeout
