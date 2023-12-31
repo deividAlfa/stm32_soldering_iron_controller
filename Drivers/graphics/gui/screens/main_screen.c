@@ -644,12 +644,14 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             break;
 
           case Rotate_Increment:
+          case Rotate_Increment_while_click:
             if(++profile > profile_C210){
               profile=profile_T12;
             }
             break;
 
           case Rotate_Decrement:
+          case Rotate_Decrement_while_click:
             if(--profile >= profile_C210){          // If underflowed
               profile = profile_C210;
             }
