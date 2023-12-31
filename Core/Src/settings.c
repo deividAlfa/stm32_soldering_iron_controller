@@ -680,8 +680,8 @@ void flashTempSettingsInit(void) //call it only once during init
         }
       }
       if(!setDefault){
-        flashProfileIndex = i;
         flashProfile=temp_settings.profile[i];
+        flashProfileIndex = i;
       }
     }
     else
@@ -713,10 +713,16 @@ void flashTempSettingsInit(void) //call it only once during init
     systemSettings.currentProfile = profile_T12;
   }
   else{
-    if(temp_settings.temperature[flashTempIndex] != UINT16_MAX) flashTempIndex++;                                             // Increase index if current slot is not empty (Only required when flash is completely erased)
-    if(temp_settings.profile[flashProfileIndex] != UINT16_MAX) flashProfileIndex++;
+    systemSettings.currentProfile = flashProfile;
+    if(temp_settings.temperature[flashTempIndex] != UINT16_MAX)
+      flashTempIndex++;                                             // Increase index if current slot is not empty (Only required when flash is completely erased)
+
+    if(temp_settings.profile[flashProfileIndex] != UINT16_MAX)
+      flashProfileIndex++;
+
     for(uint8_t n=0; n<NUM_PROFILES; n++)
-      if(temp_settings.tip[n][flashTipIndex[n]] != UINT16_MAX) flashTipIndex[n]++;
+      if(temp_settings.tip[n][flashTipIndex[n]] != UINT16_MAX)
+        flashTipIndex[n]++;
   }
 }
 
