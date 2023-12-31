@@ -308,9 +308,9 @@ static void setdisplayPrecharge(char *s) {
 }
 //=========================================================
 static int display_adv_reset(widget_t *w, RE_Rotation_t input) {
-  clk = defaultSettings.displayClk;
-  precharge = defaultSettings.displayPrecharge;
-  vcom = defaultSettings.displayVcom;
+  clk = defaultSystemSettings.displayClk;
+  precharge = defaultSystemSettings.displayPrecharge;
+  vcom = defaultSystemSettings.displayVcom;
   setDisplayClk(clk);
   setDisplayPrecharge(precharge);
   setDisplayVcom(vcom);

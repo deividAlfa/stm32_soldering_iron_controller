@@ -14,10 +14,10 @@ SET SEARCH_PATH="C:\ST"
 
 
 SET MODELS=    "BOARDS\KSGER\v1.5\STM32F103";^
-               "BOARDS\Quicko\STM32F103";^
                "BOARDS\KSGER\v2\STM32F101";^
                "BOARDS\KSGER\v3\STM32F101";^
-               "BOARDS\Quicko\STM32F072"
+               "BOARDS\Quicko\STM32F072";^
+               "BOARDS\Quicko\STM32F103"
 SET RUN_CUBEMX="n"
 SET COMPILE="n"
 cls

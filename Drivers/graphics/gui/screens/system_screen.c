@@ -112,6 +112,14 @@ static void setActiveDetection(uint32_t *val) {
   systemSettings.settings.activeDetection = * val;
 }
 //=========================================================
+static void * getColdBoost() {
+  temp = systemSettings.settings.coldBoost;
+  return &temp;
+}
+static void setColdBoost(uint32_t *val) {
+  systemSettings.settings.coldBoost = * val;
+}
+//=========================================================
 static void * getEncoderMode() {
   temp = systemSettings.settings.EncoderMode;
   return &temp;
@@ -207,14 +215,15 @@ static void system_onEnter(screen_t *scr){
   }
 }
 
-static void system_onExit(screen_t *scr){
-  if(profile!=systemSettings.currentProfile){
-    loadProfile(profile);
-  }
+static void system_onExit(screen_t *scr){                     // Save when exiting the screen, we have freed up all the screen memory
 #ifndef STM32F072xB
-  if(systemSettings.settings.clone_fix != clone_fix){
+  if(isSystemSettingsChanged()){
+    if(systemSettings.settings.clone_fix != clone_fix){       // Clone fix needs rebooting
       systemSettings.settings.clone_fix = clone_fix;
-      saveSettingsFromMenu(save_settings_reboot);
+      saveSettings(save_All, do_reboot);
+    }
+    else
+      saveSettings(save_All, no_reboot);              // Other settings changed, not requiring rebooting
   }
 #endif
 }
@@ -353,6 +362,17 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (void (*)(void *))&setActiveDetection;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
+
+  //  [ Cold Boost Widget ]
+  //
+  newComboMultiOption(w, strings[lang].SYSTEM_Cold_Boost,&edit, NULL);
+  dis=&edit->inputData;
+  dis->getData = &getColdBoost;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setColdBoost;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 

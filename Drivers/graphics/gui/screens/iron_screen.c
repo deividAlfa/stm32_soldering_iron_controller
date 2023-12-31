@@ -345,22 +345,24 @@ static void iron_onEnter(screen_t *scr){
 }
 
 static void iron_onExit(screen_t *scr){
-  uint16_t const userTemp = getUserTemperature();
+  uint16_t userTemp = getUserTemperature();
+
   if(userTemp > systemSettings.Profile.MaxSetTemperature)
-  {
     setUserTemperature(systemSettings.Profile.MaxSetTemperature);
-  }
+
   else if (userTemp < systemSettings.Profile.MinSetTemperature)
-  {
     setUserTemperature(systemSettings.Profile.MinSetTemperature);
-  }
+
+  if(isCurrentProfileChanged())
+    saveSettings(save_All, no_reboot);              // Save now we have all heap free
 }
 
 int filter_Save(widget_t *w, RE_Rotation_t input){
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   systemSettings.Profile.tipFilter = bak_f;
   TIP.filter=bak_f;
-  __enable_irq();
+  __set_PRIMASK(_irq);
   return last_scr;
 }
 
@@ -450,11 +452,12 @@ static void * get_NTC_detect_low_res_beta() {
 }
 //=========================================================
 static int saveNTC(widget_t *w, RE_Rotation_t input) {
+  uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   systemSettings.Profile.ntc = backup_ntc;
   detectNTC();
 
-  __enable_irq();
+  __set_PRIMASK(_irq);
   return last_scr;
 }
 //=========================================================

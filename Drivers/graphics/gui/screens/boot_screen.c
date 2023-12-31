@@ -17,7 +17,7 @@ screen_t Screen_boot;
 static widget_t *Widget_profile;
 static widget_t *Widget_lang;
 static widget_t *Widget_ok;
-static uint8_t boot_step=0;
+static uint8_t setup_step=0;
 
 // Credits: Jesus Vallejo  https://github.com/jesusvallejo/
 // This is XBM format! Check out u8g2 documentation.
@@ -138,10 +138,7 @@ static void setLanguage(uint32_t *val) {
 //=========================================================
 
 static int SaveSetup(widget_t* w) {
-  loadProfile(profile);
-  saveSettingsFromMenu(save_Settings);
-  boot_step++;
-  return -1;
+  return screen_main;
 }
 //=========================================================
 void draw_boot_strings(void){
@@ -157,7 +154,7 @@ static uint8_t boot_screen_draw(screen_t *scr){
   uint8_t refresh = scr->state;                   // Save sttate. If screen set to be erased, default_screenDraw will erase it.
   uint8_t ret = default_screenDraw(scr);          // So we need to run screenDraw first and save the return value
 
-  if(refresh!=screen_Idle && boot_step==1){       // If screen not idle (erased) and boot_step=1 (Setup screen)
+  if(refresh!=screen_Idle && setup_step==1){       // If screen not idle (erased) and setup_step=1 (Setup screen)
     draw_boot_strings();                          // Redraw strings
   }
 
@@ -178,39 +175,25 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
     widgetEnable(Widget_ok);
   }
 
-  if(input!=Rotate_Nothing){
+  if(input!=Rotate_Nothing)
     wakeOledDim();
-  }
+
   handleOledDim();
+  if(checkScreenTimer(SPLASH_TIMEOUT)){                                                           // After splash timeout
+    if(!systemSettings.setupMode)                                                                 // If not in setup mode
+      return screen_main;                                                                         // Go to main screen
 
-  switch(boot_step){
-
-    case 2:
-      systemSettings.setupMode=disable;                                                               // Save button clicked, disable setup mode
-      setSafeMode(disable);                                                                           // Disable safe mode and exit
-
-    case 0:
-      if(checkScreenTimer(SPLASH_TIMEOUT)){                                                           // After splash timeout
-        if(!systemSettings.setupMode){                                                                // If not in setup mode
-          ADC_Reset_measures();                                                                       // Reset the averages, show current values to avoid filtering delay at startup
-          resetIronError();                                                                           // Force timeout of any error (This won't clear errors if still detected)
-          setBootCompleteFlag();
-          return screen_main;                                                                         // Go to main screen
-        }
-        widgetEnable(Widget_lang);                                                                    // In setup mode, enable widgets
-        widgetEnable(Widget_profile);
-        widgetEnable(Widget_ok);
-        scr->state = screen_Erase;                                                                  // Force screen wipe to clear the boot logo
-        boot_step++;                                                                                  // Increase boot step
-      }
-      else{
-        return -1;                                                                                    // Boot timeout not expired, do nothing
-      }
-
-    default:
-       break;
+    else if(setup_step==0){                                                                       // 0=initial, 1=in setup screen, 2=save setup and exit
+      widgetEnable(Widget_lang);                                                                  // In setup mode, enable widgets
+      widgetEnable(Widget_profile);
+      widgetEnable(Widget_ok);
+      scr->state = screen_Erase;                                                                  // Force screen wipe to clear the boot logo
+      setup_step++;                                                                               // Increase boot step, no more
+    }
   }
-
+  else{
+    return -1;                                                                                    // Boot timeout not expired, do nothing
+  }
   return (default_screenProcessInput(scr, input, state));
 }
 
@@ -218,11 +201,6 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 void boot_screen_init(screen_t * scr){
   default_init(scr);
   profile=systemSettings.currentProfile;
-  if( (systemSettings.settings.version!=SYSTEM_SETTINGS_VERSION) || (profile>profile_C210) ){
-    profile=profile_T12;
-    setSafeMode(enable);
-    systemSettings.setupMode=enable;
-  }
   u8g2_SetDrawColor(&u8g2,WHITE);
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM.width, splashXBM.height, splashXBM.xbm);
   scr->state = screen_Erased;
@@ -232,6 +210,17 @@ void boot_screen_init(screen_t * scr){
 #endif
 }
 
+void boot_screen_onExit(screen_t *scr){
+  ADC_Reset_measures();                                   // Reset the averages, show current values to avoid filtering delay at startup
+  if(systemSettings.setupMode){
+    saveSettings(save_Settings, no_reboot);               // Save now we have all heap free. All other flash settings (Profile, tips, addons) will be checked and set to default if wrong
+    setCurrentTip(systemSettings.currentTip);             // Load tip
+    systemSettings.setupMode=0;
+  }
+  setSafeMode(disable);                                   // Disable safe mode before exit
+  resetIronError();                                       // Force timeout of any error (This won't clear errors if still detected)
+  setBootCompleteFlag();
+}
 
 void boot_screen_create(screen_t *scr){
   widget_t *w;
@@ -304,4 +293,5 @@ void boot_screen_setup(screen_t *scr) {
   scr->processInput = &boot_screen_processInput;
   scr->init = &boot_screen_init;
   scr->create = &boot_screen_create;
+  scr->onExit = &boot_screen_onExit;
 }

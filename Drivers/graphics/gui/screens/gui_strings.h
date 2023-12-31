@@ -93,6 +93,7 @@ typedef struct{
   char * SYSTEM__Step;
   char * SYSTEM__Big_Step;
   char * SYSTEM_Active_Detection;
+  char * SYSTEM_Cold_Boost;
   char * SYSTEM_LVP;
   char * SYSTEM_Gui_Time;
   char * SYSTEM_Battery;

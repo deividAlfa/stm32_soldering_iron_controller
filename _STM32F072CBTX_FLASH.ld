@@ -31,36 +31,37 @@ ENTRY(Reset_Handler)
 _estack = ORIGIN(RAM) + LENGTH(RAM);	/* end of "RAM" Ram type memory */
 
 _Min_Heap_Size = 0xC00 ;	/* required amount of heap  */
-_Min_Stack_Size = 0x400 ;	/* required amount of stack */
+_Min_Stack_Size = 0x300 ;	/* required amount of stack */
 
 /* Memories definition */
 MEMORY
 {
   RAM              (xrw) : ORIGIN = 0x20000000, LENGTH = 16K
-  FLASH            (rx)  : ORIGIN = 0x8000000,  LENGTH = 124K
+  FLASH            (rx)  : ORIGIN = 0x8000000,  LENGTH = 122K
   /* areas for storing the settings, keep the start and the end on page boundaries and continuous */
-  TEMP_SETPOINT    (rx)  : ORIGIN = 0x801E800,  LENGTH = 2048
-  PROFILE_SETTINGS (rx)  : ORIGIN = 0x801F000,  LENGTH = 3840
+  TEMP_SETTINGS    (rx)  : ORIGIN = ORIGIN(FLASH) + LENGTH(FLASH),                        LENGTH = 2048
+  PROFILE_SETTINGS (rx)  : ORIGIN = ORIGIN(TEMP_SETTINGS) + LENGTH(TEMP_SETTINGS),        LENGTH = 3840
   GLOBAL_SETTINGS  (rx)  : ORIGIN = ORIGIN(PROFILE_SETTINGS) + LENGTH(PROFILE_SETTINGS),  LENGTH = 128
-  ADDON_SETTINGS   (rx)  : ORIGIN = ORIGIN(GLOBAL_SETTINGS)  + LENGTH(GLOBAL_SETTINGS) ,  LENGTH = 128
+  ADDON_SETTINGS   (rx)  : ORIGIN = ORIGIN(GLOBAL_SETTINGS)  + LENGTH(GLOBAL_SETTINGS),   LENGTH = 128
 }
 
 /* Start address and size of the settings area */
 __SETTINGS_SECTION_START  = ORIGIN(PROFILE_SETTINGS);
 __SETTINGS_SECTION_LENGTH = LENGTH(PROFILE_SETTINGS) + LENGTH(GLOBAL_SETTINGS) + LENGTH(ADDON_SETTINGS);
-__TEMP_SETPOINT_SECTION_START  = ORIGIN(TEMP_SETPOINT);
-__TEMP_SETPOINT_SECTION_LENGTH = LENGTH(TEMP_SETPOINT);
+__TEMP_SETTINGS_SECTION_START  = ORIGIN(TEMP_SETTINGS);
+__TEMP_SETTINGS_SECTION_LENGTH = LENGTH(TEMP_SETTINGS);
 
 /* Sections */
 SECTIONS
 {
-  /* Firmware settings storage section(s) */  
+  /* Firmware settings storage section(s) */
     
-  .tempSetpoint (NOLOAD) :
+  .tempSettings (NOLOAD) :
   {
     . = ALIGN(4);
     KEEP(*(.tempSetpoint))
-  } > TEMP_SETPOINT
+  } > TEMP_SETTINGS
+
   
   .profileSettings (NOLOAD) :
   {

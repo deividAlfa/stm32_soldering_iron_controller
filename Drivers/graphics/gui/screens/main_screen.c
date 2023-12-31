@@ -15,6 +15,8 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen variables
 //-------------------------------------------------------------------------------------------------------------------------------
+static void main_screen_create(screen_t *scr);
+static void main_screen_init(screen_t *scr);
 
 static uint32_t barTime;
 slide_t screenSaver = {
@@ -24,7 +26,6 @@ slide_t screenSaver = {
     .yAdd = 1,
 };
 
-static char *tipNames[NUM_TIPS];
 enum mode{  main_none=0, main_irontemp, main_error, main_setpoint, main_tipselect,  main_tipselect_auto, main_profileselect };
 enum{ status_ok=0x20, status_error };
 enum { temp_numeric, temp_graph };
@@ -395,7 +396,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     if( (mainScr.lastError == (FLAG_ACTIVE | FLAG_NO_IRON)) && (current_time - mainScr.lastErrorTimer > 3000) ){    // If last error was no tip and >3 seconds passed, enable automatic tip selection
       mainScr.setMode = main_tipselect_auto;
       switchScreenMode();
-      return -1;
+      input=Rotate_Nothing;
     }
   }
 
@@ -659,11 +660,19 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         }
 
         if(profile!=systemSettings.currentProfile){
-          if(isCurrentProfileChanged()){         // If there's unsaved profile data
-            saveSettingsFromMenu(save_Settings); // Save settings
-            checkSettings();
+          if(isCurrentProfileChanged())                         // If there's unsaved profile data
+            Error_Handler();                                    // We shouldn't have anything unsaved here
+          updateTempData(force_update);
+          if(loadProfile(profile)){                             // New profile is bad! (Strange, they're checked at boot)
+            oled_destroy_screen(scr);                           // Destroy screen to free memory
+            saveSettings(perform_scanFix, no_reboot);           // Perform sanity check on flash
+            if(loadProfile(profile))                            // Try again
+                Error_Handler();                                // Flash bad?
+            main_screen_create(scr);                            // OK, create screen again
+            main_screen_init(scr);
+            mainScr.setMode = main_profileselect;
+            switchScreenMode();
           }
-          loadProfile(profile);
           Screen_main.state=screen_Erase;
         }
       }
@@ -781,6 +790,7 @@ static void  drawMode(uint8_t refresh){
       break;
 
     case mode_boost:
+    case mode_coldboost:
       u8g2_DrawUTF8(&u8g2, strings[lang].main_mode_Boost_xpos, 0, strings[lang].main_mode_Boost);
 
     default:
@@ -970,8 +980,8 @@ static void  drawMisc(uint8_t refresh){
     s = profileStr[systemSettings.currentProfile];                                            // Profile name
   }
   else{
-    len = u8g2_GetUTF8Width(&u8g2, tipNames[systemSettings.currentTip])+4;                    // Tip string len
-    s = tipNames[systemSettings.currentTip];                                                  // Tip name
+    len = u8g2_GetUTF8Width(&u8g2, systemSettings.currentTipData.name)+4;                     // Tip string len
+    s = systemSettings.currentTipData.name;                                                   // Tip name
   }
   if(mainScr.currentMode==main_tipselect || mainScr.currentMode==main_tipselect_auto || mainScr.currentMode==main_profileselect){     // Tip / profile selection active
     u8g2_DrawRBox(&u8g2, 0, 54, len, 10, 2);                                                  // Draw edit frame
@@ -1126,8 +1136,4 @@ void main_screen_setup(screen_t *scr) {
   scr->init = &main_screen_init;
   scr->processInput = &main_screenProcessInput;
   scr->create = &main_screen_create;
-
-  for(int x = 0; x < NUM_TIPS; x++) {
-    tipNames[x] = systemSettings.Profile.tip[x].name;
-  }
 }

@@ -14,7 +14,7 @@ if not exist %ZIP% (
 
 
 :: Copy files
-
+md Release 2>nul
 cd Release
 del *.zip *.bin *.list 2>nul >nul
 

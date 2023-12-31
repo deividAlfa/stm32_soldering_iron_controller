@@ -7,7 +7,7 @@
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "lcd.c"
+#define __BASE_FILE__ "display.c"
 #endif
 
 oled_t oled;
@@ -641,19 +641,10 @@ void fatalError(uint8_t type){
     putStrAligned(strings[lang].ERROR_BTN_RESET, 50, align_center);
 
 #if (defined DISPLAY_I2C || defined DISPLAY_SPI) && defined DISPLAY_DEVICE
-  if(!oled.use_sw)
-    update_display_ErrorHandler();
-
-#if defined DISPLAY_I2C && defined I2C_TRY_HW
-  else{
-    update_display();
-  }
-#endif
-
+  update_display_ErrorHandler();                                                      // If hardware is used, we can't use interrupts here, use special software update mode
 #else
   update_display();
 #endif
-
   buttonReset();
 }
 
@@ -696,10 +687,11 @@ void Oled_error_init(void){
     display_dma_abort();
 #endif  
   buzzer_fatal_beep();
-  setDisplayContrastOrBrightness(defaultSettings.contrastOrBrightness);
+  setDisplayContrastOrBrightness(defaultSystemSettings.contrastOrBrightness);
   fillBuffer(BLACK,fill_soft);
   u8g2_SetFont(&u8g2,u8g2_font_menu);
   u8g2_SetDrawColor(&u8g2, WHITE);
   u8g2_SetMaxClipWindow(&u8g2);
   systemSettings.settings.displayStartColumn = DISPLAY_START_COLUMN;
+  __enable_irq();
 }

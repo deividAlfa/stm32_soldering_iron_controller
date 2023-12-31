@@ -12,9 +12,9 @@
 #include "pid.h"
 #include "board.h"
 
-#define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
-#define SYSTEM_SETTINGS_VERSION   25                                // Change this if you change the system settings struct to prevent getting out of sync
-#define PROFILE_SETTINGS_VERSION  1                                 // Same, but for profile settings struct
+#define SWSTRING          "SW: 1.12.0     "                         // Software version reported in settings screen
+#define SYSTEM_SETTINGS_VERSION   27                                // Change this if you change the system settings struct to prevent getting out of sync
+#define PROFILE_SETTINGS_VERSION  2                                 // Same, but for profile settings struct
 
 #define LANGUAGE_COUNT    7                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
@@ -79,6 +79,7 @@ typedef enum{
   mode_standby            = 1,
   mode_run                = 2,
   mode_boost              = 3,
+  mode_coldboost          = 4,
 
   initialized             = 0,
 
@@ -88,41 +89,49 @@ typedef enum{
   profile_None            = 0xff,
 
   save_Settings           = 1,
-  reboot_after_save       = 0x40,
-  save_settings_reboot    = 0x41,
-  reset_Profiles          = 0x80,
-  reset_Profile           = 0x81,
-  reset_Settings          = 0x82,
-#ifdef ENABLE_ADDONS
-  reset_Addons            = 0x83,
-#endif
-  reset_All               = 0x84,
-  reboot_mask             = 0xBF,
+  save_Profile            = 2,
+  save_Tip                = 4,
+  save_Addons             = 8,
+  save_All                = save_Settings | save_Profile | save_Addons,
 
-  keepProfiles            = 1,
-  wipeProfiles            = 0x80,
+  reset_Settings          = 0x10,
+  reset_Profile           = 0x20,
+  reset_Profiles          = 0x40,
+  reset_Addons            = 0x80,
+  reset_All               = reset_Settings | reset_Profiles |  reset_Addons,
+
+  mode_SaveTip            = 1,
+  mode_AddTip             = 2,
+  mode_DeleteTip          = 3,
+
+  perform_scanFix         = 0,      // Perform check over existing flash, reset any wrong section
+
+  no_reboot               = 0,
+  do_reboot               = 1,
 
   output_PWM,
   output_Low,
   output_High,
 
-  lang_english             = 0,
-  lang_russian             = 1,
-  lang_swedish             = 2,
-  lang_german              = 3,
-  lang_turkish             = 4,
-  lang_tchinese            = 5,
-  lang_bulgarian           = 6,
+  lang_english            = 0,
+  lang_russian            = 1,
+  lang_swedish            = 2,
+  lang_german             = 3,
+  lang_turkish            = 4,
+  lang_tchinese           = 5,
+  lang_bulgarian          = 6,
 
 
-  dim_off                  = 0,
-  dim_sleep                = 1,
-  dim_always               = 2,
+  dim_off                 = 0,
+  dim_sleep               = 1,
+  dim_always              = 2,
 
-  error_sleep              = 0,
-  error_run                = 1,
-  error_resume             = 2,
+  error_sleep             = 0,
+  error_run               = 1,
+  error_resume            = 2,
 
+  normal_update           = 0,
+  force_update            = 1,
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
   fume_extractor_mode_disabled  = 0,
   fume_extractor_mode_auto      = 1,
@@ -208,7 +217,6 @@ __attribute__((aligned(4))) typedef struct{
   uint16_t      : 16;
   uint16_t      : 16;
   uint16_t      : 16;
-  tipData_t     tip[NUM_TIPS];
   uint32_t      errorTimeout;
   uint32_t      boostTimeout;
   uint32_t      sleepTimeout;
@@ -217,6 +225,11 @@ __attribute__((aligned(4))) typedef struct{
   uint32_t      : 32;
   uint32_t      : 32;
   uint32_t      : 32;
+}profile_settings_t;
+
+__attribute__((aligned(4))) typedef struct{
+  tipData_t     tip[NUM_TIPS];
+  profile_settings_t settings;
 }profile_t;
 
 __attribute__((aligned(4))) typedef struct{
@@ -235,17 +248,14 @@ __attribute__((aligned(4))) typedef struct{
     uint8_t       displayResRatio : 4;
 #endif
   };
-
-  uint8_t       :8;
   uint8_t       hasBattery;
-  uint8_t       :8;
   uint8_t       dim_inSleep;
   uint8_t       EncoderMode;
   uint8_t       debugEnabled;
   uint8_t       activeDetection;
   uint8_t       clone_fix;
   uint8_t       dim_mode;
-  uint8_t       bootProfile;
+  uint8_t       coldBoost;
   uint8_t       initMode;
   uint8_t       tempUnit;
   uint8_t       tempStep;
@@ -304,33 +314,74 @@ __attribute__((aligned(4))) typedef struct {
 
 __attribute__((aligned(4))) typedef struct{
   settings_t      settings;
-  uint32_t        settingsChecksum;
-  profile_t       Profile;
-  uint32_t        ProfileChecksum;
+  profile_settings_t Profile;
+  tipData_t       currentTipData;
 #ifdef ENABLE_ADDONS
   addonSettings_t addonSettings;
-  uint32_t        addonSettingsChecksum;
 #endif
-  uint8_t         save_Flag;
   uint8_t         setupMode;
   uint8_t         isSaving;
   uint8_t         currentProfile;
   uint8_t         currentTip;
+  uint8_t         tipUpdateMode;
+  uint8_t         tipUpdateIndex;
 }systemSettings_t;
 
-extern systemSettings_t systemSettings;
-extern const settings_t defaultSettings;
 
-/** Cyclic task to save the settings if needed. */
-void checkSettings(void);
-/** Sets a flag to save the settings in the background task. */
-void saveSettingsFromMenu(uint8_t mode);
+__attribute__((aligned(4))) typedef struct{
+  settings_t      settings;
+  uint32_t        settingsChecksum;
+} flashSettingsSettings_t;
+
+__attribute__((aligned(4))) typedef struct{
+  profile_t       Profile[NUM_PROFILES];
+  uint32_t        ProfileSettingsChecksum[NUM_PROFILES];          // Only for small profile settings block (Excluding tips)
+  uint32_t        ProfileChecksum[NUM_PROFILES];                  // For the entire profile (Including tips)
+} flashSettingsProfiles_t;
+
+__attribute__((aligned(4))) typedef struct{
+  addonSettings_t addonSettings;
+  uint32_t        addonSettingsChecksum;
+} flashSettingsAddons_t;
+
+typedef struct{
+  uint16_t profile[128];
+  uint16_t tip[NUM_PROFILES][128];
+  uint16_t temperature[512];
+}temp_settings_t;
+
+
+extern flashSettingsSettings_t flashGlobalSettings;
+extern flashSettingsProfiles_t flashProfilesSettings;
+extern temp_settings_t temp_settings;
+#ifdef ENABLE_ADDONS
+extern flashSettingsAddons_t flashAddonSettings;
+#endif
+
+
+extern systemSettings_t systemSettings;
+extern const settings_t defaultSystemSettings;
+extern const profile_settings_t defaultProfileSettings;
+
+/** Cyclic task to save the current temperature/tip/profile if needed. */
+void updateTempData(bool force);
+/** Save the settings to flash. */
+void saveSettings(uint8_t save_mode, uint8_t reboot_mode);
+/** Reads the save flag. */
+uint8_t getSaveFlag(void);
 /** Loads the settings from flash on boot. */
-void restoreSettings();
+void restoreSettings(void);
 /** Load/change to the profile with the given index */
-void loadProfile(uint8_t profile);
+ErrorStatus loadProfile(uint8_t profile);
+void setCurrentTip(uint8_t tip);
+tipData_t *getCurrentTip(void);
+
+/** Checks if the current system settings in RAM were changed */
+bool isSystemSettingsChanged(void);
 /** Checks if the current profile in RAM is changed */
 bool isCurrentProfileChanged(void);
+/** Checks if the current addons settings in RAM were changed */
+bool isAddonSettingsChanged(void);
 
 /** Restores settings from the backup ram used in the last session (eg last temp/tip).
  *  Call this after all the modules  */

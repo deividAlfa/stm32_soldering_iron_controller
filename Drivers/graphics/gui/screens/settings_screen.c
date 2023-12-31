@@ -16,6 +16,9 @@ static comboBox_item_t *comboitem_system_debug;
 static void SETTINGS_create(screen_t *scr) {
   widget_t* w;
 
+  if(isCurrentProfileChanged())           // Unlikely, but if there's unsaved profile data, save before creating the screen
+    saveSettings(save_All, no_reboot);
+
   //  [ SETTINGS MAIN SCREEN ]
   //
   newWidget(&w,widget_combo,scr, NULL);
@@ -38,9 +41,6 @@ static void SETTINGS_create(screen_t *scr) {
 static void SETTINGS_OnEnter(screen_t *scr) {
   if(scr==&Screen_main){
     comboResetIndex(Screen_settings.current_widget);
-  }
-  if(isCurrentProfileChanged()){         // If there's unsaved profile data
-    saveSettingsFromMenu(save_Settings); // Save settings
   }
 }
 
