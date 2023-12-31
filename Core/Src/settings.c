@@ -148,6 +148,11 @@ static uint8_t flashTipIndex[NUM_PROFILES];
 static uint8_t flashTip[NUM_PROFILES];
 static uint8_t flashProfileIndex;
 static uint8_t flashProfile;
+static uint8_t prevTip[NUM_PROFILES];
+static uint8_t prevProfile;
+static uint16_t prevTemp;
+static uint32_t lastTempCheckTime[3];
+
 
 systemSettings_t systemSettings;
 
@@ -218,58 +223,59 @@ extern int  __TEMP_SETTINGS_SECTION_LENGTH; /* defined by the linker, only its a
 
 
 void updateTempData(bool force){
-  static uint8_t prevTip[NUM_PROFILES];
-  static uint8_t prevProfile;
-  static uint16_t prevTemp;
-  static uint32_t lastTempCheckTime;
-
   uint32_t CurrentTime = HAL_GetTick();
   uint8_t scr_index=current_screen->index;
 
   if(getIronCalibrationMode() || systemSettings.setupMode || scr_index == screen_debug)                                 // Don't update while calibration is in progress or in the debug screen
     return;
                                                                                                                         // Always update the data, whether the batery option is enabled or not
-  bkpRamData.values.lastSelTip[systemSettings.currentProfile] = systemSettings.currentTip;
-  bkpRamData.values.lastProfile = systemSettings.currentProfile;
-  bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserTemperature();
-
   if(systemSettings.settings.hasBattery == true){
-    flashTip[systemSettings.currentProfile] = systemSettings.currentTip;                                                // Keep track of tips in the flash variables if the battery option is disabled later, updateTempData will be forced to save the flash data
+    bkpRamData.values.lastSelTip[systemSettings.currentProfile] = systemSettings.currentTip;
+    bkpRamData.values.lastProfile = systemSettings.currentProfile;
+    bkpRamData.values.lastTipTemp[systemSettings.currentProfile] = getUserTemperature();
     writeBackupRam();
   }
-  else if (force){                                                                      // No battery or forced
+  else if ((systemSettings.settings.hasBattery == false) || force){                                                      // No battery or forced
     uint16_t currentTemp = getUserTemperature();
     uint8_t currentTip = systemSettings.currentTip;
     uint8_t currentProfile = systemSettings.currentProfile;
 
-    if(flashTemp != currentTemp) {                                                      // Compare with stored in flash
-      if(prevTemp != currentTemp) {                                                     // Store if different to last check
+    if(force){
+      prevTemp = currentTemp;
+      prevTip[currentProfile] = currentTip;
+      prevProfile = currentProfile;
+    }
+
+    if(flashTemp != currentTemp) {                                       // Compare with stored in flash
+      if(prevTemp != currentTemp) {                                      // Store if different to last check
         prevTemp = currentTemp;
-        lastTempCheckTime = CurrentTime;                                                // Start timeout
+        lastTempCheckTime[0] = CurrentTime;                                            // Start timeout
       }
-      else if(force || (CurrentTime-lastTempCheckTime)>4999) {                          // Different than flash and timeout is over
+      if(force || ((CurrentTime-lastTempCheckTime[0])>4999)) {                           // Different than flash and timeout is over
         flashTemp = currentTemp;
-        flashTempWrite();                                                               // Update temperature in flash
+        flashTempWrite();                                                           // Update temperature in flash
       }
     }
     if(flashTip[currentProfile] != currentTip) {
-      if(prevTip[currentProfile] != currentTip) {                                       // Store if different to last check
+      if(prevTip[currentProfile] != currentTip) {                        // Store if different to last check
         prevTip[currentProfile] = currentTip;
-        lastTempCheckTime = CurrentTime;                                                // Start timeout
+        lastTempCheckTime[1] = CurrentTime;                                            // Start timeout
       }
-      else if(force || (CurrentTime-lastTempCheckTime)>4999) {                          // Different than flash and timeout is over
-        flashTip[currentProfile] = currentTip;
-        flashTipWrite();                                                                // Update tip data in flash
+      if(force || ((CurrentTime-lastTempCheckTime[1])>4999)) {                           // Different than flash and timeout is over
+        for(uint8_t i=0;i<NUM_PROFILES;i++){                                            // Update all tips
+          flashTip[i] = prevTip[i];
+        }
+        flashTipWrite();                                                            // Update tip data in flash
       }
     }
     if(flashProfile != currentProfile) {
-      if(prevProfile != currentProfile) {                                               // Store if different to last check
+      if(prevProfile != currentProfile) {                                // Store if different to last check
         prevProfile = currentProfile;
-        lastTempCheckTime = CurrentTime;                                                // Start timeout
+        lastTempCheckTime[2] = CurrentTime;                                            // Start timeout
       }
-      else if(force || (CurrentTime-lastTempCheckTime)>4999) {                          // Different than flash and timeout is over
+      if(force || ((CurrentTime-lastTempCheckTime[2])>4999)) {                           // Different than flash and timeout is over
         flashProfile = currentProfile;
-        flashProfileWrite();                                                            // Update tip data in flash
+        flashProfileWrite();                                                        // Update tip data in flash
       }
     }
   }
@@ -1117,6 +1123,27 @@ bool isSystemSettingsChanged(void) {
 }
 bool isAddonSettingsChanged(void) {
   return ChecksumAddons(&systemSettings.addonSettings) != flashAddonSettings.addonSettingsChecksum;
+}
+
+void copy_bkp_data(uint8_t mode){
+  if(mode==flash_to_ram){
+    bkpRamData.values.lastProfile = flashProfile;
+    for(uint8_t i=0;i<NUM_PROFILES;i++){
+      bkpRamData.values.lastSelTip[i] = flashTip[i];
+      bkpRamData.values.lastTipTemp[i] = flashTemp;
+    }
+    writeBackupRam();
+  }
+  else if(mode==ram_to_flash){
+    flashProfile = bkpRamData.values.lastProfile;
+    flashTemp = bkpRamData.values.lastTipTemp[0];                            // Flash temp only stores one temperature. Choose first profile.
+    for(uint8_t i=0;i<NUM_PROFILES;i++){
+      flashTip[i] = bkpRamData.values.lastSelTip[i];
+    }
+    flashTempWrite();
+    flashProfileWrite();
+    flashTipWrite();
+  }
 }
 
 //Max 99 seconds countdown.

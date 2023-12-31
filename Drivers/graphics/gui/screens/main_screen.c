@@ -662,9 +662,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         }
 
         if(profile!=systemSettings.currentProfile){
+          updateTempData(force_update);                         // Update current data
           if(isCurrentProfileChanged())                         // If there's unsaved profile data
             Error_Handler();                                    // We shouldn't have anything unsaved here
-          updateTempData(force_update);
           if(loadProfile(profile)){                             // New profile is bad! (Strange, they're checked at boot)
             oled_destroy_screen(scr);                           // Destroy screen to free memory
             saveSettings(perform_scanFix, no_reboot);           // Perform sanity check on flash
