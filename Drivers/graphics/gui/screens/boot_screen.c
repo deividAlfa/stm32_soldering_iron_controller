@@ -215,6 +215,7 @@ void boot_screen_onExit(screen_t *scr){
   if(systemSettings.setupMode){
     saveSettings(save_Settings, no_reboot);               // Save now we have all heap free. All other flash settings (Profile, tips, addons) will be checked and set to default if wrong
     loadProfile(profile);                                 // Now flash is initialized and we can properly load a profile
+    updateTempData(force_update);
     systemSettings.setupMode=0;                           // Disable setup mode
   }
   setSafeMode(disable);                                   // Disable safe mode before exit

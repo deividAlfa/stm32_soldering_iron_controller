@@ -419,7 +419,6 @@ static void storeSettings(uint8_t mode){
     resetSystemSettings(&flashBufferSettings->settings);                                                  // Load defaults
     if(mode == reset_All){
       flashBufferSettings->settings.version = 0xFF;                                                       // To trigger setup screen
-      flashTempSettingsErase();
     }
   }
   else if(mode & save_Settings){                                                                          // Save current settings
@@ -578,8 +577,9 @@ void restoreSettings(void) {
       loadProfile(systemSettings.currentProfile);           // loadProfile will restore lastTemp and lastTip from the correct source (Flash or backup SRAM).
     }
   }
-  if(!setup && reset)                                               // If not in setup mode and we have bad data
+  if(!setup && reset){                                              // If not in setup mode and we have bad data
     saveSettings(perform_scanFix, do_reboot);                       // Store settings with no arguments, this will check and reset any bad setting
+  }
 }                                                                   // Otherwise, everything be resetted when exiting the boot screen
 
 void loadSettingsFromBackupRam(void) {
@@ -655,6 +655,22 @@ static uint32_t ChecksumBackupRam(){
   return checksum;
 }
 
+void flashTempSettingsInitialSetup(void){                                     // To be called after initial setup screen
+  flashTempSettingsErase();
+  for(uint8_t i=0;i<NUM_PROFILES;i++)
+    flashTip[i]= 0;
+
+  flashTemp = defaultProfileSettings.defaultTemperature;
+  flashProfile=profile_T12;
+  flashTempWrite();
+  flashTipWrite();
+  flashProfileWrite();
+
+  systemSettings.currentProfile = profile_T12;                                // Just in case
+  systemSettings.currentTip = 0;
+  setUserTemperature( defaultProfileSettings.defaultTemperature);
+}
+
 void flashTempSettingsInit(void) //call it only once during init
 {
   bool setDefault=0;
@@ -715,10 +731,9 @@ void flashTempSettingsInit(void) //call it only once during init
     }
   }
 
-  if(setDefault){                                                                           // Profile not initialized yet, so we have to wait
-    flashTempSettingsErase();                                                               // This will be detected later in loadProfile
-    systemSettings.currentProfile = profile_T12;
-  }
+  if(setDefault)
+    flashTempSettingsInitialSetup();
+
   else{
     systemSettings.currentProfile = flashProfile;
     if(temp_settings.temperature[flashTempIndex] != UINT16_MAX)
@@ -800,7 +815,8 @@ void flashTempSettingsErase(void){
   flashTempIndex = 0;                                             // Reset index
   flashProfileIndex = 0;
   for(uint8_t i=0; i<NUM_PROFILES;i++)
-    flashTipIndex[i] = 0;
+      flashTipIndex[i] = 0;
+
   flashTemp=0xFFFF;
   flashProfile=0xFF;
 }
@@ -867,6 +883,7 @@ static void resetSystemSettings(settings_t * data) {
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   *data = defaultSystemSettings;
+  flashTempSettingsInitialSetup();
   __set_PRIMASK(_irq);
 }
 
@@ -966,7 +983,9 @@ static void resetProfileSettings(profile_settings_t * data, uint8_t profile){
 uint8_t loadProfile(uint8_t profile){
   while(ADC_Status!=ADC_Idle);
 
-  if(profile>profile_C210)                                                                              // Sanity check
+  if(profile==0xFF)                                   // Erased flash, load T12
+    profile=profile_T12;
+  else if(profile>profile_C210)                       // Sanity check
     Error_Handler();
 
   uint32_t _irq = __get_PRIMASK();
