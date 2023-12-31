@@ -512,6 +512,7 @@ static void storeSettings(uint8_t mode){
   _free(flashBufferSettings);
   _free(flashBufferProfiles);
   if(systemSettings.tipUpdateMode){                   // If tip was deleted / updated / added
+    systemSettings.tipUpdateMode = 0;
     setCurrentTip(systemSettings.currentTip);        // Reload tip, sortTips will have updated the number to keep the same tip, or the new one
   }
   systemSettings.isSaving = 0;

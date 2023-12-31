@@ -19,7 +19,6 @@ static comboBox_item_t *comboitem_tip_settings_copy;
 static comboBox_item_t *comboitem_tip_settings_delete;
 static editable_widget_t *editable_tip_settings_cal250;
 static editable_widget_t *editable_tip_settings_cal400;
-static uint8_t tip_save_flag;
 static uint8_t tip_different;
 
 //=========================================================
@@ -117,7 +116,6 @@ static int tip_save(widget_t *w, RE_Rotation_t input) {
 
   if(Selected_Tip==systemSettings.Profile.currentNumberOfTips){                                                 // If new tip
     systemSettings.tipUpdateMode=mode_AddTip;                                                                   // Set flag for saveSettings
-    tip_save_flag = 1;
   }
   else{
     uint8_t *new=(uint8_t*)&backupTip, *current=(uint8_t*)&systemSettings.currentTipData;
@@ -125,7 +123,6 @@ static int tip_save(widget_t *w, RE_Rotation_t input) {
       if(new[i] != current[i]){
         systemSettings.tipUpdateIndex=Selected_Tip;                                                                 // Store tip to be saved
         systemSettings.tipUpdateMode=mode_SaveTip;                                                              // Set save flag if different
-        tip_save_flag = 1;
         break;
       }
     }
@@ -136,7 +133,6 @@ static int tip_save(widget_t *w, RE_Rotation_t input) {
 static int tip_delete(widget_t *w, RE_Rotation_t input) {
   systemSettings.tipUpdateMode=mode_DeleteTip;                                                                  // Set flag for saveSettings
   systemSettings.tipUpdateIndex=Selected_Tip;                                                                   // Store tip to be deleted
-  tip_save_flag = 1;                                                                                            // Se flag for screen exit function
   return last_scr;                                                                                              // Return to main screen or system menu screen
 }
 //=========================================================
@@ -207,13 +203,12 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
 }
 
 static void tip_settings_onExit(screen_t *scr){
-  if(tip_save_flag){
-    systemSettings.currentTipData = backupTip;                                                                  // Store modified tip data
-    saveSettings(save_Tip, no_reboot);                                                                          // Save now we have all heap free
+  if(systemSettings.tipUpdateMode){                                                                               // Pending tip change
+    systemSettings.currentTipData = backupTip;                                                                    // Store modified tip data
+    saveSettings(save_Tip, no_reboot);                                                                            // Save now we have all heap free
   }
 }
 static void tip_settings_onEnter(screen_t *scr){
-  tip_save_flag = 0;
   tip_different = 0;
   comboResetIndex(Screen_tip_settings.current_widget);
   if(newTip){                                                                                                   // If new tip selected
