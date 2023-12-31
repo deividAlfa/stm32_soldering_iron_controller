@@ -396,7 +396,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     if( (mainScr.lastError == (FLAG_ACTIVE | FLAG_NO_IRON)) && (current_time - mainScr.lastErrorTimer > 3000) ){    // If last error was no tip and >3 seconds passed, enable automatic tip selection
       mainScr.setMode = main_tipselect_auto;
       switchScreenMode();
-      return -1;
+      input=Rotate_Nothing;
     }
   }
 
