@@ -549,9 +549,14 @@ void restoreSettings(void) {
 #ifdef ENABLE_ADDONS
     reset |= loadAddonSettings();
 #endif
-    if(checkFlashProfiles()==ERROR){
-      checksumError(reset_Profile);
-      reset |= reset_Profile;                                 // Some profile is wrong
+    if(checkFlashProfiles()==ERROR){                                                                      // Some profile is wrong
+      for(uint8_t i=0;i<NUM_PROFILES;i++){
+        if(flashProfilesSettings.Profile[i].settings.version==PROFILE_SETTINGS_VERSION){                  // If profile version is correct,
+          checksumError(reset_Profile);                                                                   // Show checksum error, otherwise clear silently
+          break;
+        }
+      }
+      reset |= reset_Profile;
     }
     else
       loadProfile(systemSettings.currentProfile);
