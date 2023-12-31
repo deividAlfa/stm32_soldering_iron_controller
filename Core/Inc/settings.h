@@ -12,7 +12,7 @@
 #include "pid.h"
 #include "board.h"
 
-#define SWSTRING          "SW: "__DATE__                            // Software version reported in settings screen
+#define SWSTRING          "SW: 1.12.0     "                         // Software version reported in settings screen
 #define SYSTEM_SETTINGS_VERSION   27                                // Change this if you change the system settings struct to prevent getting out of sync
 #define PROFILE_SETTINGS_VERSION  2                                 // Same, but for profile settings struct
 
