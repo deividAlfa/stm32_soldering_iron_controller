@@ -153,6 +153,18 @@ static uint8_t prevProfile;
 static uint16_t prevTemp;
 static uint32_t lastTempCheckTime[3];
 
+#if (__CORTEX_M == 3)                 // STM32F1xx flash page size are 1K or 2K depending on the flash size
+static uint8_t flashPages_GlobalSettings, flashPages_TempSettings;
+static uint16_t flashPageSize;
+#elif (__CORTEX_M == 0)               // All STM32F07x have 2KB flash pages
+  #if (FLASH_PAGE_SIZE != 2048)
+    #error Wrong flash page size??
+  #endif
+#define flashPageSize                 FLASH_PAGE_SIZE
+#define flashPages_GlobalSettings     ((SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize)
+#define flashPages_TempSettings       ((TEMP_SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize)
+#endif
+
 
 systemSettings_t systemSettings;
 
@@ -316,7 +328,7 @@ static void eraseFlashPages(uint32_t pageAddress, uint32_t numPages)
   HAL_FLASH_Lock();
 
   // Ensure flash was erased
-  for (uint32_t i = 0u; i < (numPages * FLASH_PAGE_SIZE / sizeof(int32_t)); i++) {
+  for (uint32_t i = 0u; i < (numPages * flashPageSize / sizeof(int32_t)); i++) {
     if( *((uint32_t*)pageAddress+i) != 0xFFFFFFFF){
       Flash_error();
     }
@@ -482,7 +494,7 @@ static void storeSettings(uint8_t mode){
     return;
   }
 
-  eraseFlashPages(SETTINGS_SECTION_START, (SETTINGS_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);
+  eraseFlashPages(SETTINGS_SECTION_START, flashPages_GlobalSettings);
   writeFlash((uint32_t*)flashBufferProfiles, sizeof(flashSettingsProfiles_t), (uint32_t)&flashProfilesSettings);
   writeFlash((uint32_t*)flashBufferSettings, sizeof(flashSettingsSettings_t), (uint32_t)&flashGlobalSettings);
 #ifdef ENABLE_ADDONS
@@ -536,6 +548,13 @@ void restoreSettings(void) {
   RCC->BDCR    |= RCC_BDCR_RTCEN;
   PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
   RTC->TAFCR   = 0u;                                        // disable tamper pin, just to be sure
+#endif
+
+#if (__CORTEX_M == 3)
+  uint32_t flashSize = 0xFFFF & *(uint32_t*)FLASHSIZE_BASE;
+  flashPageSize = ( flashSize > 128 ? 2048 : 1024 );                   // STM32F1xx have 1K and 2K flash page sizes depending on the flash size
+  flashPages_GlobalSettings = ((SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize);
+  flashPages_TempSettings   = ((TEMP_SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize);
 #endif
 
   if(setup){                                                                                              // Setup mode, so flash data is not initialized
@@ -811,7 +830,7 @@ void flashTipWrite(void)
 }
 
 void flashTempSettingsErase(void){
-  eraseFlashPages(TEMP_SETTINGS_SECTION_START, (TEMP_SETTINGS_SECTION_LENGTH+FLASH_PAGE_SIZE-1) / FLASH_PAGE_SIZE);
+  eraseFlashPages(TEMP_SETTINGS_SECTION_START, flashPages_TempSettings);
   flashTempIndex = 0;                                             // Reset index
   flashProfileIndex = 0;
   for(uint8_t i=0; i<NUM_PROFILES;i++)
