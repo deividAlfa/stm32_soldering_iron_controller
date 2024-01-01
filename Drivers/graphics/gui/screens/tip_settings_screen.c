@@ -220,7 +220,11 @@ static void tip_settings_onEnter(screen_t *scr){
     comboitem_tip_settings_delete->enabled=0;                                                                   // Cannot delete a new tip
   }
   else{
-    backupTip = systemSettings.currentTipData;                                                                             // Copy current tip
+    if(scr != &Screen_tip_list)                                                                                 // If coming from tip list screen, Selected_Tip will be set already
+      Selected_Tip = systemSettings.currentTip;                                                                 // Otherwise use current tip
+
+    backupTip = flashProfilesSettings.Profile[systemSettings.currentProfile].tip[Selected_Tip];
+
     comboitem_tip_settings_delete->enabled = (systemSettings.Profile.currentNumberOfTips>1);                    // If more than 1 tip in the system, enable delete
     comboitem_tip_settings_copy->enabled = (systemSettings.Profile.currentNumberOfTips<NUM_TIPS);               // If tip slots available, enable copy button
     Flash_to_Edit(backupTip.name);
