@@ -17,7 +17,7 @@ static void SETTINGS_create(screen_t *scr) {
   widget_t* w;
 
   if(isCurrentProfileChanged())           // Unlikely, but if there's unsaved profile data, save before creating the screen
-    saveSettings(save_All, no_reboot);
+    saveSettings(save_All, no_mode, no_mode, no_reboot);
 
   //  [ SETTINGS MAIN SCREEN ]
   //

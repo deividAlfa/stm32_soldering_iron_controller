@@ -200,7 +200,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 
 void boot_screen_init(screen_t * scr){
   default_init(scr);
-  profile=systemSettings.currentProfile;
+  profile=getCurrentProfile();
   u8g2_SetDrawColor(&u8g2,WHITE);
   u8g2_DrawXBMP(&u8g2, 0, 0, splashXBM.width, splashXBM.height, splashXBM.xbm);
   scr->state = screen_Erased;
@@ -213,7 +213,7 @@ void boot_screen_init(screen_t * scr){
 void boot_screen_onExit(screen_t *scr){
   ADC_Reset_measures();                                   // Reset the averages, show current values to avoid filtering delay at startup
   if(systemSettings.setupMode){
-    saveSettings(save_Settings, no_reboot);               // Save now we have all heap free. All other flash settings (Profile, tips, addons) will be checked and set to default if wrong
+    saveSettings(save_Settings, no_mode, no_mode, no_reboot);               // Save now we have all heap free. All other flash settings (Profile, tips, addons) will be checked and set to default if wrong
     loadProfile(profile);                                 // Now flash is initialized and we can properly load a profile
     updateTempData(force_update);
     systemSettings.setupMode=0;                           // Disable setup mode
@@ -221,6 +221,7 @@ void boot_screen_onExit(screen_t *scr){
   setSafeMode(disable);                                   // Disable safe mode before exit
   resetIronError();                                       // Force timeout of any error (This won't clear errors if still detected)
   setBootCompleteFlag();                                  // This is for checkIronError, will load the boot state when this flag is set.
+  waitForNextConversion();                                // Wait for a conversion to show a glitch-free screen
 }
 
 void boot_screen_create(screen_t *scr){

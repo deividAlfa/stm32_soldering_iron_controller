@@ -100,6 +100,7 @@ typedef enum{
   reset_Addons            = 0x80,
   reset_All               = reset_Settings | reset_Profiles |  reset_Addons,
 
+  no_mode                 = 0,
   mode_SaveTip            = 1,
   mode_AddTip             = 2,
   mode_DeleteTip          = 3,
@@ -326,8 +327,6 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t         isSaving;
   uint8_t         currentProfile;
   uint8_t         currentTip;
-  uint8_t         tipUpdateMode;
-  uint8_t         tipUpdateIndex;
 }systemSettings_t;
 
 
@@ -365,19 +364,29 @@ extern flashSettingsAddons_t flashAddonSettings;
 extern systemSettings_t systemSettings;
 extern const settings_t defaultSystemSettings;
 extern const profile_settings_t defaultProfileSettings;
+extern const tipData_t defaultTipData[NUM_PROFILES];
 
 /** Cyclic task to save the current temperature/tip/profile if needed. */
 void updateTempData(bool force);
 /** Save the settings to flash. */
-void saveSettings(uint8_t save_mode, uint8_t reboot_mode);
+void saveSettings(uint8_t save_mode, uint8_t tip_mode, uint8_t tip_index, uint8_t reboot_mode);
 /** Reads the save flag. */
 uint8_t getSaveFlag(void);
 /** Loads the settings from flash on boot. */
 void restoreSettings(void);
+
 /** Load/change to the profile with the given index */
 ErrorStatus loadProfile(uint8_t profile);
+void setCurrentProfile(uint8_t profile);
+uint8_t getCurrentProfile(void);
+
+void loadTipDataFromFlash(uint8_t tip);
+tipData_t * getFlashTipData(uint8_t tip);
+tipData_t * getCurrentTipData(void);
+void setCurrentTipData(tipData_t * tip);
+uint8_t getCurrentTip(void);
 void setCurrentTip(uint8_t tip);
-tipData_t *getCurrentTip(void);
+
 
 /** Checks if the current system settings in RAM were changed */
 bool isSystemSettingsChanged(void);

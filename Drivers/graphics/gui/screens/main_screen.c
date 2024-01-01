@@ -558,7 +558,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       }
     case main_tipselect:
       {
-        uint8_t tip = systemSettings.currentTip;
+        uint8_t tip = getCurrentTip();
 
         if(mainScr.ironStatus==status_error){                                 // If error appears while in tip selection, it needs to update now to avoid overlapping problems
           plot.enabled = 0;
@@ -575,7 +575,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         switch((uint8_t)input){
           case LongClick:
-            Selected_Tip = systemSettings.currentTip;
+            Selected_Tip = getCurrentTip();
             return screen_tip_settings;
 
           case Click:
@@ -609,8 +609,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           default:
             break;
         }
-        if(tip!=systemSettings.currentTip){
-          setCurrentTip(tip);
+        if(tip!=getCurrentTip()){
+          loadTipDataFromFlash(tip);
           Screen_main.state=screen_Erase;
         }
         break;
@@ -618,7 +618,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
     case  main_profileselect:
       {
-        uint8_t profile = systemSettings.currentProfile;
+        uint8_t profile = getCurrentProfile();
 
         if(mainScr.ironStatus==status_error){                                 // If error appears while in tip selection, it needs to update now to avoid overlapping problems
           plot.enabled = 0;
@@ -661,13 +661,13 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             break;
         }
 
-        if(profile!=systemSettings.currentProfile){
+        if(profile!=getCurrentProfile()){
           updateTempData(force_update);                         // Update current data
           if(isCurrentProfileChanged())                         // If there's unsaved profile data
             Error_Handler();                                    // We shouldn't have anything unsaved here
           if(loadProfile(profile)){                             // New profile is bad! (Strange, they're checked at boot)
             oled_destroy_screen(scr);                           // Destroy screen to free memory
-            saveSettings(perform_scanFix, no_reboot);           // Perform sanity check on flash
+            saveSettings(perform_scanFix, no_mode, no_mode, no_reboot);           // Perform sanity check on flash
             if(loadProfile(profile))                            // Try again
                 Error_Handler();                                // Flash bad?
             main_screen_create(scr);                            // OK, create screen again
@@ -890,13 +890,13 @@ static uint8_t  drawError(uint8_t refresh){
 
     uint8_t xp, update = 0;
 
-    if(systemSettings.currentProfile == profile_T12)
+    if(getCurrentProfile() == profile_T12)
       xp = (displayWidth-ironXBM_T12.width-x_markXBM.width-5)/2;
     else
       xp = (displayWidth-ironXBM_JBC.width-x_markXBM.width-5)/2;
 
     if(refresh){
-      if(systemSettings.currentProfile == profile_T12)
+      if(getCurrentProfile() == profile_T12)
         u8g2_DrawXBM(&u8g2, xp, (displayHeight-ironXBM_T12.height)/2, ironXBM_T12.width, ironXBM_T12.height, ironXBM_T12.xbm);
       else
         u8g2_DrawXBM(&u8g2, xp, (displayHeight-ironXBM_JBC.height)/2, ironXBM_JBC.width, ironXBM_JBC.height, ironXBM_JBC.xbm);
@@ -912,14 +912,14 @@ static uint8_t  drawError(uint8_t refresh){
     if(update){
       if(x_mark_state){
         u8g2_SetDrawColor(&u8g2, BLACK);
-        if(systemSettings.currentProfile == profile_T12)
+        if(getCurrentProfile() == profile_T12)
           u8g2_DrawBox(&u8g2, xp+ironXBM_T12.width+5, (displayHeight-x_markXBM.height)/2, x_markXBM.width, x_markXBM.height);
         else
           u8g2_DrawBox(&u8g2, xp+ironXBM_JBC.width+5, (displayHeight-x_markXBM.height)/2, x_markXBM.width, x_markXBM.height);
         u8g2_SetDrawColor(&u8g2, WHITE);
       }
       else{
-        if(systemSettings.currentProfile == profile_T12)
+        if(getCurrentProfile() == profile_T12)
           u8g2_DrawXBM(&u8g2, xp+ironXBM_T12.width+5, (displayHeight-x_markXBM.height)/2, x_markXBM.width, x_markXBM.height, x_markXBM.xbm);
         else
           u8g2_DrawXBM(&u8g2, xp+ironXBM_JBC.width+5, (displayHeight-x_markXBM.height)/2, x_markXBM.width, x_markXBM.height, x_markXBM.xbm);
@@ -978,12 +978,12 @@ static void  drawMisc(uint8_t refresh){
 
   }
   if(mainScr.currentMode==main_profileselect){
-    len = u8g2_GetUTF8Width(&u8g2, profileStr[systemSettings.currentProfile])+4;              // Profile string len
-    s = profileStr[systemSettings.currentProfile];                                            // Profile name
+    len = u8g2_GetUTF8Width(&u8g2, profileStr[getCurrentProfile()])+4;              // Profile string len
+    s = profileStr[getCurrentProfile()];                                            // Profile name
   }
   else{
-    len = u8g2_GetUTF8Width(&u8g2, systemSettings.currentTipData.name)+4;                     // Tip string len
-    s = systemSettings.currentTipData.name;                                                   // Tip name
+    len = u8g2_GetUTF8Width(&u8g2, getCurrentTipData()->name)+4;                    // Tip string len
+    s = getCurrentTipData()->name;                                                  // Tip name
   }
   if(mainScr.currentMode==main_tipselect || mainScr.currentMode==main_tipselect_auto || mainScr.currentMode==main_profileselect){     // Tip / profile selection active
     u8g2_DrawRBox(&u8g2, 0, 54, len, 10, 2);                                                  // Draw edit frame

@@ -211,7 +211,7 @@ static void system_onEnter(screen_t *scr){
 
   if(scr==&Screen_settings){
     comboResetIndex(Screen_system.current_widget);
-    profile=systemSettings.currentProfile;
+    profile=getCurrentProfile();
   }
 }
 
@@ -221,15 +221,15 @@ static void system_onExit(screen_t *scr){                                       
 
     if(systemSettings.settings.hasBattery != flashGlobalSettings.settings.hasBattery){            // Battery mode changed
       copy_bkp_data((systemSettings.settings.hasBattery) && 1);                                   // 0=ram_to_flash, 1=flash_to_ram
-      loadProfile(systemSettings.currentProfile);                                                 // Reload tip from current backup source
+      loadProfile(getCurrentProfile());                                                 // Reload tip from current backup source
     }
 
     if(systemSettings.settings.clone_fix != clone_fix){                                           // Clone fix needs rebooting
       systemSettings.settings.clone_fix = clone_fix;
-      saveSettings(save_All, do_reboot);
+      saveSettings(save_Settings, no_mode, no_mode, do_reboot);
     }
     else
-      saveSettings(save_All, no_reboot);                                                          // Other settings changed, not requiring rebooting
+      saveSettings(save_Settings, no_mode, no_mode, no_reboot);                                                          // Other settings changed, not requiring rebooting
   }
 #endif
 }

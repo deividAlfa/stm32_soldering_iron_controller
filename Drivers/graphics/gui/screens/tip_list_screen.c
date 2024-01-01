@@ -31,7 +31,7 @@ int tip_list_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state
   comboBox_item_t *item = ((comboBox_widget_t*)scr->current_widget->content)->currentItem;
   if(input==LongClick){
     if( item!=comboitem_tip_list_addNewTip && item!=comboitem_tip_list_back){                                   // If long click over a tip
-      setCurrentTip(comboItemToIndex(scr->current_widget, item));                                               // Set tip
+      loadTipDataFromFlash(comboItemToIndex(scr->current_widget, item));                                               // Set tip
       return screen_main;                                                                                       // Exit to main screen
     }
   }
@@ -44,7 +44,7 @@ static void tip_list_create(screen_t *scr){
   //
   newWidget(&w,widget_combo,scr,NULL);
   for(int x = 0; x < systemSettings.Profile.currentNumberOfTips; x++) {
-    newComboAction(w, flashProfilesSettings.Profile[systemSettings.currentProfile].tip[x].name, &editTip, &i);
+    newComboAction(w, flashProfilesSettings.Profile[getCurrentProfile()].tip[x].name, &editTip, &i);
   }
   if(systemSettings.Profile.currentNumberOfTips < NUM_TIPS){
     newComboAction(w, strings[lang]._ADD_NEW, &addNewTip, &comboitem_tip_list_addNewTip);
