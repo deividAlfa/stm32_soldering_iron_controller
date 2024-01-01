@@ -109,6 +109,9 @@ typedef enum{
   no_reboot               = 0,
   do_reboot               = 1,
 
+  ram_to_flash            = 0,
+  flash_to_ram            = 1,
+
   output_PWM,
   output_Low,
   output_High,
@@ -382,9 +385,8 @@ bool isSystemSettingsChanged(void);
 bool isCurrentProfileChanged(void);
 /** Checks if the current addons settings in RAM were changed */
 bool isAddonSettingsChanged(void);
-
-/** Restores settings from the backup ram used in the last session (eg last temp/tip).
- *  Call this after all the modules  */
-void restoreLastSessionSettings(void);
-
+/** Copies las Profile / Temperature / Tip data between flash and ram when battery option is changed*/
+void copy_bkp_data(uint8_t mode);
+/** Set initial values after setup screen */
+void flashTempSettingsInitialSetup(void);
 #endif /* SETTINGS_H_ */

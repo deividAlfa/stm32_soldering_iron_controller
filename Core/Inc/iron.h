@@ -94,6 +94,5 @@ bool getIronShakeFlag(void);
 void clearIronShakeFlag(void);
 uint32_t getIronLastShakeTime(void);
 wakeSrc_t getIronWakeSource(void);
-uint16_t getUserSetTemperature(void);
 
 #endif /* IRON_H_ */
