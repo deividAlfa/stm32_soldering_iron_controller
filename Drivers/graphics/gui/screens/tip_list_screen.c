@@ -18,7 +18,7 @@ static int addNewTip(widget_t *w, RE_Rotation_t input){
 }
 
 static int editTip(widget_t *w, RE_Rotation_t input) {
-  Selected_Tip = comboItemToIndex(w,((comboBox_widget_t*)w->content)->currentItem);
+  Selected_Tip = ((comboBox_widget_t*)w->content)->currentScroll;
   return screen_tip_settings;
 }
 
