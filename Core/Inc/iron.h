@@ -94,5 +94,6 @@ bool getIronShakeFlag(void);
 void clearIronShakeFlag(void);
 uint32_t getIronLastShakeTime(void);
 wakeSrc_t getIronWakeSource(void);
+void waitForNextConversion(void);
 
 #endif /* IRON_H_ */

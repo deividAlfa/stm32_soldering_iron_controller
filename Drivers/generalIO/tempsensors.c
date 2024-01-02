@@ -219,7 +219,7 @@ int16_t readTipTemperatureCompensated(bool new, bool mode, bool tempUnit){
 
 // Translate the human readable t into internal value
 int16_t human2adc(int16_t t) {
-  tipData_t *currentTipData = getCurrentTip();
+  tipData_t *currentTipData = getCurrentTipData();
   t = t*10;
   // If using Farenheit, convert to Celsius
   if(getSystemTempUnit()==mode_Farenheit){
@@ -256,7 +256,7 @@ int16_t human2adc(int16_t t) {
 // Translate temperature from internal units to the human readable value
 int16_t adc2Human_x10(int16_t adc_value,bool correction, bool tempUnit) {
   int16_t temp;
-  tipData_t *currentTipData = getCurrentTip();
+  tipData_t *currentTipData = getCurrentTipData();
 
   if(adc_value<currentTipData->calADC_At_250){
     temp = map(adc_value, systemSettings.Profile.calADC_At_0, currentTipData->calADC_At_250, 0, state_temps[cal_250]);

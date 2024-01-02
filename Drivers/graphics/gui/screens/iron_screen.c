@@ -354,7 +354,7 @@ static void iron_onExit(screen_t *scr){
     setUserTemperature(systemSettings.Profile.MinSetTemperature);
 
   if(isCurrentProfileChanged())
-    saveSettings(save_All, no_reboot);              // Save now we have all heap free
+    saveSettings(save_Profile, no_mode, no_mode, no_reboot);              // Save now we have all heap free
 }
 
 int filter_Save(widget_t *w, RE_Rotation_t input){

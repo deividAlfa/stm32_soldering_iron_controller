@@ -25,7 +25,6 @@ static uint8_t tempReady;
 static int32_t measuredTemp;
 static uint8_t processCalibration(void);
 static void setCalState(state_t s);
-static tipData_t *Currtip;
 static uint8_t update, update_draw;
 static zero_state_t zero_state;
 screen_t Screen_calibration;
@@ -42,11 +41,8 @@ static comboBox_item_t *Cal_Combo_Adjust_C400;
 static void restore_tip(void){
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
-   *Currtip = backupTip;
+   setCurrentTipData(&backupTip);
    __set_PRIMASK(_irq);
-}
-static void backup_tip(void){
-  backupTip = *Currtip ;
 }
 //=========================================================
 static uint8_t processCalibration(void) {
@@ -86,7 +82,7 @@ static void setCal250(int32_t *val) {
     temp=calAdjust[cal_400]-10;
   }
   calAdjust[cal_250] = temp;
-  Currtip->calADC_At_250 = calAdjust[cal_250];
+  getCurrentTipData()->calADC_At_250 = calAdjust[cal_250];
 }
 static int Cal250_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
   int ret = default_widgetProcessInput(w, input, state);
@@ -110,7 +106,7 @@ static void setCal400(int32_t *val) {
     temp=calAdjust[cal_250]+10;
   }
   calAdjust[cal_400] = temp;
-  Currtip->calADC_At_400 = calAdjust[cal_400];
+  getCurrentTipData()->calADC_At_400 = calAdjust[cal_400];
 }
 static int Cal400_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *state){
   int ret = default_widgetProcessInput(w, input, state);
@@ -190,6 +186,7 @@ static void setCalState(state_t s) {
       else{
         backupTip.calADC_At_250 = adcCal[cal_250];        // If calibration correct, save values to backup tip
         backupTip.calADC_At_400 = adcCal[cal_400];        // Which will be transferred to the current tip on exiting the screen
+        current_state = cal_finished;
       }
     }
   }
@@ -201,7 +198,7 @@ static void Cal_onEnter(screen_t *scr) {
   if(scr == &Screen_settings) {
     backupMode=getCurrentMode();
     backupTemp=getUserTemperature();
-    Currtip = getCurrentTip();
+    backupTip = *getCurrentTipData();
     comboResetIndex(Screen_calibration.current_widget);
     error=0;
     setIronCalibrationMode(enable);
@@ -270,9 +267,8 @@ static void Cal_Start_init(screen_t *scr) {
   default_init(scr);
   backupTempUnit=getSystemTempUnit();
   setSystemTempUnit(mode_Celsius);
-  backup_tip();
-  Currtip->calADC_At_250 = systemSettings.Profile.Cal250_default;
-  Currtip->calADC_At_400 = systemSettings.Profile.Cal400_default;
+  getCurrentTipData()->calADC_At_250 = systemSettings.Profile.Cal250_default;
+  getCurrentTipData()->calADC_At_400 = systemSettings.Profile.Cal400_default;
   setCalState(cal_250);
 }
 
@@ -335,10 +331,9 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
 static void Cal_Start_OnExit(screen_t *scr) {
   tempReady = 0;
   setSystemTempUnit(backupTempUnit);
-  restore_tip();
-  if(current_state==cal_save){
-    saveSettings(save_All, no_reboot);              // Save now we have all heap free
-  }
+  restore_tip();                              // Restore default calibration temps if calibration was cancelled, or new calibration values if ok.
+  if(current_state==cal_save)
+    saveSettings(save_Tip, mode_SaveTip, getCurrentTip(), no_reboot);              // Save now we have all heap free
 }
 
 static uint8_t Cal_Start_draw(screen_t *scr){
@@ -354,7 +349,7 @@ static uint8_t Cal_Start_draw(screen_t *scr){
 
     if(current_state<cal_finished){
       uint8_t s = current_state;
-      u8g2_DrawUTF8(&u8g2, 0, 50, systemSettings.currentTipData.name);  // Draw current tip name
+      u8g2_DrawUTF8(&u8g2, 0, 50, backupTip.name);  // Draw current tip name
       u8g2_DrawUTF8(&u8g2, 8, 6, strings[lang].CAL_Step);            // Draw current cal state
 
       if(current_state<cal_input_250){
@@ -431,17 +426,17 @@ static void Cal_Settings_init(screen_t *scr) {
   calAdjust[cal_400] = systemSettings.Profile.Cal400_default;
   calAdjust[cal_0] = systemSettings.Profile.calADC_At_0;
   backup_calADC_At_0 = systemSettings.Profile.calADC_At_0;
-  backup_tip();
-  Currtip->calADC_At_250 = calAdjust[cal_250];
-  Currtip->calADC_At_400 = calAdjust[cal_400];
+  backupTip = *getCurrentTipData();
+  getCurrentTipData()->calADC_At_250 = calAdjust[cal_250];
+  getCurrentTipData()->calADC_At_400 = calAdjust[cal_400];
 }
 
 static void Cal_Settings_OnExit(screen_t *scr) {
-  restore_tip();
   systemSettings.Profile.calADC_At_0 = backup_calADC_At_0;
-  if(current_state==cal_save){
-    saveSettings(save_All, no_reboot);              // Save now we have all heap free
-  }
+  if(current_state==cal_save)
+    saveSettings(save_Profile, no_mode, no_mode, no_reboot);              // Save now we have all heap free
+  else
+    restore_tip();
 }
 
 static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_t *s) {

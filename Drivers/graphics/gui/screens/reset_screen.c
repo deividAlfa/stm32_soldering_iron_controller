@@ -43,7 +43,7 @@ static void reset_onEnter(screen_t *scr){
 
 static void reset_confirmation_onExit(screen_t *scr){
   if(reset_mode)
-    saveSettings(reset_mode, do_reboot);                 // If we have pending save/reset, save now we have all heap free
+    saveSettings(reset_mode, no_mode, no_mode, do_reboot);                 // If we have pending save/reset, save now we have all heap free
 }
 
 static void reset_create(screen_t *scr){

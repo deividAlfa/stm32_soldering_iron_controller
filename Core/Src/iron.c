@@ -41,6 +41,7 @@ typedef struct {
   uint8_t             boot_loaded;                          // Flag set to 1 when the initial boot profile was loaded
   uint8_t             err_resumed;                          // Flag set to 1 when the iron was resumed after a system error
   uint8_t             Load_det_pos;                         // For load detection
+  uint8_t             waiting_conversion;                   // USeful if you want to wait somwhere until the the ADC cycle is completed (Set by user, clear after conversion)
 
   uint16_t            Pwm_Period;                           // PWM period
   uint16_t            Pwm_Max;                              // Max PWM output for power limit
@@ -125,7 +126,7 @@ void handleIron(void) {
   CurrentTime = HAL_GetTick();
   if(!Iron.Error.safeMode){
     if( (systemSettings.setupMode==enable) || systemSettings.settings.version!=SYSTEM_SETTINGS_VERSION || systemSettings.Profile.version!=PROFILE_SETTINGS_VERSION ||
-        (systemSettings.Profile.ID != systemSettings.currentProfile) || (systemSettings.currentProfile>profile_C210)){
+        (systemSettings.Profile.ID != getCurrentProfile()) || (getCurrentProfile()>profile_C210)){
 
       setSafeMode(enable);
     }
@@ -151,6 +152,8 @@ void handleIron(void) {
       }
     }
   }
+
+  Iron.waiting_conversion = 0;
 
   // If sleeping or error, stop here
   if(!Iron.boot_complete || Iron.CurrentMode==mode_sleep || Iron.Error.active) {                // For safety, force PWM low everytime
@@ -884,4 +887,9 @@ uint32_t getIronLastShakeTime(void){
 
 wakeSrc_t getIronWakeSource(void){
   return Iron.lastWakeSrc;
+}
+
+void waitForNextConversion(void){
+  Iron.waiting_conversion  = 1;
+  while(Iron.waiting_conversion);
 }
