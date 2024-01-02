@@ -20,7 +20,7 @@ static uint8_t clk, precharge, vcom;
 
 void update_display_menu(void){
 #ifndef ST7565
-  bool mode = (systemSettings.settings.dim_mode>dim_off);
+  bool mode = (getSystemSettings()->dim_mode>dim_off);
   comboitem_display_Dim_PowerOff->enabled = mode;
   comboitem_display_Dim_Timeout->enabled = mode;
 #endif
@@ -29,99 +29,99 @@ void update_display_menu(void){
 //=========================================================
 static void * getDisplayContrastOrBrightness_() {
 #ifdef ST7565
-  temp = systemSettings.settings.contrastOrBrightness;
+  temp = getSystemSettings()->contrastOrBrightness;
 #else
-  temp = systemSettings.settings.contrastOrBrightness/25;
+  temp = getSystemSettings()->contrastOrBrightness/25;
 #endif
   return &temp;
 }
 static void setDisplayContrast_(uint32_t *val) {
 #ifdef ST7565
-  systemSettings.settings.contrastOrBrightness=*val;
+  getSystemSettings()->contrastOrBrightness=*val;
 #else
   if(*val==0){
-    systemSettings.settings.contrastOrBrightness=5;
+    getSystemSettings()->contrastOrBrightness=5;
   }
   else if(*val==10){
-    systemSettings.settings.contrastOrBrightness=255;
+    getSystemSettings()->contrastOrBrightness=255;
   }
   else{
-    systemSettings.settings.contrastOrBrightness=*val*25;
+    getSystemSettings()->contrastOrBrightness=*val*25;
   }
 #endif
-  setDisplayContrastOrBrightness(systemSettings.settings.contrastOrBrightness);
+  setDisplayContrastOrBrightness(getSystemSettings()->contrastOrBrightness);
 }
 //=========================================================
 static void * getdisplayStartColumn() {
-  temp = systemSettings.settings.displayStartColumn;
+  temp = getSystemSettings()->displayStartColumn;
   return &temp;
 }
 static void setdisplayStartColumn(uint32_t *val) {
-  systemSettings.settings.displayStartColumn= *val;
+  getSystemSettings()->displayStartColumn= *val;
 }
 //=========================================================
 static void * getdisplayStartLine() {
-  temp = systemSettings.settings.displayStartLine;
+  temp = getSystemSettings()->displayStartLine;
   return &temp;
 }
 static void setdisplayStartLine(uint32_t *val) {
-  systemSettings.settings.displayStartLine= *val;
-  setDisplayStartLine(systemSettings.settings.displayStartLine);
+  getSystemSettings()->displayStartLine= *val;
+  setDisplayStartLine(getSystemSettings()->displayStartLine);
 }
 //=========================================================
 static void * getdisplayXflip() {
-  temp = systemSettings.settings.displayXflip;
+  temp = getSystemSettings()->displayXflip;
   return &temp;
 }
 static void setdisplayXflip(uint32_t *val) {
-  systemSettings.settings.displayXflip= *val;
-  setDisplayXflip(systemSettings.settings.displayXflip);
+  getSystemSettings()->displayXflip= *val;
+  setDisplayXflip(getSystemSettings()->displayXflip);
 }
 //=========================================================
 static void * getdisplayYflip() {
-  temp = systemSettings.settings.displayYflip;
+  temp = getSystemSettings()->displayYflip;
   return &temp;
 }
 static void setdisplayYflip(uint32_t *val) {
-  systemSettings.settings.displayYflip= *val;
-  setDisplayYflip(systemSettings.settings.displayYflip);
+  getSystemSettings()->displayYflip= *val;
+  setDisplayYflip(getSystemSettings()->displayYflip);
 }
 
 #ifdef SSD1306
 static void * getdimMode() {
-  temp = systemSettings.settings.dim_mode;
+  temp = getSystemSettings()->dim_mode;
   return &temp;
 }
 static void setdimMode(uint32_t *val) {
-  systemSettings.settings.dim_mode = * val;
+  getSystemSettings()->dim_mode = * val;
   update_display_menu();
 }
 //=========================================================
 static void * getDimTimeout() {
-  temp = systemSettings.settings.dim_Timeout/1000;
+  temp = getSystemSettings()->dim_Timeout/1000;
   return &temp;
 }
 static void setDimTimeout(uint32_t *val) {
-  systemSettings.settings.dim_Timeout = *val*1000;
+  getSystemSettings()->dim_Timeout = *val*1000;
 }
 //=========================================================
 static void * getDimTurnOff() {
-  temp = systemSettings.settings.dim_inSleep;
+  temp = getSystemSettings()->dim_inSleep;
   return &temp;
 }
 static void setDimTurnOff(uint32_t *val) {
-  systemSettings.settings.dim_inSleep = *val;
+  getSystemSettings()->dim_inSleep = *val;
 }
 
 #elif defined ST7565
 //=========================================================
 static void * getdisplayResRatio() {
-  temp = systemSettings.settings.displayResRatio;
+  temp = getSystemSettings()->displayResRatio;
   return &temp;
 }
 static void setdisplayResRatio(uint32_t *val) {
-  systemSettings.settings.displayResRatio= *val;
-  setDisplayResRatio(systemSettings.settings.displayResRatio);
+  getSystemSettings()->displayResRatio= *val;
+  setDisplayResRatio(getSystemSettings()->displayResRatio);
 }
 
 #endif
@@ -308,9 +308,9 @@ static void setdisplayPrecharge(char *s) {
 }
 //=========================================================
 static int display_adv_reset(widget_t *w, RE_Rotation_t input) {
-  clk = defaultSystemSettings.displayClk;
-  precharge = defaultSystemSettings.displayPrecharge;
-  vcom = defaultSystemSettings.displayVcom;
+  clk = getDefaultSystemSettings()->displayClk;
+  precharge = getDefaultSystemSettings()->displayPrecharge;
+  vcom = getDefaultSystemSettings()->displayVcom;
   setDisplayClk(clk);
   setDisplayPrecharge(precharge);
   setDisplayVcom(vcom);
@@ -319,24 +319,24 @@ static int display_adv_reset(widget_t *w, RE_Rotation_t input) {
 }
 //=========================================================
 static int display_adv_save(widget_t *w, RE_Rotation_t input) {
-  systemSettings.settings.displayClk = clk;
-  systemSettings.settings.displayPrecharge = precharge;
-  systemSettings.settings.displayVcom = vcom;
+  getSystemSettings()->displayClk = clk;
+  getSystemSettings()->displayPrecharge = precharge;
+  getSystemSettings()->displayVcom = vcom;
   return last_scr;
 }
 //=========================================================
 static int display_adv_cancel(widget_t *w, RE_Rotation_t input) {
-  setDisplayClk(systemSettings.settings.displayClk);
-  setDisplayPrecharge(systemSettings.settings.displayPrecharge);
-  setDisplayVcom(systemSettings.settings.displayVcom);
+  setDisplayClk(getSystemSettings()->displayClk);
+  setDisplayPrecharge(getSystemSettings()->displayPrecharge);
+  setDisplayVcom(getSystemSettings()->displayVcom);
   return last_scr;
 }
 //=========================================================
 static void display_adv_init(screen_t *scr){
   comboResetIndex(scr->current_widget);
-  clk = systemSettings.settings.displayClk;
-  precharge = systemSettings.settings.displayPrecharge;
-  vcom = systemSettings.settings.displayVcom;
+  clk = getSystemSettings()->displayClk;
+  precharge = getSystemSettings()->displayPrecharge;
+  vcom = getSystemSettings()->displayVcom;
 }
 //=========================================================
 static void display_adv_create(screen_t *scr){

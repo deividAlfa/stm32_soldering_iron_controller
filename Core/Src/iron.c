@@ -104,15 +104,15 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
   Iron.Pwm_Channel    = pwmchannel;
   Iron.Error.Flags    = FLAG_NOERROR;
 
-  if(systemSettings.Profile.WakeInputMode == mode_shake){
-    setCurrentMode(systemSettings.settings.initMode);
+  if(getProfileSettings()->WakeInputMode == mode_shake){
+    setCurrentMode(getSystemSettings()->initMode);
   }
   else{
     if(WAKE_input()){
       setCurrentMode(mode_run);
     }
     else{
-      setCurrentMode(systemSettings.Profile.StandMode);
+      setCurrentMode(getProfileSettings()->StandMode);
     }
   }
   initTimers();
@@ -125,8 +125,8 @@ void handleIron(void) {
   static uint32_t reachedTime = 0;
   CurrentTime = HAL_GetTick();
   if(!Iron.Error.safeMode){
-    if( (systemSettings.setupMode==enable) || systemSettings.settings.version!=SYSTEM_SETTINGS_VERSION || systemSettings.Profile.version!=PROFILE_SETTINGS_VERSION ||
-        (systemSettings.Profile.ID != getCurrentProfile()) || (getCurrentProfile()>profile_C210)){
+    if( (getSettings()->setupMode==enable) || getSystemSettings()->version!=SYSTEM_SETTINGS_VERSION || getProfileSettings()->version!=PROFILE_SETTINGS_VERSION ||
+        (getProfileSettings()->ID != getCurrentProfile()) || (getCurrentProfile()>profile_C210)){
 
       setSafeMode(enable);
     }
@@ -143,7 +143,7 @@ void handleIron(void) {
       Iron.updateStandMode=no_update;
     }
     else{
-      if ( (Iron.changeMode < mode_run  && (CurrentTime-Iron.LastModeChangeTime) > (!systemSettings.Profile.standDelay ? 100 : (uint32_t)1000*systemSettings.Profile.standDelay )) ||   // Low power mode mode, apply delay from settings, or debouncing if set to 0.
+      if ( (Iron.changeMode < mode_run  && (CurrentTime-Iron.LastModeChangeTime) > (!getProfileSettings()->standDelay ? 100 : (uint32_t)1000*getProfileSettings()->standDelay )) ||   // Low power mode mode, apply delay from settings, or debouncing if set to 0.
            (Iron.changeMode >= mode_run && (CurrentTime-Iron.LastModeChangeTime) > 100) ){                                                                                              // Run/boost mode, just do some debouncing.
 
         Iron.updateStandMode=no_update;
@@ -168,8 +168,8 @@ void handleIron(void) {
     uint32_t mode_time = CurrentTime - Iron.CurrentModeTimer;
 
     // Smart wake detection only in active modes, after 10 seconds of entering the current mode
-    if(systemSettings.Profile.smartActiveEnabled==enable && (Iron.CurrentMode>mode_standby) && (mode_time>9999)){
-      if(Iron.Load_det_value > systemSettings.Profile.smartActiveLoad){                       // Check threshold
+    if(getProfileSettings()->smartActiveEnabled==enable && (Iron.CurrentMode>mode_standby) && (mode_time>9999)){
+      if(Iron.Load_det_value > getProfileSettings()->smartActiveLoad){                       // Check threshold
         Iron.CurrentModeTimer = CurrentTime-10000;                                            // Preload the timeout with 10 seconds so smartActiv keeps working
         Iron.lastWakeSrc = wakeSrc_Smart;
         Iron.lastShakeTime = CurrentTime;
@@ -187,23 +187,23 @@ void handleIron(void) {
     if((Iron.CurrentMode==mode_coldboost) && (mode_time>12000)){                              // If cold boost mode and time expired
       setCurrentMode(mode_run);
     }
-    else if((Iron.CurrentMode==mode_boost) && (mode_time>systemSettings.Profile.boostTimeout)){    // If boost mode and time expired
+    else if((Iron.CurrentMode==mode_boost) && (mode_time>getProfileSettings()->boostTimeout)){    // If boost mode and time expired
       setCurrentMode(mode_run);
     }
     else if(Iron.CurrentMode==mode_run){                                                      // If running
-      if(systemSettings.Profile.standbyTimeout){                                              // If standby timer enabled
-        if(mode_time>systemSettings.Profile.standbyTimeout){                                  // Check timeout
+      if(getProfileSettings()->standbyTimeout){                                              // If standby timer enabled
+        if(mode_time>getProfileSettings()->standbyTimeout){                                  // Check timeout
           setCurrentMode(mode_standby);
         }
       }
       else{                                                                                   // Otherwise, check sleep timeout
-        if(mode_time>systemSettings.Profile.sleepTimeout){                                    //
+        if(mode_time>getProfileSettings()->sleepTimeout){                                    //
           setCurrentMode(mode_sleep);
         }
       }
     }
     else if(Iron.CurrentMode==mode_standby){                                                  // If in standby
-      if(mode_time>systemSettings.Profile.sleepTimeout){                                      // Check sleep timeout
+      if(mode_time>getProfileSettings()->sleepTimeout){                                      // Check sleep timeout
         setCurrentMode(mode_sleep);
       }
     }
@@ -211,7 +211,7 @@ void handleIron(void) {
 
 
   if(Iron.updatePwm){                                                                         // If pending PWM period update, refresh Iron Pwm_period
-    Iron.Pwm_Period = ((systemSettings.Profile.readPeriod+1)/systemSettings.Profile.pwmMul)-1;
+    Iron.Pwm_Period = ((getProfileSettings()->readPeriod+1)/getProfileSettings()->pwmMul)-1;
   }
 
   updatePowerLimit();                                                                         // Update power limit values
@@ -220,7 +220,7 @@ void handleIron(void) {
   int32_t target = human2adc(Iron.TargetTemperature);
   Iron.Pwm_Out = calculatePID(target, TIP.last_avg, Iron.Pwm_Max);
 
-  if((systemSettings.Profile.smartActiveEnabled==enable) && ((CurrentTime - Iron.Load_det_Time)>199)){   // Sample load every 200ms
+  if((getProfileSettings()->smartActiveEnabled==enable) && ((CurrentTime - Iron.Load_det_Time)>199)){   // Sample load every 200ms
     Iron.Load_det_Time = CurrentTime;
     int32_t err = target - TIP.last_avg;
     Iron.Load_det_bf[Iron.Load_det_pos] = (err<0 ? 0 : err);    // Taking only the positive errors remove PID overshooting negative errors
@@ -287,23 +287,23 @@ void setSystemTempUnit(bool unit){
 
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
-  if(systemSettings.Profile.tempUnit != unit){
-    systemSettings.Profile.tempUnit = unit;
+  if(getProfileSettings()->tempUnit != unit){
+    getProfileSettings()->tempUnit = unit;
     Iron.UserSetTemperature = round_10(TempConversion(Iron.UserSetTemperature,unit,0));                                         // User temp is loaded from the profile, thus it uses the same unit
-    systemSettings.Profile.defaultTemperature = round_10(TempConversion(systemSettings.Profile.defaultTemperature,unit,0));
-    systemSettings.Profile.standbyTemperature = round_10(TempConversion(systemSettings.Profile.standbyTemperature,unit,0));
-    systemSettings.Profile.MaxSetTemperature = round_10(TempConversion(systemSettings.Profile.MaxSetTemperature,unit,0));
-    systemSettings.Profile.MinSetTemperature = round_10(TempConversion(systemSettings.Profile.MinSetTemperature,unit,0));
-    systemSettings.Profile.boostTemperature = round_10(TempIncrementConversion(systemSettings.Profile.boostTemperature,unit));
+    getProfileSettings()->defaultTemperature = round_10(TempConversion(getProfileSettings()->defaultTemperature,unit,0));
+    getProfileSettings()->standbyTemperature = round_10(TempConversion(getProfileSettings()->standbyTemperature,unit,0));
+    getProfileSettings()->MaxSetTemperature = round_10(TempConversion(getProfileSettings()->MaxSetTemperature,unit,0));
+    getProfileSettings()->MinSetTemperature = round_10(TempConversion(getProfileSettings()->MinSetTemperature,unit,0));
+    getProfileSettings()->boostTemperature = round_10(TempIncrementConversion(getProfileSettings()->boostTemperature,unit));
   }
-  if(systemSettings.settings.tempUnit != unit){
-    systemSettings.settings.tempUnit = unit;
+  if(getSystemSettings()->tempUnit != unit){
+    getSystemSettings()->tempUnit = unit;
   }
   __set_PRIMASK(_irq);
   setCurrentMode(Iron.CurrentMode);     // Reload temps
 }
 bool getSystemTempUnit(void){
-  return systemSettings.settings.tempUnit;
+  return getSystemSettings()->tempUnit;
 }
 
 // This function inits the timers and sets the prescaler settings depending on the system core clock
@@ -316,7 +316,7 @@ void initTimers(void){
   Iron.Read_Timer->Init.Prescaler = (SystemCoreClock/200000)-1;
   #endif
 
-  Iron.Read_Timer->Init.Period = systemSettings.Profile.readPeriod-(systemSettings.Profile.readDelay+1);
+  Iron.Read_Timer->Init.Period = getProfileSettings()->readPeriod-(getProfileSettings()->readDelay+1);
   if (HAL_TIM_Base_Init(Iron.Read_Timer) != HAL_OK){
     Error_Handler();
   }
@@ -326,7 +326,7 @@ void initTimers(void){
   #else
   Iron.Pwm_Timer->Init.Prescaler = (SystemCoreClock/200000)-1;
   #endif
-  Iron.Pwm_Period = ((systemSettings.Profile.readPeriod+1)/ systemSettings.Profile.pwmMul)-1;
+  Iron.Pwm_Period = ((getProfileSettings()->readPeriod+1)/ getProfileSettings()->pwmMul)-1;
   Iron.Pwm_Timer->Init.Period = Iron.Pwm_Period;
   if (HAL_TIM_Base_Init(Iron.Pwm_Timer) != HAL_OK){
     Error_Handler();
@@ -354,14 +354,14 @@ void initTimers(void){
 }
 
 void setReadDelay(uint16_t delay){
- systemSettings.Profile.readDelay=delay;
+ getProfileSettings()->readDelay=delay;
 }
 
 
 void setReadPeriod(uint16_t period){
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
- systemSettings.Profile.readPeriod=period;
+ getProfileSettings()->readPeriod=period;
  Iron.updatePwm=1;
   __set_PRIMASK(_irq);
 }
@@ -369,7 +369,7 @@ void setReadPeriod(uint16_t period){
 void setPwmMul(uint16_t mult){
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
-  systemSettings.Profile.pwmMul=mult;
+  getProfileSettings()->pwmMul=mult;
   Iron.updatePwm=1;
   __set_PRIMASK(_irq);
 }
@@ -413,7 +413,7 @@ void runAwayCheck(void){
   static uint8_t pos, prev_power[RUNAWAY_DEPTH];
   uint8_t power = 0;
 
-  if(systemSettings.setupMode==enable || (Iron.Error.safeMode && Iron.Error.active)){
+  if(getSettings()->setupMode==enable || (Iron.Error.safeMode && Iron.Error.active)){
     return;
   }
 #if defined RUNAWAY_RESET_CYCLES && RUNAWAY_RESET_CYCLES>0
@@ -515,12 +515,12 @@ void updatePowerLimit(void){
     volts=1;                                                                                // set minimum value to avoid division by 0
   }
   uint32_t PwmPeriod=Iron.Pwm_Period+1;                                                       // Read complete PWM period
-  uint32_t maxPower = volts/systemSettings.Profile.impedance;                               // Compute max power with current voltage and impedance(Impedance stored in x10)
-  if(systemSettings.Profile.power >= maxPower){                                             // If set power is already higher than the max possible power given the voltage and heater resistance
+  uint32_t maxPower = volts/getProfileSettings()->impedance;                               // Compute max power with current voltage and impedance(Impedance stored in x10)
+  if(getProfileSettings()->power >= maxPower){                                             // If set power is already higher than the max possible power given the voltage and heater resistance
     Iron.Pwm_Max = PwmPeriod;                                                               // Set max PWM
   }
   else{                                                                                     // Else,
-    Iron.Pwm_Max = (PwmPeriod*systemSettings.Profile.power)/maxPower;                       // Compute max PWM output for current power limit
+    Iron.Pwm_Max = (PwmPeriod*getProfileSettings()->power)/maxPower;                       // Compute max PWM output for current power limit
     if(Iron.Pwm_Period > PwmPeriod){
       Iron.Pwm_Max = PwmPeriod;
     }
@@ -535,7 +535,7 @@ void updatePowerLimit(void){
 
 // Sets no Iron detection threshold
 void setNoIronValue(uint16_t noiron){
-  systemSettings.Profile.noIronValue=noiron;
+  getProfileSettings()->noIronValue=noiron;
 }
 
 // Change the iron operating mode in stand mode
@@ -562,33 +562,33 @@ void setCurrentMode(uint8_t mode){
   CurrentTime=HAL_GetTick();                                                              // Update local time value just in case it's called by handleIron, to avoid drift
   Iron.CurrentModeTimer = CurrentTime;                                                    // Refresh current mode timer
 
-  if(!getIronCalibrationMode() && systemSettings.settings.coldBoost){
-    int16_t diff = (systemSettings.Profile.tempUnit == mode_Farenheit) ? 200 : 100;
-    int16_t tipTemp = (systemSettings.Profile.tempUnit == mode_Farenheit) ? last_TIP_F : last_TIP_C;
+  if(!getIronCalibrationMode() && getSystemSettings()->coldBoost){
+    int16_t diff = (getProfileSettings()->tempUnit == mode_Farenheit) ? 200 : 100;
+    int16_t tipTemp = (getProfileSettings()->tempUnit == mode_Farenheit) ? last_TIP_F : last_TIP_C;
     if(mode==mode_run && getCurrentMode() < mode_run && (Iron.UserSetTemperature - tipTemp)>diff)
       mode=mode_coldboost;
   }
   if(mode==mode_standby){
-    if(Iron.UserSetTemperature < systemSettings.Profile.standbyTemperature)
+    if(Iron.UserSetTemperature < getProfileSettings()->standbyTemperature)
     {
       // if the user set temp is smaller than the standby temp, don't heat up the iron in standby
       Iron.TargetTemperature = Iron.UserSetTemperature;               // Set standby temp
     }
     else
     {
-      Iron.TargetTemperature = systemSettings.Profile.standbyTemperature;               // Set standby temp
+      Iron.TargetTemperature = getProfileSettings()->standbyTemperature;               // Set standby temp
     }
   }
   else if(mode==mode_boost){
-    Iron.TargetTemperature = Iron.UserSetTemperature+systemSettings.Profile.boostTemperature;
-    if(Iron.TargetTemperature>systemSettings.Profile.MaxSetTemperature){
-      Iron.TargetTemperature=systemSettings.Profile.MaxSetTemperature;
+    Iron.TargetTemperature = Iron.UserSetTemperature+getProfileSettings()->boostTemperature;
+    if(Iron.TargetTemperature>getProfileSettings()->MaxSetTemperature){
+      Iron.TargetTemperature=getProfileSettings()->MaxSetTemperature;
     }
   }
   else if(mode==mode_coldboost){
-    Iron.TargetTemperature = Iron.UserSetTemperature + (systemSettings.Profile.tempUnit == mode_Farenheit ? 100 : 50);
-    if(Iron.TargetTemperature>systemSettings.Profile.MaxSetTemperature){
-      Iron.TargetTemperature=systemSettings.Profile.MaxSetTemperature;
+    Iron.TargetTemperature = Iron.UserSetTemperature + (getProfileSettings()->tempUnit == mode_Farenheit ? 100 : 50);
+    if(Iron.TargetTemperature>getProfileSettings()->MaxSetTemperature){
+      Iron.TargetTemperature=getProfileSettings()->MaxSetTemperature;
     }
   }
   else{
@@ -611,22 +611,22 @@ void setCurrentMode(uint8_t mode){
 bool IronWake(wakeSrc_t src){                                                                 // source: handle shake, encoder push button
   static uint32_t last_time;
 
-  if(Iron.Error.Flags || systemSettings.Profile.WakeInputMode==mode_stand){                   // Ignore wake calls when error is present or in stand mode
+  if(Iron.Error.Flags || getProfileSettings()->WakeInputMode==mode_stand){                   // Ignore wake calls when error is present or in stand mode
     return 0;
   }
   if(Iron.CurrentMode==mode_standby){                                                         // Check whether current mode is allowed to be waken from the specified source
-    if( (src==wakeSrc_Button && !(systemSettings.settings.buttonWakeMode & wake_standby)) ||
-        (src==wakeSrc_Shake && !(systemSettings.settings.shakeWakeMode & wake_standby))   ){
+    if( (src==wakeSrc_Button && !(getSystemSettings()->buttonWakeMode & wake_standby)) ||
+        (src==wakeSrc_Shake && !(getSystemSettings()->shakeWakeMode & wake_standby))   ){
       return 0;
     }
   }
   else if(Iron.CurrentMode==mode_sleep){
-    if( (src==wakeSrc_Button && !(systemSettings.settings.buttonWakeMode & wake_sleep)) ||
-        (src==wakeSrc_Shake && !(systemSettings.settings.shakeWakeMode & wake_sleep))   ){
+    if( (src==wakeSrc_Button && !(getSystemSettings()->buttonWakeMode & wake_sleep)) ||
+        (src==wakeSrc_Shake && !(getSystemSettings()->shakeWakeMode & wake_sleep))   ){
       return 0;
     }
   }
-  if(systemSettings.Profile.shakeFiltering && src==wakeSrc_Shake){                            // Shake filtering enabled ?
+  if(getProfileSettings()->shakeFiltering && src==wakeSrc_Shake){                            // Shake filtering enabled ?
     uint32_t time=(HAL_GetTick()-last_time);
     last_time = HAL_GetTick();
     if(time<100 || time>500){                                                                 // Ignore changes happening faster than 100mS or slower than 500mS.
@@ -645,15 +645,15 @@ void readWake(void){
 
     if(last_wake!=now_wake){                                            // If wake sensor input changed
       last_wake=now_wake;
-      if(systemSettings.Profile.WakeInputMode==mode_stand){
+      if(getProfileSettings()->WakeInputMode==mode_stand){
         if(now_wake){
           setModefromStand(mode_run);
         }
         else{
-          setModefromStand(systemSettings.Profile.StandMode);          // Set sleep or standby mode depending on system setting
+          setModefromStand(getProfileSettings()->StandMode);          // Set sleep or standby mode depending on system setting
         }
       }
-      if(systemSettings.Profile.WakeInputMode==mode_shake){
+      if(getProfileSettings()->WakeInputMode==mode_shake){
         if(IronWake(wakeSrc_Shake)){
           Iron.shakeActive = 1;
           Iron.lastShakeTime = HAL_GetTick();
@@ -666,7 +666,7 @@ void resetIronError(void){
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   Iron.Error.Flags &= (FLAG_ACTIVE | FLAG_SAFE_MODE | FLAG_NO_IRON);           // Clear all errors except active, safe mode and no iron
-  Iron.LastErrorTime += (systemSettings.Profile.errorTimeout+2);               // Bypass timeout
+  Iron.LastErrorTime += (getProfileSettings()->errorTimeout+2);               // Bypass timeout
   checkIronError();                                                            // Refresh Errors
   __set_PRIMASK(_irq);
 }
@@ -677,14 +677,14 @@ void checkIronError(void){
   CurrentTime = HAL_GetTick();
   IronError_t Err;
   Err.Flags=0;
-  Err.noIron = (TIP.last_raw>systemSettings.Profile.noIronValue);
+  Err.noIron = (TIP.last_raw>getProfileSettings()->noIronValue);
   Err.safeMode = Iron.Error.safeMode;
 
   if(!Iron.Error.noIron){                                                               // Bypass other errors when no iron detected
       Err.NTC_high =  (last_NTC_C > 800);                                               // As the NTC is often connected in the handle
       Err.NTC_low =  (last_NTC_C < -200);                                               // This way only the "No iron" image is shown.
       #ifdef USE_VIN
-      Err.V_low = (getSupplyVoltage_v_x10() < systemSettings.settings.lvp);
+      Err.V_low = (getSupplyVoltage_v_x10() < getSystemSettings()->lvp);
       #endif
   }
 
@@ -703,7 +703,7 @@ void checkIronError(void){
     }
   }
   else if (Iron.Error.active && !Err.Flags){                                            // If global flag set, but no errors
-    if((CurrentTime-Iron.LastErrorTime)>systemSettings.Profile.errorTimeout){           // Check if enough time has passed
+    if((CurrentTime-Iron.LastErrorTime)>getProfileSettings()->errorTimeout){           // Check if enough time has passed
       buzzer_alarm_stop();                                                              // Stop alarm
       Iron.Error.Flags = FLAG_NOERROR;                                                  // Clear error flags
       Iron.err_resumed=0;                                                               // Clear resume flag so the mode is is restored
@@ -711,18 +711,18 @@ void checkIronError(void){
   }
   if(!Iron.err_resumed && !Iron.Error.active){                                          // Resume after error
 
-    if(!Iron.boot_loaded && (current_time > systemSettings.Profile.errorTimeout+3000))  // If the system stays in error state for more than 3 seconds after boot, assume it's a problem
+    if(!Iron.boot_loaded && (current_time > getProfileSettings()->errorTimeout+3000))  // If the system stays in error state for more than 3 seconds after boot, assume it's a problem
       Iron.boot_loaded=1;
 
     Iron.err_resumed = 1;                                                               // Set resume flag
     if(!Iron.boot_loaded){                                                              // Boot profile not loaded, use boot mode
       Iron.boot_loaded=1;
-      setCurrentMode(systemSettings.settings.initMode);
+      setCurrentMode(getSystemSettings()->initMode);
     }
     else{                                                                               // Already initialized boot mode, this error happened later
-      if(systemSettings.Profile.errorResumeMode==error_sleep)                           // Load mode defined in errorResumeMode
+      if(getProfileSettings()->errorResumeMode==error_sleep)                           // Load mode defined in errorResumeMode
         setCurrentMode(mode_sleep);
-      else if(systemSettings.Profile.errorResumeMode==error_run)
+      else if(getProfileSettings()->errorResumeMode==error_run)
         setCurrentMode(mode_run);
       else
         setCurrentMode(Iron.lastMode);

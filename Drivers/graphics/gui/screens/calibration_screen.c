@@ -51,7 +51,7 @@ static uint8_t processCalibration(void) {
   if (  (measured_temps[cal_400]<measured_temps[cal_250]) || (adcAtTemp[cal_400]<adcAtTemp[cal_250]) ){
     return 1;
   }
-  adcCal[cal_250] = map(state_temps[cal_250], 0, measured_temps[cal_250], systemSettings.Profile.calADC_At_0, adcAtTemp[cal_250]);
+  adcCal[cal_250] = map(state_temps[cal_250], 0, measured_temps[cal_250], getProfileSettings()->calADC_At_0, adcAtTemp[cal_250]);
   adcCal[cal_400] = map(state_temps[cal_400], measured_temps[cal_250], measured_temps[cal_400], adcAtTemp[cal_250], adcAtTemp[cal_400]);
   if(adcCal[cal_250]>4090 || adcCal[cal_250]<0 || adcCal[cal_400]>4090 || adcCal[cal_400]<0 || adcCal[cal_400]<adcCal[cal_250]){    // Check that values are valid and don't exceed ADC range
     return 1;
@@ -121,12 +121,12 @@ static int Cal400_processInput(widget_t *w, RE_Rotation_t input, RE_State_t *sta
 }
 //=========================================================
 static int Cal_Settings_SaveAction(widget_t *w, RE_Rotation_t input) {
-  if( systemSettings.Profile.Cal250_default != calAdjust[cal_250] ||
-      systemSettings.Profile.Cal400_default != calAdjust[cal_400] ||
+  if( getProfileSettings()->Cal250_default != calAdjust[cal_250] ||
+      getProfileSettings()->Cal400_default != calAdjust[cal_400] ||
       backup_calADC_At_0 != calAdjust[cal_0] ){
 
-    systemSettings.Profile.Cal250_default = calAdjust[cal_250];
-    systemSettings.Profile.Cal400_default = calAdjust[cal_400];
+    getProfileSettings()->Cal250_default = calAdjust[cal_250];
+    getProfileSettings()->Cal400_default = calAdjust[cal_400];
     backup_calADC_At_0 = calAdjust[cal_0];                               // backup_calADC_At_0 is transferred to profile on screen exiting
     current_state = cal_save;
   }
@@ -141,10 +141,10 @@ static int zero_setAction(widget_t* w, RE_Rotation_t input) {
   if(input==Click){
     if(++zero_state>zero_capture){
       zero_state=zero_disabled;
-      systemSettings.Profile.calADC_At_0 = calAdjust[cal_0] = backup_calADC_At_0;   // Apply zero value in real time
+      getProfileSettings()->calADC_At_0 = calAdjust[cal_0] = backup_calADC_At_0;   // Apply zero value in real time
     }
     else if(zero_state==zero_capture){
-      systemSettings.Profile.calADC_At_0 = calAdjust[cal_0] = TIP.last_avg;
+      getProfileSettings()->calADC_At_0 = calAdjust[cal_0] = TIP.last_avg;
     }
     update=1;
   }
@@ -267,8 +267,8 @@ static void Cal_Start_init(screen_t *scr) {
   default_init(scr);
   backupTempUnit=getSystemTempUnit();
   setSystemTempUnit(mode_Celsius);
-  getCurrentTipData()->calADC_At_250 = systemSettings.Profile.Cal250_default;
-  getCurrentTipData()->calADC_At_400 = systemSettings.Profile.Cal400_default;
+  getCurrentTipData()->calADC_At_250 = getProfileSettings()->Cal250_default;
+  getCurrentTipData()->calADC_At_400 = getProfileSettings()->Cal400_default;
   setCalState(cal_250);
 }
 
@@ -422,17 +422,17 @@ static void Cal_Settings_init(screen_t *scr) {
   default_init(scr);
   comboResetIndex(Screen_calibration_settings.current_widget);
   zero_state = zero_disabled;
-  calAdjust[cal_250] = systemSettings.Profile.Cal250_default;
-  calAdjust[cal_400] = systemSettings.Profile.Cal400_default;
-  calAdjust[cal_0] = systemSettings.Profile.calADC_At_0;
-  backup_calADC_At_0 = systemSettings.Profile.calADC_At_0;
+  calAdjust[cal_250] = getProfileSettings()->Cal250_default;
+  calAdjust[cal_400] = getProfileSettings()->Cal400_default;
+  calAdjust[cal_0] = getProfileSettings()->calADC_At_0;
+  backup_calADC_At_0 = getProfileSettings()->calADC_At_0;
   backupTip = *getCurrentTipData();
   getCurrentTipData()->calADC_At_250 = calAdjust[cal_250];
   getCurrentTipData()->calADC_At_400 = calAdjust[cal_400];
 }
 
 static void Cal_Settings_OnExit(screen_t *scr) {
-  systemSettings.Profile.calADC_At_0 = backup_calADC_At_0;
+  getProfileSettings()->calADC_At_0 = backup_calADC_At_0;
   if(current_state==cal_save)
     saveSettings(save_Profile, no_mode, no_mode, no_reboot);              // Save now we have all heap free
   else

@@ -218,7 +218,7 @@ static void * main_screen_getIronTemp() {
     if(getCurrentMode()>mode_sleep){
       uint16_t const targetTemp = getIronTargetTemperature();
       // Lock numeric display if within limits
-      if(isIronTargetTempReached() && abs(mainScr.lastTip-targetTemp)<systemSettings.settings.guiTempDenoise){
+      if(isIronTargetTempReached() && abs(mainScr.lastTip-targetTemp) < getSystemSettings()->guiTempDenoise){
         mainScr.lastTip = targetTemp;
       }
     }
@@ -414,7 +414,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     wakeOledDim();                                                        // But  wake up screen
   }
 
-  if(systemSettings.settings.dim_mode!=dim_always && currentIronMode>mode_standby){  // If dim not enabled in all modes
+  if(getSystemSettings()->dim_mode != dim_always && currentIronMode>mode_standby){  // If dim not enabled in all modes
     wakeOledDim();                                                        // Refresh timeout if running
   }
 
@@ -590,14 +590,14 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             break;
 
           case Rotate_Increment:
-            if(++tip >= systemSettings.Profile.currentNumberOfTips){
+            if(++tip >= getProfileSettings()->currentNumberOfTips){
               tip=0;
             }
             break;
 
           case Rotate_Decrement:
-            if(--tip >= systemSettings.Profile.currentNumberOfTips){          // If underflowed
-              tip = systemSettings.Profile.currentNumberOfTips-1;
+            if(--tip >= getProfileSettings()->currentNumberOfTips){          // If underflowed
+              tip = getProfileSettings()->currentNumberOfTips-1;
             }
             break;
 
@@ -1044,16 +1044,16 @@ static void main_screen_init(screen_t *scr) {
   default_init(scr);
   clearIronShakeFlag();
   mainScr.shakeActive = 0;
-  plot.timeStep = (systemSettings.Profile.readPeriod+1)/200;                                                         // Update at the same rate as the system pwm
+  plot.timeStep = (getProfileSettings()->readPeriod+1)/200;                                                         // Update at the same rate as the system pwm
 
   mainScr.setMode = main_irontemp;
   switchScreenMode();
 
   edit = extractEditablePartFromWidget(Widget_SetPoint);
-  edit->step = systemSettings.settings.tempStep;
-  edit->big_step = systemSettings.settings.tempBigStep;
-  edit->max_value = systemSettings.Profile.MaxSetTemperature;
-  edit->min_value = systemSettings.Profile.MinSetTemperature;
+  edit->step = getSystemSettings()->tempStep;
+  edit->big_step = getSystemSettings()->tempBigStep;
+  edit->max_value = getProfileSettings()->MaxSetTemperature;
+  edit->min_value = getProfileSettings()->MinSetTemperature;
   setMainScrTempUnit();
 }
 

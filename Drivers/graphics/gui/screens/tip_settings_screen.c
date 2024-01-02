@@ -18,6 +18,7 @@ static comboBox_item_t *comboitem_tip_settings_save;
 static comboBox_item_t *comboitem_tip_settings_copy;
 static comboBox_item_t *comboitem_tip_settings_new;
 static comboBox_item_t *comboitem_tip_settings_delete;
+//static editable_widget_t *editable_tip_settings_name;
 static editable_widget_t *editable_tip_settings_cal250;
 static editable_widget_t *editable_tip_settings_cal400;
 static uint8_t tipUpdateMode;
@@ -115,7 +116,7 @@ static int tip_save(widget_t *w, RE_Rotation_t input) {
 
 // TODO: Last time we got Hard Fault here when TIP_LEN >9! 
 
-  if(Selected_Tip==systemSettings.Profile.currentNumberOfTips){                                                 // If new tip
+  if(Selected_Tip==getProfileSettings()->currentNumberOfTips){                                                 // If new tip
     tipUpdateMode=mode_AddTip;                                                                                  // Set flag for saveSettings
   }
   else{
@@ -131,7 +132,7 @@ static int tip_delete(widget_t *w, RE_Rotation_t input) {
 }
 //=========================================================
 static int tip_copy(widget_t *w, RE_Rotation_t input) {
-  Selected_Tip = systemSettings.Profile.currentNumberOfTips;                                                    // Select next available slot
+  Selected_Tip = getProfileSettings()->currentNumberOfTips;                                                    // Select next available slot
   if(newTip){                                                                                                   // If new, load default name, otherwise keep existigg
     newTip=0;                                                                                                   // This is sort a hack, can only happen from tip_new function, otherwise copyign is always disabled for new tips
     backupTip = *getFlashTipData(0);
@@ -190,13 +191,20 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
 
   if(widget_tip_settings->refresh > refresh_idle){                                                                // If something changed, check conditions
     bool enable=1;
+    /*
+    uint8_t i = editable_tip_settings_name->current_edit;
+    if((editable_tip_settings_name->selectable.state == widget_edit) && (input==Click) && (i>1) && (backupTip.name[i-2]==' ') && (backupTip.name[i-1]==' ')){
+      editable_tip_settings_name->selectable.state=widget_selected;                         // TODO unselect when 2nd space is added
+      editable_tip_settings_name->selectable.previous_state=widget_edit;
+    }
+    */
     if(strcmp(backupTip.name, _BLANK_TIP) == 0){                                                                  // Check that the name is not empty
       enable=0;                                                                                                   // If empty, disable save button
     }
     else{
-      for(uint8_t i = 0; i < systemSettings.Profile.currentNumberOfTips; i++) {                                   // Seek through all tips
+      for(uint8_t i = 0; i < getProfileSettings()->currentNumberOfTips; i++) {                                   // Seek through all tips
         char flashTip[TIP_LEN];                                                                                   // Flash tip is null-terminated, but editor field is tabbed with spaces
-        strcpy(flashTip, flashProfilesSettings.Profile[getCurrentProfile()].tip[i].name);               // Copy tip name from flash
+        strcpy(flashTip, getFlashTipData(i)->name);                                                               // Copy tip name from flash
         Flash_to_Edit(flashTip);                                                                                  // Convert to editor format (Fill with spaces)
         if((i!=Selected_Tip) && strcmp(backupTip.name, flashTip) == 0){  // Compare names with other tips                              // Compare
           enable=0;                                                                                             // If match is found with a different tip, disable save button
@@ -224,7 +232,7 @@ static void tip_settings_onEnter(screen_t *scr){
     backupTip = *getFlashTipData(0);                            // Copy data from first tip in the system
     strcpy(backupTip.name, defaultTipData[getCurrentProfile()].name);                                                                         // Set an empty name
     Flash_to_Edit(backupTip.name);
-    Selected_Tip=systemSettings.Profile.currentNumberOfTips;                                                    // Selected tip is next position
+    Selected_Tip=getProfileSettings()->currentNumberOfTips;                                                    // Selected tip is next position
     comboitem_tip_settings_copy->enabled=0;                                                                     // Cannot copy a new tip
     comboitem_tip_settings_new->enabled=0;                                                                       // Cannot copy a new tip
     comboitem_tip_settings_delete->enabled=0;                                                                   // Cannot delete a new tip
@@ -235,8 +243,8 @@ static void tip_settings_onEnter(screen_t *scr){
 
     backupTip = *getFlashTipData(Selected_Tip);
 
-    comboitem_tip_settings_delete->enabled = (systemSettings.Profile.currentNumberOfTips>1);                    // If more than 1 tip in the system, enable delete
-    comboitem_tip_settings_copy->enabled = (systemSettings.Profile.currentNumberOfTips<NUM_TIPS);               // If tip slots available, enable copy button
+    comboitem_tip_settings_delete->enabled = (getProfileSettings()->currentNumberOfTips>1);                    // If more than 1 tip in the system, enable delete
+    comboitem_tip_settings_copy->enabled = (getProfileSettings()->currentNumberOfTips<NUM_TIPS);               // If tip slots available, enable copy button
     comboitem_tip_settings_new->enabled = comboitem_tip_settings_copy->enabled;
     Flash_to_Edit(backupTip.name);
   }
@@ -255,6 +263,7 @@ static void tip_settings_create(screen_t *scr){
   //[ TIP label]
   //
   newComboEditableString(w, strings[lang].TIP_SETTINGS_Name, &edit, NULL, backupTip.name);
+  //editable_tip_settings_name = edit;
   dis=&edit->inputData;
   dis->reservedChars=TIP_LEN;
   dis->getData = &getTipName;

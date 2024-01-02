@@ -17,7 +17,7 @@ void handleAddonFumeExtractor()
   static uint32_t lastActiveTime    = 0u;
   static bool     extractorRequired = false;
 
-  switch (systemSettings.addonSettings.fumeExtractorMode)
+  switch (getAddons()->fumeExtractorMode)
   {
     case fume_extractor_mode_disabled:
     default:
@@ -40,7 +40,7 @@ void handleAddonFumeExtractor()
       }
 
       if(extractorRequired &&
-         ((lastActiveTime + (5000u * systemSettings.addonSettings.fumeExtractorAfterrun)) < currentTimeStamp))
+         ((lastActiveTime + (5000u * getAddons()->fumeExtractorAfterrun)) < currentTimeStamp))
       {
         // iron has not been in the active state for the configured amount of time, turn it off
         extractorRequired = false;

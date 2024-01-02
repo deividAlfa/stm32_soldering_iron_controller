@@ -332,7 +332,7 @@ void update_display( void ){
 }
 
 void setDisplayRow(uint8_t row){
-  uint8_t cmd[] = { c_page | row, c_col_H, c_col_L | systemSettings.settings.displayStartColumn };
+  uint8_t cmd[] = { c_page | row, c_col_H, c_col_L | getSystemSettings()->displayStartColumn };
   for(uint8_t i=0; i<sizeof(cmd); i++)
       lcd_write(&cmd[i], 1, modeCmd);     // Normal
 }
@@ -440,7 +440,7 @@ void lcd_init(I2C_HandleTypeDef *device,DMA_HandleTypeDef *dma){
 #endif
   HAL_IWDG_Refresh(&hiwdg);                       // Clear watchdog
   HAL_Delay(200);                                 // 200mS wait for internal initialization
-  systemSettings.settings.displayStartColumn = 2;         // Set by default while system settings are not loaded
+  getSystemSettings()->displayStartColumn = 2;         // Set by default while system settings are not loaded
   HAL_IWDG_Refresh(&hiwdg);                       // Clear watchdog
 
 #if defined DISPLAY_I2C && defined DISPLAY_DEVICE && defined I2C_TRY_HW
@@ -546,7 +546,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
       return;                                           // Return without re-triggering DMA.
     }
     {
-      uint8_t cmd[] = { c_page | oled.row, c_col_H, c_col_L | systemSettings.settings.displayStartColumn };
+      uint8_t cmd[] = { c_page | oled.row, c_col_H, c_col_L | getSystemSettings()->displayStartColumn };
       for(uint8_t i=0; i<sizeof(cmd); i++)
         _lcd_write(&cmd[i], 1, modeCmd);
     }
@@ -572,7 +572,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 
 void fatalError(uint8_t type){
   inFatalError = 1;
-  uint8_t lang = systemSettings.settings.language;
+  uint8_t lang = getSystemSettings()->language;
   if(lang>(LANGUAGE_COUNT-1)){
     lang=lang_english;
   }
@@ -687,11 +687,11 @@ void Oled_error_init(void){
     display_dma_abort();
 #endif  
   buzzer_fatal_beep();
-  setDisplayContrastOrBrightness(defaultSystemSettings.contrastOrBrightness);
+  setDisplayContrastOrBrightness(getDefaultSystemSettings()->contrastOrBrightness);
   fillBuffer(BLACK,fill_soft);
   u8g2_SetFont(&u8g2,u8g2_font_menu);
   u8g2_SetDrawColor(&u8g2, WHITE);
   u8g2_SetMaxClipWindow(&u8g2);
-  systemSettings.settings.displayStartColumn = DISPLAY_START_COLUMN;
+  getSystemSettings()->displayStartColumn = DISPLAY_START_COLUMN;
   __enable_irq();
 }

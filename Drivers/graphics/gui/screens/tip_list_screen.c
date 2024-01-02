@@ -43,10 +43,10 @@ static void tip_list_create(screen_t *scr){
   //  [ IRON TIPS COMBO ]
   //
   newWidget(&w,widget_combo,scr,NULL);
-  for(int x = 0; x < systemSettings.Profile.currentNumberOfTips; x++) {
-    newComboAction(w, flashProfilesSettings.Profile[getCurrentProfile()].tip[x].name, &editTip, &i);
+  for(int x = 0; x < getProfileSettings()->currentNumberOfTips; x++) {
+    newComboAction(w, getFlashTipData(x)->name, &editTip, &i);
   }
-  if(systemSettings.Profile.currentNumberOfTips < NUM_TIPS){
+  if(getProfileSettings()->currentNumberOfTips < NUM_TIPS){
     newComboAction(w, strings[lang]._ADD_NEW, &addNewTip, &comboitem_tip_list_addNewTip);
   }
   newComboScreen(w, strings[lang]._BACK, screen_settings, &comboitem_tip_list_back);

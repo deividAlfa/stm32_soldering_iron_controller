@@ -24,7 +24,7 @@ void RE_Init(RE_State_t* data, GPIO_TypeDef* GPIO_A_Port, uint16_t GPIO_A_Pin, G
   data->pv_click = RE_BT_HIDLE;
 
   /* Set default mode */
-  data->Mode = systemSettings.settings.EncoderMode;
+  data->Mode = getSystemSettings()->EncoderMode;
 
   /* Set default */
   data->RE_Count = 0;

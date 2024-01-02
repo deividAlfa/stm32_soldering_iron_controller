@@ -26,52 +26,52 @@ static void  setReminderPeriod(uint32_t *val);
 
 static void* getSwitchOffReminderEnabledState()
 {
-  temp = systemSettings.addonSettings.swOffReminderEnabled;
+  temp = getAddons()->swOffReminderEnabled;
   return &temp;
 }
 
 static void setSwitchOffReminderEnabledState(uint32_t *val)
 {
-  systemSettings.addonSettings.swOffReminderEnabled=*val;
+  getAddons()->swOffReminderEnabled=*val;
   update_addons_screen_switch_off_reminder();
 }
 
 static void* getInactivityDelay()
 {
-  temp = systemSettings.addonSettings.swOffReminderInactivityDelay;
+  temp = getAddons()->swOffReminderInactivityDelay;
   return &temp;
 }
 
 static void setInactivityDelay(uint32_t *val)
 {
-  systemSettings.addonSettings.swOffReminderInactivityDelay = *val;
+  getAddons()->swOffReminderInactivityDelay = *val;
 }
 
 static void* getReminderPeriod()
 {
-  temp = systemSettings.addonSettings.swOffReminderPeriod;
+  temp = getAddons()->swOffReminderPeriod;
   return &temp;
 }
 
 static void setReminderPeriod(uint32_t *val)
 {
-  systemSettings.addonSettings.swOffReminderPeriod = *val;
+  getAddons()->swOffReminderPeriod = *val;
 }
 
 static void* getBeepType()
 {
-  temp = systemSettings.addonSettings.swOffReminderBeepType;
+  temp = getAddons()->swOffReminderBeepType;
   return &temp;
 }
 
 static void setBeepType(uint32_t *val)
 {
-  systemSettings.addonSettings.swOffReminderBeepType = *val;
+  getAddons()->swOffReminderBeepType = *val;
 }
 
 static void update_addons_screen_switch_off_reminder(void)
 {
-  uint8_t const enabled = systemSettings.addonSettings.swOffReminderEnabled ? true : false;
+  uint8_t const enabled = getAddons()->swOffReminderEnabled ? true : false;
   comboitem_switch_off_reminder_inactivity_delay_widget->enabled = enabled;
   comboitem_switch_off_reminder_reminder_period_widget ->enabled = enabled;
   comboitem_switch_off_reminder_beep_type_widget       ->enabled = enabled;

@@ -128,12 +128,12 @@ static void setProfile(uint32_t *val) {
 }
 //=========================================================
 static void * getLanguage() {
-  temp = systemSettings.settings.language;
+  temp = getSystemSettings()->language;
   return &temp;
 }
 static void setLanguage(uint32_t *val) {
   lang = *val;
-  systemSettings.settings.language=*val;
+  getSystemSettings()->language=*val;
 }
 //=========================================================
 
@@ -180,7 +180,7 @@ int boot_screen_processInput(screen_t * scr, RE_Rotation_t input, RE_State_t *st
 
   handleOledDim();
   if(checkScreenTimer(SPLASH_TIMEOUT)){                                                           // After splash timeout
-    if(!systemSettings.setupMode)                                                                 // If not in setup mode
+    if(!getSettings()->setupMode)                                                                 // If not in setup mode
       return screen_main;                                                                         // Go to main screen
 
     else if(setup_step==0){                                                                       // 0=initial, 1=in setup screen, 2=save setup and exit
@@ -212,11 +212,11 @@ void boot_screen_init(screen_t * scr){
 
 void boot_screen_onExit(screen_t *scr){
   ADC_Reset_measures();                                   // Reset the averages, show current values to avoid filtering delay at startup
-  if(systemSettings.setupMode){
+  if(getSettings()->setupMode){
     saveSettings(save_Settings, no_mode, no_mode, no_reboot);               // Save now we have all heap free. All other flash settings (Profile, tips, addons) will be checked and set to default if wrong
     loadProfile(profile);                                 // Now flash is initialized and we can properly load a profile
     updateTempData(force_update);
-    systemSettings.setupMode=0;                           // Disable setup mode
+    getSettings()->setupMode=0;                           // Disable setup mode
   }
   setSafeMode(disable);                                   // Disable safe mode before exit
   resetIronError();                                       // Force timeout of any error (This won't clear errors if still detected)
@@ -230,7 +230,7 @@ void boot_screen_create(screen_t *scr){
   editable_widget_t *edit;
   button_widget_t *button;
 
-  lang = systemSettings.settings.language;
+  lang = getSystemSettings()->language;
   if(lang>=LANGUAGE_COUNT){
     lang=lang_english;
   }
