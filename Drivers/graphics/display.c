@@ -578,9 +578,6 @@ void fatalError(uint8_t type){
   }
   Oled_error_init();
   switch(type){
-    case error_FLASH:
-      putStrAligned("FLASH ERROR", 0, align_center);
-      break;
     case error_NMI:
       putStrAligned("NMI HANDLER", 0, align_center);
       break;

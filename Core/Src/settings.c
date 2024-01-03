@@ -195,7 +195,6 @@ static uint16_t flashPageSize;
 settings_t settings;
 
 static void checksumError(uint8_t mode);
-static void Flash_error(void);
 static void Button_reset(void);
 static void ErrCountDown(uint8_t Start,uint8_t xpos, uint8_t ypos);
 static uint32_t ChecksumSystemSettings(systemSettings_t* system);
@@ -314,14 +313,14 @@ static void eraseFlashPages(uint32_t pageAddress, uint32_t numPages)
 
   HAL_IWDG_Refresh(&hiwdg);
   if((HAL_FLASHEx_Erase(&erase, &error)!=HAL_OK) || (error!=0xFFFFFFFF)){
-    Flash_error();
+     Error_Handler();
   }
   HAL_FLASH_Lock();
 
   // Ensure flash was erased
   for (uint32_t i = 0u; i < (numPages * flashPageSize / sizeof(int32_t)); i++) {
     if( *((uint32_t*)pageAddress+i) != 0xFFFFFFFF){
-      Flash_error();
+      Error_Handler();
     }
   }
 }
@@ -340,7 +339,7 @@ static void writeFlash(uint32_t* src, uint32_t len, uint32_t dstAddr)
   for(uint32_t written=0; written < numWordsToWrite; written++){
     if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, dstAddr, *srcData ) != HAL_OK)
     {
-      Flash_error();
+       Error_Handler();
     }
     dstAddr += sizeof(uint32_t); // increase pointers
     srcData++;
@@ -502,21 +501,21 @@ void saveSettings(uint8_t save_mode, uint8_t tip_mode, uint8_t tip_index, uint8_
     flashChecksum = ChecksumProfile(&flashProfiles.profile[x]);
     ramChecksum   = ChecksumProfile(&flashBufferProfiles->profile[x]);
     if(flashChecksum != ramChecksum)
-      Flash_error();
+       Error_Handler();
   }
 
   // Check flash and settings buffer have same checksum
   flashChecksum   = ChecksumSystemSettings(&flashSettings.system);
   ramChecksum     = ChecksumSystemSettings(&flashBufferSettings->system);
   if(flashChecksum != ramChecksum)
-    Flash_error();
+     Error_Handler();
 
 #ifdef ENABLE_ADDONS
   // Verify addon crc
   flashChecksum   = ChecksumAddons(&flashAddons.addons);
   ramChecksum     = ChecksumAddons(&flashBufferAddons->addons);
   if(flashChecksum != ramChecksum)
-    Flash_error();
+     Error_Handler();
 #endif
 
 #ifdef ENABLE_ADDONS
@@ -779,7 +778,7 @@ void flashTempWrite(void)
   HAL_FLASH_Unlock();
   __set_PRIMASK(_irq);
   if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&temp_settings.temperature[flashTemp.tempIndex], flashTemp.temp) != HAL_OK) {    // Store new temp
-    Flash_error();
+     Error_Handler();
   }
   HAL_FLASH_Lock();
   flashTemp.tempIndex++;                                                                                                         // Increase index for next time
@@ -800,7 +799,7 @@ void flashProfileWrite(void)
   HAL_FLASH_Unlock();
   __set_PRIMASK(_irq);
   if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&temp_settings.profile[flashTemp.profileIndex], flashTemp.profile) != HAL_OK) {        // Store new tip/profile data
-    Flash_error();
+     Error_Handler();
   }
   HAL_FLASH_Lock();
   flashTemp.profileIndex++;                                                                                                         // Increase index for next time
@@ -821,7 +820,7 @@ void flashTipWrite(void)
   HAL_FLASH_Unlock();
   __set_PRIMASK(_irq);
   if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&temp_settings.tip[p][flashTemp.tipIndex[p]], flashTemp.tip[p]) != HAL_OK) {        // Store new tip/profile data
-    Flash_error();
+     Error_Handler();
   }
   HAL_FLASH_Lock();
   flashTemp.tipIndex[p]++;                                                                                                         // Increase index for next time
@@ -1135,10 +1134,6 @@ systemSettings_t * getDefaultSystemSettings(void){
 }
 settings_t * getSettings(void){
   return(&settings);
-}
-static void Flash_error(void){
-  HAL_FLASH_Lock();
-  fatalError(error_FLASH);
 }
 
 static void checksumError(uint8_t mode){
