@@ -38,9 +38,8 @@ extern slide_t screenSaver;
 extern plotData_t plot;
 
 extern int32_t temp;
-extern uint8_t status, profile, Selected_Tip, lang, backupMode, current_lang;
+extern uint8_t newTip, status, profile, Selected_Tip, lang, backupMode, backupTempUnit, current_lang;
 extern int16_t backupTemp;
-extern uint8_t newTip;
 extern tipData_t backupTip;
 
 void handleOledDim(void);

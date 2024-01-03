@@ -8,7 +8,7 @@
 
 int32_t temp;
 int16_t backupTemp;
-uint8_t status, profile, Selected_Tip, lang, backupMode, current_lang=lang_english;
+uint8_t newTip, status, profile, Selected_Tip, lang, backupMode, backupTempUnit, current_lang=lang_english;
 tipData_t backupTip;
 
 struct{
@@ -17,8 +17,6 @@ struct{
   uint32_t timer;
   uint32_t stepTimer;
 }dim;
-
-uint8_t newTip;
 
 plotData_t plot;
 

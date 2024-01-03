@@ -9,8 +9,8 @@
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "tip_settings_screen.c"
 #endif
+#define __BASE_FILE__ "tip_settings_screen.c"
 
 screen_t Screen_tip_settings;
 static widget_t        *widget_tip_settings;

@@ -7,8 +7,8 @@
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "display.c"
 #endif
+#define __BASE_FILE__ "display.c"
 
 oled_t oled;
 

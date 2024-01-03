@@ -15,8 +15,8 @@
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "settings.c"
 #endif
+#define __BASE_FILE__ "settings.c"
 
 const systemSettings_t defaultSystemSettings = {
   .version              =  SYSTEM_SETTINGS_VERSION,
@@ -936,33 +936,33 @@ static void resetProfileSettings(profile_settings_t * p, uint8_t profile){
 
   __disable_irq();
     if(profile==profile_T12){
-    p->ID = profile_T12;
-    p->currentNumberOfTips      = 1;
-    p->impedance                = 80;             // 8.0 Ohms
-    p->power                    = 80;             // 80W
-    p->noIronValue              = 4000;
-    p->Cal250_default           = T12_Cal250;
-    p->Cal400_default           = T12_Cal400;
+      p->ID = profile_T12;
+      p->currentNumberOfTips      = 1;
+      p->impedance                = 80;             // 8.0 Ohms
+      p->power                    = 80;             // 80W
+      p->noIronValue              = 4000;
+      p->Cal250_default           = T12_Cal250;
+      p->Cal400_default           = T12_Cal400;
   }
 
   else if(profile==profile_C245){
-    p->ID = profile_C245;
-    p->currentNumberOfTips      = 1;
-    p->impedance                = 26;
-    p->power                    = 150;
-    p->noIronValue              = 4000;
-    p->Cal250_default           = C245_Cal250;
-    p->Cal400_default           = C245_Cal400;
+      p->ID = profile_C245;
+      p->currentNumberOfTips      = 1;
+      p->impedance                = 26;
+      p->power                    = 150;
+      p->noIronValue              = 4000;
+      p->Cal250_default           = C245_Cal250;
+      p->Cal400_default           = C245_Cal400;
   }
 
   else if(profile==profile_C210){
-    p->ID = profile_C210;
-    p->currentNumberOfTips    = 1;
-    p->power                  = 80;
-    p->impedance              = 21;
-    p->noIronValue            = 1200;
-    p->Cal250_default         = C210_Cal250;
-    p->Cal400_default         = C210_Cal400;
+      p->ID = profile_C210;
+      p->currentNumberOfTips    = 1;
+      p->power                  = 80;
+      p->impedance              = 21;
+      p->noIronValue            = 1200;
+      p->Cal250_default         = C210_Cal250;
+      p->Cal400_default         = C210_Cal400;
   }
   else{
     Error_Handler();  // We shouldn't get here!

@@ -14,8 +14,8 @@
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "adc_global.c"
 #endif
+#define __BASE_FILE__ "adc_global.c"
 
 
 #define SELECTIVE_FILTERING

@@ -17,8 +17,8 @@
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "iron.c"
 #endif
+#define __BASE_FILE__ "iron.c"
 
 typedef struct {
   uint8_t             Pwm_Channel;                          // PWM channel

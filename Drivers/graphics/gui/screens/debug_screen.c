@@ -12,27 +12,30 @@
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "debug_screen.c"
 #endif
+#define __BASE_FILE__ "debug_screen.c"
 
 screen_t Screen_debug;
 screen_t Screen_pid_debug;
 
+#define PID_SZ  95
+typedef struct{
+  struct {
+    uint8_t p[PID_SZ];
+    uint8_t i[PID_SZ];
+    uint8_t d[PID_SZ];
+    uint8_t index;
+    uint8_t i_scale;
+  }pidPlot;
+  uint8_t update, update_draw;
+  int32_t debug_temp;
+}dbgScrData_t;
+
+dbgScrData_t * dbgScrData;
 widget_t *widget_setPoint;
 widget_t *widget_Temp;
 
-static int32_t debug_temp;
-static uint8_t update, update_draw;
-#define PID_SZ  95
-typedef struct {
-  uint8_t p[PID_SZ];
-  uint8_t i[PID_SZ];
-  uint8_t d[PID_SZ];
-  uint8_t index;
-  uint8_t i_scale;
-}pid_plot_t;
 
-static pid_plot_t *pidPlot;
 
 
 //=========================================================
@@ -50,7 +53,7 @@ static int32_t clampValues(int32_t val){
 //=========================================================
 static void * getTemp() {
   static int32_t value;
-  if(update){
+  if(dbgScrData->update){
     value=readTipTemperatureCompensated(old_reading, read_average, getSystemSettings()->tempUnit);
   }
   temp=value;
@@ -58,16 +61,16 @@ static void * getTemp() {
 }
 //=========================================================
 static void setSetpoint(uint32_t *val) {
-  debug_temp=*val;
-  setUserTemperature(debug_temp);
+  dbgScrData->debug_temp=*val;
+  setUserTemperature(dbgScrData->debug_temp);
 }
 static void * getSetpoint() {
-  return &debug_temp;
+  return &dbgScrData->debug_temp;
 }
 //=========================================================
 static void * get_PID_P() {
   static int32_t value;
-  if(update){
+  if(dbgScrData->update){
     value=clampValues(getPID_P()*1000);
   }
   temp=value;
@@ -76,7 +79,7 @@ static void * get_PID_P() {
 //=========================================================
 static void * get_PID_I() {
   static int32_t value;
-  if(update){
+  if(dbgScrData->update){
     value=clampValues(getPID_I()*1000);
   }
   temp=value;
@@ -85,7 +88,7 @@ static void * get_PID_I() {
 //=========================================================
 static void * get_PID_D() {
   static int32_t value;
-  if(update){
+  if(dbgScrData->update){
     value=clampValues(getPID_D()*1000);
   }
   temp=value;
@@ -94,7 +97,7 @@ static void * get_PID_D() {
 //=========================================================
 static void * get_AVG() {
   static int32_t value;
-  if(update){
+  if(dbgScrData->update){
     value=TIP.last_avg;
   }
   temp=value;
@@ -103,7 +106,7 @@ static void * get_AVG() {
 //=========================================================
 static void * get_RAW() {
   static int32_t value;
-  if(update){
+  if(dbgScrData->update){
     value=TIP.last_raw;
   }
   temp=value;
@@ -112,8 +115,8 @@ static void * get_RAW() {
 //=========================================================
 static void * get_SET() {
   static int32_t value;
-  if(update){
-    value = human2adc(debug_temp);
+  if(dbgScrData->update){
+    value = human2adc(dbgScrData->debug_temp);
   }
   temp=value;
   return &temp;
@@ -121,7 +124,7 @@ static void * get_SET() {
 //=========================================================
 static void * get_ERR() {
   static int32_t value;
-  if(update){
+  if(dbgScrData->update){
     value=getPID_Error();
   }
   temp=value;
@@ -130,7 +133,7 @@ static void * get_ERR() {
 //=========================================================
 static void * get_PWM() {
   static int32_t value;
-  if(update){
+  if(dbgScrData->update){
     value=getIronPwmOutValue();
   }
   temp=value;
@@ -139,7 +142,7 @@ static void * get_PWM() {
 //=========================================================
 static void * get_PWR() {
   static int32_t value;
-  if(update){
+  if(dbgScrData->update){
     value=getCurrentPower();
   }
   temp=value;
@@ -155,12 +158,12 @@ static uint8_t scalePlot(int32_t val){
 }
 
 void updatePIDplot(void){
-  if(update){
-    pidPlot->p[pidPlot->index] = scalePlot((getPID_P()*10)+10);
-    pidPlot->i[pidPlot->index] = scalePlot(getPID_I()*pidPlot->i_scale);
-    pidPlot->d[pidPlot->index] = scalePlot((getPID_D()*10)+10);
-    if(++pidPlot->index>(PID_SZ-1))
-      pidPlot->index=0;
+  if(dbgScrData->update){
+    dbgScrData->pidPlot.p[dbgScrData->pidPlot.index] = scalePlot((getPID_P()*10)+10);
+    dbgScrData->pidPlot.i[dbgScrData->pidPlot.index] = scalePlot(getPID_I()*dbgScrData->pidPlot.i_scale);
+    dbgScrData->pidPlot.d[dbgScrData->pidPlot.index] = scalePlot((getPID_D()*10)+10);
+    if(++dbgScrData->pidPlot.index > (PID_SZ-1))
+      dbgScrData->pidPlot.index=0;
   }
 }
 
@@ -169,8 +172,8 @@ void updatePIDplot(void){
 
 int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 
-  update=update_GUI_Timer();
-  update_draw |= update;
+  dbgScrData->update=update_GUI_Timer();
+  dbgScrData->update_draw |= dbgScrData->update;
   updatePlot();
   updatePIDplot();
 
@@ -223,6 +226,12 @@ static void debug_onEnter(screen_t *scr){
   displayOnly_widget_t *dis = extractDisplayPartFromWidget(widget_Temp);
 
 
+  if(scr!=&Screen_debug && scr!=&Screen_pid_debug ){                             // Coming from system, allocate data
+    dbgScrData = calloc(1, sizeof(dbgScrData_t));
+    if(!dbgScrData){
+      Error_Handler();
+    }
+  }
   if(getSystemTempUnit()==mode_Celsius){
     if(scr!=&Screen_debug){
       edit->max_value = 450;
@@ -249,36 +258,27 @@ static void debug_onEnter(screen_t *scr){
     backupTemp=getUserTemperature();
 
     if(getSystemTempUnit()==mode_Celsius){
-      debug_temp=0;
+      dbgScrData->debug_temp=0;
     }
     else{
-      debug_temp=0;
+      dbgScrData->debug_temp=0;
     }
-    setUserTemperature(debug_temp);
+    setUserTemperature(dbgScrData->debug_temp);
 
-    pidPlot=_malloc(sizeof(pid_plot_t));
-    pidPlot->index=0;
-    if(!pidPlot){
-      Error_Handler();
-    }
+    dbgScrData->pidPlot.index=0;
 
     if(pid.limMaxInt>=1.0f){
-      pidPlot->i_scale = 20;
+      dbgScrData->pidPlot.i_scale = 20;
     }
     else{
-      pidPlot->i_scale = (float)20/pid.limMaxInt;
+      dbgScrData->pidPlot.i_scale = (float)20/pid.limMaxInt;
     }
-
-    memset(pidPlot->p, scalePlot(getPID_P()* 10), PID_SZ);
-    memset(pidPlot->i, scalePlot(getPID_I()* pidPlot->i_scale), PID_SZ);
-    memset(pidPlot->d, scalePlot(getPID_D()* 10), PID_SZ);
-
   }
 }
 
 static void debug_onExit(screen_t *scr){
   if(scr!=&Screen_debug && scr!=&Screen_pid_debug){
-    _free(pidPlot);
+    free(dbgScrData);
     setUserTemperature(backupTemp);
     setCurrentMode(backupMode);
   }
@@ -491,14 +491,14 @@ static void pid_debug_create(screen_t *scr){
 }
 
 static uint8_t pid_debug_Draw(screen_t * scr){
-  if(update_draw || scr->state==screen_Erased){
-    if(update_draw){
-      update_draw=0;
+  if(dbgScrData->update_draw || scr->state==screen_Erased){
+    if(dbgScrData->update_draw){
+      dbgScrData->update_draw=0;
       fillBuffer(BLACK, fill_dma);
       scr->state=screen_Erased;
     }
     for(uint8_t x=1; x<(PID_SZ-1); x++){
-      uint8_t pos=pidPlot->index+x;
+      uint8_t pos=dbgScrData->pidPlot.index+x;
       uint8_t prev;
       if(pos>(PID_SZ-1)){
         pos-=PID_SZ;
@@ -510,9 +510,9 @@ static uint8_t pid_debug_Draw(screen_t * scr){
         prev=pos-1;
       }
       u8g2_SetDrawColor(&u8g2, WHITE);
-      u8g2_DrawLine(&u8g2, x+(displayWidth-PID_SZ), 20-pidPlot->p[prev], x+(displayWidth-PID_SZ+1), 20-pidPlot->p[pos]);
-      u8g2_DrawLine(&u8g2, x+(displayWidth-PID_SZ), 42-pidPlot->i[prev], x+(displayWidth-PID_SZ+1), 42-pidPlot->i[pos]);
-      u8g2_DrawLine(&u8g2, x+(displayWidth-PID_SZ), 63-pidPlot->d[prev], x+(displayWidth-PID_SZ+1), 63-pidPlot->d[pos]);
+      u8g2_DrawLine(&u8g2, x+(displayWidth-PID_SZ), 20-dbgScrData->pidPlot.p[prev], x+(displayWidth-PID_SZ+1), 20-dbgScrData->pidPlot.p[pos]);
+      u8g2_DrawLine(&u8g2, x+(displayWidth-PID_SZ), 42-dbgScrData->pidPlot.i[prev], x+(displayWidth-PID_SZ+1), 42-dbgScrData->pidPlot.i[pos]);
+      u8g2_DrawLine(&u8g2, x+(displayWidth-PID_SZ), 63-dbgScrData->pidPlot.d[prev], x+(displayWidth-PID_SZ+1), 63-dbgScrData->pidPlot.d[pos]);
     }
   }
   return (default_screenDraw(scr));

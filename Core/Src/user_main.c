@@ -36,8 +36,8 @@
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "user_main.c"
 #endif
+#define __BASE_FILE__ "user_main.c"
 
 extern ADC_HandleTypeDef ADC_DEVICE;
 extern DMA_HandleTypeDef FILL_DMA;

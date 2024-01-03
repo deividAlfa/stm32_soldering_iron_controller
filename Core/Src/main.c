@@ -36,8 +36,8 @@
 /* USER CODE BEGIN PD */
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "main.c"
 #endif
+#define __BASE_FILE__ "main.c"
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
