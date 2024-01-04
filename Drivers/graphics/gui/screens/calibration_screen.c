@@ -205,7 +205,7 @@ static void setCalState(state_t s) {
 //=========================================================
 static void Cal_onEnter(screen_t *scr) {
   if(scr == &Screen_settings) {
-    cal = calloc(1,sizeof(cal_t));
+    cal = _calloc(1,sizeof(cal_t));
     if(!cal)
       Error_Handler();
     backupMode=getCurrentMode();
@@ -220,7 +220,7 @@ static void Cal_onEnter(screen_t *scr) {
 }
 static void Cal_onExit(screen_t *scr) {
   if(scr!=&Screen_calibration_start && scr!=&Screen_calibration_settings ){
-    free(cal);
+    _free(cal);
     setIronCalibrationMode(disable);
     setCurrentMode(backupMode);
     setUserTemperature(backupTemp);

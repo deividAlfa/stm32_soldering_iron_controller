@@ -225,9 +225,8 @@ static void debug_onEnter(screen_t *scr){
   editable_widget_t *edit = extractEditablePartFromWidget(widget_setPoint);
   displayOnly_widget_t *dis = extractDisplayPartFromWidget(widget_Temp);
 
-
   if(scr!=&Screen_debug && scr!=&Screen_pid_debug ){                             // Coming from system, allocate data
-    dbgScrData = calloc(1, sizeof(dbgScrData_t));
+    dbgScrData = _calloc(1, sizeof(dbgScrData_t));
     if(!dbgScrData){
       Error_Handler();
     }
@@ -278,7 +277,7 @@ static void debug_onEnter(screen_t *scr){
 
 static void debug_onExit(screen_t *scr){
   if(scr!=&Screen_debug && scr!=&Screen_pid_debug){
-    free(dbgScrData);
+    _free(dbgScrData);
     setUserTemperature(backupTemp);
     setCurrentMode(backupMode);
   }
