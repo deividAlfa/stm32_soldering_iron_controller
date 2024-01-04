@@ -548,8 +548,15 @@ void restoreSettings(void) {
 #endif
 
 #if (__CORTEX_M == 3)
-  uint32_t flashSize = 0xFFFF & *(uint32_t*)FLASHSIZE_BASE;
-  flashPageSize = ( flashSize > 128 ? 2048 : 1024 );                   // STM32F1xx have 1K and 2K flash page sizes depending on the flash size
+  uint32_t flashSize = 0xFFFF & *(uint32_t*)FLASHSIZE_BASE;   // Some clones report no flash size (0xFFFF), assume these use 1KB sectors.
+
+
+  if( (flashSize>128) && (flashSize<=1024) )      // Between 256K and 1M (High Density / XL devices), 2KB sectors
+    flashPageSize = 2048;
+
+  else                                            //  Everything else, assume 1KB sectors.
+    flashPageSize = 1024;
+
   flashPages_GlobalSettings = ((SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize);
   flashPages_TempSettings   = ((TEMP_SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize);
 #endif
