@@ -131,7 +131,7 @@ void InitAfterMCUConfiguration(void){
     setDisplayVcom(getSystemSettings()->displayVcom);
     setDisplayPrecharge(getSystemSettings()->displayPrecharge);
 #elif defined ST7565
-    setDisplayResRatio(getSettings()->displayResRatio);        // Only for ST7565
+    setDisplayResRatio(getSystemSettings()->displayResRatio);        // Only for ST7565
 #endif
     setDisplayPower(enable);
     ironInit(&READ_TIMER, &PWM_TIMER,PWM_CHANNEL);
