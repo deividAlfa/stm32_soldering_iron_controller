@@ -187,7 +187,7 @@ static uint16_t flashPageSize;
     #error Wrong flash page size??
   #endif
 #define flashPageSize                 FLASH_PAGE_SIZE
-#define flashPages_Global     ((SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize)
+#define flashPages_GlobalSettings     ((SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize)
 #define flashPages_TempSettings       ((TEMP_SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize)
 #endif
 
