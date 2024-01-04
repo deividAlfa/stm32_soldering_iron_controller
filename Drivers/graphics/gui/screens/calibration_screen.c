@@ -209,13 +209,13 @@ static void Cal_onEnter(screen_t *scr) {
     if(!cal)
       Error_Handler();
     backupMode=getCurrentMode();
-    backupTempUnit=getUserTemperature();
+    backupTempUnit=getSystemTempUnit();
+    backupTemp=getUserTemperature();
     backupTip = *getCurrentTipData();
     comboResetIndex(Screen_calibration.current_widget);
     cal->error=0;
     setIronCalibrationMode(enable);
   }
-
   setUserTemperature(0);
 }
 static void Cal_onExit(screen_t *scr) {
@@ -275,10 +275,8 @@ static void Cal_create(screen_t *scr) {
   newComboScreen(w, strings[lang]._BACK, screen_settings, NULL);
 }
 
-
 static void Cal_Start_init(screen_t *scr) {
   default_init(scr);
-  backupTempUnit=getSystemTempUnit();
   setSystemTempUnit(mode_Celsius);
   getCurrentTipData()->calADC_At_250 = getProfileSettings()->Cal250_default;
   getCurrentTipData()->calADC_At_400 = getProfileSettings()->Cal400_default;
@@ -343,7 +341,6 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
 
 static void Cal_Start_OnExit(screen_t *scr) {
   cal->tempReady = 0;
-  setSystemTempUnit(backupTempUnit);
   restore_tip();                              // Restore default calibration temps if calibration was cancelled, or new calibration values if ok.
   if(cal->current_state==cal_save)
     saveSettings(save_Tip, mode_SaveTip, getCurrentTip(), no_reboot);              // Save now we have all heap free
@@ -439,7 +436,6 @@ static void Cal_Settings_init(screen_t *scr) {
   cal->calAdjust[cal_400] = getProfileSettings()->Cal400_default;
   cal->calAdjust[cal_0] = getProfileSettings()->calADC_At_0;
   cal->backup_calADC_At_0 = getProfileSettings()->calADC_At_0;
-  backupTip = *getCurrentTipData();
   getCurrentTipData()->calADC_At_250 = cal->calAdjust[cal_250];
   getCurrentTipData()->calADC_At_400 = cal->calAdjust[cal_400];
 }
