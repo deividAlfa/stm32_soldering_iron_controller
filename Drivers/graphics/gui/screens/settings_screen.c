@@ -27,7 +27,7 @@ static void SETTINGS_create(screen_t *scr) {
   newComboScreen(w, strings[lang].settings_SYSTEM, screen_system, NULL);
   #ifdef ENABLE_DEBUG_SCREEN
   newComboScreen(w, strings[lang].settings_DEBUG, screen_debug, &comboitem_system_debug);
-  comboitem_system_debug->enabled = (systemSettings.settings.debugEnabled);
+  comboitem_system_debug->enabled = (getSystemSettings()->debugEnabled);
   #endif
   newComboScreen(w, strings[lang].settings_EDIT_TIPS, screen_tip_list, NULL);
   newComboScreen(w, strings[lang].settings_CALIBRATION, screen_calibration, NULL);

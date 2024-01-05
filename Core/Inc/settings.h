@@ -296,7 +296,7 @@ __attribute__((aligned(4))) typedef struct{
   uint32_t      : 32;
   uint32_t      : 32;
   uint32_t      : 32;
-}settings_t;
+}systemSettings_t;
 
 #ifdef ENABLE_ADDONS
 __attribute__((aligned(4))) typedef struct {
@@ -317,34 +317,34 @@ __attribute__((aligned(4))) typedef struct {
 #endif
 
 __attribute__((aligned(4))) typedef struct{
-  settings_t      settings;
-  profile_settings_t Profile;
+  systemSettings_t   system;
+  profile_settings_t profile;
   tipData_t       currentTipData;
 #ifdef ENABLE_ADDONS
-  addonSettings_t addonSettings;
+  addonSettings_t addons;
 #endif
   uint8_t         setupMode;
   uint8_t         isSaving;
   uint8_t         currentProfile;
   uint8_t         currentTip;
-}systemSettings_t;
+}settings_t;
 
 
 __attribute__((aligned(4))) typedef struct{
-  settings_t      settings;
-  uint32_t        settingsChecksum;
-} flashSettingsSettings_t;
+  systemSettings_t      system;
+  uint32_t        systemChecksum;
+} flashSettings_t;
 
 __attribute__((aligned(4))) typedef struct{
-  profile_t       Profile[NUM_PROFILES];
-  uint32_t        ProfileSettingsChecksum[NUM_PROFILES];          // Only for small profile settings block (Excluding tips)
-  uint32_t        ProfileChecksum[NUM_PROFILES];                  // For the entire profile (Including tips)
-} flashSettingsProfiles_t;
+  profile_t       profile[NUM_PROFILES];
+  uint32_t        profileSettingsChecksum[NUM_PROFILES];          // Only for small profile settings block (Excluding tips)
+  uint32_t        profileChecksum[NUM_PROFILES];                  // For the entire profile (Including tips)
+} flashProfiles_t;
 
 __attribute__((aligned(4))) typedef struct{
-  addonSettings_t addonSettings;
-  uint32_t        addonSettingsChecksum;
-} flashSettingsAddons_t;
+  addonSettings_t addons;
+  uint32_t        addonsChecksum;
+} flashAddons_t;
 
 typedef struct{
   uint16_t profile[128];
@@ -352,17 +352,48 @@ typedef struct{
   uint16_t temperature[512];
 }temp_settings_t;
 
+typedef struct{
+  uint8_t  tipIndex[NUM_PROFILES];
+  uint8_t  tip[NUM_PROFILES];
+  uint8_t  profileIndex;
+  uint8_t  profile;
+  uint8_t  prevTip[NUM_PROFILES];
+  uint8_t  prevProfile;
+  uint16_t prevTemp;
+  uint16_t tempIndex;
+  uint16_t temp;
+  uint32_t tempCheckTime;
+  uint32_t tipCheckTime;
+  uint32_t profileCheckTime;
+}flashTemp_t;
 
-extern flashSettingsSettings_t flashGlobalSettings;
-extern flashSettingsProfiles_t flashProfilesSettings;
+
+#define BACKUP_RAM_SIZE_IN_BYTES 20u
+#define NUM_BACKUP_RAM_REGISTERS (BACKUP_RAM_SIZE_IN_BYTES / 2u) // each register holds 2 byte of data in the lower nibble
+
+typedef union {
+  struct {
+    struct {
+      // max (BACKUP_RAM_SIZE_IN_BYTES - 4) byte of data in total
+      uint16_t lastTipTemp[NUM_PROFILES];
+      uint8_t  lastSelTip[NUM_PROFILES];
+      uint8_t  lastProfile;
+    } values;
+    uint32_t crc;
+  };
+  uint8_t bytes[BACKUP_RAM_SIZE_IN_BYTES];
+} backupRamData_t;
+
+extern flashSettings_t flashSettings;
+extern flashProfiles_t flashProfiles;
 extern temp_settings_t temp_settings;
 #ifdef ENABLE_ADDONS
-extern flashSettingsAddons_t flashAddonSettings;
+extern flashAddons_t flashAddonSettings;
 #endif
 
 
-extern systemSettings_t systemSettings;
-extern const settings_t defaultSystemSettings;
+extern settings_t settings;
+extern const systemSettings_t defaultSystemSettings;
 extern const profile_settings_t defaultProfileSettings;
 extern const tipData_t defaultTipData[NUM_PROFILES];
 
@@ -372,17 +403,33 @@ void updateTempData(bool force);
 void saveSettings(uint8_t save_mode, uint8_t tip_mode, uint8_t tip_index, uint8_t reboot_mode);
 /** Reads the save flag. */
 uint8_t getSaveFlag(void);
+
 /** Loads the settings from flash on boot. */
 void restoreSettings(void);
+flashSettings_t * getFlashSettings(void);
+systemSettings_t* getSystemSettings(void);
+settings_t * getSettings(void);
+systemSettings_t * getDefaultSystemSettings(void);
+systemSettings_t * getFlashSystemSettings(void);
+flashSettings_t * getFlashSettings(void);
 
 /** Load/change to the profile with the given index */
 ErrorStatus loadProfile(uint8_t profile);
 void setCurrentProfile(uint8_t profile);
 uint8_t getCurrentProfile(void);
+profile_settings_t * getProfileSettings(void);
+profile_settings_t * getDefaultProfileSettings(void);
+profile_settings_t * getFlashProfileSettings(void);
+flashProfiles_t * getFlashProfiles(void);
+
+addonSettings_t * getAddons(void);
+addonSettings_t * getDefaultAddons(void);
+flashAddons_t * getFlashAddons(void);
 
 void loadTipDataFromFlash(uint8_t tip);
 tipData_t * getFlashTipData(uint8_t tip);
 tipData_t * getCurrentTipData(void);
+tipData_t * getDefaultTipData(void);
 void setCurrentTipData(tipData_t * tip);
 uint8_t getCurrentTip(void);
 void setCurrentTip(uint8_t tip);

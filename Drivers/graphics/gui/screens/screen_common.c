@@ -8,7 +8,7 @@
 
 int32_t temp;
 int16_t backupTemp;
-uint8_t status, profile, Selected_Tip, lang, backupMode, current_lang=lang_english;
+uint8_t newTip, status, profile, Selected_Tip, lang, backupMode, backupTempUnit, current_lang=lang_english;
 tipData_t backupTip;
 
 struct{
@@ -17,8 +17,6 @@ struct{
   uint32_t timer;
   uint32_t stepTimer;
 }dim;
-
-uint8_t newTip;
 
 plotData_t plot;
 
@@ -58,7 +56,7 @@ int longClickReturn(widget_t *w){
 
 uint8_t update_GUI_Timer(void){
   static uint32_t guiTimer=0;
-  if((current_time-guiTimer)>=systemSettings.settings.guiUpdateDelay){
+  if((current_time-guiTimer) >= getSystemSettings()->guiUpdateDelay){
     guiTimer=current_time;
     return 1;
   }
@@ -118,8 +116,8 @@ uint8_t checkScreenTimer(uint32_t time){
 }
 void restore_contrastOrBrightness(void){
 #ifndef ST7565
-  if(getDisplayContrastOrBrightness() != systemSettings.settings.contrastOrBrightness){
-    setDisplayContrastOrBrightness(systemSettings.settings.contrastOrBrightness);
+  if(getDisplayContrastOrBrightness() != getSystemSettings()->contrastOrBrightness){
+    setDisplayContrastOrBrightness(getSystemSettings()->contrastOrBrightness);
   }
 #endif
 }
@@ -127,7 +125,7 @@ void restore_contrastOrBrightness(void){
 void wakeOledDim(void){
 #ifndef ST7565
   dim.timer = current_time;
-  if(dim.step<=0 && getDisplayContrastOrBrightness()<systemSettings.settings.contrastOrBrightness ){
+  if(dim.step<=0 && getDisplayContrastOrBrightness()<getSystemSettings()->contrastOrBrightness ){
     if(getDisplayPower()==disable){
       setDisplayPower(enable);
     }
@@ -145,15 +143,15 @@ void handleOledDim(void){
   }
 
   if(dim.step==0){                                                      // If idle
-    if(systemSettings.settings.dim_mode==dim_off){                      // Return if dimmer is disabled
+    if(getSystemSettings()->dim_mode==dim_off){                      // Return if dimmer is disabled
       return;
     }
     // If idle timer expired, start decreasing brightness
-    if(brightness>5 && ((current_time-dim.timer)>systemSettings.settings.dim_Timeout)){
+    if(brightness>5 && ((current_time-dim.timer)>getSystemSettings()->dim_Timeout)){
       dim.step=-5;
     }
     // If min. brightness reached and Oled power is disabled in sleep mode, turn off screen if temp<100ºC or error active
-    else if(dim.min_reached && getCurrentMode()==mode_sleep && systemSettings.settings.dim_inSleep==disable && (last_TIP_C<100 || (getIronErrorFlags().active))){
+    else if(dim.min_reached && getCurrentMode()==mode_sleep && getSystemSettings()->dim_inSleep==disable && (last_TIP_C<100 || (getIronErrorFlags().active))){
       setDisplayPower(disable);
       dim.min_reached=0;
     }
@@ -162,7 +160,7 @@ void handleOledDim(void){
   else if((current_time-dim.stepTimer)>19){
     dim.stepTimer = current_time;
     brightness+=dim.step;
-    if(brightness>4 && brightness<systemSettings.settings.contrastOrBrightness){
+    if(brightness>4 && brightness < getSystemSettings()->contrastOrBrightness){
       setDisplayContrastOrBrightness(brightness);
     }
     else{

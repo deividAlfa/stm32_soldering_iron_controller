@@ -44,7 +44,7 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
 
   if(new){
     do{                                                                                                 // Detection loop
-      if(systemSettings.Profile.ntc.enabled){                                                           // If NTC enabled
+      if(getProfileSettings()->ntc.enabled){                                                           // If NTC enabled
         if(error){                                                                                      // If errors (handle removed)
           ntc_status = _USE_EXTERNAL;                                                                   // Force external NTC mode, clear detected and first pass flags
         }
@@ -53,7 +53,7 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
             ntc_status=_FIRST;                                                                          // Set first pass flag, wait for next call to get new readings
           }
           else if(last_NTC_C<-100 || last_NTC_C>900){                                                   // If temp <-10.0ºC or >90.0ºC
-            if(systemSettings.Profile.ntc.detection){                                                   // If NTC Auto-detection is enabled
+            if(getProfileSettings()->ntc.detection){                                                   // If NTC Auto-detection is enabled
               if(ntc_status&_USE_EXTERNAL_HIGH){                                                        // If already trying higher values
                 ntc_status = (_DETECTED | _USE_INTERNAL);                                               // Use internal sensor automatically
               }
@@ -77,27 +77,27 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
 
       if(!(ntc_status&_USE_INTERNAL)){                                                                  // Compute external NTC temperature (if internal sensor not selected)
         float NTC_res;
-        float pull_res=systemSettings.Profile.ntc.pull_res*100;
+        float pull_res=getProfileSettings()->ntc.pull_res*100;
         float NTC_Beta;
         float adcValue=NTC.last_avg;
         float result;
 
-        if(systemSettings.Profile.ntc.detection){                                                       // NTC Autodetect enabled?
+        if(getProfileSettings()->ntc.detection){                                                       // NTC Autodetect enabled?
           if(ntc_status & _USE_EXTERNAL_HIGH){
-            NTC_res = systemSettings.Profile.ntc.high_NTC_res*100;                                      // Second stage, use higher NTC values
-            NTC_Beta = systemSettings.Profile.ntc.high_NTC_beta;
+            NTC_res = getProfileSettings()->ntc.high_NTC_res*100;                                      // Second stage, use higher NTC values
+            NTC_Beta = getProfileSettings()->ntc.high_NTC_beta;
           }
           else{
-            NTC_res = systemSettings.Profile.ntc.low_NTC_res*100;                                       // First stage, use lower NTC values
-            NTC_Beta = systemSettings.Profile.ntc.low_NTC_beta;
+            NTC_res = getProfileSettings()->ntc.low_NTC_res*100;                                       // First stage, use lower NTC values
+            NTC_Beta = getProfileSettings()->ntc.low_NTC_beta;
           }
         }
         else{                                                                                           // NTC Autodetect disabled, use normal values
-          NTC_res = systemSettings.Profile.ntc.NTC_res*100;
-          NTC_Beta = systemSettings.Profile.ntc.NTC_beta;
+          NTC_res = getProfileSettings()->ntc.NTC_res*100;
+          NTC_Beta = getProfileSettings()->ntc.NTC_beta;
         }
 
-        if(systemSettings.Profile.ntc.pullup){
+        if(getProfileSettings()->ntc.pullup){
           if(adcValue > 4094){
             result = (float)-99.9;
           }
@@ -163,7 +163,7 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
 
 // Read tip temperature
 int16_t readTipTemperatureCompensated(bool new, bool mode, bool tempUnit){
-  if(systemSettings.setupMode==enable)
+  if(getSettings()->setupMode==enable)
       return 0;
 
   int16_t temp, temp_Raw;
@@ -229,7 +229,7 @@ int16_t human2adc(int16_t t) {
   t -= last_NTC_C;
 
   if(t< state_temps[cal_250]){
-    temp = map(t, 0, state_temps[cal_250], systemSettings.Profile.calADC_At_0, currentTipData->calADC_At_250);
+    temp = map(t, 0, state_temps[cal_250], getProfileSettings()->calADC_At_0, currentTipData->calADC_At_250);
   }
   else{
     temp = map(t, state_temps[cal_250], state_temps[cal_400], currentTipData->calADC_At_250, currentTipData->calADC_At_400);
@@ -259,7 +259,7 @@ int16_t adc2Human_x10(int16_t adc_value,bool correction, bool tempUnit) {
   tipData_t *currentTipData = getCurrentTipData();
 
   if(adc_value<currentTipData->calADC_At_250){
-    temp = map(adc_value, systemSettings.Profile.calADC_At_0, currentTipData->calADC_At_250, 0, state_temps[cal_250]);
+    temp = map(adc_value, getProfileSettings()->calADC_At_0, currentTipData->calADC_At_250, 0, state_temps[cal_250]);
   }
   else{
     temp = map(adc_value, currentTipData->calADC_At_250, currentTipData->calADC_At_400, state_temps[cal_250], state_temps[cal_400]);

@@ -36,8 +36,8 @@
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "user_main.c"
 #endif
+#define __BASE_FILE__ "user_main.c"
 
 extern ADC_HandleTypeDef ADC_DEVICE;
 extern DMA_HandleTypeDef FILL_DMA;
@@ -121,17 +121,17 @@ void InitAfterMCUConfiguration(void){
     restoreSettings();
     ADC_Init(&ADC_DEVICE);
     setDisplayPower(disable);
-    setDisplayContrastOrBrightness(systemSettings.settings.contrastOrBrightness);
-    setDisplayXflip(systemSettings.settings.displayXflip);
-    setDisplayYflip(systemSettings.settings.displayYflip);
-    setDisplayStartLine(systemSettings.settings.displayStartLine);
+    setDisplayContrastOrBrightness(getSystemSettings()->contrastOrBrightness);
+    setDisplayXflip(getSystemSettings()->displayXflip);
+    setDisplayYflip(getSystemSettings()->displayYflip);
+    setDisplayStartLine(getSystemSettings()->displayStartLine);
 #ifndef ST7565                                                          // Only for SSD1306
     setDisplayPower(disable);
-    setDisplayClk(systemSettings.settings.displayClk);
-    setDisplayVcom(systemSettings.settings.displayVcom);
-    setDisplayPrecharge(systemSettings.settings.displayPrecharge);
+    setDisplayClk(getSystemSettings()->displayClk);
+    setDisplayVcom(getSystemSettings()->displayVcom);
+    setDisplayPrecharge(getSystemSettings()->displayPrecharge);
 #elif defined ST7565
-    setDisplayResRatio(systemSettings.settings.displayResRatio);        // Only for ST7565
+    setDisplayResRatio(getSystemSettings()->displayResRatio);        // Only for ST7565
 #endif
     setDisplayPower(enable);
     ironInit(&READ_TIMER, &PWM_TIMER,PWM_CHANNEL);
@@ -171,7 +171,7 @@ void Program_Handler(void) {
 #ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
   handleAddonSwitchOffReminder();
 #endif
-  if(systemSettings.Profile.WakeInputMode!=mode_stand){
+  if(getProfileSettings()->WakeInputMode!=mode_stand){
     readWake();
   }
 }
@@ -185,9 +185,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
     __HAL_TIM_CLEAR_FLAG(ironReadTimer,TIM_FLAG_UPDATE);
 
     if(ADC_Status==ADC_Idle){
-      __HAL_TIM_SET_AUTORELOAD(ironReadTimer,systemSettings.Profile.readPeriod-(systemSettings.Profile.readDelay+1)); // load (period-delay) time
+      __HAL_TIM_SET_AUTORELOAD(ironReadTimer,getProfileSettings()->readPeriod-(getProfileSettings()->readDelay+1)); // load (period-delay) time
 
-      if(systemSettings.settings.activeDetection && !getIronErrorFlags().safeMode){
+      if(getSystemSettings()->activeDetection && !getIronErrorFlags().safeMode){
         configurePWMpin(output_High);                                                   // Force PWM high for a few uS (typically 5-10uS)
         while(__HAL_TIM_GET_COUNTER(ironReadTimer)<(TIP_DETECT_TIME/5));
       }
@@ -195,7 +195,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *_htim){
       ADC_Status = ADC_Waiting;
     }
     else if(ADC_Status==ADC_Waiting){
-      __HAL_TIM_SET_AUTORELOAD(ironReadTimer,systemSettings.Profile.readDelay);       // Load Delay time
+      __HAL_TIM_SET_AUTORELOAD(ironReadTimer,getProfileSettings()->readDelay);       // Load Delay time
       ADC_Start_DMA();
     }
   }

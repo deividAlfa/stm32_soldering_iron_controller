@@ -25,7 +25,7 @@ static bool clone_fix;
 #endif
 
 void update_System_menu(void){
-  bool mode = (systemSettings.Profile.WakeInputMode==mode_shake);
+  bool mode = (getProfileSettings()->WakeInputMode==mode_shake);
   comboitem_system_BootMode->enabled        = mode;
   comboitem_system_ShakeWakeMode->enabled   = mode;
   comboitem_system_ButtonWakeMode->enabled  = mode;
@@ -49,11 +49,11 @@ void updateTemperatureUnit(void){
 //=========================================================
 #ifdef ENABLE_DEBUG_SCREEN
 static void * getDbgScr() {
-  temp = systemSettings.settings.debugEnabled;
+  temp = getSystemSettings()->debugEnabled;
   return &temp;
 }
 static void setDbgScr(uint32_t *val) {
-  systemSettings.settings.debugEnabled = *val;
+  getSystemSettings()->debugEnabled = *val;
 }
 #endif
 
@@ -78,112 +78,112 @@ static void setTmpUnit(uint32_t *val) {
 }
 //=========================================================
 static void * getTmpStep() {
-  temp = systemSettings.settings.tempStep;
+  temp = getSystemSettings()->tempStep;
   return &temp;
 }
 static void setTmpStep(uint32_t *val) {
-  systemSettings.settings.tempStep = *val;
+  getSystemSettings()->tempStep = *val;
 }
 //=========================================================
 
 static void * getBigTmpStep() {
-  temp = systemSettings.settings.tempBigStep;
+  temp = getSystemSettings()->tempBigStep;
   return &temp;
 }
 
 static void setBigTmpStep(uint32_t *val) {
-  systemSettings.settings.tempBigStep = *val;
+  getSystemSettings()->tempBigStep = *val;
 }
 //=========================================================
 
 static void * getGuiTempDenoise() {
-  temp = systemSettings.settings.guiTempDenoise;
+  temp = getSystemSettings()->guiTempDenoise;
   return &temp;
 }
 static void setGuiTempDenoise(uint32_t *val) {
-  systemSettings.settings.guiTempDenoise = *val;
+  getSystemSettings()->guiTempDenoise = *val;
 }
 //=========================================================
 static void * getActiveDetection() {
-  temp = systemSettings.settings.activeDetection;
+  temp = getSystemSettings()->activeDetection;
   return &temp;
 }
 static void setActiveDetection(uint32_t *val) {
-  systemSettings.settings.activeDetection = * val;
+  getSystemSettings()->activeDetection = * val;
 }
 //=========================================================
 static void * getColdBoost() {
-  temp = systemSettings.settings.coldBoost;
+  temp = getSystemSettings()->coldBoost;
   return &temp;
 }
 static void setColdBoost(uint32_t *val) {
-  systemSettings.settings.coldBoost = * val;
+  getSystemSettings()->coldBoost = * val;
 }
 //=========================================================
 static void * getEncoderMode() {
-  temp = systemSettings.settings.EncoderMode;
+  temp = getSystemSettings()->EncoderMode;
   return &temp;
 }
 static void setEncoderMode(uint32_t *val) {
-  systemSettings.settings.EncoderMode = * val;
-  RE_SetMode(&RE1_Data, systemSettings.settings.EncoderMode);
+  getSystemSettings()->EncoderMode = * val;
+  RE_SetMode(&RE1_Data, getSystemSettings()->EncoderMode);
 }
 //=========================================================
 static void * getGuiUpd_ms() {
-  temp = systemSettings.settings.guiUpdateDelay;
+  temp = getSystemSettings()->guiUpdateDelay;
   return &temp;
 }
 static void setGuiUpd_ms(uint32_t *val) {
-  systemSettings.settings.guiUpdateDelay = *val;
+  getSystemSettings()->guiUpdateDelay = *val;
 }
 //=========================================================
 static void * getLVP() {
-  temp = systemSettings.settings.lvp;
+  temp = getSystemSettings()->lvp;
   return &temp;
 }
 static void setLVP(uint32_t *val) {
-  systemSettings.settings.lvp = *val;
+  getSystemSettings()->lvp = *val;
 }
 //=========================================================
 static void * getbuzzerMode() {
-  temp = systemSettings.settings.buzzerMode;
+  temp = getSystemSettings()->buzzerMode;
   return &temp;
 }
 static void setbuzzerMode(uint32_t *val) {
-  systemSettings.settings.buzzerMode = *val;
+  getSystemSettings()->buzzerMode = *val;
 }
 //=========================================================
 static void * getInitMode() {
-  temp = systemSettings.settings.initMode;
+  temp = getSystemSettings()->initMode;
   return &temp;
 }
 static void setInitMode(uint32_t *val) {
-  systemSettings.settings.initMode = *val;
+  getSystemSettings()->initMode = *val;
 }
 //=========================================================
 static void * getLanguage() {
-  temp = systemSettings.settings.language;
+  temp = getSystemSettings()->language;
   return &temp;
 }
 static void setLanguage(uint32_t *val) {
   lang = *val;
-  systemSettings.settings.language=*val;
+  getSystemSettings()->language=*val;
 }
 //=========================================================
 static void * getButtonWakeMode() {
-  temp = systemSettings.settings.buttonWakeMode;
+  temp = getSystemSettings()->buttonWakeMode;
   return &temp;
 }
 static void setButtonWakeMode(uint32_t *val) {
-  systemSettings.settings.buttonWakeMode = *val;
+  getSystemSettings()->buttonWakeMode = *val;
 }
 //=========================================================
 static void * getShakeWakeMode() {
-  temp = systemSettings.settings.shakeWakeMode;
+  temp = getSystemSettings()->shakeWakeMode;
   return &temp;
 }
 static void setShakeWakeMode(uint32_t *val) {
-  systemSettings.settings.shakeWakeMode = *val;
+  getSystemSettings()->shakeWakeMode = *val;
 }
 //=========================================================
 #ifndef STM32F072xB
@@ -197,16 +197,16 @@ static void setCloneFix(uint32_t *val) {
 #endif
 //=========================================================
 static void * getHasBattery() {
-  temp = systemSettings.settings.hasBattery;
+  temp = getSystemSettings()->hasBattery;
   return &temp;
 }
 static void setHasBattery(uint32_t *val) {
-  systemSettings.settings.hasBattery = * val;
+  getSystemSettings()->hasBattery = * val;
 }
 //=========================================================
 static void system_onEnter(screen_t *scr){
 #ifndef STM32F072xB
-  clone_fix = systemSettings.settings.clone_fix;
+  clone_fix = getSystemSettings()->clone_fix;
 #endif
 
   if(scr==&Screen_settings){
@@ -219,13 +219,13 @@ static void system_onExit(screen_t *scr){                                       
 #ifndef STM32F072xB
   if(isSystemSettingsChanged()){
 
-    if(systemSettings.settings.hasBattery != flashGlobalSettings.settings.hasBattery){            // Battery mode changed
-      copy_bkp_data((systemSettings.settings.hasBattery) && 1);                                   // 0=ram_to_flash, 1=flash_to_ram
+    if(getSystemSettings()->hasBattery != getFlashSystemSettings()->hasBattery){            // Battery mode changed
+      copy_bkp_data((getSystemSettings()->hasBattery) && 1);                                   // 0=ram_to_flash, 1=flash_to_ram
       loadProfile(getCurrentProfile());                                                 // Reload tip from current backup source
     }
 
-    if(systemSettings.settings.clone_fix != clone_fix){                                           // Clone fix needs rebooting
-      systemSettings.settings.clone_fix = clone_fix;
+    if(getSystemSettings()->clone_fix != clone_fix){                                           // Clone fix needs rebooting
+      getSystemSettings()->clone_fix = clone_fix;
       saveSettings(save_Settings, no_mode, no_mode, do_reboot);
     }
     else

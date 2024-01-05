@@ -16,30 +16,30 @@ static comboBox_item_t* comboitem_fume_extractor_after_run_widget;
 
 static void update_addons_screen_fume_extractor(void)
 {
-  comboitem_fume_extractor_after_run_widget->enabled = systemSettings.addonSettings.fumeExtractorMode == fume_extractor_mode_auto;
+  comboitem_fume_extractor_after_run_widget->enabled = getAddons()->fumeExtractorMode == fume_extractor_mode_auto;
 }
 
 static void* getFumeExtractorMode()
 {
-  temp = systemSettings.addonSettings.fumeExtractorMode;
+  temp = getAddons()->fumeExtractorMode;
   return &temp;
 }
 
 static void setFumeExtractorMode(uint32_t *val)
 {
-  systemSettings.addonSettings.fumeExtractorMode = *val;
+  getAddons()->fumeExtractorMode = *val;
   update_addons_screen_fume_extractor();
 }
 
 static void* getAfterRunDelay()
 {
-  temp = systemSettings.addonSettings.fumeExtractorAfterrun * 5u;
+  temp = getAddons()->fumeExtractorAfterrun * 5u;
   return &temp;
 }
 
 static void setAfterRunDelay(uint32_t *val)
 {
-  systemSettings.addonSettings.fumeExtractorAfterrun = (*val) / 5u;
+  getAddons()->fumeExtractorAfterrun = (*val) / 5u;
 }
 
 

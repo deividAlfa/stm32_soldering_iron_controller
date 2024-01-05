@@ -14,8 +14,8 @@
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "adc_global.c"
 #endif
+#define __BASE_FILE__ "adc_global.c"
 
 
 #define SELECTIVE_FILTERING
@@ -145,7 +145,7 @@ void ADC_Init(ADC_HandleTypeDef *adc){
   ADC_ChannelConfTypeDef sConfig = {0};
 
 #ifndef STM32F072xB
-  if(systemSettings.settings.clone_fix){
+  if(getSystemSettings()->clone_fix){
       clone_fix();
   }
 #endif
@@ -232,7 +232,7 @@ void ADC_Start_DMA(){
   if(ADC_Status!=ADC_Waiting){
     Error_Handler();
   }
-  if(systemSettings.isSaving){                                                              // If saving, skip ADC conversion (PWM pin disabled)
+  if(getSettings()->isSaving){                                                              // If saving, skip ADC conversion (PWM pin disabled)
     ADC_Status=ADC_Idle;
     HAL_IWDG_Refresh(&hiwdg);
     return;
@@ -250,7 +250,7 @@ void ADC_Start_DMA(){
 
 void ADC_Stop_DMA(void){
 #ifndef STM32F072xB                                             // Disable workaround for STM32F0x
-  bool clone=systemSettings.settings.clone_fix;
+  bool clone=getSystemSettings()->clone_fix;
   if(clone)
       CLEAR_BIT(adc_device->Instance->CR2, ADC_CR2_CONT);
 #endif
@@ -409,7 +409,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* _hadc){
     #ifdef DEBUG_PWM
     PWM_DBG_GPIO_Port->BSRR=PWM_DBG_Pin<<16;                                                // Set TEST to 0
     #endif
-    if(systemSettings.Profile.WakeInputMode==mode_stand){
+    if(getProfileSettings()->WakeInputMode==mode_stand){
       readWake();
     }
 

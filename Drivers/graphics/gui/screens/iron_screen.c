@@ -119,70 +119,70 @@ static void * get_reset_threshold() {
 }
 //=========================================================
 void update_Iron_menu(void){
-  comboitem_ShakeFiltering->enabled = (systemSettings.Profile.WakeInputMode==mode_shake);
-  comboitem_StandMode->enabled = (systemSettings.Profile.WakeInputMode==mode_stand);
-  comboitem_StandDelay->enabled = (systemSettings.Profile.WakeInputMode==mode_stand);
-  comboitem_smartActiveLoad->enabled = (systemSettings.Profile.smartActiveEnabled==enable);
+  comboitem_ShakeFiltering->enabled = (getProfileSettings()->WakeInputMode==mode_shake);
+  comboitem_StandMode->enabled = (getProfileSettings()->WakeInputMode==mode_stand);
+  comboitem_StandDelay->enabled = (getProfileSettings()->WakeInputMode==mode_stand);
+  comboitem_smartActiveLoad->enabled = (getProfileSettings()->smartActiveEnabled==enable);
 }
 //=========================================================
 #ifdef USE_VIN
 static void * getMaxPower() {
-  temp = systemSettings.Profile.power;
+  temp = getProfileSettings()->power;
   return &temp;
 }
 static void setMaxPower(uint32_t *val) {
-  systemSettings.Profile.power = *val;
+  getProfileSettings()->power = *val;
 }
 //=========================================================
 static void * getTipImpedance() {
-  temp = systemSettings.Profile.impedance;
+  temp = getProfileSettings()->impedance;
   return &temp;
 }
 static void setTipImpedance(uint32_t *val) {
-  systemSettings.Profile.impedance = *val;
+  getProfileSettings()->impedance = *val;
 }
 #endif
 //=========================================================
 static void setSleepTime(uint32_t *val) {
-  systemSettings.Profile.sleepTimeout= *val*60000;
+  getProfileSettings()->sleepTimeout= *val*60000;
 }
 static void * getSleepTime() {
-  temp = systemSettings.Profile.sleepTimeout/60000;
+  temp = getProfileSettings()->sleepTimeout/60000;
   return &temp;
 }
 //=========================================================
 static void setStandbyTime(uint32_t *val) {
-  systemSettings.Profile.standbyTimeout= *val*60000;
+  getProfileSettings()->standbyTimeout= *val*60000;
 }
 static void * getStandbyTime() {
-  temp = systemSettings.Profile.standbyTimeout/60000;
+  temp = getProfileSettings()->standbyTimeout/60000;
   return &temp;
 }
 //=========================================================
 static void setStandbyTemp(uint32_t *val) {
-  systemSettings.Profile.standbyTemperature= *val;
+  getProfileSettings()->standbyTemperature= *val;
 }
 static void * getStandbyTemp() {
-  temp = systemSettings.Profile.standbyTemperature;
+  temp = getProfileSettings()->standbyTemperature;
   return &temp;
 }
 //=========================================================
 static void setDefaultTemp(uint32_t *val) {
-  if(*val > systemSettings.Profile.MaxSetTemperature){
-    *val = systemSettings.Profile.MaxSetTemperature;
+  if(*val > getProfileSettings()->MaxSetTemperature){
+    *val = getProfileSettings()->MaxSetTemperature;
   }
-  else if(*val < systemSettings.Profile.MinSetTemperature){
-    *val = systemSettings.Profile.MinSetTemperature;
+  else if(*val < getProfileSettings()->MinSetTemperature){
+    *val = getProfileSettings()->MinSetTemperature;
   }
-  systemSettings.Profile.defaultTemperature = *val;
+  getProfileSettings()->defaultTemperature = *val;
 }
 static void * getDefaultTemp() {
-  temp = systemSettings.Profile.defaultTemperature;
+  temp = getProfileSettings()->defaultTemperature;
   return &temp;
 }
 //=========================================================
 static void * _getPwmMul() {
-  temp=systemSettings.Profile.pwmMul;
+  temp=getProfileSettings()->pwmMul;
   return &temp;
 }
 static void _setPwmMul(uint32_t *val) {
@@ -190,136 +190,136 @@ static void _setPwmMul(uint32_t *val) {
 }
 //=========================================================
 static void * _getReadDelay() {
-  temp=(systemSettings.Profile.readDelay+1)/20;
+  temp=(getProfileSettings()->readDelay+1)/20;
   return &temp;
 }
 static void _setReadDelay(uint32_t *val) {
   uint16_t delay=(*val*20)-1;
-  if(delay>(systemSettings.Profile.readPeriod-200)){
-    delay = systemSettings.Profile.readPeriod-200;
+  if(delay>(getProfileSettings()->readPeriod-200)){
+    delay = getProfileSettings()->readPeriod-200;
   }
   setReadDelay(delay);
 }
 //=========================================================
 static void * _getReadPeriod() {
-  temp=(systemSettings.Profile.readPeriod+1)/200;
+  temp=(getProfileSettings()->readPeriod+1)/200;
   return &temp;
 }
 static void _setReadPeriod(uint32_t *val) {
   uint16_t period=(*val*200)-1;
 
-  if(period<(systemSettings.Profile.readDelay+200)){
-      period=systemSettings.Profile.readDelay+200;
+  if(period<(getProfileSettings()->readDelay+200)){
+      period=getProfileSettings()->readDelay+200;
   }
   setReadPeriod(period);
 }
 //=========================================================
 static void * getMaxTemp() {
-  temp=systemSettings.Profile.MaxSetTemperature;
+  temp=getProfileSettings()->MaxSetTemperature;
   return &temp;
 }
 static void setMaxTemp(uint32_t *val) {
-  systemSettings.Profile.MaxSetTemperature=*val;
+  getProfileSettings()->MaxSetTemperature=*val;
   updateTempValues();
 }
 //=========================================================
 static void * getMinTemp() {
-  temp=systemSettings.Profile.MinSetTemperature;
+  temp=getProfileSettings()->MinSetTemperature;
   return &temp;
 }
 static void setMinTemp(uint32_t *val) {
-  systemSettings.Profile.MinSetTemperature=*val;
+  getProfileSettings()->MinSetTemperature=*val;
   updateTempValues();
 }
 //=========================================================
 static void * geterrorDelay() {
-  temp = systemSettings.Profile.errorTimeout/100;
+  temp = getProfileSettings()->errorTimeout/100;
   return &temp;
 }
 static void seterrorDelay(uint32_t *val) {
-  systemSettings.Profile.errorTimeout = *val*100;
+  getProfileSettings()->errorTimeout = *val*100;
 }
 //=========================================================
 static void * geterrorResume() {
-  temp = systemSettings.Profile.errorResumeMode;
+  temp = getProfileSettings()->errorResumeMode;
   return &temp;
 }
 static void seterrorResume(uint32_t *val) {
-  systemSettings.Profile.errorResumeMode = *val;
+  getProfileSettings()->errorResumeMode = *val;
 }
 //=========================================================
 static void * getNoIronADC() {
-  temp = systemSettings.Profile.noIronValue;
+  temp = getProfileSettings()->noIronValue;
   return &temp;
 }
 static void setNoIronADC(uint32_t *val) {
-  systemSettings.Profile.noIronValue = *val;
+  getProfileSettings()->noIronValue = *val;
 }
 //=========================================================
 static void setBoostTime(uint32_t *val) {
-  systemSettings.Profile.boostTimeout= *val*60000;
+  getProfileSettings()->boostTimeout= *val*60000;
 }
 static void * getBoostTime() {
-  temp = systemSettings.Profile.boostTimeout/60000;
+  temp = getProfileSettings()->boostTimeout/60000;
   return &temp;
 }
 //=========================================================
 static void setBoostTemp(uint32_t *val) {
-  systemSettings.Profile.boostTemperature= *val;
+  getProfileSettings()->boostTemperature= *val;
 }
 static void * getBoostTemp() {
-  temp = systemSettings.Profile.boostTemperature;
+  temp = getProfileSettings()->boostTemperature;
   return &temp;
 }
 //=========================================================
 static void * getWakeMode() {
-  temp = systemSettings.Profile.WakeInputMode;
+  temp = getProfileSettings()->WakeInputMode;
   update_Iron_menu();
   return &temp;
 }
 static void setWakeMode(uint32_t *val) {
-  systemSettings.Profile.WakeInputMode = *val;
+  getProfileSettings()->WakeInputMode = *val;
 }
 //=========================================================
 static void * getStandMode() {
-  temp = systemSettings.Profile.StandMode;
+  temp = getProfileSettings()->StandMode;
   return &temp;
 }
 static void setStandMode(uint32_t *val) {
-  systemSettings.Profile.StandMode = *val;
+  getProfileSettings()->StandMode = *val;
 }
 //=========================================================
 static void * getStandDelay() {
-  temp = systemSettings.Profile.standDelay;
+  temp = getProfileSettings()->standDelay;
   return &temp;
 }
 static void setStandDelay(uint32_t *val) {
-  systemSettings.Profile.standDelay = *val;
+  getProfileSettings()->standDelay = *val;
 }
 //=========================================================
 static void setsmartActiveEnable(uint32_t *val) {
-  systemSettings.Profile.smartActiveEnabled = *val;
+  getProfileSettings()->smartActiveEnabled = *val;
   update_Iron_menu();
 }
 static void * getsmartActiveEnable() {
-  temp = systemSettings.Profile.smartActiveEnabled;
+  temp = getProfileSettings()->smartActiveEnabled;
   return &temp;
 }
 //=========================================================
 static void setsmartActiveLoad(uint32_t *val) {
-  systemSettings.Profile.smartActiveLoad = *val;
+  getProfileSettings()->smartActiveLoad = *val;
 }
 static void * getsmartActiveLoad() {
-  temp = systemSettings.Profile.smartActiveLoad;
+  temp = getProfileSettings()->smartActiveLoad;
   return &temp;
 }
 //=========================================================
 static void * getShakeFiltering() {
-  temp = systemSettings.Profile.shakeFiltering;
+  temp = getProfileSettings()->shakeFiltering;
   return &temp;
 }
 static void setShakeFiltering(uint32_t *val) {
-  systemSettings.Profile.shakeFiltering = *val;
+  getProfileSettings()->shakeFiltering = *val;
 }
 //=========================================================
 
@@ -347,11 +347,11 @@ static void iron_onEnter(screen_t *scr){
 static void iron_onExit(screen_t *scr){
   uint16_t userTemp = getUserTemperature();
 
-  if(userTemp > systemSettings.Profile.MaxSetTemperature)
-    setUserTemperature(systemSettings.Profile.MaxSetTemperature);
+  if(userTemp > getProfileSettings()->MaxSetTemperature)
+    setUserTemperature(getProfileSettings()->MaxSetTemperature);
 
-  else if (userTemp < systemSettings.Profile.MinSetTemperature)
-    setUserTemperature(systemSettings.Profile.MinSetTemperature);
+  else if (userTemp < getProfileSettings()->MinSetTemperature)
+    setUserTemperature(getProfileSettings()->MinSetTemperature);
 
   if(isCurrentProfileChanged())
     saveSettings(save_Profile, no_mode, no_mode, no_reboot);              // Save now we have all heap free
@@ -360,7 +360,7 @@ static void iron_onExit(screen_t *scr){
 int filter_Save(widget_t *w, RE_Rotation_t input){
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
-  systemSettings.Profile.tipFilter = bak_f;
+  getProfileSettings()->tipFilter = bak_f;
   TIP.filter=bak_f;
   __set_PRIMASK(_irq);
   return last_scr;
@@ -454,7 +454,7 @@ static void * get_NTC_detect_low_res_beta() {
 static int saveNTC(widget_t *w, RE_Rotation_t input) {
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
-  systemSettings.Profile.ntc = backup_ntc;
+  getProfileSettings()->ntc = backup_ntc;
   detectNTC();
 
   __set_PRIMASK(_irq);
@@ -464,7 +464,7 @@ static int saveNTC(widget_t *w, RE_Rotation_t input) {
 
 static void system_ntc_onEnter(screen_t *scr){
   comboResetIndex(Screen_system_ntc.current_widget);
-  backup_ntc = systemSettings.Profile.ntc;
+  backup_ntc = getProfileSettings()->ntc;
   update_NTC_menu();
 }
 
@@ -919,7 +919,7 @@ static void iron_create(screen_t *scr){
 
 static void iron_advFilter_onEnter(screen_t *scr){
   comboResetIndex(Screen_advFilter.current_widget);
-  bak_f = systemSettings.Profile.tipFilter;
+  bak_f = getProfileSettings()->tipFilter;
 }
 static void iron_advFilter_create(screen_t *scr){
   widget_t *w;
@@ -1033,16 +1033,16 @@ void iron_screen_setup(screen_t *scr){
 
 void updateTempValues()
 {
-  editable_IRON_MinTemp->max_value = systemSettings.Profile.MaxSetTemperature - 1;
-  editable_IRON_MaxTemp->min_value = systemSettings.Profile.MinSetTemperature + 1;
+  editable_IRON_MinTemp->max_value = getProfileSettings()->MaxSetTemperature - 1;
+  editable_IRON_MaxTemp->min_value = getProfileSettings()->MinSetTemperature + 1;
 
-  if(systemSettings.Profile.defaultTemperature > systemSettings.Profile.MaxSetTemperature)
+  if(getProfileSettings()->defaultTemperature > getProfileSettings()->MaxSetTemperature)
   {
-    systemSettings.Profile.defaultTemperature = systemSettings.Profile.MaxSetTemperature;
+    getProfileSettings()->defaultTemperature = getProfileSettings()->MaxSetTemperature;
   }
-  else if(systemSettings.Profile.defaultTemperature < systemSettings.Profile.MinSetTemperature)
+  else if(getProfileSettings()->defaultTemperature < getProfileSettings()->MinSetTemperature)
   {
-    systemSettings.Profile.defaultTemperature = systemSettings.Profile.MinSetTemperature;
+    getProfileSettings()->defaultTemperature = getProfileSettings()->MinSetTemperature;
   }
 }
 

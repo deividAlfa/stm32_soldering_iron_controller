@@ -24,8 +24,8 @@ struct{
 
 #ifdef __BASE_FILE__
 #undef __BASE_FILE__
-#define __BASE_FILE__ "widgets.c"
 #endif
+#define __BASE_FILE__ "widgets.c"
 
 void newWidget(widget_t **new, widgetType type, struct screen_t *scr, void **content){
   widget_t *w=_malloc(sizeof(widget_t));

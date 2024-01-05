@@ -20,13 +20,13 @@ void handleAddonSwitchOffReminder()
   static uint32_t lastBeepTime   = 0u;
 
   uint32_t const currentTimeStamp = HAL_GetTick();
-  uint32_t const beepPeriodInMsec = systemSettings.addonSettings.swOffReminderPeriod * MSEC_IN_SEC;
+  uint32_t const beepPeriodInMsec = getAddons()->swOffReminderPeriod * MSEC_IN_SEC;
 
-  if((systemSettings.addonSettings.swOffReminderEnabled) &&
+  if((getAddons()->swOffReminderEnabled) &&
      (getCurrentMode() == mode_sleep))
   {
     uint32_t const elapsedSinceActive                 = currentTimeStamp - lastActiveTime;
-    uint32_t const swOffReminderInactivityDelayInMsec = systemSettings.addonSettings.swOffReminderInactivityDelay * MSEC_IN_SEC;
+    uint32_t const swOffReminderInactivityDelayInMsec = getAddons()->swOffReminderInactivityDelay * MSEC_IN_SEC;
 
     if(elapsedSinceActive > swOffReminderInactivityDelayInMsec)
     {
@@ -36,7 +36,7 @@ void handleAddonSwitchOffReminder()
       {
         lastBeepTime = currentTimeStamp;
 
-        switch (systemSettings.addonSettings.swOffReminderBeepType) {
+        switch (getAddons()->swOffReminderBeepType) {
           case switch_off_reminder_short_beep:
           {
             buzzer_short_beep();
