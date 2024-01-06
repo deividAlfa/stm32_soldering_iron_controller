@@ -78,7 +78,7 @@ static const uint8_t u8x8_d_ssd1606_172x72_gde021a1_init_seq[] = {
   U8X8_CA(0x4f, 0),	/* set y pos, 0...179 */
 
   U8X8_CA(0xf0, 0x1f),	/* set booster feedback to internal */
-  U8X8_CA(0x22, 0xc0),	/* display update seq. option: enable clk, enable CP, .... todo: this is never activated */
+  U8X8_CA(0x22, 0xc0),	/* display update seq. option: enable clk, enable CP, .... to-do: this is never activated */
   
   U8X8_C(0x32),	/* write LUT register*/
 

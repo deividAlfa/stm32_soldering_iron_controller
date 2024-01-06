@@ -102,7 +102,7 @@ static uint8_t u8x8_d_lc7981_common(u8x8_t *u8x8, uint8_t msg, U8X8_UNUSED uint8
 	
 	x is assumed to be zero
     
-	TODO: Consider arg_int, however arg_int is not used by u8g2
+	TO-DO: Consider arg_int, however arg_int is not used by u8g2
       */
       c = ((u8x8_tile_t *)arg_ptr)->cnt;	/* number of tiles */
       ptr = ((u8x8_tile_t *)arg_ptr)->tile_ptr;	/* data ptr to the tiles */

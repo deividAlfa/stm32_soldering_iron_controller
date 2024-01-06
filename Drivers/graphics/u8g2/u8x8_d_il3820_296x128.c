@@ -283,7 +283,7 @@ static const uint8_t u8x8_d_il3820_296x128_init_seq[] = {
   U8X8_CA(0x03, 0x00), 	/* Gate Driving voltage: 15V (lowest value)*/
   U8X8_CA(0x04, 0x0a), 	/* Source Driving voltage: 15V (mid value and POR)*/
   
-  //U8X8_CA(0x22, 0xc0),	/* display update seq. option: enable clk, enable CP, .... todo: this is never activated */
+  //U8X8_CA(0x22, 0xc0),	/* display update seq. option: enable clk, enable CP, .... to-do: this is never activated */
 
   //U8X8_CA(0x0b, 7),	/* Set Delay of gate and source non overlap period, POR = 7 */
   U8X8_CA(0x2c, 0xa8),	/* write vcom value*/
