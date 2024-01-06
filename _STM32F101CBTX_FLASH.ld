@@ -59,7 +59,7 @@ SECTIONS
   .tempSettings (NOLOAD) :
   {
     . = ALIGN(4);
-    KEEP(*(.tempSetpoint))
+    KEEP(*(.tempSettings))
   } > TEMP_SETTINGS
 
   .profileSettings (NOLOAD) :
