@@ -84,7 +84,7 @@ static void addons_screen_fume_extractor_init(screen_t *scr)
 static void addons_screen_fume_extractor_onExit(screen_t *scr)
 {
   if(isAddonSettingsChanged()){
-    saveSettings(save_All, no_reboot);              // Save now we have all heap free
+    saveSettings(save_addons, no_reboot);              // Save now we have all heap free
   }
 }
 void addons_screen_fume_extractor_setup(screen_t *scr)

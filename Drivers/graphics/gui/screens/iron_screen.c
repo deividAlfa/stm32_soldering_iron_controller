@@ -10,7 +10,7 @@
 #include "screen_common.h"
 
 screen_t Screen_iron;
-screen_t Screen_advFilter;
+screen_t Screen_iron_advFilter;
 static comboBox_item_t *comboItem_advFilter;
 static comboBox_item_t *comboitem_ShakeFiltering;
 static comboBox_item_t *comboitem_StandMode;
@@ -21,7 +21,9 @@ static editable_widget_t *editable_IRON_BoostTemp;
 static editable_widget_t *editable_IRON_MaxTemp;
 static editable_widget_t *editable_IRON_MinTemp;
 static editable_widget_t *editable_IRON_UserTemp;
+
 #ifdef USE_NTC
+screen_t Screen_iron_ntc;
 static comboBox_item_t *comboitem_PullRes;
 static comboBox_item_t *comboitem_PullMode;
 static comboBox_item_t *comboitem_AutoDetect;
@@ -345,16 +347,18 @@ static void iron_onEnter(screen_t *scr){
 }
 
 static void iron_onExit(screen_t *scr){
-  uint16_t userTemp = getUserTemperature();
 
-  if(userTemp > getProfileSettings()->MaxSetTemperature)
-    setUserTemperature(getProfileSettings()->MaxSetTemperature);
+  if((scr != &Screen_iron_advFilter) && (scr != &Screen_iron_ntc) && (scr != &Screen_iron) && isCurrentProfileChanged()){    // Going to main screen?
+    uint16_t userTemp = getUserTemperature();
 
-  else if (userTemp < getProfileSettings()->MinSetTemperature)
-    setUserTemperature(getProfileSettings()->MinSetTemperature);
+    if(userTemp > getProfileSettings()->MaxSetTemperature)
+      setUserTemperature(getProfileSettings()->MaxSetTemperature);
 
-  if(isCurrentProfileChanged())
-    saveSettings(save_Profile, no_mode, no_mode, no_reboot);              // Save now we have all heap free
+    else if (userTemp < getProfileSettings()->MinSetTemperature)
+      setUserTemperature(getProfileSettings()->MinSetTemperature);
+
+    saveSettings(save_profile, no_reboot);              // Save now we have all heap free
+  }
 }
 
 int filter_Save(widget_t *w, RE_Rotation_t input){
@@ -462,13 +466,13 @@ static int saveNTC(widget_t *w, RE_Rotation_t input) {
 }
 //=========================================================
 
-static void system_ntc_onEnter(screen_t *scr){
-  comboResetIndex(Screen_system_ntc.current_widget);
+static void iron_ntc_onEnter(screen_t *scr){
+  comboResetIndex(Screen_iron_ntc.current_widget);
   backup_ntc = getProfileSettings()->ntc;
   update_NTC_menu();
 }
 
-static void system_ntc_create(screen_t *scr){
+static void iron_ntc_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
   editable_widget_t* edit;
@@ -485,7 +489,7 @@ static void system_ntc_create(screen_t *scr){
   dis->getData = &get_enable_NTC;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_enable_NTC;
+  edit->setData = (setterFn)&set_enable_NTC;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -497,7 +501,7 @@ static void system_ntc_create(screen_t *scr){
   dis->getData = &get_Pull_mode;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_Pull_mode;
+  edit->setData = (setterFn)&set_Pull_mode;
   edit->options = strings[lang].DownUp;
   edit->numberOfOptions = 2;
 
@@ -511,7 +515,7 @@ static void system_ntc_create(screen_t *scr){
   dis->getData = &get_Pull_res;
   edit->big_step = 10;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_Pull_res;
+  edit->setData = (setterFn)&set_Pull_res;
   edit->max_value = 5000;
   edit->min_value = 1;
 
@@ -523,7 +527,7 @@ static void system_ntc_create(screen_t *scr){
   dis->getData = &get_NTC_detect;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_NTC_detect;
+  edit->setData = (setterFn)&set_NTC_detect;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -537,7 +541,7 @@ static void system_ntc_create(screen_t *scr){
   dis->getData = &get_NTC_detect_high_res;
   edit->big_step = 10;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_NTC_detect_high_res;
+  edit->setData = (setterFn)&set_NTC_detect_high_res;
   edit->max_value = 5000;
   edit->min_value = 1;
 
@@ -549,7 +553,7 @@ static void system_ntc_create(screen_t *scr){
   dis->getData = &get_NTC_detect_high_res_beta;
   edit->big_step = 100;
   edit->step = 10;
-  edit->setData = (void (*)(void *))&set_NTC_detect_high_res_beta;
+  edit->setData = (setterFn)&set_NTC_detect_high_res_beta;
   edit->max_value = 50000;
   edit->min_value = 500;
 
@@ -563,7 +567,7 @@ static void system_ntc_create(screen_t *scr){
   dis->getData = &get_NTC_detect_low_res;
   edit->big_step = 10;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_NTC_detect_low_res;
+  edit->setData = (setterFn)&set_NTC_detect_low_res;
   edit->max_value = 5000;
   edit->min_value = 1;
 
@@ -575,7 +579,7 @@ static void system_ntc_create(screen_t *scr){
   dis->getData = &get_NTC_detect_low_res_beta;
   edit->big_step = 100;
   edit->step = 10;
-  edit->setData = (void (*)(void *))&set_NTC_detect_low_res_beta;
+  edit->setData = (setterFn)&set_NTC_detect_low_res_beta;
   edit->max_value = 50000;
   edit->min_value = 500;
 
@@ -589,7 +593,7 @@ static void system_ntc_create(screen_t *scr){
   dis->getData = &get_NTC_res;
   edit->big_step = 10;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_NTC_res;
+  edit->setData = (setterFn)&set_NTC_res;
   edit->max_value = 5000;
   edit->min_value = 1;
 
@@ -601,7 +605,7 @@ static void system_ntc_create(screen_t *scr){
   dis->getData = &get_NTC_beta;
   edit->big_step = 100;
   edit->step = 10;
-  edit->setData = (void (*)(void *))&set_NTC_beta;
+  edit->setData = (setterFn)&set_NTC_beta;
   edit->max_value = 50000;
   edit->min_value = 500;
 
@@ -631,7 +635,7 @@ static void iron_create(screen_t *scr){
   edit->big_step = 10;
   edit->step = 5;
   edit->max_value = maxTemp;
-  edit->setData = (void (*)(void *))&setMaxTemp;
+  edit->setData = (setterFn)&setMaxTemp;
 
   //  [ Min Temp Widget ]
   //
@@ -644,7 +648,7 @@ static void iron_create(screen_t *scr){
   edit->step = 5;
   edit->max_value = maxTemp;
   edit->min_value = 50;
-  edit->setData = (void (*)(void *))&setMinTemp;
+  edit->setData = (setterFn)&setMinTemp;
 
   //  [ user Temp Widget ]
   //
@@ -655,7 +659,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getDefaultTemp;
   edit->big_step = 10;
   edit->step = 5;
-  edit->setData = (void (*)(void *))&setDefaultTemp;
+  edit->setData = (setterFn)&setDefaultTemp;
 
   //  [ Stby Time Widget ]
   //
@@ -666,7 +670,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getStandbyTime;
   edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setStandbyTime;
+  edit->setData = (setterFn)&setStandbyTime;
   edit->max_value = 60;
 
   //  [ Stby Temp Widget ]
@@ -680,7 +684,7 @@ static void iron_create(screen_t *scr){
   edit->step = 5;
   edit->max_value = 350;
   edit->min_value = 50;
-  edit->setData = (void (*)(void *))&setStandbyTemp;
+  edit->setData = (setterFn)&setStandbyTemp;
 
   //  [ Sleep Time Widget ]
   //
@@ -691,7 +695,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getSleepTime;
   edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setSleepTime;
+  edit->setData = (setterFn)&setSleepTime;
   edit->max_value = 60;
   edit->min_value = 1;
 
@@ -706,7 +710,7 @@ static void iron_create(screen_t *scr){
   edit->step = 1;
   edit->max_value = 60;
   edit->min_value = 1;
-  edit->setData = (void (*)(void *))&setBoostTime;
+  edit->setData = (setterFn)&setBoostTime;
 
   //  [ Boost Temp Widget ]
   //
@@ -719,7 +723,7 @@ static void iron_create(screen_t *scr){
   edit->step = 5;
   edit->max_value = 200;
   edit->min_value = 10;
-  edit->setData = (void (*)(void *))&setBoostTemp;
+  edit->setData = (setterFn)&setBoostTemp;
 
   //  [ Wake mode Widget ]
   //
@@ -728,7 +732,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getWakeMode;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setWakeMode;
+  edit->setData = (setterFn)&setWakeMode;
   edit->options = strings[lang].wakeMode;
   edit->numberOfOptions = 2;
 
@@ -739,7 +743,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getShakeFiltering;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setShakeFiltering;
+  edit->setData = (setterFn)&setShakeFiltering;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -750,7 +754,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getStandMode;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setStandMode;
+  edit->setData = (setterFn)&setStandMode;
   edit->options = strings[lang].InitMode;
   edit->numberOfOptions = 2;
 
@@ -764,7 +768,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getStandDelay;
   edit->big_step = 10;
   edit->step = 5;
-  edit->setData = (void (*)(void *))&setStandDelay;
+  edit->setData = (setterFn)&setStandDelay;
   edit->max_value = 240;
   edit->min_value = 0;
 
@@ -776,7 +780,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getsmartActiveEnable;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setsmartActiveEnable;
+  edit->setData = (setterFn)&setsmartActiveEnable;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -790,7 +794,7 @@ static void iron_create(screen_t *scr){
   edit->step = 1;
   edit->max_value = 500;
   edit->min_value = 1;
-  edit->setData = (void (*)(void *))&setsmartActiveLoad;
+  edit->setData = (setterFn)&setsmartActiveLoad;
 #ifdef USE_VIN
   //  [ Power Widget ]
   //
@@ -801,7 +805,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getMaxPower;
   edit->big_step = 20;
   edit->step = 5;
-  edit->setData = (void (*)(void *))&setMaxPower;
+  edit->setData = (setterFn)&setMaxPower;
   edit->max_value = 500;
   edit->min_value = 5;
 
@@ -815,7 +819,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getTipImpedance;
   edit->big_step = 10;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setTipImpedance;
+  edit->setData = (setterFn)&setTipImpedance;
   edit->max_value = 160;
   edit->min_value = 10;
 #endif
@@ -830,7 +834,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &_getReadPeriod;
   edit->big_step = 10;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&_setReadPeriod;
+  edit->setData = (setterFn)&_setReadPeriod;
   edit->max_value = 200;
   edit->min_value = 10;
 
@@ -844,7 +848,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &_getReadDelay;
   edit->big_step = 10;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&_setReadDelay;
+  edit->setData = (setterFn)&_setReadDelay;
   edit->max_value = 900;
   edit->min_value = 1;
 
@@ -858,7 +862,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &_getPwmMul;
   edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&_setPwmMul;
+  edit->setData = (setterFn)&_setPwmMul;
   edit->max_value = 20;
   edit->min_value = 1;
 
@@ -870,7 +874,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &getNoIronADC;
   edit->big_step = 50;
   edit->step = 10;
-  edit->setData = (void (*)(void *))&setNoIronADC;
+  edit->setData = (setterFn)&setNoIronADC;
   edit->max_value = 4100;
   edit->min_value = 200;
 
@@ -884,7 +888,7 @@ static void iron_create(screen_t *scr){
   dis->getData = &geterrorDelay;
   edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&seterrorDelay;
+  edit->setData = (setterFn)&seterrorDelay;
   edit->max_value = 250;
   edit->min_value = 1;
 
@@ -895,18 +899,18 @@ static void iron_create(screen_t *scr){
   dis->getData = &geterrorResume;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&seterrorResume;
+  edit->setData = (setterFn)&seterrorResume;
   edit->options = strings[lang].errMode;
   edit->numberOfOptions = 3;
 
   //  [ Filter screen ]
   //
-  newComboScreen(w, strings[lang].IRON_FILTER_MENU, screen_advFilter, &comboItem_advFilter);
+  newComboScreen(w, strings[lang].IRON_FILTER_MENU, screen_iron_advFilter, &comboItem_advFilter);
 
   #ifdef USE_NTC
   //  [ NTC screen ]
   //
-  newComboScreen(w, strings[lang].IRON_NTC_MENU, screen_ntc, NULL);
+  newComboScreen(w, strings[lang].IRON_NTC_MENU, screen_iron_ntc, NULL);
   #endif
 
   //  [ BACK button ]
@@ -918,7 +922,7 @@ static void iron_create(screen_t *scr){
 }
 
 static void iron_advFilter_onEnter(screen_t *scr){
-  comboResetIndex(Screen_advFilter.current_widget);
+  comboResetIndex(Screen_iron_advFilter.current_widget);
   bak_f = getProfileSettings()->tipFilter;
 }
 static void iron_advFilter_create(screen_t *scr){
@@ -939,7 +943,7 @@ static void iron_advFilter_create(screen_t *scr){
   dis->endString = "%";
   edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_filter;
+  edit->setData = (setterFn)&set_filter;
   edit->max_value = 99;
   edit->min_value = 0;
 
@@ -951,7 +955,7 @@ static void iron_advFilter_create(screen_t *scr){
   dis->getData = &get_threshold;
   edit->big_step = 10;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_threshold;
+  edit->setData = (setterFn)&set_threshold;
   edit->max_value = 500;
   edit->min_value = 10;
 
@@ -963,7 +967,7 @@ static void iron_advFilter_create(screen_t *scr){
   dis->getData = &get_count_limit;
   edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_count_limit;
+  edit->setData = (setterFn)&set_count_limit;
   edit->max_value = 100;
   edit->min_value = 0;
 
@@ -976,7 +980,7 @@ static void iron_advFilter_create(screen_t *scr){
   dis->endString="%";
   edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_limit_step;
+  edit->setData = (setterFn)&set_limit_step;
   edit->max_value = -1;
   edit->min_value = -20;
 
@@ -989,7 +993,7 @@ static void iron_advFilter_create(screen_t *scr){
   dis->endString="%";
   edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&set_min_filter;
+  edit->setData = (setterFn)&set_min_filter;
   edit->max_value = 99;
   edit->min_value = 0;
 
@@ -1001,7 +1005,7 @@ static void iron_advFilter_create(screen_t *scr){
   dis->getData = &get_reset_threshold;
   edit->big_step = 20;
   edit->step = 5;
-  edit->setData = (void (*)(void *))&set_reset_threshold;
+  edit->setData = (setterFn)&set_reset_threshold;
   edit->max_value = 1000;
   edit->min_value = 10;
 
@@ -1015,18 +1019,20 @@ void iron_screen_setup(screen_t *scr){
   scr->create = &iron_create;
   scr->onExit = &iron_onExit;
 
-  scr = &Screen_advFilter;
-  oled_addScreen(scr, screen_advFilter);
+  scr = &Screen_iron_advFilter;
+  oled_addScreen(scr, screen_iron_advFilter);
   scr->onEnter = &iron_advFilter_onEnter;
+  scr->onExit = &iron_onExit;
   scr->processInput = &autoReturn_ProcessInput;
   scr->create = &iron_advFilter_create;
 
   #ifdef USE_NTC
-  scr=&Screen_system_ntc;
-  oled_addScreen(scr, screen_ntc);
-  scr->onEnter = &system_ntc_onEnter;
+  scr=&Screen_iron_ntc;
+  oled_addScreen(scr, screen_iron_ntc);
+  scr->onEnter = &iron_ntc_onEnter;
+  scr->onExit = &iron_onExit;
   scr->processInput=&autoReturn_ProcessInput;
-  scr->create = &system_ntc_create;
+  scr->create = &iron_ntc_create;
   #endif
 
 }

@@ -355,7 +355,7 @@ static void debug_create(screen_t *scr){
   w->width = 52;
   edit->big_step = 20;
   edit->step = 5;
-  edit->setData = (void (*)(void *))&setSetpoint;
+  edit->setData = (setterFn)&setSetpoint;
   edit->selectable.tab=0;
   edit->selectable.state=widget_edit;
 

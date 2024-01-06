@@ -136,6 +136,15 @@ static void display_onEnter(screen_t *scr){
 #endif
 }
 
+static void display_onExit(screen_t *scr){
+#if defined ST7565
+    if((scr != &Screen_display) && (scr != &Screen_system) && isSystemSettingsChanged())
+#else
+    if((scr != &Screen_display) && (scr != &Screen_display_adv) && (scr != &Screen_system) && isSystemSettingsChanged())    // Going to main screen?
+#endif
+    saveSettings(save_settings, no_reboot);                                                                               // Save
+}
+
 static void display_create(screen_t *scr){
   widget_t* w;
   displayOnly_widget_t* dis;
@@ -153,7 +162,7 @@ static void display_create(screen_t *scr){
   dis->getData = &getDisplayContrastOrBrightness_;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setDisplayContrast_;
+  edit->setData = (setterFn)&setDisplayContrast_;
 #ifdef ST7565
   edit->max_value = 0x3f;
 #else
@@ -169,7 +178,7 @@ static void display_create(screen_t *scr){
   dis->getData = &getdisplayStartColumn;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setdisplayStartColumn;
+  edit->setData = (setterFn)&setdisplayStartColumn;
   edit->max_value = 15;
   edit->min_value = 0;
 
@@ -181,7 +190,7 @@ static void display_create(screen_t *scr){
   dis->getData = &getdisplayStartLine;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setdisplayStartLine;
+  edit->setData = (setterFn)&setdisplayStartLine;
   edit->max_value = 63;
   edit->min_value = 0;
 
@@ -192,7 +201,7 @@ static void display_create(screen_t *scr){
   dis->getData = &getdisplayXflip;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setdisplayXflip;
+  edit->setData = (setterFn)&setdisplayXflip;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -203,7 +212,7 @@ static void display_create(screen_t *scr){
   dis->getData = &getdisplayYflip;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setdisplayYflip;
+  edit->setData = (setterFn)&setdisplayYflip;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -216,7 +225,7 @@ static void display_create(screen_t *scr){
   dis->getData = &getdisplayResRatio;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setdisplayResRatio;
+  edit->setData = (setterFn)&setdisplayResRatio;
   edit->max_value = 7;
   edit->min_value = 1;
 #else
@@ -227,7 +236,7 @@ static void display_create(screen_t *scr){
   dis->getData = &getdimMode;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setdimMode;
+  edit->setData = (setterFn)&setdimMode;
   edit->options = strings[lang].dimMode;
   edit->numberOfOptions = 3;
 
@@ -240,7 +249,7 @@ static void display_create(screen_t *scr){
   dis->getData = &getDimTimeout;
   edit->big_step = 10;
   edit->step = 5;
-  edit->setData = (void (*)(void *))&setDimTimeout;
+  edit->setData = (setterFn)&setDimTimeout;
   edit->max_value = 600;
   edit->min_value = 5;
 
@@ -251,7 +260,7 @@ static void display_create(screen_t *scr){
   dis->getData = &getDimTurnOff;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setDimTurnOff;
+  edit->setData = (setterFn)&setDimTurnOff;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 #endif
@@ -264,6 +273,7 @@ static void display_create(screen_t *scr){
 
 void display_screen_setup(screen_t *scr){
   scr->onEnter = &display_onEnter;
+  scr->onExit= &display_onExit;
   scr->processInput=&autoReturn_ProcessInput;
   scr->create = &display_create;
 }
@@ -355,7 +365,7 @@ static void display_adv_create(screen_t *scr){
   dis->reservedChars=2;
   dis->displayString = bf;
   dis->getData = &getdisplayClk;
-  edit->setData = (void (*)(void *))&setdisplayClk;
+  edit->setData = (setterFn)&setdisplayClk;
 
   //  [ Display Precharge Widget ]
   //
@@ -365,7 +375,7 @@ static void display_adv_create(screen_t *scr){
   dis->reservedChars=2;
   dis->displayString = bf;
   dis->getData = &getdisplayPrecharge;
-  edit->setData = (void (*)(void *))&setdisplayPrecharge;
+  edit->setData = (setterFn)&setdisplayPrecharge;
 
   //  [ Display Vcom Widget ]
   //
@@ -375,7 +385,7 @@ static void display_adv_create(screen_t *scr){
   dis->reservedChars=2;
   dis->displayString = bf;
   dis->getData = &getdisplayVcom;
-  edit->setData = (void (*)(void *))&setdisplayVcom;
+  edit->setData = (setterFn)&setdisplayVcom;
 
   newComboAction(w, strings[lang]._RESET, &display_adv_reset, NULL);
   newComboAction(w, strings[lang]._SAVE, &display_adv_save, NULL);
@@ -384,6 +394,7 @@ static void display_adv_create(screen_t *scr){
 
 void display_screen_adv_setup(screen_t *scr){
   scr->init = &display_adv_init;
+  scr->onExit= &display_onExit;
   scr->processInput=&autoReturn_ProcessInput;
   scr->create = &display_adv_create;
 }

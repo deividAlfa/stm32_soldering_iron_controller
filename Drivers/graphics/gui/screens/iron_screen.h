@@ -12,7 +12,6 @@
 
 
 extern screen_t Screen_iron;
-extern screen_t Screen_advFilter;
 
 void iron_screen_setup(screen_t *scr);
 

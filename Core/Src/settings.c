@@ -168,27 +168,25 @@ const tipData_t defaultTipData[NUM_PROFILES] = {
     .name            =  "C210-",
   },
 };
+const char * defaultTipName[NUM_PROFILES] = { "T12-BC3", "C245-963", "C210-018" };
 
-
-__attribute__((section(".globalSettings"))) flashSettings_t flashSettings;
-__attribute__((section(".profileSettings"))) flashProfiles_t flashProfiles;
-__attribute__((section(".tempSettings"))) temp_settings_t temp_settings;
-#ifdef ENABLE_ADDONS
-__attribute__((section(".addonSettings"))) flashAddons_t flashAddons;
-#endif
+__attribute__((section(".globalSettings"))) flashSettings_t flashGlobalSettings;
+__attribute__((section(".tempSettings"))) temp_settings_t flashTempSettings;
+__attribute__((section(".tips"))) flashTipSlot_t flashTips[3];
 
 static flashTemp_t flashTemp;
 
 #if (__CORTEX_M == 3)                 // STM32F1xx flash page size are 1K or 2K depending on the flash size
-static uint8_t flashPages_GlobalSettings, flashPages_TempSettings;
+static uint8_t flashPages_GlobalSettings, flashPages_TempSettings, flashPages_TipSlot;
 static uint16_t flashPageSize;
 #elif (__CORTEX_M == 0)               // All STM32F07x have 2KB flash pages
   #if (FLASH_PAGE_SIZE != 2048)
     #error Wrong flash page size??
   #endif
 #define flashPageSize                 FLASH_PAGE_SIZE
-#define flashPages_GlobalSettings     ((SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize)
-#define flashPages_TempSettings       ((TEMP_SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize)
+#define flashPages_GlobalSettings     ((sizeof(flashSettings_t) + flashPageSize - 1) / flashPageSize)
+#define flashPages_TempSettings       ((sizeof(temp_settings_t) + flashPageSize - 1) / flashPageSize)
+#define flashPages_TipSlot           ((sizeof(flashTipSlot_t) + flashPageSize - 1) / flashPageSize)
 #endif
 
 
@@ -199,42 +197,24 @@ static void Button_reset(void);
 static void ErrCountDown(uint8_t Start,uint8_t xpos, uint8_t ypos);
 static uint32_t ChecksumSystemSettings(systemSettings_t* system);
 static uint32_t ChecksumProfileSettings(profile_settings_t* profile_settings);
-static uint32_t ChecksumProfile(profile_t* profile);
-static ErrorStatus checkFlashProfiles(void);
+static uint32_t ChecksumTipData(flashTipData_t* tipData);
 static void resetSystemSettings(systemSettings_t * system) ;
-static void resetProfile(profile_t * data, uint8_t profile);
 static void resetProfileSettings(profile_settings_t * data, uint8_t profile);
-static void sortTips(profile_t * data, uint8_t profile);
+static void sortTips(flashTipData_t * data, uint8_t numberOfTips);
 static void flashTempSettingsErase(void);
 static void flashTempSettingsInit(void);
 static void flashTempWrite(void);
-static void flashTipWrite(void);
+static void flashTipsWrite(void);
 static void flashProfileWrite(void);
-
-#ifdef ENABLE_ADDONS
-static uint8_t loadAddonSettings(void);
-static void resetAddonSettings(addonSettings_t *addons);
-static uint32_t ChecksumAddons(addonSettings_t* addonSettings);
-#endif
-
 static void loadSettingsFromBackupRam(void);
 static uint32_t ChecksumBackupRam(void);
 static void readBackupRam(void);
 static void writeBackupRam(void);
-
+#ifdef ENABLE_ADDONS
+static void resetAddonSettings(addonSettings_t *addons);
+static uint32_t ChecksumAddons(addonSettings_t* addonSettings);
+#endif
 static backupRamData_t bkpRamData;
-
-
-extern int  __SETTINGS_SECTION_START; /* defined by the linker, only its address which is the target value */
-#define SETTINGS_SECTION_START ((uint32_t)&__SETTINGS_SECTION_START)
-extern int  __SETTINGS_SECTION_LENGTH; /* defined by the linker, only its address which is the target value */
-#define SETTINGS_SECTION_LENGTH ((uint32_t)&__SETTINGS_SECTION_LENGTH)
-
-extern int  __TEMP_SETTINGS_SECTION_START; /* defined by the linker, only its address which is the target value */
-#define TEMP_SETTINGS_SECTION_START ((uint32_t)&__TEMP_SETTINGS_SECTION_START)
-extern int  __TEMP_SETTINGS_SECTION_LENGTH; /* defined by the linker, only its address which is the target value */
-#define TEMP_SETTINGS_SECTION_LENGTH ((uint32_t)&__TEMP_SETTINGS_SECTION_LENGTH)
-
 
 void updateTempData(bool force){
   uint32_t CurrentTime = HAL_GetTick();
@@ -265,7 +245,7 @@ void updateTempData(bool force){
         flashTemp.prevTemp = currentTemp;
         flashTemp.tempCheckTime = CurrentTime;                                            // Start timeout
       }
-      if(force || ((CurrentTime-flashTemp.tempCheckTime)>4999)) {                           // Different than flash and timeout is over
+      if(force || ((CurrentTime-flashTemp.tempCheckTime)>TEMPSETTINGS_SAVE_TIME)) {                           // Different than flash and timeout is over
         flashTemp.temp = currentTemp;
         flashTempWrite();                                                           // Update temperature in flash
       }
@@ -279,7 +259,7 @@ void updateTempData(bool force){
         for(uint8_t i=0;i<NUM_PROFILES;i++){                                            // Update all tips
           flashTemp.tip[i] = flashTemp.prevTip[i];
         }
-        flashTipWrite();                                                            // Update tip data in flash
+        flashTipsWrite();                                                            // Update tip data in flash
       }
     }
     if(flashTemp.profile != currentProfile) {
@@ -347,22 +327,124 @@ static void writeFlash(uint32_t* src, uint32_t len, uint32_t dstAddr)
   HAL_FLASH_Lock();
 }
 
-void saveSettings(uint8_t save_mode, uint8_t tip_mode, uint8_t tip_index, uint8_t reboot_mode){
+static void resetflashTipData(flashTipData_t *tipData, uint8_t profile){
+  tipData->tip[0] = defaultTipData[profile];                                               // Load default tip
+  strcpy(tipData->tip[0].name, defaultTipName[profile]);                                   // Load default tip name
+  tipData->currentNumberOfTips = 1;                                                        // Set current tips to 1
+  tipData->version = TIP_SETTINGS_VERSION;
+}
+
+void saveTip(uint8_t save_mode, uint8_t tip_index){
+  #ifndef DEBUG
+  struct mallinfo mi = mallinfo();
+  #endif
+  if(mi.uordblks > 128)                   // Check that heap usage is low
+     Error_Handler();                      // We got there from a working screen (Heap must be free)
+
+  uint8_t profile = getCurrentProfile();
+  flashTipSlot_t* flashBufferTipBlock = _malloc(sizeof(flashTipSlot_t));
+
+  if(flashBufferTipBlock == NULL)
+    Error_Handler();
+
+  for(uint8_t i=0; i<NUM_PROFILES; i++){
+    if( ((save_mode == reset_tips) && (i == profile)) || (save_mode == reset_allTips) ||                          // Reset current tip slot, reset all tips
+        (ChecksumTipData(&flashTips[i].data) != flashTips[i].crc)){ // Perform check in others and reset if wrong
+      resetflashTipData(&flashBufferTipBlock->data, i);
+      flashBufferTipBlock->crc = ChecksumTipData(&flashBufferTipBlock->data);
+      eraseFlashPages((uint32_t)&flashTips[i], flashPages_TipSlot);
+      writeFlash((uint32_t*)flashBufferTipBlock, sizeof(flashTipSlot_t), (uint32_t)&flashTips[i]);
+    }
+  }
+
+  if(save_mode == perform_scanFix || save_mode == reset_tips || save_mode == reset_allTips){
+    _free(flashBufferTipBlock);
+    return;
+  }
+
+  if((profile>profile_C210) || (getProfileSettings()->ID != profile ))                                        // Sanity check
+      Error_Handler();
+
+  if( ChecksumTipData(&flashTips[profile].data) != flashTips[profile].crc){
+    if(flashBufferTipBlock == NULL)
+      Error_Handler();
+  }
+  flashBufferTipBlock->data = flashTips[profile].data;                                                       // Backup flash tips
+  if(save_mode == save_tip){
+    flashBufferTipBlock->data.tip[tip_index] =  *getCurrentTipData();                                       // Save current tip
+  }
+  else if(save_mode == add_tip){
+    flashBufferTipBlock->data.tip[flashBufferTipBlock->data.currentNumberOfTips++] =  *getCurrentTipData();     // Add new tip, increase count
+  }
+  else if(save_mode == delete_tip){                                                               // Delete tip
+    for(uint8_t i=tip_index; i<getCurrentNumberOfTips()-1; i++)                      // Overwrite selected tip with the next one, move the rest one position backwards
+      flashBufferTipBlock->data.tip[i] = flashBufferTipBlock->data.tip[i+1];
+
+    flashBufferTipBlock->data.currentNumberOfTips--;                                                               // Move one position back if possible
+    setCurrentTip(tip_index-1);
+  }
+  else
+    Error_Handler();                                                                                  // Save mode = Save_Tip, but tip_modenot defined, something went wrong}
+
+  sortTips(&flashBufferTipBlock->data, flashBufferTipBlock->data.currentNumberOfTips);                                                                         // Sort tips
+
+  flashBufferTipBlock->crc = ChecksumTipData(&flashBufferTipBlock->data);
+
+  eraseFlashPages((uint32_t)&flashTips[profile], flashPages_TipSlot);
+  writeFlash((uint32_t*)flashBufferTipBlock, sizeof(flashTipSlot_t), (uint32_t)&flashTips[profile]);
+
+  uint32_t flashChecksum, ramChecksum;
+
+  // Check flash and profile have same checksum
+  ramChecksum   = ChecksumTipData(&flashBufferTipBlock->data);
+  flashChecksum = ChecksumTipData(&flashTips[profile].data);
+  if( (flashChecksum != ramChecksum) ||
+     (flashChecksum != flashTips[profile].crc)){
+    Error_Handler();
+  }
+  _free(flashBufferTipBlock);
+  loadTipDataFromFlash(getCurrentTip());                                                                // Reload tip, sortTips will have updated the number to keep the same tip, or the new one
+}
+
+static void sortTips(flashTipData_t * data, uint8_t numberOfTips){
+  uint8_t min;
+  char current[TIP_LEN+1];
+  tipData_t backupTip;
+  strcpy (current, getCurrentTipData()->name);                                                    // Copy tip name being used in the system
+  for(uint8_t j=0; j<numberOfTips; j++){                            // Sort alphabetically
+    min = j;                                                                                      // Min is start position
+    for(uint8_t i=j+1; i<numberOfTips; i++){
+      if(strcmp(data->tip[min].name, data->tip[i].name) > 0)                                      // If Tip[Min] > Tip[i]
+        min = i;                                                                                  // Update min
+    }
+    if(min!=j){                                                                                   // If j is not the min
+      backupTip = data->tip[j];                                                                   // Swap j and min
+      data->tip[j] = data->tip[min];
+      data->tip[min] = backupTip;
+    }
+  }
+  setCurrentTip(0);                                                                               // Just in case it's not found
+  for(uint8_t i=0; i<numberOfTips; i++){                            // Find the same tip after sorting
+    if(strcmp(current, data->tip[i].name) == 0){                                                  // If matching name
+      setCurrentTip(i);                                                                           // Update the tip to be reloaded later
+      break;
+    }
+  }
+}
+
+void saveSettings(uint8_t save_mode, uint8_t reboot_mode){
   if(reboot_mode  == do_reboot)                                        // Force safe save_mode (disable iron power) if rebooting.
     setSafeMode(enable);
 
-  #ifndef DEBUG
-  struct mallinfo mi = mallinfo();
-#endif
-  if(mi.uordblks > 128)                   // Check that heap usage is low
-    Error_Handler();                      // We got there from a working screen (Heap must be free)
+
+
   uint8_t needs_saving = save_mode;
   uint32_t _irq = __get_PRIMASK();
 
-  if( ((save_mode & save_Settings) && (save_mode & reset_Settings)) ||        // Sanity check
-      ((save_mode & save_Profile) && (save_mode & reset_Profile))   ||
-      ((save_mode & save_Profile) && (save_mode & reset_Profiles))  ||
-      ((save_mode & save_Addons) && (save_mode & reset_Addons))     ){
+  if( ((save_mode & save_settings) && (save_mode & reset_settings)) ||        // Sanity check
+      ((save_mode & save_profile) && (save_mode & reset_profile))   ||
+      ((save_mode & save_profile) && (save_mode & reset_profiles))  ||
+      ((save_mode & save_addons) && (save_mode & reset_addons))     ){
 
     Error_Handler();
   }
@@ -372,21 +454,15 @@ void saveSettings(uint8_t save_mode, uint8_t tip_mode, uint8_t tip_index, uint8_
   if((profile>profile_C210) || (getProfileSettings()->ID != profile ))                                   // Sanity check
       Error_Handler();
 
+  if(save_mode == reset_all)
+    saveTip(reset_allTips, 0);
 
-  flashProfiles_t* flashBufferProfiles = _malloc(sizeof(flashProfiles_t));
   flashSettings_t* flashBufferSettings = _malloc(sizeof(flashSettings_t));
-#ifdef ENABLE_ADDONS
-  flashAddons_t*   flashBufferAddons   = _malloc(sizeof(flashAddons_t));
-#endif
+
 
   // check if malloc succeeded or not
-  if(    (flashBufferProfiles == NULL)
-      || (flashBufferSettings == NULL)
-#ifdef ENABLE_ADDONS
-      || (flashBufferAddons   == NULL)
-#endif
-  )
-  { Error_Handler(); }
+  if(flashBufferSettings == NULL)
+    Error_Handler();
 
   while(ADC_Status != ADC_Idle);
   __disable_irq();
@@ -394,139 +470,99 @@ void saveSettings(uint8_t save_mode, uint8_t tip_mode, uint8_t tip_index, uint8_
   configurePWMpin(output_Low);
   __set_PRIMASK(_irq);
 
-#ifdef ENABLE_ADDONS                                                                                      //                                                            ADDONS
-  if((save_mode&(save_Addons | reset_Addons)) == 0){                                                           // No addon save_mode specified
-    if(ChecksumAddons(&flashAddons.addons) != flashAddons.addonsChecksum){    // Check existing flash data is valid
-      resetAddonSettings(&flashBufferAddons->addons);                                              // Load defaults if wrong
+#ifdef ENABLE_ADDONS                                                                                                       //                                                            ADDONS
+  if((save_mode&(save_addons | reset_addons)) == 0){                                                      // No addon save_mode specified
+    if(ChecksumAddons(&flashGlobalSettings.addons) != flashGlobalSettings.addonsChecksum){                            // Check existing flash data is valid
+      resetAddonSettings(&flashBufferSettings->addons);                                                   // Load defaults if wrong
       needs_saving=1;
     }
     else
-      *flashBufferAddons = flashAddons;                                                            // Keep existing addons
+      flashBufferSettings->addons = flashGlobalSettings.addons;                                                // Keep existing addons
   }
-  if(save_mode & reset_Addons)                                                                            // Reset Addons
-    resetAddonSettings(&flashBufferAddons->addons);
-  else if(save_mode & save_Addons)                                                                        // Save Addons
-    flashBufferAddons->addons = *getAddons();
-  flashBufferAddons->addonsChecksum = ChecksumAddons(&flashBufferAddons->addons);          // Update addon checksum
+  if(save_mode & reset_addons)                                                                            // Reset Addons
+    resetAddonSettings(&flashBufferSettings->addons);
+  else if(save_mode & save_addons)                                                                        // Save Addons
+    flashBufferSettings->addons = *getAddons();
 
+  flashBufferSettings->addonsChecksum = ChecksumAddons(&flashBufferSettings->addons);                     // Update addon checksum
 #endif
-                                                                                                          //                                                            SETTINGS
-  if((save_mode&(save_Settings | reset_Settings)) == 0){                                                  // No settings save_mode specified
-    if( (ChecksumSystemSettings(&flashSettings.system) != flashSettings.systemChecksum) ||// Check existing flash data is valid
-        (flashSettings.system.version) != SYSTEM_SETTINGS_VERSION ){
+                                                                                                          //                                                            SYSTEM SETTINGS
+  if((save_mode&(save_settings | reset_settings)) == 0){                                                  // No settings save_mode specified
+    if( (ChecksumSystemSettings(&flashGlobalSettings.system) != flashGlobalSettings.systemChecksum) ||// Check existing flash data is valid
+        (flashGlobalSettings.system.version) != SYSTEM_SETTINGS_VERSION ){
       resetSystemSettings(&flashBufferSettings->system);
       needs_saving=1;
     }                                                // Load defaults if wrong
     else                                                                                                  // Keep existing settings
-      flashBufferSettings->system = flashSettings.system;                                       // Keep existing data if ok
+      flashBufferSettings->system = flashGlobalSettings.system;                                                 // Keep existing data if ok
   }
-  if(save_mode & reset_Settings){                                                                         // Reset settings
-    resetSystemSettings(&flashBufferSettings->system);                                                  // Load defaults
-    if(save_mode == reset_All){
-      flashBufferSettings->system.version = 0xFF;                                                       // To trigger setup screen
+  if(save_mode & reset_settings){                                                                         // Reset settings
+    resetSystemSettings(&flashBufferSettings->system);                                                    // Load defaults
+    if(save_mode == reset_all){
+      flashBufferSettings->system.version = 0xFF;                                                         // To trigger setup screen
     }
   }
-  else if(save_mode & save_Settings){                                                                     // Save current settings
+  else if(save_mode & save_settings){                                                                     // Save current settings
     flashBufferSettings->system = *getSystemSettings();
   }
-  flashBufferSettings->systemChecksum = ChecksumSystemSettings(&flashBufferSettings->system);         // Update checksum
+  flashBufferSettings->systemChecksum = ChecksumSystemSettings(&flashBufferSettings->system);             // Update checksum
 
-  for(uint8_t i=0;i<NUM_PROFILES;i++){                                                                    //                                                            PROFILES
-    if( (ChecksumProfile(&flashProfiles.profile[i]) != flashProfiles.profileChecksum[i]) || // Check existing flash data is valid
-        (flashProfiles.profile[i].settings.version != PROFILE_SETTINGS_VERSION) ||
-        ((save_mode & reset_Profile) && i == profile) ||
-         (save_mode & reset_Profiles) ){
+  for(uint8_t i=0;i<NUM_PROFILES;i++){                                                                    //                                                            PROFILE SETTINGS
 
-      resetProfile(&flashBufferProfiles->profile[i], i);                                                  //Reset if wrong or reset flag set
+    uint8_t bad_data = (ChecksumProfileSettings(&flashGlobalSettings.profile[i]) != flashGlobalSettings.profileChecksum[i]) ||      // check if existing flash data is valid
+                        (flashGlobalSettings.profile[i].version != PROFILE_SETTINGS_VERSION);
+
+    if( bad_data || ((save_mode & reset_profile) && (i == profile)) || (save_mode & reset_profiles) ){    // Reset data if wrong, of if resetting profiles.
+
+      resetProfileSettings(&flashBufferSettings->profile[i], i);
       needs_saving=1;
     }
-    else
-      flashBufferProfiles->profile[i] = flashProfiles.profile[i];                                 // OK, backup flash profile
-  }
-
-  if(save_mode & (save_Tip | save_Profile)){                                                              // Save current profile or tip
-    if(save_mode & save_Tip){
-      if(tip_mode == mode_SaveTip)
-        flashBufferProfiles->profile[profile].tip[tip_index] =  *getCurrentTipData();
-
-      else if(tip_mode == mode_AddTip){
-        flashBufferProfiles->profile[profile].tip[getProfileSettings()->currentNumberOfTips++] =  *getCurrentTipData();       // Add new tip, increase count
-      }
-
-      else if(tip_mode == mode_DeleteTip){                                                                // Delete tip
-        for(uint8_t i=tip_index; i<getProfileSettings()->currentNumberOfTips-1;i++)                      // Overwrite selected tip and move the rest one position backwards
-          flashBufferProfiles->profile[profile].tip[i] = flashBufferProfiles->profile[profile].tip[i+1];
-
-        getProfileSettings()->currentNumberOfTips--;                                                     // Decrease the number of tips in the system
-        uint8_t t = getCurrentTip();
-        if(t && tip_index<=t)                                                                           // If the deleted tip is lower or equal than current used tip
-          setCurrentTip(--t);                                                                             // Move one position back if possible
-
-        for(uint8_t x = getProfileSettings()->currentNumberOfTips; x < NUM_TIPS;x++) {                   // Fill the unused tips with blank names
-          strcpy(flashBufferProfiles->profile[profile].tip[x].name, _BLANK_TIP);
-        }
-      }
+    else{
+      if((save_mode & save_profile) &&  (i == profile))
+        flashBufferSettings->profile[i] = *getProfileSettings();                                          // Save profile, copy profile settings from system
       else
-        Error_Handler();                                                                                  // Save mode = Save_Tip, but tip_modenot defined, something went wrong
-
-      sortTips(&flashBufferProfiles->profile[profile], profile);                                          // Sort tips
+        flashBufferSettings->profile[i] = flashGlobalSettings.profile[i];                                       // Not saving this profile, backup existing flash profile settings
     }
-    flashBufferProfiles->profile[profile].settings = *getProfileSettings();                              // Copy profile settings from system
-  }
-  for(uint8_t i=0;i<NUM_PROFILES;i++){                                                                    // Generate profile checksums
-    flashBufferProfiles->profileChecksum[i] = ChecksumProfile(&flashBufferProfiles->profile[i]);
-    flashBufferProfiles->profileSettingsChecksum[i] = ChecksumProfileSettings(&flashBufferProfiles->profile[i].settings);
+    flashBufferSettings->profileChecksum[i] = ChecksumProfileSettings(&flashBufferSettings->profile[i]);  // Generate profile checksums
   }
 
   if(!needs_saving){                                                                                      // Nothing to save, return
+    _free(flashBufferSettings);
     getSettings()->isSaving = 0;
-#ifdef ENABLE_ADDONS
-  _free(flashBufferAddons);
-#endif
-  _free(flashBufferSettings);
-  _free(flashBufferProfiles);
     return;
   }
 
-  eraseFlashPages(SETTINGS_SECTION_START, flashPages_GlobalSettings);
-  writeFlash((uint32_t*)flashBufferProfiles, sizeof(flashProfiles_t), (uint32_t)&flashProfiles);
-  writeFlash((uint32_t*)flashBufferSettings, sizeof(flashSettings_t), (uint32_t)&flashSettings);
-#ifdef ENABLE_ADDONS
-  writeFlash((uint32_t*)flashBufferAddons, sizeof(flashAddons_t), (uint32_t)&flashAddons);
-#endif
+  eraseFlashPages((uint32_t)&flashGlobalSettings, flashPages_GlobalSettings);
+  writeFlash((uint32_t*)flashBufferSettings, sizeof(flashSettings_t), (uint32_t)&flashGlobalSettings);
+
   uint32_t flashChecksum, ramChecksum;
 
   // Check flash and profile have same checksum
-  for(uint8_t x=0;x<NUM_PROFILES;x++){
-    flashChecksum = ChecksumProfile(&flashProfiles.profile[x]);
-    ramChecksum   = ChecksumProfile(&flashBufferProfiles->profile[x]);
-    if(flashChecksum != ramChecksum)
+  for(uint8_t i=0; i<NUM_PROFILES; i++){
+    ramChecksum   = ChecksumProfileSettings(&flashGlobalSettings.profile[i]);
+    flashChecksum = ChecksumProfileSettings(&flashGlobalSettings.profile[i]);
+    if( (flashChecksum != ramChecksum) ||
+        (flashChecksum != flashGlobalSettings.profileChecksum[i])){
        Error_Handler();
+    }
   }
 
   // Check flash and settings buffer have same checksum
-  flashChecksum   = ChecksumSystemSettings(&flashSettings.system);
+  flashChecksum   = ChecksumSystemSettings(&flashGlobalSettings.system);
   ramChecksum     = ChecksumSystemSettings(&flashBufferSettings->system);
   if(flashChecksum != ramChecksum)
      Error_Handler();
 
+
 #ifdef ENABLE_ADDONS
   // Verify addon crc
-  flashChecksum   = ChecksumAddons(&flashAddons.addons);
-  ramChecksum     = ChecksumAddons(&flashBufferAddons->addons);
+  flashChecksum   = ChecksumAddons(&flashGlobalSettings.addons);
+  ramChecksum     = ChecksumAddons(&flashBufferSettings->addons);
   if(flashChecksum != ramChecksum)
      Error_Handler();
 #endif
-
-#ifdef ENABLE_ADDONS
-  _free(flashBufferAddons);
-#endif
   _free(flashBufferSettings);
-  _free(flashBufferProfiles);
-  if(tip_mode){                                                                                   // If tip was deleted / updated / added
-    tip_mode = 0;
-    loadTipDataFromFlash(getCurrentTip());                                                                     // Reload tip, sortTips will have updated the number to keep the same tip, or the new one
-  }
+
   getSettings()->isSaving = 0;
 
   if(reboot_mode  == do_reboot)
@@ -534,8 +570,7 @@ void saveSettings(uint8_t save_mode, uint8_t tip_mode, uint8_t tip_index, uint8_
 }
 
 void restoreSettings(void) {
-  bool setup = (flashSettings.system.version == 0xFF);     // 0xFF = erased flash, trigger setup mode
-  uint8_t reset = 0;
+  bool setup = (flashGlobalSettings.system.version == 0xFF);     // 0xFF = erased flash, trigger setup mode
 #ifndef STM32F072xB
   RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN;    // power the BKP peripheral
   PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
@@ -548,62 +583,75 @@ void restoreSettings(void) {
 #endif
 
 #if (__CORTEX_M == 3)
-  uint32_t flashSize = 0xFFFF & *(uint32_t*)FLASHSIZE_BASE;   // Some clones report no flash size (0xFFFF), assume these use 1KB sectors.
+  uint32_t flashSize = 0xFFFF & *(uint32_t*)FLASHSIZE_BASE; // Some clones report no flash size (0xFFFF), assume these use 1KB sectors.
 
 
-  if( (flashSize>128) && (flashSize<=1024) )      // Between 256K and 1M (High Density / XL devices), 2KB sectors
+  if( (flashSize>128) && (flashSize<=1024) )                // Between 256K and 1M (High Density / XL devices), 2KB sectors
     flashPageSize = 2048;
 
-  else                                            //  Everything else, assume 1KB sectors.
+  else                                                      //  Everything else, assume 1KB sectors.
     flashPageSize = 1024;
 
-  flashPages_GlobalSettings = ((SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize);
-  flashPages_TempSettings   = ((TEMP_SETTINGS_SECTION_LENGTH + flashPageSize - 1) / flashPageSize);
+  flashPages_GlobalSettings = (sizeof(flashSettings_t) + flashPageSize - 1) / flashPageSize;
+  flashPages_TempSettings   = (sizeof(temp_settings_t) + flashPageSize - 1) / flashPageSize;
+  flashPages_TipSlot       = (sizeof(flashTipSlot_t) + flashPageSize - 1) / flashPageSize;
 #endif
 
   if(setup){                                                                                              // Setup mode, so flash data is not initialized
     getSettings()->setupMode = enable;                                                                    // Load setup state for boot screen
     setSafeMode(enable);                                                                                  // Safe mode just in case
-    resetSystemSettings(getSystemSettings());                                                        // Load default system settings
-    resetAddonSettings(getAddons());                                                    // Load default addon settings
-    resetProfileSettings(getProfileSettings(), profile_T12);                                           // Load default profile settings
+    resetSystemSettings(getSystemSettings());                                                             // Load default system settings
+#ifdef ENABLE_ADDONS
+    resetAddonSettings(getAddons());                                                                      // Load default addon settings
+#endif
+    resetProfileSettings(getProfileSettings(), profile_T12);                                              // Load default profile settings
     flashTempSettingsInit();                                                                              // Always init this to set default/safe values at boot. Initializes flashTemp index
     loadSettingsFromBackupRam();                                                                          // Also read backup ram. loadProfile wil take the correct values depending on hasBattery variable.
     setCurrentProfile(profile_T12);                                                                       // Force profile T12, we can't call loadProfile, there's nothing in flash, let boot screen finish it
   }
   else{
     Button_reset();
-    if(flashSettings.system.version != SYSTEM_SETTINGS_VERSION)                                   // System settings version mismatch
-      reset |= reset_Settings;                                                                            // Reset silently
-    else if(ChecksumSystemSettings(&flashSettings.system) != flashSettings.systemChecksum){   // Show error message if bad checksum
-      checksumError(reset_Settings);
-      reset |= reset_Settings;
+                                                                                                          //                           [ CHECK SYSTEM SETTINGS ]
+    if( (flashGlobalSettings.system.version==SYSTEM_SETTINGS_VERSION) &&                                        // System version correct
+        (flashGlobalSettings.systemChecksum != ChecksumSystemSettings(&flashGlobalSettings.system))){                 // But bad cheksum
+      checksumError(reset_settings);                                                                      // Show checksum error
     }
-    else
-      *getSystemSettings() = flashSettings.system;                                             // Load settings
+                                                                                                          //                           [ CHECK PROFILE SETTINGS ]
+    for(uint8_t i=0;i<NUM_PROFILES;i++){
+      if( (flashGlobalSettings.profile[i].version==PROFILE_SETTINGS_VERSION) &&                                 // Profile version correct
+          (flashGlobalSettings.profileChecksum[i] != ChecksumProfileSettings(&flashGlobalSettings.profile[i])) ){     // But bad cheksum
+        checksumError(reset_profile);                                                                     // Show checksum error
+        break;
+      }
+    }
+                                                                                                          //                           [ CHECK TIPS ]
+    for(uint8_t i=0;i<NUM_PROFILES;i++){
+      if( (flashTips[i].data.version==TIP_SETTINGS_VERSION) &&                                            // Tips version correct
+          (flashTips[i].crc != ChecksumTipData(&flashTips[i].data)) ){                                    // But bad cheksum
+        checksumError(reset_tips);                                                                        // Show checksum error
+        break;
+      }
+    }
+
+#ifdef ENABLE_ADDONS                                                                                          //                           [ CHECK ADDONS SETTINGS ]
+    if( (flashGlobalSettings.addons.enabledAddons!=0xFFFFFFFFFFFFFFFFU) &&                                      // Not filled with 0xFF (Otherwise flash is erased)
+        (flashGlobalSettings.addonsChecksum != ChecksumAddons(&flashGlobalSettings.addons))){                         // But bad cheksum
+      checksumError(reset_addons);                                                                        // Show checksum error
+    }
+#endif
+    saveSettings(perform_scanFix, no_reboot);                                                             // Scan current settings, reset any bad area
+    saveTip(perform_scanFix, 0);
+
+    flashTempSettingsInit();                                                                              // These initialize currentProfile, needed later by loadProfile
+    loadSettingsFromBackupRam();
+    loadProfile(getCurrentProfile());                                                                     // Will restore lastTemp and lastTip from the correct source (Flash or backup SRAM).
 
 #ifdef ENABLE_ADDONS
-    reset |= loadAddonSettings();
+    *getAddons() = flashGlobalSettings.addons;                                                                  // Load current addons
 #endif
-    if(checkFlashProfiles()==ERROR){                                                                      // Some profile is wrong
-      for(uint8_t i=0;i<NUM_PROFILES;i++){
-        if(flashProfiles.profile[i].settings.version==PROFILE_SETTINGS_VERSION){                  // If profile version is correct,
-          checksumError(reset_Profile);                                                                   // Show checksum error, otherwise clear silently
-          break;
-        }
-      }
-      reset |= reset_Profile;
-    }
-    else{
-      flashTempSettingsInit();                              // These initialize getSettings()->currentProfile, depending on the variable hasBattery
-      loadSettingsFromBackupRam();                          //
-      loadProfile(getCurrentProfile());           // loadProfile will restore lastTemp and lastTip from the correct source (Flash or backup SRAM).
-    }
+    *getSystemSettings() = flashGlobalSettings.system;                                                          // Load current settings
   }
-  if(!setup && reset){                                              // If not in setup mode and we have bad data
-    saveSettings(perform_scanFix, no_mode, no_mode, do_reboot);                       // Store settings with no arguments, this will check and reset any bad setting
-  }
-}                                                                   // Otherwise, everything be resetted when exiting the boot screen
+}
 
 void loadSettingsFromBackupRam(void) {
   if(getSystemSettings()->hasBattery == 0)
@@ -686,7 +734,7 @@ void flashTempSettingsInitialSetup(void){                                     //
   flashTemp.temp = defaultProfileSettings.defaultTemperature;
   flashTemp.profile=profile_T12;
   flashTempWrite();
-  flashTipWrite();
+  flashTipsWrite();
   flashProfileWrite();
 
   setCurrentProfile(profile_T12);                                // Just in case
@@ -699,34 +747,34 @@ void flashTempSettingsInit(void) //call it only once during init
   bool setDefault=0;
   uint16_t i;
 
-  for(i=0; i<(sizeof(temp_settings.temperature)/2)-1 && temp_settings.temperature[i+1] != UINT16_MAX; i++);   // Seek through the array
+  for(i=0; i<(sizeof(flashTempSettings.temperature)/2)-1 && flashTempSettings.temperature[i+1] != UINT16_MAX; i++);   // Seek through the array
 
-  if(i<(sizeof(temp_settings.temperature)/2)-1){                                                              // Free slot found
-    for(uint16_t j=i+1; j<(sizeof(temp_settings.temperature)/2)-1; j++) {                                     // Ensure rest of array is erased
-      if(temp_settings.temperature[j] != UINT16_MAX){                                                         // Found unexpected data
+  if(i<(sizeof(flashTempSettings.temperature)/2)-1){                                                              // Free slot found
+    for(uint16_t j=i+1; j<(sizeof(flashTempSettings.temperature)/2)-1; j++) {                                     // Ensure rest of array is erased
+      if(flashTempSettings.temperature[j] != UINT16_MAX){                                                         // Found unexpected data
         setDefault=1;                                                                                         // Reset
         break;
       }
     }
     if(!setDefault){
       flashTemp.tempIndex = i;
-      flashTemp.temp = temp_settings.temperature[i];
+      flashTemp.temp = flashTempSettings.temperature[i];
     }
   }                                                                                                           // No free slot found, reset
   else
     setDefault=1;
 
   if(!setDefault){
-    for(i=0; i<(sizeof(temp_settings.profile)/2)-1 && temp_settings.profile[i+1] != UINT16_MAX; i++);         // Same operation with profile
-    if(i<(sizeof(temp_settings.profile)/2)-1){
-      for(uint16_t j=i+1; j<(sizeof(temp_settings.profile)/2)-1; j++) {
-        if(temp_settings.profile[j] != UINT16_MAX){
+    for(i=0; i<(sizeof(flashTempSettings.profile)/2)-1 && flashTempSettings.profile[i+1] != UINT16_MAX; i++);         // Same operation with profile
+    if(i<(sizeof(flashTempSettings.profile)/2)-1){
+      for(uint16_t j=i+1; j<(sizeof(flashTempSettings.profile)/2)-1; j++) {
+        if(flashTempSettings.profile[j] != UINT16_MAX){
           setDefault=1;
           break;
         }
       }
       if(!setDefault){
-        flashTemp.profile=temp_settings.profile[i];
+        flashTemp.profile=flashTempSettings.profile[i];
         flashTemp.profileIndex = i;
       }
     }
@@ -736,17 +784,17 @@ void flashTempSettingsInit(void) //call it only once during init
 
   if(!setDefault){
     for(uint8_t n=0; n<NUM_PROFILES; n++){
-      for(i=0; i<(sizeof(temp_settings.tip[0])/2)-1 && temp_settings.tip[n][i+1] != UINT16_MAX; i++);         // Same operation with tips
-      if(i<(sizeof(temp_settings.tip[0])/2)-1){
-        for(uint16_t j=i+1; j<(sizeof(temp_settings.tip[0])/2)-1; j++) {
-          if(temp_settings.tip[n][j] != UINT16_MAX){
+      for(i=0; i<(sizeof(flashTempSettings.tip[0])/2)-1 && flashTempSettings.tip[n][i+1] != UINT16_MAX; i++);         // Same operation with tips
+      if(i<(sizeof(flashTempSettings.tip[0])/2)-1){
+        for(uint16_t j=i+1; j<(sizeof(flashTempSettings.tip[0])/2)-1; j++) {
+          if(flashTempSettings.tip[n][j] != UINT16_MAX){
             setDefault=1;
             break;
           }
         }
         if(!setDefault){
           flashTemp.tipIndex[n] = i;
-          flashTemp.tip[n] = temp_settings.tip[n][i];
+          flashTemp.tip[n] = flashTempSettings.tip[n][i];
         }
       }
       else
@@ -759,24 +807,24 @@ void flashTempSettingsInit(void) //call it only once during init
 
   else{
     setCurrentProfile(flashTemp.profile);
-    if(temp_settings.temperature[flashTemp.tempIndex] != UINT16_MAX)
+    if(flashTempSettings.temperature[flashTemp.tempIndex] != UINT16_MAX)
       flashTemp.tempIndex++;                                             // Increase index if current slot is not empty (Only required when flash is completely erased)
 
-    if(temp_settings.profile[flashTemp.profileIndex] != UINT16_MAX)
+    if(flashTempSettings.profile[flashTemp.profileIndex] != UINT16_MAX)
       flashTemp.profileIndex++;
 
     for(uint8_t n=0; n<NUM_PROFILES; n++)
-      if(temp_settings.tip[n][flashTemp.tipIndex[n]] != UINT16_MAX)
+      if(flashTempSettings.tip[n][flashTemp.tipIndex[n]] != UINT16_MAX)
         flashTemp.tipIndex[n]++;
   }
 }
 
 void flashTempWrite(void)
 {
-  if(flashTemp.tempIndex>=(sizeof(temp_settings.temperature)/2)-1)                // All positions used
+  if(flashTemp.tempIndex>=(sizeof(flashTempSettings.temperature)/2)-1)                // All positions used
   {
     flashTempSettingsErase();
-    flashTipWrite();
+    flashTipsWrite();
     flashProfileWrite();
   }
   HAL_IWDG_Refresh(&hiwdg);
@@ -784,7 +832,7 @@ void flashTempWrite(void)
   __disable_irq();
   HAL_FLASH_Unlock();
   __set_PRIMASK(_irq);
-  if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&temp_settings.temperature[flashTemp.tempIndex], flashTemp.temp) != HAL_OK) {    // Store new temp
+  if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&flashTempSettings.temperature[flashTemp.tempIndex], flashTemp.temp) != HAL_OK) {    // Store new temp
      Error_Handler();
   }
   HAL_FLASH_Lock();
@@ -793,10 +841,10 @@ void flashTempWrite(void)
 
 void flashProfileWrite(void)
 {
-  if(flashTemp.profileIndex>=(sizeof(temp_settings.profile)/2)-1)                // All positions used
+  if(flashTemp.profileIndex>=(sizeof(flashTempSettings.profile)/2)-1)                // All positions used
   {
     flashTempSettingsErase();
-    flashTipWrite();
+    flashTipsWrite();
     flashTempWrite();
   }
 
@@ -805,17 +853,17 @@ void flashProfileWrite(void)
   __disable_irq();
   HAL_FLASH_Unlock();
   __set_PRIMASK(_irq);
-  if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&temp_settings.profile[flashTemp.profileIndex], flashTemp.profile) != HAL_OK) {        // Store new tip/profile data
+  if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&flashTempSettings.profile[flashTemp.profileIndex], flashTemp.profile) != HAL_OK) {        // Store new tip/profile data
      Error_Handler();
   }
   HAL_FLASH_Lock();
   flashTemp.profileIndex++;                                                                                                         // Increase index for next time
 }
 
-void flashTipWrite(void)
+void flashTipsWrite(void)
 {
   uint8_t p = getCurrentProfile();
-  if(flashTemp.tipIndex[p]>=(sizeof(temp_settings.tip[0])/2)-1)                // All positions used
+  if(flashTemp.tipIndex[p]>=(sizeof(flashTempSettings.tip[0])/2)-1)                // All positions used
   {
     flashTempSettingsErase();
     flashTempWrite();
@@ -826,7 +874,7 @@ void flashTipWrite(void)
   __disable_irq();
   HAL_FLASH_Unlock();
   __set_PRIMASK(_irq);
-  if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&temp_settings.tip[p][flashTemp.tipIndex[p]], flashTemp.tip[p]) != HAL_OK) {        // Store new tip/profile data
+  if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&flashTempSettings.tip[p][flashTemp.tipIndex[p]], flashTemp.tip[p]) != HAL_OK) {        // Store new tip/profile data
      Error_Handler();
   }
   HAL_FLASH_Lock();
@@ -834,7 +882,7 @@ void flashTipWrite(void)
 }
 
 void flashTempSettingsErase(void){
-  eraseFlashPages(TEMP_SETTINGS_SECTION_START, flashPages_TempSettings);
+  eraseFlashPages((uint32_t)&flashTempSettings, flashPages_TempSettings);
   flashTemp.tempIndex = 0;                                             // Reset index
   flashTemp.profileIndex = 0;
   for(uint8_t i=0; i<NUM_PROFILES;i++)
@@ -845,49 +893,18 @@ void flashTempSettingsErase(void){
 }
 
 static uint32_t ChecksumSystemSettings(systemSettings_t* system){                                                       // Check system settings block
-  uint32_t checksum;
-  checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)system, sizeof(systemSettings_t)/sizeof(uint32_t) );
-  return checksum;
+  return (HAL_CRC_Calculate(&hcrc, (uint32_t*)system, sizeof(systemSettings_t)/sizeof(uint32_t)) );
 }
 
-static uint32_t ChecksumProfile(profile_t* profile){                                                                // Check whole profile block (Including tips)
-  uint32_t checksum;
-  checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)profile, sizeof(profile_t)/sizeof(uint32_t));
-  return checksum;
+static uint32_t ChecksumTipData(flashTipData_t* tipData){                                                                // Check whole profile block (Including tips)
+  return (HAL_CRC_Calculate(&hcrc, (uint32_t*)tipData, sizeof(flashTipData_t)/sizeof(uint32_t)) );
 }
 
 static uint32_t ChecksumProfileSettings(profile_settings_t* profile_settings){                                               // Check only profile settings (Not tips)
-  uint32_t checksum;
-  checksum = HAL_CRC_Calculate(&hcrc, (uint32_t*)profile_settings, sizeof(profile_settings_t)/sizeof(uint32_t));
-  return checksum;
-}
-
-static ErrorStatus checkFlashProfiles(void){
-  ErrorStatus status=SUCCESS;
-  for(uint8_t i=0; i<NUM_PROFILES; i++){           // Reset buffered values to trigger flash udpate
-    if(ChecksumProfile(&flashProfiles.profile[i]) != flashProfiles.profileChecksum[i]){
-      status=ERROR;
-      break;
-    }
-  }
-  return status;
+  return (HAL_CRC_Calculate(&hcrc, (uint32_t*)profile_settings, sizeof(profile_settings_t)/sizeof(uint32_t)) );
 }
 
 #ifdef ENABLE_ADDONS
-static uint8_t loadAddonSettings(void) {
-  if((flashAddons.addons.enabledAddons == 0xffffffffffffffffU) && (flashAddons.addonsChecksum == 0xffffffffU)){     // Assume flash is erased, restore defaults silently
-    return reset_Addons;
-  }
-  if(ChecksumAddons(&flashAddons.addons) != flashAddons.addonsChecksum){       // crc mismatch
-    checksumError(reset_Addons);
-    return reset_Addons;
-  }
-  else
-    *getAddons() = flashAddons.addons;
-
-  return SUCCESS;
-}
-
 static void resetAddonSettings(addonSettings_t *addons){
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
@@ -903,6 +920,10 @@ static uint32_t ChecksumAddons(addonSettings_t* addonSettings){
 addonSettings_t * getAddons(void){
   return &getSettings()->addons;
 }
+
+bool isAddonSettingsChanged(void) {
+  return ChecksumAddons(getAddons()) != flashGlobalSettings.addonsChecksum;
+}
 #endif
 
 static void resetSystemSettings(systemSettings_t * system) {
@@ -910,29 +931,6 @@ static void resetSystemSettings(systemSettings_t * system) {
   __disable_irq();
   *system = defaultSystemSettings;
   flashTempSettingsInitialSetup();
-  __set_PRIMASK(_irq);
-}
-
-static void resetProfile(profile_t * p, uint8_t profile){
-  uint32_t _irq = __get_PRIMASK();
-
-  if(profile>profile_C210){
-    Error_Handler();
-  }
-  __disable_irq();
-  resetProfileSettings(&p->settings, profile);
-  for(uint8_t x = 0; x < NUM_TIPS; x++){
-    p->tip[x] = defaultTipData[profile];
-  }
-  if(profile==profile_T12){
-    strcpy(p->tip[0].name, "T12-BC3");               // Put some generic name.
-  }
-  else if(profile==profile_C245){
-    strcpy(p->tip[0].name, "C245-963");
-  }
-  else if(profile==profile_C210){
-    strcpy(p->tip[0].name, "C210-018");
-  }
   __set_PRIMASK(_irq);
 }
 
@@ -944,7 +942,6 @@ static void resetProfileSettings(profile_settings_t * p, uint8_t profile){
   __disable_irq();
     if(profile==profile_T12){
       p->ID = profile_T12;
-      p->currentNumberOfTips      = 1;
       p->impedance                = 80;             // 8.0 Ohms
       p->power                    = 80;             // 80W
       p->noIronValue              = 4000;
@@ -954,7 +951,6 @@ static void resetProfileSettings(profile_settings_t * p, uint8_t profile){
 
   else if(profile==profile_C245){
       p->ID = profile_C245;
-      p->currentNumberOfTips      = 1;
       p->impedance                = 26;
       p->power                    = 150;
       p->noIronValue              = 4000;
@@ -964,7 +960,6 @@ static void resetProfileSettings(profile_settings_t * p, uint8_t profile){
 
   else if(profile==profile_C210){
       p->ID = profile_C210;
-      p->currentNumberOfTips    = 1;
       p->power                  = 80;
       p->impedance              = 21;
       p->noIronValue            = 1200;
@@ -978,12 +973,8 @@ static void resetProfileSettings(profile_settings_t * p, uint8_t profile){
   __set_PRIMASK(_irq);
 }
 
-flashProfiles_t * getFlashProfiles(void){
-  return &flashProfiles;
-}
-
 profile_settings_t * getFlashProfileSettings(void){
-  return &getFlashProfiles()->profile[getCurrentProfile()].settings;
+  return &getFlashSettings()->profile[getCurrentProfile()];
 }
 
 profile_settings_t * getProfileSettings(void){
@@ -997,36 +988,19 @@ void setCurrentProfile(uint8_t profile){
   getSettings()->currentProfile = profile;
 }
 
-uint8_t loadProfile(uint8_t profile){
+void loadProfile(uint8_t profile){
   while(ADC_Status!=ADC_Idle);
 
-  if(profile==0xFF)                                   // Erased flash, load T12
-    profile=profile_T12;
-  else if(profile>profile_C210)                       // Sanity check
+  if(profile>profile_C210)                       // Sanity check
     Error_Handler();
 
   uint32_t _irq = __get_PRIMASK();
 
   HAL_IWDG_Refresh(&hiwdg);
-  if(profile<=profile_C210){                                                                          // If valid profile
-    if(flashProfiles.profile[profile].settings.version != PROFILE_SETTINGS_VERSION){          // If flash profile not initialized or version mismatch
-      return reset_Profile;                                                                           // Silent reset
-    }
-    else{
-      if(ChecksumProfile(&flashProfiles.profile[profile]) != flashProfiles.profileChecksum[profile]){
-        checksumError(reset_Profile);
-        return reset_Profile;
-      }
-      else{
-        __disable_irq();
-        setCurrentProfile(profile);
-        *getProfileSettings() = *getFlashProfileSettings();
-      }
-    }
-  }
-  else{
-    Error_Handler();
-  }
+
+  __disable_irq();
+  setCurrentProfile(profile);
+  *getProfileSettings() = *getFlashProfileSettings();
   setSystemTempUnit(getSystemTempUnit());                        // Ensure the profile uses the same temperature unit as the system
 
   if(getSystemSettings()->hasBattery){
@@ -1035,7 +1009,7 @@ uint8_t loadProfile(uint8_t profile){
     }
     setUserTemperature(bkpRamData.values.lastTipTemp[profile]);
 
-    if(bkpRamData.values.lastSelTip[profile] >= getProfileSettings()->currentNumberOfTips)
+    if(bkpRamData.values.lastSelTip[profile] >= getCurrentNumberOfTips())
       loadTipDataFromFlash(0);
     else
       loadTipDataFromFlash(bkpRamData.values.lastSelTip[profile]);
@@ -1053,51 +1027,23 @@ uint8_t loadProfile(uint8_t profile){
       else
         setUserTemperature(flashTemp.temp);                                            // Load stored value
 
-      if(flashTemp.tip[profile] >= getProfileSettings()->currentNumberOfTips)         // Bad tip index, load first tip
+      if(flashTemp.tip[profile] >= getCurrentNumberOfTips())         // Bad tip index, load first tip
         loadTipDataFromFlash(0);
       else
         loadTipDataFromFlash(flashTemp.tip[profile]);
     }
   }
-  setCurrentProfile(profile);
   TIP.filter=getProfileSettings()->tipFilter;
   ironSchedulePwmUpdate();
   __set_PRIMASK(_irq);
-  return SUCCESS;
-}
-
-static void sortTips(profile_t * data, uint8_t profile){
-  uint8_t min;
-  char current[TIP_LEN+1];
-  tipData_t backupTip;
-  strcpy (current, getCurrentTipData()->name);                                                    // Copy tip name being used in the system
-  for(uint8_t j=0; j<getProfileSettings()->currentNumberOfTips; j++){                            // Sort alphabetically
-    min = j;                                                                                      // Min is start position
-    for(uint8_t i=j+1; i<getProfileSettings()->currentNumberOfTips; i++){
-      if(strcmp(data->tip[min].name, data->tip[i].name) > 0)                                      // If Tip[Min] > Tip[i]
-        min = i;                                                                                  // Update min
-    }
-    if(min!=j){                                                                                   // If j is not the min
-      backupTip = data->tip[j];                                                                   // Swap j and min
-      data->tip[j] = data->tip[min];
-      data->tip[min] = backupTip;
-    }
-  }
-  setCurrentTip(0);                                                                               // Just in case it's not found
-  for(uint8_t i=0; i<getProfileSettings()->currentNumberOfTips; i++){                            // Find the same tip after sorting
-    if(strcmp(current, data->tip[i].name) == 0){                                                  // If matching name
-      setCurrentTip(i);                                                                           // Update the tip to be reloaded later
-      break;
-    }
-  }
 }
 
 tipData_t * getFlashTipData(uint8_t tip){
-  return &flashProfiles.profile[getCurrentProfile()].tip[tip];
+  return &flashTips[getCurrentProfile()].data.tip[tip];
 }
 
 void loadTipDataFromFlash(uint8_t tip) {
-  if(tip >= getProfileSettings()->currentNumberOfTips) // sanity check
+  if(tip >= getCurrentNumberOfTips()) // sanity check
     tip = 0u;
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
@@ -1113,6 +1059,10 @@ void setCurrentTip(uint8_t tip){
 
 uint8_t getCurrentTip(void){
   return getSettings()->currentTip;
+}
+
+uint8_t getCurrentNumberOfTips(void){
+  return flashTips[getCurrentProfile()].data.currentNumberOfTips;
 }
 
 void setCurrentTipData(tipData_t * tip) {
@@ -1131,7 +1081,7 @@ systemSettings_t* getSystemSettings(void){
 }
 
 flashSettings_t * getFlashSettings(void){
-  return &flashSettings;
+  return &flashGlobalSettings;
 }
 systemSettings_t * getFlashSystemSettings(void){
   return &getFlashSettings()->system;
@@ -1147,13 +1097,15 @@ static void checksumError(uint8_t mode){
   Oled_error_init();
   putStrAligned("BAD CHECKSUM!", 0, align_center);
   putStrAligned("RESTORING THE", 20, align_center);
-  if(mode==reset_Profile)
+  if(mode==reset_profile)
     putStrAligned("PROFILE", 36, align_center);
 #ifdef ENABLE_ADDONS
-  else if(mode == reset_Addons)
+  else if(mode == reset_addons)
     putStrAligned("ADDONS", 36, align_center);
+  else if(mode == reset_tips)
+    putStrAligned("TIPS", 36, align_center);
 #endif
-  else
+  else if(mode == reset_settings)
     putStrAligned("SYSTEM", 36, align_center);
   update_display();
   ErrCountDown(3,117,50);
@@ -1176,20 +1128,17 @@ static void Button_reset(void){
         update_display();
         while(!BUTTON_input())
           HAL_IWDG_Refresh(&hiwdg);
-        saveSettings(reset_All, no_mode, no_mode, do_reboot);
+        saveSettings(reset_all, do_reboot);
       }
     }
   }
 }
 
 bool isCurrentProfileChanged(void) {
-  return ChecksumProfileSettings(getProfileSettings()) != flashProfiles.profileSettingsChecksum[getCurrentProfile()];
+  return ChecksumProfileSettings(getProfileSettings()) != flashGlobalSettings.profileChecksum[getCurrentProfile()];
 }
 bool isSystemSettingsChanged(void) {
-  return ChecksumSystemSettings(getSystemSettings()) != flashSettings.systemChecksum;
-}
-bool isAddonSettingsChanged(void) {
-  return ChecksumAddons(getAddons()) != flashAddons.addonsChecksum;
+  return ChecksumSystemSettings(getSystemSettings()) != flashGlobalSettings.systemChecksum;
 }
 
 void copy_bkp_data(uint8_t mode){
@@ -1209,7 +1158,7 @@ void copy_bkp_data(uint8_t mode){
     }
     flashTempWrite();
     flashProfileWrite();
-    flashTipWrite();
+    flashTipsWrite();
   }
 }
 

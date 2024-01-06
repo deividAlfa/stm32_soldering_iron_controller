@@ -213,7 +213,8 @@ void boot_screen_init(screen_t * scr){
 void boot_screen_onExit(screen_t *scr){
   ADC_Reset_measures();                                   // Reset the averages, show current values to avoid filtering delay at startup
   if(getSettings()->setupMode){
-    saveSettings(save_Settings, no_mode, no_mode, no_reboot);               // Save now we have all heap free. All other flash settings (Profile, tips, addons) will be checked and set to default if wrong
+    saveSettings(save_settings, no_reboot);               // Save now we have all heap free. All other flash settings (Profile, tips, addons) will be checked and set to default if wrong
+    saveTip(perform_scanFix, 0);                          // Scan the tips for bad data
     loadProfile(profile);                                 // Now flash is initialized and we can properly load a profile
     updateTempData(force_update);
     getSettings()->setupMode=0;                           // Disable setup mode
@@ -248,7 +249,7 @@ void boot_screen_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->selectable.tab = 0;
-  edit->setData = (void (*)(void *))&setProfile;
+  edit->setData = (setterFn)&setProfile;
   edit->options = profileStr;
   edit->numberOfOptions = NUM_PROFILES;
   w->posX = 74;
@@ -268,7 +269,7 @@ void boot_screen_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->selectable.tab = 1;
-  edit->setData = (void (*)(void *))&setLanguage;
+  edit->setData = (setterFn)&setLanguage;
   edit->options = Langs;
   edit->numberOfOptions = LANGUAGE_COUNT;
   w->posX = 74;

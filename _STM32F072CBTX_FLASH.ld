@@ -30,56 +30,44 @@ ENTRY(Reset_Handler)
 /* Highest address of the user mode stack */
 _estack = ORIGIN(RAM) + LENGTH(RAM);	/* end of "RAM" Ram type memory */
 
-_Min_Heap_Size = 0xC00 ;	/* required amount of heap  */
+_Min_Heap_Size = 0x900 ;	/* required amount of heap  */
 _Min_Stack_Size = 0x300 ;	/* required amount of stack */
 
 /* Memories definition */
 MEMORY
 {
   RAM              (xrw) : ORIGIN = 0x20000000, LENGTH = 16K
-  FLASH            (rx)  : ORIGIN = 0x8000000,  LENGTH = 122K
+  FLASH            (rx)  : ORIGIN = 0x8000000,  LENGTH = 118K
   /* areas for storing the settings, keep the start and the end on page boundaries and continuous */
-  TEMP_SETTINGS    (rx)  : ORIGIN = ORIGIN(FLASH) + LENGTH(FLASH),                        LENGTH = 2048
-  PROFILE_SETTINGS (rx)  : ORIGIN = ORIGIN(TEMP_SETTINGS) + LENGTH(TEMP_SETTINGS),        LENGTH = 3840
-  GLOBAL_SETTINGS  (rx)  : ORIGIN = ORIGIN(PROFILE_SETTINGS) + LENGTH(PROFILE_SETTINGS),  LENGTH = 128
-  ADDON_SETTINGS   (rx)  : ORIGIN = ORIGIN(GLOBAL_SETTINGS)  + LENGTH(GLOBAL_SETTINGS),   LENGTH = 128
+  GLOBAL_SETTINGS (rx)  : ORIGIN = ORIGIN(FLASH) + LENGTH(FLASH),       			LENGTH = 2048
+  TIPS (rx)  : ORIGIN = ORIGIN(GLOBAL_SETTINGS) + LENGTH(GLOBAL_SETTINGS),       	LENGTH = 6144
+  TEMP_SETTINGS    (rx)  : ORIGIN = ORIGIN(TIPS) + LENGTH(TIPS),                    LENGTH = 2048
 }
 
-/* Start address and size of the settings area */
-__SETTINGS_SECTION_START  = ORIGIN(PROFILE_SETTINGS);
-__SETTINGS_SECTION_LENGTH = LENGTH(PROFILE_SETTINGS) + LENGTH(GLOBAL_SETTINGS) + LENGTH(ADDON_SETTINGS);
-__TEMP_SETTINGS_SECTION_START  = ORIGIN(TEMP_SETTINGS);
-__TEMP_SETTINGS_SECTION_LENGTH = LENGTH(TEMP_SETTINGS);
 
 /* Sections */
 SECTIONS
 {
-  /* Firmware settings storage section(s) */
-    
-  .tempSettings (NOLOAD) :
-  {
-    . = ALIGN(4);
-    KEEP(*(.tempSettings))
-  } > TEMP_SETTINGS
-
-  
-  .profileSettings (NOLOAD) :
-  {
-    . = ALIGN(4);
-    KEEP(*(.profileSettings))/* .settings sections */
-  } > PROFILE_SETTINGS
-  
-  .globalSettings (NOLOAD) :
+    /* Firmware settings storage section(s) */  
+    .globalSettings (NOLOAD) :
   {
     . = ALIGN(4);
     KEEP(*(.globalSettings))/* .settings sections */
   } > GLOBAL_SETTINGS
 
-  .addonSettings (NOLOAD) :
+	/* Tips storage section(s) */
+  .tips (NOLOAD) :
   {
     . = ALIGN(4);
-    KEEP(*(.addonSettings))/* .settings sections */
-  } >ADDON_SETTINGS
+    KEEP(*(.tips))
+  } > TIPS
+    
+  /* User last temperature/tip/profile storage section(s) */
+  .tempSettings (NOLOAD) :
+  {
+    . = ALIGN(4);
+    KEEP(*(.tempSettings))
+  } > TEMP_SETTINGS
 
   /* The startup code into "FLASH" Rom type memory */
   .isr_vector :

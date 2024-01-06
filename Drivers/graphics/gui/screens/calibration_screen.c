@@ -343,7 +343,7 @@ static void Cal_Start_OnExit(screen_t *scr) {
   cal->tempReady = 0;
   restore_tip();                              // Restore default calibration temps if calibration was cancelled, or new calibration values if ok.
   if(cal->current_state==cal_save)
-    saveSettings(save_Tip, mode_SaveTip, getCurrentTip(), no_reboot);              // Save now we have all heap free
+    saveTip(save_tip, getCurrentTip());              // Save now we have all heap free
 }
 
 static uint8_t Cal_Start_draw(screen_t *scr){
@@ -417,7 +417,7 @@ static void Cal_Start_create(screen_t *scr) {
   dis->reservedChars = 5;
   dis->endString = "\260C";
   dis->getData = &getMeasuredTemp;
-  edit->setData =  (void (*)(void *)) &setMeasuredTemp;
+  edit->setData =  (setterFn) &setMeasuredTemp;
   edit->selectable.tab = 1;
   edit->big_step=5;
   edit->step=1;
@@ -443,7 +443,7 @@ static void Cal_Settings_init(screen_t *scr) {
 static void Cal_Settings_OnExit(screen_t *scr) {
   getProfileSettings()->calADC_At_0 = cal->backup_calADC_At_0;
   if(cal->current_state==cal_save)
-    saveSettings(save_Profile, no_mode, no_mode, no_reboot);              // Save now we have all heap free
+    saveSettings(save_profile, no_reboot);              // Save now we have all heap free
   else
     restore_tip();
 }
@@ -505,7 +505,7 @@ static void Cal_Settings_create(screen_t *scr){
   edit->inputData.getData = &getCal250;
   edit->big_step = 20;
   edit->step = 10;
-  edit->setData = (void (*)(void *))&setCal250;
+  edit->setData = (setterFn)&setCal250;
   edit->max_value = 4000;
   edit->min_value = 0;
   edit->selectable.processInput=&Cal250_processInput;
@@ -515,7 +515,7 @@ static void Cal_Settings_create(screen_t *scr){
   edit->inputData.getData = &getCal400;
   edit->big_step = 20;
   edit->step = 10;
-  edit->setData = (void (*)(void *))&setCal400;
+  edit->setData = (setterFn)&setCal400;
   edit->max_value = 4000;
   edit->min_value = 0;
   edit->selectable.processInput=&Cal400_processInput;

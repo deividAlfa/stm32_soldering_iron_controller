@@ -9,7 +9,6 @@
 #include "screen_common.h"
 
 screen_t Screen_system;
-screen_t Screen_system_ntc;
 
 static comboBox_item_t *comboitem_system_ButtonWakeMode;
 static comboBox_item_t *comboitem_system_ShakeWakeMode;
@@ -216,22 +215,26 @@ static void system_onEnter(screen_t *scr){
 }
 
 static void system_onExit(screen_t *scr){                                                       // Save when exiting the screen, we have freed up all the screen memory
-#ifndef STM32F072xB
-  if(isSystemSettingsChanged()){
+
+#if defined ST7565
+  if((scr != &Screen_display) && (scr != &Screen_system) && isSystemSettingsChanged()){
+#else
+  if((scr != &Screen_display) && (scr != &Screen_display_adv) && (scr != &Screen_system) && isSystemSettingsChanged()){    // Going to main screen?
+#endif
 
     if(getSystemSettings()->hasBattery != getFlashSystemSettings()->hasBattery){            // Battery mode changed
       copy_bkp_data((getSystemSettings()->hasBattery) && 1);                                   // 0=ram_to_flash, 1=flash_to_ram
       loadProfile(getCurrentProfile());                                                 // Reload tip from current backup source
     }
-
+#ifndef STM32F072xB
     if(getSystemSettings()->clone_fix != clone_fix){                                           // Clone fix needs rebooting
       getSystemSettings()->clone_fix = clone_fix;
-      saveSettings(save_Settings, no_mode, no_mode, do_reboot);
+      saveSettings(save_settings, do_reboot);
     }
     else
-      saveSettings(save_Settings, no_mode, no_mode, no_reboot);                                                          // Other settings changed, not requiring rebooting
-  }
 #endif
+      saveSettings(save_settings, no_reboot);                                                          // Other settings changed, not requiring rebooting
+  }
 }
 
 static void system_create(screen_t *scr){
@@ -251,7 +254,7 @@ static void system_create(screen_t *scr){
   edit->inputData.getData = &getLanguage;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setLanguage;
+  edit->setData = (setterFn)&setLanguage;
   edit->options = Langs;
   edit->numberOfOptions = LANGUAGE_COUNT;
 
@@ -262,7 +265,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getInitMode;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setInitMode;
+  edit->setData = (setterFn)&setInitMode;
   edit->options = strings[lang].InitMode;
   edit->numberOfOptions = 3;
 
@@ -273,7 +276,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getButtonWakeMode;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setButtonWakeMode;
+  edit->setData = (setterFn)&setButtonWakeMode;
   edit->options = strings[lang].WakeModes;
   edit->numberOfOptions = 4;
 
@@ -284,7 +287,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getShakeWakeMode;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setShakeWakeMode;
+  edit->setData = (setterFn)&setShakeWakeMode;
   edit->options = strings[lang].WakeModes;
   edit->numberOfOptions = 4;
 
@@ -295,7 +298,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getEncoderMode;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setEncoderMode;
+  edit->setData = (setterFn)&setEncoderMode;
   edit->options = strings[lang].encMode;
   edit->numberOfOptions = 2;
 
@@ -306,7 +309,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getbuzzerMode;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setbuzzerMode;
+  edit->setData = (setterFn)&setbuzzerMode;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -317,7 +320,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getTmpUnit;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setTmpUnit;
+  edit->setData = (setterFn)&setTmpUnit;
   edit->options = tempUnit;
   edit->numberOfOptions = 2;
 
@@ -330,7 +333,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getTmpStep;
   edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setTmpStep;
+  edit->setData = (setterFn)&setTmpStep;
   edit->max_value = 50;
   edit->min_value = 1;
 
@@ -343,7 +346,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getBigTmpStep;
   edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setBigTmpStep;
+  edit->setData = (setterFn)&setBigTmpStep;
   edit->max_value = 50;
   edit->min_value = 1;
 
@@ -356,7 +359,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getGuiTempDenoise;
   edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setGuiTempDenoise;
+  edit->setData = (setterFn)&setGuiTempDenoise;
   edit->max_value = 50;
   edit->min_value = 0;
 
@@ -367,7 +370,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getActiveDetection;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setActiveDetection;
+  edit->setData = (setterFn)&setActiveDetection;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -378,7 +381,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getColdBoost;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setColdBoost;
+  edit->setData = (setterFn)&setColdBoost;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -392,7 +395,7 @@ static void system_create(screen_t *scr){
   dis->number_of_dec = 1;
   edit->big_step = 5;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setLVP;
+  edit->setData = (setterFn)&setLVP;
   edit->max_value = 250;
   edit->min_value = 90;
 
@@ -405,7 +408,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getGuiUpd_ms;
   edit->big_step = 20;
   edit->step = 10;
-  edit->setData = (void (*)(void *))&setGuiUpd_ms;
+  edit->setData = (setterFn)&setGuiUpd_ms;
   edit->max_value = 250;
   edit->min_value = 20;
 
@@ -416,7 +419,7 @@ static void system_create(screen_t *scr){
   dis->getData = &getHasBattery;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setHasBattery;
+  edit->setData = (setterFn)&setHasBattery;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 
@@ -429,7 +432,7 @@ static void system_create(screen_t *scr){
   dis->reservedChars=3;
   edit->big_step = 1;
   edit->step = 1;
-  edit->setData = (void (*)(void *))&setDbgScr;
+  edit->setData = (setterFn)&setDbgScr;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 #endif

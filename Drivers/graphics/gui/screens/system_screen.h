@@ -12,7 +12,6 @@
 
 
 extern screen_t Screen_system;
-extern screen_t Screen_system_ntc;
 
 
 void system_screen_setup(screen_t *scr);

@@ -20,19 +20,19 @@ static int doReset(widget_t *w) {
   return screen_main;
 }
 static int doSettingsReset(widget_t *w, RE_Rotation_t input) {
-  reset_mode=reset_Settings;
+  reset_mode=reset_settings;
   return screen_reset_confirmation;
 }
 static int doProfileReset(widget_t *w, RE_Rotation_t input) {
-  reset_mode=reset_Profile;
+  reset_mode=reset_profile;
   return screen_reset_confirmation;
 }
 static int doProfilesReset(widget_t *w, RE_Rotation_t input) {
-  reset_mode=reset_Profiles;
+  reset_mode=reset_profiles;
   return screen_reset_confirmation;
 }
 static int doFactoryReset(widget_t *w, RE_Rotation_t input) {
-  reset_mode=reset_All;
+  reset_mode=reset_all;
   return screen_reset_confirmation;
 }
 
@@ -42,8 +42,8 @@ static void reset_onEnter(screen_t *scr){
 }
 
 static void reset_confirmation_onExit(screen_t *scr){
-  if(reset_mode)
-    saveSettings(reset_mode, no_mode, no_mode, do_reboot);                 // If we have pending save/reset, save now we have all heap free
+  if( !isScreenTimerExpired() && reset_mode)            // Not exiting due timeout
+    saveSettings(reset_mode, do_reboot);                // If we have pending save/reset, save now we have all heap free
 }
 
 static void reset_create(screen_t *scr){
@@ -72,19 +72,19 @@ static void reset_confirmation_init(screen_t *scr){
   u8g2_SetDrawColor(&u8g2, WHITE);
 
   switch(reset_mode){
-    case reset_Settings:
+    case reset_settings:
       putStrAligned(strings[lang].RESET_Reset_msg_settings_1, 0, align_center);
       putStrAligned(strings[lang].RESET_Reset_msg_settings_2, 16, align_center);
       break;
-    case reset_Profile:
+    case reset_profile:
       putStrAligned(strings[lang].RESET_Reset_msg_profile_1, 0 , align_center);
       putStrAligned(strings[lang].RESET_Reset_msg_profile_2, 16, align_center);
       break;
-    case reset_Profiles:
+    case reset_profiles:
       putStrAligned(strings[lang].RESET_Reset_msg_profiles_1,0 , align_center);
       putStrAligned(strings[lang].RESET_Reset_msg_profiles_2, 16, align_center);
       break;
-    case reset_All:
+    case reset_all:
       putStrAligned(strings[lang].RESET_Reset_msg_all_1, 0, align_center);
       putStrAligned(strings[lang].RESET_Reset_msg_all_2, 16, align_center);
       break;
