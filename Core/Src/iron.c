@@ -579,14 +579,8 @@ void setCurrentMode(uint8_t mode){
       Iron.TargetTemperature = getProfileSettings()->standbyTemperature;               // Set standby temp
     }
   }
-  else if(mode==mode_boost){
+  else if((mode==mode_boost) || (mode==mode_coldboost)){
     Iron.TargetTemperature = Iron.UserSetTemperature+getProfileSettings()->boostTemperature;
-    if(Iron.TargetTemperature>getProfileSettings()->MaxSetTemperature){
-      Iron.TargetTemperature=getProfileSettings()->MaxSetTemperature;
-    }
-  }
-  else if(mode==mode_coldboost){
-    Iron.TargetTemperature = Iron.UserSetTemperature + (getProfileSettings()->tempUnit == mode_Farenheit ? 100 : 50);
     if(Iron.TargetTemperature>getProfileSettings()->MaxSetTemperature){
       Iron.TargetTemperature=getProfileSettings()->MaxSetTemperature;
     }
