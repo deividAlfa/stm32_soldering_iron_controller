@@ -18,7 +18,7 @@ static comboBox_item_t *comboitem_tip_settings_save;
 static comboBox_item_t *comboitem_tip_settings_copy;
 static comboBox_item_t *comboitem_tip_settings_new;
 static comboBox_item_t *comboitem_tip_settings_delete;
-//static editable_widget_t *editable_tip_settings_name;
+static editable_widget_t *editable_tip_settings_name;
 static editable_widget_t *editable_tip_settings_cal250;
 static editable_widget_t *editable_tip_settings_cal400;
 static uint8_t tipSaveMode;
@@ -185,7 +185,8 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
 
   ret  = default_screenProcessInput(scr, input, state);                                                           // Process screen
 
-  if(widget_tip_settings->refresh > refresh_idle){                                                                // If something changed, check conditions
+  if( (editable_tip_settings_name->selectable.state == widget_edit) &&                    // Widget in editing mode
+      (widget_tip_settings->refresh > refresh_idle) ){                                                            // If something changed, check conditions
     bool enable=1;
     /*
     uint8_t i = editable_tip_settings_name->current_edit;
@@ -258,7 +259,7 @@ static void tip_settings_create(screen_t *scr){
   //[ TIP label]
   //
   newComboEditableString(w, strings[lang].TIP_SETTINGS_Name, &edit, NULL, backupTip.name);
-  //editable_tip_settings_name = edit;
+  editable_tip_settings_name = edit;
   dis=&edit->inputData;
   dis->reservedChars=TIP_LEN;
   dis->getData = &getTipName;
