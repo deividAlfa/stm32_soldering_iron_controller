@@ -216,7 +216,12 @@ static void resetAddonSettings(addonSettings_t *addons);
 static uint32_t ChecksumAddons(addonSettings_t* addonSettings);
 #endif
 static backupRamData_t bkpRamData;
-
+#ifdef ENABLE_DBG_SAVE
+uint8_t save_prevstate_debug, save_laststate_debug;
+#define DBG_SAVE(n) save_prevstate_debug = save_laststate_debug;save_laststate_debug=n
+#else
+#define DBG_SAVE(n)
+#endif
 void updateTempData(bool force){
   uint32_t CurrentTime = HAL_GetTick();
   uint8_t scr_index=current_screen->index;
@@ -353,7 +358,9 @@ void saveTip(uint8_t save_mode, uint8_t tip_index){
         (ChecksumTipData(&flashTips[i].data) != flashTips[i].crc)){ // Perform check in others and reset if wrong
       resetflashTipData(&flashBufferTipBlock->data, i);
       flashBufferTipBlock->crc = ChecksumTipData(&flashBufferTipBlock->data);
+      DBG_SAVE(i+1);
       eraseFlashPages((uint32_t)&flashTips[i], flashPages_TipSlot);
+      DBG_SAVE(i+2);
       writeFlash((uint32_t*)flashBufferTipBlock, sizeof(flashTipSlot_t), (uint32_t)&flashTips[i]);
     }
   }
@@ -390,8 +397,9 @@ void saveTip(uint8_t save_mode, uint8_t tip_index){
   sortTips(&flashBufferTipBlock->data, flashBufferTipBlock->data.currentNumberOfTips);                                                                         // Sort tips
 
   flashBufferTipBlock->crc = ChecksumTipData(&flashBufferTipBlock->data);
-
+  DBG_SAVE(7);
   eraseFlashPages((uint32_t)&flashTips[profile], flashPages_TipSlot);
+  DBG_SAVE(8);
   writeFlash((uint32_t*)flashBufferTipBlock, sizeof(flashTipSlot_t), (uint32_t)&flashTips[profile]);
 
   uint32_t flashChecksum, ramChecksum;
@@ -404,6 +412,7 @@ void saveTip(uint8_t save_mode, uint8_t tip_index){
     Error_Handler();
   }
   _free(flashBufferTipBlock);
+  DBG_SAVE(0);
   loadTipDataFromFlash(getCurrentTip());                                                                // Reload tip, sortTips will have updated the number to keep the same tip, or the new one
 }
 
@@ -534,7 +543,9 @@ void saveSettings(uint8_t save_mode, uint8_t reboot_mode){
     return;
   }
 
+  DBG_SAVE(9);
   eraseFlashPages((uint32_t)&flashGlobalSettings, flashPages_GlobalSettings);
+  DBG_SAVE(10);
   writeFlash((uint32_t*)flashBufferSettings, sizeof(flashSettings_t), (uint32_t)&flashGlobalSettings);
 
   uint32_t flashChecksum, ramChecksum;
@@ -564,7 +575,7 @@ void saveSettings(uint8_t save_mode, uint8_t reboot_mode){
      Error_Handler();
 #endif
   _free(flashBufferSettings);
-
+  DBG_SAVE(0);
   getSettings()->isSaving = 0;
 
   if(reboot_mode  == do_reboot)
@@ -834,11 +845,13 @@ void flashTempWrite(void)
   __disable_irq();
   HAL_FLASH_Unlock();
   __set_PRIMASK(_irq);
+  DBG_SAVE(12);
   if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&flashTempSettings.temperature[flashTemp.tempIndex], flashTemp.temp) != HAL_OK) {    // Store new temp
      Error_Handler();
   }
   HAL_FLASH_Lock();
   flashTemp.tempIndex++;                                                                                                         // Increase index for next time
+  DBG_SAVE(0);
 }
 
 void flashProfileWrite(void)
@@ -855,11 +868,13 @@ void flashProfileWrite(void)
   __disable_irq();
   HAL_FLASH_Unlock();
   __set_PRIMASK(_irq);
+  DBG_SAVE(13);
   if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&flashTempSettings.profile[flashTemp.profileIndex], flashTemp.profile) != HAL_OK) {        // Store new tip/profile data
      Error_Handler();
   }
   HAL_FLASH_Lock();
   flashTemp.profileIndex++;                                                                                                         // Increase index for next time
+  DBG_SAVE(0);
 }
 
 void flashTipsWrite(void)
@@ -876,14 +891,17 @@ void flashTipsWrite(void)
   __disable_irq();
   HAL_FLASH_Unlock();
   __set_PRIMASK(_irq);
+  DBG_SAVE(14);
   if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, (uint32_t)&flashTempSettings.tip[p][flashTemp.tipIndex[p]], flashTemp.tip[p]) != HAL_OK) {        // Store new tip/profile data
      Error_Handler();
   }
   HAL_FLASH_Lock();
+  DBG_SAVE(0);
   flashTemp.tipIndex[p]++;                                                                                                         // Increase index for next time
 }
 
 void flashTempSettingsErase(void){
+  DBG_SAVE(11);
   eraseFlashPages((uint32_t)&flashTempSettings, flashPages_TempSettings);
   flashTemp.tempIndex = 0;                                             // Reset index
   flashTemp.profileIndex = 0;
@@ -892,6 +910,7 @@ void flashTempSettingsErase(void){
 
   flashTemp.temp=0xFFFF;
   flashTemp.profile=0xFF;
+  DBG_SAVE(0);
 }
 
 static uint32_t ChecksumSystemSettings(systemSettings_t* system){                                                       // Check system settings block

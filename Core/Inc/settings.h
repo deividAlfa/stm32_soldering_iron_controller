@@ -12,6 +12,8 @@
 #include "pid.h"
 #include "board.h"
 
+#define ENABLE_DBG_SAVE
+
 #define SWSTRING          "SW: 1.13.0-beta"                         // Software version reported in settings screen
 #define SYSTEM_SETTINGS_VERSION   27                                // Change this if you change the system settings struct to prevent getting out of sync
 #define PROFILE_SETTINGS_VERSION  2                                 // Same, but for profile settings struct
@@ -346,7 +348,9 @@ extern settings_t settings;
 extern const systemSettings_t defaultSystemSettings;
 extern const profile_settings_t defaultProfileSettings;
 extern const tipData_t defaultTipData[NUM_PROFILES];
-
+#ifdef ENABLE_DBG_SAVE
+extern uint8_t save_prevstate_debug, save_laststate_debug;
+#endif
 /** Cyclic task to save the current temperature/tip/profile if needed. */
 void updateTempData(bool force);
 /** Save the settings to flash. */

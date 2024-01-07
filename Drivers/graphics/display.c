@@ -584,7 +584,13 @@ void fatalError(uint8_t type){
     case error_HARDFAULT:
     {
       char str[32];
+#ifdef ENABLE_DBG_SAVE
+      u8g2_SetFont(&u8g2,u8g2_font_small);
+      sprintf(str,"%s, %u, %u", "HARD FAULT", save_prevstate_debug, save_laststate_debug);
+      putStrAligned(str, 0, align_center);
+#else
       putStrAligned("HARD FAULT", 0, align_center);
+#endif
       u8g2_SetFont(&u8g2,u8g2_font_5x8_tr);
       sprintf(str,"r0:%08lX   r1:%08lX", hardFault_args[0], hardFault_args[1]);
       u8g2_DrawUTF8(&u8g2, 0, 12, str);
