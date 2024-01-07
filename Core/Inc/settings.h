@@ -15,7 +15,8 @@
 #define SWSTRING          "SW: 1.13.0-beta"                         // Software version reported in settings screen
 #define SYSTEM_SETTINGS_VERSION   27                                // Change this if you change the system settings struct to prevent getting out of sync
 #define PROFILE_SETTINGS_VERSION  2                                 // Same, but for profile settings struct
-#define TIP_SETTINGS_VERSION      1                                 // Same, but for profile settings struct
+#define TIP_SETTINGS_VERSION      1                                 // Same, but for tip settings struct
+#define ADDONS_SETTINGS_VERSION   1                                 // Same, but for addons settings struct
 
 #define LANGUAGE_COUNT    7                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
@@ -263,6 +264,7 @@ __attribute__((aligned(4))) typedef struct{
 __attribute__((aligned(4))) typedef struct {
   // bitmask for enabled addons, used to check if switching on and off multiple addons causes the struct
   // to be the same size, thus matching CRC, but in reality its incompatible due to layout change
+  uint8_t version;
   uint64_t enabledAddons;
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
   uint8_t fumeExtractorMode;

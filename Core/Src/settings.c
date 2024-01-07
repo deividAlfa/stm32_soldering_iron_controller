@@ -61,6 +61,7 @@ const systemSettings_t defaultSystemSettings = {
 
 #ifdef ENABLE_ADDONS
 const addonSettings_t defaultAddons = {
+    .version = ADDONS_SETTINGS_VERSION,
     .enabledAddons    = 0
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
                           + 0b1
@@ -470,14 +471,15 @@ void saveSettings(uint8_t save_mode, uint8_t reboot_mode){
   configurePWMpin(output_Low);
   __set_PRIMASK(_irq);
 
-#ifdef ENABLE_ADDONS                                                                                                       //                                                            ADDONS
+#ifdef ENABLE_ADDONS                                                                                      //                                                            ADDONS
   if((save_mode&(save_addons | reset_addons)) == 0){                                                      // No addon save_mode specified
-    if(ChecksumAddons(&flashGlobalSettings.addons) != flashGlobalSettings.addonsChecksum){                            // Check existing flash data is valid
+    if( (ChecksumAddons(&flashGlobalSettings.addons) != flashGlobalSettings.addonsChecksum) ||            // Check existing flash data is valid
+            (flashGlobalSettings.addons.version) != ADDONS_SETTINGS_VERSION ){
       resetAddonSettings(&flashBufferSettings->addons);                                                   // Load defaults if wrong
       needs_saving=1;
     }
     else
-      flashBufferSettings->addons = flashGlobalSettings.addons;                                                // Keep existing addons
+      flashBufferSettings->addons = flashGlobalSettings.addons;                                           // Keep existing addons
   }
   if(save_mode & reset_addons)                                                                            // Reset Addons
     resetAddonSettings(&flashBufferSettings->addons);
@@ -612,13 +614,13 @@ void restoreSettings(void) {
   else{
     Button_reset();
                                                                                                           //                           [ CHECK SYSTEM SETTINGS ]
-    if( (flashGlobalSettings.system.version==SYSTEM_SETTINGS_VERSION) &&                                        // System version correct
-        (flashGlobalSettings.systemChecksum != ChecksumSystemSettings(&flashGlobalSettings.system))){                 // But bad cheksum
+    if( (flashGlobalSettings.system.version==SYSTEM_SETTINGS_VERSION) &&                                  // System version correct
+        (flashGlobalSettings.systemChecksum != ChecksumSystemSettings(&flashGlobalSettings.system))){     // But bad cheksum
       checksumError(reset_settings);                                                                      // Show checksum error
     }
                                                                                                           //                           [ CHECK PROFILE SETTINGS ]
     for(uint8_t i=0;i<NUM_PROFILES;i++){
-      if( (flashGlobalSettings.profile[i].version==PROFILE_SETTINGS_VERSION) &&                                 // Profile version correct
+      if( (flashGlobalSettings.profile[i].version==PROFILE_SETTINGS_VERSION) &&                           // Profile version correct
           (flashGlobalSettings.profileChecksum[i] != ChecksumProfileSettings(&flashGlobalSettings.profile[i])) ){     // But bad cheksum
         checksumError(reset_profile);                                                                     // Show checksum error
         break;
@@ -633,9 +635,9 @@ void restoreSettings(void) {
       }
     }
 
-#ifdef ENABLE_ADDONS                                                                                          //                           [ CHECK ADDONS SETTINGS ]
-    if( (flashGlobalSettings.addons.enabledAddons!=0xFFFFFFFFFFFFFFFFU) &&                                      // Not filled with 0xFF (Otherwise flash is erased)
-        (flashGlobalSettings.addonsChecksum != ChecksumAddons(&flashGlobalSettings.addons))){                         // But bad cheksum
+#ifdef ENABLE_ADDONS                                                                                      //                           [ CHECK ADDONS SETTINGS ]
+    if( (flashGlobalSettings.addons.version == ADDONS_SETTINGS_VERSION) &&                                //  Addons version correct
+        (flashGlobalSettings.addonsChecksum != ChecksumAddons(&flashGlobalSettings.addons))){             // But bad cheksum
       checksumError(reset_addons);                                                                        // Show checksum error
     }
 #endif
