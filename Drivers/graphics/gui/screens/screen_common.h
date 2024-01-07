@@ -15,6 +15,8 @@
 #include "oled.h"
 #include "gui.h"
 
+#define SCREEN_AUTORETURN_TIMEOUT 15000
+
 typedef void (*setterFn)(void*);
 
 typedef struct{
@@ -51,5 +53,6 @@ uint8_t update_GUI_Timer(void);
 void resetScreenTimer(void);
 void updateScreenTimer(RE_Rotation_t input);
 uint8_t checkScreenTimer(uint32_t time);
+uint8_t isScreenTimerExpired(void);
 void updateAmbientTemp(void);
 #endif /* GRAPHICS_GUI_SCREENS_SCREEN_COMMON_H_ */

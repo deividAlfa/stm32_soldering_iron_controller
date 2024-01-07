@@ -12,15 +12,18 @@
 #include "pid.h"
 #include "board.h"
 
-#define SWSTRING          "SW: 1.12.3     "                         // Software version reported in settings screen
+#define SWSTRING          "SW: 1.13.0-beta"                         // Software version reported in settings screen
 #define SYSTEM_SETTINGS_VERSION   27                                // Change this if you change the system settings struct to prevent getting out of sync
 #define PROFILE_SETTINGS_VERSION  2                                 // Same, but for profile settings struct
+#define TIP_SETTINGS_VERSION      1                                 // Same, but for profile settings struct
 
 #define LANGUAGE_COUNT    7                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
-#define NUM_TIPS          35                                        // Number of tips for each profile
+#define NUM_TIPS          85                                        // Number of tips for each profile
 #define TIP_LEN           8                                         // String size for each tip name (Including null termination)
 #define _BLANK_TIP        "        "                                // Empty tip name, containing (TIP_LEN) spaces. Defined here for quick updating if TIP_LEN is modified.
+
+#define TEMPSETTINGS_SAVE_TIME  3000                                // Last tip/profile/temperature in flash are updated after 3 seconds with no changes. This is not applied when battery option is enabled (Stored instantly).
 
 #ifndef PROFILE_VALUES
 
@@ -88,22 +91,23 @@ typedef enum{
   profile_C210            = 2,
   profile_None            = 0xff,
 
-  save_Settings           = 1,
-  save_Profile            = 2,
-  save_Tip                = 4,
-  save_Addons             = 8,
-  save_All                = save_Settings | save_Profile | save_Addons,
+  save_settings           = 1,
+  save_profile            = 2,
+  save_addons             = 8,
+  save_all                = save_settings | save_profile | save_addons,
 
-  reset_Settings          = 0x10,
-  reset_Profile           = 0x20,
-  reset_Profiles          = 0x40,
-  reset_Addons            = 0x80,
-  reset_All               = reset_Settings | reset_Profiles |  reset_Addons,
+  reset_settings          = 0x10,
+  reset_profile           = 0x20,
+  reset_profiles          = 0x40,
+  reset_addons            = 0x80,
+  reset_all               = reset_settings | reset_profiles |  reset_addons,
 
   no_mode                 = 0,
-  mode_SaveTip            = 1,
-  mode_AddTip             = 2,
-  mode_DeleteTip          = 3,
+  save_tip                = 1,
+  add_tip                 = 2,
+  delete_tip              = 3,
+  reset_tips              = 4,
+  reset_allTips           = 5,
 
   perform_scanFix         = 0,      // Perform check over existing flash, reset any wrong section
 
@@ -125,7 +129,6 @@ typedef enum{
   lang_tchinese           = 5,
   lang_bulgarian          = 6,
 
-
   dim_off                 = 0,
   dim_sleep               = 1,
   dim_always              = 2,
@@ -141,7 +144,6 @@ typedef enum{
   fume_extractor_mode_auto      = 1,
   fume_extractor_mode_always_on = 2,
 #endif
-
 #ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
   switch_off_reminder_short_beep  = 0,
   switch_off_reminder_medium_beep = 1,
@@ -167,6 +169,17 @@ __attribute__((aligned(4))) typedef struct{
   pid_values_t  PID;
 }tipData_t;
 
+__attribute__((aligned(2048))) typedef struct{          // 2KB aligned, as flash sector erase size
+  uint8_t       version;
+  uint8_t       currentNumberOfTips;
+  tipData_t     tip[NUM_TIPS];
+}flashTipData_t;
+
+typedef struct{
+  flashTipData_t data;
+  uint32_t       crc;
+}flashTipSlot_t;
+
 __attribute__((aligned(4))) typedef struct{
   uint8_t       enabled;
   uint8_t       detection;
@@ -185,8 +198,6 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       ID;
   uint8_t       impedance;
   uint8_t       tempUnit;
-  uint8_t       currentNumberOfTips;
-  uint8_t       defaultTip;
   uint8_t       pwmMul;
   uint8_t       errorResumeMode;
   uint8_t       shakeFiltering;
@@ -195,14 +206,6 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       smartActiveEnabled;
   uint8_t       smartActiveLoad;
   uint8_t       standDelay;
-  uint8_t       : 8; // reserved
-  uint8_t       : 8;
-  uint8_t       : 8;
-  uint8_t       : 8;
-  uint8_t       : 8;
-  uint8_t       : 8;
-  uint8_t       : 8;
-  uint8_t       : 8;
   filter_t      tipFilter;
   ntc_data_t    ntc;
   uint16_t      standbyTemperature;
@@ -217,24 +220,11 @@ __attribute__((aligned(4))) typedef struct{
   uint16_t      calADC_At_0;
   uint16_t      Cal250_default;
   uint16_t      Cal400_default;
-  uint16_t      : 16; // reserved
-  uint16_t      : 16;
-  uint16_t      : 16;
-  uint16_t      : 16;
   uint32_t      errorTimeout;
   uint32_t      boostTimeout;
   uint32_t      sleepTimeout;
   uint32_t      standbyTimeout;
-  uint32_t      : 32; // reserved
-  uint32_t      : 32;
-  uint32_t      : 32;
-  uint32_t      : 32;
 }profile_settings_t;
-
-__attribute__((aligned(4))) typedef struct{
-  tipData_t     tip[NUM_TIPS];
-  profile_settings_t settings;
-}profile_t;
 
 __attribute__((aligned(4))) typedef struct{
   uint8_t      version;                // Always 0xFF if flash is erased, used to detect blank flash, or settings version mismatch
@@ -242,16 +232,9 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       contrastOrBrightness;
   uint8_t       displayStartColumn;
   uint8_t       displayStartLine;
-  __attribute__((packed)) struct {
-    uint8_t       displayXflip : 1;
-    uint8_t       displayYflip : 1;
-#ifdef SSD1306
-    uint8_t       : 6; // reserved
-#elif defined(ST7565)
-    uint8_t       : 2; // reserved
-    uint8_t       displayResRatio : 4;
-#endif
-  };
+  uint8_t       displayXflip;
+  uint8_t       displayYflip;
+  uint8_t       displayResRatio;
   uint8_t       hasBattery;
   uint8_t       dim_inSleep;
   uint8_t       EncoderMode;
@@ -272,30 +255,8 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       displayVcom;
   uint8_t       displayClk;
   uint8_t       displayPrecharge;
-  uint8_t       : 8; // reserved
-  uint8_t       : 8;
-  uint8_t       : 8;
-  uint8_t       : 8;
-  uint8_t       : 8;
-  uint8_t       : 8;
-  uint8_t       : 8;
-  uint8_t       : 8;
   uint16_t      guiUpdateDelay;
-  uint16_t      : 16; // reserved
-  uint16_t      : 16;
-  uint16_t      : 16;
-  uint16_t      : 16;
-  uint16_t      : 16;
-  uint16_t      : 16;
-  uint16_t      : 16;
-  uint16_t      : 16;
   uint32_t      dim_Timeout;
-  uint32_t      : 32; // reserved
-  uint32_t      : 32;
-  uint32_t      : 32;
-  uint32_t      : 32;
-  uint32_t      : 32;
-  uint32_t      : 32;
 }systemSettings_t;
 
 #ifdef ENABLE_ADDONS
@@ -318,11 +279,11 @@ __attribute__((aligned(4))) typedef struct {
 
 __attribute__((aligned(4))) typedef struct{
   systemSettings_t   system;
+#ifdef ENABLE_ADDONS
+  addonSettings_t   addons;
+#endif
   profile_settings_t profile;
   tipData_t       currentTipData;
-#ifdef ENABLE_ADDONS
-  addonSettings_t addons;
-#endif
   uint8_t         setupMode;
   uint8_t         isSaving;
   uint8_t         currentProfile;
@@ -331,20 +292,15 @@ __attribute__((aligned(4))) typedef struct{
 
 
 __attribute__((aligned(4))) typedef struct{
-  systemSettings_t      system;
-  uint32_t        systemChecksum;
+  systemSettings_t  system;
+#ifdef ENABLE_ADDONS
+  addonSettings_t   addons;
+#endif
+  profile_settings_t profile[NUM_PROFILES];
+  uint32_t          systemChecksum;
+  uint32_t          addonsChecksum;
+  uint32_t          profileChecksum[NUM_PROFILES];
 } flashSettings_t;
-
-__attribute__((aligned(4))) typedef struct{
-  profile_t       profile[NUM_PROFILES];
-  uint32_t        profileSettingsChecksum[NUM_PROFILES];          // Only for small profile settings block (Excluding tips)
-  uint32_t        profileChecksum[NUM_PROFILES];                  // For the entire profile (Including tips)
-} flashProfiles_t;
-
-__attribute__((aligned(4))) typedef struct{
-  addonSettings_t addons;
-  uint32_t        addonsChecksum;
-} flashAddons_t;
 
 typedef struct{
   uint16_t profile[128];
@@ -384,14 +340,6 @@ typedef union {
   uint8_t bytes[BACKUP_RAM_SIZE_IN_BYTES];
 } backupRamData_t;
 
-extern flashSettings_t flashSettings;
-extern flashProfiles_t flashProfiles;
-extern temp_settings_t temp_settings;
-#ifdef ENABLE_ADDONS
-extern flashAddons_t flashAddonSettings;
-#endif
-
-
 extern settings_t settings;
 extern const systemSettings_t defaultSystemSettings;
 extern const profile_settings_t defaultProfileSettings;
@@ -400,7 +348,9 @@ extern const tipData_t defaultTipData[NUM_PROFILES];
 /** Cyclic task to save the current temperature/tip/profile if needed. */
 void updateTempData(bool force);
 /** Save the settings to flash. */
-void saveSettings(uint8_t save_mode, uint8_t tip_mode, uint8_t tip_index, uint8_t reboot_mode);
+void saveSettings(uint8_t save_mode, uint8_t reboot_mode);
+void saveTip(uint8_t save_mode, uint8_t tip_index);
+
 /** Reads the save flag. */
 uint8_t getSaveFlag(void);
 
@@ -414,17 +364,19 @@ systemSettings_t * getFlashSystemSettings(void);
 flashSettings_t * getFlashSettings(void);
 
 /** Load/change to the profile with the given index */
-ErrorStatus loadProfile(uint8_t profile);
+void loadProfile(uint8_t profile);
 void setCurrentProfile(uint8_t profile);
 uint8_t getCurrentProfile(void);
 profile_settings_t * getProfileSettings(void);
 profile_settings_t * getDefaultProfileSettings(void);
 profile_settings_t * getFlashProfileSettings(void);
-flashProfiles_t * getFlashProfiles(void);
 
+#ifdef ENABLE_ADDONS
 addonSettings_t * getAddons(void);
 addonSettings_t * getDefaultAddons(void);
-flashAddons_t * getFlashAddons(void);
+addonSettings_t * getFlashAddons(void);
+bool isAddonSettingsChanged(void);
+#endif
 
 void loadTipDataFromFlash(uint8_t tip);
 tipData_t * getFlashTipData(uint8_t tip);
@@ -432,6 +384,7 @@ tipData_t * getCurrentTipData(void);
 tipData_t * getDefaultTipData(void);
 void setCurrentTipData(tipData_t * tip);
 uint8_t getCurrentTip(void);
+uint8_t getCurrentNumberOfTips(void);
 void setCurrentTip(uint8_t tip);
 
 
@@ -439,9 +392,7 @@ void setCurrentTip(uint8_t tip);
 bool isSystemSettingsChanged(void);
 /** Checks if the current profile in RAM is changed */
 bool isCurrentProfileChanged(void);
-/** Checks if the current addons settings in RAM were changed */
-bool isAddonSettingsChanged(void);
-/** Copies las Profile / Temperature / Tip data between flash and ram when battery option is changed*/
+/** Copies last Profile / Temperature / Tip data between flash and ram when battery option is changed*/
 void copy_bkp_data(uint8_t mode);
 /** Set initial values after setup screen */
 void flashTempSettingsInitialSetup(void);

@@ -7,8 +7,9 @@
 #include "screen_common.h"
 
 int32_t temp;
+screen_t * lastScreen;
 int16_t backupTemp;
-uint8_t newTip, status, profile, Selected_Tip, lang, backupMode, backupTempUnit, current_lang=lang_english;
+uint8_t newTip, status, profile, Selected_Tip, lang, backupMode, backupTempUnit, current_lang=lang_english, screen_timeout;
 tipData_t backupTip;
 
 struct{
@@ -68,6 +69,11 @@ int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   updateIronPower();
   wakeOledDim();
   handleOledDim();
+
+  if(lastScreen!=scr){
+    lastScreen=scr;
+    screen_timeout=0;
+  }
   updateScreenTimer(input);
 
   if(input==Rotate_Decrement_while_click){
@@ -93,7 +99,8 @@ int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     }
   }
 
-  if(checkScreenTimer(15000)){
+  if(checkScreenTimer(SCREEN_AUTORETURN_TIMEOUT)){
+    screen_timeout=1;
     return screen_main;
   }
   return default_screenProcessInput(scr, input, state);
@@ -113,6 +120,10 @@ uint8_t checkScreenTimer(uint32_t time){
     return 1;
   }
   return 0;
+}
+
+uint8_t isScreenTimerExpired(void){
+  return screen_timeout;
 }
 void restore_contrastOrBrightness(void){
 #ifndef ST7565

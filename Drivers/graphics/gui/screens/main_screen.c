@@ -590,14 +590,14 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             break;
 
           case Rotate_Increment:
-            if(++tip >= getProfileSettings()->currentNumberOfTips){
+            if(++tip >= getCurrentNumberOfTips()){
               tip=0;
             }
             break;
 
           case Rotate_Decrement:
-            if(--tip >= getProfileSettings()->currentNumberOfTips){          // If underflowed
-              tip = getProfileSettings()->currentNumberOfTips-1;
+            if(--tip >= getCurrentNumberOfTips()){          // If underflowed
+              tip = getCurrentNumberOfTips()-1;
             }
             break;
 
@@ -665,16 +665,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           updateTempData(force_update);                         // Update current data
           if(isCurrentProfileChanged())                         // If there's unsaved profile data
             Error_Handler();                                    // We shouldn't have anything unsaved here
-          if(loadProfile(profile)){                             // New profile is bad! (Strange, they're checked at boot)
-            oled_destroy_screen(scr);                           // Destroy screen to free memory
-            saveSettings(perform_scanFix, no_mode, no_mode, no_reboot);           // Perform sanity check on flash
-            if(loadProfile(profile))                            // Try again
-                Error_Handler();                                // Flash bad?
-            main_screen_create(scr);                            // OK, create screen again
-            main_screen_init(scr);
-            mainScr.setMode = main_profileselect;
-            switchScreenMode();
-          }
+
+          loadProfile(profile);
+          updateTempData(force_update);                         // Update current data
           Screen_main.state=screen_Erase;
         }
       }
@@ -1089,7 +1082,7 @@ static void main_screen_create(screen_t *scr){
   dis->textAlign=align_center;
   dis->font=((displayOnly_widget_t*)Widget_IronTemp->content)->font;
   edit->selectable.tab = 1;
-  edit->setData = (void (*)(void *))&setTemp;
+  edit->setData = (setterFn)&setTemp;
   w->frameType=frame_solid;
   edit->selectable.state=widget_edit;
   w->radius=8;
