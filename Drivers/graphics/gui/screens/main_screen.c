@@ -8,6 +8,11 @@
 #include "main_screen.h"
 #include "screen_common.h"
 
+#ifdef __BASE_FILE__
+#undef __BASE_FILE__
+#endif
+#define __BASE_FILE__ "main_screen.c"
+
 #define SCREENSAVER
 #define PWR_BAR_WIDTH   52
 #define SCALE_FACTOR    (int)((65536*PWR_BAR_WIDTH*1.005)/100)
