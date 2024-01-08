@@ -377,12 +377,20 @@ The stored value for 400ºC calibration.<br>
 Save the tip settings.<br>
 This option will be disabled if the tip name is empty or already exists.<br>
 If this is a new tip then it is automatically selected as the active one.<br>
+  - **RESET**<br>
+Resets values to default, keeping existing name.<br>
+You still need to save for changes to be applied. 
+  - **ADD NEW**<br>
+Copy this tip into a new slot, loading the default name.<br>
+This option will be disabled if already copying the tip or when there are no free slots left.<br>
   - **COPY**<br>
-Copy this tip into a new slot.<br>
+Copy this tip into a new slot, keeping the name.<br>
 This option will be disabled if already copying the tip or when there are no free slots left.<br>
   - **DELETE**<br>
 Delete the current tip.<br>
-This option will be disabled if already copying the tip or when there's only one tip in the system.<br>
+This option will be disabled if this is a new tip or when there's only one tip in the system.<br>
+  - **SAVE**<br>
+Save changes. This option will be disabled if other tip in the system has the same name.<br>
   - **CANCEL**<br>
 Discard any changes and return.<br>
 

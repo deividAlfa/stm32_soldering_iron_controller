@@ -230,8 +230,8 @@ __attribute__((used)) void HardFault_Handler_cp(unsigned int * hardfault_args, u
 
 /* Initial hard fault trap to capture stack data*/
 __attribute__((used)) __attribute__((naked)) void HardFault_Handler_(void){
-  asm(
-#if (__CORTEX_M >=3)
+  asm volatile(
+#if (__CORTEX_M >=3)                              // https://community.st.com/t5/stm32-mcus-products/my-stm32h743vi-application-runs-to-a-debug-instruction-in-the/m-p/254666/highlight/true#M57916
       "TST     lr, #4                       \n"
       "ITE     EQ                           \n"
       "MRSEQ   R0, MSP                      \n" //Read MSP (Main)
@@ -240,9 +240,9 @@ __attribute__((used)) __attribute__((naked)) void HardFault_Handler_(void){
       "MOV     R2, R5                       \n"
       "MOV     R3, R6                       \n"
       "B       HardFault_Handler_cp         \n"
-#else
+#else                                               // https://community.st.com/t5/stm32-mcus-products/my-stm32h743vi-application-runs-to-a-debug-instruction-in-the/m-p/254668/highlight/true#M57918
       "MOV     R1, LR                       \n"
-      "LDR     R0, =HardFault_Handler_cp    \n"
+      "LDR     R1, =HardFault_Handler_cp    \n"
       "MOV     LR, R0                       \n"
       "MOVS    R0, #4                       \n"     // Determine correct stack
       "TST     R0, R1                       \n"
@@ -253,6 +253,7 @@ __attribute__((used)) __attribute__((naked)) void HardFault_Handler_(void){
       "MOV     R2, R5                       \n"
       "MOV     R3, R6                       \n"     // sourcer32@gmail.com
       "BX      LR                           \n"
+      ".LTORG                               \n"
 #endif
   );
 }
