@@ -229,7 +229,7 @@ __attribute__((used)) void HardFault_Handler_cp(unsigned int * hardfault_args, u
 }
 
 /* Initial hard fault trap to capture stack data*/
-__attribute__((used)) __attribute__((naked)) void HardFault_Handler_(void){
+__attribute__((naked, used)) void HardFault_Handler_(void){
   asm volatile(
 #if (__CORTEX_M >=3)                              // https://community.st.com/t5/stm32-mcus-products/my-stm32h743vi-application-runs-to-a-debug-instruction-in-the/m-p/254666/highlight/true#M57916
       "TST     lr, #4                       \n"
