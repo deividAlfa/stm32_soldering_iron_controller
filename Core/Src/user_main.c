@@ -242,7 +242,7 @@ __attribute__((used)) __attribute__((naked)) void HardFault_Handler_(void){
       "B       HardFault_Handler_cp         \n"
 #else                                               // https://community.st.com/t5/stm32-mcus-products/my-stm32h743vi-application-runs-to-a-debug-instruction-in-the/m-p/254668/highlight/true#M57918
       "MOV     R1, LR                       \n"
-      "LDR     R1, =HardFault_Handler_cp    \n"
+      "LDR     R0, =HardFault_Handler_cp    \n"
       "MOV     LR, R0                       \n"
       "MOVS    R0, #4                       \n"     // Determine correct stack
       "TST     R0, R1                       \n"
