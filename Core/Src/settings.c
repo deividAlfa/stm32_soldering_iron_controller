@@ -650,15 +650,13 @@ void restoreSettings(void) {
 #endif
     saveSettings(perform_scanFix, no_reboot);                                                             // Scan current settings, reset any bad area
     saveTip(perform_scanFix, 0);
-
-    flashTempSettingsInit();                                                                              // These initialize currentProfile, needed later by loadProfile
-    loadSettingsFromBackupRam();
-    loadProfile(getCurrentProfile());                                                                     // Will restore lastTemp and lastTip from the correct source (Flash or backup SRAM).
-
+    *getSystemSettings() = flashGlobalSettings.system;
 #ifdef ENABLE_ADDONS
     *getAddons() = flashGlobalSettings.addons;                                                                  // Load current addons
 #endif
-    *getSystemSettings() = flashGlobalSettings.system;                                                          // Load current settings
+    flashTempSettingsInit();                                                                              // These initialize currentProfile, needed later by loadProfile
+    loadSettingsFromBackupRam();
+    loadProfile(getCurrentProfile());
   }
 }
 
