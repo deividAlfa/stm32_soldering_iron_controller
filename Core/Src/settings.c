@@ -350,6 +350,9 @@ void saveTip(uint8_t save_mode, uint8_t tip_index){
   uint8_t profile = getCurrentProfile();
   flashTipSlot_t* flashBufferTipBlock = _malloc(sizeof(flashTipSlot_t));
 
+  if((profile>profile_C210) || (getProfileSettings()->ID != profile ))                                        // Sanity check
+    Error_Handler();
+
   if(flashBufferTipBlock == NULL)
     Error_Handler();
 
@@ -370,13 +373,7 @@ void saveTip(uint8_t save_mode, uint8_t tip_index){
     return;
   }
 
-  if((profile>profile_C210) || (getProfileSettings()->ID != profile ))                                        // Sanity check
-      Error_Handler();
 
-  if( ChecksumTipData(&flashTips[profile].data) != flashTips[profile].crc){
-    if(flashBufferTipBlock == NULL)
-      Error_Handler();
-  }
   flashBufferTipBlock->data = flashTips[profile].data;                                                       // Backup flash tips
   if(save_mode == save_tip){
     flashBufferTipBlock->data.tip[tip_index] =  *getCurrentTipData();                                       // Save current tip
@@ -388,8 +385,7 @@ void saveTip(uint8_t save_mode, uint8_t tip_index){
     for(uint8_t i=tip_index; i<getCurrentNumberOfTips()-1; i++)                      // Overwrite selected tip with the next one, move the rest one position backwards
       flashBufferTipBlock->data.tip[i] = flashBufferTipBlock->data.tip[i+1];
 
-    flashBufferTipBlock->data.currentNumberOfTips--;                                                               // Move one position back if possible
-    setCurrentTip(tip_index-1);
+    flashBufferTipBlock->data.currentNumberOfTips--;
   }
   else
     Error_Handler();                                                                                  // Save mode = Save_Tip, but tip_modenot defined, something went wrong}
