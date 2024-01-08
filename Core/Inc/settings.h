@@ -14,7 +14,7 @@
 
 #define ENABLE_DBG_SAVE
 
-#define SWSTRING          "SW: 1.13.1-beta"                         // Software version reported in settings screen
+#define SWSTRING          "SW: 1.13.2-beta"                         // Software version reported in settings screen
 #define SYSTEM_SETTINGS_VERSION   27                                // Change this if you change the system settings struct to prevent getting out of sync
 #define PROFILE_SETTINGS_VERSION  2                                 // Same, but for profile settings struct
 #define TIP_SETTINGS_VERSION      1                                 // Same, but for tip settings struct
