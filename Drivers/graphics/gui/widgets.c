@@ -849,8 +849,9 @@ uint8_t comboBoxDraw(widget_t *w) {
 #endif
   }
                                                             // If we got here, something needs refreshing
-  if(w->refresh==refresh_triggered){                        // Widget?
-    w->refresh=refresh_idle;
+  if(w->refresh!=refresh_idle){                             // Widget not idle?
+    if(w->refresh==refresh_triggered)                       // Only clear if state=refresh_triggered
+        w->refresh=refresh_idle;                            // Otherwise, keep refresh_always
     if(w->parent->state != screen_Erased){                  // If it was the widget and the screen was not erased already
       w->parent->state = screen_Erased;                     //
       fillBuffer(BLACK, fill_dma);                          // Erase fast using dma
