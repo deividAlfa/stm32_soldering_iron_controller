@@ -217,6 +217,7 @@ __attribute__((aligned(4))) typedef struct{
   uint16_t      MaxSetTemperature;
   uint16_t      MinSetTemperature;
   uint16_t      boostTemperature;
+  uint16_t      coldBoostTemperature;
   uint16_t      readPeriod;
   uint16_t      readDelay;
   uint16_t      noIronValue;

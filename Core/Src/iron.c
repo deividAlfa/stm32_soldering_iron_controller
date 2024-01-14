@@ -295,6 +295,7 @@ void setSystemTempUnit(bool unit){
     getProfileSettings()->MaxSetTemperature = round_10(TempConversion(getProfileSettings()->MaxSetTemperature,unit,0));
     getProfileSettings()->MinSetTemperature = round_10(TempConversion(getProfileSettings()->MinSetTemperature,unit,0));
     getProfileSettings()->boostTemperature = round_10(TempIncrementConversion(getProfileSettings()->boostTemperature,unit));
+    getProfileSettings()->coldBoostTemperature = round_10(TempIncrementConversion(getProfileSettings()->coldBoostTemperature,unit));
   }
   if(getSystemSettings()->tempUnit != unit){
     getSystemSettings()->tempUnit = unit;
@@ -563,9 +564,8 @@ void setCurrentMode(uint8_t mode){
   Iron.CurrentModeTimer = CurrentTime;                                                    // Refresh current mode timer
 
   if(!getIronCalibrationMode() && getProfileSettings()->coldBoostEnabled){
-    int16_t diff = (getProfileSettings()->tempUnit == mode_Farenheit) ? 300 : 150;
     int16_t tipTemp = (getProfileSettings()->tempUnit == mode_Farenheit) ? last_TIP_F : last_TIP_C;
-    if(mode==mode_run && getCurrentMode() < mode_run && (Iron.UserSetTemperature - tipTemp)>diff)
+    if(mode==mode_run && getCurrentMode() < mode_run && (Iron.UserSetTemperature - tipTemp) > getProfileSettings()->coldBoostTemperature)
       mode=mode_coldboost;
   }
   if(mode==mode_standby){
