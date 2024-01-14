@@ -47,7 +47,6 @@ const systemSettings_t defaultSystemSettings = {
   .tempBigStep          = 20,                   // 20º big steps
   .activeDetection      = true,
   .hasBattery           = false,
-  .coldBoost            = true,
   .lvp                  = 110,                  // 11.0V Low voltage
   .initMode             = mode_sleep,           // Safer to boot in sleep mode by default!
   .buzzerMode           = disable,
@@ -122,6 +121,8 @@ const profile_settings_t defaultProfileSettings = {
   .MaxSetTemperature          = 450,
   .MinSetTemperature          = 180,
   .boostTimeout               = 60000,                  // ms
+  .coldBoostEnabled           = true,
+  .coldBoostTimeout           = 10000,                  // ms
   .boostTemperature           = 50,
   .pwmMul                     = 1,
   .readPeriod                 = (200*200)-1,             // 200ms * 200  because timer period is 5us
@@ -506,7 +507,7 @@ void saveSettings(uint8_t save_mode, uint8_t reboot_mode){
   if(save_mode & reset_settings){                                                                         // Reset settings
     resetSystemSettings(&flashBufferSettings->system);                                                    // Load defaults
     if(save_mode == reset_all){
-      flashBufferSettings->system.version = 0xFF;                                                         // To trigger setup screen
+      flashBufferSettings->system.version = UINT16_MAX;                                                   // To trigger setup screen
     }
   }
   else if(save_mode & save_settings){                                                                     // Save current settings
@@ -579,7 +580,7 @@ void saveSettings(uint8_t save_mode, uint8_t reboot_mode){
 }
 
 void restoreSettings(void) {
-  bool setup = (flashGlobalSettings.system.version == 0xFF);     // 0xFF = erased flash, trigger setup mode
+  bool setup = (flashGlobalSettings.system.version == UINT16_MAX);     // 0xFFFF = erased flash, trigger setup mode
 #ifndef STM32F072xB
   RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN;    // power the BKP peripheral
   PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers

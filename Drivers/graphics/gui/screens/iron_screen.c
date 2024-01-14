@@ -16,6 +16,7 @@ static comboBox_item_t *comboitem_ShakeFiltering;
 static comboBox_item_t *comboitem_StandMode;
 static comboBox_item_t *comboitem_StandDelay;
 static comboBox_item_t *comboitem_smartActiveLoad;
+static comboBox_item_t *comboItem_coldBoostTimeout;
 static editable_widget_t *editable_IRON_StandbyTemp;
 static editable_widget_t *editable_IRON_BoostTemp;
 static editable_widget_t *editable_IRON_MaxTemp;
@@ -125,6 +126,7 @@ void update_Iron_menu(void){
   comboitem_StandMode->enabled = (getProfileSettings()->WakeInputMode==mode_stand);
   comboitem_StandDelay->enabled = (getProfileSettings()->WakeInputMode==mode_stand);
   comboitem_smartActiveLoad->enabled = (getProfileSettings()->smartActiveEnabled==enable);
+  comboItem_coldBoostTimeout->enabled = (getProfileSettings()->coldBoostEnabled==enable);
 }
 //=========================================================
 #ifdef USE_VIN
@@ -272,6 +274,23 @@ static void setBoostTemp(uint32_t *val) {
 static void * getBoostTemp() {
   temp = getProfileSettings()->boostTemperature;
   return &temp;
+}
+//=========================================================
+static void * getColdBoost() {
+  temp = getProfileSettings()->coldBoostEnabled;
+  update_Iron_menu();
+  return &temp;
+}
+static void setColdBoost(uint32_t *val) {
+  getProfileSettings()->coldBoostEnabled = * val;
+}
+//=========================================================
+static void * getColdBoostTime() {
+  temp = getProfileSettings()->coldBoostTimeout/1000;
+  return &temp;
+}
+static void setColdBoostTime(uint32_t *val) {
+  getProfileSettings()->coldBoostTimeout= *val*1000;
 }
 //=========================================================
 static void * getWakeMode() {
@@ -724,6 +743,30 @@ static void iron_create(screen_t *scr){
   edit->max_value = 200;
   edit->min_value = 10;
   edit->setData = (setterFn)&setBoostTemp;
+
+  //  [ Cold Boost Widget ]
+  //
+  newComboMultiOption(w, strings[lang].IRON_Cold_Boost,&edit, NULL);
+  dis=&edit->inputData;
+  dis->getData = &getColdBoost;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (setterFn)&setColdBoost;
+  edit->options = strings[lang].OffOn;
+  edit->numberOfOptions = 2;
+
+  //  [ Cold boost Time Widget ]
+  //
+  newComboEditable(w, strings[lang].__Time, &edit, &comboItem_coldBoostTimeout);
+  dis=&edit->inputData;
+  dis->endString="s";
+  dis->reservedChars=5;
+  dis->getData = &getColdBoostTime;
+  edit->big_step = 10;
+  edit->step = 1;
+  edit->max_value = 60;
+  edit->min_value = 1;
+  edit->setData = (setterFn)&setColdBoostTime;
 
   //  [ Wake mode Widget ]
   //

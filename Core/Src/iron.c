@@ -184,7 +184,7 @@ void handleIron(void) {
       }
 
     }
-    if((Iron.CurrentMode==mode_coldboost) && (mode_time>12000)){                              // If cold boost mode and time expired
+    if((Iron.CurrentMode==mode_coldboost) && (mode_time>getProfileSettings()->coldBoostTimeout)){                              // If cold boost mode and time expired
       setCurrentMode(mode_run);
     }
     else if((Iron.CurrentMode==mode_boost) && (mode_time>getProfileSettings()->boostTimeout)){    // If boost mode and time expired
@@ -562,8 +562,8 @@ void setCurrentMode(uint8_t mode){
   CurrentTime=HAL_GetTick();                                                              // Update local time value just in case it's called by handleIron, to avoid drift
   Iron.CurrentModeTimer = CurrentTime;                                                    // Refresh current mode timer
 
-  if(!getIronCalibrationMode() && getSystemSettings()->coldBoost){
-    int16_t diff = (getProfileSettings()->tempUnit == mode_Farenheit) ? 200 : 100;
+  if(!getIronCalibrationMode() && getProfileSettings()->coldBoostEnabled){
+    int16_t diff = (getProfileSettings()->tempUnit == mode_Farenheit) ? 300 : 150;
     int16_t tipTemp = (getProfileSettings()->tempUnit == mode_Farenheit) ? last_TIP_F : last_TIP_C;
     if(mode==mode_run && getCurrentMode() < mode_run && (Iron.UserSetTemperature - tipTemp)>diff)
       mode=mode_coldboost;
