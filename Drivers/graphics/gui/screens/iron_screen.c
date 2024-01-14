@@ -770,7 +770,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Cold Boost Temp trigger Widget ]
   //
-  newComboEditable(w, strings[lang].__Temp, &edit, &comboItem_coldBoostTemp);
+  newComboEditable(w, strings[lang].IRON_ColdBoost_Threshold, &edit, &comboItem_coldBoostTemp);
   editable_IRON_ColdBoostTemp = edit;
   dis=&edit->inputData;
   dis->reservedChars=5;
@@ -783,7 +783,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Cold boost Time Widget ]
   //
-  newComboEditable(w, strings[lang].__Time, &edit, &comboItem_coldBoostTimeout);
+  newComboEditable(w, strings[lang].IRON_ColdBoost_Timeout, &edit, &comboItem_coldBoostTimeout);
   dis=&edit->inputData;
   dis->endString="s";
   dis->reservedChars=5;
