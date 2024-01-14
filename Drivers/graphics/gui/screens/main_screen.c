@@ -1090,7 +1090,7 @@ static void main_screen_create(screen_t *scr){
   edit->setData = (setterFn)&setTemp;
   w->frameType=frame_solid;
   edit->selectable.state=widget_edit;
-  w->radius=8;
+  w->radius=4;
   w->enabled=0;
   w->width=128;
 

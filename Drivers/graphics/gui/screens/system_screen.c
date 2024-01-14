@@ -111,14 +111,6 @@ static void setActiveDetection(uint32_t *val) {
   getSystemSettings()->activeDetection = * val;
 }
 //=========================================================
-static void * getColdBoost() {
-  temp = getSystemSettings()->coldBoost;
-  return &temp;
-}
-static void setColdBoost(uint32_t *val) {
-  getSystemSettings()->coldBoost = * val;
-}
-//=========================================================
 static void * getEncoderMode() {
   temp = getSystemSettings()->EncoderMode;
   return &temp;
@@ -371,17 +363,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (setterFn)&setActiveDetection;
-  edit->options = strings[lang].OffOn;
-  edit->numberOfOptions = 2;
-
-  //  [ Cold Boost Widget ]
-  //
-  newComboMultiOption(w, strings[lang].SYSTEM_Cold_Boost,&edit, NULL);
-  dis=&edit->inputData;
-  dis->getData = &getColdBoost;
-  edit->big_step = 1;
-  edit->step = 1;
-  edit->setData = (setterFn)&setColdBoost;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 

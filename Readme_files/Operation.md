@@ -56,7 +56,7 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
 ---
 
 ## Main screen<br>
-  - **Temperature display modes**<br>  
+  - **Temperature display modes**<br>
   Issue a counter-clockwise drag-rotation to switch between numeric and graph display.<br>
   The graph update rate is the same as the ADC reading frequency.<br>
   The numerical display uses a noise supression filter to show smooth values. Once the setpoint was reached, variations of +-5ºC will be ignored (Can be adjusted).<br>    
@@ -82,7 +82,7 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
   To avoid unintended behaviour, at least 3 seconds must pass between tip changes, lower than that will be considered noise or momentary connection break.<br>
 - **Profile selection**<br>
   Issue a drag-rotation while in Tip selection mode to show the profile selection.<br>
-  Rotate to change the selected profiler (T12, C210, C245), click or wait 2 seconds to select and return to normal mode.
+  Rotate to change the selected profile (T12, C210, C245), click or wait 2 seconds to select and return to normal mode.
 - **System menu**<br>
   A long click will enter the system menu (Except while in tip selection/setpoint adjustment).<br>
 
@@ -132,6 +132,15 @@ This timer cannot be disabled.<br>
 Boost mode run time before resuming normal mode.<br>
   - **Boost increase**<br>
 Temperature increase applied in boost mode. It's added to the current temperature and limited to system maximum temperature.<br>
+  - **Cold boost**<br>
+Activated when inserting a tip. Meant to speed up heating on cheap iron tips, as the heat needs more time to spread over the metal body.<br>
+Genuine T12 / JBC tips shouldn't need this!<br>
+  - **Cold boost temperature**<br>
+If [target temperature - current temperature] surpasses this threshold, boost is automatically triggered.<br>
+This option is only enabled when Cold Boost is active.<br>
+  - **Cold boost time**<br>
+How much time the automatic boost willbe applied.<br>
+This option is only enabled when Cold Boost is active.<br>
   - **Wake mode**<br>
 WAKE input working mode (__SHAKE__ or __STAND__).<br>
 SHAKE uses a motion sensor present in T12 handles, the station will keep working while motion is detected.<br>
@@ -268,10 +277,6 @@ This is not applied to the plot graph.<br>
 Adjust Low voltage protection.<br>
   - **Active detection**<br>
 Use iron active detection by leaving the PWM slightly on all the time. If your amp has a pullup resistor it can be disabled.<br>
-  - **Cold boost**<br>
-When entering run mode, if the tip is at least 100ºC colder than the target temperature, boosts +50ºC for 12 seconds.<br>
-This is meant to speed up heating on cheap iron tips, where the heat needs some time to spread over the tip metal body.<br>
-Genuine T12 / JBC tips shouldn't need this.<br>
   - **GUI Time**<br>
 To offer maximum responsiveness, the screen is updated as fastest as possible when the cpu is idling.<br>
 It depends on the MCU used and display interface, it can reach more than 100 fps in DMA SPI mode.<br>

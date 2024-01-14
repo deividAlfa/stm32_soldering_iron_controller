@@ -14,9 +14,9 @@
 
 #define ENABLE_DBG_SAVE
 
-#define SWSTRING          "SW: 1.13.2-beta"                         // Software version reported in settings screen
-#define SYSTEM_SETTINGS_VERSION   27                                // Change this if you change the system settings struct to prevent getting out of sync
-#define PROFILE_SETTINGS_VERSION  2                                 // Same, but for profile settings struct
+#define SWSTRING          "SW: 1.13.3-beta"                         // Software version reported in settings screen
+#define SYSTEM_SETTINGS_VERSION   28                                // Change this if you change the system settings struct to prevent getting out of sync
+#define PROFILE_SETTINGS_VERSION  3                                 // Same, but for profile settings struct
 #define TIP_SETTINGS_VERSION      1                                 // Same, but for tip settings struct
 #define ADDONS_SETTINGS_VERSION   1                                 // Same, but for addons settings struct
 
@@ -197,7 +197,7 @@ __attribute__((aligned(4))) typedef struct{
 }ntc_data_t;
 
 __attribute__((aligned(4))) typedef struct{
-  uint8_t       version;                // Always 0xFF if flash is erased, used to detect blank flash, or settings version mismatch
+  uint16_t      version;                // Always 0xFFFF if flash is erased, used to detect blank flash, or settings version mismatch
   uint8_t       ID;
   uint8_t       impedance;
   uint8_t       tempUnit;
@@ -207,6 +207,7 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       WakeInputMode;
   uint8_t       StandMode;
   uint8_t       smartActiveEnabled;
+  uint8_t       coldBoostEnabled;
   uint8_t       smartActiveLoad;
   uint8_t       standDelay;
   filter_t      tipFilter;
@@ -216,6 +217,7 @@ __attribute__((aligned(4))) typedef struct{
   uint16_t      MaxSetTemperature;
   uint16_t      MinSetTemperature;
   uint16_t      boostTemperature;
+  uint16_t      coldBoostTemperature;
   uint16_t      readPeriod;
   uint16_t      readDelay;
   uint16_t      noIronValue;
@@ -225,12 +227,13 @@ __attribute__((aligned(4))) typedef struct{
   uint16_t      Cal400_default;
   uint32_t      errorTimeout;
   uint32_t      boostTimeout;
+  uint32_t      coldBoostTimeout;
   uint32_t      sleepTimeout;
   uint32_t      standbyTimeout;
 }profile_settings_t;
 
 __attribute__((aligned(4))) typedef struct{
-  uint8_t      version;                // Always 0xFF if flash is erased, used to detect blank flash, or settings version mismatch
+  uint16_t      version;                // Always 0xFF if flash is erased, used to detect blank flash, or settings version mismatch
   uint8_t       language;
   uint8_t       contrastOrBrightness;
   uint8_t       displayStartColumn;
@@ -245,7 +248,6 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       activeDetection;
   uint8_t       clone_fix;
   uint8_t       dim_mode;
-  uint8_t       coldBoost;
   uint8_t       initMode;
   uint8_t       tempUnit;
   uint8_t       tempStep;
