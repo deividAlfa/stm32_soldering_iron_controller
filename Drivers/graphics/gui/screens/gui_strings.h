@@ -62,6 +62,7 @@ typedef struct{
   char * IRON_Sleep;
   char * IRON_Boost;
   char * IRON_Boost_Add;
+  char * IRON_Cold_Boost;
   char * IRON_Wake_Mode;
   char * IRON_smartActiveEnable;
   char * IRON_smartActiveLoad;
@@ -93,7 +94,6 @@ typedef struct{
   char * SYSTEM__Step;
   char * SYSTEM__Big_Step;
   char * SYSTEM_Active_Detection;
-  char * SYSTEM_Cold_Boost;
   char * SYSTEM_LVP;
   char * SYSTEM_Gui_Time;
   char * SYSTEM_Battery;
@@ -161,6 +161,7 @@ typedef struct{
   char * _Language;
   char * __Temp;
   char * __Delay;
+  char * __Time;
   char * _Cal_250;
   char * _Cal_400;
   char * _BACK;
