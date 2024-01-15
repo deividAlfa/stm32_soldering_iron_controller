@@ -174,20 +174,6 @@ static void * getStandbyTemp() {
   return &temp;
 }
 //=========================================================
-static void setDefaultTemp(uint32_t *val) {
-  if(*val > getProfileSettings()->MaxSetTemperature){
-    *val = getProfileSettings()->MaxSetTemperature;
-  }
-  else if(*val < getProfileSettings()->MinSetTemperature){
-    *val = getProfileSettings()->MinSetTemperature;
-  }
-  getProfileSettings()->defaultTemperature = *val;
-}
-static void * getDefaultTemp() {
-  temp = getProfileSettings()->defaultTemperature;
-  return &temp;
-}
-//=========================================================
 static void * _getPwmMul() {
   temp=getProfileSettings()->pwmMul;
   return &temp;
@@ -682,17 +668,6 @@ static void iron_create(screen_t *scr){
   edit->min_value = 50;
   edit->setData = (setterFn)&setMinTemp;
 
-  //  [ user Temp Widget ]
-  //
-  newComboEditable(w, strings[lang].IRON_Default_Temp, &edit, NULL);
-  editable_IRON_UserTemp=edit;
-  dis=&edit->inputData;
-  dis->reservedChars=5;
-  dis->getData = &getDefaultTemp;
-  edit->big_step = 10;
-  edit->step = 5;
-  edit->setData = (setterFn)&setDefaultTemp;
-
   //  [ Stby Time Widget ]
   //
   newComboEditable(w, strings[lang].IRON_Standby, &edit, NULL);
@@ -1110,14 +1085,5 @@ void updateTempValues()
 {
   editable_IRON_MinTemp->max_value = getProfileSettings()->MaxSetTemperature - 1;
   editable_IRON_MaxTemp->min_value = getProfileSettings()->MinSetTemperature + 1;
-
-  if(getProfileSettings()->defaultTemperature > getProfileSettings()->MaxSetTemperature)
-  {
-    getProfileSettings()->defaultTemperature = getProfileSettings()->MaxSetTemperature;
-  }
-  else if(getProfileSettings()->defaultTemperature < getProfileSettings()->MinSetTemperature)
-  {
-    getProfileSettings()->defaultTemperature = getProfileSettings()->MinSetTemperature;
-  }
 }
 
