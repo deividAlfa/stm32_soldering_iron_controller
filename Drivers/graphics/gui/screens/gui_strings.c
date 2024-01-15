@@ -56,7 +56,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "Max temp",
       .IRON_Min_Temp = "Min temp",
-      .IRON_Default_Temp = "Def temp",
       .IRON_Standby = "Standby",
       .IRON_Sleep = "Sleep",
       .IRON_Boost = "Boost",
@@ -237,7 +236,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "Максимум",
       .IRON_Min_Temp = "Минимум",
-      .IRON_Default_Temp = "Стартовая",
       .IRON_Standby = "Сон через",
       .IRON_Sleep = "Выключать",
       .IRON_Boost = "Буст",
@@ -419,7 +417,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "Max temp",
       .IRON_Min_Temp = "Min temp",
-      .IRON_Default_Temp = "Starttemp",
       .IRON_Standby = "Standby",
       .IRON_Sleep = "Sovläge",
       .IRON_Boost = "Boost",
@@ -601,7 +598,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "Max Temp",
       .IRON_Min_Temp = "Min Temp",
-      .IRON_Default_Temp = "Usr Temp",
       .IRON_Standby = "Standby",
       .IRON_Sleep = "Sleep",
       .IRON_Boost = "Boost",
@@ -783,7 +779,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "Max Isı",
       .IRON_Min_Temp = "Min Isı",
-      .IRON_Default_Temp = "İlk Isı",
       .IRON_Standby = "Bekleme",
       .IRON_Sleep = "Uyku",
       .IRON_Boost = "Darbe",
@@ -965,7 +960,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "最高溫度",
       .IRON_Min_Temp = "最低溫度",
-      .IRON_Default_Temp = "預設溫度",
       .IRON_Standby = "睡眠時間",
       .IRON_Sleep = "休眠時間",
       .IRON_Boost = "超溫時間",
@@ -1147,7 +1141,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
       .IRON_Max_Temp = "t\260макс",
       .IRON_Min_Temp = "t\260мин",
-      .IRON_Default_Temp = "t\260",
       .IRON_Standby = "Готовност",
       .IRON_Sleep = "Заспиване",
       .IRON_Boost = "Подсилване",
