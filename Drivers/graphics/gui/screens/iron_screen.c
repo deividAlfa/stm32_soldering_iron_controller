@@ -23,7 +23,6 @@ static editable_widget_t *editable_IRON_BoostTemp;
 static editable_widget_t *editable_IRON_ColdBoostTemp;
 static editable_widget_t *editable_IRON_MaxTemp;
 static editable_widget_t *editable_IRON_MinTemp;
-static editable_widget_t *editable_IRON_UserTemp;
 
 #ifdef USE_NTC
 screen_t Screen_iron_ntc;
@@ -349,7 +348,6 @@ static void iron_onEnter(screen_t *scr){
     editable_IRON_StandbyTemp->inputData.endString="\260F";
     editable_IRON_BoostTemp->inputData.endString="\260F";
     editable_IRON_ColdBoostTemp->inputData.endString="\260F";
-    editable_IRON_UserTemp->inputData.endString="\260F";
   }
   else{
     editable_IRON_MaxTemp->inputData.endString="\260C";
@@ -357,7 +355,6 @@ static void iron_onEnter(screen_t *scr){
     editable_IRON_StandbyTemp->inputData.endString="\260C";
     editable_IRON_BoostTemp->inputData.endString="\260C";
     editable_IRON_ColdBoostTemp->inputData.endString="\260C";
-    editable_IRON_UserTemp->inputData.endString="\260C";
   }
   if(scr==&Screen_settings){
     comboResetIndex(Screen_iron.current_widget);
