@@ -57,12 +57,13 @@ typedef struct{
 
   char * IRON_Max_Temp;
   char * IRON_Min_Temp;
-  char * IRON_Default_Temp;
   char * IRON_Standby;
   char * IRON_Sleep;
   char * IRON_Boost;
   char * IRON_Boost_Add;
   char * IRON_Cold_Boost;
+  char * IRON_ColdBoost_Threshold;
+  char * IRON_ColdBoost_Timeout;
   char * IRON_Wake_Mode;
   char * IRON_smartActiveEnable;
   char * IRON_smartActiveLoad;

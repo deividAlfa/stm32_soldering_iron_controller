@@ -13,10 +13,9 @@
 #include "board.h"
 
 #define ENABLE_DBG_SAVE
-
-#define SWSTRING          "SW: 1.13.3-beta"                         // Software version reported in settings screen
+#define SWSTRING          "SW: 1.13.4     "                         // Software version reported in settings screen
 #define SYSTEM_SETTINGS_VERSION   28                                // Change this if you change the system settings struct to prevent getting out of sync
-#define PROFILE_SETTINGS_VERSION  3                                 // Same, but for profile settings struct
+#define PROFILE_SETTINGS_VERSION  4                                 // Same, but for profile settings struct
 #define TIP_SETTINGS_VERSION      1                                 // Same, but for tip settings struct
 #define ADDONS_SETTINGS_VERSION   1                                 // Same, but for addons settings struct
 
@@ -27,7 +26,7 @@
 #define _BLANK_TIP        "        "                                // Empty tip name, containing (TIP_LEN) spaces. Defined here for quick updating if TIP_LEN is modified.
 
 #define TEMPSETTINGS_SAVE_TIME  3000                                // Last tip/profile/temperature in flash are updated after 3 seconds with no changes. This is not applied when battery option is enabled (Stored instantly).
-
+#define DEFAULT_TEMPERATURE     320                                 // Temperature loaded by default
 #ifndef PROFILE_VALUES
 
 #define T12_Cal250        1100                                      // Default values to be used in the calibration if not adjusted
@@ -213,7 +212,6 @@ __attribute__((aligned(4))) typedef struct{
   filter_t      tipFilter;
   ntc_data_t    ntc;
   uint16_t      standbyTemperature;
-  uint16_t      defaultTemperature;
   uint16_t      MaxSetTemperature;
   uint16_t      MinSetTemperature;
   uint16_t      boostTemperature;

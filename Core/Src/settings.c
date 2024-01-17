@@ -117,7 +117,6 @@ const profile_settings_t defaultProfileSettings = {
   .sleepTimeout               = (uint32_t)5*60000,      // ms
   .standbyTimeout             = (uint32_t)5*60000,
   .standbyTemperature         = 180,
-  .defaultTemperature         = 320,
   .MaxSetTemperature          = 450,
   .MinSetTemperature          = 180,
   .boostTimeout               = 60000,                  // ms
@@ -740,7 +739,7 @@ void flashTempSettingsInitialSetup(void){                                     //
   for(uint8_t i=0;i<NUM_PROFILES;i++)
     flashTemp.tip[i]= 0;
 
-  flashTemp.temp = defaultProfileSettings.defaultTemperature;
+  flashTemp.temp = DEFAULT_TEMPERATURE;
   flashTemp.profile=profile_T12;
   flashTempWrite();
   flashTipsWrite();
@@ -748,7 +747,7 @@ void flashTempSettingsInitialSetup(void){                                     //
 
   setCurrentProfile(profile_T12);                                // Just in case
   setCurrentTip(0);
-  setUserTemperature( defaultProfileSettings.defaultTemperature);
+  setUserTemperature(DEFAULT_TEMPERATURE);
 }
 
 void flashTempSettingsInit(void) //call it only once during init
@@ -1022,7 +1021,7 @@ void loadProfile(uint8_t profile){
 
   if(getSystemSettings()->hasBattery){
     if((bkpRamData.values.lastTipTemp[profile] < getProfileSettings()->MinSetTemperature) || (bkpRamData.values.lastTipTemp[profile] > getProfileSettings()->MaxSetTemperature)){
-      bkpRamData.values.lastTipTemp[profile] = getProfileSettings()->defaultTemperature;
+      bkpRamData.values.lastTipTemp[profile] = DEFAULT_TEMPERATURE;
     }
     setUserTemperature(bkpRamData.values.lastTipTemp[profile]);
 
@@ -1034,13 +1033,13 @@ void loadProfile(uint8_t profile){
   }
   else{
     if((flashTemp.profile==0xFF) || (flashTemp.temp==0xFFFF)){                              // flashTemp not initialized, load defaults now the profile was loaded
-      setUserTemperature(getProfileSettings()->defaultTemperature);
+      setUserTemperature(DEFAULT_TEMPERATURE);
       loadTipDataFromFlash(flashTemp.tip[profile]);
       updateTempData(force_update);                                               // Force save now
     }
     else{
       if((flashTemp.temp < getProfileSettings()->MinSetTemperature) || (flashTemp.temp > getProfileSettings()->MaxSetTemperature))
-        setUserTemperature(getProfileSettings()->defaultTemperature);            // Stored value out of limits, set default
+        setUserTemperature(DEFAULT_TEMPERATURE);            // Stored value out of limits, set default
       else
         setUserTemperature(flashTemp.temp);                                            // Load stored value
 

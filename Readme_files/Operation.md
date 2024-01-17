@@ -135,11 +135,11 @@ Temperature increase applied in boost mode. It's added to the current temperatur
   - **Cold boost**<br>
 Activated when inserting a tip. Meant to speed up heating on cheap iron tips, as the heat needs more time to spread over the metal body.<br>
 Genuine T12 / JBC tips shouldn't need this!<br>
-  - **Cold boost temperature**<br>
+  - **Cold boost threshold**<br>
 If [target temperature - current temperature] surpasses this threshold, boost is automatically triggered.<br>
 This option is only enabled when Cold Boost is active.<br>
-  - **Cold boost time**<br>
-How much time the automatic boost willbe applied.<br>
+  - **Cold boost timeout**<br>
+How much time the automatic boost will be applied.<br>
 This option is only enabled when Cold Boost is active.<br>
   - **Wake mode**<br>
 WAKE input working mode (__SHAKE__ or __STAND__).<br>

@@ -23,7 +23,6 @@ static editable_widget_t *editable_IRON_BoostTemp;
 static editable_widget_t *editable_IRON_ColdBoostTemp;
 static editable_widget_t *editable_IRON_MaxTemp;
 static editable_widget_t *editable_IRON_MinTemp;
-static editable_widget_t *editable_IRON_UserTemp;
 
 #ifdef USE_NTC
 screen_t Screen_iron_ntc;
@@ -171,20 +170,6 @@ static void setStandbyTemp(uint32_t *val) {
 }
 static void * getStandbyTemp() {
   temp = getProfileSettings()->standbyTemperature;
-  return &temp;
-}
-//=========================================================
-static void setDefaultTemp(uint32_t *val) {
-  if(*val > getProfileSettings()->MaxSetTemperature){
-    *val = getProfileSettings()->MaxSetTemperature;
-  }
-  else if(*val < getProfileSettings()->MinSetTemperature){
-    *val = getProfileSettings()->MinSetTemperature;
-  }
-  getProfileSettings()->defaultTemperature = *val;
-}
-static void * getDefaultTemp() {
-  temp = getProfileSettings()->defaultTemperature;
   return &temp;
 }
 //=========================================================
@@ -363,7 +348,6 @@ static void iron_onEnter(screen_t *scr){
     editable_IRON_StandbyTemp->inputData.endString="\260F";
     editable_IRON_BoostTemp->inputData.endString="\260F";
     editable_IRON_ColdBoostTemp->inputData.endString="\260F";
-    editable_IRON_UserTemp->inputData.endString="\260F";
   }
   else{
     editable_IRON_MaxTemp->inputData.endString="\260C";
@@ -371,7 +355,6 @@ static void iron_onEnter(screen_t *scr){
     editable_IRON_StandbyTemp->inputData.endString="\260C";
     editable_IRON_BoostTemp->inputData.endString="\260C";
     editable_IRON_ColdBoostTemp->inputData.endString="\260C";
-    editable_IRON_UserTemp->inputData.endString="\260C";
   }
   if(scr==&Screen_settings){
     comboResetIndex(Screen_iron.current_widget);
@@ -682,17 +665,6 @@ static void iron_create(screen_t *scr){
   edit->min_value = 50;
   edit->setData = (setterFn)&setMinTemp;
 
-  //  [ user Temp Widget ]
-  //
-  newComboEditable(w, strings[lang].IRON_Default_Temp, &edit, NULL);
-  editable_IRON_UserTemp=edit;
-  dis=&edit->inputData;
-  dis->reservedChars=5;
-  dis->getData = &getDefaultTemp;
-  edit->big_step = 10;
-  edit->step = 5;
-  edit->setData = (setterFn)&setDefaultTemp;
-
   //  [ Stby Time Widget ]
   //
   newComboEditable(w, strings[lang].IRON_Standby, &edit, NULL);
@@ -770,7 +742,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Cold Boost Temp trigger Widget ]
   //
-  newComboEditable(w, strings[lang].__Temp, &edit, &comboItem_coldBoostTemp);
+  newComboEditable(w, strings[lang].IRON_ColdBoost_Threshold, &edit, &comboItem_coldBoostTemp);
   editable_IRON_ColdBoostTemp = edit;
   dis=&edit->inputData;
   dis->reservedChars=5;
@@ -783,7 +755,7 @@ static void iron_create(screen_t *scr){
 
   //  [ Cold boost Time Widget ]
   //
-  newComboEditable(w, strings[lang].__Time, &edit, &comboItem_coldBoostTimeout);
+  newComboEditable(w, strings[lang].IRON_ColdBoost_Timeout, &edit, &comboItem_coldBoostTimeout);
   dis=&edit->inputData;
   dis->endString="s";
   dis->reservedChars=5;
@@ -1110,14 +1082,5 @@ void updateTempValues()
 {
   editable_IRON_MinTemp->max_value = getProfileSettings()->MaxSetTemperature - 1;
   editable_IRON_MaxTemp->min_value = getProfileSettings()->MinSetTemperature + 1;
-
-  if(getProfileSettings()->defaultTemperature > getProfileSettings()->MaxSetTemperature)
-  {
-    getProfileSettings()->defaultTemperature = getProfileSettings()->MaxSetTemperature;
-  }
-  else if(getProfileSettings()->defaultTemperature < getProfileSettings()->MinSetTemperature)
-  {
-    getProfileSettings()->defaultTemperature = getProfileSettings()->MinSetTemperature;
-  }
 }
 
