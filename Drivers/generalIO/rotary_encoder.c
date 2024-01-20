@@ -68,41 +68,56 @@ void RE_SetMode(RE_State_t* data, RE_Mode_t mode) {
 }
 
 void RE_Process(RE_State_t* data) {
-  static uint32_t push_time=0, halfPointReachedTime=0, debounce_time=0, lastStep=0;
-  static bool last_button_read=1, last_button_stable=1;
+  static uint32_t push_time, halfPointReachedTime, debounce_time, lastStep;
+  static bool button_last=1, button_stable=1;
+  static bool a_last, a_stable, b_last, b_stable;
   uint32_t current_time = HAL_GetTick();
   uint32_t pressed_time = current_time - push_time;
   uint32_t stable_time = current_time - debounce_time;
 
   /* Read inputs */
-  bool now_a = HAL_GPIO_ReadPin(data->GPIO_A, data->GPIO_PIN_A);
-  bool now_b = HAL_GPIO_ReadPin(data->GPIO_B, data->GPIO_PIN_B);
-  bool now_button = HAL_GPIO_ReadPin(data->GPIO_BUTTON, data->GPIO_PIN_BUTTON);
+  bool a_now = HAL_GPIO_ReadPin(data->GPIO_A, data->GPIO_PIN_A);
+  bool b_now = HAL_GPIO_ReadPin(data->GPIO_B, data->GPIO_PIN_B);
+  bool button_now = HAL_GPIO_ReadPin(data->GPIO_BUTTON, data->GPIO_PIN_BUTTON);
+  bool skip=0;
 
-  if(last_button_read != now_button){                   // If different than last reading
-    last_button_read = now_button;                      // Update last reading value
-    if(stable_time<20){                                // If <debounce time
-      debounce_time = current_time;                     // Reset debounce timer
+  if(button_last != button_now){                      // If different than last reading
+    button_last = button_now;                         // Update last reading value
+    debounce_time = current_time;                     // Reset debounce timer
+    skip = 1;
+  }
+  else if(button_stable != button_now){               // If button status different than stable status
+    if(stable_time>20){                               // If >debounce time
+      button_stable = button_now;                     // Update last stable button value
     }
   }
 
-  if(last_button_stable!=now_button){                   // If button status different than stable status
-    if(stable_time>20){                                // If >debounce time
-      last_button_stable = now_button;                  // Update last stable button value
-      debounce_time = current_time;                     // Reset debounce timer
-    }
-    else{
-      now_button = last_button_stable;                  // Ignore reading, use last stable button value
-    }
+  if(a_last != a_now){                                // If encoder pin changed
+    a_last = a_now;                                   // Update last
+    skip = 1;                                         // Skip this cycle (1ms deboucing)
+  }
+  else if(a_stable != a_now){                         // Else, if not same as stable
+    a_stable = a_now;                                 // Update stable
   }
 
-  if (now_a && now_b) {
+  if(b_last != b_now){                                // Same for input b
+    b_last = b_now;
+    skip = 1;
+  }
+  else if(b_stable != b_now){
+    b_stable = b_now;
+  }
+
+  if(skip)                                            // Some pin changed, skip processing
+    return;
+
+  if (a_stable && b_stable) {
     if(data->halfPointReached) {
 
       int8_t add = 1;
       data->halfPointReached = 0;
 
-      if((current_time-lastStep)<12){                 // If last step was less than x time ago, increase twice to trigger big step
+      if((current_time-lastStep)<30){                 // If last step was less than x time ago, increase twice to trigger big step
         add = 2;
       }
       lastStep=current_time;
@@ -124,44 +139,43 @@ void RE_Process(RE_State_t* data) {
       }
     }
   }
-  else if(now_a == 0 && now_b == 0) {
+  else if(a_stable == 0 && b_stable == 0) {
     if(!data->halfPointReached){
       halfPointReachedTime = current_time;
       data->halfPointReached = 1;
-      if(now_button == 0) {//button pressed
+      if(button_stable == 0) {//button pressed
         data->pv_click = RE_BT_DRAG;
       }
     }
     else if((current_time-halfPointReachedTime)>500){
-      if(now_button == 0 && data->pv_click == RE_BT_DRAG) {//button pressed
+      if(button_stable == 0 && data->pv_click == RE_BT_DRAG) {      //button pressed
         data->pv_click = RE_BT_PRESSED;
       }
     }
   }
   else if(!data->halfPointReached) {
-    if(now_a)
+    if(a_stable)
       data->direction = 1;
-    else if (now_b)
+    else if (b_stable)
       data->direction = 0;
   }
 
-  if((data->pv_click == RE_BT_DRAG) && (now_button == 1))
+  if((data->pv_click == RE_BT_DRAG) && (button_stable == 1))
     data->pv_click = RE_BT_HIDLE;
   else if(data->pv_click != RE_BT_DRAG) {
-    if((data->pv_click == RE_BT_HIDLE) && (now_button == 0)) {
+    if((data->pv_click == RE_BT_HIDLE) && (button_stable == 0)) {
       data->pv_click = RE_BT_PRESSED;
       push_time = current_time;
     }
     else if(data->pv_click == RE_BT_PRESSED) {
-      if((now_button == 0)&&(pressed_time > 500)){
+      if((button_stable == 0)&&(pressed_time > 500)){
         data->pv_click = RE_BT_LONG_CLICK;
       }
-      else if((now_button == 1)&&(pressed_time > 50)){
+      else if((button_stable == 1)&&(pressed_time > 50)){
         data->pv_click = RE_BT_CLICKED;
       }
-
     }
-    if((data->pv_click == RE_BT_UNRELEASED) && (now_button == 1) ) {
+    if((data->pv_click == RE_BT_UNRELEASED) && (button_stable == 1) ) {
         data->pv_click = RE_BT_HIDLE;
     }
   }
