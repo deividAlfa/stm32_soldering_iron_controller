@@ -589,7 +589,7 @@ void setCurrentMode(uint8_t mode){
   }
   if(Iron.CurrentMode != mode){                                                           // If current mode is different
     Iron.CurrentMode = mode;
-    resetPID();
+    //resetPID();
     resetRunAway();
     if(!Iron.calibrating){
       buzzer_long_beep();
@@ -769,7 +769,7 @@ void setUserTemperature(uint16_t temperature) {
   __disable_irq();
   Iron.UserSetTemperature = temperature;
   if(Iron.CurrentMode==mode_run){
-    resetPID();
+    //resetPID();
     resetRunAway();
     Iron.temperatureReached = 0;
     Iron.TargetTemperature = temperature;
