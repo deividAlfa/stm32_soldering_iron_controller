@@ -21,6 +21,7 @@ struct{
   int16_t opt_len;
   uint32_t time;
   comboBox_item_t * last_item;
+  screen_t * lastscr;
 }scroll;
 #endif
 
@@ -844,15 +845,15 @@ uint8_t comboBoxDraw(widget_t *w) {
     if(u8g2.font != combo->font){
       u8g2_SetFont(&u8g2, combo->font);
     }
-    if(scroll.last_item != combo->currentItem){                                          // If screen/widget refresh triggered, check if item is different and reset offset
+    if((scroll.lastscr != w->parent) || (scroll.last_item != combo->currentItem)){                                          // If screen/widget refresh triggered, check if item or screen is different and reset offset
       scroll.offset=0;
+      scroll.lastscr = w->parent;
       scroll.last_item = combo->currentItem;
     }
     else if(scroll.status >= scroll_running){
       scroll.after_action = scroll_keep;                                                 // Otherwise, keep offset after redrawing
     }
     scroll.status = scroll_restart;
-    scroll.time = current_time;
     scroll.len = u8g2_GetUTF8Width(&u8g2, combo->currentItem->text);                     // Compute string length and limit only once
     if(combo->currentItem->type==combo_Editable || combo->currentItem->type==combo_MultiOption){                      // For editable widgets, limit is ~half of the oled width
       scroll.opt_len = comboDrawProcessEditable(w, combo->currentItem);                        // Process widget and get option length
