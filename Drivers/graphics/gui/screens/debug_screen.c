@@ -168,8 +168,6 @@ void updatePIDplot(void){
 }
 
 
-
-
 int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
 
   dbgScrData->update=update_GUI_Timer();
@@ -182,6 +180,9 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   updateScreenTimer(input);
   setCurrentMode(mode_run);                                 // Prevent mode timeout
 
+  if(input==Rotate_Decrement || input==Rotate_Increment ){
+    return (default_screenProcessInput(scr, input, state));
+  }
   if(input==LongClick){
     return screen_main;
   }
@@ -200,7 +201,7 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   else if(input==Rotate_Decrement_while_click){
     return screen_settings;
   }
-  return (default_screenProcessInput(scr, input, state));
+  return -1;
 }
 
 static uint8_t debug_Draw(screen_t *scr){
@@ -232,23 +233,19 @@ static void debug_onEnter(screen_t *scr){
     }
   }
   if(getSystemTempUnit()==mode_Celsius){
-    if(scr!=&Screen_debug){
-      edit->max_value = 450;
-      edit->min_value = 0;
-      edit->big_step = 20;
-      edit->step = 5;
-      edit->inputData.endString="\260C";
-    }
+    edit->max_value = 450;
+    edit->min_value = 0;
+    edit->big_step = 20;
+    edit->step = 5;
+    edit->inputData.endString="\260C";
     dis->endString="\260C";
   }
   else{
-    if(scr!=&Screen_debug){
-      edit->max_value = 850;
-      edit->min_value = 0;
-      edit->big_step = 50;
-      edit->step = 10;
-      edit->inputData.endString="\260F";
-    }
+    edit->max_value = 850;
+    edit->min_value = 0;
+    edit->big_step = 50;
+    edit->step = 10;
+    edit->inputData.endString="\260F";
     dis->endString="\260F";
   }
 
@@ -299,7 +296,6 @@ static void debug_create(screen_t *scr){
   dis->number_of_dec=3;
   dis->font=u8g2_font_small;
   w->posX= 12;
-  w->posY= 0;
   w->width=34;
 
   //  [ PID I Widget ]
@@ -335,11 +331,11 @@ static void debug_create(screen_t *scr){
   dis=extractDisplayPartFromWidget(w);
   dis->textAlign=align_center;
   dis->getData = &getTemp;
-  dis->reservedChars=5;
+  dis->reservedChars=6;
   dis->font=u8g2_font_small;
   w->posX= 10;
   w->posY= 35;
-  w->width=30;
+  w->width=32;
 
   //  [ Setpoint adjust Widget ]
   //
@@ -351,8 +347,7 @@ static void debug_create(screen_t *scr){
   dis->getData = &getSetpoint;
   dis->reservedChars=5;
   w->posY = 48;
-  w->posX = 0;
-  w->width = 52;
+  w->width = 46;
   edit->big_step = 20;
   edit->step = 5;
   edit->setData = (setterFn)&setSetpoint;
@@ -368,7 +363,6 @@ static void debug_create(screen_t *scr){
   dis->reservedChars=5;
   dis->font=u8g2_font_small;
   w->posX= 95;
-  w->posY= 0;
   w->width=30;
 
   //  [ Raw Widget ]
@@ -437,20 +431,8 @@ static void debug_create(screen_t *scr){
 
 static void pid_debug_create(screen_t *scr){
   widget_t *w;
+  editable_widget_t *edit;
   displayOnly_widget_t* dis;
-
-  //  [ Current temp Widget ]
-  //
-  newWidget(&w, widget_display,scr,NULL);
-  widget_Temp = w;
-  dis=extractDisplayPartFromWidget(w);
-  dis->textAlign=align_right;
-  dis->getData = &getTemp;
-  dis->reservedChars=5;
-  dis->font=u8g2_font_small;
-  w->posX= 0;
-  w->posY= 0;
-  w->width=32;
 
   //  [ PID P Widget ]
   //
@@ -461,7 +443,6 @@ static void pid_debug_create(screen_t *scr){
   dis->reservedChars=6;
   dis->number_of_dec=3;
   dis->font=u8g2_font_small;
-  w->posY= 13;
   w->width=32;
 
   //  [ PID I Widget ]
@@ -473,7 +454,7 @@ static void pid_debug_create(screen_t *scr){
   dis->reservedChars=6;
   dis->number_of_dec=3;
   dis->font=u8g2_font_small;
-  w->posY= 28;
+  w->posY= 11;
   w->width=32;
 
   //  [ PID D Widget ]
@@ -485,8 +466,37 @@ static void pid_debug_create(screen_t *scr){
   dis->reservedChars=6;
   dis->number_of_dec=3;
   dis->font=u8g2_font_small;
-  w->posY= 48;
+  w->posY= 22;
+  w->width = 32;
+
+  //  [ Current temp Widget ]
+  //
+  newWidget(&w, widget_display,scr,NULL);
+  widget_Temp = w;
+  dis=extractDisplayPartFromWidget(w);
+  dis->textAlign=align_right;
+  dis->getData = &getTemp;
+  dis->reservedChars=6;
+  dis->font=u8g2_font_small;
+  w->posY= 35;
   w->width=32;
+
+  //  [ Setpoint adjust Widget ]
+  //
+  newWidget(&w, widget_editable,scr,NULL);
+  widget_setPoint=w;
+  edit=extractEditablePartFromWidget(w);
+  dis=extractDisplayPartFromWidget(w);
+  dis= &edit->inputData;
+  dis->getData = &getSetpoint;
+  dis->reservedChars=5;
+  w->posY = 48;
+  w->width = 46;
+  edit->big_step = 20;
+  edit->step = 5;
+  edit->setData = (setterFn)&setSetpoint;
+  edit->selectable.tab=0;
+  edit->selectable.state=widget_edit;
 }
 
 static uint8_t pid_debug_Draw(screen_t * scr){
