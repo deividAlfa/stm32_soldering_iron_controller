@@ -12,13 +12,17 @@
 
 // Don't change these
 #define COMBO_STYLE_VAR     0                   // Highlight only the variable (Will fallback to this value if COMBO_STYLE not defined)
-#define COMBO_STYLE_ALL     1                   // Highlight the entire menu entry
-#define COMBO_STYLE_SLIDE   2                   // Experimental feature, divide screen and slide menu text (Allows larger strings)
+#define COMBO_STYLE_FULL    1                   // Highlight the entire menu entry
+#define COMBO_STYLE_SCROLL  2                   // Experimental feature, divide screen and slide menu text (Allows larger strings)
 
 // User-adjustable
 #define DEFAULT_FRAME_R     3                   // Default widget frame radius (round corners). -1=auto(height/2), 0=square, >0=radius
 #define COMBO_STYLE         COMBO_STYLE_VAR     // Use this combo style
 #define DEFAULT_FONT        u8g2_font_menu      // This is the default widget font
+
+
+#define SLIDE_SPACE 36                          // Space between the end of text and the new starting [ong option <<<< Long opt]
+#define SLIDE_TIME  10                          // Time between scroll updates, in ms. Lower value, faster scroll.
 
 typedef enum widgetStateType {widget_idle, widget_selected, widget_edit, widget_error}widgetStateType;
 typedef enum widgetFieldType {field_int32, field_hex, field_bmp, field_string}widgetFieldType;
@@ -27,7 +31,7 @@ typedef enum widgetFrameType {frame_auto, frame_solid, frame_outline, frame_disa
 typedef enum widgetType {widget_combo, widget_label, widget_display, widget_editable, widget_bmp, widget_multi_option, widget_button, widget_bmp_button}widgetType;
 typedef enum comboType {combo_Screen, combo_Editable, combo_MultiOption, combo_Action}comboType;
 typedef enum widgetRefreshType {refresh_idle, refresh_triggered, refresh_always}widgetRefreshType;
-typedef enum slideStatus {slide_reset, slide_disabled, slide_restart, slide_running, slide_limit}slideStatus;
+typedef enum scrollStatus {scroll_disabled, scroll_restart, scroll_running, scroll_refresh,  scroll_refresh_this, scroll_keep, scroll_finish }scrollStatus;
 
 typedef struct widget_t widget_t;
 typedef struct selectable_widget_t selectable_widget_t;
@@ -128,7 +132,7 @@ struct widget_t
   uint8_t posY;
   uint8_t width;
   uint8_t enabled;
-  int8_t radius;											// Frame radius: -1=auto(r=Height/2). 0=Square, else use defined radius
+  int8_t radius;                      // Frame radius: -1=auto(r=Height/2). 0=Square, else use defined radius
   widget_t *next_widget;
 
   struct screen_t *parent;

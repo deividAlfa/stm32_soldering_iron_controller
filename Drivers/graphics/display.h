@@ -14,8 +14,8 @@
 
 
 /*    Display size          */
-#define displayWidth   128
-#define displayHeight  64
+#define displayWidth   (int16_t)128
+#define displayHeight  (int16_t)64
 
 /*    Display command set   */
 #if defined ST7565

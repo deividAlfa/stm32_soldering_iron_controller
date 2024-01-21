@@ -12,14 +12,17 @@
 static char displayString[32];
 static bool callFromCombo;
 
-#if (COMBO_STYLE==COMBO_STYLE_SLIDE)
+#if (COMBO_STYLE==COMBO_STYLE_SCROLL)
 struct{
   uint8_t status;
+  uint8_t after_action;
   int16_t offset;
   int16_t len;
-  int16_t limit;
+  int16_t opt_len;
   uint32_t time;
-}slide;
+  comboBox_item_t * last_item;
+  screen_t * lastscr;
+}scroll;
 #endif
 
 #ifdef __BASE_FILE__
@@ -761,106 +764,124 @@ uint8_t default_widgetDraw(widget_t *w) {
   return refresh;
 }
 
+uint16_t comboDrawProcessEditable(widget_t *w, comboBox_item_t *item){
+  editable_widget_t* edit = item->widget;
+  displayOnly_widget_t* dis = &edit->inputData;
+  uint16_t opt_len = 0;
+
+  if(item->type==combo_MultiOption){
+    opt_len = u8g2_GetUTF8Width(&u8g2,edit->options[*(uint8_t*)dis->getData()]);
+  }
+  else if(item->type==combo_Editable){
+    if(dis->type==field_int32){
+      int32_t val_ui = *(int32_t*)dis->getData();                         // Get data
+      uint8_t decimals = dis->number_of_dec+1;                            // Load decimal count
+      if(val_ui<0){                                                       // If negative, add a decimal (decimals are just used as min char output in sprintf)
+        decimals++;
+      }
+      if(decimals>10){ decimals=10; }                                     // Limit max decimals
+      snprintf(dis->displayString, dis->reservedChars+1, "%0*ld", decimals, (int32_t)val_ui);    // Convert value into string
+      uint8_t dispLen=strlen(dis->displayString);                         // Get string len
+      uint8_t endLen=strlen(dis->endString);                              // Get endStr len
+      if(dis->number_of_dec){                                             // If there're decimals
+        if(dis->reservedChars >= (dispLen+1)){                            // Ensure there's enough space in the string for adding the decimal point
+          insertDot(dis->displayString,  dis->number_of_dec);             // Insert decimal dot
+        }
+      }
+      if(dis->reservedChars >= (dispLen+endLen)){                         // Ensure there's enough space in the string for adding the end String
+        strcat(dis->displayString, dis->endString);                       // Append endString
+      }
+      dis->displayString[dis->reservedChars]=0;                           // Ensure last string char is 0
+      opt_len=u8g2_GetUTF8Width(&u8g2,dis->displayString);
+    }
+    else if(dis->type==field_string || dis->type==field_hex){
+      strncpy(displayString,dis->getData(),dis->reservedChars+1);
+      opt_len=u8g2_GetUTF8Width(&u8g2,displayString);
+    }
+  }
+  return(opt_len);
+}
+
 uint8_t comboBoxDraw(widget_t *w) {
-  if(!w || !w->enabled){ return 0; }                                                // Return if null or disabled
+  if(!w || !w->enabled){ return 0; }                                                    // Return if null or disabled
 
   comboBox_widget_t* combo = (comboBox_widget_t*)w->content;
-  if(!combo){ return 0; }                                                           // Return if null
+  if(!combo){ return 0; }                                                               // Return if null
   comboBox_item_t *item = combo->first;
-  if(!item){ return 0; }                                                            // Return if null
+  if(!item){ return 0; }                                                                // Return if null
 
   uint16_t yDim = displayHeight - w->posY;
   uint8_t height;
   int8_t frameY=0;
   int8_t posY;
   bool drawFrame=1;
-  uint8_t scroll = 0;
+  uint8_t current_scroll = 0;
   uint8_t r;
-  int16_t offset=0;                                                                 // Only modified in slide mode, otherwise always 0
-  uint16_t len = 0;
-#if (COMBO_STYLE == COMBO_STYLE_SLIDE)
-  uint8_t refresh_slide=0;
-#endif
-  if(w->refresh==refresh_idle && w->parent->state==screen_Idle){                           // If screen and widget idling
-#if (COMBO_STYLE == COMBO_STYLE_SLIDE)
-      switch(slide.status){
+  int16_t offset=0;                                                                     // Only modified in scroll mode, otherwise always 0
+  uint16_t len = 0, opt_len = 0;
 
-        case slide_reset:
-          if(u8g2.font != combo->font){
-            u8g2_SetFont(&u8g2, combo->font);
-          }
-          slide.offset = 0;                                                                   // Clear offset
-          slide.len = u8g2_GetUTF8Width(&u8g2, combo->currentItem->text);                     // Compute string length and limit only once
-
-          if(combo->currentItem->type==combo_Editable || combo->currentItem->type==combo_MultiOption){                      // For editable widgets, limit is ~half of the oled width
-            slide.limit = (displayWidth/2)+8-4;
-          }
-          else{
-            slide.limit = displayWidth-8;                                                          // Else, use all the space available for the label
-          }
-          if(slide.len<slide.limit){                                                            // Disable if label text shorter than limit (No need to slide text)
-            slide.status = slide_disabled;
-            break;
-          }
-          slide.status = slide_restart;
-          slide.time = current_time;
-          break;
-
-        case slide_disabled:
-          break;
-
-        case slide_restart:
-          if((current_time-slide.time)>500){                                                   // If resetted, freeze the text 500ms
-            slide.time = current_time;
-            slide.status = slide_running;
-          }
-          break;
-
-        case slide_running:
-          if((current_time-slide.time)>19){                                                    // If text sliding running, update every 20mS
-            slide.time=current_time;
-            if((slide.len - ++slide.offset)<=slide.limit){                                    // Increase x offset, check limits
-              slide.status = slide_limit;                                                     // If reached end
-            }
-            refresh_slide=1;
-          }
-          break;
-        case slide_limit:
-          if((current_time-slide.time)>500){                                                 // If reached the end, freeze the text 500ms
-            slide.time = current_time;
-            slide.status = slide_restart;
-            slide.offset = 0;
-            refresh_slide=1;
-          }
-
-          break;
-        default:
-          break;
+  if(w->refresh==refresh_idle && w->parent->state==screen_Idle){                        // If screen and widget idling
+#if (COMBO_STYLE == COMBO_STYLE_SCROLL)
+      if(scroll.status == scroll_restart){
+        scroll.offset = 0;
+        scroll.status = scroll_running;
       }
-      if(!refresh_slide){                                                                   // If nothing to do, return
+      if((scroll.status == scroll_running) && (current_time-scroll.time)>(SLIDE_TIME)){              // If text sliding running, update every 20mS
+        scroll.time=current_time;
+        scroll.status = scroll_refresh;
+        if((scroll.len - ++scroll.offset) < (-SLIDE_SPACE + 5)){                          // Increase x offset, check limits
+          scroll.offset = 0;
+          if(scroll.len < displayWidth - scroll.opt_len - 12){                            // If the option field became smaller, stop after the scroll is over
+            scroll.after_action = scroll_finish;
+          }
+        }
+      }
+      else {                                                                            // If nothing to do, return
         return 0;
       }
   }
   else{
-    slide.offset=0;                                                                         // If screen/widget refresh triggered, reset offset
-    slide.status = slide_reset;
+    uint16_t limit;
+    if(u8g2.font != combo->font){
+      u8g2_SetFont(&u8g2, combo->font);
+    }
+    if((scroll.lastscr != w->parent) || (scroll.last_item != combo->currentItem)){                                          // If screen/widget refresh triggered, check if item or screen is different and reset offset
+      scroll.offset=0;
+      scroll.lastscr = w->parent;
+      scroll.last_item = combo->currentItem;
+    }
+    else if(scroll.status >= scroll_running){
+      scroll.after_action = scroll_keep;                                                 // Otherwise, keep offset after redrawing
+    }
+    scroll.status = scroll_restart;
+    scroll.len = u8g2_GetUTF8Width(&u8g2, combo->currentItem->text);                     // Compute string length and limit only once
+    if(combo->currentItem->type==combo_Editable || combo->currentItem->type==combo_MultiOption){                      // For editable widgets, limit is ~half of the oled width
+      scroll.opt_len = comboDrawProcessEditable(w, combo->currentItem);                        // Process widget and get option length
+      limit = displayWidth - scroll.opt_len - 12;
+    }
+    else{
+      limit = displayWidth-8;                                                     // Else, use all the space available for the label
+    }
+    if(scroll.len < limit){                                                          // Disable if label text shorter than limit (No need to scroll text)
+      scroll.status = scroll_disabled;
+    }
 #else
     return 0;
 #endif
   }
-                                                            // If we got here, something needs refreshing
-  if(w->refresh!=refresh_idle){                             // Widget not idle?
-    if(w->refresh==refresh_triggered)                       // Only clear if state=refresh_triggered
-        w->refresh=refresh_idle;                            // Otherwise, keep refresh_always
-    if(w->parent->state != screen_Erased){                  // If it was the widget and the screen was not erased already
-      w->parent->state = screen_Erased;                     //
-      fillBuffer(BLACK, fill_dma);                          // Erase fast using dma
+                                                                                      // If we got here, something needs refreshing
+  if(w->refresh!=refresh_idle){                                                       // Widget not idle?
+    if(w->refresh==refresh_triggered)                                                 // Only clear if state=refresh_triggered
+        w->refresh=refresh_idle;                                                      // Otherwise, keep refresh_always
+    if(w->parent->state != screen_Erased){                                            // If it was the widget and the screen was not erased already
+      w->parent->state = screen_Erased;                                               //
+      fillBuffer(BLACK, fill_dma);                                                    // Erase fast using dma
     }
   }
   if(u8g2.font != combo->font){
     u8g2_SetFont(&u8g2, combo->font);
   }
-  height= u8g2_GetMaxCharHeight(&u8g2)+1;                 // +1 to allow separation between combobox items
+  height= u8g2_GetMaxCharHeight(&u8g2)+1;                                             // +1 to allow separation between combobox items
 
   if(w->radius<0){
     r=(height-1)/2;
@@ -869,64 +890,64 @@ uint8_t comboBoxDraw(widget_t *w) {
     r = w->radius;
   }
 
-  while(scroll < combo->currentScroll) {
+  while(current_scroll < combo->currentScroll) {
     if(!item->next_item)
       break;
     item = item->next_item;
     if(item->enabled)
-      ++scroll;
+      ++current_scroll;
   }
   for(uint8_t y = 0; y < yDim / height; ++y) {
 
     uint8_t align = item->dispAlign;
     bool editable = (item->type==combo_Editable)||(item->type==combo_MultiOption);
 
-
-    if(item == combo->currentItem) {                                  // If the current combo item is selected
-      frameY=y * height + w->posY;                                    // Store frame position, drawn at the end
-#if (COMBO_STYLE == COMBO_STYLE_SLIDE)
-      offset=slide.offset;
-      if(refresh_slide==1){                                           // If only refreshing sliding text and this is the matching item
-        len = slide.len;
-        refresh_slide++;                                              // = 2 means update current item label
+    if(item == combo->currentItem) {                                                  // If this is the current combo item
+      frameY=y * height + w->posY;                                                    // Store frame position, drawn at the end
+#if (COMBO_STYLE == COMBO_STYLE_SCROLL)
+      offset=scroll.offset;                                                            // Get text drawing offset
+      len = scroll.len;                                                                // Get text len
+      opt_len = scroll.opt_len;
+      if(scroll.status == scroll_refresh){                                              // If only refreshing sliding text and this is the matching item
+        scroll.status = scroll_refresh_this;
         u8g2_SetDrawColor(&u8g2, BLACK);
-        if (editable){                                                // Clear textfield
-          u8g2_DrawBox(&u8g2, 4, frameY+1, (displayWidth/2)+6, height-2);
+        if (editable){                                                                // Clear textfield
+          u8g2_DrawBox(&u8g2, 2, frameY+2,  displayWidth-2-opt_len-12, height-2);
         }
         else{
-          u8g2_DrawBox(&u8g2, 4, frameY+1, displayWidth-8, height-2);
+          u8g2_DrawBox(&u8g2, 2, frameY+2, displayWidth-4, height-2);
         }
+        u8g2_SetDrawColor(&u8g2, WHITE);
       }
+#endif
     }
     else{
-      if(refresh_slide==2){                   // I sliding text has been updated, nothing else to do
-        break;
-      }
-      offset=0;                               // If not selected item, use 0 offset
-#endif
+      offset=0;                                                                       // Use 0 offset for not selected item (Not scrolling)
+      len = u8g2_GetUTF8Width(&u8g2, item->text);                                     // Get len
     }
-#if (COMBO_STYLE == COMBO_STYLE_SLIDE)
-    if(!refresh_slide || refresh_slide==2){                             // Only continue if no sliding text (full redraw) or this is the item that needs updating
+
+#if (COMBO_STYLE == COMBO_STYLE_SCROLL)
+    if((scroll.status == scroll_refresh_this) || (scroll.status < scroll_running)){                 // Only continue if no sliding text active or disabled (full redraw) or this is the item that needs updating
+#else
+      len = u8g2_GetUTF8Width(&u8g2, item->text);
 #endif
       if (!editable){                                                   // If screen or action item, just draw the label
-#if (COMBO_STYLE == COMBO_STYLE_SLIDE)
-        if(len>displayWidth-9){                                         // If too long, override with left align to provide sliding text
+        if(len>displayWidth-9){                                         // If too long, override with left align
           align=align_left;
         }
-        if(!refresh_slide)
-#endif
-          len = u8g2_GetUTF8Width(&u8g2, item->text);                   // When sliding text, length is already done.
-
-
-        u8g2_SetDrawColor(&u8g2, WHITE);
-#if (COMBO_STYLE == COMBO_STYLE_SLIDE)
         u8g2_SetClipWindow(&u8g2, 4, 0, displayWidth-4, displayHeight-1);
-#endif
         if(align==align_left){
-          u8g2_DrawUTF8(&u8g2, (int16_t)4-offset, y * height + w->posY +2, item->text);
+          u8g2_DrawUTF8(&u8g2, (int16_t)4-offset, y * height + w->posY +2, item->text);       // Draw string
+#if (COMBO_STYLE == COMBO_STYLE_SCROLL)
+          if(offset){
+            int16_t end =len - offset;
+            if(end<=(displayWidth - 4 - SLIDE_SPACE)){
+              u8g2_DrawUTF8(&u8g2, end + SLIDE_SPACE, y * height + w->posY +2, item->text);       // Draw beginning of string
+            }
+          }
+#endif
         }
         else{
-          uint8_t len = u8g2_GetUTF8Width(&u8g2, item->text);
           if(align==align_right){
             u8g2_DrawUTF8(&u8g2, displayWidth-3-len, y * height + w->posY +2, item->text);
           }
@@ -935,64 +956,28 @@ uint8_t comboBoxDraw(widget_t *w) {
           }
         }
       }
-      else{                                                                                 // Editable or multioption
+      else{                                                                                       // Editable or multioption
         editable_widget_t* edit = item->widget;
+        displayOnly_widget_t* dis = &edit->inputData;
         selectable_widget_t *sel = &edit->selectable;
 
+        posY = y * height + w->posY;                                                              // Set drawing Ypos same as the current combo option
+        opt_len = comboDrawProcessEditable(w, item);
         u8g2_SetDrawColor(&u8g2, WHITE);
-#if (COMBO_STYLE == COMBO_STYLE_SLIDE)
-        if(!refresh_slide){                                                                 // Draw the editable data if not coming for text slide.
+#if (COMBO_STYLE == COMBO_STYLE_SCROLL)
+        if(scroll.status < scroll_running){                                                       // Draw the editable data if not coming for text scroll.
 #endif
-          displayOnly_widget_t* dis = &edit->inputData;
-          default_widgetUpdate(w);
-          posY = y * height + w->posY;                                                              // Set drawing Ypos same as the current combo option
-          if(item->type==combo_MultiOption){
-            len = u8g2_GetUTF8Width(&u8g2,edit->options[*(uint8_t*)dis->getData()]);
-          }
-          else if(item->type==combo_Editable){
-            if(dis->type==field_int32){
-              int32_t val_ui = *(int32_t*)dis->getData();                         // Get data
-              uint8_t decimals = dis->number_of_dec+1;                            // Load decimal count
-              if(val_ui<0){                                                       // If negative, add a decimal (decimals are just used as min char output in sprintf)
-                decimals++;
-              }
-              if(decimals>10){ decimals=10; }                                     // Limit max decimals
-              snprintf(dis->displayString, dis->reservedChars+1, "%0*ld", decimals, (int32_t)val_ui);    // Convert value into string
-              uint8_t dispLen=strlen(dis->displayString);                         // Get string len
-              uint8_t endLen=strlen(dis->endString);                              // Get endStr len
-              if(dis->number_of_dec){                                             // If there're decimals
-                if(dis->reservedChars >= (dispLen+1)){                            // Ensure there's enough space in the string for adding the decimal point
-                  insertDot(dis->displayString,  dis->number_of_dec);             // Insert decimal dot
-                }
-              }
-              if(dis->reservedChars >= (dispLen+endLen)){                         // Ensure there's enough space in the string for adding the end String
-                strcat(dis->displayString, dis->endString);                       // Append endString
-              }
-              dis->displayString[dis->reservedChars]=0;                           // Ensure last string char is 0
-              len=u8g2_GetUTF8Width(&u8g2,dis->displayString);
-            }
-            else if(dis->type==field_string || dis->type==field_hex){
-              strncpy(displayString,dis->getData(),dis->reservedChars+1);
-              len=u8g2_GetUTF8Width(&u8g2,displayString);
-            }
-          }
-          if(sel->state==widget_edit){                                                                          // If edit mode
+          if(sel->state==widget_edit){                                                              // If edit mode
             drawFrame=0;
-#if (COMBO_STYLE == COMBO_STYLE_SLIDE)
-            u8g2_DrawRBox(&u8g2, (displayWidth/2)+11, frameY, displayWidth-((displayWidth/2)+11), height, r);   // Highlight only ~half of the width, the rest is used for the label
-#else
-#if (COMBO_STYLE == COMBO_STYLE_VAR)
-            u8g2_DrawRBox(&u8g2, displayWidth-len-8, frameY, len+8, height, r);                                 // Highlight only the variable width, the rest is used for the label
-#elif (COMBO_STYLE == COMBO_STYLE_ALL)
+#if (COMBO_STYLE == COMBO_STYLE_FULL)
             u8g2_DrawRBox(&u8g2, 0, frameY, displayWidth, height, r);                                           // Highlight the entire item
 #else
-            #error "COMBO_STYLE not defined! Check widget.h"
-#endif
+            u8g2_DrawRBox(&u8g2, displayWidth-opt_len-8, frameY, opt_len+8, height, r);                                 // Highlight only the variable width, the rest is used for the label
 #endif
             u8g2_SetDrawColor(&u8g2, BLACK);
           }
 
-          dis->stringStart = displayWidth-len-5;                                   // Align to the left measuring actual string width
+          dis->stringStart = displayWidth-opt_len-5;                                   // Align to the left measuring actual string width
           if(item->type==combo_Editable){
             if(((dis->type==field_string || dis->type==field_hex) && (sel->state==widget_edit))){
               char str[sizeof(displayString)+1];
@@ -1014,20 +999,31 @@ uint8_t comboBoxDraw(widget_t *w) {
           else if(item->type==combo_MultiOption){
             u8g2_DrawUTF8(&u8g2,dis->stringStart, posY+2,  edit->options[*(uint8_t*)dis->getData()]);
           }
-#if (COMBO_STYLE == COMBO_STYLE_SLIDE)
+#if (COMBO_STYLE == COMBO_STYLE_SCROLL)
         }
+#endif
+#if (COMBO_STYLE != COMBO_STYLE_FULL)
         else if(sel->state==widget_edit){                                                              // If edit mode
           drawFrame=0;
         }
-        u8g2_SetClipWindow(&u8g2, 4, 0, (displayWidth/2)+8, displayHeight-1);
-#endif
-#if (COMBO_STYLE != COMBO_STYLE_ALL)
         u8g2_SetDrawColor(&u8g2, WHITE);
 #endif
-        u8g2_DrawUTF8(&u8g2, (int16_t)4-offset, y * height + w->posY +2, item->text);                 // Draw the combo item label
+        u8g2_SetClipWindow(&u8g2, 4, 0,  displayWidth-2-opt_len-11, displayHeight-1);
+        u8g2_DrawUTF8(&u8g2, (int16_t)4-offset, y * height + w->posY +2, item->text);       // Draw string
+#if (COMBO_STYLE == COMBO_STYLE_SCROLL)                                           // Calculate end position
+          if(offset){
+            int16_t end = len - offset;
+            if(end<=(displayWidth-2-opt_len-12 - SLIDE_SPACE)){
+              u8g2_DrawUTF8(&u8g2, end + SLIDE_SPACE, y * height + w->posY +2, item->text);       // Draw beginning of string
+            }
+          }
+#endif
       }
-#if (COMBO_STYLE == COMBO_STYLE_SLIDE)
       u8g2_SetMaxClipWindow(&u8g2);
+#if (COMBO_STYLE == COMBO_STYLE_SCROLL)
+      if(scroll.status == scroll_refresh_this){                             // Done refreshing, set running state
+        scroll.status = scroll_running;
+      }
     }
 #endif
     do {
@@ -1042,6 +1038,16 @@ uint8_t comboBoxDraw(widget_t *w) {
     u8g2_DrawRFrame(&u8g2, 0, frameY, displayWidth, height,  r);
   }
 
+#if (COMBO_STYLE == COMBO_STYLE_SCROLL)
+  if(scroll.after_action == scroll_keep){
+    scroll.after_action = 0;                                                                   // Restore status
+    scroll.status = scroll_running;
+  }
+  if(scroll.after_action == scroll_finish){
+    scroll.after_action = 0;                                                                   // Restore status
+    scroll.status = scroll_disabled;
+  }
+#endif
   return 1;
 }
 
@@ -1100,9 +1106,6 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
         if(index > lastIndex)
           ++combo->currentScroll;
       }
-      #ifdef COMBO_SLIDE_TEXT
-      slide.status=slide_reset;
-      #endif
     }
     else if(input == Rotate_Decrement) {
       comboBox_item_t *current = NULL;
@@ -1119,9 +1122,6 @@ int comboBoxProcessInput(widget_t *w, RE_Rotation_t input, RE_State_t *state) {
         if(index < firstIndex)
           --combo->currentScroll;
       }
-      #ifdef COMBO_SLIDE_TEXT
-      slide.status=slide_reset;
-      #endif
     }
   }
   return -1;
