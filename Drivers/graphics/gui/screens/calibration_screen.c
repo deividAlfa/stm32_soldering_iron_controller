@@ -246,7 +246,7 @@ static int Cal_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_State_
   updateScreenTimer(input);
 
   if(cal->error){
-    if(checkScreenTimer(2000)){
+    if(checkScreenTimer(2000) || input==Click){
       resetScreenTimer();                       // Reset screen idle timer
       cal->error=0;
       widgetEnable(Screen_calibration.current_widget);

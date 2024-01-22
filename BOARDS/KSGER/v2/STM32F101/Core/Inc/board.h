@@ -87,17 +87,9 @@
 /********************************
  *       Buzzer        *
  ********************************/
-#define BUZZER_OFF          HAL_GPIO_WritePin(BUZ0_GPIO_Port, BUZ0_Pin, GPIO_PIN_SET);  \
-                            HAL_GPIO_WritePin(BUZ1_GPIO_Port, BUZ1_Pin, GPIO_PIN_SET);  \
-                            HAL_GPIO_WritePin(BUZ2_GPIO_Port, BUZ2_Pin, GPIO_PIN_SET);
-
-#define BUZZER_ON           HAL_GPIO_WritePin(BUZ0_GPIO_Port, BUZ0_Pin, GPIO_PIN_RESET);  \
-                            HAL_GPIO_WritePin(BUZ1_GPIO_Port, BUZ1_Pin, GPIO_PIN_RESET);  \
-                            HAL_GPIO_WritePin(BUZ2_GPIO_Port, BUZ2_Pin, GPIO_PIN_RESET);
-
-#define BUZZER_TOGGLE       HAL_GPIO_TogglePin(BUZ0_GPIO_Port, BUZ0_Pin); \
-                            HAL_GPIO_TogglePin(BUZ1_GPIO_Port, BUZ1_Pin); \
-                            HAL_GPIO_TogglePin(BUZ2_GPIO_Port, BUZ2_Pin);
+#define BUZZER_OFF          HAL_GPIO_WritePin(BUZ0_GPIO_Port, BUZ0_Pin | BUZ1_Pin | BUZ2_Pin, GPIO_PIN_SET);        // All pins belong to the same port
+#define BUZZER_ON           HAL_GPIO_WritePin(BUZ0_GPIO_Port, BUZ0_Pin | BUZ1_Pin | BUZ2_Pin, GPIO_PIN_RESET);
+#define BUZZER_TOGGLE       HAL_GPIO_TogglePin(BUZ0_GPIO_Port, BUZ0_Pin | BUZ1_Pin | BUZ2_Pin);
 
 /********************************
  *       Addons/Extras    *

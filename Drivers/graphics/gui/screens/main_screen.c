@@ -398,7 +398,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   else if(mainScr.ironStatus != status_ok){                               // If error is gone
     mainScr.ironStatus = status_ok;
     wakeOledDim();                                                        // Wake up screen
-    if( (mainScr.lastError == (FLAG_ACTIVE | FLAG_NO_IRON)) && (current_time - mainScr.lastErrorTimer > 3000) ){    // If last error was no tip and >3 seconds passed, enable automatic tip selection
+    if( (mainScr.lastError == (FLAG_ACTIVE | FLAG_NO_IRON)) && (current_time - mainScr.lastErrorTimer > 1000) ){    // If last error was no tip and >1 second passed, enable automatic tip selection
       mainScr.setMode = main_tipselect_auto;
       switchScreenMode();
       input=Rotate_Nothing;
@@ -588,8 +588,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             break;
 
           case Rotate_Nothing:        // Return after 2 seconds of inactivity, or after 5 seconds or error appears when a new tip was placed
-            if( (mainScr.currentMode == main_tipselect && checkScreenTimer(2000)) ||
-                (mainScr.currentMode == main_tipselect_auto && (mainScr.ironStatus==status_error || checkScreenTimer(5000)) )){
+            if( (checkScreenTimer(2000)) ||
+                (mainScr.currentMode == main_tipselect_auto && (mainScr.ironStatus==status_error || checkScreenTimer(3000)) )){
               mainScr.setMode=main_irontemp;
             }
             break;

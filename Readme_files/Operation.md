@@ -91,7 +91,7 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
 ## System menu<br>
 Most screens will return to main screen after 15 seconds of inactivity.<br>
 Long-clicking will have the same effect.<br>
-In most menus, rotate anti-clockwise while pushing the button to quickly return to previous screen.<br>
+In most menus, issue an anti-clockwise drag-rotation to quickly return to previous screen.<br>
 
 ### IRON
 Iron settings control the operation of the handle/tips. The settings here apply only for the currently selected profile. In other words, each profile has its own dataset. Switching between profiles can be done in the **System menu** <br>
@@ -100,8 +100,6 @@ Upper adjustable temperature limit.<br>
   - **Min temperature**<br>
 Lower adjustable temperature limit.<br>
   - **Dflt. temperature**<br>
-Default temperature applied at boot. If the board has no batter backup (or disabled) the last temperature is not saved (to reduce flash wear), the station starts up with the one set here. If the board has a backup battery and the *remember last set temp* is enabled, then this setting is ignored expect when the battery fails.<br>
-  - **Boost time**<br>
 Boost mode run time before resuming normal mode.<br>
   - **Boost temperature**<br>
 Temperature offset applied in boost mode. It's added to the current temperature and limited to system maximum temperature.<br>
