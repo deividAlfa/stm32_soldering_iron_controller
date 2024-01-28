@@ -26,10 +26,26 @@ A genuine STM32F101/102/103Cx/Rx should have any of these codes:
 > 00006410<br>
 > 20006410<br>
 > 20016410<br>
-> 20036410
+> 20036410<br>
 
 <img src="/Readme_files/dbgmcu_id.png">
+<br>
+Another test is to read the Flash Size register:
 
+- Write `0x1FFFF7E0` in "Address" field,
+- Write `0x4` in "Size" field,
+- Click "Connect to target" button.
+
+A genuine STM32F101/102/103Cx/Rx should have any of these values:
+
+> FFFF0040 (64KB)<br>
+> FFFF0080 (128KB)<br>
+> FFFF0100 (256KB)<br>
+> FFFF0200 (512KB)<br>
+
+If you get `FFFFFFFF`, then it's 100% fake.
+
+<img src="/Readme_files/flash_sz.png">
 
 ## Programming with STM32 ST-LINK Utility
 
