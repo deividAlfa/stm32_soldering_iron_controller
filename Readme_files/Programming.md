@@ -43,7 +43,7 @@ A genuine STM32F101/102/103Cx/Rx should have any of these values:
 > FFFF0100 (256KB)<br>
 > FFFF0200 (512KB)<br>
 
-If you get `FFFFFFFF`, then it's 100% fake.
+If you get `FFFFFFFF` or a strange value, then it's 100% fake. First 4 digits must be FFFF!
 
 <img src="/Readme_files/flash_sz.png">
 
