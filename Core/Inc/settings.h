@@ -244,7 +244,6 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       EncoderMode;
   uint8_t       debugEnabled;
   uint8_t       activeDetection;
-  uint8_t       clone_fix;
   uint8_t       dim_mode;
   uint8_t       initMode;
   uint8_t       tempUnit;

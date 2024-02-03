@@ -173,16 +173,6 @@ static void setShakeWakeMode(uint32_t *val) {
   getSystemSettings()->shakeWakeMode = *val;
 }
 //=========================================================
-#ifndef STM32F072xB
-static void * getCloneFix() {
-  temp = getSystemSettings()->clone_fix;
-  return &temp;
-}
-static void setCloneFix(uint32_t *val) {
-  getSystemSettings()->clone_fix = *val;
-}
-#endif
-//=========================================================
 static void * getHasBattery() {
   temp = getSystemSettings()->hasBattery;
   return &temp;
@@ -210,13 +200,7 @@ static void system_onExit(screen_t *scr){                                       
       copy_bkp_data((getSystemSettings()->hasBattery) && 1);                                   // 0=ram_to_flash, 1=flash_to_ram
       loadProfile(getCurrentProfile());                                                 // Reload tip from current backup source
     }
-#ifndef STM32F072xB
-    if(getSystemSettings()->clone_fix != getFlashSystemSettings()->clone_fix){                                           // Clone fix needs rebooting
-      saveSettings(save_settings, do_reboot);
-    }
-    else
-#endif
-      saveSettings(save_settings, no_reboot);                                                          // Other settings changed, not requiring rebooting
+    saveSettings(save_settings, no_reboot);                                                          // Other settings changed, not requiring rebooting
   }
 }
 
@@ -405,18 +389,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (setterFn)&setDbgScr;
-  edit->options = strings[lang].OffOn;
-  edit->numberOfOptions = 2;
-#endif
-
-#ifndef STM32F072xB
-  //  [ Clone fix Widget ]
-  //
-  newComboMultiOption(w, strings[lang].SYSTEM_CLONE_FIX, &edit, NULL);
-  edit->inputData.getData = &getCloneFix;
-  edit->big_step = 1;
-  edit->step = 1;
-  edit->setData = (setterFn)&setCloneFix;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 #endif

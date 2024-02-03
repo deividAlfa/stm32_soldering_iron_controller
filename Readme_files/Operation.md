@@ -170,7 +170,6 @@ The limit is done by adjusting the maximum PWM duty cycle based on the power sup
   - **Heater (resistance)**<br>
 The resistance of the tip's heating element in ohms, used for the power limitation. There is normally no need to change this from the default.<br>
   - **ADC Time**<br>
-`Clones might show wrong readings after modifying the timers, in that case simply reboot the system`<br>
 Sets the ADC reading period. The controller disables the power and runs the ADC at this frequency. Default 200 ms.<br>
 It also sets the base PWM frequency. The PWM multiplier uses this base.<br>
   - **(ADC) Delay**<br>
@@ -286,8 +285,6 @@ Use a higher setting for less "flickery" display (more steady values).<br>
 If your board has the RTC batery installed, enabling this option will store temperature, tip and profile in the RTC SRAM, reducing flash wear.<br>
   - **DEBUG**<br>
 Enable debugging menu.<br>
-  - **Clone fix**<br>
-Experimental workaround to fix the ADC readings jumping around in STM32 clones, barely tested (There are lot of clones).<br>
   - **RESET MENU**<br>
 Reset various configuration sections:<br>
     - **Settings**<br>

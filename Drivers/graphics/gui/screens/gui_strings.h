@@ -99,7 +99,6 @@ typedef struct{
   char * SYSTEM_Gui_Time;
   char * SYSTEM_Battery;
   char * SYSTEM_DEBUG;
-  char * SYSTEM_CLONE_FIX;
   char * SYSTEM_RESET_MENU;
 
   char * SYSTEM_DISPLAY_MENU;

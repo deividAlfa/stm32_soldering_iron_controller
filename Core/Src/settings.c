@@ -55,7 +55,6 @@ const systemSettings_t defaultSystemSettings = {
   .EncoderMode          = RE_Mode_Forward,
   .debugEnabled         = disable,
   .language             = lang_english,
-  .clone_fix            = disable,
 };
 
 #ifdef ENABLE_ADDONS
