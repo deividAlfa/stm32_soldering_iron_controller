@@ -213,9 +213,9 @@ void handleIron(void) {
   if(Iron.updatePwm){                                                                         // If pending PWM period update, refresh Iron Pwm_period
     Iron.Pwm_Period = ((getProfileSettings()->readPeriod+1)/getProfileSettings()->pwmMul)-1;
   }
-
+#ifdef USE_VIN
   updatePowerLimit();                                                                         // Update power limit values
-
+#endif
   // Update PID
   int32_t target = human2adc(Iron.TargetTemperature);
   Iron.Pwm_Out = calculatePID(target, TIP.last_avg, Iron.Pwm_Max);
@@ -507,31 +507,29 @@ void runAwayCheck(void){
 
 // Update PWM max value based on current supply voltage, heater resistance and power limit setting
 
-void updatePowerLimit(void){
 #ifdef USE_VIN
+void updatePowerLimit(void){                                                                           // TODO pending
   uint32_t volts = getSupplyVoltage_v_x10();                                                // Get last voltage reading x10
   volts = (volts*volts)/10;                                                                 // (Vx10 * Vx10)/10 = (V*V)*10 (x10 for fixed point precision)
   if(volts==0){
     volts=1;                                                                                // set minimum value to avoid division by 0
   }
-  uint32_t PwmPeriod=Iron.Pwm_Period+1;                                                       // Read complete PWM period
-  uint32_t maxPower = volts/getProfileSettings()->impedance;                               // Compute max power with current voltage and impedance(Impedance stored in x10)
-  if(getProfileSettings()->power >= maxPower){                                             // If set power is already higher than the max possible power given the voltage and heater resistance
-    Iron.Pwm_Max = PwmPeriod;                                                               // Set max PWM
+
+  uint32_t t = getProfileSettings()->readPeriod + 1;                                        // Complete PWM period
+  uint32_t te = t - getProfileSettings()->readDelay - 1;                                    // Effective period after subtracting read delay
+  uint32_t z = getProfileSettings()->impedance;                                             // Heater resistance
+  uint32_t pwr = getProfileSettings()->power;                                               // Power limit value
+  uint32_t maxPower = volts * te / z / t;                                                   // Compute max power with current voltage, impedance (Stored in x10) and effective pwm cycle
+  uint32_t max;
+  if(pwr >= maxPower){                                                                      // If set power is already higher than the max possible power given the voltage and heater resistance
+     max = te;                                                                              // Set max PWM
   }
   else{                                                                                     // Else,
-    Iron.Pwm_Max = (PwmPeriod*getProfileSettings()->power)/maxPower;                       // Compute max PWM output for current power limit
-    if(Iron.Pwm_Period > PwmPeriod){
-      Iron.Pwm_Max = PwmPeriod;
-    }
-    else if(Iron.Pwm_Period==0){
-      Iron.Pwm_Max = 1;
-    }
+    max = te * pwr / maxPower;                                                              // Compute max PWM output for current power limit
   }
-#else
-  Iron.Pwm_Max = Iron.Pwm_Period+1;
-#endif
+  Iron.Pwm_Max = max / getProfileSettings()->pwmMul;                                  // Adjust for PWM multiplier value
 }
+#endif
 
 // Sets no Iron detection threshold
 void setNoIronValue(uint16_t noiron){
