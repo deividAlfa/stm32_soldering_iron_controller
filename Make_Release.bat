@@ -12,6 +12,12 @@ if not exist %ZIP% (
   GOTO :ERROR
 )
 
+:: Compile all profiles
+echo Compiling...
+start /w Building_script.bat 10
+IF %ERRORLEVEL% NEQ 0 echo Build error! && GOTO :ERROR
+echo OK
+echo.
 
 :: Copy files
 md Release 2>nul
@@ -37,6 +43,8 @@ copy "..\BOARDS\Quicko\STM32F103\SSD1306.list" 		"Quicko_STM32F103_OLED.list" >n
 copy "..\BOARDS\Quicko\STM32F103\ST7565.bin" 		"Quicko_STM32F103_LCD_ST7565.bin" >nul		&& IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
 copy "..\BOARDS\Quicko\STM32F103\ST7565.list" 		"Quicko_STM32F103_LCD_ST7565.list" >nul		&& IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
 
+echo Creating zip files...
+echo.
 :: Create zips
 for %%f in (*.bin) do (
   set FILE=%%~nf
@@ -47,13 +55,15 @@ goto :DONE
 :ZIP
 echo %FILE%
 %ZIP% a -mx=9 -tzip %FILE%.zip %FILE%.* -y >nul
+::%ZIP% a -mx=9 -tzip FLASH_TEST_%FILE%.zip %FILE%.bin -y >nul
 IF %ERRORLEVEL% NEQ 0 echo Unknown 7-ZIP Error! && GOTO :ERROR
 exit /B
 
 
 :DONE
 echo.
-echo Done!
+echo OK
+echo Files placed in "Release" folder
 TIMEOUT 3 >NUL
 GOTO :END
 
@@ -66,5 +76,3 @@ echo First run Building_script.bat and select "Compile all"
 pause
 
 :END
-
-
