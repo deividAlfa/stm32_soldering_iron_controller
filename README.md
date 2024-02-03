@@ -47,17 +47,18 @@ The actual requirements are 10KB RAM and 64KB **(\*)** flash.<br>
 **(\*)** Currently the firmware has surpassed the 64KB limit, and uses the additional undocumented 64KB flash block.<br>
 **(\*)** All 64KB devices have 128KB, with the second 64KB block untested from the factory, so not guaranteed to work.<br>
 **(\*)** To date, I have found zero issues. Original KSGER firmware also does this.<br>
-**(\*)** ST-Link checks the written data, and the firmware uses checksums to protect the settings, any error will be detected.
+**(\*)** ST-Link checks the written data and the firmware uses CRC for settings, any error will be detected.
 
-Some controllers are using STM32 clones, sometimes relabeled as genuine STM32, causing problems.<br>
-Check [STM32 Clones](Readme_files/Programming.md#clone-detection) section to find out how to detect a genuine STM32.<br>
+Some controllers are using fake STM32 or compatibles, sometimes relabeled as genuine STM32, causing problems.<br>
+Check [STM32 clone detection](Readme_files/Programming.md#clone-detection) section to find out how to detect a genuine STM32.<br>
 - The only known working clone is CKS32.
 - GD32, MM32 and CH32 have issues with the ADC converter.
 - APM32 hasn't been tested yet.
 
-There's a new experimental workaround for clones, try enabling `Clone fix` in [`System menu`](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/Readme_files/Operation.md#system)<br>
-
-If your board came with a clone, you can replace it with a STM32F101/102/103, they're pin-compatible.<br>
+If your board came with a fake/clone, you can replace it with a STM32F103, they're pin-compatible:
+* **48-pin**: STM32F103C8T6, STM32F103CBT6.
+* **64-pin**: STM32F103R8T6, STM32F103RBT6, STM32F103RCT6, STM32F103RDT6, STM32F103RET6.
+<br>
 
 Currently supported controllers:
 * **Quicko T12-072**: First gen Quicko, STM32F072 variant. Compatibility issues were fixed since v1.04. [Old version](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/9f4b7f9565344e30a6ce1394d28350f82089488b/BOARDS/Quicko/STM32F072_SSD1306/STM32SolderingStation.bin).
