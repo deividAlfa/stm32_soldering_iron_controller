@@ -3,8 +3,6 @@
 :: [Default search path] Installation folder must be named STM32CubeIDE!
 SET SEARCH_PATH="C:\ST"
 
-
-
 :: [ENABLE THIS LINES TO MANUALLY SET THE TOOL PATHS]
 :: set IDEPATH="C:\ST\STM32CubeIDE_1.7.0\STM32CubeIDE"
 :: set IDE="%IDEPATH:"=%\stm32cubeide.exe"
@@ -20,6 +18,59 @@ SET MODELS=    "BOARDS\KSGER\v1.5\STM32F103";^
                "BOARDS\Quicko\STM32F103"
 SET RUN_CUBEMX="n"
 SET COMPILE="n"
+
+SET ERR=0
+SET BUILD_OPT=
+SET BUILD_TARGET=
+
+IF "%~1"=="" GOTO :BUILD_PROMPT
+IF %~1 LSS 1 GOTO :BUILD_HELP
+IF %~1 GTR 11 GOTO :BUILD_HELP
+SET BUILD_TARGET=%~1
+
+IF "%BUILD_TARGET%"=="10" GOTO :NO_BUILD_PROMPT
+IF "%~2"=="" GOTO :BUILD_HELP
+IF %~2 LSS 1 GOTO :BUILD_HELP
+IF %~2 GTR 4 GOTO :BUILD_HELP
+SET BUILD_OPT=%~2
+GOTO :NO_BUILD_PROMPT
+
+
+:BUILD_HELP
+cls
+echo.
+echo Bad arguments given!
+echo.
+echo Run without any arguments to show the interactive prompt
+echo.
+echo Usage: Building_script.bat [PROFILE] [OPT]
+echo.
+echo        PROFILE:
+echo                    1  KSGER v1.5     OLED
+echo                    2  KSGER v1.5     LCD
+echo                    3  KSGER v2       OLED
+echo                    4  KSGER v3       OLED
+echo                    5  KSGER v3       LCD
+echo                    6  Quicko 072     OLED
+echo                    7  Quicko 072     LCD
+echo                    8  Quicko 103     OLED
+echo                    9  Quicko 103     LCD
+echo                    10 Build all
+echo                    11 Quit
+echo.
+echo        OPT:
+echo                    1  Only copy files
+echo                    2  Copy files and run CubeMX
+echo                    3  Copy files, run CubeMX and compile
+echo                    4  Quit
+echo.
+echo For example, compile KSGER v3 OLED:    Building_script.bat 4 3
+echo.
+set ERR=1
+GOTO :EXIT
+
+
+:BUILD_PROMPT
 cls
 echo.
 echo     STM32 Soldering firmware automated builder.
@@ -39,20 +90,24 @@ echo     [A]   Build all
 echo     [Q]   Quit
 echo.
 CHOICE /C 123456789AQ /N /M "Please select your building target:"
+set BUILD_TARGET=%ERRORLEVEL%
 cls
-IF "%ERRORLEVEL%"=="1" SET PROFILE="BOARDS\KSGER\v1.5\STM32F103" && SET DISPLAY="SSD1306"&& GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="2" SET PROFILE="BOARDS\KSGER\v1.5\STM32F103" && SET DISPLAY="ST7565"&& GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="3" SET PROFILE="BOARDS\KSGER\v2\STM32F101" && SET DISPLAY="SSD1306"&& GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="4" SET PROFILE="BOARDS\KSGER\v3\STM32F101" && SET DISPLAY="SSD1306"&& GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="5" SET PROFILE="BOARDS\KSGER\v3\STM32F101" && SET DISPLAY="ST7565"&& GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="6" SET PROFILE="BOARDS\Quicko\STM32F072" && SET DISPLAY="SSD1306"&& GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="7" SET PROFILE="BOARDS\Quicko\STM32F072" && SET DISPLAY="ST7565"&& GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="8" SET PROFILE="BOARDS\Quicko\STM32F103" && SET DISPLAY="SSD1306"&& GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="9" SET PROFILE="BOARDS\Quicko\STM32F103" && SET DISPLAY="ST7565"&& GOTO :ASKCUBEMX
-IF "%ERRORLEVEL%"=="10" SET PROFILE="" && SET RUN_CUBEMX="y" && SET COMPILE="y" && SET DISPLAY=""&& GOTO :TOOLS
-IF "%ERRORLEVEL%"=="11" GOTO :EXIT
 
-:ASKCUBEMX
+:NO_BUILD_PROMPT
+IF "%BUILD_TARGET%"=="1" SET PROFILE="BOARDS\KSGER\v1.5\STM32F103" && SET DISPLAY="SSD1306"&& GOTO :OPT_PROMPT
+IF "%BUILD_TARGET%"=="2" SET PROFILE="BOARDS\KSGER\v1.5\STM32F103" && SET DISPLAY="ST7565"&& GOTO :OPT_PROMPT
+IF "%BUILD_TARGET%"=="3" SET PROFILE="BOARDS\KSGER\v2\STM32F101" && SET DISPLAY="SSD1306"&& GOTO :OPT_PROMPT
+IF "%BUILD_TARGET%"=="4" SET PROFILE="BOARDS\KSGER\v3\STM32F101" && SET DISPLAY="SSD1306"&& GOTO :OPT_PROMPT
+IF "%BUILD_TARGET%"=="5" SET PROFILE="BOARDS\KSGER\v3\STM32F101" && SET DISPLAY="ST7565"&& GOTO :OPT_PROMPT
+IF "%BUILD_TARGET%"=="6" SET PROFILE="BOARDS\Quicko\STM32F072" && SET DISPLAY="SSD1306"&& GOTO :OPT_PROMPT
+IF "%BUILD_TARGET%"=="7" SET PROFILE="BOARDS\Quicko\STM32F072" && SET DISPLAY="ST7565"&& GOTO :OPT_PROMPT
+IF "%BUILD_TARGET%"=="8" SET PROFILE="BOARDS\Quicko\STM32F103" && SET DISPLAY="SSD1306"&& GOTO :OPT_PROMPT
+IF "%BUILD_TARGET%"=="9" SET PROFILE="BOARDS\Quicko\STM32F103" && SET DISPLAY="ST7565"&& GOTO :OPT_PROMPT
+IF "%BUILD_TARGET%"=="10" SET PROFILE="" && SET RUN_CUBEMX="y" && SET COMPILE="y" && SET DISPLAY=""&& GOTO :TOOLS
+IF "%BUILD_TARGET%"=="11" GOTO :EXIT
+
+:OPT_PROMPT
+IF NOT "%BUILD_OPT%"=="" GOTO :NO_OPT_PROMPT
 echo.
 echo     Run options
 echo.
@@ -62,11 +117,14 @@ echo     [3]   Copy files, run CubeMX and compile
 echo     [Q]   Quit
 echo.
 CHOICE /C 123Q /N /M "Please select an option:"
+set BUILD_OPT=%ERRORLEVEL%
 cls
-IF "%ERRORLEVEL%"=="1" GOTO :ONLYCOPY
-IF "%ERRORLEVEL%"=="2" SET RUN_CUBEMX="y" && GOTO :TOOLS
-IF "%ERRORLEVEL%"=="3" SET RUN_CUBEMX="y" && SET COMPILE="y" && GOTO :TOOLS
-IF "%ERRORLEVEL%"=="4" GOTO :EXIT
+
+:NO_OPT_PROMPT
+IF "%BUILD_OPT%"=="1" GOTO :ONLYCOPY
+IF "%BUILD_OPT%"=="2" SET RUN_CUBEMX="y" && GOTO :TOOLS
+IF "%BUILD_OPT%"=="3" SET RUN_CUBEMX="y" && SET COMPILE="y" && GOTO :TOOLS
+IF "%BUILD_OPT%"=="4" GOTO :EXIT
 
 :: ##################  [TRY FINDING THE TOOLS IF INVALID PATHS DETECTED]  ##################
 
@@ -100,6 +158,7 @@ goto :START
 :NOTFOUND
 echo [91mTools not found! Ensure CubeIDE is installed in C:\ST\[0m
 echo [91mElse, edit this script and set the path manually[0m
+set ERR=1
 goto :DONE
 
 :: ##################  [START]  ##################
@@ -142,6 +201,7 @@ echo [94mRunning CubeMX...[0m
 start /w /min "CubeMX" %JAVA_CMD% -jar "%MX%" -q cubemx_script >nul
 IF %ERRORLEVEL% NEQ 0 (
   echo [91mCubeMX error![0m : %ERRORLEVEL%
+  set ERR=1
   goto :DONE
 )       
 
@@ -158,6 +218,7 @@ echo start /w /min "CubeIDE" %IDE% --launcher.suppressErrors -nosplash -applicat
 start /w /min "CubeIDE" %IDE% --launcher.suppressErrors -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import %cd% -build STM32SolderingStation/%DISP:"=%_Release 2>nul >nul
 IF %ERRORLEVEL% NEQ 0 (
   echo [91mCompiler error![0m : %ERRORLEVEL%
+  set ERR=1
   goto :DONE
 )
 move /Y "%DISP:"=%_Release\STM32SolderingStation.bin" "%CURRENT:"=%\%DISP:"=%.bin" 2>nul >nul
@@ -176,8 +237,8 @@ move /Y STM32SolderingStation.bak STM32SolderingStation.ioc >nul 2>nul
 :: Cleanup
 rd /Q /S SSD1306_Release ST7565_Release EWARM Application 2>nul
 
-
+IF "%BUILD_TARGET%"=="10" GOTO :EXIT
 pause
 
 :EXIT
-exit
+exit %ERR%
