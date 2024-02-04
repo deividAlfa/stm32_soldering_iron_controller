@@ -98,7 +98,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Gui time",
       .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "DEBUG",
-      .SYSTEM_CLONE_FIX = "Clone fix",
       .SYSTEM_RESET_MENU = "RESET MENU",
 
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
@@ -278,7 +277,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Отрисовка",
       .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "Отладка",
-      .SYSTEM_CLONE_FIX = "ФиксКлонов",
       .SYSTEM_RESET_MENU = "МЕНЮ СБРОСА",
       .SYSTEM_DISPLAY_MENU = "МЕНЮ ЭКРАНА",
 
@@ -459,7 +457,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Gui-tid",
       .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "DEBUG",
-      .SYSTEM_CLONE_FIX = "Klon-fix",
       .SYSTEM_RESET_MENU = "ÅTERST. MENY",
 
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
@@ -640,7 +637,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Gui Zeit",
       .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "DEBUG",
-      .SYSTEM_CLONE_FIX = "Clone fix",
       .SYSTEM_RESET_MENU = "RESET MENÜ",
 
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
@@ -821,7 +817,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Gui zamanı",
       .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "Geliştirici",
-      .SYSTEM_CLONE_FIX = "Clone fix",
       .SYSTEM_RESET_MENU = "MENÜ SIFIRLA",
 
       .SYSTEM_DISPLAY_MENU = "DISPLAY",
@@ -1002,7 +997,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "顯示頻率",
       .SYSTEM_Battery = "系統電池",
       .SYSTEM_DEBUG = "偵錯選單",
-      .SYSTEM_CLONE_FIX = "克隆修正",
       .SYSTEM_RESET_MENU = "重設選單",
 
       .SYSTEM_DISPLAY_MENU = "螢幕設定",
@@ -1183,7 +1177,6 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Gui_Time = "Опресняв.",
       .SYSTEM_Battery = "Battery",
       .SYSTEM_DEBUG = "ГРЕШКИ",
-      .SYSTEM_CLONE_FIX = "Клониран чип",
       .SYSTEM_RESET_MENU = "НУЛИРАНЕ",
 
       .SYSTEM_DISPLAY_MENU = "ЕКРАН",

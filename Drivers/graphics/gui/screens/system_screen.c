@@ -19,10 +19,6 @@ static editable_widget_t *editable_system_TempStep;
 static editable_widget_t *editable_system_bigTempStep;
 static editable_widget_t *editable_system_GuiTempDenoise;
 
-#ifndef STM32F072xB
-static bool clone_fix;
-#endif
-
 void update_System_menu(void){
   bool mode = (getProfileSettings()->WakeInputMode==mode_shake);
   comboitem_system_BootMode->enabled        = mode;
@@ -177,16 +173,6 @@ static void setShakeWakeMode(uint32_t *val) {
   getSystemSettings()->shakeWakeMode = *val;
 }
 //=========================================================
-#ifndef STM32F072xB
-static void * getCloneFix() {
-  temp = clone_fix;
-  return &temp;
-}
-static void setCloneFix(uint32_t *val) {
-  clone_fix = *val;
-}
-#endif
-//=========================================================
 static void * getHasBattery() {
   temp = getSystemSettings()->hasBattery;
   return &temp;
@@ -196,10 +182,6 @@ static void setHasBattery(uint32_t *val) {
 }
 //=========================================================
 static void system_onEnter(screen_t *scr){
-#ifndef STM32F072xB
-  clone_fix = getSystemSettings()->clone_fix;
-#endif
-
   if(scr==&Screen_settings){
     comboResetIndex(Screen_system.current_widget);
     profile=getCurrentProfile();
@@ -218,14 +200,7 @@ static void system_onExit(screen_t *scr){                                       
       copy_bkp_data((getSystemSettings()->hasBattery) && 1);                                   // 0=ram_to_flash, 1=flash_to_ram
       loadProfile(getCurrentProfile());                                                 // Reload tip from current backup source
     }
-#ifndef STM32F072xB
-    if(getSystemSettings()->clone_fix != clone_fix){                                           // Clone fix needs rebooting
-      getSystemSettings()->clone_fix = clone_fix;
-      saveSettings(save_settings, do_reboot);
-    }
-    else
-#endif
-      saveSettings(save_settings, no_reboot);                                                          // Other settings changed, not requiring rebooting
+    saveSettings(save_settings, no_reboot);                                                          // Other settings changed, not requiring rebooting
   }
 }
 
@@ -414,18 +389,6 @@ static void system_create(screen_t *scr){
   edit->big_step = 1;
   edit->step = 1;
   edit->setData = (setterFn)&setDbgScr;
-  edit->options = strings[lang].OffOn;
-  edit->numberOfOptions = 2;
-#endif
-
-#ifndef STM32F072xB
-  //  [ Clone fix Widget ]
-  //
-  newComboMultiOption(w, strings[lang].SYSTEM_CLONE_FIX, &edit, NULL);
-  edit->inputData.getData = &getCloneFix;
-  edit->big_step = 1;
-  edit->step = 1;
-  edit->setData = (setterFn)&setCloneFix;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
 #endif

@@ -13,7 +13,7 @@
 #include "board.h"
 
 #define ENABLE_DBG_SAVE
-#define SWSTRING          "SW: 1.13.5     "                         // Software version reported in settings screen
+#define SWSTRING          "SW: 1.13.6     "                         // Software version reported in settings screen
 #define SYSTEM_SETTINGS_VERSION   28                                // Change this if you change the system settings struct to prevent getting out of sync
 #define PROFILE_SETTINGS_VERSION  4                                 // Same, but for profile settings struct
 #define TIP_SETTINGS_VERSION      1                                 // Same, but for tip settings struct
@@ -244,7 +244,7 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       EncoderMode;
   uint8_t       debugEnabled;
   uint8_t       activeDetection;
-  uint8_t       clone_fix;
+  uint8_t       clone_fix;        // TODO Deprectaed, delete this when the settings version is updated
   uint8_t       dim_mode;
   uint8_t       initMode;
   uint8_t       tempUnit;
