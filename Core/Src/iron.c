@@ -590,7 +590,7 @@ void setCurrentMode(uint8_t mode){
     //resetPID();
     resetRunAway();
     if(!Iron.calibrating){
-      buzzer_long_beep();
+      buzzer_beep(MEDIUM_BEEP);
       modeChanged(mode);
     }
     Iron.temperatureReached = 0;                                                    // Reset temperature reached flag

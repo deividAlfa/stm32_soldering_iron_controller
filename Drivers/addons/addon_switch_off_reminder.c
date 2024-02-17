@@ -39,18 +39,18 @@ void handleAddonSwitchOffReminder()
         switch (getAddons()->swOffReminderBeepType) {
           case switch_off_reminder_short_beep:
           {
-            buzzer_short_beep();
+            buzzer_beep(SHORT_BEEP);
             break;
           }
           case switch_off_reminder_medium_beep:
           {
-            buzzer_long_beep();
+            buzzer_beep(MEDIUM_BEEP);
             break;
           }
           case switch_off_reminder_long_beep:
           default:
           {
-            buzzer_fatal_beep();
+            buzzer_beep(LONG_BEEP);
             break;
           }
         }
