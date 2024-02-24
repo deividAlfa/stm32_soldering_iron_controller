@@ -476,7 +476,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         case Click:                                                         // Received a Click, enter low power mode.
 
-          if(!checkIronModeTimer(200) && mainScr.lastIronMode < mode_boost){// If click issued too soon after iron working mode was changed to non-boost mode
+          if(!checkIronModeTimer(300) && mainScr.lastIronMode < mode_boost){// If click issued too soon after iron working mode was changed to non-boost mode
             setCurrentMode(mainScr.lastIronMode);                           // Assume it was a encoder fault rotating while trying to click, restore previous mode, then proceed with low power mode
           }
           if(mainScr.displayMode==temp_graph){                              // If in graph display
@@ -689,8 +689,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       switch((uint8_t)input){
         case LongClick:
         case Click:
-          if(!checkMainScreenModeTimer(200)){                                   // Click issued very soon after entering the screen
-            if(!checkIronModeTimer(200) && mainScr.lastIronMode < mode_boost){  // Check if also iron working mode was recently changed
+          if(!checkMainScreenModeTimer(300)){                                   // Click issued very soon after entering the screen
+            if(!checkIronModeTimer(300)){                                       // Check if also iron working mode was recently changed
               setCurrentMode(mainScr.lastIronMode);                             // Assume it was a encoder fault rotating while trying to click, restore previous mode
             }
             if(currentIronMode > mode_standby){                                 // Enter low power mode
