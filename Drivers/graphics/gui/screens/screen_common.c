@@ -148,7 +148,7 @@ void wakeOledDim(void){
 
 void handleOledDim(void){
 #ifndef ST7565
-  uint16_t brightness=getDisplayContrastOrBrightness();
+  int16_t brightness=getDisplayContrastOrBrightness();
   if(!getDisplayPower() && getCurrentMode()>mode_sleep){                   // If screen turned off and not in sleep mode, wake it.
     wakeOledDim();                                                   		// (Something woke the station from sleep)
   }
@@ -158,20 +158,21 @@ void handleOledDim(void){
       return;
     }
     // If idle timer expired, start decreasing brightness
-    if(brightness>5 && ((current_time-dim.timer)>getSystemSettings()->dim_Timeout)){
+    if((current_time-dim.timer)>getSystemSettings()->dim_Timeout){
       dim.step=-5;
     }
     // If min. brightness reached and Oled power is disabled in sleep mode, turn off screen if temp<100ºC or error active
-    else if(dim.min_reached && getCurrentMode()==mode_sleep && getSystemSettings()->dim_inSleep==disable && (last_TIP_C<100 || (getIronErrorFlags().active))){
+    else if(dim.min_reached && (current_time - dim.timer > getSystemSettings()->dim_Timeout/2) && getCurrentMode()==mode_sleep && getSystemSettings()->dim_inSleep==disable && (last_TIP_C<100 || (getIronErrorFlags().active))){
       setDisplayPower(disable);
       dim.min_reached=0;
     }
   }
   // Smooth screen brightness dimming
-  else if((current_time-dim.stepTimer)>19){
+  else if( dim.step!=0 && (current_time-dim.stepTimer)>19){
     dim.stepTimer = current_time;
-    brightness+=dim.step;
-    if(brightness>4 && brightness < getSystemSettings()->contrastOrBrightness){
+    if( (dim.step<0 && brightness > -dim.step) ||
+        (dim.step>0 && brightness+dim.step < getSystemSettings()->contrastOrBrightness)){
+      brightness+=dim.step;
       setDisplayContrastOrBrightness(brightness);
     }
     else{
