@@ -689,7 +689,7 @@ void Oled_error_init(void){
   if(!oled.use_sw)
     display_dma_abort();
 #endif  
-  buzzer_fatal_beep();
+  buzzer_force_beep(LONG_BEEP);
   setDisplayContrastOrBrightness(getDefaultSystemSettings()->contrastOrBrightness);
   fillBuffer(BLACK,fill_soft);
   u8g2_SetFont(&u8g2,u8g2_font_menu);

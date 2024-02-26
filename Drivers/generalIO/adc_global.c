@@ -161,7 +161,7 @@ void ADC_Init(ADC_HandleTypeDef *adc){
   }
 
   ADC_Status = ADC_Idle;
-  buzzer_short_beep();
+  buzzer_beep(SHORT_BEEP);
 }
 
 void ADC_Start_DMA(){

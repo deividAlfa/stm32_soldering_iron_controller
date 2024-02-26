@@ -10,13 +10,13 @@
 #include "settings.h"
 #include "main.h"
 
-typedef enum {STATE_IDLE, STATE_SB, STATE_LB, STATE_FB, STATE_AL_H,STATE_AL_L } buzzer_state_type;
+typedef enum {STATE_IDLE, STATE_BEEP, STATE_AL_H, STATE_AL_L } buzzer_state_type;
 
 static buzzer_state_type buzzer_state = STATE_IDLE;
-static uint32_t last_time;
+static uint32_t beep_end;
 
 static void tempReachedCall(uint16_t temp) {
-  buzzer_short_beep();
+  buzzer_beep(SHORT_BEEP);
 }
 static setTemperatureReachedCallback ironTempReachedCallback = &tempReachedCall;
 
@@ -24,27 +24,18 @@ void buzzer_init() {
   addSetTemperatureReachedCallback(ironTempReachedCallback);
 }
 
-void buzzer_short_beep() {
-  buzzer_state = STATE_SB;
+void buzzer_beep(uint32_t duration) {
+  buzzer_state = STATE_BEEP;
   if(getSystemSettings()->buzzerMode){
     BUZZER_ON;
   }
-  last_time = HAL_GetTick();
-}
-void buzzer_long_beep() {
-  buzzer_state = STATE_LB;
-  if(getSystemSettings()->buzzerMode){
-    BUZZER_ON;
-  }
-  last_time = HAL_GetTick();
+  beep_end = HAL_GetTick() + duration;
 }
 
-void buzzer_fatal_beep() {
-  buzzer_state = STATE_FB;
-  if(getSystemSettings()->buzzerMode){
-    BUZZER_ON;
-  }
-  last_time = HAL_GetTick();
+void buzzer_force_beep(uint32_t duration) {
+  buzzer_state = STATE_BEEP;
+  BUZZER_ON;
+  beep_end = HAL_GetTick() + duration;
 }
 
 void buzzer_alarm_start(){
@@ -53,7 +44,7 @@ void buzzer_alarm_start(){
   if(getSystemSettings()->buzzerMode){
     BUZZER_ON;
   }
-  last_time = HAL_GetTick();
+  beep_end = HAL_GetTick() + ALARM_HIGH;
 }
 
 void buzzer_alarm_stop() {
@@ -62,50 +53,36 @@ void buzzer_alarm_stop() {
 }
 
 void handle_buzzer() {
-  uint32_t delta = HAL_GetTick() - last_time;
+  uint32_t now = HAL_GetTick();
   switch (buzzer_state) {
 
     case STATE_IDLE:
       break;
 
-    case STATE_SB:
-      if (delta > SHORT_BEEP) {
-        BUZZER_OFF;
-        buzzer_state = STATE_IDLE;
-      }
-      break;
-
-    case STATE_LB:
-      if (delta > LONG_BEEP) {
-        BUZZER_OFF;
-        buzzer_state = STATE_IDLE;
-      }
-      break;
-    case STATE_FB:
-      if (delta > FATAL_BEEP) {
+    case STATE_BEEP:
+      if (beep_end < now) {
         BUZZER_OFF;
         buzzer_state = STATE_IDLE;
       }
       break;
 
     case STATE_AL_H:
-      if(delta > ALARM_HIGH){
+      if (beep_end < now) {
           buzzer_state=STATE_AL_L;
           BUZZER_OFF;
-          last_time = HAL_GetTick();
+          beep_end = now + ALARM_LOW;
       }
       break;
 
     case STATE_AL_L:
-      if(delta > ALARM_LOW){
+      if (beep_end < now) {
         buzzer_state=STATE_AL_H;
         if(getSystemSettings()->buzzerMode){
           BUZZER_ON;
         }
-        last_time = HAL_GetTick();
+        beep_end = now + ALARM_HIGH;
       }
       break;
-
 
     default:
       BUZZER_OFF;

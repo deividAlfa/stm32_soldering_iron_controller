@@ -163,6 +163,7 @@ static widget_t *Widget_IronTemp;
 static widget_t *Widget_SetPoint;
 
 static struct{
+  uint8_t lastIronMode;                   // Last stored iron mode
   uint8_t lastPwr;                        // Last stored power for widget
   uint8_t shakeActive;                    // Shake icon status: 0=disabled, 1=needs drawing, 2=drawign done, 3=needs clearing
   uint8_t ironStatus;                     // iron status: status_ok, status_error
@@ -436,23 +437,24 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
   // If at main temperature screen
   if(mainScr.currentMode == main_irontemp && (input == Rotate_Increment || input == Rotate_Decrement || input == Click)){  // Capture rotation and click events
-    if(getIronWakeSource()==wakeSrc_Button && !checkIronModeTimer(200)){  // To avoid unwanted mode change, ignore action if iron mode was set <200ms ago
-        input = Rotate_Nothing;
-      }
-      else if(currentIronMode==mode_boost){                               // Click / rotation events will exit boost mode, don't process the input afterwards
-        setCurrentMode(mode_run);
-        input = Rotate_Nothing;
-      }
-      else if(currentIronMode!=mode_run && input != Click){               // Ignore click in low power mode. Only rotation will resume run mode.
-        IronWake(wakeSrc_Button);                                         // Send wake signal
-        if(getCurrentMode()==mode_run){                                   // If mode actually changed
-          input = Rotate_Nothing;                                         // Ignore rotation to prevent setpoint adjustment
-          resetModeTimer();                                               // Reset mode timer
-          if(mainScr.displayMode==temp_graph){                            // If in graph display mode
-            mainScr.boost_allow=1;                                        // Allow boost triggering
-          }
+    if(currentIronMode!=mode_run && getIronWakeSource()==wakeSrc_Button && !checkIronModeTimer(200)){  // To avoid unwanted mode change, ignore action if low power/boost mode was set <200ms ago
+      input = Rotate_Nothing;
+    }
+    else if(currentIronMode==mode_boost){                               // Click / rotation events will exit boost mode, don't process the input afterwards
+      setCurrentMode(mode_run);
+      input = Rotate_Nothing;
+    }
+    else if(currentIronMode!=mode_run && input != Click){               // Ignore click in low power mode. Only rotation will resume run mode.
+      mainScr.lastIronMode=getCurrentMode();
+      IronWake(wakeSrc_Button);                                         // Send wake signal
+      if(getCurrentMode()==mode_run){                                   // If mode actually changed
+        input = Rotate_Nothing;                                         // Ignore rotation to prevent setpoint adjustment
+        resetModeTimer();                                               // Reset mode timer
+        if(mainScr.displayMode==temp_graph){                            // If in graph display mode
+          mainScr.boost_allow=1;                                        // Allow boost triggering
         }
       }
+    }
   }
   // Handle main screen
   switch(mainScr.currentMode){
@@ -473,6 +475,10 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;
 
         case Click:                                                         // Received a Click, enter low power mode.
+
+          if(!checkIronModeTimer(300) && mainScr.lastIronMode < mode_boost){// If click issued too soon after iron working mode was changed to non-boost mode
+            currentIronMode = mainScr.lastIronMode;                         // Assume it was a encoder fault rotating while trying to click, restore previous mode, then proceed with low power mode
+          }
           if(mainScr.displayMode==temp_graph){                              // If in graph display
             if(checkMainScreenModeTimer(1000)){                             // If more than 1 second since last rotation, disable boost allow flag
               mainScr.boost_allow=0;
@@ -482,8 +488,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
               setCurrentMode(mode_boost);                                   // Set boost mode
             }
           }
-          if(checkMainScreenModeTimer(500)){                                // After other events, wait for more than 500ms before allowing click events from entering low power modes
-            if(currentIronMode > mode_standby){                             // Otherwise the user might accidentally enter them
+          if( checkMainScreenModeTimer(500) ||                              // Wait at least 500ms after entering the screen before allowing click events from entering low power modes, otherwise the user might accidentally enter them
+              (!checkIronModeTimer(300) && mainScr.lastIronMode<mode_run)){ // Exception: Iron was sleeping but mode was changed less than 500ms ago (Rotation event) and we got a click, assume this is encoder malfunction, we shouldn't have waken up.
+            if(currentIronMode > mode_standby){                             //
               setCurrentMode(mode_standby);
             }
             else{
@@ -683,9 +690,21 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       switch((uint8_t)input){
         case LongClick:
         case Click:
-          if(mainScr.ironStatus != status_error && currentIronMode==mode_run && !checkMainScreenModeTimer(1000)){
+          if(!checkMainScreenModeTimer(300)){                                   // Click issued very soon after entering the screen
+            if(!checkIronModeTimer(300)){                                       // Check if also iron working mode was recently changed
+              currentIronMode = mainScr.lastIronMode;                           // Assume it was a encoder fault rotating while trying to click, restore previous mode, then proceed with low power mode
+            }
+            if(currentIronMode > mode_standby){                                 // Enter low power mode
+              setCurrentMode(mode_standby);
+            }
+            else{
+              setCurrentMode(mode_sleep);
+            }
+          }
+          else if(mainScr.ironStatus != status_error && currentIronMode==mode_run && !checkMainScreenModeTimer(1000)){
             setCurrentMode(mode_boost);
           }
+
           mainScr.setMode=main_irontemp;
           break;
 
@@ -702,9 +721,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         default:
           break;
-      }
-      if(input!=Rotate_Nothing){
-        IronWake(wakeSrc_Button);
       }
     default:
       break;
