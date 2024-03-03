@@ -455,7 +455,7 @@ void saveSettings(uint8_t save_mode, uint8_t reboot_mode){
     Error_Handler();
   }
 
-  uint8_t profile = getCurrentProfile();
+  uint8_t profile = getCurrentProfileID();
 
   if((profile>profile_C210) || (getProfileSettings()->ID != profile ))                                   // Sanity check
       Error_Handler();
@@ -997,6 +997,9 @@ profile_settings_t * getProfileSettings(void){
 }
 uint8_t getCurrentProfile(void){
   return getSettings()->currentProfile;
+}
+uint8_t getCurrentProfileID(void){
+  return getProfileSettings()->ID;
 }
 
 void setCurrentProfile(uint8_t profile){

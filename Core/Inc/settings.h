@@ -374,6 +374,7 @@ flashSettings_t * getFlashSettings(void);
 void loadProfile(uint8_t profile);
 void setCurrentProfile(uint8_t profile);
 uint8_t getCurrentProfile(void);
+uint8_t getCurrentProfileID(void);
 profile_settings_t * getProfileSettings(void);
 profile_settings_t * getDefaultProfileSettings(void);
 profile_settings_t * getFlashProfileSettings(void);
