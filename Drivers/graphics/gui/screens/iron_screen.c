@@ -23,6 +23,7 @@ static editable_widget_t *editable_IRON_BoostTemp;
 static editable_widget_t *editable_IRON_ColdBoostTemp;
 static editable_widget_t *editable_IRON_MaxTemp;
 static editable_widget_t *editable_IRON_MinTemp;
+static editable_widget_t *editable_IRON_Profile;
 
 #ifdef USE_NTC
 screen_t Screen_iron_ntc;
@@ -338,6 +339,15 @@ static void * getShakeFiltering() {
 static void setShakeFiltering(uint32_t *val) {
   getProfileSettings()->shakeFiltering = *val;
 }
+
+//=========================================================
+static void * getProfile() {
+  temp = profile;
+  return &temp;
+}
+static void setProfile(uint32_t *val) {
+  profile=*val;
+}
 //=========================================================
 
 static void iron_onEnter(screen_t *scr){
@@ -359,11 +369,15 @@ static void iron_onEnter(screen_t *scr){
   if(scr==&Screen_settings){
     comboResetIndex(Screen_iron.current_widget);
   }
+  else if(scr==&Screen_iron){                                           // iron screen was reloaded after changing the profile
+    editable_IRON_Profile->selectable.state=widget_edit;            // Set widget in editing mode
+    editable_IRON_Profile->selectable.previous_state=widget_selected;
+  }
 }
 
 static void iron_onExit(screen_t *scr){
 
-  if((scr != &Screen_iron_advFilter) && (scr != &Screen_iron_ntc) && (scr != &Screen_iron) && isCurrentProfileChanged()){    // Going to main screen?
+  if( (profile != getCurrentProfile() || ((scr != &Screen_iron_advFilter) && (scr != &Screen_iron_ntc) && (scr != &Screen_iron))) && isCurrentProfileChanged() ){    // Going to main screen or current profile changed? Check if profile needs saving
     uint16_t userTemp = getUserTemperature();
 
     if(userTemp > getProfileSettings()->MaxSetTemperature)
@@ -372,7 +386,11 @@ static void iron_onExit(screen_t *scr){
     else if (userTemp < getProfileSettings()->MinSetTemperature)
       setUserTemperature(getProfileSettings()->MinSetTemperature);
 
-    saveSettings(save_profile, no_reboot);              // Save now we have all heap free
+    saveSettings(save_profile, no_reboot);                            // Save now we have all heap free
+  }
+
+  if(profile != getCurrentProfile()){                                 // User changed the current profile?
+    loadProfile(profile);                                             // Load profile
   }
 }
 
@@ -639,6 +657,17 @@ static void iron_create(screen_t *scr){
   //  [ IRON COMBO ]
   //
   newWidget(&w,widget_combo,scr,NULL);
+
+  //  [ Profile Widget ]
+  //
+  newComboMultiOption(w, strings[lang].IRON_Profile, &edit, NULL);
+  editable_IRON_Profile = edit;
+  edit->inputData.getData = &getProfile;
+  edit->big_step = 1;
+  edit->step = 1;
+  edit->setData = (void (*)(void *))&setProfile;
+  edit->options = profileStr;
+  edit->numberOfOptions = NUM_PROFILES;
 
   //  [ Max Temp Widget ]
   //
