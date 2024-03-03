@@ -161,44 +161,61 @@ int16_t readColdJunctionSensorTemp_x10(bool new, bool tempUnit){
   }
 }
 
+int16_t readLastTipTemperatureCompensated(bool mode, bool tempUnit){
+  if(tempUnit==mode_Celsius){
+    if(mode==read_unfiltered){
+      return last_TIP_C_Raw;
+    }
+    else{
+      return last_TIP_C;
+    }
+  }
+  else{
+    if(mode==read_unfiltered){
+      return last_TIP_F_Raw;
+    }
+    else{
+      return last_TIP_F;
+    }
+  }
+}
 // Read tip temperature
-int16_t readTipTemperatureCompensated(bool new, bool mode, bool tempUnit){
+int16_t readNewTipTemperatureCompensated(bool mode, bool tempUnit){
   if(getSettings()->setupMode==enable)
       return 0;
 
   int16_t temp, temp_Raw;
   bool systemUnit = getSystemTempUnit();
 
-  if(new){
-    temp = (adc2Human_x10(TIP.last_avg,1,systemUnit)+5)/10;
-    temp_Raw = (adc2Human_x10(TIP.last_raw,1,systemUnit)+5)/10;
+  temp = (adc2Human_x10(TIP.last_avg,1,systemUnit)+5)/10;
+  temp_Raw = (adc2Human_x10(TIP.last_raw,1,systemUnit)+5)/10;
 
-    // Limit output values
-    if(temp>999){
-      temp=999;
-    }
-    else if(temp<-99){
-      temp = -99;
-    }
-    if(temp_Raw>999){
-      temp_Raw=999;
-    }
-    else if(temp_Raw<0){
-      temp_Raw = 0;
-    }
-    if(systemUnit==mode_Celsius){
-      last_TIP_C = temp;
-      last_TIP_C_Raw = temp_Raw;
-      last_TIP_F = TempConversion(last_TIP_C,mode_Farenheit,0);
-      last_TIP_F_Raw = TempConversion(last_TIP_C_Raw,mode_Farenheit,0);
-    }
-    else{
-      last_TIP_F = temp;
-      last_TIP_F_Raw = temp_Raw;
-      last_TIP_C = TempConversion(last_TIP_F,mode_Celsius,0);
-      last_TIP_C_Raw = TempConversion(last_TIP_F_Raw,mode_Celsius,0);
-    }
+  // Limit output values
+  if(temp>999){
+    temp=999;
   }
+  else if(temp<-99){
+    temp = -99;
+  }
+  if(temp_Raw>999){
+    temp_Raw=999;
+  }
+  else if(temp_Raw<0){
+    temp_Raw = 0;
+  }
+  if(systemUnit==mode_Celsius){
+    last_TIP_C = temp;
+    last_TIP_C_Raw = temp_Raw;
+    last_TIP_F = TempConversion(last_TIP_C,mode_Farenheit,0);
+    last_TIP_F_Raw = TempConversion(last_TIP_C_Raw,mode_Farenheit,0);
+  }
+  else{
+    last_TIP_F = temp;
+    last_TIP_F_Raw = temp_Raw;
+    last_TIP_C = TempConversion(last_TIP_F,mode_Celsius,0);
+    last_TIP_C_Raw = TempConversion(last_TIP_F_Raw,mode_Celsius,0);
+  }
+
   if(tempUnit==mode_Celsius){
     if(mode==read_unfiltered){
       return last_TIP_C_Raw;

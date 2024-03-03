@@ -54,7 +54,7 @@ static int32_t clampValues(int32_t val){
 static void * getTemp() {
   static int32_t value;
   if(dbgScrData->update){
-    value=readTipTemperatureCompensated(old_reading, read_average, getSystemSettings()->tempUnit);
+    value = readLastTipTemperatureCompensated(read_average, getSystemTempUnit());
   }
   temp=value;
   return &temp;

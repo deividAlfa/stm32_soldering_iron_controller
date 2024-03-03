@@ -134,7 +134,7 @@ void handleIron(void) {
 
   checkIronError();                                                           // Check iron error presence, must be called before coldJuctionSensor
   readColdJunctionSensorTemp_x10(new_reading, mode_Celsius);                  // to reset the NTC detection status
-  readTipTemperatureCompensated(new_reading, read_average, mode_Celsius);     // Update readings
+  readNewTipTemperatureCompensated(read_average, mode_Celsius);               // Update readings
   checkIronError();                                                           // Check iron error again (Special case when iron has been detected, show other errors)
 
   // Controls external mode changes (from stand mode changes), this acts as a debouncing timer

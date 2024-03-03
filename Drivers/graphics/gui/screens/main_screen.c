@@ -220,7 +220,7 @@ static void * getTemp() {
 
 static void * main_screen_getIronTemp() {
   if(mainScr.updateReadings){
-    mainScr.lastTip=readTipTemperatureCompensated(old_reading, read_average, getSystemTempUnit());
+    mainScr.lastTip = readLastTipTemperatureCompensated(read_average, getSystemTempUnit());
     if(getCurrentMode()>mode_sleep){
       uint16_t const targetTemp = getIronTargetTemperature();
       // Lock numeric display if within limits
@@ -377,7 +377,6 @@ int8_t switchScreenMode(void){
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   uint8_t currentIronMode = getCurrentMode();
-
   mainScr.updateReadings=update_GUI_Timer();
   updateIronPower();
   updatePlot();
@@ -729,7 +728,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   if(switchScreenMode()){
     return -1;
   }
-
   return default_screenProcessInput(scr, input, state);
 }
 
