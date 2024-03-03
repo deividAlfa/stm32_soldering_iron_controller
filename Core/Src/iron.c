@@ -126,7 +126,7 @@ void handleIron(void) {
   CurrentTime = HAL_GetTick();
   if(!Iron.Error.safeMode){
     if( (getSettings()->setupMode==enable) || getSystemSettings()->version!=SYSTEM_SETTINGS_VERSION || getProfileSettings()->version!=PROFILE_SETTINGS_VERSION ||
-        (getProfileSettings()->ID != getCurrentProfile()) || (getCurrentProfile()>profile_C210)){
+        (getProfileSettings()->ID != getCurrentProfile()) || (getCurrentProfile()>=NUM_PROFILES)){
 
       setSafeMode(enable);
     }
