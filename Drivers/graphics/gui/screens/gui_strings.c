@@ -54,6 +54,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
 #endif
 
+      .IRON_Profile = "Profile",
       .IRON_Max_Temp = "Max temp",
       .IRON_Min_Temp = "Min temp",
       .IRON_Standby = "Standby",
@@ -233,6 +234,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SWITCH_OFF_REMINDER_BeepTypes           = {"КОРОТКО" ,"НОРМА" ,"ДЛИННЫЙ"},
 #endif
 
+      .IRON_Profile = "Тип",
       .IRON_Max_Temp = "Максимум",
       .IRON_Min_Temp = "Минимум",
       .IRON_Standby = "Сон через",
@@ -413,6 +415,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SWITCH_OFF_REMINDER_BeepTypes           = {"KORT" ,"MED." ,"LÅNG"},
 #endif
 
+      .IRON_Profile = "Profil",
       .IRON_Max_Temp = "Max temp",
       .IRON_Min_Temp = "Min temp",
       .IRON_Standby = "Standby",
@@ -593,6 +596,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
 #endif
 
+      .IRON_Profile = "Profile",
       .IRON_Max_Temp = "Max Temp",
       .IRON_Min_Temp = "Min Temp",
       .IRON_Standby = "Standby",
@@ -773,6 +777,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SWITCH_OFF_REMINDER_BeepTypes           = {"SHORT" ,"MED." ,"LONG"},
 #endif
 
+      .IRON_Profile = "Profil",
       .IRON_Max_Temp = "Max Isı",
       .IRON_Min_Temp = "Min Isı",
       .IRON_Standby = "Bekleme",
@@ -953,6 +958,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SWITCH_OFF_REMINDER_BeepTypes            = { "短", "中", "長" },
 #endif
 
+      .IRON_Profile = "烙鐵類型",
       .IRON_Max_Temp = "最高溫度",
       .IRON_Min_Temp = "最低溫度",
       .IRON_Standby = "睡眠時間",
@@ -1133,6 +1139,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SWITCH_OFF_REMINDER_BeepTypes           = {"КЪС" ,"СРЕДЕН" ,"ДЪЛЪГ"},
 #endif
 
+      .IRON_Profile = "Профил",
       .IRON_Max_Temp = "t\260макс",
       .IRON_Min_Temp = "t\260мин",
       .IRON_Standby = "Готовност",
@@ -1268,6 +1275,186 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .dimMode =     { "ИЗКЛ", "СЪН", "ВСИЧКИ" },
       .errMode =     { "СЪН", "РАБОТИ", "ПРЕДНО" },
     },
+    [lang_czech] = {
+       .boot_firstBoot = "První zapnutí!",
+       .boot_Profile = "Profil",
+
+       .main_error_noIron_Detected = "HROT NEZJIŠTĚN",
+       .main_error_failsafe = "ZÁCHRANNÝ MÓD",
+       .main_error_NTC_high = "NTC HODNOTA VYSOKÁ",
+       .main_error_NTC_low = "NTC HODNOTA NÍZKÁ",
+       .main_error_VoltageLow = "NAPĚTÍ JE NÍZKÉ",
+       .main_mode_Sleep = "SPÁNEK",
+       .main_mode_Sleep_xpos = 37,
+       .main_mode_Standby = "ÚTLUM",
+       .main_mode_Standby_xpos = 42,
+       .main_mode_Boost = "TURBO",
+       .main_mode_Boost_xpos = 41,
+
+       .settings_IRON = "HROT",
+       .settings_SYSTEM = "SYSTÉM",
+       .settings_DEBUG = "LADĚNÍ",
+       .settings_EDIT_TIPS = "SEZNAM HROTŮ",
+       .settings_CALIBRATION = "KALIBRACE",
+       .settings_EXIT = "EXIT",
+ #ifdef ENABLE_ADDONS
+       .settings_ADDONS = "DOPLŇKY",
+ #endif
+
+ #ifdef ENABLE_ADDON_FUME_EXTRACTOR
+       .FUME_EXTRACTOR_Title         = "ODTAH SPLODIN",
+       .FUME_EXTRACTOR_Mode          = "Mód",
+       .FUME_EXTRACTOR_Modes         = { "VYPNUTO", "AUTO", "ZAPNUTO" },
+       .FUME_EXTRACTOR_AfterRun      = "Po zapnutí",
+       .FUME_EXTRACTOR_AfterRunUnit  = "s",
+ #endif
+
+ #ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
+       .SWITCH_OFF_REMINDER_Title               = "PŘIPOMÍNKA VYP.",
+       .SWITCH_OFF_REMINDER_EnableDisableOption = "Připomínka",
+       .SWITCH_OFF_REMINDER_InactivityDelay     = "Zpoždění",
+       .SWITCH_OFF_REMINDER_ReminderPeriod     = "Doba",
+       .SWITCH_OFF_REMINDER_TimeUnit            = "m",
+       .SWITCH_OFF_REMINDER_BeepType            = "Tón",
+       .SWITCH_OFF_REMINDER_BeepTypes           = {"KRÁTKÝ" ,"STŘEDNÍ" ,"DLOUHÝ"},
+ #endif
+
+       .IRON_Profile = "Profile",
+       .IRON_Max_Temp = "t max",
+       .IRON_Min_Temp = "t min",
+       .IRON_Standby = "ÚTLUM za",
+       .IRON_Sleep = "SPÁNEK za",
+       .IRON_Boost = "Čas TURBO",
+       .IRON_Boost_Add = " Zvýšeni o",
+       .IRON_Cold_Boost = "TURBO start",
+       .IRON_ColdBoost_Threshold = " t práh",
+       .IRON_ColdBoost_Timeout = " Čas",
+       .IRON_Wake_Mode = "Probuzení",
+       .IRON_Shake_Filtering = " Filtr",
+       .IRON_Stand_Mode = " Ve stojánku",
+       .IRON_smartActiveEnable = "Detekce pájení",
+       .IRON_smartActiveLoad = " Citlivost",
+       .IRON_Power = "Výkon",
+       .IRON_Heater = "Tělísko",
+       .IRON_ADC_Time = "ADC čas",
+       .IRON_PWM_mul = "PWM násobič",
+       .IRON_No_Iron = "Chyba hrotu",
+       .IRON_Error_Timeout = "Čas obnovy",
+       .IRON_Error_Resume_Mode = " Obnova",
+       .IRON_FILTER_MENU = "MENU FILTRU",
+       .IRON_NTC_MENU = "MENU NTC",
+
+       .FILTER_Filter = "Filtr",
+       .FILTER__Threshold = " Práh",
+       .FILTER__Count_limit = " Limit počtu",
+       .FILTER__Step_down = " Krok dolů",
+       .FILTER__Min = " Minimum",
+       .FILTER_Reset_limit = "Nulování lim.",
+
+       .SYSTEM_Boot = "Start",
+       .SYSTEM_Button_Wake = "Tlačítko",
+       .SYSTEM_Shake_Wake = "Pohyb",
+       .SYSTEM_Encoder = "Enkodér",
+       .SYSTEM_Buzzer = "Tón",
+       .SYSTEM_Temperature = "Teplota",
+       .SYSTEM__Step = " Krok",
+       .SYSTEM__Big_Step = " Rychlý krok",
+       .SYSTEM_Active_Detection = "Aktivní detekce",
+       .SYSTEM_LVP = "Napětí",
+       .SYSTEM_Gui_Time = "Refresh",
+       .SYSTEM_Battery = "Baterie",
+       .SYSTEM_DEBUG = "LADĚNÍ",
+       .SYSTEM_RESET_MENU = "MENU MAZÁNÍ",
+
+       .SYSTEM_DISPLAY_MENU = "DISPLEJ",
+ #ifndef ST756
+       .DISPLAY_ContrastOrBrightness = "Jas",
+ #else
+       .DISPLAY_ContrastOrBrightness = "Kontrast",
+ #endif
+       .DISPLAY_StartColumn = "X",
+       .DISPLAY_StartLine = "Y",
+       .DISPLAY_Xflip = "X otočení",
+       .DISPLAY_Yflip = "Y otočení",
+       .DISPLAY_Ratio = "Poměr",
+       .DISPLAY_Dim = "Stmívač",
+       .DISPLAY_Dim_inSleep = " Mód SPÁNEK",
+       .DISPLAY_Advanced = "POKROČILÝ",
+
+       .NTC_Enable_NTC = "Povolit NTC",
+       .NTC_Pull = "Rezistor k",
+       .NTC__Res = " Hodnota",
+       .NTC__Beta = " Beta",
+       .NTC_NTC_Detect = "NTC detekce",
+       .NTC__High = " +",
+       .NTC__Low = " -",
+
+       .RESET_Reset_Settings = "Mazání nastavení",
+       .RESET_Reset_Profile = "Mazání profilu",
+       .RESET_Reset_Profiles = "Mazání profilů",
+       .RESET_Reset_All = "Mazání všeho",
+       .RESET_Reset_msg_settings_1 = "SMAZAT SYSTÉMOVÁ",
+       .RESET_Reset_msg_settings_2 = "NASTAVENÍ?",
+       .RESET_Reset_msg_profile_1 = "SMAZAT STÁVAJÍCÍ",
+       .RESET_Reset_msg_profile_2 = "PROFIL?",
+       .RESET_Reset_msg_profiles_1 = "SMAZAT VŠECHNY",
+       .RESET_Reset_msg_profiles_2 = "PROFILY?",
+       .RESET_Reset_msg_all_1 = "OPRAVDU PROVÉST",
+       .RESET_Reset_msg_all_2 = "OBNOVU SYSTÉMU?",
+
+       .TIP_SETTINGS_Name = "Název",
+       .TIP_SETTINGS_PID_kp = "PID Kp",
+       .TIP_SETTINGS_PID_ki = "PID Ki",
+       .TIP_SETTINGS_PID_kd = "PID Kd",
+       .TIP_SETTINGS_PID_Imax = "PID Imax",
+       .TIP_SETTINGS_PID_Imin = "PID Imin",
+       .TIP_SETTINGS_COPY = "KOPÍROVAT",
+       .TIP_SETTINGS_DELETE = "SMAZAT",
+
+       .CAL_ZeroSet = "Nast. nuly ",       // Must be 11 chars long
+       .CAL_Sampling = "Vzorkování ",      // Must be 11 chars long
+       .CAL_Captured = "Změřeno    ",      // Must be 11 chars long
+       .CAL_Step = "KALIBR. KROK:",
+       .CAL_Wait = "ČEKEJ ...",
+       .CAL_Measured = "ZMĚŘENO:",
+       .CAL_Success = "ÚSPĚCH!",
+       .CAL_Failed = "CHYBA!",
+       .CAL_DELTA_HIGH_1 = "PŘÍLIŠ VELKÝ ROZDÍL!",
+       .CAL_DELTA_HIGH_2 = "Nastavte ručně",
+       .CAL_DELTA_HIGH_3 = "a zkuste znovu",
+       .CAL_Error = "ZJIŠTĚNA CHYBA!",
+       .CAL_Aborting = "Rušení ...",
+
+       ._Language = "Jazyk",
+       .__Temp = " Teplota",
+       .__Delay = " Zpoždění",
+       .__Time = " Čas",
+       ._Cal_250 = "Kalibrace 250\260C",
+       ._Cal_400 = "Kalibrace 400\260C",
+       ._BACK = "EXIT",
+       ._SAVE = "ULOŽIT",
+       ._CANCEL = "ZRUŠIT",
+       ._STOP = "STOP",
+       ._RESET = "RESET",
+       ._START = "START",
+       ._SETTINGS = "NASTAVENÍ",
+       ._ADD_NEW = "PŘIDAT NOVÝ",
+
+       .ERROR_RUNAWAY = "TEPLOTA ",
+       .ERROR_EXCEEDED = "PŘESAHUJE",
+       .ERROR_UNKNOWN = "NEZNÁMÁ CHYBA",
+       .ERROR_SYSTEM_HALTED = "ZASTAVENÍ SYSTÉMU",
+       .ERROR_BTN_RESET = "Použij tlačítko pro RESET",
+
+       .OffOn =       { "VYP", "ZAP" },
+       .DownUp =      { "GND", "Vdd" },
+       .WakeModes =   { "NEAKTIVNÍ", "ÚTLUM", "SPÁNEK", "VŽDY" },
+       .wakeMode =    { "POHYB", "STOJÁNEK" },
+       .encMode =     { "VLEVO", "VPRAVO" },
+       .InitMode =    { "VYPN.", "ÚTLUM", "ZAP" },
+       .dimMode =     { "NE", "SPÁNEK", "VŽDY" },
+       .errMode =     { "SPÁNEK", "ZAP", "POSLEDNÍ" },
+     },
 };
 
 
@@ -1281,4 +1468,5 @@ char * const Langs[LANGUAGE_COUNT]    = {
                                             [lang_turkish]  = "TR",
                                             [lang_tchinese] = "繁中",
                                             [lang_bulgarian] = "BG",
+                                            [lang_czech] = "CZ",
                                         };

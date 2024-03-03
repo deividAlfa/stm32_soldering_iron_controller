@@ -55,6 +55,7 @@ typedef struct{
   char * SWITCH_OFF_REMINDER_BeepTypes[3];
 #endif
 
+  char * IRON_Profile;
   char * IRON_Max_Temp;
   char * IRON_Min_Temp;
   char * IRON_Standby;
