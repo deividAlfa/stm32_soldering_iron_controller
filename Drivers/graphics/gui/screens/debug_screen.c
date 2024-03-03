@@ -233,7 +233,7 @@ static void debug_onEnter(screen_t *scr){
     }
   }
   if(getSystemTempUnit()==mode_Celsius){
-    edit->max_value = 450;
+    edit->max_value = 490;
     edit->min_value = 0;
     edit->big_step = 20;
     edit->step = 5;
@@ -241,7 +241,7 @@ static void debug_onEnter(screen_t *scr){
     dis->endString="\260C";
   }
   else{
-    edit->max_value = 850;
+    edit->max_value = 910;
     edit->min_value = 0;
     edit->big_step = 50;
     edit->step = 10;
