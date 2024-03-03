@@ -94,7 +94,9 @@ Long-clicking will have the same effect.<br>
 In most menus, issue an anti-clockwise drag-rotation to quickly return to previous screen.<br>
 
 ### IRON
-Iron settings control the operation of the handle/tips. The settings here apply only for the currently selected profile. In other words, each profile has its own dataset. Switching between profiles can be done in the **System menu** <br>
+Iron settings control the operation of the handle/tips. The settings here apply only for the currently selected profile. In other words, each profile has its own dataset.<br>
+  - **Profile**<br>
+You can also change the current profile here. The display will instantly reload the new profile settings.<br>
   - **Max temperature**<br>
 Upper adjustable temperature limit.<br>
   - **Min temperature**<br>
@@ -345,7 +347,7 @@ Return to system menu.<br>
 Different tips may have different characteristics. Tips may be added or edited here.<br>
 Select a tip to enter tip settings edit screen, or select Add New to create a new tip.<br>
 The new tip will be created by copying the PID/calibration settings from the first in the system.<br>
-Each profile (T12, C245, C210) can store up to 20 tips.<br>
+Each profile (T12, C245, C210) can store up to 85 tips.<br>
 You can also set the working tip by long-clicking over it.<br>
 Tips will be automatically sorted by name after adding/removing/modifying.<br>
 
