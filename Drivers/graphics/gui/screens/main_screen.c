@@ -630,7 +630,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
     case  main_profileselect:
       {
-        uint8_t profile = getCurrentProfile();
+        profile = getCurrentProfile();
 
         if(mainScr.ironStatus==status_error){                                 // If error appears while in tip selection, it needs to update now to avoid overlapping problems
           plot.enabled = 0;
