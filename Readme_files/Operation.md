@@ -507,6 +507,12 @@ If any internal function detects an undefined or not expected state, it will loc
 If this happens open a git hub ticket or a message in eevblog forum with the details.<br>
   - **Hardware exceptions**<br>
 If a hardware exception happens, the station will lock up and display an error message about the exception.<br>
+The CPU registers will be printed, the failure can be debugged out by searching the addresses in the listing file (.list) provided with the binaries.<br>
+Fake stm32s cause lots of issues when writing data to flash, so additional information was added to hardfault screen:<br> 
+    - Format is **`HARD FAULT, AA, BB`**, for example **`HARD FAULT, 9, 10`**.
+    - **`AA`** is the Previous saving state.
+    - **`BB`** is the Last saving state. If 0, then it didn't happen when saving.
+    - Those numbers can be found in [settings.c](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/Core/Src/settings.c), searching **`DBG_SAVE(n)`**, where **`n`** is the number. 
   - **Data error detection**<br>
 The data is stored as separate blocks: System settings, profile 1(T12), profile 2(C245) and profile 3(C210).<br>
 Each one has it's own CRC checksum. When a block is read, the checksum is computed and compared.<br>
