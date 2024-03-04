@@ -508,7 +508,7 @@ void runAwayCheck(void){
 // Update PWM max value based on current supply voltage, heater resistance and power limit setting
 
 #ifdef USE_VIN
-void updatePowerLimit(void){                                                                           // TODO pending
+void updatePowerLimit(void){
   uint32_t volts = getSupplyVoltage_v_x10();                                                // Get last voltage reading x10
   volts = (volts*volts)/10;                                                                 // (Vx10 * Vx10)/10 = (V*V)*10 (x10 for fixed point precision)
   if(volts==0){
