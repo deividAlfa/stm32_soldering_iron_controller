@@ -16,15 +16,12 @@ static comboBox_item_t *comboitem_system_debug;
 
 static void SETTINGS_create(screen_t *scr) {
   widget_t* w;
-  StringProfile = malloc(16);
+  StringProfile = malloc(32);
   if(StringProfile == NULL){
     Error_Handler();
   }
 
-  strcpy(StringProfile, strings[lang].settings_IRON);
-  strcat(StringProfile, " (");
-  strcat(StringProfile, profileStr[getCurrentProfile()]);
-  strcat(StringProfile, ")");
+  sprintf(StringProfile, "%s (%s)", strings[lang].settings_IRON, profileStr[getCurrentProfile()]);
 
   //  [ SETTINGS MAIN SCREEN ]
   //

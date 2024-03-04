@@ -13,7 +13,9 @@ def MuxMapFile(eng, cht, out):
 	start = cht_data.find("STARTCHAR")
 	end = cht_data.find("ENDFONT")
 	
-	out_data = eng_data[:index] + cht_data[start:end] + eng_data[index:]
+	out_comt = "COMMENT Traditional Chinese Fonts start from here!!!\n"
+	#out_comt = out_comt + "COMMENT Please add fonts above for better maintenance\n"
+	out_data = eng_data[:index] + out_comt + cht_data[start:end] + eng_data[index:]
 	out_data = out_data.replace(f"CHARS {eng_chars}", f"CHARS {eng_chars + cht_chars}")
 	
 	open(out, "w").write(out_data)
