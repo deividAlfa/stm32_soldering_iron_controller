@@ -62,25 +62,29 @@ So when a characters starts with escape(\) the next 1,2,3 numbers will be the oc
 But you might also find any other symbol, like spaces, letters, these are a single character.<br>
 
 <br>
-The default fonts report wrong height and need to be patched manually.<br>
+The default fonts report wrong height and need to be patched manually, modifying the byte 10.<br>
+<br>
 
-For u8g2_font_menu, replace the 10th byte, in this case \21, with \17:<br>
+**u8g2_font_menu:** In this case \21, replace with \17:<br>
 
     Original:  "\257\0\3\2\4\4\4\4\5\10\21\0\375\12\375\13\377\1\207\3\42\5' \5\0\210\30!\7\241\214"
     Modified:  "\257\0\3\2\4\4\4\4\5\10\17\0\375\12\375\13\377\1\207\3\42\5' \5\0\210\30!\7\241\214"
                                         ^^
 <br>
-For u8g2_font_small, replace the 10th byte, in this case \17, with \12.<br>
+
+**u8g2_font_small:** In this case \17, replace with \12.<br>
 
     Original:  "\257\0\3\2\4\4\2\4\5\11\17\0\375\10\376\10\376\1T\2\274\4k \5\0b\5!\6\201\343"
     Modified:  "\257\0\3\2\4\4\2\4\5\11\12\0\375\10\376\10\376\1T\2\274\4k \5\0b\5!\6\201\343"
                                         ^^
 <br>
-For u8g2_font_iron_temp, replace the 10th byte, in this case \42 with \45.<br>
+
+**u8g2_font_iron_temp:** In this case \42, replace with \45.<br>
 
     Original:  "\16\0\5\4\5\6\4\6\7 \42\0\377 \367 \365\0\0\0\0\2Q-\11\214@\225\11~`\0"
     Modified:  "\16\0\5\4\5\6\4\6\7 \45\0\377 \367 \365\0\0\0\0\2Q-\11\214@\225\11~`\0"
                                      ^^
+<br>
 
 Copy the contents of `u8g2_aio.c` (Not the file), and replace the existing sections at the beginning of [u8g2_fonts.c](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/Drivers/graphics/u8g2/u8g2_fonts.c).
 <br>
