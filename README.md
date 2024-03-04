@@ -198,7 +198,7 @@ For adding new languages, you have to modify these files:<br>
   - add your `lang_xxxx` to `Langs` at the bottom of the file.<br>
 
 For adding new characters to the existing fonts symbols, there're some instructions here:
-* [Drivers/graphics/u8g2/tools/font/bdfconv/Notes.txt](/Drivers/graphics/u8g2/tools/font/bdfconv/Notes.txt)
+* [Font build README](/Drivers/graphics/u8g2/tools/generate_fonts/README.md)
 
 
 ## Non-working features
