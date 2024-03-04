@@ -1,64 +1,88 @@
-When the bdf font is generated, the current approach for adding cyrillic characters is patching them.
+## Font generation notes
 
-The font files are:
+<br>
 
-- font_menu:	bdf/font_menu.bdf	(Modded from t0-16-uni.bdf)
-		Uses cyrillic chars 1040-1103, turkish 286,287,350,351 from unifont.bdf
-                Ohm symbol 937 custom made.
+If the characters are not present in the bdf font (For example, when adding a new language), the bdf font must be modified.<br>
+Current approach is to copy the characters from another font.<br>
 
-- font_small: 	bdf/font_small.bdf	(Modded from bdf/Wizzard12.bdf)
-		Uses cyrillic chars 1040-1103, turkish 199,231,286,287,350,351 from 6x13.bdf
+**Font files:** (Outdated, since new languages were added, but still valid for explaining the procedure)<br>
 
-- font_iron_temp: bdf/ITC Avant Garde Gothic Medium_31.bdf
-		Only displays 0-9, C, F and ° (ASCII 176), no special characters.
+- `font_menu`:    bdf/font_menu.bdf    (Modded from t0-16-uni.bdf).<br>
+        Uses cyrillic chars 1040-1103, turkish 286, 287, 350, 351 from unifont.bdf<br>
+        Ohm symbol 937 is custom made.<br>
 
-To modify and insert data from a different bdf font:
-Open the both BDFs with a text editor.
+- `font_small`:     bdf/font_small.bdf    (Modded from bdf/Wizzard12.bdf)<br>
+        Uses cyrillic chars 1040-1103, turkish 199, 231, 286, 287, 350, 351 from 6x13.bdf<br>
 
-The number of fonts are defined in this line
-CHARS 64
+- `font_iron_temp`: bdf/ITC Avant Garde Gothic Medium_31.bdf<br>
+        Only displays 0-9, C, F and ° (ASCII 176), no special characters.<br>
+<br>
 
-Each character uses this structure
+**Modification:**<br>
 
-STARTCHAR 0411		-> Start character block. The name can be anything (ex. STARTCHAR A_Letter)
-ENCODING 1041		-> Actual unicode in decimal (1041 = 0x411)
-SWIDTH 675 0
-DWIDTH 15 0
-BBX 12 16 2 0
-BITMAP				-> Start of bitmap data
----					-> Bitmap data	
----
-ENDCHAR				-> End of character block
+To modify and insert data from a different bdf font:<br>
+ - Open the both BDFs with a text editor.<br>
 
+ - The number of chars are defined in this line: `CHARS 64`<br>
 
-To add a character from one font to another, just copy the STARTCHAR--->ENDCHAR blocks and paste them in the destination font.
-Take care to not duplicate them, always search the ENCODING number and replace the whole block.
-If it doesn't exists, the CHARS count must be increased.
-Now the font will have the new symbol, and be ready for conversion using bdfconv.
+ - Each character uses this structure:<br>
 
-Run make_font_menu.bat and make_font_small.bat to generate the new fonts, they will appear in "out" folder.
+    STARTCHAR 0411        -> Start character block. The name can be anything (ex. STARTCHAR A_Letter)<br>
+    ENCODING 1041         -> Actual unicode in decimal (1041 = 0x411)<br><br>
+    SWIDTH 675 0<br>
+    DWIDTH 15 0<br>
+    BBX 12 16 2 0<br>
+    BITMAP                -> Start of bitmap data<br>
+    ---                   -> Bitmap data<br>
+    ---<br>
+    ENDCHAR               -> End of character block<br>
 
-U8g2 font structure mix octal and char representation to be as compact as possible.
-So when a characters starts with escape(\) the next 1,2,3 numbers will be the octal representation, a single byte.
-But you might also find any other symbol, like spaces, letters, these are a signle character.
+<br>
 
-The default fonts report wrong height and need to be patched manually:
+To add a character from one font to another, copy the STARTCHAR--->ENDCHAR blocks and paste them in the destination font.<br>
+Take care to not duplicate them, always search the ENCODING number and replace the whole block.<br>
+If it doesn't exists, the `CHARS` number must be increased.<br>
+Now the font will have the new symbol, and be ready for conversion using bdfconv.<br>
+<br>
 
-For u8g2_font_menu, replace the 10th byte, in this case \21, with \17
-Original:  "\257\0\3\2\4\4\4\4\5\10\21\0\375\12\375\13\377\1\207\3\42\5' \5\0\210\30!\7\241\214"
-Modified:  "\257\0\3\2\4\4\4\4\5\10\17\0\375\12\375\13\377\1\207\3\42\5' \5\0\210\30!\7\241\214"
-                                    ^
+**Generation:**<br>
 
-For u8g2_font_small, replace the 10th byte, in this case \17, with \12.
-Original:  "\257\0\3\2\4\4\2\4\5\11\17\0\375\10\376\10\376\1T\2\274\4k \5\0b\5!\6\201\343"
-Modified:  "\257\0\3\2\4\4\2\4\5\11\12\0\375\10\376\10\376\1T\2\274\4k \5\0b\5!\6\201\343"
-                                    ^
+Still, the new chars won't be added automatically, their Unicode numbers must be added to `make_u8g2.bat`, like this:<br>
+    `-m "32-126,160-255,268-271,282-283,286,287,304,305,327,328,344,345,350-353,356,357,366,367,381,382,937,..."`<br>
+It can be single chars (32, 40, 64) or ranges (32-64).<br> 
+<br>
 
-For u8g2_font_iron_temp, replace the 10th byte, in this case \42 with \45.
-Original:  "\16\0\5\4\5\6\4\6\7 \42\0\377 \367 \365\0\0\0\0\2Q-\11\214@\225\11~`\0"
-Modified:  "\16\0\5\4\5\6\4\6\7 \45\0\377 \367 \365\0\0\0\0\2Q-\11\214@\225\11~`\0"
-                                 ^
+Then run `make_u8g2.bat` to generate the new fonts.<br>
+The script also inserts the required chinese characters from the font `fireflysung.ttf` using python scripts.<br>
+`u8g2_aio.c` will be generated.<br>
 
-Copy the contents of the generated files (not the files), and replace the existing sections at the beginning of Drivers/graphics/gui/u8g2/u8g2_fonts.c
-Then, open Drivers/graphics/gui/u8g2/u8g2.h and update the font size with the new values (ex. const uint8_t u8g2_font_small[2073])
-After that, the font modification will be done.
+<br>
+U8g2 font structure mix octal and char representation to be as compact as possible.<br>
+So when a characters starts with escape(\) the next 1,2,3 numbers will be the octal representation, a single byte.<br>
+But you might also find any other symbol, like spaces, letters, these are a single character.<br>
+
+<br>
+The default fonts report wrong height and need to be patched manually.<br>
+
+For u8g2_font_menu, replace the 10th byte, in this case \21, with \17:<br>
+
+    Original:  "\257\0\3\2\4\4\4\4\5\10\21\0\375\12\375\13\377\1\207\3\42\5' \5\0\210\30!\7\241\214"
+    Modified:  "\257\0\3\2\4\4\4\4\5\10\17\0\375\12\375\13\377\1\207\3\42\5' \5\0\210\30!\7\241\214"
+                                        ^^
+<br>
+For u8g2_font_small, replace the 10th byte, in this case \17, with \12.<br>
+
+    Original:  "\257\0\3\2\4\4\2\4\5\11\17\0\375\10\376\10\376\1T\2\274\4k \5\0b\5!\6\201\343"
+    Modified:  "\257\0\3\2\4\4\2\4\5\11\12\0\375\10\376\10\376\1T\2\274\4k \5\0b\5!\6\201\343"
+                                        ^^
+<br>
+For u8g2_font_iron_temp, replace the 10th byte, in this case \42 with \45.<br>
+
+    Original:  "\16\0\5\4\5\6\4\6\7 \42\0\377 \367 \365\0\0\0\0\2Q-\11\214@\225\11~`\0"
+    Modified:  "\16\0\5\4\5\6\4\6\7 \45\0\377 \367 \365\0\0\0\0\2Q-\11\214@\225\11~`\0"
+                                     ^^
+
+Copy the contents of `u8g2_aio.c` (Not the file), and replace the existing sections at the beginning of [u8g2_fonts.c](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/Drivers/graphics/u8g2/u8g2_fonts.c).
+<br>
+
+After that, the font modification will be done.<br>
