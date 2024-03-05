@@ -762,7 +762,7 @@ bool getIronCalibrationMode(void){
   return Iron.calibrating;
 }
 
-void setUserTemperature(uint16_t temperature) {
+void setUserTemperature(int16_t temperature) {
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   Iron.UserSetTemperature = temperature;

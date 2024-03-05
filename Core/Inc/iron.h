@@ -59,7 +59,7 @@ void setSafeMode(bool mode);
 bool getSafeMode(void);
 void setCurrentMode(uint8_t mode);
 void setModefromStand(uint8_t mode);
-void setUserTemperature(uint16_t temperature);
+void setUserTemperature(int16_t temperature);
 uint16_t getUserTemperature(void);
 uint8_t getCurrentMode(void);
 int8_t getCurrentPower(void);
