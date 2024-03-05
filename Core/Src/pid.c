@@ -57,9 +57,13 @@ void resetPID(void){
 #if defined PID_RESET_CYCLES && PID_RESET_CYCLES>0
   pid.reset = 1;
 #endif
+
+  pid.prevError = 0;
+  pid.prevMeasurement = TIP.last_avg;
+
   pid.proportional=0;
   pid.integrator=0;
-  pid.derivative=0; // Clear these mainly for debugging purposes
+  pid.derivative=0;
 }
 
 float getPID_D() {
