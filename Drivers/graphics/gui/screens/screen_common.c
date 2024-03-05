@@ -165,8 +165,8 @@ void handleOledDim(void){
     if((current_time-dim.timer)>getSystemSettings()->dim_Timeout){
       dim.step=-5;
     }
-    // If min. brightness reached and Oled power is disabled in sleep mode, turn off screen if temp<100ºC or error active
-    else if(dim.min_reached && (current_time - dim.timer > getSystemSettings()->dim_Timeout/2) && getCurrentMode()==mode_sleep && getSystemSettings()->dim_inSleep==disable && (last_TIP_C<100 || (getIronErrorFlags().active))){
+    // If min. brightness reached and Oled power is disabled in sleep mode, turn off screen if temp<60ºC or error active
+    else if(dim.min_reached && (current_time - dim.timer > getSystemSettings()->dim_Timeout/2) && getCurrentMode()==mode_sleep && getSystemSettings()->dim_inSleep==disable && (last_TIP_C<60 || (getIronErrorFlags().active))){
       setDisplayPower(disable);
       dim.min_reached=0;
     }
