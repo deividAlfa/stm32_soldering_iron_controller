@@ -350,7 +350,7 @@ void saveTip(uint8_t save_mode, uint8_t tip_index){
   uint8_t profile = getCurrentProfile();
   flashTipSlot_t* flashBufferTipBlock = _malloc(sizeof(flashTipSlot_t));
 
-  if((profile>profile_C210) || (getProfileSettings()->ID != profile ))                                        // Sanity check
+  if((profile>=NUM_PROFILES) || (getProfileSettings()->ID != profile ))                                        // Sanity check
     Error_Handler();
 
   if(flashBufferTipBlock == NULL)
@@ -455,9 +455,9 @@ void saveSettings(uint8_t save_mode, uint8_t reboot_mode){
     Error_Handler();
   }
 
-  uint8_t profile = getCurrentProfile();
+  uint8_t profile = getCurrentProfileID();
 
-  if((profile>profile_C210) || (getProfileSettings()->ID != profile ))                                   // Sanity check
+  if((profile>=NUM_PROFILES) || (getProfileSettings()->ID != profile ))                                   // Sanity check
       Error_Handler();
 
   if(save_mode == reset_all)
@@ -672,7 +672,7 @@ void loadSettingsFromBackupRam(void) {
 
   readBackupRam();
   // check crc
-  if(bkpRamData.crc != ChecksumBackupRam() || bkpRamData.values.lastProfile > profile_C210  )
+  if(bkpRamData.crc != ChecksumBackupRam() || bkpRamData.values.lastProfile >= NUM_PROFILES  )
   {
     // restore defaults, show error
     memset((void*)&bkpRamData,0, sizeof(backupRamData_t));
@@ -998,6 +998,9 @@ profile_settings_t * getProfileSettings(void){
 uint8_t getCurrentProfile(void){
   return getSettings()->currentProfile;
 }
+uint8_t getCurrentProfileID(void){
+  return getProfileSettings()->ID;
+}
 
 void setCurrentProfile(uint8_t profile){
   getSettings()->currentProfile = profile;
@@ -1006,7 +1009,7 @@ void setCurrentProfile(uint8_t profile){
 void loadProfile(uint8_t profile){
   while(ADC_Status!=ADC_Idle);
 
-  if(profile>profile_C210)                       // Sanity check
+  if(profile>=NUM_PROFILES)                       // Sanity check
     Error_Handler();
 
   uint32_t _irq = __get_PRIMASK();

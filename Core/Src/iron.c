@@ -126,7 +126,7 @@ void handleIron(void) {
   CurrentTime = HAL_GetTick();
   if(!Iron.Error.safeMode){
     if( (getSettings()->setupMode==enable) || getSystemSettings()->version!=SYSTEM_SETTINGS_VERSION || getProfileSettings()->version!=PROFILE_SETTINGS_VERSION ||
-        (getProfileSettings()->ID != getCurrentProfile()) || (getCurrentProfile()>profile_C210)){
+        (getProfileSettings()->ID != getCurrentProfile()) || (getCurrentProfile()>=NUM_PROFILES)){
 
       setSafeMode(enable);
     }
@@ -134,7 +134,7 @@ void handleIron(void) {
 
   checkIronError();                                                           // Check iron error presence, must be called before coldJuctionSensor
   readColdJunctionSensorTemp_x10(new_reading, mode_Celsius);                  // to reset the NTC detection status
-  readTipTemperatureCompensated(new_reading, read_average, mode_Celsius);     // Update readings
+  readNewTipTemperatureCompensated(read_average, mode_Celsius);               // Update readings
   checkIronError();                                                           // Check iron error again (Special case when iron has been detected, show other errors)
 
   // Controls external mode changes (from stand mode changes), this acts as a debouncing timer
@@ -508,7 +508,7 @@ void runAwayCheck(void){
 // Update PWM max value based on current supply voltage, heater resistance and power limit setting
 
 #ifdef USE_VIN
-void updatePowerLimit(void){                                                                           // TODO pending
+void updatePowerLimit(void){
   uint32_t volts = getSupplyVoltage_v_x10();                                                // Get last voltage reading x10
   volts = (volts*volts)/10;                                                                 // (Vx10 * Vx10)/10 = (V*V)*10 (x10 for fixed point precision)
   if(volts==0){

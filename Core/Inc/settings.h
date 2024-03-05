@@ -13,13 +13,13 @@
 #include "board.h"
 
 #define ENABLE_DBG_SAVE
-#define SWSTRING          "SW: 1.13.7     "                         // Software version reported in settings screen
+#define SWSTRING          "SW: 1.13.8     "                         // Software version reported in settings screen
 #define SYSTEM_SETTINGS_VERSION   28                                // Change this if you change the system settings struct to prevent getting out of sync
 #define PROFILE_SETTINGS_VERSION  4                                 // Same, but for profile settings struct
 #define TIP_SETTINGS_VERSION      1                                 // Same, but for tip settings struct
 #define ADDONS_SETTINGS_VERSION   1                                 // Same, but for addons settings struct
 
-#define LANGUAGE_COUNT    7                                         // Number of languages
+#define LANGUAGE_COUNT    8                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
 #define NUM_TIPS          85                                        // Number of tips for each profile
 #define TIP_LEN           8                                         // String size for each tip name (Including null termination)
@@ -130,6 +130,7 @@ typedef enum{
   lang_turkish            = 4,
   lang_tchinese           = 5,
   lang_bulgarian          = 6,
+  lang_czech              = 7,
 
   dim_off                 = 0,
   dim_sleep               = 1,
@@ -373,6 +374,7 @@ flashSettings_t * getFlashSettings(void);
 void loadProfile(uint8_t profile);
 void setCurrentProfile(uint8_t profile);
 uint8_t getCurrentProfile(void);
+uint8_t getCurrentProfileID(void);
 profile_settings_t * getProfileSettings(void);
 profile_settings_t * getDefaultProfileSettings(void);
 profile_settings_t * getFlashProfileSettings(void);

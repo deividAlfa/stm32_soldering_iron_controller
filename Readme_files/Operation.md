@@ -94,7 +94,9 @@ Long-clicking will have the same effect.<br>
 In most menus, issue an anti-clockwise drag-rotation to quickly return to previous screen.<br>
 
 ### IRON
-Iron settings control the operation of the handle/tips. The settings here apply only for the currently selected profile. In other words, each profile has its own dataset. Switching between profiles can be done in the **System menu** <br>
+Iron settings control the operation of the handle/tips. The settings here apply only for the currently selected profile. In other words, each profile has its own dataset.<br>
+  - **Profile**<br>
+You can also change the current profile here. The display will instantly reload the new profile settings.<br>
   - **Max temperature**<br>
 Upper adjustable temperature limit.<br>
   - **Min temperature**<br>
@@ -345,7 +347,7 @@ Return to system menu.<br>
 Different tips may have different characteristics. Tips may be added or edited here.<br>
 Select a tip to enter tip settings edit screen, or select Add New to create a new tip.<br>
 The new tip will be created by copying the PID/calibration settings from the first in the system.<br>
-Each profile (T12, C245, C210) can store up to 20 tips.<br>
+Each profile (T12, C245, C210) can store up to 85 tips.<br>
 You can also set the working tip by long-clicking over it.<br>
 Tips will be automatically sorted by name after adding/removing/modifying.<br>
 
@@ -505,6 +507,12 @@ If any internal function detects an undefined or not expected state, it will loc
 If this happens open a git hub ticket or a message in eevblog forum with the details.<br>
   - **Hardware exceptions**<br>
 If a hardware exception happens, the station will lock up and display an error message about the exception.<br>
+The CPU registers will be printed, the failure can be debugged out by searching the addresses in the listing file (.list) provided with the binaries.<br>
+Fake stm32s cause lots of issues when writing data to flash, so additional information was added to hardfault screen:<br> 
+    - Format is **`HARD FAULT, AA, BB`**, for example **`HARD FAULT, 9, 10`**.
+    - **`AA`** is the Previous saving state.
+    - **`BB`** is the Last saving state. If 0, then it didn't happen when saving.
+    - Those numbers can be found in [settings.c](https://github.com/deividAlfa/stm32_soldering_iron_controller/blob/master/Core/Src/settings.c), searching **`DBG_SAVE(n)`**, where **`n`** is the number. 
   - **Data error detection**<br>
 The data is stored as separate blocks: System settings, profile 1(T12), profile 2(C245) and profile 3(C210).<br>
 Each one has it's own CRC checksum. When a block is read, the checksum is computed and compared.<br>

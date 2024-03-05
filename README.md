@@ -49,11 +49,18 @@ The actual requirements are 10KB RAM and 64KB **(\*)** flash.<br>
 **(\*)** To date, I have found zero issues. Original KSGER firmware also does this.<br>
 **(\*)** ST-Link checks the written data and the firmware uses CRC for settings, any error will be detected.
 
+**Clones / fakes:** <br>
 Some controllers are using fake STM32 or compatibles, sometimes relabeled as genuine STM32, causing problems.<br>
 Check [STM32 clone detection](Readme_files/Programming.md#clone-detection) section to find out how to detect a genuine STM32.<br>
 - The only known working clone is CKS32.
 - GD32, MM32 and CH32 have issues with the ADC converter.
 - APM32 hasn't been tested yet.
+
+They bring all kind of issues and there're too many of them, also most are relabeled and it's almost impossible to figure out the actual device.<br>
+Some fakes worked well until recently, when the flash storage layout was updated.<br>
+If you're getting a **Hardfault** or a **Checksum Error bootloop**, try the older [**v1.10.8**](https://github.com/deividAlfa/stm32_soldering_iron_controller/releases/tag/v1.10.8) release.<br>
+No effort will be done to support fake / clones!<br>
+<br> 
 
 If your board came with a fake/clone, you can replace it with a STM32F103, they're pin-compatible:
 * **48-pin**: STM32F103C8T6, STM32F103CBT6.
@@ -61,7 +68,7 @@ If your board came with a fake/clone, you can replace it with a STM32F103, they'
 <br>
 
 Currently supported controllers:
-* **Quicko T12-072**: First gen Quicko, STM32F072 variant. Compatibility issues were fixed since v1.04. [Old version](https://github.com/deividAlfa/stm32_soldering_iron_controller/raw/9f4b7f9565344e30a6ce1394d28350f82089488b/BOARDS/Quicko/STM32F072_SSD1306/STM32SolderingStation.bin).
+* **Quicko T12-072**: First gen Quicko, STM32F072 variant. Compatibility issues were fixed since v1.04.
 * **Quicko T12-103** First gen Quicko, same board but mounting a STM32F103.
 * **KSGER v1.5**: Profile for STM32F103 (There are no other known CPUs used in this board).
 * **KSGER v2**,   **JCD T12**, **T12-955**, **Handskit**: Profile compatible with all STM32F101/2/3xx models.
@@ -198,7 +205,7 @@ For adding new languages, you have to modify these files:<br>
   - add your `lang_xxxx` to `Langs` at the bottom of the file.<br>
 
 For adding new characters to the existing fonts symbols, there're some instructions here:
-* [Drivers/graphics/u8g2/tools/font/bdfconv/Notes.txt](/Drivers/graphics/u8g2/tools/font/bdfconv/Notes.txt)
+* [Font build README](/Drivers/graphics/u8g2/tools/font/generate_fonts/README.md)
 
 
 ## Non-working features

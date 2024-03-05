@@ -220,7 +220,7 @@ static void * getTemp() {
 
 static void * main_screen_getIronTemp() {
   if(mainScr.updateReadings){
-    mainScr.lastTip=readTipTemperatureCompensated(old_reading, read_average, getSystemTempUnit());
+    mainScr.lastTip = readLastTipTemperatureCompensated(read_average, getSystemTempUnit());
     if(getCurrentMode()>mode_sleep){
       uint16_t const targetTemp = getIronTargetTemperature();
       // Lock numeric display if within limits
@@ -377,7 +377,6 @@ int8_t switchScreenMode(void){
 
 int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   uint8_t currentIronMode = getCurrentMode();
-
   mainScr.updateReadings=update_GUI_Timer();
   updateIronPower();
   updatePlot();
@@ -476,7 +475,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         case Click:                                                         // Received a Click, enter low power mode.
 
-          if(!checkIronModeTimer(300) && mainScr.lastIronMode < mode_boost){// If click issued too soon after iron working mode was changed to non-boost mode
+          if(!checkIronModeTimer(250) && mainScr.lastIronMode < mode_boost){// If click issued too soon after iron working mode was changed to non-boost mode
             currentIronMode = mainScr.lastIronMode;                         // Assume it was a encoder fault rotating while trying to click, restore previous mode, then proceed with low power mode
           }
           if(mainScr.displayMode==temp_graph){                              // If in graph display
@@ -488,8 +487,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
               setCurrentMode(mode_boost);                                   // Set boost mode
             }
           }
-          if( checkMainScreenModeTimer(500) ||                              // Wait at least 500ms after entering the screen before allowing click events from entering low power modes, otherwise the user might accidentally enter them
-              (!checkIronModeTimer(300) && mainScr.lastIronMode<mode_run)){ // Exception: Iron was sleeping but mode was changed less than 500ms ago (Rotation event) and we got a click, assume this is encoder malfunction, we shouldn't have waken up.
+          if( checkMainScreenModeTimer(300) ||                              // Wait at least 300ms after entering the screen before allowing click events from entering low power modes, otherwise the user might accidentally enter them
+              (!checkIronModeTimer(250) && mainScr.lastIronMode<mode_run)){ // Exception: Iron was sleeping but mode was changed less than 250ms ago (Rotation event) and we got a click, assume this is encoder malfunction, we shouldn't have waken up.
             if(currentIronMode > mode_standby){                             //
               setCurrentMode(mode_standby);
             }
@@ -630,7 +629,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
     case  main_profileselect:
       {
-        uint8_t profile = getCurrentProfile();
+        profile = getCurrentProfile();
 
         if(mainScr.ironStatus==status_error){                                 // If error appears while in tip selection, it needs to update now to avoid overlapping problems
           plot.enabled = 0;
@@ -657,15 +656,15 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
           case Rotate_Increment:
           case Rotate_Increment_while_click:
-            if(++profile > profile_C210){
-              profile=profile_T12;
+            if(++profile >= NUM_PROFILES){
+              profile = 0;
             }
             break;
 
           case Rotate_Decrement:
           case Rotate_Decrement_while_click:
-            if(--profile >= profile_C210){          // If underflowed
-              profile = profile_C210;
+            if(--profile >= NUM_PROFILES){          // If underflowed
+              profile = NUM_PROFILES-1;
             }
             break;
 
@@ -690,8 +689,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       switch((uint8_t)input){
         case LongClick:
         case Click:
-          if(!checkMainScreenModeTimer(300)){                                   // Click issued very soon after entering the screen
-            if(!checkIronModeTimer(300)){                                       // Check if also iron working mode was recently changed
+          if(!checkMainScreenModeTimer(250)){                                   // Click issued very soon after entering the screen
+            if(!checkIronModeTimer(250)){                                       // Check if also iron working mode was recently changed
               currentIronMode = mainScr.lastIronMode;                           // Assume it was a encoder fault rotating while trying to click, restore previous mode, then proceed with low power mode
             }
             if(currentIronMode > mode_standby){                                 // Enter low power mode
@@ -729,7 +728,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   if(switchScreenMode()){
     return -1;
   }
-
   return default_screenProcessInput(scr, input, state);
 }
 

@@ -76,6 +76,10 @@ int autoReturn_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   }
   updateScreenTimer(input);
 
+  if(profile != getCurrentProfile()){       // Current screen changed the profile. Reload it.
+    return (scr->index);                    // This is currently only required by IRON screen
+  }
+
   if(input==Rotate_Decrement_while_click){
     if(scr==&Screen_settings){
       return screen_main;

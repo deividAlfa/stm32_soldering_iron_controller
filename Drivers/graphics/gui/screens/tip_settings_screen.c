@@ -188,13 +188,13 @@ static int tip_settings_processInput(screen_t * scr, RE_Rotation_t input, RE_Sta
   if( (editable_tip_settings_name->selectable.state == widget_edit) &&                    // Widget in editing mode
       (widget_tip_settings->refresh > refresh_idle) ){                                                            // If something changed, check conditions
     bool enable=1;
-    /*
+
     uint8_t i = editable_tip_settings_name->current_edit;
     if((editable_tip_settings_name->selectable.state == widget_edit) && (input==Click) && (i>1) && (backupTip.name[i-2]==' ') && (backupTip.name[i-1]==' ')){
-      editable_tip_settings_name->selectable.state=widget_selected;                         // TODO Enable to unselect when 2nd space is added
+      editable_tip_settings_name->selectable.state=widget_selected;                                               // Unselect when 2nd space is added
       editable_tip_settings_name->selectable.previous_state=widget_edit;
     }
-    */
+
     if(strcmp(backupTip.name, _BLANK_TIP) == 0){                                                                  // Check that the name is not empty
       enable=0;                                                                                                   // If empty, disable save button
     }
