@@ -128,6 +128,7 @@ typedef enum{
   error_RUNAWAY75,
   error_RUNAWAY100,
   error_RUNAWAY500,
+  error_UNSUPPORTED_FLASH,
 }FatalErrors;
 
 

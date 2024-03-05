@@ -571,6 +571,7 @@ void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *device){
 #endif
 
 void fatalError(uint8_t type){
+  char str[32];
   inFatalError = 1;
   uint8_t lang = getSystemSettings()->language;
   if(lang>(LANGUAGE_COUNT-1)){
@@ -583,7 +584,6 @@ void fatalError(uint8_t type){
       break;
     case error_HARDFAULT:
     {
-      char str[32];
 #ifdef ENABLE_DBG_SAVE
       u8g2_SetFont(&u8g2,u8g2_font_small);
       sprintf(str,"%s, %u, %u", "HARD FAULT", save_prevstate_debug, save_laststate_debug);
@@ -634,6 +634,12 @@ void fatalError(uint8_t type){
     case error_RUNAWAY500:
       putStrAligned(strings[lang].ERROR_EXCEEDED, 0, align_center);
       putStrAligned("500\260C!", 15, align_center);
+      break;
+
+    case error_UNSUPPORTED_FLASH:
+      sprintf(str,"%u Bytes",settings.system.sector_size);
+      putStrAligned("Bad sector sz:", 0, align_center);
+      putStrAligned(str, 15, align_center);
       break;
 
     default:
