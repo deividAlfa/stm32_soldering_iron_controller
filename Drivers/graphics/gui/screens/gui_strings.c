@@ -1291,7 +1291,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .main_mode_Boost = "TURBO",
       .main_mode_Boost_xpos = 41,
 
-      .settings_IRON = "PROFIL ",
+      .settings_IRON = "PROFIL",
       .settings_SYSTEM = "SYSTÉM",
       .settings_DEBUG = "LADĚNÍ",
       .settings_EDIT_TIPS = "HROTY",
@@ -1420,8 +1420,8 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .CAL_Success = "ÚSPĚCH!",
       .CAL_Failed = "CHYBA!",
       .CAL_DELTA_HIGH_1 = "PŘÍLIŠ VELKÝ ROZDÍL!",
-      .CAL_DELTA_HIGH_2 = "Nastavte ručně",
-      .CAL_DELTA_HIGH_3 = "a zkuste znovu",
+      .CAL_DELTA_HIGH_2 = "Nastavit ručně",
+      .CAL_DELTA_HIGH_3 = "a zkusit znovu",
       .CAL_Error = "ZJIŠTĚNA CHYBA!",
       .CAL_Aborting = "Rušení ...",
 
@@ -1444,7 +1444,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .ERROR_EXCEEDED = "PŘESAHUJE",
       .ERROR_UNKNOWN = "NEZNÁMÁ CHYBA",
       .ERROR_SYSTEM_HALTED = "ZASTAVENÍ SYSTÉMU",
-      .ERROR_BTN_RESET = "Použij tlačítko pro RESET",
+      .ERROR_BTN_RESET = "Tlačítko -> RESET",
 
       .OffOn =       { "VYP", "ZAP" },
       .DownUp =      { "GND", "Vdd" },
