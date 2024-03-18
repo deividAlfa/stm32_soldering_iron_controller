@@ -143,8 +143,8 @@ void handleIron(void) {
       Iron.updateStandMode=no_update;
     }
     else{
-      if ( (Iron.changeMode < mode_run  && (CurrentTime-Iron.LastModeChangeTime) > (!getProfileSettings()->standDelay ? 100 : (uint32_t)1000*getProfileSettings()->standDelay )) ||   // Low power mode mode, apply delay from settings, or debouncing if set to 0.
-           (Iron.changeMode >= mode_run && (CurrentTime-Iron.LastModeChangeTime) > 100) ){                                                                                              // Run/boost mode, just do some debouncing.
+      if ( ((Iron.changeMode < mode_run) && (Iron.changeMode<Iron.CurrentMode) && (CurrentTime-Iron.LastModeChangeTime) > (!getProfileSettings()->standDelay ? 100 : (uint32_t)1000*getProfileSettings()->standDelay )) ||   // Low power mode mode, apply delay from settings, or debouncing if set to 0. Avoid setting higher low power mode than current.
+           ((Iron.changeMode >= mode_run) && (CurrentTime-Iron.LastModeChangeTime) > 100) ){                                                                                              // Run/boost mode, just do some debouncing.
 
         Iron.updateStandMode=no_update;
         setCurrentMode(Iron.changeMode);
