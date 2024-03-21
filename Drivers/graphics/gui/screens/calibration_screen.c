@@ -151,12 +151,19 @@ static int zero_setAction(widget_t* w, RE_Rotation_t input) {
   if(input==Click){
     if(++cal->zero_state>zero_capture){
       cal->zero_state=zero_disabled;
-      getProfileSettings()->calADC_At_0 = cal->calAdjust[cal_0] = cal->backup_calADC_At_0;   // Apply zero value in real time
+      cal->calAdjust[cal_0] = cal->backup_calADC_At_0;
     }
     else if(cal->zero_state==zero_capture){
-      getProfileSettings()->calADC_At_0 = cal->calAdjust[cal_0] = TIP.last_avg;
+      cal->calAdjust[cal_0] = TIP.last_avg;
     }
-    cal->update=1;
+
+    uint32_t _irq = __get_PRIMASK();                                                // Disable IRQ so a new PID calculation can't be done while modifying the values
+    __disable_irq();
+
+    getProfileSettings()->calADC_At_0 = cal->calAdjust[cal_0];                      // Apply zero cal. value in real time.
+    resetPID();                                                                     // This sudden change can trigger PID (Derivative part) and cause a unexpected power spike, so reset the PID
+
+    __set_PRIMASK(_irq);
   }
   return -1;
 }
@@ -216,7 +223,7 @@ static void Cal_onEnter(screen_t *scr) {
     cal->error=0;
     setIronCalibrationMode(enable);
   }
-  setUserTemperature(0);
+  setUserTemperature(-100);
 }
 static void Cal_onExit(screen_t *scr) {
   if(scr!=&Screen_calibration_start && scr!=&Screen_calibration_settings ){

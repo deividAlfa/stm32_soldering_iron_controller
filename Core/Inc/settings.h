@@ -13,8 +13,8 @@
 #include "board.h"
 
 #define ENABLE_DBG_SAVE
-#define SWSTRING          "SW: 1.13.8     "                         // Software version reported in settings screen
-#define SYSTEM_SETTINGS_VERSION   28                                // Change this if you change the system settings struct to prevent getting out of sync
+#define SWSTRING          "SW: 1.13.10    "                         // Software version reported in settings screen
+#define SYSTEM_SETTINGS_VERSION   29                                // Change this if you change the system settings struct to prevent getting out of sync
 #define PROFILE_SETTINGS_VERSION  4                                 // Same, but for profile settings struct
 #define TIP_SETTINGS_VERSION      1                                 // Same, but for tip settings struct
 #define ADDONS_SETTINGS_VERSION   1                                 // Same, but for addons settings struct
@@ -233,6 +233,7 @@ __attribute__((aligned(4))) typedef struct{
 
 __attribute__((aligned(4))) typedef struct{
   uint16_t      version;                // Always 0xFF if flash is erased, used to detect blank flash, or settings version mismatch
+  uint16_t      sector_size;
   uint8_t       language;
   uint8_t       contrastOrBrightness;
   uint8_t       displayStartColumn;
@@ -245,7 +246,6 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       EncoderMode;
   uint8_t       debugEnabled;
   uint8_t       activeDetection;
-  uint8_t       delete_me;        // TODO old variable, not longer used. Still there to keep structure alignment. Delete when the settings version is updated.
   uint8_t       dim_mode;
   uint8_t       initMode;
   uint8_t       tempUnit;

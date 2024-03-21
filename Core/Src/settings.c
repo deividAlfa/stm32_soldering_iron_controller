@@ -175,23 +175,11 @@ __attribute__((section(".globalSettings"))) flashSettings_t flashGlobalSettings;
 __attribute__((section(".tempSettings"))) temp_settings_t flashTempSettings;
 __attribute__((section(".tips"))) flashTipSlot_t flashTips[3];
 
-static flashTemp_t flashTemp;
+settings_t settings;
 
-#if (__CORTEX_M == 3)                 // STM32F1xx flash page size are 1K or 2K depending on the flash size
+static flashTemp_t flashTemp;
 static uint8_t flashPages_GlobalSettings, flashPages_TempSettings, flashPages_TipSlot;
 static uint16_t flashPageSize;
-#elif (__CORTEX_M == 0)               // All STM32F07x have 2KB flash pages
-  #if (FLASH_PAGE_SIZE != 2048)
-    #error Wrong flash page size??
-  #endif
-#define flashPageSize                 FLASH_PAGE_SIZE
-#define flashPages_GlobalSettings     ((sizeof(flashSettings_t) + flashPageSize - 1) / flashPageSize)
-#define flashPages_TempSettings       ((sizeof(temp_settings_t) + flashPageSize - 1) / flashPageSize)
-#define flashPages_TipSlot           ((sizeof(flashTipSlot_t) + flashPageSize - 1) / flashPageSize)
-#endif
-
-
-settings_t settings;
 
 static void checksumError(uint8_t mode);
 static void Button_reset(void);
@@ -281,7 +269,7 @@ void updateTempData(bool force){
   }
 }
 
-static void eraseFlashPages(uint32_t pageAddress, uint32_t numPages)
+static void eraseFlashPages(uint32_t pageAddress, uint32_t numPages, uint8_t verify)
 {
   uint32_t error = 0;
   FLASH_EraseInitTypeDef erase = {0};
@@ -303,10 +291,11 @@ static void eraseFlashPages(uint32_t pageAddress, uint32_t numPages)
   }
   HAL_FLASH_Lock();
 
-  // Ensure flash was erased
-  for (uint32_t i = 0u; i < (numPages * flashPageSize / sizeof(int32_t)); i++) {
-    if( *((uint32_t*)pageAddress+i) != 0xFFFFFFFF){
-      Error_Handler();
+  if(verify){
+    for (uint32_t i = 0u; i < (numPages * (flashPageSize / sizeof(int32_t))); i++) {        // Ensure flash was erased
+      if( *((uint32_t*)pageAddress+i) != 0xFFFFFFFF){
+        Error_Handler();
+      }
     }
   }
 }
@@ -362,7 +351,7 @@ void saveTip(uint8_t save_mode, uint8_t tip_index){
       resetflashTipData(&flashBufferTipBlock->data, i);
       flashBufferTipBlock->crc = ChecksumTipData(&flashBufferTipBlock->data);
       DBG_SAVE(i+1);
-      eraseFlashPages((uint32_t)&flashTips[i], flashPages_TipSlot);
+      eraseFlashPages((uint32_t)&flashTips[i], flashPages_TipSlot, 1);
       DBG_SAVE(i+2);
       writeFlash((uint32_t*)flashBufferTipBlock, sizeof(flashTipSlot_t), (uint32_t)&flashTips[i]);
     }
@@ -394,7 +383,7 @@ void saveTip(uint8_t save_mode, uint8_t tip_index){
 
   flashBufferTipBlock->crc = ChecksumTipData(&flashBufferTipBlock->data);
   DBG_SAVE(7);
-  eraseFlashPages((uint32_t)&flashTips[profile], flashPages_TipSlot);
+  eraseFlashPages((uint32_t)&flashTips[profile], flashPages_TipSlot, 1);
   DBG_SAVE(8);
   writeFlash((uint32_t*)flashBufferTipBlock, sizeof(flashTipSlot_t), (uint32_t)&flashTips[profile]);
 
@@ -540,7 +529,7 @@ void saveSettings(uint8_t save_mode, uint8_t reboot_mode){
   }
 
   DBG_SAVE(9);
-  eraseFlashPages((uint32_t)&flashGlobalSettings, flashPages_GlobalSettings);
+  eraseFlashPages((uint32_t)&flashGlobalSettings, flashPages_GlobalSettings, 1);
   DBG_SAVE(10);
   writeFlash((uint32_t*)flashBufferSettings, sizeof(flashSettings_t), (uint32_t)&flashGlobalSettings);
 
@@ -578,8 +567,34 @@ void saveSettings(uint8_t save_mode, uint8_t reboot_mode){
     NVIC_SystemReset();
 }
 
+static void update_flash_sizes(void){
+  flashPages_GlobalSettings = (sizeof(flashSettings_t) + flashPageSize - 1) / flashPageSize;
+  flashPages_TempSettings   = (sizeof(temp_settings_t) + flashPageSize - 1) / flashPageSize;
+  flashPages_TipSlot       = (sizeof(flashTipSlot_t) + flashPageSize - 1) / flashPageSize;
+}
+
+static void flash_sector_detect(void){
+  uint32_t s=0;
+  uint8_t *p = (uint8_t*)&flashGlobalSettings;
+
+  flashSettings_t* flashBufferSettings = _calloc(1, 2048);                                  // Allocate 2KB buffer, fill with zeros
+  if(flashBufferSettings == NULL){
+    Error_Handler();
+  }
+
+  writeFlash((uint32_t*)flashBufferSettings, 2048, (uint32_t)&flashGlobalSettings);         // Write buffer to flash
+  free(flashBufferSettings);                                                                // Free temporal buffer
+  eraseFlashPages((uint32_t)&flashGlobalSettings, 1, 0);                                    // Erase only one page, don't verify (We can't, page size is still unknown)
+  while(*p++ == 0xFF && ++s<2048){}                                                         // Scan the flash and count the bytes erased to 0xFF
+  if(s!=1024 && s!=2048){                                                                   // Only 1KB/2KB page sizes are supported
+    fatalError(error_UNSUPPORTED_FLASH);
+  }
+  flashPageSize = s;                                                                        // Store value
+  update_flash_sizes();                                                                     // And update flash sizes
+}
+
 void restoreSettings(void) {
-  bool setup = (flashGlobalSettings.system.version == UINT16_MAX);     // 0xFFFF = erased flash, trigger setup mode
+  bool setup = (flashGlobalSettings.system.version == UINT16_MAX) || (flashGlobalSettings.system.sector_size!=1024 && flashGlobalSettings.system.sector_size!=2048);     // 0xFFFF = erased flash, trigger setup mode
 #ifndef STM32F072xB
   RCC->APB1ENR |= RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN;    // power the BKP peripheral
   PWR->CR      |= PWR_CR_DBP;                               // enable access to the BKP registers
@@ -591,25 +606,12 @@ void restoreSettings(void) {
   RTC->TAFCR   = 0u;                                        // disable tamper pin, just to be sure
 #endif
 
-#if (__CORTEX_M == 3)
-  uint32_t flashSize = 0xFFFF & *(uint32_t*)FLASHSIZE_BASE; // Some clones report no flash size (0xFFFF), assume these use 1KB sectors.
-
-
-  if( (flashSize>128) && (flashSize<=1024) )                // Between 256K and 1M (High Density / XL devices), 2KB sectors
-    flashPageSize = 2048;
-
-  else                                                      //  Everything else, assume 1KB sectors.
-    flashPageSize = 1024;
-
-  flashPages_GlobalSettings = (sizeof(flashSettings_t) + flashPageSize - 1) / flashPageSize;
-  flashPages_TempSettings   = (sizeof(temp_settings_t) + flashPageSize - 1) / flashPageSize;
-  flashPages_TipSlot       = (sizeof(flashTipSlot_t) + flashPageSize - 1) / flashPageSize;
-#endif
-
   if(setup){                                                                                              // Setup mode, so flash data is not initialized
     getSettings()->setupMode = enable;                                                                    // Load setup state for boot screen
     setSafeMode(enable);                                                                                  // Safe mode just in case
+    flash_sector_detect();                                                                                // Detect flash sector erase size
     resetSystemSettings(getSystemSettings());                                                             // Load default system settings
+
 #ifdef ENABLE_ADDONS
     resetAddonSettings(getAddons());                                                                      // Load default addon settings
 #endif
@@ -619,7 +621,9 @@ void restoreSettings(void) {
     setCurrentProfile(profile_T12);                                                                       // Force profile T12, we can't call loadProfile, there's nothing in flash, let boot screen finish it
   }
   else{
-    Button_reset();
+    flashPageSize = getFlashSystemSettings()->sector_size;                                                // Restore value from flash settings
+    update_flash_sizes();                                                                                 // Update flash sizes
+    Button_reset();                                                                                       // Button-triggered reset routine
                                                                                                           //                           [ CHECK SYSTEM SETTINGS ]
     if( (flashGlobalSettings.system.version==SYSTEM_SETTINGS_VERSION) &&                                  // System version correct
         (flashGlobalSettings.systemChecksum != ChecksumSystemSettings(&flashGlobalSettings.system))){     // But bad cheksum
@@ -896,7 +900,7 @@ void flashTipsWrite(void)
 
 void flashTempSettingsErase(void){
   DBG_SAVE(11);
-  eraseFlashPages((uint32_t)&flashTempSettings, flashPages_TempSettings);
+  eraseFlashPages((uint32_t)&flashTempSettings, flashPages_TempSettings, 1);
   flashTemp.tempIndex = 0;                                             // Reset index
   flashTemp.profileIndex = 0;
   for(uint8_t i=0; i<NUM_PROFILES;i++)
@@ -945,6 +949,7 @@ static void resetSystemSettings(systemSettings_t * system) {
   uint32_t _irq = __get_PRIMASK();
   __disable_irq();
   *system = defaultSystemSettings;
+  system->sector_size = flashPageSize;       // Keep existing value
   flashTempSettingsInitialSetup();
   __set_PRIMASK(_irq);
 }
