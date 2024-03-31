@@ -932,7 +932,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
 
         .settings_IRON = "烙铁设定",
         .settings_SYSTEM = "系统设定",
-        .settings_DEBUG = "错误检测",
+        .settings_DEBUG = "调式菜单",
         .settings_EDIT_TIPS = "编辑烙铁头",
         .settings_CALIBRATION = "温度校正",
         .settings_EXIT = "退出",
@@ -1089,7 +1089,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
         .DownUp =      { "下拉", "上拉" },
         .WakeModes =   { "关闭", "睡眠", "休眠", "全部" },
         .wakeMode =    { "振动", "支架" },
-        .encMode =     { "逆时", "順时" },
+        .encMode =     { "逆时", "顺时" },
         .InitMode =    { "休眠", "睡眠", "运行" },
         .dimMode =     { "关闭", "休眠", "全部" },
         .errMode =     { "休眠", "运行", "最后" },
