@@ -927,7 +927,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
         .main_mode_Sleep_xpos = 45,
         .main_mode_Standby = "睡眠",
         .main_mode_Standby_xpos = 45,
-        .main_mode_Boost = "超溫",
+        .main_mode_Boost = "超温",
         .main_mode_Boost_xpos = 45,
 
         .settings_IRON = "烙铁设定",
