@@ -1,7 +1,7 @@
 @echo off
 
 :: [Default search path] Installation folder must be named STM32CubeIDE!
-SET SEARCH_PATH="C:\ST"
+SET SEARCH_PATH="D:\ST"
 
 :: [ENABLE THIS LINES TO MANUALLY SET THE TOOL PATHS]
 :: set IDEPATH="C:\ST\STM32CubeIDE_1.7.0\STM32CubeIDE"
