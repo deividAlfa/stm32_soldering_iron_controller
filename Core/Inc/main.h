@@ -28,7 +28,6 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f1xx_hal.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -66,8 +65,6 @@ extern "C" {
 
 /* USER CODE END EM */
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -76,38 +73,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define WAKE_Pin GPIO_PIN_0
-#define WAKE_GPIO_Port GPIOA
-#define BUZ0_Pin GPIO_PIN_1
-#define BUZ0_GPIO_Port GPIOA
-#define BUZ1_Pin GPIO_PIN_2
-#define BUZ1_GPIO_Port GPIOA
-#define EE_SCL_Pin GPIO_PIN_3
-#define EE_SCL_GPIO_Port GPIOA
-#define EE_SDA_Pin GPIO_PIN_4
-#define EE_SDA_GPIO_Port GPIOA
-#define NTC_Pin GPIO_PIN_5
-#define NTC_GPIO_Port GPIOA
-#define PWM_Pin GPIO_PIN_6
-#define PWM_GPIO_Port GPIOA
-#define VIN_Pin GPIO_PIN_0
-#define VIN_GPIO_Port GPIOB
-#define TIP_Pin GPIO_PIN_1
-#define TIP_GPIO_Port GPIOB
-#define HW_SCL_Pin GPIO_PIN_13
-#define HW_SCL_GPIO_Port GPIOB
-#define HW_SDA_Pin GPIO_PIN_15
-#define HW_SDA_GPIO_Port GPIOB
-#define DISPLAY_RST_Pin GPIO_PIN_8
-#define DISPLAY_RST_GPIO_Port GPIOA
-#define DISPLAY_DC_Pin GPIO_PIN_9
-#define DISPLAY_DC_GPIO_Port GPIOA
-#define ENC_SW_Pin GPIO_PIN_15
-#define ENC_SW_GPIO_Port GPIOA
-#define ENC_L_Pin GPIO_PIN_3
-#define ENC_L_GPIO_Port GPIOB
-#define ENC_R_Pin GPIO_PIN_4
-#define ENC_R_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

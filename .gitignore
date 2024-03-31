@@ -24,6 +24,3 @@ ST7565.list
 /SSD1306_Debug/
 /ST7565_Release/
 /ST7565_Debug/
-Building_script.bat
-Core/Inc/main.h
-Core/Src/main.c
