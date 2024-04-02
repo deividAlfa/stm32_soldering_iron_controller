@@ -11,7 +11,7 @@ def make_ch_file(infile, outfile):
         chinese_chars = filter_chinese_chars(infile)
         with open(outfile, "w", encoding="utf-8") as file:
                 file.write("".join(chinese_chars))
-                file.write("└")
+                file.write("└") #Add English characters from here
 
 def make_map_file(file_path, outfile):
         with open(file_path, "r", encoding="utf-8") as file:
