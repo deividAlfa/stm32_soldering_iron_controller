@@ -19,7 +19,7 @@
 #define TIP_SETTINGS_VERSION      1                                 // Same, but for tip settings struct
 #define ADDONS_SETTINGS_VERSION   1                                 // Same, but for addons settings struct
 
-#define LANGUAGE_COUNT    8                                         // Number of languages
+#define LANGUAGE_COUNT    9                                         // Number of languages
 #define NUM_PROFILES      3                                         // Number of profiles
 #define NUM_TIPS          85                                        // Number of tips for each profile
 #define TIP_LEN           8                                         // String size for each tip name (Including null termination)
@@ -128,9 +128,10 @@ typedef enum{
   lang_swedish            = 2,
   lang_german             = 3,
   lang_turkish            = 4,
-  lang_tchinese           = 5,
-  lang_bulgarian          = 6,
-  lang_czech              = 7,
+  lang_schinese           = 5,
+  lang_tchinese           = 6,
+  lang_bulgarian          = 7,
+  lang_czech              = 8,
 
   dim_off                 = 0,
   dim_sleep               = 1,
