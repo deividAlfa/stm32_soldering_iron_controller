@@ -178,7 +178,7 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
   wakeOledDim();                                         // Prevent display dim
   handleOledDim();
   updateScreenTimer(input);
-  setCurrentMode(mode_run);                                 // Prevent mode timeout
+  setCurrentMode(mode_run, 0);                                 // Prevent mode timeout
 
   if(input==Rotate_Decrement || input==Rotate_Increment ){
     return (default_screenProcessInput(scr, input, state));
@@ -187,7 +187,7 @@ int debug_ProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *state) {
     return screen_main;
   }
   if(checkScreenTimer(300000)){   // 5 min timeout
-    setCurrentMode(mode_sleep);
+    setCurrentMode(mode_sleep, 0);
     return screen_main;
   }
   else if(input==Click){
@@ -276,7 +276,7 @@ static void debug_onExit(screen_t *scr){
   if(scr!=&Screen_debug && scr!=&Screen_pid_debug){
     _free(dbgScrData);
     setUserTemperature(backupTemp);
-    setCurrentMode(backupMode);
+    setCurrentMode(backupMode, 0);
   }
 }
 
