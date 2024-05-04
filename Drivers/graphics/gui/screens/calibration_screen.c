@@ -172,7 +172,7 @@ static void setCalState(state_t s) {
   cal->current_state = s;
 
   if(cal->current_state <= cal_400) {
-    setCurrentMode(mode_run);
+    setCurrentMode(mode_run, 0);
     setUserTemperature(state_temps[s]/10);
     widgetDisable(Widget_Cal_Measured);
     widgetEnable(Widget_Cal_Button);
@@ -229,7 +229,7 @@ static void Cal_onExit(screen_t *scr) {
   if(scr!=&Screen_calibration_start && scr!=&Screen_calibration_settings ){
     _free(cal);
     setIronCalibrationMode(disable);
-    setCurrentMode(backupMode);
+    setCurrentMode(backupMode, 0);
     setUserTemperature(backupTemp);
   }
 }
@@ -309,7 +309,7 @@ static int Cal_Start_ProcessInput(struct screen_t *scr, RE_Rotation_t input, RE_
     if(checkScreenTimer(CAL_TIMEOUT)){
       setUserTemperature(backupTemp);
       setIronCalibrationMode(disable);
-      setCurrentMode(mode_sleep);
+      setCurrentMode(mode_sleep, 0);
       return screen_main;
     }
   }
@@ -483,7 +483,7 @@ static int Cal_Settings_ProcessInput(struct screen_t *scr, RE_Rotation_t input, 
   if(checkScreenTimer(CAL_TIMEOUT)){
     setUserTemperature(backupTemp);
     setIronCalibrationMode(disable);
-    setCurrentMode(mode_sleep);
+    setCurrentMode(mode_sleep, MLONG_BEEP);   // Beep on timeout
     return screen_main;
   }
 
