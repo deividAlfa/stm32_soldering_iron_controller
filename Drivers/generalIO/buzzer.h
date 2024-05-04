@@ -10,11 +10,9 @@
 
 #include "main.h"
 
-#define RUN_BEEP      (uint16_t)  300
-#define SLP_BEEP      (uint16_t)  600
-
 #define SHORT_BEEP    (uint16_t)  50
-#define MEDIUM_BEEP   (uint16_t)  300
+#define MEDIUM_BEEP   (uint16_t)  200
+#define MLONG_BEEP    (uint16_t)  500
 #define LONG_BEEP     (uint16_t)  2000
 #define ALARM_PERIOD  (uint16_t)  2000
 #define ALARM_HIGH    (uint16_t)  10
