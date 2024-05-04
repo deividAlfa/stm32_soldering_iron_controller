@@ -56,9 +56,14 @@ Check [STM32 clone detection](Readme_files/Programming.md#clone-detection) secti
 - GD32, MM32 and CH32 have issues with the ADC converter.
 - APM32 hasn't been tested yet.
 
-They bring all kind of issues and there're too many of them, also most are relabeled and it's almost impossible to figure out the actual device.<br>
+Some issues caused by clones:<br>
+- Showing strange values in temperatures and voltage (ADC DMA issue), and/or getting NTC High/Low error even when NTC is disabled.
+- Bootlooping / freezing / dying or going black after the initial setup screen (Uncompatible flash layout).
+- Hardfault, Checksum Error bootloop.
+
+Clones bring all kind of issues and there're too many of them, lots are relabeled and they even copy a genuine STM32 device ID, so in some cases it's almost impossible to figure out the actual device.<br>
 Some fakes worked well until recently, when the flash storage layout was updated.<br>
-If you're getting a **Hardfault** or a **Checksum Error bootloop**, try the older [**v1.10.8**](https://github.com/deividAlfa/stm32_soldering_iron_controller/releases/tag/v1.10.8) release.<br>
+The older [**v1.10.8**](https://github.com/deividAlfa/stm32_soldering_iron_controller/releases/tag/v1.10.8) release is more compatible with fake devices, try it out in case you suspect having one.<br>
 No effort will be done to support fake / clones!<br>
 <br> 
 
