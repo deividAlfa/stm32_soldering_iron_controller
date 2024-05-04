@@ -443,7 +443,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       input = Rotate_Nothing;
     }
     else if(currentIronMode==mode_boost){                               // Click / rotation events will exit boost mode, don't process the input afterwards
-      setCurrentMode(mode_run);
+      setCurrentMode(mode_run, MEDIUM_BEEP);
       input = Rotate_Nothing;
     }
     else if(currentIronMode!=mode_run && input != Click){               // Ignore click in low power mode. Only rotation will resume run mode.
@@ -477,6 +477,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           break;
 
         case Click:                                                         // Received a Click, enter low power mode.
+        {
+          bool bad_enc_detect = !checkIronModeTimer(250) && mainScr.lastIronMode_EncoderFix<mode_run; // Iron was sleeping but mode was changed less than 250ms ago (Rotation event) and we got a click, assume this is encoder malfunction
 
           if(!checkIronModeTimer(250) && mainScr.lastIronMode_EncoderFix < mode_boost){// If click issued too soon after iron working mode was changed to non-boost mode
             currentIronMode = mainScr.lastIronMode_EncoderFix;                         // Assume it was a encoder fault rotating while trying to click, restore previous mode, then proceed with low power mode
@@ -487,20 +489,21 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             }
             if(mainScr.boost_allow && currentIronMode==mode_run){           // If boost flag enabled and iron running
               mainScr.boost_allow=0;                                        // Clear flag
-              setCurrentMode(mode_boost);                                   // Set boost mode
+              setCurrentMode(mode_boost, MEDIUM_BEEP);                      // Set boost mode
             }
           }
-          if( checkMainScreenModeTimer(300) ||                              // Wait at least 300ms after entering the screen before allowing click events from entering low power modes, otherwise the user might accidentally enter them
-              (!checkIronModeTimer(250) && mainScr.lastIronMode_EncoderFix<mode_run)){ // Exception: Iron was sleeping but mode was changed less than 250ms ago (Rotation event) and we got a click, assume this is encoder malfunction, we shouldn't have waken up.
-            if(currentIronMode > mode_standby){                             //
-              setCurrentMode(mode_standby);
+          if( checkMainScreenModeTimer(300) || bad_enc_detect ){            // Wait at least 300ms after entering the screen before allowing click events from entering low power modes, otherwise the user might accidentally enter them.
+            uint16_t beep_time =  bad_enc_detect ? 0 : MEDIUM_BEEP;         // Restore mode if bad encoder detected, we shouldn't have waken up, don't beep in this case.
+
+            if(currentIronMode > mode_standby){
+              setCurrentMode(mode_standby, beep_time);
             }
             else{
-              setCurrentMode(mode_sleep);
+              setCurrentMode(mode_sleep, beep_time);
             }
           }
           break;
-
+        }
         case Rotate_Increment:
         case Rotate_Decrement:
           if(mainScr.displayMode==temp_graph){
@@ -697,14 +700,14 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
               currentIronMode = mainScr.lastIronMode_EncoderFix;                // Assume it was a encoder fault rotating while trying to click, restore previous mode, then proceed with low power mode
             }
             if(currentIronMode > mode_standby){                                 // Enter low power mode
-              setCurrentMode(mode_standby);
+              setCurrentMode(mode_standby, MEDIUM_BEEP);
             }
             else{
-              setCurrentMode(mode_sleep);
+              setCurrentMode(mode_sleep, MEDIUM_BEEP);
             }
           }
           else if(mainScr.ironStatus != status_error && currentIronMode==mode_run && !checkMainScreenModeTimer(1000)){
-            setCurrentMode(mode_boost);
+            setCurrentMode(mode_boost, MEDIUM_BEEP);
           }
 
           mainScr.setMode=main_irontemp;
