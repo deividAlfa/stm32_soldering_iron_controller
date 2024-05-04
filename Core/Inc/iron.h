@@ -57,7 +57,7 @@ void updatePowerLimit(void);
 void runAwayCheck(void);
 void setSafeMode(bool mode);
 bool getSafeMode(void);
-void setCurrentMode(uint8_t mode);
+void setCurrentMode(uint8_t mode, uint16_t beep_time);
 void setModefromStand(uint8_t mode);
 void setUserTemperature(int16_t temperature);
 uint16_t getUserTemperature(void);

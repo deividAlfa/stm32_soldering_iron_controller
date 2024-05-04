@@ -105,14 +105,14 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
   Iron.Error.Flags    = FLAG_NOERROR;
 
   if(getProfileSettings()->WakeInputMode == mode_shake){
-    setCurrentMode(getSystemSettings()->initMode);
+    setCurrentMode(getSystemSettings()->initMode, MLONG_BEEP);
   }
   else{
     if(WAKE_input()){
-      setCurrentMode(mode_run);
+      setCurrentMode(mode_run, MLONG_BEEP);
     }
     else{
-      setCurrentMode(getProfileSettings()->StandMode);
+      setCurrentMode(getProfileSettings()->StandMode, MLONG_BEEP);
     }
   }
   initTimers();
@@ -147,7 +147,7 @@ void handleIron(void) {
            ((Iron.changeMode >= mode_run) && (CurrentTime-Iron.LastModeChangeTime) > 100) ){                                                                                              // Run/boost mode, just do some debouncing.
 
         Iron.updateStandMode=no_update;
-        setCurrentMode(Iron.changeMode);
+        setCurrentMode(Iron.changeMode, MLONG_BEEP);
         Iron.lastWakeSrc = wakeSrc_Stand;
       }
     }
@@ -185,26 +185,26 @@ void handleIron(void) {
 
     }
     if((Iron.CurrentMode==mode_coldboost) && (mode_time>getProfileSettings()->coldBoostTimeout)){                              // If cold boost mode and time expired
-      setCurrentMode(mode_run);
+      setCurrentMode(mode_run, MLONG_BEEP);
     }
     else if((Iron.CurrentMode==mode_boost) && (mode_time>getProfileSettings()->boostTimeout)){    // If boost mode and time expired
-      setCurrentMode(mode_run);
+      setCurrentMode(mode_run, MLONG_BEEP);
     }
     else if(Iron.CurrentMode==mode_run){                                                      // If running
       if(getProfileSettings()->standbyTimeout){                                              // If standby timer enabled
         if(mode_time>getProfileSettings()->standbyTimeout){                                  // Check timeout
-          setCurrentMode(mode_standby);
+          setCurrentMode(mode_standby, MLONG_BEEP);
         }
       }
       else{                                                                                   // Otherwise, check sleep timeout
         if(mode_time>getProfileSettings()->sleepTimeout){                                    //
-          setCurrentMode(mode_sleep);
+          setCurrentMode(mode_sleep, MLONG_BEEP);
         }
       }
     }
     else if(Iron.CurrentMode==mode_standby){                                                  // If in standby
       if(mode_time>getProfileSettings()->sleepTimeout){                                      // Check sleep timeout
-        setCurrentMode(mode_sleep);
+        setCurrentMode(mode_sleep, MLONG_BEEP);
       }
     }
   }
@@ -300,7 +300,7 @@ void setSystemTempUnit(bool unit){
     getSystemSettings()->tempUnit = unit;
   }
   __set_PRIMASK(_irq);
-  setCurrentMode(Iron.CurrentMode);     // Reload temps
+  setCurrentMode(Iron.CurrentMode, 0);     // Reload temps, no beeping
 }
 bool getSystemTempUnit(void){
   return getSystemSettings()->tempUnit;
@@ -550,7 +550,7 @@ void setModefromStand(uint8_t mode){
 }
 
 // Set the iron operating mode
-void setCurrentMode(uint8_t mode){
+void setCurrentMode(uint8_t mode, uint16_t beep_time){
   if(Iron.Error.active){
     mode=mode_sleep;                                                                      // If error active, override with sleep mode
   }
@@ -590,7 +590,7 @@ void setCurrentMode(uint8_t mode){
     //resetPID();
     resetRunAway();
     if(!Iron.calibrating){
-      buzzer_beep( mode<mode_run ? SLP_BEEP : RUN_BEEP );
+      buzzer_beep(beep_time);
       modeChanged(mode);
     }
     Iron.temperatureReached = 0;                                                    // Reset temperature reached flag
@@ -625,7 +625,7 @@ bool IronWake(wakeSrc_t src){                                                   
     }
   }
   if(Iron.CurrentMode<mode_boost)
-      setCurrentMode(mode_run);
+      setCurrentMode(mode_run, MLONG_BEEP);
   Iron.lastWakeSrc = src;
   return 1;
 }
@@ -685,11 +685,15 @@ void checkIronError(void){
     Iron.Error.Flags |= Err.Flags;                                                      // Update stored Iron errors
     Iron.LastErrorTime = CurrentTime;                                                   // Update error time
     if(!Iron.Error.active){                                                             // Active flag wasnt set, this is a first occurring error
-      if(Err.Flags!=FLAG_NO_IRON)                                                       // Avoid alarm if only the tip is removed
+      if(Err.Flags!=FLAG_NO_IRON){                                                      // Avoid alarm if only the tip is removed
+        setCurrentMode(mode_sleep, 0);                                                  // Set sleep mode, no beeping as alarm is active
         buzzer_alarm_start();                                                           // Start alarm
+      }
+      else{
+        setCurrentMode(mode_sleep, MEDIUM_BEEP);                                        // Set sleep mode, short beep, tip removed
+      }
       Iron.lastMode = Iron.CurrentMode;                                                 // Save current mode
       Iron.Error.active = 1;                                                            // Set active flag
-      setCurrentMode(mode_sleep);                                                       // Set sleep mode
       configurePWMpin(output_Low);                                                      // Force pin low to completely remove the power
     }
   }
@@ -708,15 +712,15 @@ void checkIronError(void){
     Iron.err_resumed = 1;                                                               // Set resume flag
     if(!Iron.boot_loaded){                                                              // Boot profile not loaded, use boot mode
       Iron.boot_loaded=1;
-      setCurrentMode(getSystemSettings()->initMode);
+      setCurrentMode(getSystemSettings()->initMode, 0);
     }
     else{                                                                               // Already initialized boot mode, this error happened later
       if(getProfileSettings()->errorResumeMode==error_sleep)                           // Load mode defined in errorResumeMode
-        setCurrentMode(mode_sleep);
+        setCurrentMode(mode_sleep, MEDIUM_BEEP);
       else if(getProfileSettings()->errorResumeMode==error_run)
-        setCurrentMode(mode_run);
+        setCurrentMode(mode_run, MEDIUM_BEEP);
       else
-        setCurrentMode(Iron.lastMode);
+        setCurrentMode(Iron.lastMode, MEDIUM_BEEP);
     }
   }
 }
@@ -734,7 +738,7 @@ void setSafeMode(bool mode){
   __disable_irq();
   if(mode==disable && Iron.Error.Flags==(FLAG_ACTIVE | FLAG_SAFE_MODE)){                 // If only failsafe was active? (This should only happen because it was on first init screen)
     Iron.Error.Flags = FLAG_NOERROR;
-    setCurrentMode(mode_run);
+    setCurrentMode(mode_run, 0);
   }
   else{
     if(mode==enable){
@@ -754,7 +758,7 @@ bool GetSafeMode(void){
 void setIronCalibrationMode(uint8_t mode){
   Iron.calibrating = mode;
   if(mode==enable){
-    setCurrentMode(mode_run);
+    setCurrentMode(mode_run, 0);
   }
 }
 
