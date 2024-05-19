@@ -10,6 +10,7 @@
 */
 
 #define HWSTRING "HW: Quicko F072"
+#define DISABLE_CHINESE
 
 /********************************
  *       Display Settings    *
@@ -66,6 +67,7 @@
 #define USE_NTC
 #define ENABLE_INT_TEMP                                       // Enable internal temperature if NTC fails or disabled in options (Depends on USE_NTC)
 
+#define DISABLE_TCHINESE                                      // Traditional Chinese doesn't fit in this MCU, disable it
 
 /********************************
  *       TIP calibration    *
