@@ -1,7 +1,4 @@
-import re
-import subprocess
-import os
-import time
+import re, subprocess, os, shutil, time
 
 # Universal file reading function
 def read_file(file_path):
@@ -121,9 +118,8 @@ def main():
                 combined_file.write(f.read())
     
     # Clean up temporary files
-    for font_file in font_files:
-        os.remove(font_file)
-
+    shutil.rmtree(output_dir)
+    
 if __name__ == '__main__':
     start_time = time.perf_counter()
     main()
