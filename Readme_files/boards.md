@@ -50,3 +50,9 @@ Check whether it has a STM32F072 or STM32F103 and choose the correct firmware ac
 <br>
 <img src="/Readme_files/boards/quicko.jpg">
 <br>
+
+## T12-958 v2
+This is a very recent board introduced mid-2024.<br>
+<br>
+<img src="/Readme_files/boards/T12-958_v2.jpg">
+<br>
