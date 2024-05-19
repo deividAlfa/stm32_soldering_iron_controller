@@ -13,13 +13,20 @@
 #include "board.h"
 
 #define ENABLE_DBG_SAVE
-#define SWSTRING          "SW: 1.13.11    "                         // Software version reported in settings screen
+#define SWSTRING                  "SW: 1.13.11    "                 // Software version reported in settings screen
 #define SYSTEM_SETTINGS_VERSION   29                                // Change this if you change the system settings struct to prevent getting out of sync
 #define PROFILE_SETTINGS_VERSION  4                                 // Same, but for profile settings struct
 #define TIP_SETTINGS_VERSION      1                                 // Same, but for tip settings struct
 #define ADDONS_SETTINGS_VERSION   1                                 // Same, but for addons settings struct
 
-#define LANGUAGE_COUNT    9                                         // Number of languages
+#define LANGUAGE_COUNT_WITH_CHINESE    9                            // Number of languages including chinese variations
+
+#ifdef DISABLE_
+#define LANGUAGE_COUNT    (LANGUAGE_COUNT_WITH_CHINESE - 2)
+#else
+#define LANGUAGE_COUNT    (LANGUAGE_COUNT_WITH_CHINESE)
+#endif
+
 #define NUM_PROFILES      3                                         // Number of profiles
 #define NUM_TIPS          85                                        // Number of tips for each profile
 #define TIP_LEN           8                                         // String size for each tip name (Including null termination)
@@ -43,6 +50,19 @@
 
 #endif
 
+typedef enum{
+  lang_english,
+  lang_russian,
+  lang_swedish,
+  lang_german,
+  lang_turkish,
+  lang_bulgarian,
+  lang_czech,
+#ifndef DISABLE_CHINESE
+  lang_schinese,
+  lang_tchinese,
+#endif
+}languages_t;
 
 typedef enum{
   mode_shake              = 0,
@@ -122,16 +142,6 @@ typedef enum{
   output_PWM,
   output_Low,
   output_High,
-
-  lang_english            = 0,
-  lang_russian            = 1,
-  lang_swedish            = 2,
-  lang_german             = 3,
-  lang_turkish            = 4,
-  lang_schinese           = 5,
-  lang_tchinese           = 6,
-  lang_bulgarian          = 7,
-  lang_czech              = 8,
 
   dim_off                 = 0,
   dim_sleep               = 1,

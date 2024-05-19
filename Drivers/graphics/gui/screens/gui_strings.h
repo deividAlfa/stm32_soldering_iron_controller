@@ -11,6 +11,11 @@
 
 #include "settings.h"
 
+#ifdef DISABLE_CHINESE
+#define u8g2_font_menu  u8g2_font_menu_no_CN
+#define u8g2_font_small u8g2_font_small_no_CN
+#endif
+
 typedef struct{
   char * boot_firstBoot;
   char * boot_Profile;
