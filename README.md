@@ -78,6 +78,7 @@ Currently supported controllers:
 * **KSGER v1.5**: Profile for STM32F103 (There are no other known CPUs used in this board).
 * **KSGER v2**,   **JCD T12**, **T12-955**, **Handskit**: Profile compatible with all STM32F101/2/3xx models.
 * **KSGER v3**,   **T12-958**: Profile compatible with all STM32F101/2/3xx models.
+* **T12-958 v2**: Profile compatible with STM32F103. Needs a [mod](https://raw.githubusercontent.com/deividAlfa/stm32_soldering_iron_controller/master/BOARDS/Quecoo/vbat_mod.jpg) for battery to work.
 
 Don't follow the version reported in the original firmware to identify your board.<br>
 To this day, the easiest way to quickly identify your controller version is by checking the OLED screen connection:
