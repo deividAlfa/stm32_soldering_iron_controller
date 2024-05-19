@@ -21,7 +21,7 @@
 
 #define LANGUAGE_COUNT_WITH_CHINESE    9                            // Number of languages including chinese variations
 
-#ifdef DISABLE_
+#ifdef DISABLE_CHINESE
 #define LANGUAGE_COUNT    (LANGUAGE_COUNT_WITH_CHINESE - 2)
 #else
 #define LANGUAGE_COUNT    (LANGUAGE_COUNT_WITH_CHINESE)
