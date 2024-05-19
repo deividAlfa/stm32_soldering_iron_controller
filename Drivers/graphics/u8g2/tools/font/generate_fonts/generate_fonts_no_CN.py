@@ -82,8 +82,8 @@ def main():
     
     # Replace specific characters
     replace_pixel(os.path.join(output_dir, "font_iron_temp.c"), "\\42\\", "\\45\\")
-    replace_pixel(os.path.join(output_dir, "font_menu.c"), "\\21\\", "\\17\\")
-    replace_pixel(os.path.join(output_dir, "font_small.c"), "\\16\\", "\\12\\")
+    replace_pixel(os.path.join(output_dir, "font_menu_no_CN.c"), "\\21\\", "\\17\\")
+    replace_pixel(os.path.join(output_dir, "font_small_no_CN.c"), "\\16\\", "\\12\\")
     
     # Merge C files
     font_files = [os.path.join(output_dir, "font_iron_temp.c"),
