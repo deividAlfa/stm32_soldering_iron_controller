@@ -14,7 +14,7 @@ if not exist %ZIP% (
 
 :: Compile all profiles
 echo Compiling...
-start /w Building_script.bat 10
+start /w Building_script.bat 12
 IF %ERRORLEVEL% NEQ 0 echo Build error! && GOTO :ERROR
 echo OK
 echo.
@@ -38,10 +38,14 @@ copy "..\BOARDS\Quicko\STM32F072\SSD1306.bin" 		"Quicko_STM32F072_OLED.bin" >nul
 copy "..\BOARDS\Quicko\STM32F072\SSD1306.list" 		"Quicko_STM32F072_OLED.list" >nul		&& IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
 copy "..\BOARDS\Quicko\STM32F072\ST7565.bin" 		"Quicko_STM32F072_LCD_ST7565.bin" >nul		&& IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
 copy "..\BOARDS\Quicko\STM32F072\ST7565.list" 		"Quicko_STM32F072_LCD_ST7565.list" >nul		&& IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
-copy "..\BOARDS\Quicko\STM32F103\SSD1306.bin" 		"Quicko_STM32F103_OLED.bin" >nul		&& IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
-copy "..\BOARDS\Quicko\STM32F103\SSD1306.list" 		"Quicko_STM32F103_OLED.list" >nul		&& IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
-copy "..\BOARDS\Quicko\STM32F103\ST7565.bin" 		"Quicko_STM32F103_LCD_ST7565.bin" >nul		&& IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
-copy "..\BOARDS\Quicko\STM32F103\ST7565.list" 		"Quicko_STM32F103_LCD_ST7565.list" >nul		&& IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
+copy "..\BOARDS\Quicko\STM32F103\SSD1306.bin"     "Quicko_STM32F103_OLED.bin" >nul    && IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
+copy "..\BOARDS\Quicko\STM32F103\SSD1306.list"    "Quicko_STM32F103_OLED.list" >nul   && IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
+copy "..\BOARDS\Quicko\STM32F103\ST7565.bin"    "Quicko_STM32F103_LCD_ST7565.bin" >nul    && IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
+copy "..\BOARDS\Quicko\STM32F103\ST7565.list"     "Quicko_STM32F103_LCD_ST7565.list" >nul   && IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
+copy "..\BOARDS\Quecoo\T12-958_v2\STM32F103\SSD1306.bin"     "Quecoo_T12-958_v2_OLED.bin" >nul    && IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
+copy "..\BOARDS\Quecoo\T12-958_v2\STM32F103\SSD1306.list"    "Quecoo_T12-958_v2_OLED.list" >nul   && IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
+copy "..\BOARDS\Quecoo\T12-958_v2\STM32F103\ST7565.bin"    "Quecoo_T12-958_v2_LCD_ST7565.bin" >nul    && IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
+copy "..\BOARDS\Quecoo\T12-958_v2\STM32F103\ST7565.list"     "Quecoo_T12-958_v2_LCD_ST7565.list" >nul   && IF %ERRORLEVEL% NEQ 0 GOTO :NO_FILES
 
 echo Creating zip files...
 echo.

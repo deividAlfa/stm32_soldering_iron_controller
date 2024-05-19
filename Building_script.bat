@@ -15,7 +15,8 @@ SET MODELS=    "BOARDS\KSGER\v1.5\STM32F103";^
                "BOARDS\KSGER\v2\STM32F101";^
                "BOARDS\KSGER\v3\STM32F101";^
                "BOARDS\Quicko\STM32F072";^
-               "BOARDS\Quicko\STM32F103"
+               "BOARDS\Quicko\STM32F103";^
+               "BOARDS\Quecoo\T12-958_v2\STM32F103"
 SET RUN_CUBEMX="n"
 SET COMPILE="n"
 
@@ -24,13 +25,19 @@ SET BUILD_OPT=
 SET BUILD_TARGET=
 
 IF "%~1"=="" GOTO :BUILD_PROMPT
+
+:: 1-12 are profiles, 13 is "quit"
 IF %~1 LSS 1 GOTO :BUILD_HELP
-IF %~1 GTR 11 GOTO :BUILD_HELP
+IF %~1 EQU 13 GOTO :EXIT
+IF %~1 GTR 13 GOTO :BUILD_HELP
 SET BUILD_TARGET=%~1
 
-IF "%BUILD_TARGET%"=="10" GOTO :NO_BUILD_PROMPT
+IF "%BUILD_TARGET%"=="12" GOTO :NO_BUILD_PROMPT
 IF "%~2"=="" GOTO :BUILD_HELP
+
+:: 1-4 are build modes
 IF %~2 LSS 1 GOTO :BUILD_HELP
+IF %~2 EQU 4 GOTO :EXIT
 IF %~2 GTR 4 GOTO :BUILD_HELP
 SET BUILD_OPT=%~2
 GOTO :NO_BUILD_PROMPT
@@ -55,8 +62,10 @@ echo                    6  Quicko 072     OLED
 echo                    7  Quicko 072     LCD
 echo                    8  Quicko 103     OLED
 echo                    9  Quicko 103     LCD
-echo                    10 Build all
-echo                    11 Quit
+echo                    10 T12-958 v2     OLED
+echo                    11 T12-958 v2     LCD
+echo                    12 Build all
+echo                    13 Quit
 echo.
 echo        OPT:
 echo                    1  Only copy files
@@ -86,10 +95,12 @@ echo     [6]   Quicko 072     OLED
 echo     [7]   Quicko 072     LCD
 echo     [8]   Quicko 103     OLED
 echo     [9]   Quicko 103     LCD
+echo     [W]   T12-958 v2     OLED
+echo     [E]   T12-958 v2     LCD
 echo     [A]   Build all
 echo     [Q]   Quit
 echo.
-CHOICE /C 123456789AQ /N /M "Please select your building target:"
+CHOICE /C 123456789WEAQ /N /M "Please select your building target:"
 set BUILD_TARGET=%ERRORLEVEL%
 cls
 
@@ -103,8 +114,10 @@ IF "%BUILD_TARGET%"=="6" SET PROFILE="BOARDS\Quicko\STM32F072" && SET DISPLAY="S
 IF "%BUILD_TARGET%"=="7" SET PROFILE="BOARDS\Quicko\STM32F072" && SET DISPLAY="ST7565"&& GOTO :OPT_PROMPT
 IF "%BUILD_TARGET%"=="8" SET PROFILE="BOARDS\Quicko\STM32F103" && SET DISPLAY="SSD1306"&& GOTO :OPT_PROMPT
 IF "%BUILD_TARGET%"=="9" SET PROFILE="BOARDS\Quicko\STM32F103" && SET DISPLAY="ST7565"&& GOTO :OPT_PROMPT
-IF "%BUILD_TARGET%"=="10" SET PROFILE="" && SET RUN_CUBEMX="y" && SET COMPILE="y" && SET DISPLAY=""&& GOTO :TOOLS
-IF "%BUILD_TARGET%"=="11" GOTO :EXIT
+IF "%BUILD_TARGET%"=="10" SET PROFILE="BOARDS\Quecoo\T12-958_v2\STM32F103" && SET DISPLAY="SSD1306"&& GOTO :OPT_PROMPT
+IF "%BUILD_TARGET%"=="11" SET PROFILE="BOARDS\Quecoo\T12-958_v2\STM32F103" && SET DISPLAY="ST7565"&& GOTO :OPT_PROMPT
+IF "%BUILD_TARGET%"=="12" SET PROFILE="" && SET RUN_CUBEMX="y" && SET COMPILE="y" && SET DISPLAY=""&& GOTO :TOOLS
+IF "%BUILD_TARGET%"=="13" GOTO :EXIT
 
 :OPT_PROMPT
 IF NOT "%BUILD_OPT%"=="" GOTO :NO_OPT_PROMPT
@@ -237,7 +250,8 @@ move /Y STM32SolderingStation.bak STM32SolderingStation.ioc >nul 2>nul
 :: Cleanup
 rd /Q /S SSD1306_Release ST7565_Release EWARM Application 2>nul
 
-IF "%BUILD_TARGET%"=="10" GOTO :EXIT
+::IF "%BUILD_TARGET%"=="12" GOTO :EXIT
+IF NOT "%~1"=="" GOTO :EXIT
 pause
 
 :EXIT
