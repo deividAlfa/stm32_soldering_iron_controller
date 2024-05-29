@@ -17,6 +17,9 @@
 #include <math.h>
 #include <malloc.h>
 
+
+//#define RUN_FLASH_TEST              // Enable this to build clone/flash test fw
+
 extern IWDG_HandleTypeDef hiwdg;
 extern CRC_HandleTypeDef hcrc;
 

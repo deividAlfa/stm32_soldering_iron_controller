@@ -102,6 +102,87 @@ void initBeforeMCUConfiguration(void)
 #endif
 }
 
+#ifdef RUN_FLASH_TEST
+void flash_test(void){
+
+  char str[16];
+  int32_t sz = 0xFFFF & *(uint32_t*)FLASHSIZE_BASE;
+  uint32_t dstAddr = (uint32_t)getFlashSettings();
+  uint32_t error, _irq = __get_PRIMASK();
+
+  FLASH_EraseInitTypeDef erase = {
+    .NbPages     = 1,
+    .PageAddress = (uint32_t)getFlashSettings(),
+    .TypeErase   = FLASH_TYPEERASE_PAGES,
+  };
+
+  Oled_error_init();
+
+  strcpy(str, "CPUID:");                                      // Read CPUID
+  itoa(SCB->CPUID, &str[6], 16);
+  u8g2_DrawStr(&u8g2, 0, 0, str);
+
+  strcpy(str, "Flash:");                                      // Parse flash size register. <=128KB flash have 1KB page size, 2KB otherwise.
+  if(sz<=1024){
+    itoa(sz, &str[6], 10);
+    if(sz<=128){
+      u8g2_DrawStr(&u8g2, 0, 32, "Theorical:1024B");
+    }
+    else{
+      u8g2_DrawStr(&u8g2, 0, 32, "Theorical:2048B");
+    }
+  }
+  else{
+    strcpy(&str[6], "???");
+    u8g2_DrawStr(&u8g2, 0, 32, "Theorical:???");
+  }
+  strcat(str, " KB");
+  u8g2_DrawStr(&u8g2, 0, 16, str);
+
+
+  __disable_irq();                                                          // Detect real page size
+  HAL_FLASH_Unlock();
+  __set_PRIMASK(_irq);
+
+  for(uint32_t written=0; written < 2048; written++){                       // Fill 8KB of flash with zeros
+    if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, dstAddr, 0 ) != HAL_OK)
+    {
+      Error_Handler();
+    }
+    dstAddr += sizeof(uint32_t);
+    HAL_IWDG_Refresh(&hiwdg);
+  }
+
+  if((HAL_FLASHEx_Erase(&erase, &error)!=HAL_OK) || (error!=0xFFFFFFFF)){   // Erase one page (Should erase only 1 or 2KB)
+    Error_Handler();
+  }
+  HAL_IWDG_Refresh(&hiwdg);
+  HAL_FLASH_Lock();
+
+  sz=0;                                                                     // Count erased size
+  dstAddr = (uint32_t)getFlashSettings();
+  while(*(uint32_t*)dstAddr == 0xFFFFFFFF){
+    dstAddr += sizeof(uint32_t);
+    sz += sizeof(uint32_t);
+
+    if(sz>8192){
+      sz=-1;
+      break;
+    }
+  }
+
+  strcpy(str, "Detected: ");
+  itoa(sz, &str[9], 10);
+  strcat(str, "B");
+  u8g2_DrawStr(&u8g2, 0, 48, str);
+
+  update_display();
+  while(1){
+    HAL_IWDG_Refresh(&hiwdg);
+  }
+}
+#endif
+
 void InitAfterMCUConfiguration(void){
   configurePWMpin(output_Low);
 
@@ -117,6 +198,11 @@ void InitAfterMCUConfiguration(void){
 #endif
 
     guiInit();
+
+#ifdef RUN_FLASH_TEST
+    flash_test();
+#endif
+
     buzzer_init();
     restoreSettings();
     ADC_Init(&ADC_DEVICE);
