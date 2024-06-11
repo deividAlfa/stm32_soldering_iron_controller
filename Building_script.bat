@@ -1,5 +1,8 @@
 @echo off
 
+:: Navigate to the folder where the batch is located
+cd %~dp0
+
 :: [Default search path] Installation folder must be named STM32CubeIDE!
 SET SEARCH_PATH="C:\ST"
 

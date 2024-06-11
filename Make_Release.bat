@@ -1,16 +1,17 @@
 @echo off
 
 :: Adjust this to 7-Zip executable
-
 set ZIP="C:\Program Files\7-Zip\7z.exe"
 
-:: Check that 7-Zip exists        
-
+:: Check that 7-Zip exists
 if not exist %ZIP% (
   echo 7-Zip not installed or wrong path set!
   echo You might need to modify "ZIP" variable in this bat file.
   GOTO :ERROR
 )
+
+:: Navigate to the folder where the batch is located
+cd %~dp0
 
 :: Compile all profiles
 echo Compiling...
