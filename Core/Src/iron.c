@@ -632,7 +632,18 @@ bool IronWake(wakeSrc_t src){                                                   
 
 void readWake(void){
   static bool last_wake=0;
-    bool now_wake = WAKE_input();
+  bool now_wake;
+
+#ifdef STAND_Pin                                                        // Dedicated Stand pin
+  if(getProfileSettings()->WakeInputMode==mode_stand){
+    now_wake = STAND_input();
+  }
+  else{
+    now_wake = WAKE_input();
+  }
+#else                                                                   // Shared pin (Same signal works either as Stand or Shake input)
+  now_wake = WAKE_input();
+#endif
 
     if(last_wake!=now_wake){                                            // If wake sensor input changed
       last_wake=now_wake;
@@ -641,7 +652,7 @@ void readWake(void){
           setModefromStand(mode_run);
         }
         else{
-          setModefromStand(getProfileSettings()->StandMode);          // Set sleep or standby mode depending on system setting
+          setModefromStand(getProfileSettings()->StandMode);            // Set sleep or standby mode depending on system setting
         }
       }
       if(getProfileSettings()->WakeInputMode==mode_shake){
