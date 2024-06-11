@@ -141,9 +141,9 @@ const tipData_t defaultTipData[NUM_PROFILES] = {
   [profile_T12] = {
     .calADC_At_250   = T12_Cal250,
     .calADC_At_400   = T12_Cal400,     // These values are way lower, but better to be safe than sorry
-    .PID.Kp          = 4000,           // val = /1.000.000
-    .PID.Ki          = 5500,           // val = /1.000.000
-    .PID.Kd          = 700,           // val = /1.000.000
+    .PID.Kp          = 4500,           // val = /1.000.000
+    .PID.Ki          = 1500,           // val = /1.000.000
+    .PID.Kd          = 600,           // val = /1.000.000
     .PID.maxI        = 70,             // val = /100
     .PID.minI        = 0,              // val = /100
     .name            = "T12-",               // Put some generic name
@@ -151,9 +151,9 @@ const tipData_t defaultTipData[NUM_PROFILES] = {
   [profile_C245] = {
     .calADC_At_250   = C245_Cal250,
     .calADC_At_400   = C245_Cal400,
-    .PID.Kp          = 4000,           // val = /1.000.000
-    .PID.Ki          = 5500,           // val = /1.000.000
-    .PID.Kd          = 700,           // val = /1.000.000
+    .PID.Kp          = 4500,           // val = /1.000.000
+    .PID.Ki          = 1500,           // val = /1.000.000
+    .PID.Kd          = 600,           // val = /1.000.000
     .PID.maxI        = 70,             // val = /100
     .PID.minI        = 0,
     .name            = "C245-",
@@ -161,9 +161,9 @@ const tipData_t defaultTipData[NUM_PROFILES] = {
   [profile_C210] = {
     .calADC_At_250   = C210_Cal250,
     .calADC_At_400   = C210_Cal400,
-    .PID.Kp          = 4000,           // val = /1.000.000
-    .PID.Ki          = 5500,           // val = /1.000.000
-    .PID.Kd          = 700,           // val = /1.000.000
+    .PID.Kp          = 4500,           // val = /1.000.000
+    .PID.Ki          = 1500,           // val = /1.000.000
+    .PID.Kd          = 600,           // val = /1.000.000
     .PID.maxI        = 70,             // val = /100
     .PID.minI        = 0,
     .name            =  "C210-",
