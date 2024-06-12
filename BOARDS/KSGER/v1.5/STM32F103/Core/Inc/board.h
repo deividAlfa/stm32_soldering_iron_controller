@@ -106,7 +106,7 @@
 #ifdef USE_NTC
 
 #define NTC_RES       10000
-#define NTC_BETA      3450
+#define NTC_BETA      3950
 #define PULL_RES      10000
 #define PULLUP
 
