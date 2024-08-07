@@ -218,20 +218,28 @@ Exceeding this limit will instantly reset the filter and use the current reading
 This is used for huge differences, usually when the tip is removed or plugged in, to allow instant response from the system.<br>
   - **NTC MENU**<br>
 Adjust NTC settings:<br>
+    - **Enable NTC**<br>
+ON: Try external NTC, fallback to internal STM32 sensor if not detected.<br>
+OFF: Always use internal STM32 sensor.<br>
     - **Pull mode**<br>
 Adjust as your circuit: Pull up or pull down.<br>
     - **Pull resistance**<br>
-    - **NTC Detect** : Enables or disables automatic switching between 2 NTC values (typically 10K and 100K).<br>
+Pull resistance value in the board, often 4.7K or 10K, might need tweaking for different or custom boards.<br>
+    - **NTC Detect**<br>
+Enables or disables automatic switching between two NTC values (For example, handles with different NTCs).<br>
+This will only work if the NTC values are very different (Typically 10K and 100K), will fail to differentiate closer values.<br>
         
-        OFF: Fixed NTC values:<br>
+        **OFF**: Fixed NTC values:<br>
         - **NTC resistance**<br>
-          - **NTC beta coefficient**<br>
+Nominal resistance at 25ºC.<br>
+        - **NTC beta coefficient**<br>
+Beta coefficient of the NTC. Common values range from 3000 to 5000.
           
-        ON: Two NTC values:<br>
-          - **Higher NTC value**<br>
-          - **Higher NTC Beta**<br>
-          - **Lower NTC value**<br>
-          - **Lower NTC Beta**<br>
+        **ON**: Two NTC values, detected automatically. <br>
+        - **Higher NTC value**<br>
+        - **Higher NTC Beta**<br>
+        - **Lower NTC value**<br>
+        - **Lower NTC Beta**<br>
     - **Back**<br>
 Return to iron menu.<br>
   - **Back**<br>
