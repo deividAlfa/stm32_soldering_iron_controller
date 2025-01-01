@@ -27,7 +27,8 @@ Video of operation here: (Project in active development, the features will chang
 
 ## Project details
 * This project started by forking [PTDreamer's firmware](https://github.com/PTDreamer/stm32_soldering_iron_controller). Since then it became a separate project.
-* Developed on STM32Cube IDE. Basic configuration is easily done in CubeMX (Included in STM32Cube IDE).
+* Developed on STM32Cube IDE v1.12.1. Basic configuration made in CubeMX (Included in CubeIDE).<br>
+ST has removed this version from their site, so [here's a download mirror](https://github.com/deividAlfa/stm32_soldering_iron_controller/releases/tag/CubeIDE_v1.12.1). 
 * Unified codebase, different hardware support based on profiles, very few files need to be changed.
 * Supports all display modes: I2C, SPI, software and hardware+DMA (When connected to hardware pins).
 * Uses U8g2 graphics library.
