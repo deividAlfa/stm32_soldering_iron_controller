@@ -204,12 +204,12 @@ After fully reading the documentation, if you still have problems or doubts, the
 ## Translations
 For adding new languages, you have to modify these files:<br>
 * [`Core/Inc/settings.h`](/Core/Inc/settings.h)<br>
-  - increment the value of `LANGUAGE_COUNT` by one, 
-  - add your language identifier (`lang_xxxx`) in `system_types` enum around row 100.
+  - increment the value of `LANGUAGE_COUNT_WITH_CHINESE` by one, 
+  - add your language identifier (`lang_xxxx`) in `languages_t` enum.
 * [`Drivers/graphics/gui/screens/gui_strings.c`](/Drivers/graphics/gui/screens/gui_strings.c)<br>
   - copy the whole `[lang_english] = { … }` section at the bottom of `strings_t` strings,
   - replace `lang_english` with `lang_xxxx` of the section you just copied and translate,
-  - add your `lang_xxxx` to `Langs` at the bottom of the file.<br>
+  - add your `lang_xxxx` to `Langs` near the bottom of the same file.<br>
 
 For adding new characters to the existing fonts symbols, there're some instructions here:
 * [Font build README](/Drivers/graphics/u8g2/tools/font/generate_fonts/README.md)
