@@ -90,8 +90,9 @@ To this day, the easiest way to quickly identify your controller version is by c
 For KSGER v2/v3: As long as use the correct firmware, any STM32 variant (101/102/103/C8/R8/CB/RB) will work.<br>
 There are several compatible/cloned boards in the market that will work fine with KSGER profiles.<br>
 
-T12-951, T12-952, T12-956, T12-959 use STC MCU, not supported by this firmware.
+T12-951, T12-952, T12-956, T12-959 use STC MCU, not supported by this firmware, nor any STM32 else than STM32F10x or STM32F072 (Quicko v1 only).<br>
 
+Recently some controllers started using STM32F030x. This FW will never fit in such small flash, and the 32-pin package makes upgrading to STM32F10x impossible.<br>
 
 ## Bug reporting
 If you encounter any error or bug:<br>
