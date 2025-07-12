@@ -490,6 +490,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
             if(mainScr.boost_allow && currentIronMode==mode_run){           // If boost flag enabled and iron running
               mainScr.boost_allow=0;                                        // Clear flag
               setCurrentMode(mode_boost, MEDIUM_BEEP);                      // Set boost mode
+              return -1;                                                    // Exit now to prevent processing of the click event, triggering sleep mode
             }
           }
           if( checkMainScreenModeTimer(300) || bad_enc_detect ){            // Wait at least 300ms after entering the screen before allowing click events from entering low power modes, otherwise the user might accidentally enter them.
