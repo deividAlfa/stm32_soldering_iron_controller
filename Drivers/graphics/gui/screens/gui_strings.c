@@ -941,15 +941,15 @@ const strings_t strings[LANGUAGE_COUNT] = {
 #endif
 
 #ifdef ENABLE_ADDON_FUME_EXTRACTOR
-      .FUME_EXTRACTOR_Title         = "FUME EXT. CTL.",
+      .FUME_EXTRACTOR_Title         = "ИЗВЕЖДАНЕ ДИМ",
       .FUME_EXTRACTOR_Mode          = "Режим",
-      .FUME_EXTRACTOR_Modes         = { "DISABLED", "AUTO", "ALW. ON" },
-      .FUME_EXTRACTOR_AfterRun      = "After Run",
+      .FUME_EXTRACTOR_Modes         = { "ИЗКЛЮЧЕНО", "АВТО", "ВКЛЮЧЕНО" },
+      .FUME_EXTRACTOR_AfterRun      = "След работа",
       .FUME_EXTRACTOR_AfterRunUnit  = "с",
 #endif
 
 #ifdef ENABLE_ADDON_SWITCH_OFF_REMINDER
-      .SWITCH_OFF_REMINDER_Title               = "SW OFF REMINDER",
+      .SWITCH_OFF_REMINDER_Title               = "НАПОМНЯНЕ ИЗКЛ.",
       .SWITCH_OFF_REMINDER_EnableDisableOption = "Напомняне",
       .SWITCH_OFF_REMINDER_InactivityDelay     = "Закъснение",
       .SWITCH_OFF_REMINDER_ReminderPeriod      = "Период",
@@ -965,9 +965,9 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_Sleep = "Заспиване",
       .IRON_Boost = "Подсилване",
       .IRON_Boost_Add = " Увелич.",
-      .IRON_Cold_Boost = "Cold Boost",
-      .IRON_ColdBoost_Threshold = " Thresh.",
-      .IRON_ColdBoost_Timeout = " Timeout",
+      .IRON_Cold_Boost = "Студ.подси",
+      .IRON_ColdBoost_Threshold = " Праг",
+      .IRON_ColdBoost_Timeout = " Изчакване",
       .IRON_Wake_Mode = "Събуждане",
       .IRON_Shake_Filtering = " Филтър",
       .IRON_Stand_Mode = " Поставка",
@@ -978,7 +978,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .IRON_ADC_Time = "Време АЦП",
       .IRON_PWM_mul = "Множ. шим",
       .IRON_No_Iron = "Без поял.",
-      .IRON_Error_Timeout = "Врм. гршк",
+      .IRON_Error_Timeout = "Изтек.врем",
       .IRON_Error_Resume_Mode = " Възстан.",
       .IRON_FILTER_MENU = "ФИЛТЪР",
       .IRON_NTC_MENU = "NTC",
@@ -986,7 +986,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .FILTER_Filter = "Филтър",
       .FILTER__Threshold = " Праг",
       .FILTER__Count_limit = " Огранич.брой",
-      .FILTER__Step_down = " Step down",
+      .FILTER__Step_down = " Намаляване",
       .FILTER__Min = " Мин.",
       .FILTER_Reset_limit = "Нулир.огрнч.",
 
@@ -1001,7 +1001,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .SYSTEM_Active_Detection = "Проверка",
       .SYSTEM_LVP = "Нис.напрж",
       .SYSTEM_Gui_Time = "Опресняв.",
-      .SYSTEM_Battery = "Battery",
+      .SYSTEM_Battery = "Батерия",
       .SYSTEM_DEBUG = "ГРЕШКИ",
       .SYSTEM_RESET_MENU = "НУЛИРАНЕ",
 
@@ -1024,7 +1024,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .NTC_Pull = "Pull",
       .NTC__Res = " Съпротив.",
       .NTC__Beta = " Бета",
-      .NTC_NTC_Detect = "NTC Detect",
+      .NTC_NTC_Detect = "Детект.NTC",
       .NTC__High = " Високо",
       .NTC__Low = " Ниско",
 
@@ -1054,7 +1054,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       .CAL_Sampling = "Взема проба",      // Must be 11 chars long
       .CAL_Captured = "Проба взета",      // Must be 11 chars long
       .CAL_Step = "СТЪПКА:",
-      .CAL_Wait = "WAIT...",
+      .CAL_Wait = "ЧАКАЙТЕ...",
       .CAL_Measured = "ИЗМЕРЕНО:",
       .CAL_Success = "ГОТОВО!",
       .CAL_Failed = "ГРЕШКА!",
@@ -1067,7 +1067,7 @@ const strings_t strings[LANGUAGE_COUNT] = {
       ._Language = "Език",
       .__Temp = " t\260",
       .__Delay = " Забавяне",
-      .__Time = " Time",
+      .__Time = " Време",
       ._Cal_250 = "Кал. 250\260C",
       ._Cal_400 = "Кал. 400\260C",
       ._BACK = "НАЗАД",
