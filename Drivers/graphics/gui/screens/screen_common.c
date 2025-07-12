@@ -56,7 +56,7 @@ int longClickReturn(widget_t *w){
 }
 
 uint8_t update_GUI_Timer(void){
-  static uint32_t guiTimer=0;
+  static uint32_t guiTimer;
   if((current_time-guiTimer) >= getSystemSettings()->guiUpdateDelay){
     guiTimer=current_time;
     return 1;
