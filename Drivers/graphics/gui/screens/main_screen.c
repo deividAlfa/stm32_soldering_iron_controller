@@ -34,6 +34,14 @@ slide_t screenSaver = {
 enum mode{  main_none=0, main_irontemp, main_error, main_setpoint, main_tipselect,  main_tipselect_auto, main_profileselect };
 enum{ status_ok=0x20, status_error };
 enum { temp_numeric, temp_graph };
+xbm_t boostAllowXBM = {
+  .width=9,
+  .height=9,
+  .xbm=(const uint8_t[]){
+    0x7C, 0x00, 0x82, 0x00, 0x11, 0x01, 0x11, 0x01, 0x7D, 0x01, 0x11, 0x01, 
+    0x11, 0x01, 0x82, 0x00, 0x7C, 0x00, 
+  },
+};
 xbm_t shakeXBM = {
   .width=9,
   .height=9,
@@ -183,6 +191,7 @@ static struct{
   #endif
   uint32_t modeTimer;                     // Timer to track current screen mode time
   uint32_t inputBlockTimer;               // Timer to block user input Load current time+blocking time in ms
+  uint32_t lastEncoderWakeTimer;          // Timer to track last wake send by encoder
   uint32_t lastErrorTimer;                // Timer to track last error time
 }mainScr;
 
@@ -210,6 +219,12 @@ uint8_t checkIronModeTimer(uint32_t time){
   return 0;
 }
 
+uint8_t checkEncoderWakeTimer(uint32_t time){
+  if((current_time-mainScr.lastEncoderWakeTimer)>time){
+    return 1;
+  }
+  return 0;
+}
 static void setTemp(uint16_t *val) {
   setUserTemperature(*val);
 }
@@ -340,7 +355,7 @@ int8_t switchScreenMode(void){
 
       case main_irontemp:
         widgetDisable(Widget_SetPoint);
-        mainScr.boost_allow=0;
+        mainScr.boost_allow=3;
         if(mainScr.ironStatus!=status_error){
           if(!plot.enabled){
             setMainWidget(Widget_IronTemp);
@@ -356,6 +371,7 @@ int8_t switchScreenMode(void){
 
       case main_setpoint:
         plot.enabled = 0;
+        mainScr.boost_allow=1;
         setMainWidget(Widget_SetPoint);
         break;
 
@@ -405,7 +421,11 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       input=Rotate_Nothing;
     }
   }
-
+  
+  // If more than 1 second since last rotation, disable boost allow flag
+  if(mainScr.boost_allow && checkMainScreenModeTimer(1000)){
+    mainScr.boost_allow=3;
+  }
 
   // Timer for ignoring user input
   if(current_time < mainScr.inputBlockTimer){
@@ -446,12 +466,13 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       setCurrentMode(mode_run, MEDIUM_BEEP);
       input = Rotate_Nothing;
     }
-    else if(currentIronMode!=mode_run && input != Click){               // Ignore click in low power mode. Only rotation will resume run mode.
+    else if(currentIronMode<mode_run && input != Click){               // Ignore click in low power mode. Only rotation will resume run mode.
       mainScr.lastIronMode_EncoderFix = getCurrentMode();
+      mainScr.lastEncoderWakeTimer = current_time;
       IronWake(wakeSrc_Button);                                         // Send wake signal
       if(getCurrentMode()==mode_run){                                   // If mode actually changed
         input = Rotate_Nothing;                                         // Ignore rotation to prevent setpoint adjustment
-        resetModeTimer();                                               // Reset mode timer
+        //resetModeTimer();                                               // Reset mode timer
       }
     }
   }
@@ -475,17 +496,14 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         case Click:                                                         // Received a Click, enter low power mode.
         {
-          bool bad_enc_detect = !checkIronModeTimer(250) && mainScr.lastIronMode_EncoderFix<mode_run; // Iron was sleeping but mode was changed less than 250ms ago (Rotation event) and we got a click, assume this is encoder malfunction
+          uint8_t bad_enc_detect = !checkEncoderWakeTimer(250) && (mainScr.lastIronMode_EncoderFix<mode_run); // Iron was sleeping but mode was changed less than 250ms ago (Rotation event) and we got a click, assume this is encoder malfunction
 
-          if(!checkIronModeTimer(250) && mainScr.lastIronMode_EncoderFix < mode_boost){// If click issued too soon after iron working mode was changed to non-boost mode
+          if(!checkEncoderWakeTimer(250) && mainScr.lastIronMode_EncoderFix < mode_boost){// If click issued too soon after iron working mode was changed to non-boost mode
             currentIronMode = mainScr.lastIronMode_EncoderFix;                         // Assume it was a encoder fault rotating while trying to click, restore previous mode, then proceed with low power mode
           }
           if(mainScr.displayMode==temp_graph){                              // If in graph display
-            if(checkMainScreenModeTimer(1000)){                             // If more than 1 second since last rotation, disable boost allow flag
-              mainScr.boost_allow=0;
-            }
             if(mainScr.boost_allow && currentIronMode==mode_run){           // If boost flag enabled and iron running
-              mainScr.boost_allow=0;                                        // Clear flag
+              mainScr.boost_allow=3;                                        // Clear flag
               setCurrentMode(mode_boost, MEDIUM_BEEP);                      // Set boost mode
               return -1;                                                    // Exit now to prevent processing of the click event, triggering sleep mode
             }
@@ -505,8 +523,8 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         case Rotate_Increment:
         case Rotate_Decrement:
           if(mainScr.displayMode==temp_graph){
-            if(!checkMainScreenModeTimer(500)){                             // If last rotation step happened <500ms ago, disable boost allow flag and modify the setpoint.
-              mainScr.boost_allow=0;                                        // Disable boost allow flag
+            if(!checkMainScreenModeTimer(1000)){                            // If last rotation step happened <1000ms ago, disable boost allow flag and modify the setpoint.
+              mainScr.boost_allow=3;                                        // Disable boost allow flag
               widgetEnable(Widget_SetPoint);                                // Enable the setpoint widget, but don't set it as current widget (Dirty hack), just to be able to process the input
               default_widgetProcessInput(Widget_SetPoint, input, state);    // If the widget is disabled, the widget process will skip it. It will be disabled before drawing in drawMisc function
             }
@@ -533,7 +551,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           else{
             mainScr.displayMode=temp_numeric;
             mainScr.updateReadings=1;
-            mainScr.boost_allow=0;                                        // Clear flag
+            mainScr.boost_allow=3;                                        // Clear flag
             widgetEnable(Widget_IronTemp);
             plot.enabled=0;
           }
@@ -704,7 +722,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
               setCurrentMode(mode_sleep, MEDIUM_BEEP);
             }
           }
-          else if(mainScr.ironStatus != status_error && currentIronMode==mode_run && !checkMainScreenModeTimer(1000)){
+          else if(mainScr.boost_allow && mainScr.ironStatus != status_error && currentIronMode==mode_run){
             setCurrentMode(mode_boost, MEDIUM_BEEP);
           }
 
@@ -717,6 +735,12 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           }
           break;
 
+
+        case Rotate_Decrement:          // Rotated while in screen, abort boost, change setpoint
+        case Rotate_Increment:
+          mainScr.boost_allow=3;
+          break;
+            
         case Rotate_Increment_while_click:
         case Rotate_Decrement_while_click:
           mainScr.setMode=main_irontemp;
@@ -745,8 +769,16 @@ static uint8_t  drawIcons(uint8_t refresh){
     u8g2_DrawXBMP(&u8g2, 0, 0, voltXBM.width, voltXBM.height, voltXBM.xbm);
     #endif
   }
-
-  if(mainScr.shakeActive==1 || (mainScr.shakeActive==2 && refresh) ){ //1 = needs drawing, 2 = already drawn
+  if(mainScr.boost_allow==1){    
+    u8g2_DrawXBMP(&u8g2, displayWidth-boostAllowXBM.width-PWR_BAR_WIDTH-8, displayHeight-boostAllowXBM.height, boostAllowXBM.width, boostAllowXBM.height, boostAllowXBM.xbm);
+  }
+  else if(mainScr.boost_allow==3){
+      mainScr.boost_allow=0;
+      u8g2_SetDrawColor(&u8g2,BLACK);
+      u8g2_DrawBox(&u8g2, displayWidth-boostAllowXBM.width-PWR_BAR_WIDTH-8, displayHeight-boostAllowXBM.height, boostAllowXBM.width, boostAllowXBM.height);
+      u8g2_SetDrawColor(&u8g2,WHITE);
+  }
+  else if(mainScr.shakeActive==1 || (mainScr.shakeActive==2 && refresh) ){ //1 = needs drawing, 2 = already drawn
     mainScr.shakeActive=2;
     u8g2_DrawXBMP(&u8g2, displayWidth-shakeXBM.width-PWR_BAR_WIDTH-8, displayHeight-shakeXBM.height, shakeXBM.width, shakeXBM.height, shakeXBM.xbm);
     return 1;
