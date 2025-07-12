@@ -1039,6 +1039,8 @@ static uint8_t main_screen_draw(screen_t *scr){
     fillBuffer(BLACK, fill_dma);
   }
 
+  mainScr.updateReadings = 0;                   // If update flag was set in main_screenProcessInput, widgets were already updated. Clear flag now to prevent readings from updating again.
+
   u8g2_SetDrawColor(&u8g2, WHITE);
 
   if(mainScr.ironStatus != status_error){
