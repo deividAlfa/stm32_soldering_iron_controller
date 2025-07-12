@@ -452,9 +452,6 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       if(getCurrentMode()==mode_run){                                   // If mode actually changed
         input = Rotate_Nothing;                                         // Ignore rotation to prevent setpoint adjustment
         resetModeTimer();                                               // Reset mode timer
-        if(mainScr.displayMode==temp_graph){                            // If in graph display mode
-          mainScr.boost_allow=1;                                        // Allow boost triggering
-        }
       }
     }
   }
