@@ -73,7 +73,7 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
   The encoder only resumes normal mode when adjusting the setpoint or clicking in the temperature screen (Not when selecting tips or navigating in the menu)<br>
 - **Boost mode**<br>
   Rotate the encoder one step to show up the setpoint adjustment and click within 1 second to trigger boost mode.<br>
-  A (+)icon will appear during the time where boost mode can be triggered with a click.<br>
+  A icon ⯭ will appear during the time where boost mode can be triggered with a click.<br>
   While boost mode is enabled, clicking or rotating the encoder will return to normal mode.<br>
   This also works in plot mode, but the setpoint won't appear, only the boost icon will be shown <br>.
 - **Tip selection**<br>
