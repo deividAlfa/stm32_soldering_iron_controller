@@ -696,6 +696,7 @@ void checkIronError(void){
     Iron.Error.Flags |= Err.Flags;                                                      // Update stored Iron errors
     Iron.LastErrorTime = CurrentTime;                                                   // Update error time
     if(!Iron.Error.active){                                                             // Active flag wasnt set, this is a first occurring error
+      Iron.lastMode = Iron.CurrentMode;                                                 // Save current mode
       if(Err.Flags!=FLAG_NO_IRON){                                                      // Avoid alarm if only the tip is removed
         setCurrentMode(mode_sleep, 0);                                                  // Set sleep mode, no beeping as alarm is active
         buzzer_alarm_start();                                                           // Start alarm
@@ -703,7 +704,6 @@ void checkIronError(void){
       else{
         setCurrentMode(mode_sleep, MEDIUM_BEEP);                                        // Set sleep mode, short beep, tip removed
       }
-      Iron.lastMode = Iron.CurrentMode;                                                 // Save current mode
       Iron.Error.active = 1;                                                            // Set active flag
       configurePWMpin(output_Low);                                                      // Force pin low to completely remove the power
     }
