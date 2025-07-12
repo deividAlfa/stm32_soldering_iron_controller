@@ -55,6 +55,7 @@ extern struct mallinfo mi;
 #endif
 
 #define WAKE_input()   HAL_GPIO_ReadPin(WAKE_GPIO_Port, WAKE_Pin)
+#define STAND_input()  HAL_GPIO_ReadPin(STAND_GPIO_Port, STAND_Pin)
 #define BUTTON_input() HAL_GPIO_ReadPin(ENC_SW_GPIO_Port, ENC_SW_Pin)
 
 void Program_Handler(void);
