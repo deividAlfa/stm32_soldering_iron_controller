@@ -478,6 +478,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     }
     else if(currentIronMode==mode_boost){                               // Click / rotation events will exit boost mode, don't process the input afterwards
       setCurrentMode(mode_run, MEDIUM_BEEP);
+      mainScr.lastClickTimer = current_time;
       input = Rotate_Nothing;
     }
     else if(currentIronMode<mode_run && input != Click){               // Ignore click in low power mode. Only rotation will resume run mode.
