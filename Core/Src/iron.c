@@ -776,7 +776,7 @@ void setIronSafeMode(uint8_t mode){
 void setIronTipChange(uint8_t mode){
   if(mode)
     setCurrentMode(mode_sleep, MLONG_BEEP);
-  Iron.standMode_tipchange = mode;
+  Iron.tipchange = mode;
 }
 
 bool GetSafeMode(void){

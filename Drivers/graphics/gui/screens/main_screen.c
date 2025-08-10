@@ -781,7 +781,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       if(mainScr.ironStatus==status_error)
         trig=1;
 
-      if((trig && mainScr.ironStatus==status_ok) || (current_time - mainScr.modeTimer > 20000) || input==Click){ // If error is gone, or >20s in this screen, or click, return to normal
+      if((trig && !getIronErrorFlags().noIron) || (current_time - mainScr.modeTimer > 20000) || input==Click){ // Tip is back, >20s in this screen, or click, return to main screen
         trig=0;
         setIronTipChange(0);
         mainScr.setMode = mainScr.ironStatus==status_ok ? main_tipselect_auto : main_irontemp;
