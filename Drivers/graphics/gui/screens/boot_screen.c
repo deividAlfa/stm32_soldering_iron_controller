@@ -219,7 +219,7 @@ void boot_screen_onExit(screen_t *scr){
     updateTempData(force_update);
     getSettings()->setupMode=0;                           // Disable setup mode
   }
-  setSafeMode(disable);                                   // Disable safe mode before exit
+  setIronSafeMode(disable);                                   // Disable safe mode before exit
   resetIronError();                                       // Force timeout of any error (This won't clear errors if still detected)
   setBootCompleteFlag();                                  // This is for checkIronError, will load the boot state when this flag is set.
   waitForNextConversion();                                // Wait for a conversion to show a glitch-free screen

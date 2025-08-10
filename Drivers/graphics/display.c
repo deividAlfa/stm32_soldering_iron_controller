@@ -690,7 +690,7 @@ void buttonReset(void){
 }
 
 void Oled_error_init(void){
-  setSafeMode(enable);
+  setIronSafeMode(enable);
 #if defined DISPLAY_DEVICE
   if(!oled.use_sw)
     display_dma_abort();

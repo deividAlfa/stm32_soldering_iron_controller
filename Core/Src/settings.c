@@ -429,7 +429,7 @@ static void sortTips(flashTipData_t * data, uint8_t numberOfTips){
 
 void saveSettings(uint8_t save_mode, uint8_t reboot_mode){
   if(reboot_mode  == do_reboot)                                        // Force safe save_mode (disable iron power) if rebooting.
-    setSafeMode(enable);
+    setIronSafeMode(enable);
 
 
 
@@ -608,7 +608,7 @@ void restoreSettings(void) {
 
   if(setup){                                                                                              // Setup mode, so flash data is not initialized
     getSettings()->setupMode = enable;                                                                    // Load setup state for boot screen
-    setSafeMode(enable);                                                                                  // Safe mode just in case
+    setIronSafeMode(enable);                                                                                  // Safe mode just in case
     flash_sector_detect();                                                                                // Detect flash sector erase size
     resetSystemSettings(getSystemSettings());                                                             // Load default system settings
 
