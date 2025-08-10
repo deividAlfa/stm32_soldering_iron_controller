@@ -31,7 +31,7 @@ slide_t screenSaver = {
     .yAdd = 1,
 };
 
-enum mode{  main_none=0, main_irontemp, main_error, main_setpoint, main_tipselect,  main_tipselect_auto, main_profileselect };
+enum mode{  main_none=0, main_irontemp, main_error, main_setpoint, main_tipselect,  main_tipselect_auto, main_profileselect, main_tipchange };
 enum{ status_ok=0x20, status_error };
 enum { temp_numeric, temp_graph };
 xbm_t boostAllowXBM = {
@@ -154,6 +154,15 @@ xbm_t x_markXBM = {
     0x06, 0x06, 0x07, 0x0E, 0x03, 0x0C,
   },
 };
+xbm_t arrowXBM = {
+  .width=12,
+  .height=15,
+  .xbm=(const uint8_t[]){
+    0x00, 0x00, 0x60, 0x00, 0xE0, 0x00, 0xE0, 0x01, 0xC0, 0x03, 0x80, 0x07,
+    0xFF, 0x0F, 0xFF, 0x0F, 0xFF, 0x0F, 0x80, 0x07, 0xC0, 0x03, 0xE0, 0x01,
+    0xE0, 0x00, 0x60, 0x00, 0x00, 0x00,
+  },
+};
 //-------------------------------------------------------------------------------------------------------------------------------
 // Main screen widgets
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -190,6 +199,7 @@ static struct{
   uint16_t lastVin;                       // Last stored voltage for widget
   #endif
   uint32_t modeTimer;                     // Timer to track current screen mode time
+  uint32_t lastClickTimer;                // Timer to track last user click
   uint32_t inputBlockTimer;               // Timer to block user input Load current time+blocking time in ms
   uint32_t lastEncoderWakeTimer;          // Timer to track last wake send by encoder
   uint32_t lastErrorTimer;                // Timer to track last error time
@@ -364,6 +374,7 @@ int8_t switchScreenMode(void){
         }
         mainScr.setMode=main_error;
         // No break intentionally
+      case main_tipchange:
       case main_error:
         plot.enabled = 0;
         widgetDisable(Widget_IronTemp);
@@ -371,7 +382,8 @@ int8_t switchScreenMode(void){
 
       case main_setpoint:
         plot.enabled = 0;
-        mainScr.boost_allow=1;
+        if(getCurrentMode()==mode_run)
+          mainScr.boost_allow=1;
         setMainWidget(Widget_SetPoint);
         break;
 
@@ -415,10 +427,12 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   else if(mainScr.ironStatus != status_ok){                               // If error is gone
     mainScr.ironStatus = status_ok;
     wakeOledDim();                                                        // Wake up screen
-    if( (mainScr.lastError == (FLAG_ACTIVE | FLAG_NO_IRON)) && (current_time - mainScr.lastErrorTimer > 1000) ){    // If last error was no tip and >1 second passed, enable automatic tip selection
-      mainScr.setMode = main_tipselect_auto;
-      switchScreenMode();
-      input=Rotate_Nothing;
+    if(mainScr.currentMode != main_tipchange){
+      if( (mainScr.lastError == (FLAG_ACTIVE | FLAG_NO_IRON)) && (current_time - mainScr.lastErrorTimer > 1000) ){    // If last error was no tip and >1 second passed, enable automatic tip selection
+        mainScr.setMode = main_tipselect_auto;
+        switchScreenMode();
+        input=Rotate_Nothing;
+      }
     }
   }
   
@@ -480,7 +494,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
   switch(mainScr.currentMode){
     case main_irontemp:
 
-      if(mainScr.ironStatus!=status_ok){                                  // When the screen goes to error state
+      if(mainScr.currentMode!=main_tipchange && mainScr.ironStatus!=status_ok){                                  // When the screen goes to error state (Ignore in tip change)
         mainScr.setMode=main_error;                                       // Set error screen
         break;
       }
@@ -488,7 +502,14 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
       switch((uint8_t)input){
 
         case LongClick:
-          return screen_settings;
+
+          if(getProfileSettings()->WakeInputMode == mode_stand && (current_time -  mainScr.lastClickTimer <1000)){
+            setIronTipChange(1);
+            mainScr.setMode=main_tipchange;
+          }
+          else
+            return screen_settings;
+          break;
 
         case Rotate_Increment_while_click:
           mainScr.setMode=main_tipselect;
@@ -497,6 +518,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         case Click:                                                         // Received a Click, enter low power mode.
         {
           uint8_t bad_enc_detect = !checkEncoderWakeTimer(250) && (mainScr.lastIronMode_EncoderFix<mode_run); // Iron was sleeping but mode was changed less than 250ms ago (Rotation event) and we got a click, assume this is encoder malfunction
+          mainScr.lastClickTimer = current_time;
 
           if(!checkEncoderWakeTimer(250) && mainScr.lastIronMode_EncoderFix < mode_boost){// If click issued too soon after iron working mode was changed to non-boost mode
             currentIronMode = mainScr.lastIronMode_EncoderFix;                         // Assume it was a encoder fault rotating while trying to click, restore previous mode, then proceed with low power mode
@@ -749,6 +771,24 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         default:
           break;
       }
+      break;
+
+    case main_tipchange:
+    {
+      static uint8_t trig;
+
+      wakeOledDim();
+      if(mainScr.ironStatus==status_error)
+        trig=1;
+
+      if((trig && mainScr.ironStatus==status_ok) || (current_time - mainScr.modeTimer > 20000) || input==Click){ // If error is gone, or >20s in this screen, or click, return to normal
+        trig=0;
+        setIronTipChange(0);
+        mainScr.setMode = mainScr.ironStatus==status_ok ? main_tipselect_auto : main_irontemp;
+      }
+      break;
+    }
+
     default:
       break;
   }
@@ -923,6 +963,13 @@ static uint8_t  drawPlot(uint8_t refresh){
   return 0;
 }
 
+static void drawTip(void){
+  if(getCurrentProfile() == profile_T12)
+    u8g2_DrawXBM(&u8g2, (displayWidth-ironXBM_T12.width-x_markXBM.width-5)/2, (displayHeight-ironXBM_T12.height)/2, ironXBM_T12.width, ironXBM_T12.height, ironXBM_T12.xbm);
+  else
+    u8g2_DrawXBM(&u8g2, (displayWidth-ironXBM_JBC.width-x_markXBM.width-5)/2, (displayHeight-ironXBM_JBC.height)/2, ironXBM_JBC.width, ironXBM_JBC.height, ironXBM_JBC.xbm);
+}
+
 static uint8_t  drawError(uint8_t refresh){
   static uint32_t last_time;
   static uint8_t x_mark_state;
@@ -935,6 +982,8 @@ static uint8_t  drawError(uint8_t refresh){
   IronError_t const ironErrorFlags = getIronErrorFlags();
 
   if(ironErrorFlags.Flags == (FLAG_ACTIVE | FLAG_NO_IRON)){                               // Only "No iron detected". Don't show error screen just for it
+    if(mainScr.currentMode==main_tipchange)                                               // Ignore no tip error when changing the tip
+      return 0;
 
     uint8_t xp, update = 0;
 
@@ -944,10 +993,7 @@ static uint8_t  drawError(uint8_t refresh){
       xp = (displayWidth-ironXBM_JBC.width-x_markXBM.width-5)/2;
 
     if(refresh){
-      if(getCurrentProfile() == profile_T12)
-        u8g2_DrawXBM(&u8g2, xp, (displayHeight-ironXBM_T12.height)/2, ironXBM_T12.width, ironXBM_T12.height, ironXBM_T12.xbm);
-      else
-        u8g2_DrawXBM(&u8g2, xp, (displayHeight-ironXBM_JBC.height)/2, ironXBM_JBC.width, ironXBM_JBC.height, ironXBM_JBC.xbm);
+      drawTip();
       update = 1;
     }
 
@@ -982,7 +1028,9 @@ static uint8_t  drawError(uint8_t refresh){
                   (uint8_t)ironErrorFlags.safeMode +
                   (uint8_t)(ironErrorFlags.NTC_low | ironErrorFlags.NTC_high) +
                   ironErrorFlags.noIron;
-    if(err<4){
+    if(err==0)
+      return 0;
+    else if(err<4){
       Err_ypos= 12+ ((40-(err*12))/2);
     }
     else{
@@ -1015,6 +1063,8 @@ static uint8_t  drawError(uint8_t refresh){
 }
 
 static void  drawMisc(uint8_t refresh){
+  static uint8_t arrow_state;
+
   if(!refresh) return;
   uint8_t len = 0;
   char *s = NULL;
@@ -1037,6 +1087,26 @@ static void  drawMisc(uint8_t refresh){
     u8g2_DrawRBox(&u8g2, 0, 54, len, 10, 2);                                                  // Draw edit frame
     u8g2_SetDrawColor(&u8g2, BLACK);
   }
+  else if(mainScr.currentMode==main_tipchange){
+    if( refresh || arrow_state==0){
+      uint8_t xp;
+
+      if(getCurrentProfile() == profile_T12)
+        xp = (displayWidth-ironXBM_T12.width-x_markXBM.width-5)/2;
+      else
+        xp = (displayWidth-ironXBM_JBC.width-x_markXBM.width-5)/2;
+
+      arrow_state=1;
+      drawTip();
+      if(getCurrentProfile() == profile_T12)
+        u8g2_DrawXBM(&u8g2, xp+ironXBM_T12.width+5, (displayHeight-arrowXBM.height)/2, arrowXBM.width, arrowXBM.height, arrowXBM.xbm);
+      else
+        u8g2_DrawXBM(&u8g2, xp+ironXBM_JBC.width+5, (displayHeight-arrowXBM.height)/2, arrowXBM.width, arrowXBM.height, arrowXBM.xbm);
+    }
+  }
+  else
+    arrow_state=0;
+
   u8g2_DrawUTF8(&u8g2, 2, 54, s);                                                             // Draw tip/profile name
   u8g2_SetDrawColor(&u8g2, WHITE);
   return;
