@@ -32,7 +32,7 @@ typedef struct {
   uint8_t             calibrating;                          // Flag to indicate calibration state (don't save temperature settings)
   uint8_t             standMode_update;                     // Flag to indicate the stand mode must be changed
   uint8_t             standMode_beepDone;                   // Flag to indicate the stand change already beeped
-  uint8_t             standMode_tipchange;                  // Flag to indicate we're changing the tip
+  uint8_t             tipchange;                            // Flag to indicate we're changing the tip
   uint8_t             shakeActive;                          // Flag to indicate handle movement
   uint8_t             temperatureReached;                   // Flag for temperature calibration
   uint8_t             updatePwm;                            // Flag to indicate PWM need to be updated
@@ -659,20 +659,21 @@ void readWake(void){
   now_wake = WAKE_input();
 #endif
 
-    if(last_wake!=now_wake){                                            // If wake sensor input changed
-      last_wake=now_wake;
-      if(getProfileSettings()->WakeInputMode==mode_shake){
-        if(IronWake(wakeSrc_Shake)){
-          Iron.shakeActive = 1;
-          Iron.lastShakeTime = HAL_GetTick();
-        }
-      }
-      else if(getProfileSettings()->WakeInputMode==mode_stand){
-        if(!Iron.standMode_tipchange){                                            // Suppress any actions while changing the tip
-          setModefromStand(now_wake ? mode_run: getProfileSettings()->StandMode);
-        }
+  if(last_wake!=now_wake){                                            // If wake sensor input changed
+    if(Iron.tipchange)                                                // Suppress any actions while changing the tip
+      return;
+
+    last_wake=now_wake;
+    if(getProfileSettings()->WakeInputMode==mode_shake){
+      if(IronWake(wakeSrc_Shake)){
+        Iron.shakeActive = 1;
+        Iron.lastShakeTime = HAL_GetTick();
       }
     }
+    else if(getProfileSettings()->WakeInputMode==mode_stand){
+      setModefromStand(now_wake ? mode_run: getProfileSettings()->StandMode);
+    }
+  }
 }
 
 void resetIronError(void){

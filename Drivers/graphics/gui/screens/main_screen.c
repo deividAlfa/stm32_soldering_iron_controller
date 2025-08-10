@@ -503,7 +503,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         case LongClick:
 
-          if(getProfileSettings()->WakeInputMode == mode_stand && (current_time -  mainScr.lastClickTimer <1000)){
+          if(current_time -  mainScr.lastClickTimer < 1000){          // Click + long click withign 1s, enter tip change mode.
             setIronTipChange(1);
             mainScr.setMode=main_tipchange;
           }
