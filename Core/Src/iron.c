@@ -151,7 +151,7 @@ void handleIron(void) {
       }
       else{
                       // Delay of 500ms when removing the handle, "standDelay" when placing the handle.
-        uint32_t delay = (Iron.changeMode < mode_run) ? (getProfileSettings()->standDelay ? 1000UL*getProfileSettings()->standDelay : 500 ) : 500;
+        uint32_t delay = (Iron.changeMode < mode_run) ? (getProfileSettings()->standDelay ? (1000UL*getProfileSettings()->standDelay) : 500 ) : 500;
         uint32_t elapsed = CurrentTime-Iron.LastModeChangeTime;
 
         if (!Iron.standMode_beepDone && (elapsed > 500) ){                   // Apply a small delay of 500ms for the beep
@@ -162,6 +162,7 @@ void handleIron(void) {
           Iron.standMode_beepDone = 0;
           Iron.standMode_update = no_update;
           Iron.lastWakeSrc = wakeSrc_Stand;
+          setCurrentMode(Iron.changeMode, MLONG_BEEP);
         }
       }
     }
