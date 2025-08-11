@@ -80,7 +80,7 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
   Issue a clockwise drag-rotation to show the tip selection. The tip name label will be highlighted.<br>
   Rotate to change the selected tip, click or wait 2 seconds to select and return to normal mode. Long-click to enter the tip settings.<br>
   When inserting a new tip, this setting will be enabled automatically for 5 seconds.<br>
-  To avoid unintended behaviour, at least 3 seconds must pass between tip changes, lower than that will be considered noise or momentary connection break.<br>
+  To avoid unintended behaviour, if the time between tip removal and insertion is less than 2 seconds, it will be considered a temporary connection break, and the selection won't be enabled.<br>
 - **Profile selection**<br>
   Issue a drag-rotation while in Tip selection mode to show the profile selection.<br>
   Rotate to change the selected profile (T12, C210, C245), click or wait 2 seconds to select and return to normal mode.
