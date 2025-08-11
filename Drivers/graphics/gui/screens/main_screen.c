@@ -428,7 +428,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
     mainScr.ironStatus = status_ok;
     wakeOledDim();                                                        // Wake up screen
     if(mainScr.currentMode != main_tipchange){
-      if( (mainScr.lastError == (FLAG_ACTIVE | FLAG_NO_IRON)) && (current_time - mainScr.lastErrorTimer > 1000) ){    // If last error was no tip and >1 second passed, enable automatic tip selection
+      if( (mainScr.lastError == (FLAG_ACTIVE | FLAG_NO_IRON)) && (current_time - mainScr.lastErrorTimer > 2000) ){    // If last error was no tip and >2 second passed, enable automatic tip selection
         mainScr.setMode = main_tipselect_auto;
         switchScreenMode();
         input=Rotate_Nothing;
