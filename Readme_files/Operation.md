@@ -66,16 +66,20 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
   Rotate the encoder, the setpoint will be shown, continue rotating to adjust it.<br>
   After 1 second of inactivity it will return to normal mode.<br>
 - **Sleep/Standby modes**<br>
-  You can manually enter lower power modes by clicking in the main screen.<br>
-  The sequence would be [run/boost mode]->[standby mode]->[sleep mode].<br>
-  If button wake is enabled, encoder activity will resume normal mode, otherwise only the display brightness will be restored.<br>
-  Wake-up sources are the enconder (If enabled) or handle wake input sensor (If shake wake is enabled or in stand mode).<br>
-  The encoder only resumes normal mode when adjusting the setpoint or clicking in the temperature screen (Not when selecting tips or navigating in the menu)<br>
+  You can manually enter low power modes by clicking in the main screen.<br>
+  The sequence on each click would be [boost mode]->[run mode]->[standby mode]->[sleep mode].<br>
+  Additionally, standby and sleep timeouts will enter low power modes.<br>
+  The timeouts still apply when the stand is used, preventing infinite operation if the stand sensor becomes defective.<br>
+- **Exiting low power mode**<br>
+  Wake-up can be triggered by enconder rotation or wake input (Shake) sensor.<br>
+  Both can be enabled or disabled from the menu.<br>
+  In stand mode, encoder input is ignored, only the stand sensor is used.<br>
+  If display dimming is enabled, first encoder action will only restore the brightness, taking no further action.<br>
 - **Boost mode**<br>
   Rotate the encoder one step to show up the setpoint adjustment and click within 1 second to trigger boost mode.<br>
   A icon ⯭ will appear during the time where boost mode can be triggered with a click.<br>
   While boost mode is enabled, clicking or rotating the encoder will return to normal mode.<br>
-  This also works in plot mode, but the setpoint won't appear, only the boost icon will be shown <br>.
+  This also works in plot mode, but the setpoint won't appear, only the boost icon will be shown.<br>
 - **Tip selection**<br>
   Issue a clockwise drag-rotation to show the tip selection. The tip name label will be highlighted.<br>
   Rotate to change the selected tip, click or wait 2 seconds to select and return to normal mode. Long-click to enter the tip settings.<br>
@@ -84,6 +88,10 @@ The PID (Proportional, Integral, Derivative) algorithm determines the PWM duty c
 - **Profile selection**<br>
   Issue a drag-rotation while in Tip selection mode to show the profile selection.<br>
   Rotate to change the selected profile (T12, C210, C245), click or wait 2 seconds to select and return to normal mode.
+- **Tip change mode**<br>
+  While in the main temperature screen, issue a click and inmediately after press and hold the button down, after which a screen with a soldering tip and an arrow will be displayed.<br>
+  The power will be removed and the station will ignore any wake/shake/stand events, so the tip can be conveniently changed.<br>
+  It will exit when the tip change is detected, on click action, or after a 20 second timeout.<br>
 - **System menu**<br>
   A long click will enter the system menu (Except while in tip selection/setpoint adjustment).<br>
 
