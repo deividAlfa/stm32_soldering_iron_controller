@@ -181,6 +181,7 @@ static widget_t *Widget_SetPoint;
 
 static struct{
   uint8_t lastIronMode;                   // Last stored iron mode
+  uint8_t lastIronMode_onClick;           // Last stored iron mode before changing by click
   uint8_t lastIronMode_EncoderFix;        // Last stored iron mode for encoder workaround
   uint8_t lastPwr;                        // Last stored power for widget
   uint8_t shakeActive;                    // Shake icon status: 0=disabled, 1=needs drawing, 2=drawign done, 3=needs clearing
@@ -504,8 +505,9 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
 
         case LongClick:
 
-          if(current_time -  mainScr.lastClickTimer < 1000){          // Click + long click withign 1s, enter tip change mode.
-            setIronTipChange(1);
+          if(current_time -  mainScr.lastClickTimer < 1000){          // Click + long click within 1 second, enter tip change mode.
+            setCurrentMode(mainScr.lastIronMode_onClick, 0);          // Restore mode changed by previous click, so "Error resume mode" works as intended
+            setIronTipChange(enable);
             mainScr.setMode=main_tipchange;
           }
           else
@@ -533,7 +535,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
           }
           if( checkMainScreenModeTimer(300) || bad_enc_detect ){            // Wait at least 300ms after entering the screen before allowing click events from entering low power modes, otherwise the user might accidentally enter them.
             uint16_t beep_time =  bad_enc_detect ? 0 : MEDIUM_BEEP;         // Restore mode if bad encoder detected, we shouldn't have waken up, don't beep in this case.
-
+            mainScr.lastIronMode_onClick = currentIronMode;
             if(currentIronMode > mode_standby){
               setCurrentMode(mode_standby, beep_time);
             }
@@ -783,7 +785,7 @@ int main_screenProcessInput(screen_t * scr, RE_Rotation_t input, RE_State_t *sta
         trig=1;
 
       if((trig && !getIronErrorFlags().noIron) || (current_time - mainScr.modeTimer > 20000) || input==Click){ // Tip is back, >20s in this screen, or click, return to main screen
-        setIronTipChange(0);
+        setIronTipChange(disable);
         mainScr.setMode = mainScr.ironStatus==status_ok ? (trig ? main_tipselect_auto : main_irontemp) : main_irontemp; // Only go to tip select if the tip was actually changed. On error or unchanged, go to main screen.
         trig=0;
       }
