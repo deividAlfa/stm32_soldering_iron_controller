@@ -171,7 +171,7 @@ void handleIron(void) {
   Iron.waiting_conversion = 0;
 
   // If sleeping or error, stop here
-  if(!Iron.boot_complete || Iron.CurrentMode==mode_sleep || Iron.Error.active) {                // For safety, force PWM low everytime
+  if(!Iron.boot_complete || Iron.CurrentMode==mode_sleep || Iron.Error.active || Iron.tipchange) {                // For safety, force PWM low everytime
     Iron.Pwm_Out=0;
     __HAL_TIM_SET_COMPARE(Iron.Pwm_Timer, Iron.Pwm_Channel, 0);
     Iron.CurrentIronPower=0;
@@ -775,8 +775,6 @@ void setIronSafeMode(uint8_t mode){
 }
 
 void setIronTipChange(uint8_t mode){
-  if(mode)
-    setCurrentMode(mode_sleep, MLONG_BEEP);
   Iron.tipchange = mode;
 }
 
