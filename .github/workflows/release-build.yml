@@ -1,0 +1,38 @@
+name: Build And Attach Release Artifacts
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build release artifacts in Docker
+        run: |
+          mkdir -p build
+          docker build -t stm32-iron-builder .
+          docker run --rm \
+            -e BOARD=release \
+            -v "${GITHUB_WORKSPACE}:/src:ro" \
+            -v "${GITHUB_WORKSPACE}/build:/output" \
+            stm32-iron-builder
+
+      - name: Verify produced artifacts
+        run: |
+          ls -lah build
+          test -n "$(ls -1 build/*.zip 2>/dev/null)"
+
+      - name: Attach artifacts to the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          gh release upload "$TAG_NAME" build/*.zip --clobber
