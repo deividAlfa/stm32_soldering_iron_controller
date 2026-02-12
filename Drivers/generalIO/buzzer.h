@@ -9,11 +9,13 @@
 #define GENERALIO_BUZZER_H_
 
 #include "main.h"
+#include "settings.h"
 
 #define SHORT_BEEP    (uint16_t)  50
 #define MEDIUM_BEEP   (uint16_t)  200
 #define MLONG_BEEP    (uint16_t)  500
 #define LONG_BEEP     (uint16_t)  2000
+#define BEEP_DURATION (getSystemSettings()->beepDuration)
 #define ALARM_PERIOD  (uint16_t)  2000
 #define ALARM_HIGH    (uint16_t)  10
 #define ALARM_LOW     (uint16_t)  (ALARM_PERIOD-ALARM_HIGH)

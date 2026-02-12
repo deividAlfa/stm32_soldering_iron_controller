@@ -50,6 +50,7 @@ const systemSettings_t defaultSystemSettings = {
   .lvp                  = 110,                  // 11.0V Low voltage
   .initMode             = mode_sleep,           // Safer to boot in sleep mode by default!
   .buzzerMode           = disable,
+  .beepDuration         = 500,
   .buttonWakeMode       = wake_all,
   .shakeWakeMode        = wake_all,
   .EncoderMode          = RE_Mode_Forward,
