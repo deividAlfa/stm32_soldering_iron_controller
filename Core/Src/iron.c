@@ -107,14 +107,14 @@ void ironInit(TIM_HandleTypeDef *delaytimer, TIM_HandleTypeDef *pwmtimer, uint32
   Iron.Error.Flags    = FLAG_NOERROR;
 
   if(getProfileSettings()->WakeInputMode == mode_shake){
-    setCurrentMode(getSystemSettings()->initMode, MLONG_BEEP);
+    setCurrentMode(getSystemSettings()->initMode, BEEP_DURATION);
   }
   else{
     if(WAKE_input()){
-      setCurrentMode(mode_run, MLONG_BEEP);
+      setCurrentMode(mode_run, BEEP_DURATION);
     }
     else{
-      setCurrentMode(getProfileSettings()->StandMode, MLONG_BEEP);
+      setCurrentMode(getProfileSettings()->StandMode, BEEP_DURATION);
     }
   }
   initTimers();
@@ -156,13 +156,13 @@ void handleIron(void) {
 
         if (!Iron.standMode_beepDone && (elapsed > 500) ){                   // Apply a small delay of 500ms for the beep
           Iron.standMode_beepDone = 1;
-          buzzer_beep(MLONG_BEEP);
+          buzzer_beep(BEEP_DURATION);
         }
         if(elapsed > delay){
           Iron.standMode_beepDone = 0;
           Iron.standMode_update = no_update;
           Iron.lastWakeSrc = wakeSrc_Stand;
-          setCurrentMode(Iron.changeMode, MLONG_BEEP);
+          setCurrentMode(Iron.changeMode, BEEP_DURATION);
         }
       }
     }
@@ -200,26 +200,26 @@ void handleIron(void) {
 
     }
     if((Iron.CurrentMode==mode_coldboost) && (mode_time>getProfileSettings()->coldBoostTimeout)){                              // If cold boost mode and time expired
-      setCurrentMode(mode_run, MLONG_BEEP);
+      setCurrentMode(mode_run, BEEP_DURATION);
     }
     else if((Iron.CurrentMode==mode_boost) && (mode_time>getProfileSettings()->boostTimeout)){    // If boost mode and time expired
-      setCurrentMode(mode_run, MLONG_BEEP);
+      setCurrentMode(mode_run, BEEP_DURATION);
     }
     else if(Iron.CurrentMode==mode_run){                                                      // If running
       if(getProfileSettings()->standbyTimeout){                                              // If standby timer enabled
         if(mode_time>getProfileSettings()->standbyTimeout){                                  // Check timeout
-          setCurrentMode(mode_standby, MLONG_BEEP);
+          setCurrentMode(mode_standby, BEEP_DURATION);
         }
       }
       else{                                                                                   // Otherwise, check sleep timeout
         if(mode_time>getProfileSettings()->sleepTimeout){                                    //
-          setCurrentMode(mode_sleep, MLONG_BEEP);
+          setCurrentMode(mode_sleep, BEEP_DURATION);
         }
       }
     }
     else if(Iron.CurrentMode==mode_standby){                                                  // If in standby
       if(mode_time>getProfileSettings()->sleepTimeout){                                      // Check sleep timeout
-        setCurrentMode(mode_sleep, MLONG_BEEP);
+        setCurrentMode(mode_sleep, BEEP_DURATION);
       }
     }
   }
@@ -640,7 +640,7 @@ bool IronWake(wakeSrc_t src){                                                   
     }
   }
   if(Iron.CurrentMode<mode_boost)
-      setCurrentMode(mode_run, MLONG_BEEP);
+      setCurrentMode(mode_run, BEEP_DURATION);
   Iron.lastWakeSrc = src;
   return 1;
 }

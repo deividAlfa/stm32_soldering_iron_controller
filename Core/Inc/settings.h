@@ -14,7 +14,7 @@
 
 #define ENABLE_DBG_SAVE
 #define SWSTRING                  "SW: 1.13.14    "                 // Software version reported in settings screen
-#define SYSTEM_SETTINGS_VERSION   29                                // Change this if you change the system settings struct to prevent getting out of sync
+#define SYSTEM_SETTINGS_VERSION   30                                // Change this if you change the system settings struct to prevent getting out of sync
 #define PROFILE_SETTINGS_VERSION  4                                 // Same, but for profile settings struct
 #define TIP_SETTINGS_VERSION      1                                 // Same, but for tip settings struct
 #define ADDONS_SETTINGS_VERSION   1                                 // Same, but for addons settings struct
@@ -264,6 +264,7 @@ __attribute__((aligned(4))) typedef struct{
   uint8_t       tempBigStep;
   uint8_t       guiTempDenoise;
   uint8_t       buzzerMode;
+  uint16_t      beepDuration;
   uint8_t       buttonWakeMode;
   uint8_t       shakeWakeMode;
   uint8_t       lvp;

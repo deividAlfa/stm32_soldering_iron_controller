@@ -97,6 +97,7 @@ typedef struct{
   char * SYSTEM_Shake_Wake;
   char * SYSTEM_Encoder;
   char * SYSTEM_Buzzer;
+  char * SYSTEM_Beep_Duration;
   char * SYSTEM_Temperature;
   char * SYSTEM__Step;
   char * SYSTEM__Big_Step;

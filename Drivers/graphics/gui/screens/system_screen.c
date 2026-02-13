@@ -140,6 +140,14 @@ static void setbuzzerMode(uint32_t *val) {
   getSystemSettings()->buzzerMode = *val;
 }
 //=========================================================
+static void * getBeepDuration() {
+  temp = getSystemSettings()->beepDuration;
+  return &temp;
+}
+static void setBeepDuration(uint32_t *val) {
+  getSystemSettings()->beepDuration = *val;
+}
+//=========================================================
 static void * getInitMode() {
   temp = getSystemSettings()->initMode;
   return &temp;
@@ -279,6 +287,19 @@ static void system_create(screen_t *scr){
   edit->setData = (setterFn)&setbuzzerMode;
   edit->options = strings[lang].OffOn;
   edit->numberOfOptions = 2;
+
+  //  [ Beep duration Widget ]
+  //
+  newComboEditable(w, strings[lang].SYSTEM_Beep_Duration, &edit, NULL);
+  dis=&edit->inputData;
+  dis->endString="ms";
+  dis->reservedChars=6;
+  dis->getData = &getBeepDuration;
+  edit->big_step = 200;
+  edit->step = 100;
+  edit->setData = (setterFn)&setBeepDuration;
+  edit->max_value = 1000;
+  edit->min_value = 100;
 
   //  [ Temp display unit Widget ]
   //
