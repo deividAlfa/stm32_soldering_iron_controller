@@ -24,3 +24,4 @@ ST7565.list
 /SSD1306_Debug/
 /ST7565_Release/
 /ST7565_Debug/
+/build/

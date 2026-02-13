@@ -1,0 +1,9 @@
+services:
+  build:
+    build: .
+    volumes:
+      - .:/src:ro
+      - ./build:/output
+    environment:
+      - BOARD=${BOARD:-release}
+      - DISPLAY=${DISPLAY:-SSD1306}
